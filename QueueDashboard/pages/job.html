@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Worker Pool Queue Status Dashboard">
+    <meta name="author" content="Tyler Kaye">
+
+    <title>Queue Dashboard</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- JQUERY-JSON   --> 
+    <link href= "../vendor/json/json-viewer.css" rel="stylesheet" type="text/css">
+
+    <!-- Custom CSS -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Worker Pool Dashboard</a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" id="usernameId" placeholder="Search for profile...">
+                                <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" 
+                                    onclick='window.location = "tables.html?type=jobsUser&user=" + document.getElementById("usernameId").value'>
+                                    <i class="fa fa-search"></i>
+                                </button>
+                                </span>
+                            </div>
+                            <!-- /input-group -->
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header" id="tableName">Job</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+                <pre id="json-renderer"></pre>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    
+    <!-- JSON-Viewer Javascript -->
+    <script src="../vendor/json/json-viewer.js"></script>
+
+    <script src="https://s3.amazonaws.com/stitch-sdks/js/bundles/4.1.0/stitch.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <!-- <script src="../js/bson.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.8/bson.min.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/job.js"></script>
+
+</body>
+
+</html>
