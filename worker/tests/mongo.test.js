@@ -1,6 +1,7 @@
 const {MongoClient} = require('mongodb');
 const mongo = require('../utils/mongo');
 
+// Helper function to add n days to the current date
 function newDateInNDays(n) {
   let date = new Date();
   date.setDate(date.getDate() + n);
@@ -18,6 +19,7 @@ job1 = {
   numFailures: 0, 
   failures: [], 
   result: null,
+  logs: {},
 }
 
 // Job2 should be the second job taken off the queue because it has the earliest createdTime
@@ -40,20 +42,24 @@ describe('Mongo Tests', () => {
   let connection;
   let db;
 
+  // Use the mongo in-memory storage engine for testing
+  // See tests/mongo/ for details on setup/teardown of this. 
   beforeAll(async () => {
     connection = await MongoClient.connect(global.__MONGO_URI__,  {useNewUrlParser: true});
     db = await connection.db(global.__MONGO_DB_NAME__);
+
+    // Removem the jobs collection (should be empty anyways)
     db.dropCollection("jobs").catch(err => {
-      //console.log(err);
+      console.log(err);
     });
 
     // Put jobs in a random order (shouldnt matter)
     const jobsColl = db.collection('jobs');
     jobs = [job4, job2, job1, job3];
-
     await jobsColl.insertMany(jobs);
   });
 
+  // Make sure to close the connection to the in-memory DB
   afterAll(async () => {
     await connection.close();
     await db.close();
@@ -84,7 +90,7 @@ describe('Mongo Tests', () => {
   it('getNextJob() should dequeue correct job', async () => {
     const jobsColl = db.collection('jobs');
     
-    // First job out should be job1
+    // First job out should be job1 because of its priority 
     var jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -92,7 +98,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate.value).toHaveProperty("payload", {jobType: "job1"});
     job1._id = jobUpdate.value._id;
 
-    // Second job out should be job2 
+    // Second job out should be job2 because of its createdTime
     jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -100,6 +106,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate.value).toHaveProperty("payload", {jobType: "job2"});
     job2._id = jobUpdate.value._id;
 
+    // Third item out should be job3 because it is the last possible job
     jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -107,6 +114,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate.value).toHaveProperty("payload", {jobType: "job3"});
     job3._id = jobUpdate.value._id;
 
+    // Fourth job shouldnt be dequeued because its createdTime is in 10 days
     jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -153,10 +161,10 @@ describe('Mongo Tests', () => {
   /********************************************************************
    *                       finishJobWithResult()                      *
    ********************************************************************/
-  it('finishJobWithResult(queueCollection, jobId, result) works properly', async () => {
+  it('finishJobWithResult(queueCollection, job, result) works properly', async () => {
     const jobsColl = db.collection('jobs');
 
-    await mongo.finishJobWithResult(jobsColl, job1._id, {success: true});
+    await mongo.finishJobWithResult(jobsColl, job1, {success: true});
     let currJob = await jobsColl.findOne({_id: job1._id});
     expect(currJob).toBeTruthy();
     expect(currJob.status).toEqual("completed");
@@ -169,41 +177,87 @@ describe('Mongo Tests', () => {
   it('finishJobWithResult() fails on incorrect jobId', async () => {
     const jobsColl = db.collection('jobs');
     expect.assertions(1);
-    await expect(mongo.finishJobWithResult(jobsColl, "notRealId", "a", 0)).rejects.toBeTruthy();
+    await expect(mongo.finishJobWithResult(jobsColl, {_id: "notRealId"}, "a")).rejects.toBeTruthy();
   }, 5000);
 
   /********************************************************************
    *                       finishJobWithFailure()                     *
    ********************************************************************/
-  it('finishJobWithFailure(queueCollection, jobId, reason, numFailure) works properly with numFailure < 2', async () => {
+  it('finishJobWithFailure(queueCollection, job, reason) works properly with numFailure < 2', async () => {
     const jobsColl = db.collection('jobs');
 
-    await mongo.finishJobWithFailure(jobsColl, job2._id, "failed job 2", 1);
+    await mongo.finishJobWithFailure(jobsColl, job2, "failed job 2");
     let currJob = await jobsColl.findOne({_id: job2._id});
     expect(currJob).toBeTruthy();
     expect(currJob.status).toEqual("inQueue");
     expect(currJob.startTime).toBeNull();
-    expect(currJob.numFailures).toEqual(2);
+    expect(currJob.numFailures).toEqual(1);
     expect(currJob.failures).toHaveLength(1);
     expect(currJob.failures[0].reason).toEqual("failed job 2");
+
+    await mongo.finishJobWithFailure(jobsColl, job2, "failed job 2");
+    currJob = await jobsColl.findOne({_id: job2._id});
+    expect(currJob).toBeTruthy();
+    expect(currJob.status).toEqual("inQueue");
+    expect(currJob.startTime).toBeNull();
+    expect(currJob.numFailures).toEqual(2);
+    expect(currJob.failures).toHaveLength(2);
+    expect(currJob.failures[1].reason).toEqual("failed job 2");
+
+
   }, 5000);
 
-  it('finishJobWithFailure(queueCollection, jobId, reason, numFailure) works properly with numFailure >= 2', async () => {
+  it('finishJobWithFailure(queueCollection, job, reason) works properly with numFailure >= 2', async () => {
     const jobsColl = db.collection('jobs');
+    job2.numFailures = 2;
 
-    await mongo.finishJobWithFailure(jobsColl, job3._id, "failed job 3", 2);
-    let currJob = await jobsColl.findOne({_id: job3._id});
+    await mongo.finishJobWithFailure(jobsColl, job2, "failed job 2 (real)");
+    let currJob = await jobsColl.findOne({_id: job2._id});
     expect(currJob).toBeTruthy();
     expect(currJob.status).toEqual("failed");
     expect(currJob.startTime).toBeNull();
     expect(currJob.numFailures).toEqual(3);
-    expect(currJob.failures).toHaveLength(1);
-    expect(currJob.failures[0].reason).toEqual("failed job 3");
+    expect(currJob.failures).toHaveLength(3);
+    expect(currJob.failures[2].reason).toEqual("failed job 2 (real)");
   }, 5000);
 
   it('finishJobWithFailure() fails on incorrect jobId', async () => {
     const jobsColl = db.collection('jobs');
     expect.assertions(1);
-    await expect(mongo.finishJobWithFailure(jobsColl, "notRealId", "a", 0)).rejects.toBeTruthy();
+    await expect(mongo.finishJobWithFailure(jobsColl, {_id: "notRealId", numFailures: 0}, "a")).rejects.toBeTruthy();
   }, 5000);
+
+  /********************************************************************
+   *                       logInMongo()                               *
+   ********************************************************************/
+  it('logInMongoWorks', async () => {
+    const jobsColl = db.collection('jobs');
+    mongo.getQueueCollection = jest.fn().mockReturnValue(jobsColl);
+    job2.numFailures = 0;
+
+    await mongo.logMessageInMongo(job2, "message 1");
+    let currJob = await jobsColl.findOne({_id: job2._id});
+    expect(currJob.logs).toHaveProperty("try0");
+    expect(currJob.logs.try0).toHaveLength(1);
+    expect(currJob.logs.try0[0]).toEqual("message 1");
+
+    await mongo.logMessageInMongo(job2, "message 2");
+    currJob = await jobsColl.findOne({_id: job2._id});
+    expect(currJob.logs).toHaveProperty("try0");
+    expect(currJob.logs.try0).toHaveLength(2);
+    expect(currJob.logs.try0[1]).toEqual("message 2");
+
+    job2.numFailures = 1;
+    await mongo.logMessageInMongo(job2, "message 3");
+    currJob = await jobsColl.findOne({_id: job2._id});
+    expect(currJob.logs).toHaveProperty("try0");
+    expect(currJob.logs.try1).toHaveLength(1);
+    expect(currJob.logs.try1[0]).toEqual("message 3");
+
+    mongo.getQueueCollection = jest.fn().mockReturnValue();
+    await mongo.logMessageInMongo(job2, "message 1");
+  }, 5000);
+
 });
+
+

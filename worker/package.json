@@ -4,16 +4,26 @@
   "description": "Worker Pool Basic Implementation",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --coverage"
+    "test": "jest --detectOpenHandles --coverage",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mongodb/docs-worker-pool.git"
   },
   "author": "Tyler Kaye",
   "license": "ISC",
   "dependencies": {
-    "@godaddy/terminus": "^4.1.0",
+    "async-retry": "^1.2.3",
     "aws-sdk": "^2.383.0",
     "express": "^4.16.4",
     "fs-extra": "^7.0.1",
-    "mongodb": "^3.1.10"
+    "gatsby": "^2.0.91",
+    "mongodb": "^3.1.10",
+    "mongodb-stitch-browser-sdk": "^4.1.2",
+    "mongodb-stitch-server-sdk": "^4.1.2",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
   },
   "devDependencies": {
     "aws-sdk-mock": "^4.3.0",

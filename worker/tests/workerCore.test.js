@@ -39,6 +39,7 @@ let promiseTimeoutSSpy;
 describe('Worker.Work() Tests', () => {
     beforeAll(() => {
         workerUtils.resetDirectory("work/");
+        workerUtils.logInMongo = jest.fn().mockResolvedValue();
     });
   
     afterAll(() => {
@@ -204,7 +205,8 @@ describe('Worker.Work() Tests', () => {
      ********************************************************************/
     it('work() --> getNextJob() times-out', async() => {
         // Set getNextJob to not return job
-        workerUtils.promiseTimeoutS = jest.fn().mockRejectedValueOnce().mockResolvedValue();   
+        console.log("HE")
+        workerUtils.promiseTimeoutS = jest.fn().mockRejectedValue("rejected"); 
 
         // Run worker and clear all timers
         await worker.work();

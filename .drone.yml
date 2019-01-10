@@ -15,12 +15,13 @@ pipeline:
 
   deploy-staging:
     image: quay.io/ipedrazas/drone-helm
-    release: DocsWorkerPool
+    release: docs-worker-pool
     namespace: docs
     environment:
       - API_SERVER=https://api.staging.mongodb.sh
     prefix: STAGING
     secrets: [ staging_kubernetes_token ]
+    values_files: [ "environments/staging.yml" ]
     helm_repos: mongodb=https://10gen-ops.github.io/helm-charts
     chart: mongodb/web-app
     chart_version: 3.1.0
