@@ -95,9 +95,12 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 	/***************************************************************************** 
 	 *                 Find Jobs That Do Not Make Any Sense                      *
 	 *****************************************************************************/
+	let oneHourAgo = new Date();
+	oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
 	statuses = {
 		inQueue: {status: "inQueue", '$or': [{createdTime: null}, {startTime: {$ne: null}}, {endTime: {$ne: null}}, {numFailures: {$gte: 3}}]},
-		inProgress: {status: "inProgress", '$or': [{createdTime: null}, {startTime: null}, {endTime: {$ne: null}}, {numFailures: {$gte: 3}}]}, 
+		inProgress: {status: "inProgress", '$or': [{createdTime: null}, {startTime: null}, {endTime: {$ne: null}}, {numFailures: {$gte: 3}}, {startTime: {$lte: oneHourAgo}}]}, 
 		completed: {status: "completed", '$or': [{createdTime: null}, {startTime: null}, {endTime: null}, {numFailures: {$gte: 3}}]},
 		failed: {status: "failed", '$or': [{createdTime: null},{startTime: {$ne: null}}, {endTime: {$ne: null}},  {numFailures: {$lt: 3}}]},
 	}; 

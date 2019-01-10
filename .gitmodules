@@ -1,0 +1,3 @@
+[submodule "worker/docs-tools"]
+	path = worker/docs-tools
+	url = https://github.com/mongodb/docs-tools.git

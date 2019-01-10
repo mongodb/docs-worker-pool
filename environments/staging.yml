@@ -1,0 +1,5 @@
+envSecrets:
+  MONGO_ATLAS_PASSWORD: my-secrets
+  MONGO_ATLAS_USERNAME: my-secrets
+  AWS_SECRET_ACCESS_KEY: my-secrets
+  AWS_ACCESS_KEY_ID: my-secrets

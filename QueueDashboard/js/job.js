@@ -68,6 +68,7 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
             failures: result.failures, 
             result: result.result,
             payload: result.payload,
+            logs: result.logs,
         }
 
         for(i in job.failures) {
