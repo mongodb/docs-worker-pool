@@ -1,0 +1,25 @@
+{
+  "name": "workerpool",
+  "version": "1.0.0",
+  "description": "Worker Pool Basic Implementation",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles --coverage"
+  },
+  "author": "Tyler Kaye",
+  "license": "ISC",
+  "dependencies": {
+    "@godaddy/terminus": "^4.1.0",
+    "aws-sdk": "^2.383.0",
+    "express": "^4.16.4",
+    "fs-extra": "^7.0.1",
+    "mongodb": "^3.1.10"
+  },
+  "devDependencies": {
+    "aws-sdk-mock": "^4.3.0",
+    "babel-jest": "^23.6.0",
+    "jest": "^23.6.0",
+    "mongodb-memory-server": "^2.9.1",
+    "regenerator-runtime": "^0.13.1"
+  }
+}
