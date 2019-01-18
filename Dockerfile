@@ -19,6 +19,5 @@ RUN npm -g config set user root
 RUN npm install --only=production
 RUN npm -g install gatsby
 
-# entry to expose route that kicks-off the worker
-EXPOSE 3000
+# entry to kick-off the worker
 CMD ["node", "index"]

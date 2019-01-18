@@ -70,6 +70,20 @@ module.exports = {
 	}, 
 
 	/***********************************************************************************
+	 *                    Start the server and set everything up                       *
+	 ***********************************************************************************/
+	startServer : async function() {
+		// Initialize MongoDB Collection 
+		let mongoClient = await mongo.initMongoClient();
+		if (mongoClient) { // <-- this is just for testing
+			queueCollection = mongo.getQueueCollection();
+		}
+
+		// Clean up the work folder
+		workerUtils.resetDirectory("work/");
+	},
+
+	/***********************************************************************************
 	 *                                  main function                                  *
 	 ***********************************************************************************/
 	work : async function() {
@@ -93,11 +107,11 @@ module.exports = {
 			if (job && job.value) {
 				currentJob = job.value;
 
-				let logMsg = "* Starting Job with ID: " + currentJob._id + " and type: " + currentJob.payload.jobType;
+				logMsg = "* Starting Job with ID: " + currentJob._id + " and type: " + currentJob.payload.jobType;
 				workerUtils.logInMongo(currentJob, logMsg)
 	
 				// Throw error if we cannot perform this job / it is not a valid job
-				if (!(currentJob.payload.jobType in jobTypeToFunc)) {
+				if (!currentJob.payload.hasOwnProperty("jobType") || !(currentJob.payload.jobType in jobTypeToFunc)) {
 					throw new Error("Job type of (" + currentJob.payload.jobType + ") not recognized")
 				}
 				
@@ -130,48 +144,40 @@ module.exports = {
 				setTimeout(module.exports.work, RETRY_TIMEOUT_MS);
 			}
 		} catch (err) {	
-			// Create a deep copy of the current job to prevent it from being overwritten
-			let lastJob = workerUtils.cloneObject(currentJob);
-			console.log(err);
-			
-			// Start new job before labeling the previous job as a failure so that it does not just 
-			// get the same job that it just failed at
-			if (!shouldStop) {
-				setTimeout(module.exports.work, MIN_TIMEOUT_MS);
-			}
-	
-			// If there is a current job --> update the job document to be failed 
-			if (lastJob) {
-				// Log the error: 
-				workerUtils.logInMongo(lastJob, "    (ERROR)".padEnd(LOG_PADDING) + err);
+			console.log("  Error caught by first catch: " + err);
+			try {
+				// Create a deep copy of the current job to prevent it from being overwritten
+				let lastJob = JSON.parse(JSON.stringify(currentJob));
+				lastJob._id = currentJob._id;
+				
+				// Start new job before labeling the previous job as a failure so that it does not just 
+				// get the same job that it just failed at
+				if (!shouldStop) {
+					setTimeout(module.exports.work, MIN_TIMEOUT_MS);
+				}
+		
+				// If there is a current job --> update the job document to be failed 
+				if (lastJob) {
 
-				// If we end up here, then the folder work/jobId will still be there, so delete it
-				fs.removeSync("work/" + lastJob._id);
+					// Log the error: 
+					workerUtils.logInMongo(lastJob, "    (ERROR)".padEnd(LOG_PADDING) + err.toString());
 
-				// Try to finish the job with failure and retry it 3 times
-				await retry(async bail => {
-					mongo.finishJobWithFailure(queueCollection, lastJob, err.toString());
-				}, {
-					retries: 3
-				}).catch(errObj => {
-					console.log("****** finishJobWithFailure failed for job " + lastJob._id + 
-								" and failure {" + err.toString() + "} with err: " + errObj.toString());
-				});
+					// If we end up here, then the folder work/jobId will still be there, so delete it
+					fs.removeSync("work/" + lastJob._id);
+
+					// Try to finish the job with failure and retry it 3 times
+					await retry(async bail => {
+						mongo.finishJobWithFailure(queueCollection, lastJob, err.toString());
+					}, {
+						retries: 3
+					}).catch(errObj => {
+						console.log("****** finishJobWithFailure failed for job " + lastJob._id + 
+									" and failure {" + err.toString() + "} with err: " + errObj.toString());
+					});
+				}
+			} catch (err) {
+				console.log("  Error caught by second catch: " + err);
 			}
 		}	
 	}, 
-
-	/***********************************************************************************
-	 *                    Start the server and set everything up                       *
-	 ***********************************************************************************/
-	startServer : async function() {
-		// Initialize MongoDB Collection 
-		let mongoClient = await mongo.initMongoClient();
-		if (mongoClient) { // <-- this is just for testing
-			queueCollection = mongo.getQueueCollection();
-		}
-
-		// Clean up the work folder
-		workerUtils.resetDirectory("work/");
-	},
 }

@@ -59,7 +59,7 @@ module.exports = {
 		}};
 		let updateResult = await queueCollection.updateOne(query, update);
 		if (updateResult.result.n < 1) {
-			throw new Error("Failed to update job (" + jobId + ") in queue on success");
+			throw new Error("Failed to update job (" + job._id + ") in queue on success");
 		}
 	},
 
@@ -77,17 +77,17 @@ module.exports = {
 		if (job.numFailures >= 2) {
 			update["$set"]["status"] = "failed";
 		}
-		
+
 		let updateResult = await queueCollection.updateOne(query, update);
 		if (updateResult.result.n < 1) {
-			throw new Error("Failed to update job (" + jobId + ") in queue on failure");
+			throw new Error("Failed to update job (" + job._id + ") in queue on failure");
 		}
 	}, 
 
 	/***********************************************************************************
 	 *   logInMongo() --> adds log message to the job in the queue                     *
 	 ***********************************************************************************/
-	logInMongo : async function(currentJob, message) {
+	logMessageInMongo : async function(currentJob, message) {
 		let queueCollection = module.exports.getQueueCollection();
 		if (queueCollection) {
 			const query = {_id: currentJob._id};

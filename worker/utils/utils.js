@@ -118,7 +118,7 @@ module.exports = {
 	 ***********************************************************************************/
 	logInMongo : async function(currentJob, message) {
 		console.log(message);
-		await mongo.logInMongo(currentJob, message);
+		await mongo.logMessageInMongo(currentJob, message);
 	}, 
 
 	/***********************************************************************************
