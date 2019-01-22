@@ -1,8 +1,8 @@
 const MongoClient = require("mongodb").MongoClient;
 
 // Get username password credentials
-const username = process.env.MONGO_ATLAS_USERNAME;
-const password = process.env.MONGO_ATLAS_PASSWORD;
+const username = encodeURIComponent(process.env.MONGO_ATLAS_USERNAME);
+const password = encodeURIComponent(process.env.MONGO_ATLAS_PASSWORD);
 const url = "mongodb+srv://" + username + ":" + password + "@cluster0-ylwlz.mongodb.net/admin?retryWrites=true";
 
 // Collection information

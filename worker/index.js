@@ -8,6 +8,8 @@ worker.startServer().then(function() {
 	console.log("ERROR: " + err);
 });
 
+
+// Handle SIGINT / SIGTERM from KUBERNETES
 process.on('SIGINT', async () => {
 	console.log('Received SIGINT');
 	await worker.gracefulShutdown();

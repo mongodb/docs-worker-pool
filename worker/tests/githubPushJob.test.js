@@ -3,6 +3,8 @@ const workerUtils = require('../utils/utils');
 const util = require('util');
 
 describe('Test Class', () => {
+
+    // Dont actually reset the directory and dont care about the logging
     beforeAll(() => {
         workerUtils.resetDirectory = jest.fn().mockResolvedValue();
         workerUtils.logInMongo = jest.fn().mockResolvedValue();
@@ -36,7 +38,7 @@ describe('Test Class', () => {
         await expect(job.gatsbyBuild()).rejects.toEqual({signal: true});
     });
 
-    it('gatsbyBuild() rejects properly', async() => {
+    it('gatsbyBuild() resolves properly', async() => {
         let execMock = jest.fn().mockRejectedValue({notSignal: true});
         workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
         await expect(job.gatsbyBuild()).resolves.toBeUndefined();

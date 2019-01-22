@@ -152,13 +152,10 @@ module.exports = {
 				
 				// Start new job before labeling the previous job as a failure so that it does not just 
 				// get the same job that it just failed at
-				if (!shouldStop) {
-					setTimeout(module.exports.work, MIN_TIMEOUT_MS);
-				}
+				if (!shouldStop) { setTimeout(module.exports.work, MIN_TIMEOUT_MS); }
 		
 				// If there is a current job --> update the job document to be failed 
 				if (lastJob) {
-
 					// Log the error: 
 					workerUtils.logInMongo(lastJob, "    (ERROR)".padEnd(LOG_PADDING) + err.toString());
 

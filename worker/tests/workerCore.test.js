@@ -223,38 +223,38 @@ describe('Worker.Work() Tests', () => {
     /********************************************************************
      *                      runGithubPush() times-out                   *
      ********************************************************************/
-    // it('work() --> runGithubPush() times-out', async() => {
-    //     // Set getNextJob to not return job
-    //     workerUtils.promiseTimeoutS = jest.fn().mockResolvedValueOnce({value: validJob}).mockRejectedValue("Timed out!");
+    it('work() --> runGithubPush() times-out', async() => {
+        // Set getNextJob to not return job
+        workerUtils.promiseTimeoutS = jest.fn().mockResolvedValueOnce({value: validJob}).mockRejectedValue("Timed out!");
 
-    //     // Run worker and clear all timers
-    //     await worker.work();
-    //     jest.clearAllTimers();
+        // Run worker and clear all timers
+        await worker.work();
+        jest.clearAllTimers();
         
-    //     // Set Expectations
-    //     expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
-    //     expect(runGithubPushMock).toHaveBeenCalledTimes(1);
-    //     expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(0);
-    //     expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
-    //     expect(mongo.finishJobWithFailure.mock.calls[0][2]).toMatch(/Timed out!/)
-    // });
+        // Set Expectations
+        expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
+        expect(runGithubPushMock).toHaveBeenCalledTimes(1);
+        expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(0);
+        expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
+        expect(mongo.finishJobWithFailure.mock.calls[0][2]).toMatch(/Timed out!/)
+    });
 
-    // /********************************************************************
-    //  *                  finishJobWithResult() times-out                 *
-    //  ********************************************************************/
-    // it('work() --> finishJobWithResult() times-out', async() => {
-    //     // Set getNextJob to not return job
-    //     workerUtils.promiseTimeoutS = jest.fn().mockResolvedValueOnce({value: validJob}).mockResolvedValueOnce().mockRejectedValue("Timed out!");
+    /********************************************************************
+     *                  finishJobWithResult() times-out                 *
+     ********************************************************************/
+    it('work() --> finishJobWithResult() times-out', async() => {
+        // Set getNextJob to not return job
+        workerUtils.promiseTimeoutS = jest.fn().mockResolvedValueOnce({value: validJob}).mockResolvedValueOnce().mockRejectedValue("Timed out!");
 
-    //     // Run worker and clear all timers
-    //     await worker.work();
-    //     jest.clearAllTimers();
+        // Run worker and clear all timers
+        await worker.work();
+        jest.clearAllTimers();
         
-    //     // Set Expectations
-    //     expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
-    //     expect(runGithubPushMock).toHaveBeenCalledTimes(1);
-    //     expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(1);
-    //     expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
-    //     expect(mongo.finishJobWithFailure.mock.calls[0][2]).toMatch(/Timed out!/)
-    // });
+        // Set Expectations
+        expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
+        expect(runGithubPushMock).toHaveBeenCalledTimes(1);
+        expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(1);
+        expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
+        expect(mongo.finishJobWithFailure.mock.calls[0][2]).toMatch(/Timed out!/)
+    });
 });

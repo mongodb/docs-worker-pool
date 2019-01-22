@@ -1,6 +1,7 @@
 const {MongoClient} = require('mongodb');
 const mongo = require('../utils/mongo');
 
+// Helper function to add n days to the current date
 function newDateInNDays(n) {
   let date = new Date();
   date.setDate(date.getDate() + n);
@@ -41,20 +42,24 @@ describe('Mongo Tests', () => {
   let connection;
   let db;
 
+  // Use the mongo in-memory storage engine for testing
+  // See tests/mongo/ for details on setup/teardown of this. 
   beforeAll(async () => {
     connection = await MongoClient.connect(global.__MONGO_URI__,  {useNewUrlParser: true});
     db = await connection.db(global.__MONGO_DB_NAME__);
+
+    // Removem the jobs collection (should be empty anyways)
     db.dropCollection("jobs").catch(err => {
-      //console.log(err);
+      console.log(err);
     });
 
     // Put jobs in a random order (shouldnt matter)
     const jobsColl = db.collection('jobs');
     jobs = [job4, job2, job1, job3];
-
     await jobsColl.insertMany(jobs);
   });
 
+  // Make sure to close the connection to the in-memory DB
   afterAll(async () => {
     await connection.close();
     await db.close();
@@ -85,7 +90,7 @@ describe('Mongo Tests', () => {
   it('getNextJob() should dequeue correct job', async () => {
     const jobsColl = db.collection('jobs');
     
-    // First job out should be job1
+    // First job out should be job1 because of its priority 
     var jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -93,7 +98,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate.value).toHaveProperty("payload", {jobType: "job1"});
     job1._id = jobUpdate.value._id;
 
-    // Second job out should be job2 
+    // Second job out should be job2 because of its createdTime
     jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -101,6 +106,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate.value).toHaveProperty("payload", {jobType: "job2"});
     job2._id = jobUpdate.value._id;
 
+    // Third item out should be job3 because it is the last possible job
     jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -108,6 +114,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate.value).toHaveProperty("payload", {jobType: "job3"});
     job3._id = jobUpdate.value._id;
 
+    // Fourth job shouldnt be dequeued because its createdTime is in 10 days
     jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty("ok", 1);
@@ -228,27 +235,27 @@ describe('Mongo Tests', () => {
     mongo.getQueueCollection = jest.fn().mockReturnValue(jobsColl);
     job2.numFailures = 0;
 
-    await mongo.logInMongo(job2, "message 1");
+    await mongo.logMessageInMongo(job2, "message 1");
     let currJob = await jobsColl.findOne({_id: job2._id});
     expect(currJob.logs).toHaveProperty("try0");
     expect(currJob.logs.try0).toHaveLength(1);
     expect(currJob.logs.try0[0]).toEqual("message 1");
 
-    await mongo.logInMongo(job2, "message 2");
+    await mongo.logMessageInMongo(job2, "message 2");
     currJob = await jobsColl.findOne({_id: job2._id});
     expect(currJob.logs).toHaveProperty("try0");
     expect(currJob.logs.try0).toHaveLength(2);
     expect(currJob.logs.try0[1]).toEqual("message 2");
 
     job2.numFailures = 1;
-    await mongo.logInMongo(job2, "message 3");
+    await mongo.logMessageInMongo(job2, "message 3");
     currJob = await jobsColl.findOne({_id: job2._id});
     expect(currJob.logs).toHaveProperty("try0");
     expect(currJob.logs.try1).toHaveLength(1);
     expect(currJob.logs.try1[0]).toEqual("message 3");
 
     mongo.getQueueCollection = jest.fn().mockReturnValue();
-    await mongo.logInMongo(job2, "message 1");
+    await mongo.logMessageInMongo(job2, "message 1");
   }, 5000);
 
 });
