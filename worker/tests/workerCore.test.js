@@ -205,7 +205,6 @@ describe('Worker.Work() Tests', () => {
      ********************************************************************/
     it('work() --> getNextJob() times-out', async() => {
         // Set getNextJob to not return job
-        console.log("HE")
         workerUtils.promiseTimeoutS = jest.fn().mockRejectedValue("rejected"); 
 
         // Run worker and clear all timers

@@ -1,6 +1,5 @@
 
 // Imports
-const http    		= require('http');
 const express 		= require('express');
 const mongo   		= require('./utils/mongo');
 const workerUtils   =  require('./utils/utils');
@@ -12,8 +11,6 @@ const retry   		= require('async-retry')
 // Import job function
 const {runGithubPush} = require('./jobTypes/githubPushJob');
 
-const app = express()
-
 // Variables
 let queueCollection;                // Holder for the queueCollection in MongoDB Atlas
 let currentJob;                     // Holder for the job currently executing 
@@ -23,16 +20,29 @@ let mongoClient;
 
 // Constants
 const MONGO_TIMEOUT_S = 15;         // Reject any mongo operation taking longer than this number of seconds
-const JOB_TIMEOUT_S = 60 * 60 * 2;  // Reject any job taking longer than this number of seconds
+const JOB_TIMEOUT_S = 60 * 60;      // Reject any job taking longer than this number of seconds
 const RETRY_TIMEOUT_MS = 5 * 1000;  // Number of seconds to wait before querying for a new job after not finding one
 const MIN_TIMEOUT_MS = 1;           // Small timeout to re-call the work() function 
 const LOG_PADDING = 15;             // For formatting the log output
+const PORT = 3000;    				// For the liveness check
+
+// If the worker has not updated lastCheckin in maxCheckin seconds --> kubernetes will know
+// Set to be the critical path of the worker plus 10 minutes
+const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60*10) * 1000; 
+
 
 // **** IF YOU ARE ADDING A FUNCTION --> ADD IT TO THIS DICTIONARY
 // Dictionary of possible jobs for this node
 var jobTypeToFunc = {
 	"githubPush": runGithubPush,
 }
+
+// route for liveness check
+const app = express()
+app.get('/liveness', (req, res) => {
+	let result = getLiveness();
+	res.status(result.status).send({msg: result.msg});
+});
 
 module.exports = {
 	/***********************************************************************************
@@ -45,6 +55,21 @@ module.exports = {
 	addJobTypeToFunc : function(jobType, func) {
 		jobTypeToFunc[jobType] = func;
 	},
+
+	setLastCheckIn : function(lastCheck) {
+		lastCheckIn = lastCheck;
+	},
+
+	getLiveness() {
+		let timeSince = (new Date()).getTime() - lastCheckIn.getTime();
+		if (timeSince > maxCheckIn) {
+			let errMsg = "Server has not checked in " + timeSince / 1000 + " seconds " + "(maxCheckin = " + maxCheckIn + ")"; 
+			return {status: 500, msg: errMsg};
+		} else {
+			let success = "Server checked in " + timeSince / 1000 + " seconds ago";
+			return {status: 200, msg: success};
+		}
+	}, 
 
 	/***********************************************************************************
 	 *                      Terminus / Kubernetes Related Functions                    *
@@ -81,6 +106,9 @@ module.exports = {
 
 		// Clean up the work folder
 		workerUtils.resetDirectory("work/");
+
+		// Setup http server
+		return app.listen(PORT);
 	},
 
 	/***********************************************************************************

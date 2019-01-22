@@ -20,4 +20,5 @@ RUN npm install --only=production
 RUN npm -g install gatsby
 
 # entry to kick-off the worker
+EXPOSE 3000 
 CMD ["node", "index"]

@@ -3,3 +3,18 @@ envSecrets:
   MONGO_ATLAS_USERNAME: my-secrets
   AWS_SECRET_ACCESS_KEY: my-secrets
   AWS_ACCESS_KEY_ID: my-secrets
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+probes:
+  enabled: true
+  path: /liveness
+  headers: {}
+  liveness:
+    httpGet: true
+    initialDelaySeconds: 10
+    periodSeconds: 60
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
