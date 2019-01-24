@@ -16,7 +16,10 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 	/***************************************************************************** 
 	 *                 Get the current job by its _id field                      *
 	 *****************************************************************************/
-    let dict = parseQueryStringToDictionary(document.location.search);
+    const url = new URL(window.location.href);
+    const dict = {};
+    url.searchParams.forEach((v,k) => { dict[k] = v });
+
     // console.log(dict["jobId"])
     // let id = new ObjectId.createFromHexString(dict["jobId"]);
     // console.log(id);
@@ -54,7 +57,7 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
     
     // Would like to switch this out eventually
     stitchClient.callFunction("getJobById", [dict["jobId"]]).then(result => {
-        job = {
+        const job = {
             _id: result._id.toString(), 
             title: result.title, 
             user: result.user, 
@@ -71,8 +74,8 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
             logs: result.logs,
         }
 
-        for(i in job.failures) {
-            job.failures[i].time = formatDate(job.failures[i].time);
+        for (const failure of job.failures) {
+            failure.time = formatDate(failure.time);
         }
 
         $('#json-renderer').jsonViewer(job);

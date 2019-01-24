@@ -1,138 +1,118 @@
+
+
 // Imports
 const path = require('path');
-const aws  = require('aws-sdk');
-const fs   = require('fs-extra');
-const mongo   = require('./mongo');
+const aws = require('aws-sdk');
+const fs = require('fs-extra');
 // const git  = require("nodegit");
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
-
+const mongo = require('./mongo');
 
 // Get and Set Github Credentials
-const githubUser     = encodeURIComponent(process.env.GITHUB_USERNAME);
-const githubPassword = encodeURIComponent(process.env.GITHUB_PASSWORD);
+// const githubUser = encodeURIComponent(process.env.GITHUB_USERNAME);
+// const githubPassword = encodeURIComponent(process.env.GITHUB_PASSWORD);
 
 // Get and Set AWS Credentials
 aws.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
 const s3 = new aws.S3();
 
 module.exports = {
-	/***********************************************************************************
-	 *  							 FileSystem Utilities   						   *
-	 ***********************************************************************************/
-	getFilesInDir : function(base,ext = "",files,result) {
-		if (fs.existsSync(base)) {
-			files = files || fs.readdirSync(base) 
-			result = result || [] 
-			files.forEach( 
-				function (file) {
-					var newbase = path.join(base,file)
-					if ( fs.statSync(newbase).isDirectory() ) {
-						result = module.exports.getFilesInDir(newbase,ext,fs.readdirSync(newbase),result)
-					} else if ( ext === "" || file.substr(-1*(ext.length+1)) == '.' + ext ) {
-						result.push(newbase) 
-					}
-				}
-			)
-		};
-		return result;
-	},  
 
-	resetDirectory : async function(dir) {
-		fs.removeSync(dir); 
-		fs.mkdirsSync(dir);
-	},
+    // Outputs a list of all of the files in the directory (base) with the given extension (ext)
+    getFilesInDir(base, ext = '', files, result) {
+        let resultInternal;
+        if (fs.existsSync(base)) {
+            const filesInternal = files || fs.readdirSync(base);
+            resultInternal = result || [];
+            filesInternal.forEach(
+                (file) => {
+                    const newbase = path.join(base, file);
+                    if (fs.statSync(newbase).isDirectory()) {
+                        resultInternal = module.exports.getFilesInDir(
+                            newbase, ext, fs.readdirSync(newbase), resultInternal,
+                        );
+                    } else if (ext === '' || file.substr(-1 * (ext.length + 1)) === `.${ext}`) {
+                        resultInternal.push(newbase);
+                    }
+                },
+            );
+        }
+        return resultInternal;
+    },
 
-	/***********************************************************************************
-	 *  							    AWS S3 Utilities    						   *
-	 ***********************************************************************************/
-	s3PutObject : async function(params) {
-		// return s3.putObject(params).promise();
-	},
+    async resetDirectory(dir) {
+        fs.removeSync(dir);
+        fs.mkdirsSync(dir);
+    },
 
-	uploadFileToS3Bucket : async function(filePath, bucketName) {
-		//console.log("Uploading ", filePath, " to S3 bucket ", bucketName);
-		var params = {
-		  	Bucket: bucketName,
-		  	Body : fs.createReadStream(filePath),
-		  	Key : "folder/" + Date.now() + "_" + path.basename(filePath), 
-		  	ACL: 'public-read',
-		};
-		return module.exports.s3PutObject(params);
-	},
+    // Returns promisified version of s3.putObject()
+    // Needs its own function for testing purposes
+    async s3PutObject(params) {
+        return s3.putObject(params).promise();
+    },
 
-	uploadDirectoryToS3Bucket : async function(currentJob, dirPath, bucketName) {
-		let logMsg = "    (AWS)".padEnd(15) + "Uploading Directory (" + dirPath + ") to S3 Bucket: " + bucketName;
-		module.exports.logInMongo(currentJob, logMsg);
+    // Uploads file at filePath to bucket with bucketName
+    async uploadFileToS3Bucket(filePath, bucketName) {
+        // console.log("Uploading ", filePath, " to S3 bucket ", bucketName);
+        const params = {
+            Bucket: bucketName,
+            Body: fs.createReadStream(filePath),
+            // NOT SURE WHAT THE KEY NEEDS TO BE!
+            Key: `folder/${path.basename(filePath)}`,
+            ACL: 'public-read',
+        };
+        return module.exports.s3PutObject(params);
+    },
 
-		var files = module.exports.getFilesInDir(dirPath, "");
-		const promiseArray = files.map(
-			file => this.uploadFileToS3Bucket(file, bucketName)
-		);
+    // Uploads entire directory (dirPath) to bucket with name (bucketName)
+    async uploadDirectoryToS3Bucket(currentJob, dirPath, bucketName) {
+        let logMsg = `${'    (AWS)'.padEnd(15)}Uploading Directory (${dirPath}) to S3 Bucket: ${bucketName}`;
+        module.exports.logInMongo(currentJob, logMsg);
 
-		logMsg = "    (AWS)".padEnd(15) + "Uploaded Files: " + files;
-		module.exports.logInMongo(currentJob, logMsg);
+        const files = module.exports.getFilesInDir(dirPath, '');
+        const promiseArray = files.map(
+            file => this.uploadFileToS3Bucket(file, bucketName),
+        );
 
-		return Promise.all(promiseArray);
-	},
+        logMsg = `${'    (AWS)'.padEnd(15)}Uploaded Files: ${files}`;
+        module.exports.logInMongo(currentJob, logMsg);
 
-	// cloneGitRepository : async function(repository, dir) {
-	// 	console.log("    (GIT)".padEnd(15) + "Starting to Clone Git Repository: ", repository);
-	// 	await git.Clone(repository, dir);
-	// 	console.log("    (GIT)".padEnd(15) + "Successfully Cloned Repository: ", repository);
-	// },
+        return Promise.all(promiseArray);
+    },
 
-	/***********************************************************************************
-	 *  							    Async Utilities    			  	   		       *
-	 ***********************************************************************************/
-	resolveAfterNSeconds : async function(n) {
-		return new Promise(resolve => {
-		  setTimeout(() => { resolve(); }, 1000 * n);
-		});
-	}, 
+    // Function for testing that resolves in n seconds
+    async resolveAfterNSeconds(n) {
+        return new Promise((resolve) => {
+            setTimeout(() => { resolve(); }, 1000 * n);
+        });
+    },
 
-	promiseTimeoutS : function(seconds, promise, errMsg){
-		// Create a promise that rejects in <seconds> seconds
-		let timeout = new Promise((resolve, reject) => {
-		  	let id = setTimeout(() => {
-				clearTimeout(id);
-				reject(errMsg + ' --> Timed out in '+ seconds + ' seconds.')}, 1000 * seconds)
-			})
-	  
-		// Returns a race between our timeout and the passed in promise
-		return Promise.race([promise, timeout])
-	}, 
-	
-	/***********************************************************************************
-	 *  							    Exec Utilities    			  	   		       *
-	 ***********************************************************************************/
-	getExecPromise : function() {
-		return exec;
-	},
+    // Function that rejects function (promise) after (seconds) seconds with error (errMsg)
+    promiseTimeoutS(seconds, promise, errMsg) {
+        // Create a promise that rejects in <seconds> seconds
+        const timeout = new Promise((resolve, reject) => {
+            const id = setTimeout(() => {
+                clearTimeout(id);
+                reject(new Error(`${errMsg} --> Timed out in ${seconds} seconds.`));
+            }, 1000 * seconds);
+        });
 
-	/***********************************************************************************
-	 *   logInMongo() --> adds log message to the job in the queue                     *
-	 ***********************************************************************************/
-	logInMongo : async function(currentJob, message) {
-		console.log(message);
-		await mongo.logMessageInMongo(currentJob, message);
-	}, 
+        // Returns a race between our timeout and the passed in promise
+        return Promise.race([promise, timeout]);
+    },
 
-	/***********************************************************************************
-	 *   cloneObject() --> performs a deep copy of an object                           *
-	 ***********************************************************************************/
-	cloneObject: function(obj) {
-		if (!obj) { return obj; }
-		var clone = {};
-		for(var i in obj) {
-			if(obj[i] != null &&  typeof(obj[i])=="object")
-				clone[i] = module.exports.cloneObject(obj[i]);
-			else
-				clone[i] = obj[i];
-		}
-		return clone;
-	}
-}
+    // Return promisified version of exec() function - for testing purposes
+    getExecPromise() {
+        return exec;
+    },
+
+    // Adds log message (message) to current job in queue at spot (currentJob.numFailures)
+    async logInMongo(currentJob, message) {
+        console.log(message);
+        await mongo.logMessageInMongo(currentJob, message);
+    },
+};

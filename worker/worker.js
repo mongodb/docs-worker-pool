@@ -1,208 +1,198 @@
 
-// Imports
-const express 		= require('express');
-const mongo   		= require('./utils/mongo');
-const workerUtils   =  require('./utils/utils');
-const fs      		= require('fs-extra');
-const retry   		= require('async-retry')
 
+// Imports
+const express = require('express');
+const fs = require('fs-extra');
+const retry = require('async-retry');
+const mongo = require('./utils/mongo');
+const workerUtils = require('./utils/utils');
 
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
-const {runGithubPush} = require('./jobTypes/githubPushJob');
+const { runGithubPush } = require('./jobTypes/githubPushJob');
 
 // Variables
-let queueCollection;                // Holder for the queueCollection in MongoDB Atlas
-let currentJob;                     // Holder for the job currently executing 
-let lastCheckIn = new Date();       // Variable used to see if the worker has failed
+let queueCollection; // Holder for the queueCollection in MongoDB Atlas
+let currentJob; // Holder for the job currently executing
+let lastCheckIn = new Date(); // Variable used to see if the worker has failed
 let shouldStop = false;
 let mongoClient;
 
 // Constants
-const MONGO_TIMEOUT_S = 15;         // Reject any mongo operation taking longer than this number of seconds
-const JOB_TIMEOUT_S = 60 * 60;      // Reject any job taking longer than this number of seconds
-const RETRY_TIMEOUT_MS = 5 * 1000;  // Number of seconds to wait before querying for a new job after not finding one
-const MIN_TIMEOUT_MS = 1;           // Small timeout to re-call the work() function 
-const LOG_PADDING = 15;             // For formatting the log output
-const PORT = 3000;    				// For the liveness check
+const MONGO_TIMEOUT_S = 15; // Reject any mongo operation taking longer than this number of seconds
+const JOB_TIMEOUT_S = 60 * 60; // Reject any job taking longer than this number of seconds
+const RETRY_TIMEOUT_MS = 5 * 1000; // Number of seconds to wait after not finding one
+const MIN_TIMEOUT_MS = 1; // Small timeout to re-call the work() function
+const LOG_PADDING = 15; // For formatting the log output
+const PORT = 3000; // For the liveness check
 
 // If the worker has not updated lastCheckin in maxCheckin seconds --> kubernetes will know
 // Set to be the critical path of the worker plus 10 minutes
-const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60*10) * 1000; 
-
+const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60 * 10) * 1000;
 
 // **** IF YOU ARE ADDING A FUNCTION --> ADD IT TO THIS DICTIONARY
 // Dictionary of possible jobs for this node
-var jobTypeToFunc = {
-	"githubPush": runGithubPush,
-}
+const jobTypeToFunc = {
+    githubPush: runGithubPush,
+};
 
 // route for liveness check
-const app = express()
+const app = express();
 app.get('/liveness', (req, res) => {
-	let result = getLiveness();
-	res.status(result.status).send({msg: result.msg});
+    const result = module.exports.getLiveness();
+    res.status(result.status).send({ msg: result.msg });
 });
 
 module.exports = {
-	/***********************************************************************************
-	 *                           Functions Used For Testing                            *
-	 ***********************************************************************************/
-	setCurrentJob : function(job) {
-		currentJob = job;
-	},
+    //
+    // Functions Used For Testing
+    //
+    setCurrentJob(job) {
+        currentJob = job;
+    },
 
-	addJobTypeToFunc : function(jobType, func) {
-		jobTypeToFunc[jobType] = func;
-	},
+    addJobTypeToFunc(jobType, func) {
+        jobTypeToFunc[jobType] = func;
+    },
 
-	setLastCheckIn : function(lastCheck) {
-		lastCheckIn = lastCheck;
-	},
+    setLastCheckIn(lastCheck) {
+        lastCheckIn = lastCheck;
+    },
 
-	getLiveness() {
-		let timeSince = (new Date()).getTime() - lastCheckIn.getTime();
-		if (timeSince > maxCheckIn) {
-			let errMsg = "Server has not checked in " + timeSince / 1000 + " seconds " + "(maxCheckin = " + maxCheckIn + ")"; 
-			return {status: 500, msg: errMsg};
-		} else {
-			let success = "Server checked in " + timeSince / 1000 + " seconds ago";
-			return {status: 200, msg: success};
-		}
-	}, 
+    getLiveness() {
+        const timeSince = (new Date()).getTime() - lastCheckIn.getTime();
+        if (timeSince > maxCheckIn) {
+            const errMsg = `Server has not checked in ${timeSince / 1000} seconds (maxCheckin = ${maxCheckIn})`;
+            return { status: 500, msg: errMsg };
+        }
+        const success = `Server checked in ${timeSince / 1000} seconds ago`;
+        return { status: 200, msg: success };
+    },
 
-	/***********************************************************************************
-	 *                      Terminus / Kubernetes Related Functions                    *
-	 ***********************************************************************************/
-	gracefulShutdown : async function() {
-		console.log('\nServer is starting cleanup');
-		shouldStop = true;
+    // Function to handle server shutdown
+    async gracefulShutdown() {
+        console.log('\nServer is starting cleanup');
+        shouldStop = true;
 
-		if (currentJob) {
-			let logMsg = "    (ERROR)".padEnd(LOG_PADDING) + "Resetting Job with ID: " + currentJob._id + " because server is being shut down";
-			workerUtils.logInMongo(currentJob, logMsg);
+        if (currentJob) {
+            const logMsg = `${'    (ERROR)'.padEnd(LOG_PADDING)}Resetting Job with ID: ${currentJob._id} because server is being shut down`;
+            workerUtils.logInMongo(currentJob, logMsg);
 
-			workerUtils.resetDirectory("work/");
-			await workerUtils.promiseTimeoutS(
-				MONGO_TIMEOUT_S, 
-				await mongo.finishJobWithFailure(queueCollection, currentJob, "Server is being shutdown"), 
-				"Mongo Timeout Error: Timed out finishing failed job with jobId: " + currentJob._id
-			);
-		}
-		if (mongoClient) {
-			mongoClient.close();
-		}
-	}, 
+            workerUtils.resetDirectory('work/');
+            await workerUtils.promiseTimeoutS(
+                MONGO_TIMEOUT_S,
+                await mongo.finishJobWithFailure(queueCollection, currentJob, 'Server is being shutdown'),
+                `Mongo Timeout Error: Timed out finishing failed job with jobId: ${currentJob._id}`,
+            );
+        }
+        if (mongoClient) {
+            mongoClient.close();
+        }
+    },
 
-	/***********************************************************************************
-	 *                    Start the server and set everything up                       *
-	 ***********************************************************************************/
-	startServer : async function() {
-		// Initialize MongoDB Collection 
-		let mongoClient = await mongo.initMongoClient();
-		if (mongoClient) { // <-- this is just for testing
-			queueCollection = mongo.getQueueCollection();
-		}
+    //  Start the server and set everything up
+    async startServer() {
+    // Initialize MongoDB Collection
+        mongoClient = await mongo.initMongoClient();
+        if (mongoClient) { // <-- this is just for testing
+            queueCollection = mongo.getQueueCollection();
+        }
 
-		// Clean up the work folder
-		workerUtils.resetDirectory("work/");
+        // Clean up the work folder
+        workerUtils.resetDirectory('work/');
 
-		// Setup http server
-		return app.listen(PORT);
-	},
+        // Setup http server
+        return app.listen(PORT);
+    },
 
-	/***********************************************************************************
-	 *                                  main function                                  *
-	 ***********************************************************************************/
-	work : async function() {
-		try {
-			lastCheckIn = new Date();
-			currentJob = null;
-			let logMsg;
+    // Main function for the worker
+    async work() {
+        try {
+            lastCheckIn = new Date();
+            currentJob = null;
+            let logMsg;
 
-			if (shouldStop) {
-				throw new Error("Shutting Down --> Should not get new jobs");
-			}
-	
-			// Get a new job
-			let job = await workerUtils.promiseTimeoutS(
-				MONGO_TIMEOUT_S, 
-				mongo.getNextJob(queueCollection), 
-				"Mongo Timeout Error: Timed out getting next job from queue collection"
-			);
-			
-			// If there was a job in the queue
-			if (job && job.value) {
-				currentJob = job.value;
+            if (shouldStop) {
+                throw new Error('Shutting Down --> Should not get new jobs');
+            }
 
-				logMsg = "* Starting Job with ID: " + currentJob._id + " and type: " + currentJob.payload.jobType;
-				workerUtils.logInMongo(currentJob, logMsg)
-	
-				// Throw error if we cannot perform this job / it is not a valid job
-				if (!currentJob.payload.hasOwnProperty("jobType") || !(currentJob.payload.jobType in jobTypeToFunc)) {
-					throw new Error("Job type of (" + currentJob.payload.jobType + ") not recognized")
-				}
-				
-				// Perform the job
-				let result = await workerUtils.promiseTimeoutS(
-					JOB_TIMEOUT_S, 
-					jobTypeToFunc[currentJob.payload.jobType](currentJob), 
-					"Worker Timeout Error: Timed out performing " + currentJob.payload.jobType + 
-						" for jobId: " + currentJob._id
-				);
-				
-				// Update the job to be successful
-				await workerUtils.promiseTimeoutS(
-					MONGO_TIMEOUT_S, 
-					mongo.finishJobWithResult(queueCollection, currentJob, result), 
-					"Mongo Timeout Error: Timed out finishing successful job with jobId: " + currentJob._id
-				);
-	
-				// Log that we are done with this job
-				logMsg = "    (DONE)".padEnd(LOG_PADDING) + "Finished Job with ID: " + currentJob._id;
-				workerUtils.logInMongo(currentJob, logMsg);
+            // Get a new job
+            const job = await workerUtils.promiseTimeoutS(
+                MONGO_TIMEOUT_S,
+                mongo.getNextJob(queueCollection),
+                'Mongo Timeout Error: Timed out getting next job from queue collection',
+            );
 
-				// Must use timeout for testing purposes (but essentially this is just re-calling work())
-				setTimeout(module.exports.work, MIN_TIMEOUT_MS);
-			} else {
-				// Log that no jobs were found
-				console.log("No Jobs Found....: ", new Date());
+            // If there was a job in the queue
+            if (job && job.value) {
+                currentJob = job.value;
 
-				// Wait retryMs milliseconds and then try work() again
-				setTimeout(module.exports.work, RETRY_TIMEOUT_MS);
-			}
-		} catch (err) {	
-			console.log("  Error caught by first catch: " + err);
-			try {
-				// Create a deep copy of the current job to prevent it from being overwritten
-				let lastJob = JSON.parse(JSON.stringify(currentJob));
-				lastJob._id = currentJob._id;
-				
-				// Start new job before labeling the previous job as a failure so that it does not just 
-				// get the same job that it just failed at
-				if (!shouldStop) { setTimeout(module.exports.work, MIN_TIMEOUT_MS); }
-		
-				// If there is a current job --> update the job document to be failed 
-				if (lastJob) {
-					// Log the error: 
-					workerUtils.logInMongo(lastJob, "    (ERROR)".padEnd(LOG_PADDING) + err.toString());
+                logMsg = `* Starting Job with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
+                workerUtils.logInMongo(currentJob, logMsg);
 
-					// If we end up here, then the folder work/jobId will still be there, so delete it
-					fs.removeSync("work/" + lastJob._id);
+                // Throw error if we cannot perform this job / it is not a valid job
+                if (!currentJob.payload.hasOwnProperty('jobType') || !(currentJob.payload.jobType in jobTypeToFunc)) {
+                    throw new Error(`Job type of (${currentJob.payload.jobType}) not recognized`);
+                }
 
-					// Try to finish the job with failure and retry it 3 times
-					await retry(async bail => {
-						mongo.finishJobWithFailure(queueCollection, lastJob, err.toString());
-					}, {
-						retries: 3
-					}).catch(errObj => {
-						console.log("****** finishJobWithFailure failed for job " + lastJob._id + 
-									" and failure {" + err.toString() + "} with err: " + errObj.toString());
-					});
-				}
-			} catch (err) {
-				console.log("  Error caught by second catch: " + err);
-			}
-		}	
-	}, 
-}
+                // Perform the job
+                const result = await workerUtils.promiseTimeoutS(
+                    JOB_TIMEOUT_S,
+                    jobTypeToFunc[currentJob.payload.jobType](currentJob),
+                    `Worker Timeout Error: Timed out performing ${currentJob.payload.jobType} for jobId: ${currentJob._id}`,
+                );
+
+                // Update the job to be successful
+                await workerUtils.promiseTimeoutS(
+                    MONGO_TIMEOUT_S,
+                    mongo.finishJobWithResult(queueCollection, currentJob, result),
+                    `Mongo Timeout Error: Timed out finishing successful job with jobId: ${currentJob._id}`,
+                );
+
+                // Log that we are done with this job
+                logMsg = `${'    (DONE)'.padEnd(LOG_PADDING)}Finished Job with ID: ${currentJob._id}`;
+                workerUtils.logInMongo(currentJob, logMsg);
+
+                // Must use timeout for testing purposes (essentially just re-calling work())
+                setTimeout(module.exports.work, MIN_TIMEOUT_MS);
+            } else {
+                // Log that no jobs were found
+                console.log('No Jobs Found....: ', new Date());
+
+                // Wait retryMs milliseconds and then try work() again
+                setTimeout(module.exports.work, RETRY_TIMEOUT_MS);
+            }
+        } catch (err) {
+            console.log(`  Error caught by first catch: ${err}`);
+            try {
+                // Create a deep copy of the current job to prevent it from being overwritten
+                const lastJob = JSON.parse(JSON.stringify(currentJob));
+                lastJob._id = currentJob._id;
+
+                // Start new job before labeling the previous job as a failure so that it
+                // does not just get the same job that it just failed at
+                if (!shouldStop) { setTimeout(module.exports.work, MIN_TIMEOUT_MS); }
+
+                // If there is a current job --> update the job document to be failed
+                if (lastJob) {
+                    // Log the error:
+                    workerUtils.logInMongo(lastJob, '    (ERROR)'.padEnd(LOG_PADDING) + err.toString());
+
+                    // If we end up here, then the folder work/jobId will still be there --> delete
+                    fs.removeSync(`work/${lastJob._id}`);
+
+                    // Try to finish the job with failure and retry it 3 times
+                    await retry(async () => {
+                        mongo.finishJobWithFailure(queueCollection, lastJob, err.toString());
+                    }, {
+                        retries: 3,
+                    }).catch((errObj) => {
+                        console.log(`****** finishJobWithFailure failed for job ${lastJob._id} and failure {${err.toString()}} with err: ${errObj.toString()}`);
+                    });
+                }
+            } catch (err2) {
+                console.log(`  Error caught by second catch: ${err2}`);
+            }
+        }
+    },
+};

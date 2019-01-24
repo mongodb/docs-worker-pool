@@ -23,14 +23,17 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 	];
 
 	itemsCollection.aggregate(statusAggregation).asArray().then(results => {
-		let statuses = {inQueue: 0, inProgress: 0, completed: 0, failed: 0};
-		for (i in results) {
-			statuses[results[i]._id] = results[i].count
+		const statuses = {inQueue: 0, inProgress: 0, completed: 0, failed: 0};
+
+		for (const result of results) {
+			statuses[result._id] = result.count
 		}
-		document.getElementById('numFailed').innerHTML = statuses.failed;
-   	  	document.getElementById('numCompleted').innerHTML = statuses.completed;
-   	  	document.getElementById('numInProgress').innerHTML = statuses.inProgress;
-   	  	document.getElementById('numInQueue').innerHTML = statuses.inQueue;
+
+		document.getElementById('numFailed').appendChild(document.createTextNode(statuses.failed));
+		document.getElementById('numCompleted').appendChild(document.createTextNode(statuses.completed));
+		document.getElementById('numInProgress').appendChild(document.createTextNode(statuses.inProgress));
+		document.getElementById('numInQueue').appendChild(document.createTextNode(statuses.inQueue));
+
 	}).catch(err => {
 		console.log(err);
 	});
@@ -44,10 +47,10 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 
 	itemsCollection.aggregate(jobNameAggregation).asArray().then(results => {
 		data = [];
-   		for (i in results) {
+   		for (const result of results) {
    			data.push({
-   				label: results[i]._id, 
-   				value: results[i].count,
+   				label: result._id, 
+   				value: result.count,
    			});
    		}
    		Morris.Donut({
@@ -62,32 +65,46 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 	/***************************************************************************** 
 	 *                 Get the last 10 jobs added to the queue                   *
 	 *****************************************************************************/
-	let symbolsDict = {
+	const symbolsDict = {
 		inQueue: 'fa fa-list-alt', 
 		inProgress: 'fa fa-refresh',
 		completed: 'fa fa-check-circle-o', 
 		failed: 'fa fa-times-circle-o'
 	}
-	
-	let n = 10;
-	let options = {
+
+	const options = {
 		projection: {_id: 1, title: 1, createdTime: 1, status: 1}, 
-		limit: n, 
+		limit: 10, 
 		sort: {createdTime: -1}
 	}
 
 	itemsCollection.find({}, options).asArray().then(results => {
-		let str = "";
-		for (i in results) {
-			let job = results[i];
-			str += '<a href="job.html?jobId=' + job._id + '" class="list-group-item"><i class="'
-			if (job.status in symbolsDict) {
-				str += symbolsDict[job.status];
-			}
-   			str += '"></i> ' + job.title;
-   			str += '<span class="pull-right text-muted small"><em>' + formatDate(job.createdTime) + '</em></span></a>';
+		for (const job of results) {
+			const jobElement = document.createElement('a');
+			jobElement.href = 'job.html?jobId=' + job._id;
+			jobElement.className = "list-group-item";
+
+			// create icon and add
+			const iElement = document.createElement("i");
+			iElement.className = symbolsDict[job.status];
+			jobElement.appendChild(iElement);
+
+			// Add title text
+			var textElement = document.createTextNode(" " + job.title);
+			jobElement.appendChild(textElement);
+
+			// Add date span
+			const spanElement = document.createElement("span");
+			spanElement.className = "pull-right text-muted small";
+			const emElement = document.createElement("em");
+			textElement = document.createTextNode(formatDate(job.createdTime));
+			emElement.appendChild(textElement);
+			spanElement.appendChild(emElement);
+			jobElement.appendChild(spanElement);
+
+			/// add element to DOM
+			document.getElementById('last10Jobs').appendChild(jobElement);
 		}
-		document.getElementById('last10Jobs').innerHTML = str;
 	}).catch(err => {
 		console.log(err);
 	});
@@ -95,38 +112,71 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 	/***************************************************************************** 
 	 *                 Find Jobs That Do Not Make Any Sense                      *
 	 *****************************************************************************/
-	let oneHourAgo = new Date();
+	const oneHourAgo = new Date();
 	oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-	statuses = {
+	const statuses = {
 		inQueue: {status: "inQueue", '$or': [{createdTime: null}, {startTime: {$ne: null}}, {endTime: {$ne: null}}, {numFailures: {$gte: 3}}]},
 		inProgress: {status: "inProgress", '$or': [{createdTime: null}, {startTime: null}, {endTime: {$ne: null}}, {numFailures: {$gte: 3}}, {startTime: {$lte: oneHourAgo}}]}, 
 		completed: {status: "completed", '$or': [{createdTime: null}, {startTime: null}, {endTime: null}, {numFailures: {$gte: 3}}]},
 		failed: {status: "failed", '$or': [{createdTime: null},{startTime: {$ne: null}}, {endTime: {$ne: null}},  {numFailures: {$lt: 3}}]},
 	}; 
+
 	itemsCollection.find({status: {$nin: Object.keys(statuses)}}, options).asArray().then(results => {
-		let str = "";
-		for (i in results) {
-			let job = results[i];
+		for (const job of results) {
 			console.log("Invalid Status " + JSON.stringify(job));
-			str += '<a href="job.html?jobId=' + job._id + '" class="list-group-item"><i class=""></i> ' + job.title;
-   			str += '<span class="pull-right text-muted small"><em>' + formatDate(job.createdTime) + '</em></span></a>';
+
+			// Create job element
+			const jobElement = document.createElement('a');
+			jobElement.href = 'job.html?jobId=' + job._id;
+			jobElement.className = "list-group-item";
+
+			// Add title text
+			var textElement = document.createTextNode(" " + job.title);
+			jobElement.appendChild(textElement);
+
+			// Add date span
+			const spanElement = document.createElement("span");
+			spanElement.className = "pull-right text-muted small";
+			const emElement = document.createElement("em");
+			textElement = document.createTextNode(formatDate(job.createdTime));
+			emElement.appendChild(textElement);
+			spanElement.appendChild(emElement);
+			jobElement.appendChild(spanElement);
+
+			// add it to dom
+			document.getElementById("oddJobs").appendChild(jobElement);
 		}
-		document.getElementById('oddJobs').innerHTML += str;
 	}).catch(err => {
 		console.log(err);
 	});
-
-	for (status in statuses) {
+	
+	for (const status in statuses) {
 		itemsCollection.find(statuses[status], options).asArray().then(results => {
-			let str = "";
-			for (i in results) {
-				let job = results[i];
+			for (const job of results) {
 				console.log("Invalid Job: " + JSON.stringify(job));
-				str += '<a href="job.html?jobId=' + job._id + '" class="list-group-item"><i class=""></i> ' + job.title;
-				   str += '<span class="pull-right text-muted small"><em>' + formatDate(job.createdTime) + '</em></span></a>';
+
+				// Create job element
+				const jobElement = document.createElement('a');
+				jobElement.href = 'job.html?jobId=' + job._id;
+				jobElement.className = "list-group-item";
+
+				// Add title text
+				var textElement = document.createTextNode(" " + job.title);
+				jobElement.appendChild(textElement);
+
+				// Add date span
+				const spanElement = document.createElement("span");
+				spanElement.className = "pull-right text-muted small";
+				const emElement = document.createElement("em");
+				textElement = document.createTextNode(formatDate(job.createdTime));
+				emElement.appendChild(textElement);
+				spanElement.appendChild(emElement);
+				jobElement.appendChild(spanElement);
+
+				// add it to dom
+				document.getElementById("oddJobs").appendChild(jobElement);
 			}
-			document.getElementById('oddJobs').innerHTML += str;
 		}).catch(err => {
 			console.log(err);
 		});
