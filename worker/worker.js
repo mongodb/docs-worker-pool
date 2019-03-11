@@ -9,7 +9,7 @@ const workerUtils = require('./utils/utils');
 
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
-const { runGithubPush } = require('./jobTypes/githubPushJob');
+const { runGithubPush, sanitizeGithubPush } = require('./jobTypes/githubPushJob');
 
 // Variables
 let queueCollection; // Holder for the queueCollection in MongoDB Atlas
@@ -33,8 +33,9 @@ const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60 * 10) * 1000;
 // **** IF YOU ARE ADDING A FUNCTION --> ADD IT TO THIS DICTIONARY
 // Dictionary of possible jobs for this node
 const jobTypeToFunc = {
-    githubPush: runGithubPush,
+    githubPush: { function: runGithubPush, sanitize: sanitizeGithubPush }
 };
+
 
 // route for liveness check
 const app = express();
@@ -52,7 +53,7 @@ module.exports = {
     },
 
     addJobTypeToFunc(jobType, func) {
-        jobTypeToFunc[jobType] = func;
+        jobTypeToFunc[jobType] = { function: func }
     },
 
     setLastCheckIn(lastCheck) {
@@ -93,6 +94,7 @@ module.exports = {
     //  Start the server and set everything up
     async startServer() {
     // Initialize MongoDB Collection
+    // This is the collection that houses the work tickets
         mongoClient = await mongo.initMongoClient();
         if (mongoClient) { // <-- this is just for testing
             queueCollection = mongo.getQueueCollection();
@@ -125,6 +127,7 @@ module.exports = {
 
             // If there was a job in the queue
             if (job && job.value) {
+                
                 currentJob = job.value;
 
                 logMsg = `* Starting Job with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
@@ -135,10 +138,20 @@ module.exports = {
                     throw new Error(`Job type of (${currentJob.payload.jobType}) not recognized`);
                 }
 
+                // Sanitize the job (note that jobs that do not implement the sanitize function
+                // will not proceed
+
+                const sanitize = await workerUtils.promiseTimeoutS(
+                    JOB_TIMEOUT_S,
+                    jobTypeToFunc[currentJob.payload.jobType].sanitize(currentJob),
+                    `Worker Timeout Error: Timed out performing ${currentJob.payload.jobType} for jobId: ${currentJob._id}`,
+                );
+
+
                 // Perform the job
                 const result = await workerUtils.promiseTimeoutS(
                     JOB_TIMEOUT_S,
-                    jobTypeToFunc[currentJob.payload.jobType](currentJob),
+                    jobTypeToFunc[currentJob.payload.jobType].function(currentJob),
                     `Worker Timeout Error: Timed out performing ${currentJob.payload.jobType} for jobId: ${currentJob._id}`,
                 );
 

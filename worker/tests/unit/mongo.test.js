@@ -1,5 +1,5 @@
 const { MongoClient } = require('mongodb');
-const mongo = require('../utils/mongo');
+const mongo = require('../../utils/mongo');
 
 // Helper function to add n days to the current date
 function newDateInNDays(n) {

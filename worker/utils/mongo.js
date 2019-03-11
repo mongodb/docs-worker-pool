@@ -97,4 +97,21 @@ module.exports = {
             console.log('Error in logInMongo(): queueCollection does not exist');
         }
     },
+    // Adds Log Message To Job In The Queue
+    async populateCommunicationMessageInMongo(currentJob, message) {
+        const queueCollection = module.exports.getQueueCollection();
+        if (queueCollection) {
+            const query = { _id: currentJob._id };
+            const update = {
+                $set: { comMessage: message}
+            };
+            try {
+                await queueCollection.updateOne(query, update);
+            } catch (err) {
+                console.log(`Error in populateCommunicationMessageInMongo(): ${err}`);
+            }
+        } else {
+            console.log('Error in populateCommunicationMessageInMongo(): queueCollection does not exist');
+        }
+    }
 };

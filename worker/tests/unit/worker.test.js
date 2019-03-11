@@ -1,6 +1,6 @@
-const worker = require('../worker');
-const mongo = require('../utils/mongo');
-const workerUtils = require('../utils/utils');
+const worker = require('../../worker');
+const mongo = require('../../utils/mongo');
+const workerUtils = require('../../utils/utils');
 
 describe('Test Class', () => {
     beforeAll(() => {
