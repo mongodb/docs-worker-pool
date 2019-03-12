@@ -63,7 +63,7 @@ module.exports = {
                 throw new Error('master branches not supported');   
             }
             
-            const { stdout, stderr } = await exec(command);
+            await exec(command);
   
         } catch (errResult) {
             if (errResult.hasOwnProperty('code') || errResult.hasOwnProperty('signal') || errResult.hasOwnProperty('killed')) {

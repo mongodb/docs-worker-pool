@@ -38,7 +38,7 @@ module.exports = {
     },
 
     async removeDirectory(dir) {
-        
+
         if (fs.existsSync('./' + dir)) {
             await fs.removeSync('./' + dir)
         }
