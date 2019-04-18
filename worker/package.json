@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles --coverage",
-    "start": "node index.js"
+    "start": "node index.js",
+    "clean": "node maintain.js"
   },
   "repository": {
     "type": "git",
