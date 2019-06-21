@@ -37,6 +37,24 @@ module.exports = {
     return fs.existsSync('./' + dir);
   },
 
+  rootFileExists(dir) {
+    return fs.existsSync(dir);
+  },
+
+  writeToFile(fileName, text) {
+    fs.outputFile(fileName, text, function(err) {
+      console.log(err); //null
+    })
+  },
+
+  printFile(fileName) {
+    fs.readFile(fileName, function(err, data) {
+  /* If an error exists, show it, otherwise show the file */
+  err ? Function("error","throw error")(err) : console.log(data);
+  });
+
+  },
+
   async removeDirectory(dir) {
     if (fs.existsSync('./' + dir)) {
       await fs.removeSync('./' + dir);
@@ -45,8 +63,12 @@ module.exports = {
   },
 
   async resetDirectory(dir) {
-    fs.removeSync(dir);
-    fs.mkdirsSync(dir);
+    await fs.removeSync(dir);
+    await fs.mkdirsSync(dir);
+  },
+
+  async touchFile(file) {
+    await fs.closeSync(fs.openSync(file, 'w'));
   },
 
   // Function for testing that resolves in n seconds
@@ -81,6 +103,7 @@ module.exports = {
   async logInMongo(currentJob, message) {
     await mongo.logMessageInMongo(currentJob, message);
   },
+  
   async populateCommunicationMessageInMongo(currentJob, message) {
     await mongo.populateCommunicationMessageInMongo(currentJob, message);
   },

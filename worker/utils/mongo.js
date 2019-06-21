@@ -53,7 +53,8 @@ module.exports = {
         endTime: new Date(),
       },
     };
-    const updateResult = await queueCollection.updateOne(query, update);
+    const updateResult = await queueCollection.
+      updateOne(query, update);
     if (updateResult.result.n < 1) {
       throw new Error(`Failed to update job (${job._id}) in queue on success`);
     }

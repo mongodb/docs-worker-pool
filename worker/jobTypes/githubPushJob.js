@@ -12,10 +12,16 @@ const validator = require('validator');
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
 
+const keyLoc = '.config';
+const keyFile = 'giza-aws-authentication.conf';
+
+
 process.env.STITCH_ID = 'ref_data-bnbxq';
 process.env.NAMESPACE = 'snooty/documents';
 
 const invalidJobDef = new Error('job not valid');
+
+const userDir = process.env.HOME;
 
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
@@ -26,7 +32,19 @@ function safeString(stringToCheck) {
   );
 }
 
-async function safeGithubPush(currentJob) {
+
+async function initGithubPush() {
+  const fileName = userDir + '/' + keyLoc + '/' + keyFile;
+  if (!workerUtils.rootFileExists(fileName)) {
+    await workerUtils.touchFile(fileName);
+    await workerUtils.writeToFile(fileName, '[authentication]' + '\n' +
+      `accesskey=${process.env.ACCESS_KEY}` + '\n' + `secretkey=${process.env.SECRET_KEY}`);
+  } else {
+    console.log('keyfile exists');
+  }
+}
+
+function safeGithubPush(currentJob) {
   if (
     !currentJob ||
     !currentJob.payload ||
@@ -64,15 +82,26 @@ async function build(currentJob) {
       currentJob,
       `${'    (BUILD)'.padEnd(15)}running worker.sh`
     );
-    let command = 'cd ' + currentJob.payload.repoName + '; ./worker.sh';
-
+    
+    let repoPath =
+      'https://github.com/' +
+      currentJob.payload.repoOwner +
+      '/' +
+      currentJob.payload.repoName;
+    
     if (currentJob.payload.branchName != 'master') {
-      command =
-        `cd ` +
-        currentJob.payload.repoName +
-        `; git checkout ` +
-        currentJob.payload.branchName +
-        '; ./worker.sh';
+      const command = `cd ${currentJob.payload.repoName}; git checkout ${
+        currentJob.payload.branchName
+        }; git pull origin ${currentJob.payload.branchName};`;
+      
+      await exec(command);
+   
+      const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; ./worker.sh`;
+      const execTwo = workerUtils.getExecPromise();
+      const { stdout, stderr } = await execTwo(commandbuild);
+
+      console.log(stdout + ':' + stderr);
+      
     } else {
       workerUtils.logInMongo(
         currentJob,
@@ -81,8 +110,8 @@ async function build(currentJob) {
       throw new Error('master branches not supported');
     }
 
-    await exec(command);
   } catch (errResult) {
+    console.log('error ' + errResult);
     if (
       errResult.hasOwnProperty('code') ||
       errResult.hasOwnProperty('signal') ||
@@ -99,7 +128,7 @@ async function build(currentJob) {
       throw errResult;
     }
   }
-
+  console.log('finished build');
   workerUtils.logInMongo(
     currentJob,
     `${'    (BUILD)'.padEnd(15)}Finished Build`
@@ -184,10 +213,9 @@ async function pushToStage(currentJob) {
   // change working dir to the repo we need to build
   try {
     const exec = workerUtils.getExecPromise();
-    const command = `cd ${currentJob.payload.repoName}; git checkout ${
-      currentJob.payload.branchName
-    }; make stage;`;
-    const { stdout } = await exec(command);
+    const command = `cd ${currentJob.payload.repoName}; make stage;`;
+    const { stdout, stderr } = await exec(command);
+    console.log(stdout + ':' + stderr);
     workerUtils.logInMongo(
       currentJob,
       `${'    (stage)'.padEnd(15)}Finished pushing to staging`
@@ -213,6 +241,8 @@ async function pushToStage(currentJob) {
 }
 
 async function runGithubPush(currentJob) {
+  await initGithubPush();
+  
   workerUtils.logInMongo(currentJob, ' ** Running github push function');
 
   if (
@@ -249,6 +279,8 @@ async function runGithubPush(currentJob) {
     'Timed out on build'
   );
 
+  console.log('competed build');
+
   let branchext = '';
   let isMaster = true;
 
@@ -260,6 +292,7 @@ async function runGithubPush(currentJob) {
   if (isMaster) {
     //TODO: push to prod
   } else {
+    console.log('pushing to stage');
     await workerUtils.promiseTimeoutS(
       buildTimeout,
       pushToStage(currentJob),
