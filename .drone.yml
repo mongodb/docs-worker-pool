@@ -18,7 +18,7 @@ pipeline:
     release: docs-worker-pool
     namespace: docs
     environment:
-      - API_SERVER=https://api.staging.mongodb.sh
+      - API_SERVER=https://api.staging.corp.mongodb.com
     prefix: STAGING
     secrets: [ staging_kubernetes_token ]
     values_files: [ "environments/staging.yml" ]
