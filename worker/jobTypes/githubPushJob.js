@@ -89,16 +89,32 @@ async function build(currentJob) {
       '/' +
       currentJob.payload.repoName;
     
+    console.log('repo path');
+    console.log(repoPath);
+    
     if (currentJob.payload.branchName != 'master') {
-      const command = `cd ${currentJob.payload.repoName}; git checkout ${
+      const command = `git clone ${repoPath}; cd ${currentJob.payload.repoName}; git checkout ${
         currentJob.payload.branchName
         }; git pull origin ${currentJob.payload.branchName};`;
       
       await exec(command);
-   
+
+
       const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; ./worker.sh`;
+      console.log(commandbuild);
+
+      const commandpwd = `pwd`;
+      const { stdout, stderr } = await exec(commandpwd);
+      const execThree = workerUtils.getExecPromise();
+      await execThree(commandbuild);
+
       const execTwo = workerUtils.getExecPromise();
-      const { stdout, stderr } = await execTwo(commandbuild);
+      await execTwo(commandbuild);
+
+      workerUtils.logInMongo(
+        currentJob,
+        `${'    (BUILD)'.padEnd(15)}ran worker.sh`
+      );
 
       console.log(stdout + ':' + stderr);
       
@@ -155,6 +171,8 @@ async function cloneRepo(currentJob) {
       '/' +
       currentJob.payload.repoName;
 
+    console.log(repoPath);
+
     await simpleGit()
       .silent(false)
       .clone(repoPath)
@@ -162,7 +180,6 @@ async function cloneRepo(currentJob) {
         console.error('failed: ', err);
         throw err;
       });
-
     workerUtils.logInMongo(currentJob, `${'    (GIT)'.padEnd(15)}ran fetch`);
   } catch (errResult) {
     if (
