@@ -213,7 +213,7 @@ async function pushToStage(currentJob) {
   // change working dir to the repo we need to build
   try {
     const exec = workerUtils.getExecPromise();
-    const command = `cd ${currentJob.payload.repoName}; make stage;`;
+    const command = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; make stage;`;
     const { stdout, stderr } = await exec(command);
     console.log(stdout + ':' + stderr);
     workerUtils.logInMongo(
