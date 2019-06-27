@@ -98,16 +98,8 @@ async function build(currentJob) {
         }; git pull origin ${currentJob.payload.branchName};`;
       
       await exec(command);
-
-
-      const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; ./worker.sh`;
-      console.log(commandbuild);
-
-      const commandpwd = `pwd`;
-      const { stdout, stderr } = await exec(commandpwd);
-      const execThree = workerUtils.getExecPromise();
-      await execThree(commandbuild);
-
+   
+      const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; chmod 755 worker.sh; ./worker.sh`;
       const execTwo = workerUtils.getExecPromise();
       await execTwo(commandbuild);
 
@@ -230,7 +222,7 @@ async function pushToStage(currentJob) {
   // change working dir to the repo we need to build
   try {
     const exec = workerUtils.getExecPromise();
-    const command = `cd ${currentJob.payload.repoName}; make stage;`;
+    const command = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; make stage;`;
     const { stdout, stderr } = await exec(command);
     console.log(stdout + ':' + stderr);
     workerUtils.logInMongo(
