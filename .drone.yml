@@ -12,7 +12,7 @@ pipeline:
     when:
       branch: master
       event: push
-
+ 
   deploy-staging:
     image: quay.io/ipedrazas/drone-helm
     release: docs-worker-pool
