@@ -96,7 +96,7 @@ async function build(currentJob) {
       
       await exec(command);
    
-      const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; ./worker.sh`;
+      const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; chmod 755 ./worker.sh; ./worker.sh`;
       const execTwo = workerUtils.getExecPromise();
       const { stdout, stderr } = await execTwo(commandbuild);
 

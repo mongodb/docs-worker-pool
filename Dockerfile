@@ -12,6 +12,7 @@ RUN /venv/bin/pip install --upgrade --force setuptools
 RUN /venv/bin/pip install giza sphinx==1.6.6
 
 # get python 3.6
+# https://hub.docker.com/r/miseyu/docker-ubuntu16-python3.6/dockerfile
 RUN apt-get update && apt-get install -y software-properties-common && add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && apt-get install -y python3.6 python3.6-dev python3-pip
 RUN ln -sfn /usr/bin/python3.6 /usr/bin/python3 && ln -sfn /usr/bin/python3 /usr/bin/python && ln -sfn /usr/bin/pip3 /usr/bin/pip
@@ -25,6 +26,7 @@ RUN python3 -m pip install typing
 COPY worker/ .
 
 # get node 12
+# https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
 RUN apt-get install --yes curl
 RUN curl --location https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get install --yes nodejs
