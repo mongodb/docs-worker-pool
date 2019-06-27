@@ -5,8 +5,10 @@ As part of the Docs Tools Next Generation Project, the Worker Pool seeks to make
 ## Build and Run Docker Image
 ```
 docker build --tag=workerpool .
-docker run --env MONGO_ATLAS_USERNAME --env MONGO_ATLAS_PASSWORD workerpool
+docker run --env MONGO_ATLAS_USERNAME --env MONGO_ATLAS_PASSWORD --env ACCESS_KEY --env SECRET_KEY workerpool
 ```
+* `MONGO_ATLAS_USERNAME` and `MONGO_ATLAS_PASSWORD` is username/password of atlas database
+* `ACCESS_KEY` and `SECRET_KEY` are needed for uploading to S3 via [mut](https://github.com/mongodb/mut)
 
 ## Run Tests
 ```
