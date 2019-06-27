@@ -21,8 +21,7 @@ RUN apt-get -y install python3-pip python3-venv git pkg-config libxml2-dev
 RUN python3 -m pip install mut
 RUN python3 -m pip install typing
 
-# create working directory  
-COPY worker/ .
+RUN echo "export PATH=$PATH:/usr/local/lib/python2.7/dist-packages/virtualenv/bin" > /etc/environment
 
 # get node 12
 RUN apt-get install --yes curl
@@ -30,12 +29,24 @@ RUN curl --location https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
+
+RUN useradd -ms /bin/bash docsworker
+
+
+# create working directory  
+
 # install the node dependencies for worker pool
 RUN npm -g config set user root
-RUN npm install
+#RUN npm install
+
+USER docsworker
+WORKDIR /home/docsworker
+COPY worker/ .
+run npm install
 
 # entry to kick-off the worker
+
 EXPOSE 3000
 CMD ["npm", "start"]
-RUN echo "export PATH=$PATH:/usr/local/lib/python2.7/dist-packages/virtualenv/bin" > /etc/environment
+
 
