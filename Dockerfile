@@ -6,6 +6,7 @@ RUN sed -i '/deb http:\/\/deb.debian.org\/debian jessie-updates main/d' /etc/apt
 RUN apt-get -o Acquire::Check-Valid-Until=false update
 RUN apt-get -y install libpython2.7-dev python2.7 git python-pip rsync
 RUN pip install requests virtualenv virtualenvwrapper py-dateutil
+RUN python2 -m pip install python-dateutil
 RUN python -m pip install --upgrade --force pip
 RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools

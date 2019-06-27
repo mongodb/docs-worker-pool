@@ -93,7 +93,7 @@ async function build(currentJob) {
     console.log(repoPath);
     
     if (currentJob.payload.branchName != 'master') {
-      const command = `git clone ${repoPath}; cd ${currentJob.payload.repoName}; git checkout ${
+      const command = `cd ${currentJob.payload.repoName}; git checkout ${
         currentJob.payload.branchName
         }; git pull origin ${currentJob.payload.branchName};`;
       
