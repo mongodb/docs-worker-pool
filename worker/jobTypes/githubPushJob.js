@@ -97,7 +97,7 @@ async function build(currentJob) {
         currentJob.payload.branchName
         }; git pull origin ${currentJob.payload.branchName};`;
       
-      await exec(command);
+      const { stdout, stderr } = await exec(command);
    
       const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; chmod 755 worker.sh; ./worker.sh`;
       const execTwo = workerUtils.getExecPromise();
