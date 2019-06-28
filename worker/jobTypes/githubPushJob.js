@@ -108,7 +108,7 @@ async function build(currentJob) {
         `${'    (BUILD)'.padEnd(15)}ran worker.sh`
       );
 
-      console.log(stdout + ':' + stderr);
+      //console.log(stdout + ':' + stderr);
       
     } else {
       workerUtils.logInMongo(
@@ -224,12 +224,17 @@ async function pushToStage(currentJob) {
     const exec = workerUtils.getExecPromise();
     const command = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; make stage;`;
     const { stdout, stderr } = await exec(command);
+    let stdoutMod = '';
     console.log(stdout + ':' + stderr);
+    // get only last part of message which includes # of files changes + s3 link
+    if (stdout.indexOf('Summary') !== -1) {
+      stdoutMod = stdout.substr(stdout.indexOf('Summary'));
+    } 
     workerUtils.logInMongo(
       currentJob,
       `${'    (stage)'.padEnd(15)}Finished pushing to staging`
     );
-    workerUtils.populateCommunicationMessageInMongo(currentJob, stdout);
+    workerUtils.populateCommunicationMessageInMongo(currentJob, stdoutMod);
   } catch (errResult) {
     if (
       errResult.hasOwnProperty('code') ||
