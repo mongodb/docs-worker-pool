@@ -104,12 +104,9 @@ async function build(currentJob) {
       console.log(commandbuild);
 
       const commandpwd = `pwd`;
-      const { stdout, stderr } = await exec(commandpwd);
+      await exec(commandpwd);
       const execThree = workerUtils.getExecPromise();
-      await execThree(commandbuild);
-
-      const execTwo = workerUtils.getExecPromise();
-      await execTwo(commandbuild);
+      const { stdout, stderr } = await execThree(commandbuild);
 
       workerUtils.logInMongo(
         currentJob,

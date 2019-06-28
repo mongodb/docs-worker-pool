@@ -1,5 +1,5 @@
 # get nodejs
-FROM node:10.10.0
+FROM node:10.16.0
 
 # # make sure submodules are installed 
 #RUN git submodule init
@@ -17,8 +17,8 @@ RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
 RUN /venv/bin/pip install giza sphinx==1.6.6
 
-#RUN apt-get -y install python3 python3-pip python3-venv pkg-config libxml2-dev
-RUN apt-get -y install python3 python3-pip python3-venv git pkg-config libxml2-dev
+RUN apt-get -y install python3-pip
+#RUN apt-get -y install python3 python3-pip python3-venv git pkg-config libxml2-dev
 RUN python3 -m pip install mut
 RUN python3 -m pip install typing
 #RUN pip install virtualenv
