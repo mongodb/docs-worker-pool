@@ -15,7 +15,6 @@ const uploadToS3Timeout = 20;
 const keyLoc = '.config';
 const keyFile = 'giza-aws-authentication.conf';
 
-
 process.env.STITCH_ID = 'ref_data-bnbxq';
 process.env.NAMESPACE = 'snooty/documents';
 
@@ -259,7 +258,8 @@ async function pushToStage(currentJob) {
 }
 
 async function runGithubPush(currentJob) {
-  await initGithubPush();
+  // do not create this file, andrew said it's better to set ENV vars instead
+  //await initGithubPush();
   
   workerUtils.logInMongo(currentJob, ' ** Running github push function');
 
