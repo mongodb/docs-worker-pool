@@ -12,15 +12,10 @@ const validator = require('validator');
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
 
-const keyLoc = '.config';
-const keyFile = 'giza-aws-authentication.conf';
-
 process.env.STITCH_ID = 'ref_data-bnbxq';
 process.env.NAMESPACE = 'snooty/documents';
 
 const invalidJobDef = new Error('job not valid');
-
-const userDir = process.env.HOME;
 
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
@@ -29,18 +24,6 @@ function safeString(stringToCheck) {
     validator.isAscii(stringToCheck) &&
     validator.matches(stringToCheck, /^((\w)+[-]?(\w)+)*$/)
   );
-}
-
-
-async function initGithubPush() {
-  const fileName = userDir + '/' + keyLoc + '/' + keyFile;
-  if (!workerUtils.rootFileExists(fileName)) {
-    await workerUtils.touchFile(fileName);
-    await workerUtils.writeToFile(fileName, '[authentication]' + '\n' +
-      `accesskey=${process.env.ACCESS_KEY}` + '\n' + `secretkey=${process.env.SECRET_KEY}`);
-  } else {
-    console.log('keyfile exists');
-  }
 }
 
 function safeGithubPush(currentJob) {
@@ -258,9 +241,6 @@ async function pushToStage(currentJob) {
 }
 
 async function runGithubPush(currentJob) {
-  // do not create this file, andrew said it's better to set ENV vars instead
-  //await initGithubPush();
-  
   workerUtils.logInMongo(currentJob, ' ** Running github push function');
 
   if (
