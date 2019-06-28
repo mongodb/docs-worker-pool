@@ -234,6 +234,10 @@ async function pushToStage(currentJob) {
       currentJob,
       `${'    (stage)'.padEnd(15)}Finished pushing to staging`
     );
+    workerUtils.logInMongo(
+      currentJob,
+      `${'    (stage)'.padEnd(15)}Staging push details:\n\n${stdout}\n---\n${stderr}`
+    );
     workerUtils.populateCommunicationMessageInMongo(currentJob, stdoutMod);
   } catch (errResult) {
     if (
