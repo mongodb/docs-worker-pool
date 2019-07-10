@@ -1,5 +1,5 @@
 // Initialize the App Client
-const stitchClient = stitch.Stitch.initializeDefaultAppClient("workerpool-boxgs");
+const stitchClient = stitch.Stitch.initializeDefaultAppClient(window.STITCH_APP_ID);
 
 stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(user => {
 	console.log(`Logged in as anonymous user with id ${user.id}`);
