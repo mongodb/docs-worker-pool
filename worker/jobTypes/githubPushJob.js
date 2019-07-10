@@ -12,9 +12,6 @@ const validator = require('validator');
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
 
-process.env.STITCH_ID = 'ref_data-bnbxq';
-process.env.NAMESPACE = 'snooty/documents';
-
 const invalidJobDef = new Error('job not valid');
 
 //anything that is passed to an exec must be validated or sanitized

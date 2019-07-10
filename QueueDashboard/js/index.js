@@ -13,8 +13,6 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 	// Get a reference to the items database
 	const itemsCollection = mongoClient.db("pool").collection("queue");
 
-
-	
 	/***************************************************************************** 
 	 *       Get the distributions of the status of jobs in the queue            *
 	 *****************************************************************************/

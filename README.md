@@ -10,6 +10,11 @@ docker run --env MONGO_ATLAS_USERNAME --env MONGO_ATLAS_PASSWORD --env AWS_ACCES
 * `MONGO_ATLAS_USERNAME` and `MONGO_ATLAS_PASSWORD` is username/password of atlas database
 * `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are needed for uploading to S3 via [mut](https://github.com/mongodb/mut)
 
+If you are running a local version of the docker image for testing, we have a separate staging environment setup. Add the following env variables to the `docker run` command:
+```
+--env DB_NAME --env COLL_NAME
+```
+
 ## Run Tests
 ```
 cd worker 
