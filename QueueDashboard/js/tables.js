@@ -29,9 +29,11 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
 		stitch.RemoteMongoClient.factory,
 		"mongodb-atlas"
 	  );
+
+    const dbValues = await stitchClient.callFunction('getDBCollection');
 	
 	// Get a reference to the items database
-	const itemsCollection = mongoClient.db(window.DB_NAME).collection(window.COLL_NAME);
+	const itemsCollection = mongoClient.db(dbValues.db_name).collection(dbValues.coll_name);
 	
 	/***************************************************************************** 
 	 *       Get the distributions of the status of jobs in the queue            *
