@@ -21,7 +21,7 @@ if (type in typeToName) {
     document.getElementById('tableName').replaceChild(newChild, firstChild);
 }
 
-stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(user => {
+stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(async user => {
 	console.log(`Logged in as anonymous user with id ${user.id}`);
 
 	// Get Atlas client
