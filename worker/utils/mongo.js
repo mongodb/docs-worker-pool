@@ -7,7 +7,7 @@ const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/ad
 
 // Collection information
 const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
-const COLL_NAME = process.env.COLL_NAME ? process.env.COLL_NAME : 'queue'; // Collection name of the queue in MongoDB Atlas
+const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
 
 // Hold onto the client
 let client;
@@ -103,7 +103,7 @@ module.exports = {
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
-        $set: { comMessage: message },
+        $push: { comMessage: message },
       };
       try {
         await queueCollection.updateOne(query, update);

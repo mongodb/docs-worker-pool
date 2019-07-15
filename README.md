@@ -12,7 +12,7 @@ docker run --env MONGO_ATLAS_USERNAME --env MONGO_ATLAS_PASSWORD --env AWS_ACCES
 
 If you are running a local version of the docker image for testing, we have a separate staging environment setup. Add the following env variables to the `docker run` command:
 ```
---env DB_NAME --env COLL_NAME
+--env DB_NAME
 ```
 
 ## Run Tests
