@@ -12,9 +12,6 @@ const validator = require('validator');
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
 
-process.env.STITCH_ID = 'ref_data-bnbxq';
-process.env.NAMESPACE = 'snooty/documents';
-
 const invalidJobDef = new Error('job not valid');
 
 //anything that is passed to an exec must be validated or sanitized
@@ -79,18 +76,28 @@ async function build(currentJob) {
         currentJob.payload.branchName
         }; git pull origin ${currentJob.payload.branchName};`;
       
-      const { stdout, stderr } = await exec(command);
+      await exec(command);
    
       const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; chmod 755 worker.sh; ./worker.sh`;
       const execTwo = workerUtils.getExecPromise();
-      await execTwo(commandbuild);
+
+      const { stdout, stderr } = await execTwo(commandbuild);
 
       workerUtils.logInMongo(
         currentJob,
         `${'    (BUILD)'.padEnd(15)}ran worker.sh`
       );
 
-      //console.log(stdout + ':' + stderr);
+      workerUtils.logInMongo(
+        currentJob,
+        `${'    (BUILD)'.padEnd(15)}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
+      );
+
+      // only post entire build output to slack if there are warnings
+      const buildOutputToSlack = stdout + '\n\n' + stderr;
+      if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
+        workerUtils.populateCommunicationMessageInMongo(currentJob, buildOutputToSlack);
+      }
       
     } else {
       workerUtils.logInMongo(

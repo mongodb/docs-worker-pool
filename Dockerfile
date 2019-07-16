@@ -36,7 +36,6 @@ RUN useradd -ms /bin/bash docsworker
 
 # install the node dependencies for worker pool
 RUN npm -g config set user root
-#RUN npm install
 
 USER docsworker
 WORKDIR /home/docsworker

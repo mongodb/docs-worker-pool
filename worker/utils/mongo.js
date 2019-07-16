@@ -6,7 +6,7 @@ const password = encodeURIComponent(process.env.MONGO_ATLAS_PASSWORD);
 const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
 
 // Collection information
-const DB_NAME = 'pool'; // Database name of the queue in MongoDB Atlas
+const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
 
 // Hold onto the client
@@ -103,7 +103,7 @@ module.exports = {
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
-        $set: { comMessage: message },
+        $push: { comMessage: message },
       };
       try {
         await queueCollection.updateOne(query, update);
