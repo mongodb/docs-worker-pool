@@ -61,12 +61,15 @@ async function build(currentJob) {
       currentJob,
       `${'    (BUILD)'.padEnd(15)}running worker.sh`
     );
+
+    let basePath = `https://github.com`;
     
-    let repoPath =
-      'https://github.com/' +
-      currentJob.payload.repoOwner +
-      '/' +
-      currentJob.payload.repoName;
+    // private repos use builder bot from github to pull
+    if (currentJob.payload.private) {
+      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
+    }
+
+    const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
     
     console.log('repo path');
     console.log(repoPath);
@@ -146,13 +149,15 @@ async function cloneRepo(currentJob) {
   }
   // clone the repo we need to build
   try {
-    let repoPath =
-      'https://github.com/' +
-      currentJob.payload.repoOwner +
-      '/' +
-      currentJob.payload.repoName;
 
-    console.log(repoPath);
+    let basePath = `https://github.com`;
+    
+    // private repos use builder bot from github to pull
+    if (currentJob.payload.private) {
+      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
+    }
+
+    const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
 
     await simpleGit()
       .silent(false)
