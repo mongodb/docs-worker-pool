@@ -5,7 +5,6 @@ const retry = require('async-retry');
 const mongo = require('./utils/mongo');
 const workerUtils = require('./utils/utils');
 
-
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
