@@ -14,6 +14,15 @@ const uploadToS3Timeout = 20;
 
 const invalidJobDef = new Error('job not valid');
 
+// get base path for public/private repos
+function getBasePath(currentJob) {
+  let basePath = `https://github.com`;
+  if (currentJob.payload.private) {
+    basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
+  }
+  return basePath;
+}
+
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
 function safeString(stringToCheck) {
@@ -62,13 +71,7 @@ async function build(currentJob) {
       `${'    (BUILD)'.padEnd(15)}running worker.sh`
     );
 
-    let basePath = `https://github.com`;
-    
-    // private repos use builder bot from github to pull
-    if (currentJob.payload.private) {
-      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
-    }
-
+    const basePath = getBasePath(currentJob);
     const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
     
     console.log('repo path');
@@ -150,13 +153,7 @@ async function cloneRepo(currentJob) {
   // clone the repo we need to build
   try {
 
-    let basePath = `https://github.com`;
-    
-    // private repos use builder bot from github to pull
-    if (currentJob.payload.private) {
-      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
-    }
-
+    const basePath = getBasePath(currentJob);
     const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
 
     await simpleGit()
