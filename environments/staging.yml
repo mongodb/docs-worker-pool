@@ -5,6 +5,8 @@ envSecrets:
   AWS_ACCESS_KEY_ID: my-secrets
   SECRET_KEY: my-secrets
   ACCESS_KEY: my-secrets
+  GITHUB_BOT_USERNAME: my-secrets
+  GITHUB_BOT_PASSWORD: my-secrets
 service:
   type: ClusterIP
   port: 3000
