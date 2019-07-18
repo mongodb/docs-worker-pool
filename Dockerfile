@@ -45,5 +45,3 @@ run npm install
 # entry to kick-off the worker
 EXPOSE 3000
 CMD ["npm", "start"]
-
-
