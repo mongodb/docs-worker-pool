@@ -10,7 +10,7 @@ function newDateInNDays(n) {
 
 // Job 1 should be the first job taken off the queue because of its priority
 const job1 = {
-  payload: { jobType: 'job1' },
+  payload: { jobType: 'job1', isXlarge:false },
   createdTime: newDateInNDays(0),
   startTime: null,
   endTime: null,
@@ -26,6 +26,7 @@ const job1 = {
 const job2 = JSON.parse(JSON.stringify(job1));
 job2.payload.jobType = 'job2';
 job2.priority = 1;
+job2.payload.isXlarge = false;
 job2.createdTime = newDateInNDays(-2);
 
 // Job 3 should be the third job taken off the queue because it has the oldest createdTime
@@ -45,6 +46,7 @@ describe('Mongo Tests', () => {
   // Use the mongo in-memory storage engine for testing
   // See tests/mongo/ for details on setup/teardown of this.
   beforeAll(async () => {
+    console.log('***** running setup for mongo db unit tests *****');
     connection = await MongoClient.connect(global.__MONGO_URI__, {
       useNewUrlParser: true,
     });
@@ -97,7 +99,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty('ok', 1);
     expect(jobUpdate).toHaveProperty('value');
-    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job1' });
+    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job1' , isXlarge:false});
     job1._id = jobUpdate.value._id;
 
     // Second job out should be job2 because of its createdTime
@@ -105,7 +107,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty('ok', 1);
     expect(jobUpdate).toHaveProperty('value');
-    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job2' });
+    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job2', isXlarge: false});
     job2._id = jobUpdate.value._id;
 
     // Third item out should be job3 because it is the last possible job
@@ -113,7 +115,7 @@ describe('Mongo Tests', () => {
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty('ok', 1);
     expect(jobUpdate).toHaveProperty('value');
-    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job3' });
+    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job3', isXlarge: false });
     job3._id = jobUpdate.value._id;
 
     // Fourth job shouldnt be dequeued because its createdTime is in 10 days

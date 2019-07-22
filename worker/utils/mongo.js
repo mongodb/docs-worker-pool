@@ -3,12 +3,13 @@ const { MongoClient } = require('mongodb');
 // Get username password credentials
 const username = encodeURIComponent(process.env.MONGO_ATLAS_USERNAME);
 const password = encodeURIComponent(process.env.MONGO_ATLAS_PASSWORD);
+const runXlarge = process.env.XLARGE === undefined ? false : Boolean(process.env.XLARGE);
+
 const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
 
 // Collection information
 const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
-
 // Hold onto the client
 let client;
 
@@ -31,12 +32,13 @@ module.exports = {
   async getNextJob(queueCollection) {
     const query = {
       status: 'inQueue',
+      "payload.isXlarge": runXlarge,
       createdTime: { $lte: new Date() },
 
       // We may eventually want to add in the following logic
       // payLoad.jobName: {$in: [jobs]}
     };
-
+    
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 } };
 

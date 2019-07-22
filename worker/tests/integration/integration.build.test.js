@@ -7,6 +7,7 @@ const payloadObj = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test',
   repoOwner: 'mongodb',
+  isXlarge: false
 };
 
 const payloadNoBranch = {
