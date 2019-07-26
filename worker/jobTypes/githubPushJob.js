@@ -102,9 +102,6 @@ async function build(currentJob) {
       // only post entire build output to slack if there are warnings
       const buildOutputToSlack = stdout + '\n\n' + stderr;
 
-      // something here is fucking up
-      // buildOutputToSlack
-
       if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
         workerUtils.populateCommunicationMessageInMongo(currentJob, buildOutputToSlack);
       }
