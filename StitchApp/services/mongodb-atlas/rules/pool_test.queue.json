@@ -1,0 +1,40 @@
+{
+    "id": "5d24b40bfa2441361b56121a",
+    "database": "pool_test",
+    "collection": "queue",
+    "roles": [
+        {
+            "name": "default",
+            "apply_when": {},
+            "read": true,
+            "write": false,
+            "insert": false,
+            "delete": false,
+            "additional_fields": {}
+        }
+    ],
+    "schema": {
+        "roles": [
+            {
+                "name": "owner",
+                "apply_when": {},
+                "insert": false,
+                "delete": false,
+                "read": true,
+                "fields": {},
+                "additional_fields": {}
+            }
+        ],
+        "filters": [],
+        "schema": {
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId"
+                },
+                "owner_id": {
+                    "bsonType": "string"
+                }
+            }
+        }
+    }
+}
