@@ -101,6 +101,10 @@ async function build(currentJob) {
 
       // only post entire build output to slack if there are warnings
       const buildOutputToSlack = stdout + '\n\n' + stderr;
+
+      // something here is fucking up
+      // buildOutputToSlack
+
       if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
         workerUtils.populateCommunicationMessageInMongo(currentJob, buildOutputToSlack);
       }
@@ -216,18 +220,18 @@ async function pushToStage(currentJob) {
     const command = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; make stage;`;
     const { stdout, stderr } = await exec(command);
     let stdoutMod = '';
-    console.log(stdout + ':' + stderr);
     // get only last part of message which includes # of files changes + s3 link
     if (stdout.indexOf('Summary') !== -1) {
       stdoutMod = stdout.substr(stdout.indexOf('Summary'));
     } 
+    console.log(stdoutMod);
     workerUtils.logInMongo(
       currentJob,
       `${'    (stage)'.padEnd(15)}Finished pushing to staging`
     );
     workerUtils.logInMongo(
       currentJob,
-      `${'    (stage)'.padEnd(15)}Staging push details:\n\n${stdout}\n---\n${stderr}`
+      `${'    (stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
     );
     workerUtils.populateCommunicationMessageInMongo(currentJob, stdoutMod);
   } catch (errResult) {
