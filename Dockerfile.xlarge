@@ -10,7 +10,7 @@ RUN python2 -m pip install python-dateutil
 RUN python -m pip install --upgrade --force pip
 RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
-RUN /venv/bin/pip install giza sphinx==1.6.6
+RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt 
 
 # get python 3.6
 # https://hub.docker.com/r/miseyu/docker-ubuntu16-python3.6/dockerfile
