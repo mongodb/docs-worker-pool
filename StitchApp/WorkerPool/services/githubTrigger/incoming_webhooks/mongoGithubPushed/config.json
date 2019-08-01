@@ -1,0 +1,10 @@
+{
+    "id": "5c1a72cb13c80673fa72c91d",
+    "name": "mongoGithubPushed",
+    "run_as_user_id": "",
+    "run_as_user_id_script_source": "",
+    "options": {
+        "secret": "mongostitchgithub"
+    },
+    "respond_result": false
+}

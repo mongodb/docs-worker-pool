@@ -1,0 +1,37 @@
+{
+    "id": "5d418c650269ab5179dd175a",
+    "name": "trigger0",
+    "type": "DATABASE",
+    "config": {
+        "operation_types": [
+            "INSERT",
+            "UPDATE"
+        ],
+        "database": "pool",
+        "collection": "queue",
+        "service_name": "mongodb-atlas",
+        "match": {
+            "$or": [
+                {
+                    "operationType": "update",
+                    "updateDescription.updatedFields.status": {
+                        "$exists": true
+                    }
+                },
+                {
+                    "operationType": "update",
+                    "updateDescription.updatedFields.status": {
+                        "$exists": true
+                    }
+                },
+                {
+                    "operationType": "insert"
+                }
+            ]
+        },
+        "full_document": true,
+        "unordered": true
+    },
+    "function_name": "handleSlackTrigger",
+    "disabled": false
+}

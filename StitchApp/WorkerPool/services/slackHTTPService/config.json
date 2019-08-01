@@ -1,0 +1,7 @@
+{
+    "id": "5c40edbc1af0d21d513fe0fd",
+    "name": "slackHTTPService",
+    "type": "http",
+    "config": {},
+    "version": 1
+}
