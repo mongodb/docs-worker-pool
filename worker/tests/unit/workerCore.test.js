@@ -5,7 +5,13 @@ const workerUtils = require('../../utils/utils');
 // Valid job with jobType for testing purposes
 const validJob = {
   _id: 'sampleId',
-  payload: { jobType: 'githubPush' },
+  payload: {
+    jobType: 'githubPush',
+    isXlarge: false,
+    branchName: 'DOCSP_hi',
+    repoOwner: 'docsworker',
+    repoName: 'docs-worker-fake'
+  },
   createdTime: new Date(),
   startTime: null,
   endTime: null,
@@ -19,7 +25,7 @@ const validJob = {
 // Invalid job for testing purposes
 const invalidJob = {
   _id: 'sampleId',
-  payload: { jobType: 'notARealJobType' },
+  payload: { jobType: 'notARealJobType', isXlarge: false },
   createdTime: new Date(),
   startTime: null,
   endTime: null,
@@ -74,10 +80,10 @@ describe('Worker.Work() Tests', () => {
     // Set Expectations
     jest.clearAllTimers();
     expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
-    expect(runGithubPushMock).toHaveBeenCalledTimes(0);
-    expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(0);
-    expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
-    expect(promiseTimeoutSSpy).toHaveBeenCalledTimes(1);
+    expect(runGithubPushMock).toHaveBeenCalledTimes(1);
+    expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(1);
+    expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(0);
+    expect(promiseTimeoutSSpy).toHaveBeenCalledTimes(4);
   });
 
   /** *******************************************************************
@@ -155,11 +161,11 @@ describe('Worker.Work() Tests', () => {
 
     // Set Expectations
     expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
-    expect(runGithubPushMock).toHaveBeenCalledTimes(0);
+    expect(runGithubPushMock).toHaveBeenCalledTimes(1);
     expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(0);
     expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
     //expect(mongo.finishJobWithFailure.mock.calls[0][2]).toMatch(/runGithubPush Failed/);
-    expect(promiseTimeoutSSpy).toHaveBeenCalledTimes(1);
+    expect(promiseTimeoutSSpy).toHaveBeenCalledTimes(3);
   });
 
   /** ******************************************************************
@@ -177,11 +183,11 @@ describe('Worker.Work() Tests', () => {
 
     // Set Expectations
     expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
-    expect(runGithubPushMock).toHaveBeenCalledTimes(0);
-    expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(0);
+    expect(runGithubPushMock).toHaveBeenCalledTimes(1);
+    expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(1);
     expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
     //expect(mongo.finishJobWithFailure.mock.calls[0][2]).toMatch(/finishJobWithResult failed/);
-    expect(promiseTimeoutSSpy).toHaveBeenCalledTimes(1);
+    expect(promiseTimeoutSSpy).toHaveBeenCalledTimes(4);
   });
 
   /** ******************************************************************

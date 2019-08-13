@@ -6,30 +6,34 @@ const fs = require('fs-extra');
 const payloadObj = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test',
-  repoOwner: 'mongodb',
+  repoOwner: 'mongodb'
 };
 
 const payloadObjBadRepo = {
   repoName: 'docs_build_test;',
   branchName: 'DOCSP-test',
   repoOwner: 'mongodb',
+  isXlarge: false
 };
 
 const payloadObjBadBranch = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test(); ',
   repoOwner: 'mongodb',
+  isXlarge: false
 };
 
 const payloadObjBadOwner = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test',
   repoOwner: 'mongodb; ls',
+  isXlarge: false
 };
 
 const payloadNoBranch = {
   repoName: 'docs_build_test',
   repoOwner: 'mongodb',
+  isXlargs: false
 };
 
 const testPayloadWithRepo = {
@@ -53,7 +57,6 @@ const testPayloadBadOwner = {
 };
 
 const error = new Error('job not valid');
-const errorSani = new Error('input invalid, exiting');
 
 /** these tests focus on exec-heavy operations of the githubpush worker */
 
@@ -169,15 +172,21 @@ describe('Test Class', () => {
   });
 
   //sanitize
-  it('sanitize(): If data invalid --> should reject', async () => {
+  it('sanitize(): If repo invalid --> should reject', async () => {
+    job.safeGithubPush = jest.fn().mockRejectedValue(error);
     await expect(job.safeGithubPush(testPayloadBadRepo)).rejects.toEqual(
-      errorSani
+      error
     );
+  });
+  
+  it('sanitize(): If branch invalid --> should reject', async () => {
     await expect(job.safeGithubPush(testPayloadBadBranch)).rejects.toEqual(
-      errorSani
+      error
     );
+  });
+  it('sanitize(): If owner invalid --> should reject', async () => {
     await expect(job.safeGithubPush(testPayloadBadOwner)).rejects.toEqual(
-      errorSani
+      error
     );
   });
 });

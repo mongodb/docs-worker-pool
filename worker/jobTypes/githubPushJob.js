@@ -28,7 +28,7 @@ function getBasePath(currentJob) {
 function safeString(stringToCheck) {
   return (
     validator.isAscii(stringToCheck) &&
-    validator.matches(stringToCheck, /^((\w)+[-]?(\w)+)*$/)
+    validator.matches(stringToCheck, /^((\w)*[-]?(\w)*)*$/)
   );
 }
 
@@ -54,8 +54,7 @@ function safeGithubPush(currentJob) {
   ) {
     return true;
   }
-
-  throw new Error('input invalid, exiting');
+  throw invalidJobDef;
 }
 
 async function build(currentJob) {
@@ -73,9 +72,6 @@ async function build(currentJob) {
 
     const basePath = getBasePath(currentJob);
     const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
-    
-    console.log('repo path');
-    console.log(repoPath);
     
     if (currentJob.payload.branchName != 'master') {
       const command = `cd ${currentJob.payload.repoName}; git checkout ${
@@ -287,7 +283,7 @@ async function runGithubPush(currentJob) {
     'Timed out on build'
   );
 
-  console.log('competed build');
+  console.log('completed build');
 
   let branchext = '';
   let isMaster = true;
