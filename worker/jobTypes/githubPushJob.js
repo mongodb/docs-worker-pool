@@ -28,7 +28,7 @@ function getBasePath(currentJob) {
 function safeString(stringToCheck) {
   return (
     validator.isAscii(stringToCheck) &&
-    validator.matches(stringToCheck, /^((\w)+[-]?(\w)+)*$/)
+    validator.matches(stringToCheck, /^((\w)*[-]?(\w)*)*$/)
   );
 }
 
