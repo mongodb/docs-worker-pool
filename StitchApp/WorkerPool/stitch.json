@@ -1,0 +1,12 @@
+{
+    "app_id": "workerpool-boxgs",
+    "config_version": 20180301,
+    "name": "WorkerPool",
+    "location": "US-VA",
+    "deployment_model": "GLOBAL",
+    "security": {},
+    "hosting": {
+        "enabled": true,
+        "app_default_domain": "workerpool-boxgs.mongodbstitch.com"
+    }
+}
