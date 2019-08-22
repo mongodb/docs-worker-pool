@@ -36,3 +36,11 @@ persistence:
   size: 10Gi
   mountPath: /home/docsworker
   accessMode: ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 3
+    memory: 3Gi
