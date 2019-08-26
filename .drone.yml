@@ -1,6 +1,6 @@
 ---
 pipeline:
-  publish:
+  publish-staging:
     image: plugins/ecr
     secrets: [ecr_access_key, ecr_secret_key]
     registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
@@ -20,7 +20,7 @@ pipeline:
     environment:
       - API_SERVER=https://api.staging.corp.mongodb.com
     secrets: [staging_kubernetes_token]
-    values_files: ["environments/staging.yml"]
+    values_files: ["environments/staging.yaml"]
     helm_repos: mongodb=https://10gen.github.io/helm-charts
     chart: mongodb/web-app
     chart_version: 4.4.0
