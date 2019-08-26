@@ -48,7 +48,7 @@ pipeline:
     namespace: docs
     environment:
       - API_SERVER=https://api.prod.corp.mongodb.com
-    secrets: [staging_kubernetes_token]
+    secrets: [prod_kubernetes_token]
     values_files: ["environments/prod.yaml"]
     helm_repos: mongodb=https://10gen.github.io/helm-charts
     chart: mongodb/web-app
