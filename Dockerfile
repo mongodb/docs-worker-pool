@@ -42,6 +42,16 @@ WORKDIR /home/docsworker
 COPY worker/ .
 run npm install
 
+# install snooty front-end
+RUN git clone https://github.com/mongodb/snooty.git snooty
+RUN cd snooty && \
+	npm install && \
+	touch .env.production && \
+	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
+	mkdir -p ./static/images && \
+	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
+	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+
 # entry to kick-off the worker
 EXPOSE 3000
 CMD ["npm", "start"]
