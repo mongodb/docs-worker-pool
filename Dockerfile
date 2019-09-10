@@ -40,7 +40,6 @@ RUN cd snooty-parser && FLIT_ROOT_INSTALL=1 python3 -m flit install
 ENV PATH="${PATH}:/home/docsworker/.local/bin"
 
 # install snooty front-end
-RUN echo 'abc'
 RUN git clone https://github.com/danielborowski/snooty.git snooty
 RUN cd snooty && \
 	npm install && \
