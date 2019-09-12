@@ -1,33 +1,60 @@
 ---
 pipeline:
-  publish:
+  publish-staging:
     image: plugins/ecr
-    secrets: [ ecr_access_key, ecr_secret_key]
+    secrets: [ecr_access_key, ecr_secret_key]
     registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
     repo: 795250896452.dkr.ecr.us-east-1.amazonaws.com/docs/${DRONE_REPO_NAME}
     create_repository: true
     tags:
-    - git-${DRONE_COMMIT_SHA:0:7}
-    - latest
+      - git-${DRONE_COMMIT_SHA:0:7}
+      - latest
     when:
       branch: master
       event: push
- 
+
   deploy-staging:
     image: quay.io/ipedrazas/drone-helm
     release: docs-worker-pool
     namespace: docs
     environment:
       - API_SERVER=https://api.staging.corp.mongodb.com
-    prefix: STAGING
-    secrets: [ staging_kubernetes_token ]
-    values_files: [ "environments/staging.yml" ]
-    helm_repos: mongodb=https://10gen-ops.github.io/helm-charts
+    secrets: [staging_kubernetes_token]
+    values_files: ["environments/staging.yaml"]
+    helm_repos: mongodb=https://10gen.github.io/helm-charts
     chart: mongodb/web-app
-    chart_version: 4.1.0
+    chart_version: 4.4.0
     tiller_ns: docs
     client_only: true
-    values: "image.tag=git-${DRONE_COMMIT_SHA:0:7},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/docs/${DRONE_REPO_NAME},ingress.enabled=true,ingress.hosts[0]=docs-worker-pool.docs.staging.corp.mongodb.com"
+    values: "image.tag=git-${DRONE_COMMIT_SHA:0:7},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/docs/${DRONE_REPO_NAME}"
     when:
       branch: master
       event: push
+
+  publish-prod:
+    image: plugins/ecr
+    secrets: [ecr_access_key, ecr_secret_key]
+    registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
+    repo: 795250896452.dkr.ecr.us-east-1.amazonaws.com/docs/${DRONE_REPO_NAME}
+    create_repository: true
+    tags:
+      - "${DRONE_TAG}"
+    when:
+      event: tag
+
+  deploy-prod:
+    image: quay.io/ipedrazas/drone-helm
+    release: docs-worker-pool
+    namespace: docs
+    environment:
+      - API_SERVER=https://api.prod.corp.mongodb.com
+    secrets: [prod_kubernetes_token]
+    values_files: ["environments/prod.yaml"]
+    helm_repos: mongodb=https://10gen.github.io/helm-charts
+    chart: mongodb/web-app
+    chart_version: 4.4.0
+    tiller_ns: docs
+    client_only: true
+    values: "image.tag=${DRONE_TAG},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/docs/${DRONE_REPO_NAME}"
+    when:
+      event: tag
