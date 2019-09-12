@@ -17,6 +17,7 @@ pipeline:
     image: quay.io/ipedrazas/drone-helm
     release: docs-worker-pool
     namespace: docs
+    prefix: staging
     environment:
       - API_SERVER=https://api.staging.corp.mongodb.com
     secrets: [staging_kubernetes_token]
@@ -46,6 +47,7 @@ pipeline:
     image: quay.io/ipedrazas/drone-helm
     release: docs-worker-pool
     namespace: docs
+    prefix: prod
     environment:
       - API_SERVER=https://api.prod.corp.mongodb.com
     secrets: [prod_kubernetes_token]
