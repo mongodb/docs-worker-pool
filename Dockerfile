@@ -24,9 +24,7 @@ RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
 # setup user and root directory
-RUN useradd -ms /bin/bash docsworker
 RUN npm -g config set user root
-USER docsworker
 WORKDIR /home/docsworker
 
 # install snooty parser
