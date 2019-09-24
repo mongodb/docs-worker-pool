@@ -29,10 +29,6 @@ RUN npm -g config set user root
 USER docsworker
 WORKDIR /home/docsworker
 
-# install the node dependencies for worker pool
-COPY worker/ .
-RUN npm install
-
 # install snooty parser
 RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser
@@ -47,6 +43,13 @@ RUN cd snooty && \
 	mkdir -p ./static/images && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
 	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+
+# install the node dependencies for worker pool
+COPY worker/ . 
+RUN npm install
+
+# where repo work will happen
+RUN mkdir repos && chmod 777 repos
 
 # entry to kick-off the worker
 EXPOSE 3000

@@ -74,13 +74,13 @@ async function build(currentJob) {
     const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
     
     if (currentJob.payload.branchName != 'master') {
-      const command = `cd ${currentJob.payload.repoName}; git checkout ${
+      const command = `cd repos/${currentJob.payload.repoName}; git checkout ${
         currentJob.payload.branchName
         }; git pull origin ${currentJob.payload.branchName};`;
       
       await exec(command);
    
-      const commandbuild = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; chmod 755 worker.sh; ./worker.sh`;
+      const commandbuild = `. /venv/bin/activate; cd repos/${currentJob.payload.repoName}; chmod 755 worker.sh; ./worker.sh`;
       const execTwo = workerUtils.getExecPromise();
 
       const { stdout, stderr } = await execTwo(commandbuild);
@@ -153,7 +153,7 @@ async function cloneRepo(currentJob) {
     const basePath = getBasePath(currentJob);
     const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
 
-    await simpleGit()
+    await simpleGit('repos')
       .silent(false)
       .clone(repoPath)
       .catch(err => {
@@ -192,7 +192,7 @@ async function cleanup(currentJob) {
     `${'    (rm)'.padEnd(15)}Cleaning up repository`
   );
   try {
-    workerUtils.removeDirectory(currentJob.payload.repoName);
+    workerUtils.removeDirectory(`repos/${currentJob.payload.repoName}`);
     workerUtils.logInMongo(
       currentJob,
       `${'    (rm)'.padEnd(15)}Finished cleaning repo`
@@ -210,7 +210,7 @@ async function pushToStage(currentJob) {
   // change working dir to the repo we need to build
   try {
     const exec = workerUtils.getExecPromise();
-    const command = `. /venv/bin/activate; cd ${currentJob.payload.repoName}; make stage;`;
+    const command = `. /venv/bin/activate; cd repos/${currentJob.payload.repoName}; make stage;`;
     const { stdout, stderr } = await exec(command);
     let stdoutMod = '';
     // get only last part of message which includes # of files changes + s3 link

@@ -1,7 +1,7 @@
 ingress:
   enabled: true
   hosts:
-    - docs-worker-pool.docs.staging.corp.mongodb.com
+    - docs-worker-pool.docs.prod.corp.mongodb.com
 
 envSecrets:
   MONGO_ATLAS_PASSWORD: docs-worker-pool
