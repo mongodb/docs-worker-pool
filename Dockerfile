@@ -1,8 +1,6 @@
-FROM ubuntu:16.04
+FROM ubuntu:disco
 
 # install legacy build environment for docs
-RUN echo "deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/jessie-backports.list
-RUN sed -i '/deb http:\/\/deb.debian.org\/debian jessie-updates main/d' /etc/apt/sources.list
 RUN apt-get -o Acquire::Check-Valid-Until=false update
 RUN apt-get -y install libpython2.7-dev python2.7 git python-pip rsync
 RUN pip install requests virtualenv virtualenvwrapper py-dateutil
@@ -12,18 +10,11 @@ RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
 RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
 
-# get python 3.6
-# https://hub.docker.com/r/miseyu/docker-ubuntu16-python3.6/dockerfile
-RUN apt-get update && apt-get install -y software-properties-common && add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && apt-get install -y python3.6 python3.6-dev python3-pip
-RUN ln -sfn /usr/bin/python3.6 /usr/bin/python3 && ln -sfn /usr/bin/python3 /usr/bin/python && ln -sfn /usr/bin/pip3 /usr/bin/pip
-
 # helper libraries for docs builds
-RUN apt-get -y install python3-pip python3-venv git pkg-config libxml2-dev
+RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
+RUN apt-get -y install git pkg-config libxml2-dev
 RUN python3 -m pip install mut
-RUN python3 -m pip install typing
-
-RUN echo "export PATH=$PATH:/usr/local/lib/python2.7/dist-packages/virtualenv/bin" > /etc/environment
+ENV PATH="${PATH}:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 12
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -32,15 +23,33 @@ RUN curl --location https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
+# setup user and root directory
 RUN useradd -ms /bin/bash docsworker
-
-# install the node dependencies for worker pool
 RUN npm -g config set user root
-
 USER docsworker
 WORKDIR /home/docsworker
-COPY worker/ .
-run npm install
+
+# install snooty parser
+RUN python3 -m pip install --upgrade pip flit
+RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser
+RUN cd snooty-parser && FLIT_ROOT_INSTALL=1 python3 -m flit install
+ENV PATH="${PATH}:/home/docsworker/.local/bin"
+
+# install snooty front-end
+RUN git clone https://github.com/mongodb/snooty.git snooty
+RUN cd snooty && \
+	npm install && \
+	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
+	mkdir -p ./static/images && \
+	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
+	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+
+# install the node dependencies for worker pool
+COPY worker/ . 
+RUN npm install
+
+# where repo work will happen
+RUN mkdir repos && chmod 777 repos
 
 # entry to kick-off the worker
 EXPOSE 3000
