@@ -1,0 +1,31 @@
+ingress:
+  enabled: true
+  hosts:
+    - docs-worker-pool.docs.staging.corp.mongodb.com
+
+envSecrets:
+  MONGO_ATLAS_PASSWORD: docs-worker-pool
+  MONGO_ATLAS_USERNAME: docs-worker-pool
+  AWS_SECRET_ACCESS_KEY: docs-worker-pool
+  AWS_ACCESS_KEY_ID: docs-worker-pool
+  SECRET_KEY: docs-worker-pool
+  ACCESS_KEY: docs-worker-pool
+  GITHUB_BOT_USERNAME: docs-worker-pool
+  GITHUB_BOT_PASSWORD: docs-worker-pool
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+probes:
+  enabled: true
+  path: /liveness
+  headers: {}
+  liveness:
+    httpGet: true
+    initialDelaySeconds: 10
+    periodSeconds: 60
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
