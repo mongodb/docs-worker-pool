@@ -11,6 +11,7 @@ const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
 
 // Variables
 let queueCollection; // Holder for the queueCollection in MongoDB Atlas
+let metaCollection; // Holder for the meta collection which holds repos/branches to build
 let currentJob; // Holder for the job currently executing
 let lastCheckIn = new Date(); // Variable used to see if the worker has failed
 let shouldStop = false;
@@ -106,8 +107,19 @@ module.exports = {
     // This is the collection that houses the work tickets
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
-      // <-- this is just for testing
       queueCollection = mongo.getQueueCollection();
+
+      // **** TESTING **** 
+      // testing meta collection operations
+      metaCollection = mongo.getMetaCollection();
+      const repos = await mongo.getAllRepos(metaCollection);
+      console.log('testing: all repos', repos);
+      const pubBranches = await mongo.getRepoPublishedBranches({
+        repoOwner: 'danielborowski',
+        repoName: 'docs-spark-connector',
+      });
+      console.log('testing: branches content', pubBranches);
+
     }
 
     // Clean up the work folder

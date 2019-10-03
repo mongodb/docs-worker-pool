@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const request = require('request');
 
 // Get username password credentials
 const username = encodeURIComponent(process.env.MONGO_ATLAS_USERNAME);
@@ -10,6 +11,7 @@ const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/ad
 // Collection information
 const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
+
 // Hold onto the client
 let client;
 
@@ -26,6 +28,41 @@ module.exports = {
       return client.db(DB_NAME).collection(COLL_NAME);
     }
     return null;
+  },
+
+  getMetaCollection() {
+    if (client) {
+      // hardcoded for now because if I use env variables
+      // I'll need to create a meta collection in both databases: `pool` and `pool_test`
+      return client.db('pool').collection('meta');
+    }
+    return null;
+  },
+
+  async getAllRepos(metaCollection) {
+    if (client) {
+      const metaDocuments = await metaCollection.find({}).toArray();
+      const repos = metaDocuments[0].repos;
+      return repos;
+    }
+    return null;
+  },
+
+  async getRepoPublishedBranches(repoObject) {
+    const pubBranchesFile = `https://raw.githubusercontent.com/${repoObject.repoOwner}/${repoObject.repoName}/meta/published-branches.yaml`;
+    const returnObject = {};
+    return new Promise(function (resolve, reject) {
+      request(pubBranchesFile, function(error, response, body) {
+        if (!error && response.statusCode == 200) {
+          returnObject['status'] = 'success';
+          returnObject['content'] = body;
+        } else {
+          returnObject['status'] = 'failure';
+        }
+        // TODO: convert to json here before returning
+        resolve(returnObject);
+      });
+    });
   },
 
   // Gets the Next Job Off The Queue And Sets It To inProgress
