@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb');
 const request = require('request');
+const yaml = require('js-yaml');
 
 // Get username password credentials
 const username = encodeURIComponent(process.env.MONGO_ATLAS_USERNAME);
@@ -54,12 +55,17 @@ module.exports = {
     return new Promise(function (resolve, reject) {
       request(pubBranchesFile, function(error, response, body) {
         if (!error && response.statusCode == 200) {
-          returnObject['status'] = 'success';
-          returnObject['content'] = body;
+          try {
+            const yamlParsed = yaml.safeLoad(body);
+            returnObject['status'] = 'success';
+            returnObject['content'] = yamlParsed;
+          } catch (e) {
+            console.log('ERROR parsing yaml file!', repoObject, e);
+            returnObject['status'] = 'failure';
+          }
         } else {
           returnObject['status'] = 'failure';
         }
-        // TODO: convert to json here before returning
         resolve(returnObject);
       });
     });
