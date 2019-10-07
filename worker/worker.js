@@ -108,18 +108,6 @@ module.exports = {
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
       queueCollection = mongo.getQueueCollection();
-
-      // **** TESTING **** 
-      // testing meta collection operations
-      metaCollection = mongo.getMetaCollection();
-      const repos = await mongo.getAllRepos(metaCollection);
-      console.log('testing: all repos', repos);
-      const pubBranches = await mongo.getRepoPublishedBranches({
-        repoOwner: 'danielborowski', // would be master?
-        repoName: 'docs-spark-connector', // repo name
-      });
-      console.log('testing: branches content', pubBranches);
-
     }
 
     // Clean up the work folder

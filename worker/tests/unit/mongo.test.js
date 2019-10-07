@@ -8,6 +8,20 @@ function newDateInNDays(n) {
   return date;
 }
 
+const metaObject = {
+  repos: [
+    {
+      name: 'docs-spark-connector',
+      url: 'https://github.com/danielborowski/docs-spark-connector',
+    },
+  ]
+};
+
+const publishedBranchObject = {
+  repoOwner: 'danielborowski',
+  repoName: 'docs-spark-connector',
+};
+
 // Job 1 should be the first job taken off the queue because of its priority
 const job1 = {
   payload: { jobType: 'job1', isXlarge:false },
@@ -52,7 +66,7 @@ describe('Mongo Tests', () => {
     });
     db = await connection.db(global.__MONGO_DB_NAME__);
 
-    // Removem the jobs collection (should be empty anyways)
+    // Remove the jobs collection (should be empty anyways)
     db.dropCollection('jobs').catch(err => {
       console.log(err);
     });
@@ -61,6 +75,10 @@ describe('Mongo Tests', () => {
     const jobsColl = db.collection('jobs');
     const jobs = [job4, job2, job1, job3];
     await jobsColl.insertMany(jobs);
+
+    // add repos for meta collection
+    const metaColl = db.collection('meta');
+    await metaColl.insertMany([metaObject]);
   });
 
   // Make sure to close the connection to the in-memory DB
@@ -87,6 +105,30 @@ describe('Mongo Tests', () => {
     expect(currJob).toHaveProperty('failures', []);
     expect(currJob).toHaveProperty('result', null);
   });
+
+  /** ******************************************************************
+   *                             getAllRepos()                         *
+   ******************************************************************* */
+  it('get all repos from meta collection', async () => {
+    const metaColl = db.collection('meta');
+    const repos = await mongo.getAllRepos(metaColl);
+    expect(repos).toBeDefined();
+    expect(repos).toBeTruthy();
+    expect(repos).toBeInstanceOf(Array);
+  }, 5000);
+
+  /** ******************************************************************
+   *                    getRepoPublishedBranches()                     *
+   ******************************************************************* */
+  it('get published branches for each repo', async () => {
+    const pubBranches = await mongo.getRepoPublishedBranches(publishedBranchObject);
+    expect(pubBranches).toBeDefined();
+    expect(pubBranches).toBeTruthy();
+    expect(pubBranches).toBeInstanceOf(Object);
+    expect(pubBranches).toHaveProperty('status', 'success');
+    expect(pubBranches).toHaveProperty('content');
+    expect(pubBranches.content).toBeInstanceOf(Object);
+  }, 5000);
 
   /** ******************************************************************
    *                             getNextJob()                         *

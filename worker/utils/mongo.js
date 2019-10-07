@@ -41,12 +41,7 @@ module.exports = {
   },
 
   async getAllRepos(metaCollection) {
-    if (client) {
-      const metaDocuments = await metaCollection.find({}).toArray();
-      const repos = metaDocuments[0].repos;
-      return repos;
-    }
-    return null;
+    return metaCollection.find({}).toArray();
   },
 
   async getRepoPublishedBranches(repoObject) {
