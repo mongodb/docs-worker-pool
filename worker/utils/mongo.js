@@ -12,6 +12,7 @@ const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/ad
 // Collection information
 const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
+const META_NAME = 'meta';
 
 // Hold onto the client
 let client;
@@ -33,9 +34,7 @@ module.exports = {
 
   getMetaCollection() {
     if (client) {
-      // hardcoded for now because if I use env variables
-      // I'll need to create a meta collection in both databases: `pool` and `pool_test`
-      return client.db('pool').collection('meta');
+      return client.db(DB_NAME).collection(META_NAME);
     }
     return null;
   },
