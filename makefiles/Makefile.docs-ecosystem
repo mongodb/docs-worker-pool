@@ -7,6 +7,7 @@ PRODUCTION_BUCKET=docs-mongodb-org-prod
 
 # "PROJECT" currently exists to support having multiple projects
 # within one bucket.
+PROFIX-ecosystem
 PROJECT=ecosystem
 EPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
