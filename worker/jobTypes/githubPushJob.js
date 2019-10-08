@@ -1,7 +1,7 @@
 /**
  *  this is the github-triggered processor for builds
- *  it expects a worker.sh in the root of the repository
- *  an example job definition lives in jobDef.json
+ *  it expects a worker.sh in the root of the repository.
+ *  An example job definition lives in jobDef.json.
  */
 
 const fs = require('fs-extra');
