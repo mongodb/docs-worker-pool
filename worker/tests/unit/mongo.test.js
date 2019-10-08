@@ -52,7 +52,7 @@ describe('Mongo Tests', () => {
     });
     db = await connection.db(global.__MONGO_DB_NAME__);
 
-    // Removem the jobs collection (should be empty anyways)
+    // Remove the jobs collection (should be empty anyways)
     db.dropCollection('jobs').catch(err => {
       console.log(err);
     });

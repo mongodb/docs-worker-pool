@@ -1,9 +1,37 @@
 const workerUtils = require('../../utils/utils');
+const { MongoClient } = require('mongodb');
+const mongo = require('../../utils/mongo');
 
 const numFilesInTestsMongo = 5;
 
+const metaObject = {
+  repos: [
+    {
+      name: 'docs-spark-connector',
+      url: 'https://github.com/danielborowski/docs-spark-connector',
+    },
+  ]
+};
+
+const publishedBranchObject = {
+  repoOwner: 'danielborowski',
+  repoName: 'docs-spark-connector',
+};
+
 describe('Mongo Tests', () => {
+  let connection;
+  let db;
+
   beforeAll(async () => {
+    connection = await MongoClient.connect(global.__MONGO_URI__, {
+      useNewUrlParser: true,
+    });
+    db = await connection.db(global.__MONGO_DB_NAME__);
+
+    // add repos for meta collection
+    const metaColl = db.collection('meta');
+    await metaColl.insertMany([metaObject]);
+
     await expect(workerUtils.resetDirectory('work/')).resolves.toBeUndefined();
   });
 
@@ -38,5 +66,24 @@ describe('Mongo Tests', () => {
   it('getExecPromise()', async () => {
     const exec = workerUtils.getExecPromise();
     await expect(exec('lssss')).rejects.toBeTruthy();
+  });
+
+  it('get all repos from meta collection', async () => {
+    const metaColl = db.collection('meta');
+    mongo.getMetaCollection = jest.fn().mockReturnValue(metaColl);
+    const repos = await workerUtils.getAllRepos();
+    expect(repos).toBeDefined();
+    expect(repos).toBeTruthy();
+    expect(repos).toBeInstanceOf(Array);
+    expect(repos[0]).toHaveProperty('repos');
+  });
+
+  it('get published branches for each repo', async () => {
+    const pubBranches = await workerUtils.getRepoPublishedBranches(publishedBranchObject);
+    expect(pubBranches).toBeDefined();
+    expect(pubBranches).toBeInstanceOf(Object);
+    expect(pubBranches).toHaveProperty('status', 'success');
+    expect(pubBranches).toHaveProperty('content');
+    expect(pubBranches.content).toBeInstanceOf(Object);
   });
 });
