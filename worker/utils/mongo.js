@@ -1,6 +1,4 @@
 const { MongoClient } = require('mongodb');
-const request = require('request');
-const yaml = require('js-yaml');
 
 // Get username password credentials
 const username = encodeURIComponent(process.env.MONGO_ATLAS_USERNAME);
@@ -37,32 +35,6 @@ module.exports = {
       return client.db(DB_NAME).collection(META_NAME);
     }
     return null;
-  },
-
-  async getAllRepos(metaCollection) {
-    return metaCollection.find({}).toArray();
-  },
-
-  async getRepoPublishedBranches(repoObject) {
-    const pubBranchesFile = `https://raw.githubusercontent.com/${repoObject.repoOwner}/${repoObject.repoName}/meta/published-branches.yaml`;
-    const returnObject = {};
-    return new Promise(function (resolve, reject) {
-      request(pubBranchesFile, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-          try {
-            const yamlParsed = yaml.safeLoad(body);
-            returnObject['status'] = 'success';
-            returnObject['content'] = yamlParsed;
-          } catch (e) {
-            console.log('ERROR parsing yaml file!', repoObject, e);
-            returnObject['status'] = 'failure';
-          }
-        } else {
-          returnObject['status'] = 'failure';
-        }
-        resolve(returnObject);
-      });
-    });
   },
 
   // Gets the Next Job Off The Queue And Sets It To inProgress
