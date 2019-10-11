@@ -110,6 +110,20 @@ module.exports = {
     await mongo.populateCommunicationMessageInMongo(currentJob, message);
   },
 
+  // get base path for public/private repos
+  getBasePath(currentJob) {
+    let basePath = `https://github.com`;
+    if (currentJob.payload.private) {
+      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
+    }
+    return basePath;
+  },
+
+  // where each repo is saved locally
+  getRepoDirName(currentJob) {
+    return `${currentJob.payload.repoName}_${currentJob.payload.newHead}`;
+  },
+
   async getAllRepos() {
     return mongo.getMetaCollection().find({}).toArray();
   },

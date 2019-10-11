@@ -6,6 +6,7 @@
 
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
+const buildUtils = require('../utils/builds');
 const simpleGit = require('simple-git/promise');
 const validator = require('validator');
 
@@ -13,15 +14,6 @@ const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
 
 const invalidJobDef = new Error('job not valid');
-
-// get base path for public/private repos
-function getBasePath(currentJob) {
-  let basePath = `https://github.com`;
-  if (currentJob.payload.private) {
-    basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
-  }
-  return basePath;
-}
 
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
@@ -57,84 +49,6 @@ function safeGithubPush(currentJob) {
   throw invalidJobDef;
 }
 
-async function build(currentJob) {
-  workerUtils.logInMongo(
-    currentJob,
-    `${'    (BUILD)'.padEnd(15)}Running Build`
-  );
-  // Perform the build --> exec is weird
-  try {
-    const exec = workerUtils.getExecPromise();
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (BUILD)'.padEnd(15)}running worker.sh`
-    );
-
-    const basePath = getBasePath(currentJob);
-    const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
-    
-    if (currentJob.payload.branchName != 'master') {
-      const command = `cd repos/${currentJob.payload.repoName}; git checkout ${
-        currentJob.payload.branchName
-        }; git pull origin ${currentJob.payload.branchName};`;
-      
-      await exec(command);
-   
-      const commandbuild = `. /venv/bin/activate; cd repos/${currentJob.payload.repoName}; chmod 755 worker.sh; ./worker.sh`;
-      const execTwo = workerUtils.getExecPromise();
-
-      const { stdout, stderr } = await execTwo(commandbuild);
-
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (BUILD)'.padEnd(15)}ran worker.sh`
-      );
-
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (BUILD)'.padEnd(15)}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
-      );
-
-      // only post entire build output to slack if there are warnings
-      const buildOutputToSlack = stdout + '\n\n' + stderr;
-
-      if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
-        workerUtils.populateCommunicationMessageInMongo(currentJob, buildOutputToSlack);
-      }
-      
-    } else {
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (BUILD)'.padEnd(15)} failed, master branch not supported`
-      );
-      throw new Error('master branches not supported');
-    }
-
-  } catch (errResult) {
-    console.log('error ' + errResult);
-    if (
-      errResult.hasOwnProperty('code') ||
-      errResult.hasOwnProperty('signal') ||
-      errResult.hasOwnProperty('killed')
-    ) {
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (BUILD)'.padEnd(15)}failed with code: ${errResult.code}`
-      );
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (BUILD)'.padEnd(15)}stdErr: ${errResult.stderr}`
-      );
-      throw errResult;
-    }
-  }
-  console.log('finished build');
-  workerUtils.logInMongo(
-    currentJob,
-    `${'    (BUILD)'.padEnd(15)}Finished Build`
-  );
-}
-
 async function cloneRepo(currentJob) {
   workerUtils.logInMongo(
     currentJob,
@@ -150,12 +64,12 @@ async function cloneRepo(currentJob) {
   // clone the repo we need to build
   try {
 
-    const basePath = getBasePath(currentJob);
+    const basePath = workerUtils.getBasePath(currentJob);
     const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
 
     await simpleGit('repos')
       .silent(false)
-      .clone(repoPath)
+      .clone(repoPath, `${workerUtils.getRepoDirName(currentJob)}`)
       .catch(err => {
         console.error('failed: ', err);
         throw err;
@@ -192,7 +106,7 @@ async function cleanup(currentJob) {
     `${'    (rm)'.padEnd(15)}Cleaning up repository`
   );
   try {
-    workerUtils.removeDirectory(`repos/${currentJob.payload.repoName}`);
+    workerUtils.removeDirectory(`repos/${workerUtils.getRepoDirName(currentJob)}`);
     workerUtils.logInMongo(
       currentJob,
       `${'    (rm)'.padEnd(15)}Finished cleaning repo`
@@ -200,6 +114,13 @@ async function cleanup(currentJob) {
   } catch (errResult) {
     throw errResult;
   }
+}
+
+async function build(currentJob) {
+  var building = await buildUtils.build(currentJob);
+  return new Promise(function(resolve, reject) {
+    resolve(true);
+  });
 }
 
 async function pushToStage(currentJob) {
@@ -210,7 +131,7 @@ async function pushToStage(currentJob) {
   // change working dir to the repo we need to build
   try {
     const exec = workerUtils.getExecPromise();
-    const command = `. /venv/bin/activate; cd repos/${currentJob.payload.repoName}; make stage;`;
+    const command = `. /venv/bin/activate; cd repos/${workerUtils.getRepoDirName(currentJob)}; make stage;`;
     const { stdout, stderr } = await exec(command);
     let stdoutMod = '';
     // get only last part of message which includes # of files changes + s3 link
