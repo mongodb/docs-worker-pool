@@ -1,4 +1,4 @@
-/**
+/*
  *  this is the github-triggered processor for builds
  *  it expects a worker.sh in the root of the repository
  *  an example job definition lives in jobDef.json
@@ -6,7 +6,7 @@
 
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
-const buildUtils = require('../utils/builds');
+const GitHubJob = require('../jobTypes/githubJob').GitHubJob;
 const simpleGit = require('simple-git/promise');
 const validator = require('validator');
 
@@ -49,78 +49,59 @@ function safeGithubPush(currentJob) {
   throw invalidJobDef;
 }
 
-async function cloneRepo(currentJob) {
-  workerUtils.logInMongo(
-    currentJob,
-    `${'    (GIT)'.padEnd(15)}Cloning repository`
+async function startGithubBuild(job, logger) {
+  // cleanup the repo directory
+  await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    cleanup(job, logger),
+    'Timed out on rm'
   );
-  if (!currentJob.payload.branchName) {
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (CLONE)'.padEnd(15)}failed due to insufficient definition`
-    );
-    throw new Error('branch name not indicated');
-  }
-  // clone the repo we need to build
-  try {
 
-    const basePath = workerUtils.getBasePath(currentJob);
-    const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
+  // clone the repo
+  await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    cloneRepo(job, logger),
+    'Timed out on clone repo'
+  );
 
-    await simpleGit('repos')
-      .silent(false)
-      .clone(repoPath, `${workerUtils.getRepoDirName(currentJob)}`)
-      .catch(err => {
-        console.error('failed: ', err);
-        throw err;
-      });
-    workerUtils.logInMongo(currentJob, `${'    (GIT)'.padEnd(15)}ran fetch`);
-  } catch (errResult) {
-    if (
-      errResult.hasOwnProperty('code') ||
-      errResult.hasOwnProperty('signal') ||
-      errResult.hasOwnProperty('killed')
-    ) {
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (GIT)'.padEnd(15)}failed with code: ${errResult.code}`
-      );
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`
-      );
-      // console.log('\n\nstdout:', errResult.stdout);
-      throw errResult;
+  // execute the build
+  await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    buildRepo(job, logger),
+    'Timed out on build'
+  );
+}
+
+async function cleanup(currentJob, logger) {
+  logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
+  const cleaning = await currentJob.cleanup(logger);
+  logger.save(`${'(rm)'.padEnd(15)}Finished cleaning repo`);
+}
+
+async function cloneRepo(currentJob, logger) {
+  logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
+  logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
+  const cloning = await currentJob.cloneRepo(logger);
+  logger.save(`${'(GIT)'.padEnd(15)}Finished git clone`);
+}
+
+async function buildRepo(currentJob, logger) {
+  logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
+  logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
+  const building = await currentJob.buildRepo(logger);
+
+  if (building && building.status === 'success') {
+    logger.save(`${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${building.stdout}\n---\n${building.stderr}`);
+
+    // only post entire build output to slack if there are warnings
+    const buildOutputToSlack = building.stdout + '\n\n' + building.stderr;
+    if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
+      workerUtils.populateCommunicationMessageInMongo(currentJob, buildOutputToSlack);
     }
+
+    console.log('finished build');
+    logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
   }
-
-  workerUtils.logInMongo(
-    currentJob,
-    `${'    (GIT)'.padEnd(15)}Finished git clone`
-  );
-}
-
-async function cleanup(currentJob) {
-  workerUtils.logInMongo(
-    currentJob,
-    `${'    (rm)'.padEnd(15)}Cleaning up repository`
-  );
-  try {
-    workerUtils.removeDirectory(`repos/${workerUtils.getRepoDirName(currentJob)}`);
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (rm)'.padEnd(15)}Finished cleaning repo`
-    );
-  } catch (errResult) {
-    throw errResult;
-  }
-}
-
-async function build(currentJob) {
-  var building = await buildUtils.build(currentJob);
-  return new Promise(function(resolve, reject) {
-    resolve(true);
-  });
 }
 
 async function pushToStage(currentJob) {
@@ -176,33 +157,25 @@ async function runGithubPush(currentJob) {
     !currentJob.payload.repoName ||
     !currentJob.payload.branchName
   ) {
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (BUILD)'.padEnd(15)}failed due to insufficient definition`
-    );
+    workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
     throw invalidJobDef;
   }
 
-  // execute the build
-  await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    cleanup(currentJob),
-    'Timed out on rm'
-  );
+  // TODO: create logging class somewhere else.. for now it's here
+  const Logger = function(currentJob) {
+    return {
+      save: function(message) {
+        workerUtils.logInMongo(currentJob, message);
+      }
+    };
+  };
 
-  //clone the repo
-  await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    cloneRepo(currentJob),
-    'Timed out on clone repo'
-  );
+  // instantiate github job class and logging class
+  const job = new GitHubJob(currentJob);
+  const logger = new Logger(currentJob);
 
-  // execute the build
-  await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    build(currentJob),
-    'Timed out on build'
-  );
+  // start the entire build by running through the steps
+  await startGithubBuild(job, logger);
 
   console.log('completed build');
 
@@ -235,8 +208,5 @@ async function runGithubPush(currentJob) {
 module.exports = {
   runGithubPush,
   pushToStage,
-  cleanup,
-  cloneRepo,
-  build,
   safeGithubPush,
 };
