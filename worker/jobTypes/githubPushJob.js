@@ -50,57 +50,24 @@ function safeGithubPush(currentJob) {
 }
 
 async function startGithubBuild(job, logger) {
-  // cleanup the repo directory
-  await workerUtils.promiseTimeoutS(
+  const buildOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
-    cleanup(job, logger),
-    'Timed out on rm'
-  );
-
-  // clone the repo
-  await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    cloneRepo(job, logger),
-    'Timed out on clone repo'
-  );
-
-  // execute the build
-  await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    buildRepo(job, logger),
+    job.buildRepo(logger),
     'Timed out on build'
   );
-}
-
-async function cleanup(currentJob, logger) {
-  logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
-  const cleaning = await currentJob.cleanup(logger);
-  logger.save(`${'(rm)'.padEnd(15)}Finished cleaning repo`);
-}
-
-async function cloneRepo(currentJob, logger) {
-  logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
-  logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
-  const cloning = await currentJob.cloneRepo(logger);
-  logger.save(`${'(GIT)'.padEnd(15)}Finished git clone`);
-}
-
-async function buildRepo(currentJob, logger) {
-  logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
-  logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
-  const building = await currentJob.buildRepo(logger);
-
-  if (building && building.status === 'success') {
-    logger.save(`${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${building.stdout}\n---\n${building.stderr}`);
+  // checkout output of build
+  if (buildOutput && buildOutput.status === 'success') {
+    logger.save(`${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${buildOutput.stdout}\n---\n${buildOutput.stderr}`);
 
     // only post entire build output to slack if there are warnings
-    const buildOutputToSlack = building.stdout + '\n\n' + building.stderr;
+    const buildOutputToSlack = buildOutput.stdout + '\n\n' + buildOutput.stderr;
     if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
-      workerUtils.populateCommunicationMessageInMongo(currentJob, buildOutputToSlack);
+      logger.sendSlackMsg(buildOutputToSlack);
     }
 
-    console.log('finished build');
-    logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
+    return new Promise(function(resolve, reject) {
+      resolve(true);
+    });
   }
 }
 
@@ -161,12 +128,21 @@ async function runGithubPush(currentJob) {
     throw invalidJobDef;
   }
 
+  // master branch cannot run through staging build
+  if (currentJob.payload.branchName === 'master') {
+    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, master branch not supported on staging builds`);
+    throw new Error('master branches not supported');
+  }
+
   // TODO: create logging class somewhere else.. for now it's here
   const Logger = function(currentJob) {
     return {
       save: function(message) {
         workerUtils.logInMongo(currentJob, message);
-      }
+      },
+      sendSlackMsg: function(message) {
+        workerUtils.populateCommunicationMessageInMongo(currentJob, message);
+      },
     };
   };
 
@@ -174,7 +150,6 @@ async function runGithubPush(currentJob) {
   const job = new GitHubJob(currentJob);
   const logger = new Logger(currentJob);
 
-  // start the entire build by running through the steps
   await startGithubBuild(job, logger);
 
   console.log('completed build');

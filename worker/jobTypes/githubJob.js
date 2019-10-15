@@ -9,9 +9,20 @@ class GitHubJobClass {
     this.currentJob = currentJob;
   }
 
+  // get base path for public/private repos
+  getBasePath() {
+    const currentJob = this.currentJob;
+    let basePath = `https://github.com`;
+    if (currentJob.payload.private) {
+      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
+    }
+    return basePath;
+  }
+
   // cleanup before pulling repo
   async cleanup(logger) {
     const currentJob = this.currentJob;
+    logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
     try {
       workerUtils.removeDirectory(`repos/${workerUtils.getRepoDirName(currentJob)}`);
     } catch (errResult) {
@@ -19,18 +30,21 @@ class GitHubJobClass {
       throw errResult;
     }
     return new Promise(function(resolve, reject) {
+      logger.save(`${'(rm)'.padEnd(15)}Finished cleaning repo`);
       resolve(true);
     });
   }
 
   async cloneRepo(logger) {
     const currentJob = this.currentJob;
+    logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
+    logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
     try {
       if (!currentJob.payload.branchName) {
         logger.save(`${'(CLONE)'.padEnd(15)}failed due to insufficient definition`);
         throw new Error('branch name not indicated');
       }
-      const basePath = workerUtils.getBasePath(currentJob);
+      const basePath = this.getBasePath();
       const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
       await simpleGit('repos')
         .silent(false)
@@ -51,21 +65,24 @@ class GitHubJobClass {
       }
     }
     return new Promise(function(resolve, reject) {
+      logger.save(`${'(GIT)'.padEnd(15)}Finished git clone`);
       resolve(true);
     });
   }
 
   async buildRepo(logger) {
     const currentJob = this.currentJob;
-    try {
-      // master branch cannot run through staging build
-      if (currentJob.payload.branchName === 'master') {
-        logger.save(`${'(BUILD)'.padEnd(15)} failed, master branch not supported`);
-        throw new Error('master branches not supported');
-      }
 
+    // setup for building
+    await this.cleanup(logger);
+    await this.cloneRepo(logger);
+
+    logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
+    logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
+
+    try {
       const exec = workerUtils.getExecPromise();
-      const basePath = workerUtils.getBasePath(currentJob);
+      const basePath = this.getBasePath();
       const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
 
       const command = `
@@ -77,9 +94,10 @@ class GitHubJobClass {
       await exec(command);
    
       const commandbuild = `
-        . /venv/bin/activate; 
-        cd repos/${workerUtils.getRepoDirName(currentJob)}; 
-        chmod 755 worker.sh; ./worker.sh
+        . /venv/bin/activate && 
+        cd repos/${workerUtils.getRepoDirName(currentJob)} &&
+        chmod 755 worker.sh &&
+        ./worker.sh
       `;
 
       const execTwo = workerUtils.getExecPromise();
@@ -87,6 +105,7 @@ class GitHubJobClass {
       const { stdout, stderr } = await execTwo(commandbuild);
 
       return new Promise(function(resolve, reject) {
+        logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
         resolve({
           'status': 'success',
           'stdout': stdout,
