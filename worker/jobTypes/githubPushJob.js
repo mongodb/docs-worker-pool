@@ -6,7 +6,8 @@
 
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
-const GitHubJob = require('../jobTypes/githubJob').GitHubJob;
+const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
+const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
 const simpleGit = require('simple-git/promise');
 const validator = require('validator');
 
@@ -57,12 +58,10 @@ async function startGithubBuild(job, logger) {
   );
   // checkout output of build
   if (buildOutput && buildOutput.status === 'success') {
-    logger.save(`${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${buildOutput.stdout}\n---\n${buildOutput.stderr}`);
-
     // only post entire build output to slack if there are warnings
     const buildOutputToSlack = buildOutput.stdout + '\n\n' + buildOutput.stderr;
     if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
-      logger.sendSlackMsg(buildOutputToSlack);
+      await logger.sendSlackMsg(buildOutputToSlack);
     }
 
     return new Promise(function(resolve, reject) {
@@ -71,47 +70,19 @@ async function startGithubBuild(job, logger) {
   }
 }
 
-async function pushToStage(currentJob) {
-  workerUtils.logInMongo(
-    currentJob,
-    `${'    (stage)'.padEnd(15)}Pushing to staging`
+async function pushToStage(publisher, logger) {
+  const stageOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    publisher.pushToStage(logger),
+    'Timed out on push to stage'
   );
-  // change working dir to the repo we need to build
-  try {
-    const exec = workerUtils.getExecPromise();
-    const command = `. /venv/bin/activate; cd repos/${workerUtils.getRepoDirName(currentJob)}; make stage;`;
-    const { stdout, stderr } = await exec(command);
-    let stdoutMod = '';
-    // get only last part of message which includes # of files changes + s3 link
-    if (stdout.indexOf('Summary') !== -1) {
-      stdoutMod = stdout.substr(stdout.indexOf('Summary'));
-    } 
-    console.log(stdoutMod);
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (stage)'.padEnd(15)}Finished pushing to staging`
-    );
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
-    );
-    workerUtils.populateCommunicationMessageInMongo(currentJob, stdoutMod);
-  } catch (errResult) {
-    if (
-      errResult.hasOwnProperty('code') ||
-      errResult.hasOwnProperty('signal') ||
-      errResult.hasOwnProperty('killed')
-    ) {
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (stage)'.padEnd(15)}failed with code: ${errResult.code}`
-      );
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (stage)'.padEnd(15)}stdErr: ${errResult.stderr}`
-      );
-      throw errResult;
-    }
+  // checkout output of build
+  if (stageOutput && stageOutput.status === 'success') {
+    await logger.sendSlackMsg(stageOutput.stdout);
+
+    return new Promise(function(resolve, reject) {
+      resolve(true);
+    });
   }
 }
 
@@ -149,6 +120,7 @@ async function runGithubPush(currentJob) {
   // instantiate github job class and logging class
   const job = new GitHubJob(currentJob);
   const logger = new Logger(currentJob);
+  const publisher = new S3Publish(currentJob);
 
   await startGithubBuild(job, logger);
 
@@ -163,14 +135,10 @@ async function runGithubPush(currentJob) {
   }
 
   if (isMaster) {
-    //TODO: push to prod
+    // TODO: push to prod
   } else {
     console.log('pushing to stage');
-    await workerUtils.promiseTimeoutS(
-      buildTimeout,
-      pushToStage(currentJob),
-      'Timed out on push to stage'
-    );
+    await pushToStage(publisher, logger);
   }
 
   const files = workerUtils.getFilesInDir(
@@ -182,6 +150,5 @@ async function runGithubPush(currentJob) {
 
 module.exports = {
   runGithubPush,
-  pushToStage,
   safeGithubPush,
 };
