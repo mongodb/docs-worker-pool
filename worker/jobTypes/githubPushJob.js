@@ -1,9 +1,3 @@
-/*
- *  this is the github-triggered processor for builds
- *  it expects a worker.sh in the root of the repository
- *  an example job definition lives in jobDef.json
- */
-
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
@@ -120,7 +114,7 @@ async function runGithubPush(currentJob) {
   // instantiate github job class and logging class
   const job = new GitHubJob(currentJob);
   const logger = new Logger(currentJob);
-  const publisher = new S3Publish(currentJob);
+  const publisher = new S3Publish(job);
 
   await startGithubBuild(job, logger);
 

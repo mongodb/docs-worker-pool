@@ -3,27 +3,21 @@ const workerUtils = require('../utils/utils');
 
 class S3PublishClass {
 
-  constructor(currentJob) {
-    this.currentJob = currentJob;
+  constructor(GitHubJob) {
+    this.GitHubJob = GitHubJob;
   }
 
   async pushToStage(logger) {
-    const currentJob = this.currentJob;
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
     try {
       const exec = workerUtils.getExecPromise();
-      const command = `
-        . /venv/bin/activate && 
-        cd repos/${workerUtils.getRepoDirName(currentJob)} && 
-        make stage;
-      `;
+      const command = this.GitHubJob.deployCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
       let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       } 
-      console.log(stdoutMod);
       return new Promise(function(resolve, reject) {
         logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
         logger.save(`${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`);
@@ -43,6 +37,10 @@ class S3PublishClass {
         throw errResult;
       }
     }
+  }
+
+  async pushToProduction(logger) {
+    // todo
   }
 
 }

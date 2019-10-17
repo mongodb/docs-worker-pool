@@ -7,6 +7,7 @@ class GitHubJobClass {
   // pass in a job payload to setup class
   constructor(currentJob) {
     this.currentJob = currentJob;
+    this.deployCommands = [];
   }
 
   // get base path for public/private repos
@@ -19,12 +20,16 @@ class GitHubJobClass {
     return basePath;
   }
 
+  getRepoDirName() {
+    return `${this.currentJob.payload.repoName}_${this.currentJob.payload.newHead}`;
+  }
+
   // cleanup before pulling repo
   async cleanup(logger) {
     const currentJob = this.currentJob;
     logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
     try {
-      workerUtils.removeDirectory(`repos/${workerUtils.getRepoDirName(currentJob)}`);
+      workerUtils.removeDirectory(`repos/${this.getRepoDirName(currentJob)}`);
     } catch (errResult) {
       logger.save(`${'(CLEANUP)'.padEnd(15)}failed cleaning repo directory`);
       throw errResult;
@@ -48,7 +53,7 @@ class GitHubJobClass {
       const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
       await simpleGit('repos')
         .silent(false)
-        .clone(repoPath, `${workerUtils.getRepoDirName(currentJob)}`)
+        .clone(repoPath, `${this.getRepoDirName(currentJob)}`)
         .catch(err => {
           console.error('failed: ', err);
           throw err;
@@ -85,24 +90,47 @@ class GitHubJobClass {
       const basePath = this.getBasePath();
       const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
 
-      const command = `
-        cd repos/${workerUtils.getRepoDirName(currentJob)}; 
-        git checkout ${currentJob.payload.branchName}; 
-        git pull origin ${currentJob.payload.branchName};
-      `;
+      const pullRepoCommands = [
+        `cd repos/${this.getRepoDirName(currentJob)}`,
+        `git checkout ${currentJob.payload.branchName}`,
+        `git pull origin ${currentJob.payload.branchName}`,
+      ];
 
-      await exec(command);
-   
-      const commandbuild = `
-        . /venv/bin/activate && 
-        cd repos/${workerUtils.getRepoDirName(currentJob)} &&
-        chmod 755 worker.sh &&
-        ./worker.sh
-      `;
+      await exec(pullRepoCommands.join(' && '));
+
+      // default commands to run to build repo
+      const commandsToBuild = [
+        `. /venv/bin/activate`,
+        `cd repos/${this.getRepoDirName(currentJob)}`,
+        `make html`,
+      ];
+
+      const deployCommands = [
+        `. /venv/bin/activate`,
+        `cd repos/${this.getRepoDirName(currentJob)}`,
+        `make stage`,
+      ];
+
+      // the way we now build is to search for a specific function string in worker.sh
+      // which then maps to a specific target that we run
+      const makeFileContents = fs.readFileSync(`repos/${this.getRepoDirName(currentJob)}/worker.sh`,{ encoding: 'utf8' });
+      const makeFileLines = makeFileContents.split(/\r?\n/);
+      
+      // check if need to build next-gen instead
+      for (let i = 0; i < makeFileLines.length; i++) {
+        if (makeFileLines[i] === '"build-and-stage-next-gen"') {
+          commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+          deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
+          break;
+        }
+      }
+
+      // set this to data property so deploy class can pick it up later
+      this.deployCommands = deployCommands;
 
       const execTwo = workerUtils.getExecPromise();
 
-      const { stdout, stderr } = await execTwo(commandbuild);
+      const { stdout, stderr } = await execTwo(commandsToBuild.join(' && '));
 
       return new Promise(function(resolve, reject) {
         logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
@@ -114,7 +142,6 @@ class GitHubJobClass {
         });
       });
     } catch (errResult) {
-      console.log('error ' + errResult);
       if (
         errResult.hasOwnProperty('code') ||
         errResult.hasOwnProperty('signal') ||

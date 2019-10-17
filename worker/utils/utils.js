@@ -110,11 +110,6 @@ module.exports = {
     await mongo.populateCommunicationMessageInMongo(currentJob, message);
   },
 
-  // where each repo is saved locally
-  getRepoDirName(currentJob) {
-    return `${currentJob.payload.repoName}_${currentJob.payload.newHead}`;
-  },
-
   async getAllRepos() {
     return mongo.getMetaCollection().find({}).toArray();
   },
