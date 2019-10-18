@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-/**
- *  this is the github-triggered processor for builds
- *  it expects a worker.sh in the root of the repository.
- *  An example job definition lives in jobDef.json.
- */
-
-=======
->>>>>>> DOCSP-7001
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
