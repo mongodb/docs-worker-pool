@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const simpleGit = require('simple-git/promise');
+const request = require('request');
 
 class GitHubJobClass {
 
@@ -22,6 +23,24 @@ class GitHubJobClass {
 
   getRepoDirName() {
     return `${this.currentJob.payload.repoName}_${this.currentJob.payload.newHead}`;
+  }
+
+  // our maintained directory of makefiles
+  async downloadMakefile() {
+    const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/master/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+    const returnObject = {};
+    return new Promise(function(resolve, reject) {
+      request(makefileLocation, function(error, response, body) {
+        if (!error && body && response.statusCode === 200) {
+          returnObject['status'] = 'success';
+          returnObject['content'] = body;
+        } else {
+          returnObject['status'] = 'failure';
+          returnObject['content'] = response;
+        }
+        resolve(returnObject);
+      });
+    });
   }
 
   // cleanup before pulling repo
@@ -113,12 +132,18 @@ class GitHubJobClass {
 
       // the way we now build is to search for a specific function string in worker.sh
       // which then maps to a specific target that we run
-      const makeFileContents = fs.readFileSync(`repos/${this.getRepoDirName(currentJob)}/worker.sh`,{ encoding: 'utf8' });
-      const makeFileLines = makeFileContents.split(/\r?\n/);
+      const workerContents = fs.readFileSync(`repos/${this.getRepoDirName(currentJob)}/worker.sh`, { encoding: 'utf8' });
+      const workerLines = workerContents.split(/\r?\n/);
+
+      // overwrite repo makefile with the one our team maintains
+      const makefileContents = await this.downloadMakefile();
+      if (makefileContents && makefileContents.status === 'success') {
+        await fs.writeFileSync(`repos/${this.getRepoDirName(currentJob)}/Makefile`, makefileContents.content, { encoding: 'utf8', flag: 'w' });
+      }
       
       // check if need to build next-gen instead
-      for (let i = 0; i < makeFileLines.length; i++) {
-        if (makeFileLines[i] === '"build-and-stage-next-gen"') {
+      for (let i = 0; i < workerLines.length; i++) {
+        if (workerLines[i] === '"build-and-stage-next-gen"') {
           commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
           deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
           break;
