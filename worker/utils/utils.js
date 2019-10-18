@@ -1,6 +1,8 @@
 // Imports
 const path = require('path');
 const fs = require('fs-extra');
+const request = require('request');
+const yaml = require('js-yaml');
 // const git  = require("nodegit");
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
@@ -106,5 +108,32 @@ module.exports = {
   
   async populateCommunicationMessageInMongo(currentJob, message) {
     await mongo.populateCommunicationMessageInMongo(currentJob, message);
+  },
+
+  async getAllRepos() {
+    return mongo.getMetaCollection().find({}).toArray();
+  },
+
+  async getRepoPublishedBranches(repoObject) {
+    const pubBranchesFile = `https://raw.githubusercontent.com/${repoObject.repoOwner}/${repoObject.repoName}/meta/published-branches.yaml`;
+    const returnObject = {};
+    return new Promise(function(resolve, reject) {
+      request(pubBranchesFile, function(error, response, body) {
+        if (!error && body && response.statusCode === 200) {
+          try {
+            const yamlParsed = yaml.safeLoad(body);
+            returnObject['status'] = 'success';
+            returnObject['content'] = yamlParsed;
+          } catch(e) {
+            console.log('ERROR parsing yaml file!', repoObject, e);
+            returnObject['status'] = 'failure';
+          }
+        } else {
+          returnObject['status'] = 'failure';
+          returnObject['content'] = response;
+        }
+        resolve(returnObject);
+      });
+    });
   },
 };
