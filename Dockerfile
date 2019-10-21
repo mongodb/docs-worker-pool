@@ -49,6 +49,7 @@ COPY worker/ .
 RUN npm install
 
 # where repo work will happen
+RUN mv repos repos_tmp
 RUN mkdir repos && chmod 777 repos
 
 # entry to kick-off the worker
