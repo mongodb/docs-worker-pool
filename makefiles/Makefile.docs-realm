@@ -1,0 +1,63 @@
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+USER=$(shell whoami)
+STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+PRODUCTION_URL="https://docs.mongodb.com/realm"
+STAGING_BUCKET=docs-mongodb-org-staging
+PRODUCTION_BUCKET=docs-mongodb-org-prod
+REPO_DIR=$(shell pwd)
+
+# "PROJECT" currently exists to support having multiple projects
+# within one bucket.
+PROJECT=realm
+
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+.PHONY: help lint html stage deploy deploy-search-index
+
+help: ## Show this help message
+    @grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+    @echo
+    @echo 'Variables'
+    @printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
+
+next-gen-html:
+    # snooty parse and then build-front-end
+    @-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
+    cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
+    cd snooty; \
+    echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+    echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
+    echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+    npm run build; \
+    cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
+next-gen-stage: ## Host online for review
+    mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+    @echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+
+html: ## Builds this branch's HTML under build/<branch>/html
+    giza make html
+
+publish: ## Builds this branch's publishable HTML and other artifacts under build/public
+    if [ ${GIT_BRANCH} = master ]; then rm -rf build/master build/public; fi
+    giza make publish
+    if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
+
+lint: ## Checks URLs in the built corpus underneath build/<branch>/html
+    mut-lint --linters=links ./build/master/source/ ${ARGS}
+
+stage: ## Host online for review
+    mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+    @echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+
+deploy: build/public ## Deploy to the production bucket
+    mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='ecosystem' --all-subdirectories  ${ARGS}
+
+    @echo "Hosted at ${PRODUCTION_URL}/index.html"
+
+    $(MAKE) deploy-search-index
+
+deploy-search-index: ## Update the search index for this branch
+    @echo "Building search index"
+    mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
