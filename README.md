@@ -36,5 +36,3 @@ cd worker
 npm install --dev
 ./node_modules/.bin/eslint .
 ```
-
-See the [spec doc](https://docs.google.com/document/d/1XZOuuGmozcLQRSDitx0UWhZzJaS4opR1JVwZqDp-N4g/edit?usp=sharing) for more details. 
