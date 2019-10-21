@@ -26,3 +26,4 @@ git clone https://github.com/mongodb/docs-worker-pool.git && cd docs-worker-pool
         && sudo ./rundocker.sh
 
 } > $LOG_LASTBUILD
+
