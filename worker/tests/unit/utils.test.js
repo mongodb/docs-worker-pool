@@ -56,18 +56,23 @@ describe('Mongo Tests', () => {
     workerUtils.resolveAfterNSeconds(5);
     expect(setTimeout).toHaveBeenCalledTimes(1);
   });
-
-  // encrypt job 
+  
+  //test encrypt job
   it('encryptJob()', () => {
     const digest = workerUtils.encryptJob("test string1", "test string2");
-
     digest.then(function(value) {
-      await expect(value).toBe("55397fd48c066c9747ce6b08bf75a6d8be92310a576d6e4b7dcf283e03a3bc6c");
+      expect(value).toBe("55397fd48c066c9747ce6b08bf75a6d8be92310a576d6e4b7dcf283e03a3bc6c");
     });
-    
-    
-    
   });
+
+  //test decrypt job
+  it('decryptJob()', () => {
+    const success = workerUtils.decryptJob("55397fd48c066c9747ce6b08bf75a6d8be92310a576d6e4b7dcf283e03a3bc6c", "test string1", "test string2");
+    success.then(function(value) {
+     expect(success).toBeTruthy();
+    });
+  });
+
   // Testing For getExecPromise()
   it('getExecPromise()', async () => {
     const exec = workerUtils.getExecPromise();

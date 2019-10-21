@@ -62,14 +62,18 @@ module.exports = {
     const message = string1 + string2;
     const hmac = crypto.createHmac('sha256', message);
     const hash = hmac.digest('hex')
-    console.log(hash)
     return hash;
   },
+
   async decryptJob(digest, string1, string2){
+    console.log("in heeeeya!")
     const message = string1 + string2;
     const hmac = crypto.createHmac('sha256', message);
     const hash = hmac.digest('hex')
-    
+    if(hash == digest){
+      return true;
+    }
+    return false;
   },
   printFile(fileName) {
     fs.readFile(fileName, function(err, data) {
