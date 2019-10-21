@@ -7,6 +7,15 @@ const yaml = require('js-yaml');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const mongo = require('./mongo');
+const util= require('util');
+var crypto = require('crypto');
+
+try {
+  crypto = require('crypto');
+} catch (err) {
+  console.log(err)
+  console.log('crypto support is disabled!');
+}
 
 module.exports = {
   // Outputs a list of all of the files in the directory (base) with the given extension (ext)
@@ -49,6 +58,19 @@ module.exports = {
     })
   },
 
+  async encryptJob(string1, string2){
+    const message = string1 + string2;
+    const hmac = crypto.createHmac('sha256', message);
+    const hash = hmac.digest('hex')
+    console.log(hash)
+    return hash;
+  },
+  async decryptJob(digest, string1, string2){
+    const message = string1 + string2;
+    const hmac = crypto.createHmac('sha256', message);
+    const hash = hmac.digest('hex')
+    
+  },
   printFile(fileName) {
     fs.readFile(fileName, function(err, data) {
   /* If an error exists, show it, otherwise show the file */
