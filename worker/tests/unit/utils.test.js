@@ -79,7 +79,7 @@ describe('Mongo Tests', () => {
     await expect(exec('ls')).resolves.toBeTruthy();
   });
 
-  it('getExectoBeTruthy()', async () => {
+  it('getExecPromise()', async () => {
     const exec = workerUtils.getExecPromise();
     await expect(exec('lssss')).rejects.toBeTruthy();
   });
