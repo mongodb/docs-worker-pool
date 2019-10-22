@@ -7,15 +7,9 @@ const yaml = require('js-yaml');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const mongo = require('./mongo');
-const util= require('util');
+const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool';
 var crypto = require('crypto');
 
-try {
-  crypto = require('crypto');
-} catch (err) {
-  console.log(err)
-  console.log('crypto support is disabled!');
-}
 
 module.exports = {
   // Outputs a list of all of the files in the directory (base) with the given extension (ext)
@@ -58,17 +52,19 @@ module.exports = {
     })
   },
 
-  async encryptJob(string1, string2){
+  async encryptJob(env_variable, string1, string2){
+    const password = process.env.crypto_secret ? process.env.crypto_secret  : 'password';
     const message = string1 + string2;
-    const hmac = crypto.createHmac('sha256', message);
-    const hash = hmac.digest('hex')
+    const hmac = crypto.createHmac('sha256', password);
+    hmac.update(message);   
+    hash = hmac.digest('hex')
     return hash;
   },
 
   async decryptJob(digest, string1, string2){
-    console.log("in heeeeya!")
+    const password = process.env.crypto_secret ? process.env.crypto_secret  : 'password';
     const message = string1 + string2;
-    const hmac = crypto.createHmac('sha256', message);
+    const hmac = crypto.createHmac('sha256',password);
     const hash = hmac.digest('hex')
     if(hash == digest){
       return true;

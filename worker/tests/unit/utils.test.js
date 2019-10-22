@@ -61,13 +61,13 @@ describe('Mongo Tests', () => {
   it('encryptJob()', () => {
     const digest = workerUtils.encryptJob("test string1", "test string2");
     digest.then(function(value) {
-      expect(value).toBe("55397fd48c066c9747ce6b08bf75a6d8be92310a576d6e4b7dcf283e03a3bc6c");
+      expect(value).toBe("232d1df9b58c1d7d6c611a9b10eb752687927931bfeb6aea3eae430e056bde7e");
     });
   });
 
   //test decrypt job
   it('decryptJob()', () => {
-    const success = workerUtils.decryptJob("55397fd48c066c9747ce6b08bf75a6d8be92310a576d6e4b7dcf283e03a3bc6c", "test string1", "test string2");
+    const success = workerUtils.decryptJob("232d1df9b58c1d7d6c611a9b10eb752687927931bfeb6aea3eae430e056bde7e", "test string1", "test string2");
     success.then(function(value) {
      expect(success).toBeTruthy();
     });
