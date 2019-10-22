@@ -7,6 +7,7 @@ PRODUCTION_BUCKET=docs-compass-prod
 PREFIX=compass
 PROJECT=compass
 REPO_DIR=$(shell pwd)
+
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
@@ -36,8 +37,8 @@ publish: migrate-assets ## Builds this branch's publishable HTML and other artif
 
 next-gen-html:
 	# snooty parse and then build-front-end
-	echo "${SNOOTY_DB_PWD}" | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
-	cp -r "${REPO_DIR}/../../snooty" ${REPO_DIR};
+	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
+	cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
@@ -45,9 +46,13 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
-stage: ## Host online for review
+next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+
+stage: ## Host online for review
+	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 
 fake-deploy: build/public/${GIT_BRANCH} ## Do a fake deploy on the staging bucket
 	mut-publish build/public/${GIT_BRANCH} ${STAGING_BUCKET} --prefix=${PROJECT} --deploy ${ARGS}
