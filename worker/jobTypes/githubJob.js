@@ -121,6 +121,7 @@ class GitHubJobClass {
       const commandsToBuild = [
         `. /venv/bin/activate`,
         `cd repos/${this.getRepoDirName(currentJob)}`,
+        `rm -f makefile`,
         `make html`,
       ];
 
