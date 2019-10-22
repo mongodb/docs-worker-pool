@@ -11,6 +11,7 @@ PRODUCTION_BUCKET=docs-k8s-operator-prod
 PROJECT=kubernetes-operator
 PREFIX=kubernetes-operator
 REPO_DIR=$(shell pwd)
+
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
@@ -75,11 +76,10 @@ publish:
 ####   DEPLOY KUBERNETES OPERATOR DOCUMENTATION TO STAGING   ####
 #################################################################
 
-## Host online for review
 next-gen-html:
 	# snooty parse and then build-front-end
-	echo "${SNOOTY_DB_PWD}" | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
-	cp -r "${REPO_DIR}/../../snooty" ${REPO_DIR};
+	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
+	cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
@@ -87,13 +87,17 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
-stage: ## Host online for review
+next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"
 
 #################################################################
 ####  DEPLOY KUBERNETES OPERATOR DOCUMENTATION TO PRODUCTION ####
 #################################################################
+
+stage: ## Host online for review
+	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 
 ## Deploy to the production bucket
 deploy: build/public
