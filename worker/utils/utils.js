@@ -52,17 +52,17 @@ module.exports = {
     })
   },
 
-  async encryptJob(env_variable, string1, string2){
-    const password = process.env.crypto_secret ? process.env.crypto_secret  : 'password';
+  async encryptJob(string1, string2){
+    const password = this.retrievePassword()
     const message = string1 + string2;
     const hmac = crypto.createHmac('sha256', password);
     hmac.update(message);   
-    hash = hmac.digest('hex')
-    return hash;
+    digest = hmac.digest('hex')
+    return digest;
   },
 
   async decryptJob(digest, string1, string2){
-    const password = process.env.crypto_secret ? process.env.crypto_secret  : 'password';
+    const password = this.retrievePassword();
     const message = string1 + string2;
     const hmac = crypto.createHmac('sha256',password);
     const hash = hmac.digest('hex')
@@ -70,6 +70,10 @@ module.exports = {
       return true;
     }
     return false;
+  },
+
+  retrievePassword(){
+    return process.env.crypto_secret; 
   },
   printFile(fileName) {
     fs.readFile(fileName, function(err, data) {

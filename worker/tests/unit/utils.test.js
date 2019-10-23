@@ -57,17 +57,24 @@ describe('Mongo Tests', () => {
     expect(setTimeout).toHaveBeenCalledTimes(1);
   });
   
+
+
+  // So in that case I think you might want to separate the retrieval of the password into a function, 
+  // then use the jest test mock function feature to effectively override that function with a result. 
+  // That way we don’t accidentally deploy a very weak password.
   //test encrypt job
-  it('encryptJob()', () => {
+  it('encryptJob()', () => { 
+    workerUtils.retrievePassword = jest.fn().mockReturnValue("password");
     const digest = workerUtils.encryptJob("test string1", "test string2");
     digest.then(function(value) {
-      expect(value).toBe("232d1df9b58c1d7d6c611a9b10eb752687927931bfeb6aea3eae430e056bde7e");
+      expect(value).toBe("d9f11175cc1ca7f0705e5d8e8537e257a5a7a1b100b8b19a0abb5e021bfde7c2");
     });
   });
 
   //test decrypt job
   it('decryptJob()', () => {
-    const success = workerUtils.decryptJob("232d1df9b58c1d7d6c611a9b10eb752687927931bfeb6aea3eae430e056bde7e", "test string1", "test string2");
+    workerUtils.retrievePassword = jest.fn().mockReturnValue("password");
+    const success = workerUtils.decryptJob("2d9f11175cc1ca7f0705e5d8e8537e257a5a7a1b100b8b19a0abb5e021bfde7c2", "test string1", "test string2");
     success.then(function(value) {
      expect(success).toBeTruthy();
     });
