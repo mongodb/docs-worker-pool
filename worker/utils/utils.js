@@ -7,8 +7,7 @@ const yaml = require('js-yaml');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const mongo = require('./mongo');
-const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool';
-var crypto = require('crypto');
+const crypto = require('crypto');
 
 
 module.exports = {
@@ -66,10 +65,7 @@ module.exports = {
     const message = string1 + string2;
     const hmac = crypto.createHmac('sha256',password);
     const hash = hmac.digest('hex')
-    if(hash == digest){
-      return true;
-    }
-    return false;
+    return (hash == digest);
   },
 
   retrievePassword(){
