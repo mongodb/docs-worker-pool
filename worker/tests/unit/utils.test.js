@@ -57,7 +57,7 @@ describe('Mongo Tests', () => {
     expect(setTimeout).toHaveBeenCalledTimes(1);
   });
 
-
+  //test encrypt job
   it('encryptJob()', () => {
     workerUtils.retrievePassword = jest.fn().mockReturnValue("password");
     workerUtils.generateSalt = jest.fn().mockReturnValue("A1+Czhen/oTh7k4UmbdOVQ==");
