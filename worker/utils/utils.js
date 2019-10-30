@@ -52,24 +52,25 @@ module.exports = {
   },
 
   async encryptJob(string1, string2){
-    const password = this.retrievePassword()
-    const message = string1 + string2;
-    const hmac = crypto.createHmac('sha256', password);
-    hmac.update(message);   
-    digest = hmac.digest('hex')
-    return digest;
+    const secret = this.retrievePassword() + string1 + string2
+    const salt = this.generateSalt();
+    const digest = crypto.scryptSync(secret, salt, 64);
+    return digest.toString('hex');
   },
 
   async decryptJob(digest, string1, string2){
-    const password = this.retrievePassword();
-    const message = string1 + string2;
-    const hmac = crypto.createHmac('sha256',password);
-    const hash = hmac.digest('hex')
+
+    const secret = this.retrievePassword() + string1 + string2;
+    const salt = this.generateSalt();
+    const hash = crypto.scryptSync(secret, salt, 64,);
     return (hash == digest);
   },
 
+  generateSalt(){
+    return crypto.randomBytes(16).toString('base64')
+  },
   retrievePassword(){
-    return process.env.crypto_secret; 
+    return process.env.crypto_secret;
   },
   printFile(fileName) {
     fs.readFile(fileName, function(err, data) {
@@ -127,7 +128,7 @@ module.exports = {
   async logInMongo(currentJob, message) {
     await mongo.logMessageInMongo(currentJob, message);
   },
-  
+
   async populateCommunicationMessageInMongo(currentJob, message) {
     await mongo.populateCommunicationMessageInMongo(currentJob, message);
   },
