@@ -61,17 +61,19 @@ describe('Mongo Tests', () => {
   it('encryptJob()', () => {
     workerUtils.retrievePassword = jest.fn().mockReturnValue("password");
     workerUtils.generateSalt = jest.fn().mockReturnValue("A1+Czhen/oTh7k4UmbdOVQ==");
-    const digest = workerUtils.encryptJob("test string1", "test string2");
-    digest.then(function(value) {
-      expect(value).toBe("df22f6a6c4e704a1fadd4af251d16ba78a6b04adbb75126f758416185da2310bab6915a4b1bb524c67c4943e0462617778aff7a5ed03e7b039768857437bfab6");
-    });
+    const promise1 = workerUtils.encryptJob("test string1", "test string2");
+    const promise2 = workerUtils.encryptJob("test string1", "test string2");
+   
+    Promise.all([promise1, promise2]).then(function(values) {
+      expect(values[0] === values[1]).toBeTruthy();
+    })
+
   });
 
-  //test decrypt job
-  it('decryptJob()', () => {
-    workerUtils.retrievePassword = jest.fn().mockReturnValue("password");
-    workerUtils.generateSalt = jest.fn().mockReturnValue("A1+Czhen/oTh7k4UmbdOVQ==");
-    const success = workerUtils.decryptJob("df22f6a6c4e704a1fadd4af251d16ba78a6b04adbb75126f758416185da2310bab6915a4b1bb524c67c4943e0462617778aff7a5ed03e7b039768857437bfab6", "test string1", "test string2");
+  //test validate job
+  it('validateJob()', () => {
+    const digest = Buffer.from("df22f6a6c4e704a1fadd4af251d16ba78a6b04adbb75126f758416185da2310bab6915a4b1bb524c67c4943e0462617778aff7a5ed03e7b039768857437bfab6", 'utf8');
+    const success = workerUtils.validateJob(digest, "test string1", "test string2");
     success.then(function(value) {
      expect(success).toBeTruthy();
     });

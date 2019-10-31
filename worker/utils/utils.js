@@ -58,12 +58,12 @@ module.exports = {
     return digest.toString('hex');
   },
 
-  async decryptJob(digest, string1, string2){
-
-    const secret = this.retrievePassword() + string1 + string2;
-    const salt = this.generateSalt();
-    const hash = crypto.scryptSync(secret, salt, 64,);
-    return (hash == digest);
+  async validateJob(digest, string1, string2){
+    this.encryptJob(string1, string2).then(function(value) {
+      digest2 = Buffer.from(value, 'utf8');
+      crypto.timingSafeEqual(digest, digest2);
+    })
+    
   },
 
   generateSalt(){
