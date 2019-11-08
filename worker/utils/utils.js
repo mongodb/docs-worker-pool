@@ -51,17 +51,17 @@ module.exports = {
     })
   },
 
-  async encryptJob(string1, string2){
+  async encryptJob(salt, string1, string2){
     const secret = this.retrievePassword() + string1 + string2
-    const salt = this.generateSalt();
     const digest = crypto.scryptSync(secret, salt, 64);
     return digest.toString('hex');
   },
 
-  async validateJob(digest, string1, string2){
-    this.encryptJob(string1, string2).then(function(value) {
-      digest2 = Buffer.from(value, 'utf8');
-      crypto.timingSafeEqual(digest, digest2);
+  async validateJob(digest, salt, string1, string2){
+    this.encryptJob(salt, string1, string2).then(function(value) {
+      bufferDigest2 = Buffer.from(value, 'utf8');
+      bufferDigest1 = Buffer.from(digest, 'utf8');
+      crypto.timingSafeEqual(bufferDigest1, bufferDigest2);
     })
     
   },
