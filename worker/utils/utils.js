@@ -7,6 +7,8 @@ const yaml = require('js-yaml');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const mongo = require('./mongo');
+const crypto = require('crypto');
+
 
 module.exports = {
   // Outputs a list of all of the files in the directory (base) with the given extension (ext)
@@ -49,6 +51,27 @@ module.exports = {
     })
   },
 
+  async encryptJob(salt, string1, string2){
+    const secret = this.retrievePassword() + string1 + string2
+    const digest = crypto.scryptSync(secret, salt, 64);
+    return digest.toString('hex');
+  },
+
+  async validateJob(digest, salt, string1, string2){
+    this.encryptJob(salt, string1, string2).then(function(value) {
+      bufferDigest2 = Buffer.from(value, 'utf8');
+      bufferDigest1 = Buffer.from(digest, 'utf8');
+      crypto.timingSafeEqual(bufferDigest1, bufferDigest2);
+    })
+    
+  },
+
+  generateSalt(){
+    return crypto.randomBytes(16).toString('base64')
+  },
+  retrievePassword(){
+    return process.env.crypto_secret;
+  },
   printFile(fileName) {
     fs.readFile(fileName, function(err, data) {
   /* If an error exists, show it, otherwise show the file */
@@ -105,7 +128,7 @@ module.exports = {
   async logInMongo(currentJob, message) {
     await mongo.logMessageInMongo(currentJob, message);
   },
-  
+
   async populateCommunicationMessageInMongo(currentJob, message) {
     await mongo.populateCommunicationMessageInMongo(currentJob, message);
   },
