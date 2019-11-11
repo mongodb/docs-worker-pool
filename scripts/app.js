@@ -10,6 +10,7 @@ function createPayload(
   patch,
   buildSize
 ) {
+    console.log(patch.substring(0, 10))
   const payload = {
     jobType: "githubPatch",
     source: "github",
@@ -21,7 +22,7 @@ function createPayload(
     isXlarge: false,
     repoOwner: repoOwnerArg,
     url: urlArg,
-    newHead: "17330b506db3993d9ed1a916ada1f4a0f473b3ac"
+    newHead: patch.substring(0, 10)
   };
 
   return payload;
