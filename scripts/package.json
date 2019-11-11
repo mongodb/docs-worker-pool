@@ -1,0 +1,26 @@
+{
+  "name": "@heneise/makefile-example",
+  "description": "Node.js Makefile and Environment",
+  "author": "Heneise Consulting <info@heneise.consulting> (http://heneise.consulting)",
+  "version": "0.0.0-development",
+  "license": "MIT",
+  "contributors": [
+    "Patrick Heneise (https://github.com/patrickheneise)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heneise/makefile-example.git"
+  },
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "chokidar-cli": "^1.2.0",
+    "nodemon": "^1.12.5",
+    "standard": "^10.0.3",
+    "tape": "^4.8.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node 'test/index.js'"
+  }
+}
