@@ -97,19 +97,13 @@ async function getGitCommits() {
 }
 
 async function main() {
-  try {
-    const { name, email } = getGitUser();
+  
+    const { name, email } = await getGitUser();
     console.log(name, email);
-  } catch (error) {
-    console.error(error.toString());
-  }
+  
 
-  try {
-    console.log("get in here!!!");
     const commits = await getGitCommits();
-  } catch (error) {
-    console.error(error.toString());
-  }
+ 
 }
 
 main();
