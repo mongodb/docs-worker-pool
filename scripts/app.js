@@ -33,6 +33,7 @@ async function getGitPatch() {
     stderr
   ) {
     console.log(stdout);
+    console.log(" ")
     if (error !== null) {
       console.log("exec error: " + error);
     }
