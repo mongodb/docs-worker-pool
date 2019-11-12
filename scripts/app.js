@@ -8,9 +8,9 @@ function createPayload(
   repoOwnerArg,
   urlArg,
   patch,
-  buildSize
+  buildSizeArg
 ) {
-    console.log(patch.substring(0, 10))
+    hasHead = patch.substring(0, 10);
   const payload = {
     jobType: "githubPatch",
     source: "github",
@@ -22,7 +22,8 @@ function createPayload(
     isXlarge: false,
     repoOwner: repoOwnerArg,
     url: urlArg,
-    newHead: patch.substring(0, 10)
+    newHead: hasHead,
+    buildSize: buildSizeArg
   };
 
   return payload;
@@ -39,6 +40,7 @@ async function getBranchName() {
         console.log("exec error: " + error);
         reject(error);
       }
+      console.log(stdout)
       resolve(stdout);
     });
   });
@@ -55,25 +57,25 @@ async function getRepoInfo() {
       let repoName = stdout.split("/");
       repoName = repoName[repoName.length - 1];
       repoName = repoName.replace(".git", "");
+      repoName = repoName.replace("\n", "");
+      
       resolve({ stdout, repoName });
     });
   });
 }
 
 async function getGitUser() {
-  console.log("one");
   return new Promise((resolve, reject) => {
     exec("git config --global user.name", function(error, stdout, stderr) {
       if (error !== null) {
         console.log("exec error: " + error);
       }
-      resolve(stdout);
+      resolve(stdout.replace("\n", ""));
     });
   });
 }
 
 async function getGitCommits() {
-  console.log("two");
   return new Promise((resolve, reject) => {
     exec("git cherry", function(error, stdout, stderr) {
       if (error !== null) {
@@ -93,7 +95,6 @@ async function getGitCommits() {
 }
 
 async function getGitPatch(firstCommit, lastCommit) {
-  console.log("three");
   return new Promise((resolve, reject) => {
     exec(
       "git diff " + firstCommit + "..." + lastCommit + " > myPatch.patch",
@@ -128,6 +129,8 @@ async function main() {
     patch,
     buildSize
   );
+
+  console.log(payLoad);
 }
 
 main();
