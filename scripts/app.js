@@ -1,6 +1,82 @@
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const fs = require("fs");
+const dotenv = require("dotenv");
+
+function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
+  // look at this link: https://mongodb.github.io/node-mongodb-native/api-generated/collection.html
+
+  console.log(JSON.stringify(context.user));
+
+  //all of this I have to get from a env variable
+  const db_name = process.env.DB_NAME;
+  const coll_name = process.env.COL_NAME;
+
+  // get the queue collection
+  //   var queue = context.services
+  //     .get("mongodb-atlas")
+  //     .db(db_name)
+  //     .collection(coll_name);
+
+  // create the new job document
+  const newJob = {
+    title: jobTitle,
+    user: jobUserName,
+    email: jobUserEmail,
+    status: "inQueue",
+    createdTime: new Date(),
+    startTime: null,
+    endTime: null,
+    priority: 1,
+    numFailures: 0,
+    failures: [],
+    result: null,
+    payload: payload,
+    logs: {}
+  };
+
+  // we are looking for jobs in the queue with the same payload that have not yet started (startTime == null)
+  const filterDoc = { payload: payload, startTime: null };
+  const updateDoc = { $setOnInsert: newJob };
+
+  // upsert the new job and return if the upsertedId if the job was added to the queue
+  //   return queue.updateOne(filterDoc, updateDoc, { upsert: true }).then(
+  //     result => {
+  //       if (result.upsertedId) {
+  //         return result.upsertedId;
+  //       } else {
+  //         return "Already Existed";
+  //       }
+  //     },
+  //     error => {
+  //       return error;
+  //     }
+  //   );
+
+  var MongoClient = require("mongodb").MongoClient;
+  var url = "mongodb://localhost:27017/";
+
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db(db_name);
+
+    dbo
+      .collection(coll_name)
+      .updateOne(filterDoc, updateDoc, { upsert: true })
+      .then(
+        result => {
+          if (result.upsertedId) {
+            return result.upsertedId;
+          } else {
+            return "Already Existed";
+          }
+        },
+        error => {
+          return error;
+        }
+      );
+  });
+}
 
 function createPayload(
   repoNameArg,
@@ -10,7 +86,7 @@ function createPayload(
   patch,
   buildSizeArg
 ) {
-    hasHead = patch.substring(0, 10);
+  hasHead = patch.substring(0, 10);
   const payload = {
     jobType: "githubPatch",
     source: "github",
@@ -31,17 +107,13 @@ function createPayload(
 
 async function getBranchName() {
   return new Promise((resolve, reject) => {
-    exec("git branch | grep * | cut -d ' ' -f2", function(
-      error,
-      stdout,
-      stderr
-    ) {
+    exec("git rev-parse --abbrev-ref HEAD", function(error, stdout, stderr) {
       if (error !== null) {
         console.log("exec error: " + error);
         reject(error);
       }
-      console.log(stdout)
-      resolve(stdout);
+
+      resolve(stdout.replace("\n", ""));
     });
   });
 }
@@ -51,15 +123,17 @@ async function getRepoInfo() {
     exec(`git config --get remote.origin.url`, function(error, stdout, stderr) {
       if (error !== null) {
         console.log("exec error: " + error);
+        reject(error);
       }
 
       //extract repoName from url
+      const repoUrl = stdout;
       let repoName = stdout.split("/");
       repoName = repoName[repoName.length - 1];
       repoName = repoName.replace(".git", "");
       repoName = repoName.replace("\n", "");
-      
-      resolve({ stdout, repoName });
+
+      resolve({ repoUrl, repoName });
     });
   });
 }
@@ -69,8 +143,10 @@ async function getGitUser() {
     exec("git config --global user.name", function(error, stdout, stderr) {
       if (error !== null) {
         console.log("exec error: " + error);
+        reject(error);
+      } else {
+        resolve(stdout.replace("\n", ""));
       }
-      resolve(stdout.replace("\n", ""));
     });
   });
 }
@@ -85,7 +161,6 @@ async function getGitCommits() {
         const cleanedup = stdout.replace(/\+ /g, "");
         let commitarray = cleanedup.split(/\r\n|\r|\n/);
         commitarray.length = commitarray.length - 1; //remove the last, dummy element that results from splitting on newline
-        console.log(commitarray);
         const firstCommit = commitarray[0];
         const lastCommit = commitarray[commitarray.length - 1];
         resolve({ firstCommit, lastCommit });
@@ -114,10 +189,10 @@ async function getGitPatch(firstCommit, lastCommit) {
 
 async function main() {
   //world or repo build is passed in through cmd line/makefil
-
   const buildSize = process.argv[2];
+
   const userName = await getGitUser();
-  const { repoName, url } = await getRepoInfo();
+  const { url, repoName } = await getRepoInfo();
   const branchName = await getBranchName();
   const { firstCommit, lastCommit } = await getGitCommits();
   const patch = await getGitPatch(firstCommit, lastCommit);
@@ -131,6 +206,13 @@ async function main() {
   );
 
   console.log(payLoad);
+  const success = insertJob(
+    payload,
+    "Github Push: " + userName + "/" + repoName,
+    userName,
+    "mez2113@columbia.edu"
+  );
+  console.log(success);
 }
 
 main();
