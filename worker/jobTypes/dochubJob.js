@@ -1,16 +1,13 @@
 /**
- *  this is the github-triggered processor for builds
- *  it expects a worker.sh in the root of the repository
+ *  this is the triggered processor for running 
+ *  Dochub jobs.
  *  an example job definition lives in jobDef.json
  */
 
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
-const simpleGit = require('simple-git/promise');
-const validator = require('validator');
 
 const buildTimeout = 60 * 450;
-const uploadToS3Timeout = 20;
 
 const invalidJobDef = new Error('job not valid');
 
@@ -32,13 +29,12 @@ function safeString(stringToCheck) {
   );
 }
 
-function safeGithubPush(currentJob) {
+function safeDochub(currentJob) {
   if (
     !currentJob ||
     !currentJob.payload ||
-    !currentJob.payload.repoName ||
-    !currentJob.payload.repoOwner ||
-    !currentJob.payload.branchName
+    !currentJob.payload.source ||
+    !currentJob.payload.target
   ) {
     workerUtils.logInMongo(
       currentJob,
@@ -48,9 +44,8 @@ function safeGithubPush(currentJob) {
   }
 
   if (
-    safeString(currentJob.payload.repoName) &&
-    safeString(currentJob.payload.repoOwner) &&
-    safeString(currentJob.payload.branchName)
+    safeString(currentJob.payload.source) &&
+    safeString(currentJob.payload.target)
   ) {
     return true;
   }
@@ -135,7 +130,7 @@ async function build(currentJob) {
   );
 }
 
-async function cloneRepo(currentJob) {
+async function addToFastly(currentJob) {
   workerUtils.logInMongo(
     currentJob,
     `${'    (GIT)'.padEnd(15)}Cloning repository`
@@ -186,6 +181,7 @@ async function cloneRepo(currentJob) {
   );
 }
 
+
 async function cleanup(currentJob) {
   workerUtils.logInMongo(
     currentJob,
@@ -202,58 +198,14 @@ async function cleanup(currentJob) {
   }
 }
 
-async function pushToStage(currentJob) {
-  workerUtils.logInMongo(
-    currentJob,
-    `${'    (stage)'.padEnd(15)}Pushing to staging`
-  );
-  // change working dir to the repo we need to build
-  try {
-    const exec = workerUtils.getExecPromise();
-    const command = `. /venv/bin/activate; cd repos/${currentJob.payload.repoName}; make stage;`;
-    const { stdout, stderr } = await exec(command);
-    let stdoutMod = '';
-    // get only last part of message which includes # of files changes + s3 link
-    if (stdout.indexOf('Summary') !== -1) {
-      stdoutMod = stdout.substr(stdout.indexOf('Summary'));
-    } 
-    console.log(stdoutMod);
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (stage)'.padEnd(15)}Finished pushing to staging`
-    );
-    workerUtils.logInMongo(
-      currentJob,
-      `${'    (stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
-    );
-    workerUtils.populateCommunicationMessageInMongo(currentJob, stdoutMod);
-  } catch (errResult) {
-    if (
-      errResult.hasOwnProperty('code') ||
-      errResult.hasOwnProperty('signal') ||
-      errResult.hasOwnProperty('killed')
-    ) {
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (stage)'.padEnd(15)}failed with code: ${errResult.code}`
-      );
-      workerUtils.logInMongo(
-        currentJob,
-        `${'    (stage)'.padEnd(15)}stdErr: ${errResult.stderr}`
-      );
-      throw errResult;
-    }
-  }
-}
-
-async function runGithubPush(currentJob) {
-  workerUtils.logInMongo(currentJob, ' ** Running github push function');
+async function runDochub(currentJob) {
+  workerUtils.logInMongo(currentJob, ' ** Adding source/target links to Fastly edge dictionary');
 
   if (
     !currentJob ||
     !currentJob.payload ||
-    !currentJob.payload.repoName ||
-    !currentJob.payload.branchName
+    !currentJob.payload.source ||
+    !currentJob.payload.target
   ) {
     workerUtils.logInMongo(
       currentJob,
@@ -269,13 +221,6 @@ async function runGithubPush(currentJob) {
     'Timed out on rm'
   );
 
-  //clone the repo
-  await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    cloneRepo(currentJob),
-    'Timed out on clone repo'
-  );
-
   // execute the build
   await workerUtils.promiseTimeoutS(
     buildTimeout,
@@ -285,37 +230,24 @@ async function runGithubPush(currentJob) {
 
   console.log('completed build');
 
-  let branchext = '';
-  let isMaster = true;
-
-  if (currentJob.payload.branchName !== 'master') {
-    branchext = '-' + currentJob.payload.branchName;
-    isMaster = false;
-  }
-
-  if (isMaster) {
-    //TODO: push to prod
-  } else {
-    console.log('pushing to stage');
-    await workerUtils.promiseTimeoutS(
-      buildTimeout,
-      pushToStage(currentJob),
-      'Timed out on push to stage'
-    );
-  }
+  console.log('adding source and target to Fastly');
+  await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    addToFastly(currentJob),
+    'Timed out on add to Fastly'
+  );
 
   const files = workerUtils.getFilesInDir(
     './' + currentJob.payload.repoName + '/build/public' + branchext
   );
 
-  return files;
+  return files; // what do i return??
 }
 
 module.exports = {
-  runGithubPush,
-  pushToStage,
+  runDochub,
   cleanup,
-  cloneRepo,
+  addToFastly,
   build,
-  safeGithubPush,
+  safeDochub,
 };

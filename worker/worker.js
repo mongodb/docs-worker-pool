@@ -8,6 +8,7 @@ const workerUtils = require('./utils/utils');
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
+const { runDochub, safeDochub } = require('./jobTypes/dochubJob')
 
 // Variables
 let queueCollection; // Holder for the queueCollection in MongoDB Atlas
@@ -33,6 +34,7 @@ const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60 * 10) * 1000;
 // Dictionary of possible jobs for this node
 const jobTypeToFunc = {
   githubPush: { function: runGithubPush, safe: safeGithubPush },
+  dochub: { function: runDochub, safe: safeDochub },
 };
 
 // route for liveness check
