@@ -8,8 +8,8 @@ STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-k8s-operator-prod
-PROJECT=kubernetes-operator
-PREFIX=kubernetes-operator
+PROJECT=k8s-operator
+PREFIX=k8s-operator
 REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
