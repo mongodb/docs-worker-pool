@@ -1,9 +1,7 @@
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
-const DochubJob = require('../jobTypes/dochubJob').DochubJobClass;
+// const DochubJob = require('../jobTypes/dochubJob').DochubJobClass;
 const validator = require('validator');
-
-const buildTimeout = 60 * 450;
 
 const invalidJobDef = new Error('job not valid');
 
@@ -16,7 +14,7 @@ function safeString(stringToCheck) {
   );
 }
 
-function safeDochub(currentJob) {
+function safePublishDochub(currentJob) {
   if (
     !currentJob ||
     !currentJob.payload ||
@@ -39,7 +37,8 @@ function safeDochub(currentJob) {
   throw invalidJobDef;
 }
 
-async function runDochub(currentJob) {
+async function runPublishDochub(currentJob) {
+
   workerUtils.logInMongo(currentJob, ' ** Running dochub-fastly migration');
 
   if (
@@ -53,34 +52,19 @@ async function runDochub(currentJob) {
   }
 
   // instantiate dochub job class
-  const job = new DochubJob(currentJob);
-  const publisher = new S3Publish(job);
+  // const job = new DochubJob(currentJob);
 
-  console.log('completed build');
+  // add source and target to Fastly edge dictionary
+  var fastly = require('fastly')('6aRkvo3EJN7N2JLJcZdOaS7AxFKMu6qq') // put this token elsewhere!
 
-  let branchext = '';
-  let isMaster = true;
-
-  if (currentJob.payload.branchName !== 'master') {
-    branchext = '-' + currentJob.payload.branchName;
-    isMaster = false;
-  }
-
-  if (isMaster) {
-    // TODO: push to prod
-  } else {
-    console.log('pushing to stage');
-    await pushToStage(publisher, logger);
-  }
-
-  const files = workerUtils.getFilesInDir(
-    './' + currentJob.payload.repoName + '/build/public' + branchext
-  );
-
-  return files;
+  // fastly.request('GET', '/content/edge_check?url=docs.mongodb.com', function (err, obj) {
+  fastly.request('GET', '/service/0U4FLNfta0jDgmrSFA193k/version/35/dictionary/redirect_map', function (err, obj) {
+    if (err) return console.dir(err);
+    console.dir(obj);
+  });
 }
 
 module.exports = {
-  runDochub,
-  safeDochub,
+  runPublishDochub,
+  safePublishDochub,
 };
