@@ -12,7 +12,10 @@
     "url": "https://github.com/heneise/makefile-example.git"
   },
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mongodb": "^3.3.4"
+  },
   "devDependencies": {
     "chokidar-cli": "^1.2.0",
     "nodemon": "^1.12.5",
