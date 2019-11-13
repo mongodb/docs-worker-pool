@@ -2,22 +2,19 @@ const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const fs = require("fs");
 const dotenv = require("dotenv");
+const result = dotenv.config();
+if (result.error) {
+  throw result.error;
+}
+const { parsed: envs } = result;
+console.log(envs);
 
 function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
-  // look at this link: https://mongodb.github.io/node-mongodb-native/api-generated/collection.html
-
-  console.log(JSON.stringify(context.user));
-
   //all of this I have to get from a env variable
   const db_name = process.env.DB_NAME;
   const coll_name = process.env.COL_NAME;
-
-  // get the queue collection
-  //   var queue = context.services
-  //     .get("mongodb-atlas")
-  //     .db(db_name)
-  //     .collection(coll_name);
-
+  const username = process.env.USERNAME;
+  const secret = process.env.SECRET;
   // create the new job document
   const newJob = {
     title: jobTitle,
@@ -38,44 +35,60 @@ function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
   // we are looking for jobs in the queue with the same payload that have not yet started (startTime == null)
   const filterDoc = { payload: payload, startTime: null };
   const updateDoc = { $setOnInsert: newJob };
+  //mongodb+srv://<username>:<password>@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority
 
-  // upsert the new job and return if the upsertedId if the job was added to the queue
-  //   return queue.updateOne(filterDoc, updateDoc, { upsert: true }).then(
-  //     result => {
-  //       if (result.upsertedId) {
-  //         return result.upsertedId;
-  //       } else {
-  //         return "Already Existed";
-  //       }
-  //     },
-  //     error => {
-  //       return error;
-  //     }
-  //   );
+//   const MongoClient = require("mongodb").MongoClient;
+//   const uri =
+//     "mongodb+srv://" + username +":" + secret + "@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority";
+//   const client = new MongoClient(uri, { useNewUrlParser: true });
+//   client.connect(err => {
+//     const collection = client
+//       .db(db_name)
+//       .collection(coll_name)
+    //   .updateOne(filterDoc, updateDoc, { upsert: true })
+    //   .then(
+    //     result => {
+    //       if (result.upsertedId) {
+    //         return result.upsertedId;
+    //       } else {
+    //         return "Already Existed";
+    //       }
+    //     },
+    //     error => {
+    //         console.log(error);
+    //       return error;
+    //     }
+    //   );
+ 
+//     client.close();
+//   });
 
-  var MongoClient = require("mongodb").MongoClient;
-  var url = "mongodb://localhost:27017/";
+const MongoClient = require('mongodb').MongoClient;
+const uri =
+     "mongodb+srv://" + username +":" + secret + "@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true });
+client.connect(err => {
+  const collection = client.db("pool_test").collection("queue");
+  // perform actions on the collection object
+  console.log(collection);
+  collection.updateOne(filterDoc, updateDoc, { upsert: true })
+  .then(
+    result => {
+      if (result.upsertedId) {
+          console.log("success")
+        return result.upsertedId;
+      } else {
+        return "Already Existed";
+      }
+    },
+    error => {
+        console.log(error);
+      return error;
+    }
+  );
+  client.close();
+});
 
-  MongoClient.connect(url, function(err, db) {
-    if (err) throw err;
-    var dbo = db.db(db_name);
-
-    dbo
-      .collection(coll_name)
-      .updateOne(filterDoc, updateDoc, { upsert: true })
-      .then(
-        result => {
-          if (result.upsertedId) {
-            return result.upsertedId;
-          } else {
-            return "Already Existed";
-          }
-        },
-        error => {
-          return error;
-        }
-      );
-  });
 }
 
 function createPayload(
@@ -83,12 +96,13 @@ function createPayload(
   branchNameArg,
   repoOwnerArg,
   urlArg,
-  patch,
+  patchArg,
   buildSizeArg
 ) {
-  hasHead = patch.substring(0, 10);
+  hashHead = patchArg.substring(0, 10);
+ 
   const payload = {
-    jobType: "githubPatch",
+    jobType: "githubPush",
     source: "github",
     action: "push",
     repoName: repoNameArg,
@@ -98,8 +112,9 @@ function createPayload(
     isXlarge: false,
     repoOwner: repoOwnerArg,
     url: urlArg,
-    newHead: hasHead,
-    buildSize: buildSizeArg
+    newHead: hashHead,
+    buildSize: buildSizeArg,
+    patch: patchArg
   };
 
   return payload;
@@ -118,6 +133,15 @@ async function getBranchName() {
   });
 }
 
+//extract repo name from url
+function getRepoName(url) {
+  let repoName = url.split("/");
+  repoName = repoName[repoName.length - 1];
+  repoName = repoName.replace(".git", "");
+  repoName = repoName.replace("\n", "");
+  return repoName;
+}
+
 async function getRepoInfo() {
   return new Promise((resolve, reject) => {
     exec(`git config --get remote.origin.url`, function(error, stdout, stderr) {
@@ -126,14 +150,21 @@ async function getRepoInfo() {
         reject(error);
       }
 
-      //extract repoName from url
-      const repoUrl = stdout;
-      let repoName = stdout.split("/");
-      repoName = repoName[repoName.length - 1];
-      repoName = repoName.replace(".git", "");
-      repoName = repoName.replace("\n", "");
+      const repoUrl = stdout.replace("\n", "");
+      resolve(repoUrl);
+    });
+  });
+}
 
-      resolve({ repoUrl, repoName });
+async function getGitEmail() {
+  return new Promise((resolve, reject) => {
+    exec("git config --global user.email", function(error, stdout, stderr) {
+      if (error !== null) {
+        console.log("exec error: " + error);
+        reject(error);
+      } else {
+        resolve(stdout.replace("\n", ""));
+      }
     });
   });
 }
@@ -190,12 +221,15 @@ async function getGitPatch(firstCommit, lastCommit) {
 async function main() {
   //world or repo build is passed in through cmd line/makefil
   const buildSize = process.argv[2];
-
   const userName = await getGitUser();
-  const { url, repoName } = await getRepoInfo();
+  const userEmail = await getGitEmail();
+  //const { url, repoName } = await getRepoInfo();
+  const url = await getRepoInfo();
+  const repoName = getRepoName(url);
   const branchName = await getBranchName();
   const { firstCommit, lastCommit } = await getGitCommits();
   const patch = await getGitPatch(firstCommit, lastCommit);
+
   const payLoad = await createPayload(
     repoName,
     branchName,
@@ -205,13 +239,14 @@ async function main() {
     buildSize
   );
 
-  console.log(payLoad);
+  //console.log(payLoad);
   const success = insertJob(
-    payload,
+    payLoad,
     "Github Push: " + userName + "/" + repoName,
     userName,
-    "mez2113@columbia.edu"
+    userEmail
   );
+  console.log("before succ")
   console.log(success);
 }
 
