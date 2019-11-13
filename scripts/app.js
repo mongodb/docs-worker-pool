@@ -35,33 +35,7 @@ function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
   // we are looking for jobs in the queue with the same payload that have not yet started (startTime == null)
   const filterDoc = { payload: payload, startTime: null };
   const updateDoc = { $setOnInsert: newJob };
-  //mongodb+srv://<username>:<password>@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority
 
-//   const MongoClient = require("mongodb").MongoClient;
-//   const uri =
-//     "mongodb+srv://" + username +":" + secret + "@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority";
-//   const client = new MongoClient(uri, { useNewUrlParser: true });
-//   client.connect(err => {
-//     const collection = client
-//       .db(db_name)
-//       .collection(coll_name)
-    //   .updateOne(filterDoc, updateDoc, { upsert: true })
-    //   .then(
-    //     result => {
-    //       if (result.upsertedId) {
-    //         return result.upsertedId;
-    //       } else {
-    //         return "Already Existed";
-    //       }
-    //     },
-    //     error => {
-    //         console.log(error);
-    //       return error;
-    //     }
-    //   );
- 
-//     client.close();
-//   });
 
 const MongoClient = require('mongodb').MongoClient;
 const uri =
