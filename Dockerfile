@@ -10,6 +10,10 @@ RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
 RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
 
+
+# install git
+RUN apt-get update && apt-get -y install git
+
 # helper libraries for docs builds
 RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
 RUN apt-get -y install git pkg-config libxml2-dev
@@ -29,6 +33,8 @@ RUN npm -g config set user root
 USER docsworker
 WORKDIR /home/docsworker
 
+
+	
 # install snooty parser
 RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser
