@@ -36,33 +36,34 @@ function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
   const filterDoc = { payload: payload, startTime: null };
   const updateDoc = { $setOnInsert: newJob };
 
-
-const MongoClient = require('mongodb').MongoClient;
-const uri =
-     "mongodb+srv://" + username +":" + secret + "@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true });
-client.connect(err => {
-  const collection = client.db("pool_test").collection("queue");
-  // perform actions on the collection object
-  console.log(collection);
-  collection.updateOne(filterDoc, updateDoc, { upsert: true })
-  .then(
-    result => {
-      if (result.upsertedId) {
-          console.log("success")
-        return result.upsertedId;
-      } else {
-        return "Already Existed";
-      }
-    },
-    error => {
+  const MongoClient = require("mongodb").MongoClient;
+  const uri =
+    "mongodb+srv://" +
+    username +
+    ":" +
+    secret +
+    "@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority";
+  const client = new MongoClient(uri, { useNewUrlParser: true });
+  client.connect(err => {
+    const collection = client.db("pool_test").collection("queue");
+    // perform actions on the collection object
+    console.log(collection);
+    collection.updateOne(filterDoc, updateDoc, { upsert: true }).then(
+      result => {
+        if (result.upsertedId) {
+          console.log("success");
+          return result.upsertedId;
+        } else {
+          return "Already Existed";
+        }
+      },
+      error => {
         console.log(error);
-      return error;
-    }
-  );
-  client.close();
-});
-
+        return error;
+      }
+    );
+    client.close();
+  });
 }
 
 function createPayload(
@@ -71,10 +72,9 @@ function createPayload(
   repoOwnerArg,
   urlArg,
   patchArg,
-  buildSizeArg
+  buildSizeArg,
+  lastCommit
 ) {
-  hashHead = patchArg.substring(0, 10);
- 
   const payload = {
     jobType: "githubPush",
     source: "github",
@@ -86,7 +86,7 @@ function createPayload(
     isXlarge: false,
     repoOwner: repoOwnerArg,
     url: urlArg,
-    newHead: hashHead,
+    newHead: lastCommit,
     buildSize: buildSizeArg,
     patch: patchArg
   };
@@ -166,29 +166,83 @@ async function getGitCommits() {
         const cleanedup = stdout.replace(/\+ /g, "");
         let commitarray = cleanedup.split(/\r\n|\r|\n/);
         commitarray.length = commitarray.length - 1; //remove the last, dummy element that results from splitting on newline
-        const firstCommit = commitarray[0];
-        const lastCommit = commitarray[commitarray.length - 1];
-        resolve({ firstCommit, lastCommit });
+        if (commitarray.length == 1) {
+          const firstCommit = commitarray[0];
+          const lastCommit = null;
+          resolve({ firstCommit, lastCommit });
+        } else {
+          const firstCommit = commitarray[0];
+          const lastCommit = commitarray[commitarray.length - 1];
+          resolve({ firstCommit, lastCommit });
+        }
       }
     });
   });
 }
 
 async function getGitPatch(firstCommit, lastCommit) {
+  //should I delete the patch file?
+  console.log(firstCommit, lastCommit)
+  
   return new Promise((resolve, reject) => {
-    exec(
-      "git diff " + firstCommit + "..." + lastCommit + " > myPatch.patch",
-      function(error, stdout, stderr) {
-        if (error !== null) {
-          console.log(error);
-          reject(error);
-        } else {
-          fs.readFile("myPatch.patch", "utf8", function(err, data) {
-            resolve(data);
-          });
+    if (lastCommit === null) {
+      console.log("indeed null!!!")
+      let patchCommand = "git show HEAD > myPatch.patch";
+      console.log(patchCommand)
+      exec(
+        patchCommand,
+        function(error, stdout, stderr) {
+          if (error !== null) {
+            console.log(error);
+            reject(error);
+          } else {
+            
+            fs.readFile(
+              "myPatch.patch",
+              "utf8",
+              function(err, data) {
+                if(err){
+                  console.log("error!!!1", err);
+                  reject(err);
+                }
+                console.log("it worked ", data);
+                resolve(data);
+              }
+            );
+          }
         }
-      }
-    );
+      );
+    } else {
+      let patchCommand =
+        "git diff " +
+        firstCommit +
+        "..." +
+        lastCommit +
+        " > ~/patch-dir/docs-bi-connector/myPatch.patch";
+        console.log("patch commmand: ", patchCommand);
+        exec(
+          patchCommand,
+          function(error, stdout, stderr) {
+            if (error !== null) {
+              console.log(error);
+              reject(error);
+            } else {
+              
+              fs.readFile(
+                "~/patch-dir/docs-bi-connector/myPatch.patch",
+                "utf8",
+                function(err, data) {
+                  console.log("it worked", data)
+                  resolve(data);
+                }
+              );
+            }
+          }
+        );
+    }
+
+
+    
   });
 }
 
@@ -210,17 +264,18 @@ async function main() {
     userName,
     url,
     patch,
-    buildSize
+    buildSize,
+    lastCommit
   );
-
-  //console.log(payLoad);
+  console.log("payload?????");
+  console.log(payLoad);
   const success = insertJob(
     payLoad,
     "Github Push: " + userName + "/" + repoName,
     userName,
     userEmail
   );
-  console.log("before succ")
+
   console.log(success);
 }
 
