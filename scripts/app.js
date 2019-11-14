@@ -186,7 +186,6 @@ async function getGitPatch(firstCommit, lastCommit) {
   
   return new Promise((resolve, reject) => {
     if (lastCommit === null) {
-      console.log("indeed null!!!")
       let patchCommand = "git show HEAD > myPatch.patch";
       console.log(patchCommand)
       exec(
@@ -216,9 +215,9 @@ async function getGitPatch(firstCommit, lastCommit) {
       let patchCommand =
         "git diff " +
         firstCommit +
-        "..." +
+        "^..." +
         lastCommit +
-        " > ~myPatch.patch";
+        " > myPatch.patch";
         console.log("patch commmand: ", patchCommand);
         exec(
           patchCommand,
@@ -229,14 +228,13 @@ async function getGitPatch(firstCommit, lastCommit) {
             } else {
               
               fs.readFile(
-                "~myPatch.patch",
+                "myPatch.patch",
                 "utf8",
                 function(err, data) {
-                  if(err !== null){
-                    console.log(err);
+                  if(err){
+                    console.log(err)
                     reject(err);
                   }
-                  console.log("it worked", data)
                   resolve(data);
                 }
               );
@@ -271,8 +269,7 @@ async function main() {
     buildSize,
     lastCommit
   );
-  console.log("payload?????");
-  console.log(payLoad);
+  
   const success = insertJob(
     payLoad,
     "Github Push: " + userName + "/" + repoName,
