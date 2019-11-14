@@ -218,7 +218,7 @@ async function getGitPatch(firstCommit, lastCommit) {
         firstCommit +
         "..." +
         lastCommit +
-        " > ~/patch-dir/docs-bi-connector/myPatch.patch";
+        " > ~myPatch.patch";
         console.log("patch commmand: ", patchCommand);
         exec(
           patchCommand,
@@ -229,9 +229,13 @@ async function getGitPatch(firstCommit, lastCommit) {
             } else {
               
               fs.readFile(
-                "~/patch-dir/docs-bi-connector/myPatch.patch",
+                "~myPatch.patch",
                 "utf8",
                 function(err, data) {
+                  if(err !== null){
+                    console.log(err);
+                    reject(err);
+                  }
                   console.log("it worked", data)
                   resolve(data);
                 }

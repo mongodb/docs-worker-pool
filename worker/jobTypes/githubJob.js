@@ -124,8 +124,10 @@ class GitHubJobClass {
       ];
       
       fs.readFile("/tmp/mypatch.patch", "utf8", function(err, data) {
-        if (err) {
-          return console.log(err);
+        if (err !== null) {
+          
+          console.log(err);
+          reject(err)
         }
         console.log("trying to rad what we just read!!!")
         console.log(data)
@@ -179,7 +181,7 @@ class GitHubJobClass {
       console.log(currentJob.payload.patch);
 
       // might be undefined
-      if (currentJob.payload.patch !== null) {
+      if (currentJob.payload.patch !== '') {
         //apply patch
         await this.applyPatch(currentJob.payload.patch, this.getRepoDirName(currentJob));
       }
