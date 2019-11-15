@@ -7,10 +7,8 @@ if (result.error) {
   throw result.error;
 }
 const { parsed: envs } = result;
-console.log(envs);
 
 function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
-  //all of this I have to get from a env variable
   const db_name = process.env.DB_NAME;
   const coll_name = process.env.COL_NAME;
   const username = process.env.USERNAME;
@@ -46,12 +44,9 @@ function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
   const client = new MongoClient(uri, { useNewUrlParser: true });
   client.connect(err => {
     const collection = client.db("pool_test").collection("queue");
-    // perform actions on the collection object
-    console.log(collection);
     collection.updateOne(filterDoc, updateDoc, { upsert: true }).then(
       result => {
         if (result.upsertedId) {
-          console.log("success");
           return result.upsertedId;
         } else {
           return "Already Existed";
@@ -101,7 +96,6 @@ async function getBranchName() {
         console.log("exec error: " + error);
         reject(error);
       }
-
       resolve(stdout.replace("\n", ""));
     });
   });
@@ -183,15 +177,14 @@ async function getGitPatchFromLocal(){
   return new Promise((resolve, reject) => {
     exec("git diff > myPatch.patch", function(error, stdout, stderr) {
       if (error !== null) {
-        console.log(error);
+        console.log("error generating patch: ", error);
         reject(error);
       } else {
         fs.readFile("myPatch.patch", "utf8", function(err, data) {
           if (err) {
-            console.log("error!!", err);
+            console.log("error reading patch file: ", err);
             reject(err);
           }
-          console.log("it worked ", data);
           resolve(data);
         });
       }
@@ -199,24 +192,20 @@ async function getGitPatchFromLocal(){
   })
 }
 async function getGitPatchFromCommits(firstCommit, lastCommit) {
-  //should I delete the patch file?
-  console.log(firstCommit, lastCommit);
-
+  //need to delete patch file?
   return new Promise((resolve, reject) => {
     if (lastCommit === null) {
       let patchCommand = "git show HEAD > myPatch.patch";
-      console.log(patchCommand);
       exec(patchCommand, function(error, stdout, stderr) {
         if (error !== null) {
-          console.log(error);
+          console.log("error generating patch: ", error);
           reject(error);
         } else {
           fs.readFile("myPatch.patch", "utf8", function(err, data) {
             if (err) {
-              console.log("error!!!1", err);
+              console.log("error reading patch file", err);
               reject(err);
             }
-            console.log("it worked ", data);
             resolve(data);
           });
         }
@@ -224,15 +213,14 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
     } else {
       let patchCommand =
         "git diff " + firstCommit + "^..." + lastCommit + " > myPatch.patch";
-      console.log("patch commmand: ", patchCommand);
       exec(patchCommand, function(error, stdout, stderr) {
         if (error !== null) {
-          console.log(error);
+          console.log("error generating patch: ", error);
           reject(error);
         } else {
           fs.readFile("myPatch.patch", "utf8", function(err, data) {
             if (err) {
-              console.log(err);
+              console.log("error reading patch file ", err);
               reject(err);
             }
             resolve(data);
@@ -244,8 +232,7 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
 }
 
 async function main() {
-  //world or repo build is passed in through cmd line/makefil
-  console.log(process.argv);
+  //world or repo build is passed in through cmd line/makefile
   const buildSize = process.argv[2];
   const patchFlag = process.argv[3];
   const userName = await getGitUser();
@@ -253,25 +240,6 @@ async function main() {
   const url = await getRepoInfo();
   const repoName = getRepoName(url);
   const branchName = await getBranchName();
-
-
-//   const { firstCommit, lastCommit } = await getGitCommits();
-//     const patch = await getGitPatchFromCommits(firstCommit, lastCommit);
-//     const payLoad = await createPayload(
-//       repoName,
-//       branchName,
-//       userName,
-//       url,
-//       patch,
-//       buildSize,
-//       lastCommit
-//     );
-//     const success = insertJob(
-//       payLoad,
-//       "Github Push: " + userName + "/" + repoName,
-//       userName,
-//       userEmail
-//     );
 
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === "commit") {
@@ -295,7 +263,6 @@ async function main() {
     );
   }
   if(patchFlag === "local"){
-    console.log("in local!!!!!")
     const patch = await getGitPatchFromLocal();
     const payLoad = await createPayload(
       repoName,
