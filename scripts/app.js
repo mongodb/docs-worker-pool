@@ -260,6 +260,7 @@ async function main() {
       userName,
       userEmail
     );
+
   }
   if(patchFlag === "local"){
     const patch = await getGitPatchFromLocal();
@@ -278,6 +279,7 @@ async function main() {
       userName,
       userEmail
     );
+
   }
 }
 
