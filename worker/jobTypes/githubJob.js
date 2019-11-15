@@ -5,7 +5,6 @@ const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const request = require("request");
 
-
 class GitHubJobClass {
   // pass in a job payload to setup class
   constructor(currentJob) {
@@ -104,36 +103,21 @@ class GitHubJobClass {
   }
 
   async applyPatch(patch, currentJobDir) {
-    console.log("called apply patch!!!");
- 
-    const pwd = await exec("pwd")
-    const ls = await exec("ls")
+    const pwd = await exec("pwd");
+    const ls = await exec("ls");
 
     //create patch file
-    //need to delete the file after???
-    fs.writeFile("/tmp/mypatch.patch", patch, function(err) {
+    fs.writeFile("/tmp/myPatch.patch", patch, function(err) {
       if (err) {
         return console.log(err);
       }
-      const stats = fs.statSync("/tmp/mypatch.patch")
-      const fileSizeInBytes = stats["size"]
-      console.log("The file was saved!", fileSizeInBytes);
+
       const commandsToBuild = [
         `cd repos/${currentJobDir}`,
-        `patch -p1 <  /tmp/mypatch.patch`
+        `patch -p1 <  /tmp/myPatch.patch`
       ];
-      
-      fs.readFile("/tmp/mypatch.patch", "utf8", function(err, data) {
-        if (err !== null) {
-          
-          console.log(err);
-          reject(err)
-        }
-        console.log("trying to rad what we just read!!!")
-        console.log(data)
-      })
+
       return new Promise((resolve, reject) => {
-        
         exec(commandsToBuild.join(" && "), function(error, stdout, stderr) {
           if (error !== null) {
             console.log("exec error: " + error);
@@ -145,9 +129,22 @@ class GitHubJobClass {
         });
       });
     });
-    
 
-    
+    //delete patch file
+    async function deletePatchFile() {
+      console.log("called");
+      return new Promise((resolve, reject) => {
+        exec(`rm myPatch.patch`, function(error, stdout, stderr) {
+          if (error !== null) {
+            console.log("exec error: " + error);
+            reject(error);
+          }
+
+          console.log("removed the file!");
+          resolve();
+        });
+      });
+    }
   }
   async buildRepo(logger) {
     const currentJob = this.currentJob;
@@ -157,7 +154,6 @@ class GitHubJobClass {
     await this.cloneRepo(logger);
     //check for patch in job
 
-    
     logger.save(`${"(BUILD)".padEnd(15)}Running Build`);
     logger.save(`${"(BUILD)".padEnd(15)}running worker.sh`);
 
@@ -181,9 +177,12 @@ class GitHubJobClass {
       console.log(currentJob.payload.patch);
 
       // might be undefined
-      if (currentJob.payload.patch !== '') {
-        //apply patch
-        await this.applyPatch(currentJob.payload.patch, this.getRepoDirName(currentJob));
+      if (currentJob.payload.patch !== undefined) {
+        await this.applyPatch(
+          currentJob.payload.patch,
+          this.getRepoDirName(currentJob)
+        );
+        await deletePatchFile();
       }
       // default commands to run to build repo
       const commandsToBuild = [

@@ -110,6 +110,21 @@ function getRepoName(url) {
   return repoName;
 }
 
+//delete patch file
+async function cleanUp(){
+  console.log("called")
+  return new Promise((resolve, reject) => {
+    exec(`rm myPatch.patch`, function(error, stdout, stderr) {
+      if (error !== null) {
+        console.log("exec error: " + error);
+        reject(error);
+      }
+
+      console.log("removed the file!")
+      resolve();
+    });
+  })
+}
 async function getRepoInfo() {
   return new Promise((resolve, reject) => {
     exec(`git config --get remote.origin.url`, function(error, stdout, stderr) {
@@ -240,7 +255,7 @@ async function main() {
   const url = await getRepoInfo();
   const repoName = getRepoName(url);
   const branchName = await getBranchName();
-  const newHead = "patchBuild";
+  const newHead = "genericscsss";
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === "commit") {
     const { firstCommit, lastCommit } = await getGitCommits();
@@ -260,8 +275,8 @@ async function main() {
       userName,
       userEmail
     );
-
   }
+
   if(patchFlag === "local"){
     const patch = await getGitPatchFromLocal();
     const payLoad = await createPayload(
@@ -278,9 +293,12 @@ async function main() {
       "Github Push: " + userName + "/" + repoName,
       userName,
       userEmail
-    );
+    );   
 
   }
+
+  await cleanUp()
+
 }
 
 main();
