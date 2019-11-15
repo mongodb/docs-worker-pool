@@ -240,12 +240,11 @@ async function main() {
   const url = await getRepoInfo();
   const repoName = getRepoName(url);
   const branchName = await getBranchName();
-
+  const newHead = "patchBuild";
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === "commit") {
     const { firstCommit, lastCommit } = await getGitCommits();
     const patch = await getGitPatchFromCommits(firstCommit, lastCommit);
-    //for now we are setting the last commit as the newHead in payload
     const payLoad = await createPayload(
       repoName,
       branchName,
@@ -253,7 +252,7 @@ async function main() {
       url,
       patch,
       buildSize,
-      lastCommit
+      newHead
     );
     const success = insertJob(
       payLoad,
@@ -271,7 +270,7 @@ async function main() {
       url,
       patch,
       buildSize,
-      "generic"
+      newHead
     );
     const success = insertJob(
       payLoad,
@@ -280,12 +279,6 @@ async function main() {
       userEmail
     );
   }
-
-  
-
- 
-
-  console.log(success);
 }
 
 main();
