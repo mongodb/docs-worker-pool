@@ -111,7 +111,7 @@ function getRepoName(url) {
 }
 
 //delete patch file
-async function cleanUp(){
+async function deletePatchFile(){
   console.log("called")
   return new Promise((resolve, reject) => {
     exec(`rm myPatch.patch`, function(error, stdout, stderr) {
@@ -297,7 +297,7 @@ async function main() {
 
   }
 
-  await cleanUp()
+  await deletePatchFile()
 
 }
 
