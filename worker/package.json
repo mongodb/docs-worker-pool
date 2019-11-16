@@ -23,6 +23,7 @@
     "express": "^4.16.4",
     "fs-extra": "^7.0.1",
     "gatsby": "^2.0.91",
+    "ip": "^1.1.5",
     "js-yaml": "^3.13.1",
     "mongodb": "^3.1.10",
     "mongodb-stitch-browser-sdk": "^4.2.0",
