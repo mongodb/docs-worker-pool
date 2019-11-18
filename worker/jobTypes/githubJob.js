@@ -122,9 +122,7 @@ class GitHubJobClass {
       });
     });
 
-    //delete patch file
     async function deletePatchFile() {
-      console.log("called");
       return new Promise((resolve, reject) => {
         exec(`rm myPatch.patch`, function(error, stdout, stderr) {
           if (error !== null) {
@@ -132,7 +130,6 @@ class GitHubJobClass {
             reject(error);
           }
 
-          console.log("removed the file!");
           resolve();
         });
       });
