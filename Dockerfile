@@ -30,14 +30,20 @@ USER docsworker
 WORKDIR /home/docsworker
 
 # install snooty parser
+RUN python3 -m pip uninstall -y snooty
 RUN python3 -m pip install --upgrade pip flit
-RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser
-RUN cd snooty-parser && FLIT_ROOT_INSTALL=1 python3 -m flit install
+RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser && \
+	cd snooty-parser && \
+	git fetch --all && \
+	git reset --hard origin/master && \
+	FLIT_ROOT_INSTALL=1 python3 -m flit install
 ENV PATH="${PATH}:/home/docsworker/.local/bin"
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
+	git fetch --all && \
+	git reset --hard origin/master && \
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
@@ -49,7 +55,7 @@ COPY worker/ .
 RUN npm install
 
 # where repo work will happen
-RUN mv repos repos_tmp
+#RUN mv repos repos_tmp
 RUN mkdir repos && chmod 777 repos
 
 # entry to kick-off the worker
