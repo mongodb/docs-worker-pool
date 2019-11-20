@@ -4,6 +4,7 @@ const workerUtils = require('../utils/utils');
 const validator = require('validator');
 
 const invalidJobDef = new Error('job not valid');
+const mongo = require('../utils/mongo');
 
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
@@ -51,32 +52,19 @@ async function runPublishDochub(currentJob) {
     throw invalidJobDef;
   }
 
-  // instantiate dochub job class
-  // const job = new DochubJob(currentJob);
-
-    // add source and target to Fastly edge dictionary
-  var fastly = require('fastly')('6aRkvo3EJN7N2JLJcZdOaS7AxFKMu6qq') // put this token elsewhere!
-
-  const options = {
-    name: "redirect_map"
-  }
-  // fastly.request('GET', '/content/edge_check?url=docs.mongodb.com', function (err, obj) {
-  fastly.request('GET', '/service/0U4FLNfta0jDgmrSFA193k/version/36/dictionary', options, function (err, obj) {
-    if (err) return console.dir(err);
-    console.dir(obj);
-  });
+  // retrieve Fastly service
+  var fastly = require('fastly')(`${process.env.FASTLY_TOKEN}`)
 
   var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-  var request = new XMLHttpRequest();
+  var req = new XMLHttpRequest();
 
   // connect to MongoDB dochub database
   const MongoClient = require("mongodb").MongoClient;
   assert = require("assert")
 
-  // connection url - PUT USERNAME/PASSWORD ELSEWHERE
-  const url = 'mongodb+srv://varsha:gypsh3K0mL55Nl7w@cluster0-ylwlz.mongodb.net/dochub?authSource=admin';
-
-  MongoClient.connect(url, function(err, client) {
+  const url = `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@cluster0-ylwlz.mongodb.net/dochub?authSource=admin`;
+  
+  MongoClient.connect(mongo.url, function(err, client) {
     assert.equal(null, err);
 
     const db = client.db("dochub");
@@ -84,8 +72,24 @@ async function runPublishDochub(currentJob) {
     var cursor = db.collection('keys').find({});
 
     function iterateFunc(doc) {
-      page = "https://dochub.mongodb.org/core/" + doc.name;
-      console.log(JSON.stringify(doc, null, 4));
+      const page = "https://dochub.mongodb.org/core/" + doc.name;
+      var request = require('request');
+      var r = request.get(page, function(err, res, body) {
+        if (res != null) {
+          if (res.status != 404) {
+            const options = {
+              item_value: doc.url
+            }
+
+            fastly.request('PUT', '/service/0U4FLNfta0jDgmrSFA193k/dictionary/2FoAatLRziZlxb6aTwnRWs/item/'+doc.name, options, function (err, obj) {
+              if (err) return console.dir(err);
+              console.dir(obj);
+            });
+          } else {
+            console.log("Bad URL: ", page, res.status);
+          }
+        }
+      });
     }
 
     function errorFunc(error) {
@@ -97,37 +101,6 @@ async function runPublishDochub(currentJob) {
 
     client.close();
   });
-
-
-  var page = "http://www.googlevaralsdj.com";
-  request.open("GET", page, false);
-  request.send()
-  if (request.status === 200) {
-    console.log("real page: ", page)
-  } else {
-    console.log("fake page: ", page)
-  }
-
-  const new_options = {
-    item_key: page,
-    item_value: "Fake Google"
-  }
-
-  // dictionary_id: 5dNt5O5Kr6cD6eIbkexmbb
-  fastly.request('POST', '/service/0U4FLNfta0jDgmrSFA193k/dictionary/5dNt5O5Kr6cD6eIbkexmbb/item', new_options, function (err, obj) {
-    if (err) return console.dir(err);
-    console.dir(obj);
-  });
-
-  fastly.request('GET', '/service/0U4FLNfta0jDgmrSFA193k/version/36/dictionary', options, function (err, obj) {
-    if (err) return console.dir(err);
-    console.dir(obj);
-  });
-
-  // fastly.request('GET', '/service/0U4FLNfta0jDgmrSFA193k/version/36/dictionary/redirect_map', function (err, obj) {
-  //   if (err) return console.dir(err);
-  //   console.dir(obj);
-  // });
 }
 
 module.exports = {

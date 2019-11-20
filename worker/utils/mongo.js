@@ -16,6 +16,8 @@ const META_NAME = 'meta';
 let client;
 
 module.exports = {
+  url: url,
+
   // Initializes the Mongo Client
   async initMongoClient() {
     client = new MongoClient(url, { useNewUrlParser: true });
