@@ -1,6 +1,4 @@
-const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
-// const DochubJob = require('../jobTypes/dochubJob').DochubJobClass;
 const validator = require('validator');
 
 const invalidJobDef = new Error('job not valid');
@@ -20,7 +18,8 @@ function safePublishDochub(currentJob) {
     !currentJob ||
     !currentJob.payload ||
     !currentJob.payload.source ||
-    !currentJob.payload.target
+    !currentJob.payload.target ||
+    !currentJob.payload.email
   ) {
     workerUtils.logInMongo(
       currentJob,
@@ -46,7 +45,8 @@ async function runPublishDochub(currentJob) {
     !currentJob ||
     !currentJob.payload ||
     !currentJob.payload.source ||
-    !currentJob.payload.target
+    !currentJob.payload.target ||
+    !currentJob.payload.email
   ) {
     workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
     throw invalidJobDef;
