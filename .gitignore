@@ -9,4 +9,3 @@ worker/node_modules
 worker/coverage
 worker/work
 worker/docs-tools
-worker/repos/*
