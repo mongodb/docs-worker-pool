@@ -1,11 +1,10 @@
 const job = require('../../jobTypes/publishDochubJob');
 const workerUtils = require('../../utils/utils');
 
-const fs = require('fs-extra');
-
 const payloadObj = {
   source: 'someSource',
-  target: 'someTarget'
+  target: 'someTarget',
+  email: 'email@gmail.com'
 };
 
 const payloadObjBadSource = {
