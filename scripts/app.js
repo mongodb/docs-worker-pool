@@ -3,10 +3,29 @@ const exec = promisify(require("child_process").exec);
 const fs = require("fs");
 const dotenv = require("dotenv");
 const result = dotenv.config();
+
 if (result.error) {
-  throw result.error;
+  if(result.error.errno === -2){
+    console.log("The .env file does not exist. You cannot stage a build without this file.")
+    return
+  }
 }
+
 const { parsed: envs } = result;
+
+if(process.env.DB_NAME === undefined || process.env.DB_NAME === ""){
+  console.log("The database name is not defined in the environment variables. Check the .env file for DB_NAME")
+}
+if(process.env.COL_NAME === undefined || process.env.COL_NAME === ""){
+  console.log("The column name is not defined in the environment variables. Check the .env file for COL_NAME")
+}
+if(process.env.USERNAME === undefined || process.env.USERNAME === ""){
+  console.log("The username is not defined in the environment variables. Check the .env file for USERNAME")
+}
+
+if(process.env.SECRET === undefined || process.env.SECRET === ""){
+  console.log("The access token is not defined in the environment variables. Check the .env file for SECRET")
+}
 
 function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
   const db_name = process.env.DB_NAME;
@@ -47,6 +66,7 @@ function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
     collection.updateOne(filterDoc, updateDoc, { upsert: true }).then(
       result => {
         if (result.upsertedId) {
+          console.log("You successfully enqued a staging job to docs autobuilder. This is the record id: ", result.upsertedId)
           return result.upsertedId;
         } else {
           return "Already Existed";
@@ -247,9 +267,41 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
 }
 
 async function main() {
-  //world or repo build is passed in through cmd line/makefile
   const buildSize = process.argv[2];
   const patchFlag = process.argv[3];
+
+
+  let missingFlag = false
+  if(buildSize === undefined){
+    console.log('You need a build size flag("repo" or "world") in your make command')
+    missingFlag = true
+  }
+
+  if(patchFlag === undefined){
+    console.log('You need a patch flag("commit" or "local") in your make command')
+    missingFlag = true
+  }
+
+  if(missingFlag === true){
+    return
+  }
+
+  let invalidFlag = false
+  console.log(buildSize !== "world")
+  if(buildSize !== "world" && buildSize != "repo"){
+    console.log('Invalid build size. Use "world" or "repo"')
+    invalidFlag = true
+  }
+
+  if(patchFlag != "local" && patchFlag != "commit"){
+    console.log('Invalid patch flag. Use "commit" to stage a build from the committed work you have locally or use "local" to stage a build from the uncommitted work you have locally')
+    invalidFlag = true
+  }
+
+  if(invalidFlag === true){
+    return
+  }
+
   const userName = await getGitUser();
   const userEmail = await getGitEmail();
   const url = await getRepoInfo();
