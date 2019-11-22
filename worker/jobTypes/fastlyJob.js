@@ -8,13 +8,15 @@ class FastlyJobClass {
 
     // connects to dochub database and upsert {source: target} mappings
     // to the fastly edge dictionary
-    connectAndUpsert(MongoClient, fastly) {
+    connectAndUpsert(MongoClient, fastly, database, collection) {
+        mongo.initMongoClient();
+        var cursor = 
         MongoClient.connect(mongo.url, function(err, client) {
             assert.equal(null, err);
         
-            const db = client.db("dochub");
+            const db = client.db(database);
         
-            var cursor = db.collection('keys').find({});
+            var cursor = db.collection(collection).find({});
         
             function iterateFunc(doc) {
               const page = "https://dochub.mongodb.org/core/" + doc.name;
@@ -42,8 +44,7 @@ class FastlyJobClass {
             }
         
             cursor.forEach(iterateFunc, errorFunc);
-        
-        
+
             client.close();
         });
     }

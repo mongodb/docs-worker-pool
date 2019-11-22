@@ -45,7 +45,7 @@ async function startFastly(job) {
   const MongoClient = require("mongodb").MongoClient;
   assert = require("assert")
 
-  job.connectAndUpsert(MongoClient, fastly);
+  job.connectAndUpsert(MongoClient, fastly, "dochub", "keys");
 }
 
 async function runPublishDochub(currentJob) {
