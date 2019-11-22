@@ -27,9 +27,11 @@ RUN apt-get install --yes build-essential
 RUN useradd -ms /bin/bash docsworker
 RUN npm -g config set user root
 USER docsworker
+
 WORKDIR /home/docsworker
 
 # install snooty parser
+RUN pwd
 RUN python3 -m pip uninstall -y snooty
 RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser && \
