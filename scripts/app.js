@@ -73,7 +73,7 @@ function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
         }
       },
       error => {
-        console.log(error);
+        console.log("There was an error enqueing a staging job to docs autobuilder. Here is the error: \n", error);
         return error;
       }
     );
