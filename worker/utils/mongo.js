@@ -11,6 +11,7 @@ const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/ad
 const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
 const META_NAME = 'meta';
+const MONITOR_NAME = 'monitor';
 
 // Hold onto the client
 let client;
@@ -30,6 +31,13 @@ module.exports = {
     return null;
   },
 
+  getMonitorCollection() {
+    if (client) {
+      return client.db(DB_NAME).collection(MONITOR_NAME);
+    }
+    return null;
+  },
+
   getMetaCollection() {
     if (client) {
       return client.db(DB_NAME).collection(META_NAME);
@@ -37,20 +45,38 @@ module.exports = {
     return null;
   },
 
+  async reportStatus(monitor) {
+    monitor.setXlarge(runXlarge);
+    monitor.setEnvType(DB_NAME);
+    const monitorCollection = module.exports.getMonitorCollection();
+    if (monitorCollection) {
+      const query = { _id: monitor.ip };
+      const update = {
+        $set: { monitor },
+      };
+      try {
+        await monitorCollection.updateOne(query, update, { upsert: true });
+      } catch (err) {
+        console.log(`Error in reportStatus(): ${err}`);
+      }
+    } else {
+      console.log('Error in reportStatus(): monitorCollection does not exist');
+    }
+  },
+
   // Gets the Next Job Off The Queue And Sets It To inProgress
   async getNextJob(queueCollection) {
     const query = {
       status: 'inQueue',
-      "payload.isXlarge": runXlarge,
+      'payload.isXlarge': runXlarge,
       createdTime: { $lte: new Date() },
-
       // We may eventually want to add in the following logic
       // payLoad.jobName: {$in: [jobs]}
     };
-    
+
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 } };
-
+    await queueCollection.findOne({ status: 'inQueue' });
     return queueCollection.findOneAndUpdate(query, update, options);
   },
 
@@ -64,8 +90,7 @@ module.exports = {
         endTime: new Date(),
       },
     };
-    const updateResult = await queueCollection.
-      updateOne(query, update);
+    const updateResult = await queueCollection.updateOne(query, update);
     if (updateResult.result.n < 1) {
       throw new Error(`Failed to update job (${job._id}) in queue on success`);
     }
@@ -123,7 +148,7 @@ module.exports = {
       }
     } else {
       console.log(
-        'Error in populateCommunicationMessageInMongo(): queueCollection does not exist'
+        'Error in populateCommunicationMessageInMongo(): queueCollection does not exist',
       );
     }
   },

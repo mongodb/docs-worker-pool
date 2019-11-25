@@ -57,7 +57,22 @@ describe('Mongo Tests', () => {
     expect(setTimeout).toHaveBeenCalledTimes(1);
   });
 
-  // Testing For getExecPromise()
+  //test encrypt job and validate job
+  it('encryptJob()', () => {
+    workerUtils.retrievePassword = jest.fn().mockReturnValue("password");
+    const salt = workerUtils.generateSalt();
+    const encryptedJob = workerUtils.encryptJob(salt, "test string1", "test string2");
+
+    encryptedJob.then(function(digest) {
+      const success = workerUtils.validateJob(digest, salt, "test string1", "test string2");
+        success.then(function(value) {
+        expect(success).toBeTruthy();
+       });
+    })
+     
+  });
+
+
   it('getExecPromise()', async () => {
     const exec = workerUtils.getExecPromise();
     await expect(exec('ls')).resolves.toBeTruthy();
