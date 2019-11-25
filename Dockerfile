@@ -27,6 +27,7 @@ RUN apt-get install --yes build-essential
 RUN useradd -ms /bin/bash docsworker
 RUN npm -g config set user root
 USER docsworker
+
 WORKDIR /home/docsworker
 
 # install snooty parser
@@ -55,7 +56,6 @@ COPY worker/ .
 RUN npm install
 
 # where repo work will happen
-#RUN mv repos repos_tmp
 RUN mkdir repos && chmod 777 repos
 
 # entry to kick-off the worker
