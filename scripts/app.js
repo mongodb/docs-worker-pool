@@ -58,6 +58,7 @@ function insertJob(payload, jobTitle, jobUserName, jobUserEmail) {
           console.log("You successfully enqued a staging job to docs autobuilder. This is the record id: ", result.upsertedId)
           return result.upsertedId;
         } else {
+          console.log("Already existed ", newJob)
           return "Already Existed";
         }
       },
@@ -87,7 +88,7 @@ function createPayload(
     branchName: branchNameArg,
     isFork: true,
     private: false,
-    isXlarge: true,
+    isXlarge: false,
     repoOwner: repoOwnerArg,
     url: urlArg,
     newHead: lastCommit,
@@ -201,9 +202,9 @@ async function getGitCommits() {
     });
   });
 }
-async function getGitPatchFromLocal(){
+async function getGitPatchFromLocal(branchName){
   return new Promise((resolve, reject) => {
-    exec("git diff > myPatch.patch", function(error, stdout, stderr) {
+    exec(`git diff origin/${branchName} > myPatch.patch`, function(error, stdout, stderr) {
       if (error !== null) {
         console.log("error generating patch: ", error);
         reject(error);
@@ -323,7 +324,7 @@ async function main() {
   }
 
   if(patchFlag === "local"){
-    const patch = await getGitPatchFromLocal();
+    const patch = await getGitPatchFromLocal(branchName);
     const payLoad = await createPayload(
       repoName,
       branchName,
@@ -342,7 +343,7 @@ async function main() {
 
   }
 
-  await deletePatchFile()
+  //await deletePatchFile()
 
 }
 
