@@ -65,12 +65,14 @@ async function startGithubBuild(job, logger) {
 }
 
 async function pushToStage(publisher, logger) {
+  // console.log("we in push to stage", publisher, logger)
   const stageOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
     publisher.pushToStage(logger),
     'Timed out on push to stage'
   );
   // checkout output of build
+  console.log("3333 \n", stageOutput, stageOutput.status);
   if (stageOutput && stageOutput.status === 'success') {
     await logger.sendSlackMsg(stageOutput.stdout);
 
@@ -119,7 +121,7 @@ async function runGithubPush(currentJob) {
   await startGithubBuild(job, logger);
 
   console.log('completed build');
-
+  // console.log(job)
   let branchext = '';
   let isMaster = true;
 
@@ -133,12 +135,13 @@ async function runGithubPush(currentJob) {
   } else {
     console.log('pushing to stage');
     await pushToStage(publisher, logger);
+    console.log("after push to stage???")
   }
 
   const files = workerUtils.getFilesInDir(
     './' + currentJob.payload.repoName + '/build/public' + branchext
   );
-
+  console.log(files)
   return files;
 }
 

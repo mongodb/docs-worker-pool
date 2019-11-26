@@ -27,6 +27,22 @@ class S3PublishClass {
         });
       });
     } catch (errResult) {
+      console.log("inside s3 catch!! ", errResult)
+
+  //     TypeError [ERR_INVALID_ARG_VALUE]: The argument 'file' cannot be empty. Received ''
+  //   at normalizeSpawnArguments (child_process.js:401:11)
+  //   at spawn (child_process.js:534:16)
+  //   at Object.execFile (child_process.js:224:17)
+  //   at exec (child_process.js:145:25)
+  //   at child_process.js:159:29
+  //   at S3PublishClass.pushToStage (/home/docsworker/jobTypes/S3Publish.js:15:40)
+  //   at pushToStage (/home/docsworker/jobTypes/githubPushJob.js:71:15)
+  //   at Object.runGithubPush [as function] (/home/docsworker/jobTypes/githubPushJob.js:137:11)
+  //   at processTicksAndRejections (internal/process/task_queues.js:93:5)
+  //   at async Timeout.work [as _onTimeout] (/home/docsworker/worker.js:169:24) {
+  // code: 'ERR_INVALID_ARG_VALUE'
+
+
       if (
         errResult.hasOwnProperty('code') ||
         errResult.hasOwnProperty('signal') ||
