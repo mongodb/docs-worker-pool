@@ -184,6 +184,10 @@ async function getGitCommits() {
         const cleanedup = stdout.replace(/\+ /g, "");
         let commitarray = cleanedup.split(/\r\n|\r|\n/);
         commitarray.length = commitarray.length - 1; //remove the last, dummy element that results from splitting on newline
+        if(commitarray.length == 0){
+          console.log("You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again");
+          reject();
+        }
         if (commitarray.length == 1) {
           const firstCommit = commitarray[0];
           const lastCommit = null;
