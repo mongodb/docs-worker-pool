@@ -1,17 +1,6 @@
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const fs = require("fs");
-const dotenv = require("dotenv");
-const result = dotenv.config();
-
-if (result.error) {
-  if(result.error.errno === -2){
-    console.log("The .env file does not exist. You cannot stage a build without this file.")
-    return
-  }
-}
-
-const { parsed: envs } = result;
 
 if(process.env.DB_NAME === undefined || process.env.DB_NAME === ""){
   console.log("The database name is not defined in the environment variables. Check the .env file for DB_NAME")
