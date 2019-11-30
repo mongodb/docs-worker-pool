@@ -19,7 +19,7 @@ module.exports = class MongoEnvironment extends NodeEnvironment {
   async teardown() {
     console.log('Teardown MongoDB Test Environment');
 
-    await super.teardown();
+    super.teardown();
   }
 
   runScript(script) {
