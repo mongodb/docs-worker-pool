@@ -36,12 +36,12 @@ describe('Mongo Tests', () => {
   });
 
   // Testing For promiseTimeoutS()
-  it('promiseTimeoutS() resolves', async () => {
+  /**it('promiseTimeoutS() resolves', async () => {
     const promise = workerUtils.resolveAfterNSeconds(0.005);
     await expect(
       workerUtils.promiseTimeoutS(1, promise, 'ShouldErr')
     ).resolves.toBeUndefined();
-  });
+  });**/
 
   it('promiseTimeoutS() rejects', async () => {
     const promise = workerUtils.resolveAfterNSeconds(0.01);
