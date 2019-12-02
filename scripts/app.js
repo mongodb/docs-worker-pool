@@ -1,6 +1,7 @@
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const fs = require('fs');
+const { MongoClient } = require('mongodb');
 
 function insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
   const dbName = process.env.DB_NAME;
@@ -27,8 +28,6 @@ function insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
   // we are looking for jobs in the queue with the same payload that have not yet started (startTime == null)
   const filterDoc = { payload: payloadObj, startTime: null };
   const updateDoc = { $setOnInsert: newJob };
-
-  const MongoClient = require('mongodb').MongoClient;
 
   const uri = `mongodb+srv://${username}:${secret}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
   const client = new MongoClient(uri, { useNewUrlParser: true });
