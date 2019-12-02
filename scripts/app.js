@@ -111,10 +111,9 @@ async function deletePatchFile() {
   return new Promise((resolve, reject) => {
     exec('rm myPatch.patch', (error) => {
       if (error !== null) {
-        console.log('exec error: ', error);
+        console.log('exec error deleting patch file: ', error);
         reject(error);
       }
-      console.log('removed the file!');
       resolve();
     });
   })
@@ -244,22 +243,35 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
   });
 }
 
+function validateConfiguration() {
+  let missingConfigs = [];
+
+  if (process.env.DB_NAME === undefined || process.env.DB_NAME === '') {
+    console.log(process.env.DB_NAME )
+    missingConfigs.push('DB_NAME');
+  }
+  if (process.env.COL_NAME === undefined || process.env.COL_NAME === '') {
+    console.log(process.env.COL_NAME);
+    missingConfigs.push('COL_NAME');
+  }
+  if (process.env.USERNAME === undefined || process.env.USERNAME === '') {
+    missingConfigs.push('USERNAME');
+  }
+  if (process.env.SECRET === undefined || process.env.SECRET === '') {
+    console.log(process.env.SECRET);
+    missingConfigs.push('SECRET');
+  }
+  if (missingConfigs.length !== 0) {
+    console.log(`The .env file is found but does not contain the following required fields: ${missingConfigs.toString()}`);
+  }
+}
+
 async function main() {
   const buildSize = process.argv[2];
   const patchFlag = process.argv[3];
 
-  if (process.env.DB_NAME === undefined || process.env.DB_NAME === '') {
-    console.log('The database name is not defined in the environment variables. Check the .env file for DB_NAME');
-  }
-  if (process.env.COL_NAME === undefined || process.env.COL_NAME === '') {
-    console.log('The column name is not defined in the environment variables. Check the .env file for COL_NAME');
-  }
-  if (process.env.USERNAME === undefined || process.env.USERNAME === '') {
-    console.log('The username is not defined in the environment variables. Check the .env file for USERNAME');
-  }
-  if (process.env.SECRET === undefined || process.env.SECRET === '') {
-    console.log('The access token is not defined in the environment variables. Check the .env file for SECRET');
-  }
+
+  validateConfiguration();
 
   let missingFlag = false;
   if (buildSize === undefined) {
