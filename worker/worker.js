@@ -9,6 +9,7 @@ const workerUtils = require('./utils/utils');
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
+const { runPublishDochub, safePublishDochub } = require('./jobTypes/publishDochubJob')
 
 // add some application monitoring
 const monitorInstance = new Monitor({ component: 'worker' }, mongo);
@@ -36,7 +37,8 @@ const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60 * 10) * 1000;
 // **** IF YOU ARE ADDING A FUNCTION --> ADD IT TO THIS DICTIONARY
 // Dictionary of possible jobs for this node
 const jobTypeToFunc = {
-  githubPush: { function: runGithubPush, safe: safeGithubPush }
+  githubPush: { function: runGithubPush, safe: safeGithubPush },
+  publishDochub: { function: runPublishDochub, safe: safePublishDochub }
 };
 
 // route for liveness check
