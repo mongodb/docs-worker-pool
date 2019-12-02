@@ -223,8 +223,7 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
         }
       });
     } else {
-      const patchCommand = `git diff ${firstCommit}^...${lastCommit} + > myPatch.path`;
-        //"git diff " + firstCommit + "^..." + lastCommit + " > myPatch.patch";
+      const patchCommand =  "git diff " + firstCommit + "^..." + lastCommit + " > myPatch.patch";
       exec(patchCommand, (error) => {
         if (error !== null) {
           console.log('error generating patch: ', error);
@@ -244,7 +243,7 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
 }
 
 function validateConfiguration() {
-  let missingConfigs = [];
+  const missingConfigs = [];
 
   if (process.env.DB_NAME === undefined || process.env.DB_NAME === '') {
     console.log(process.env.DB_NAME )
@@ -269,7 +268,6 @@ function validateConfiguration() {
 async function main() {
   const buildSize = process.argv[2];
   const patchFlag = process.argv[3];
-
 
   validateConfiguration();
 
