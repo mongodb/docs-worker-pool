@@ -19,7 +19,7 @@ function safePublishDochub(currentJob) {
     !currentJob.payload ||
     !currentJob.payload.source ||
     !currentJob.payload.target ||
-    !currentJob.payload.email
+    !currentJob.email
   ) {
     workerUtils.logInMongo(
       currentJob,
