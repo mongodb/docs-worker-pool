@@ -174,14 +174,11 @@ class GitHubJobClass {
 
       //check for patch
       if (currentJob.payload.patch !== undefined) {
-        console.log("we have a patch!!!")
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
         );
-        console.log("apply patch finishes")
         await this.deletePatchFile();
-        console.log("delete patch finishes")
       }
 
       // default commands to run to build repo
@@ -221,8 +218,6 @@ class GitHubJobClass {
 
       // set this to data property so deploy class can pick it up later
       this.deployCommands = deployCommands;
-      console.log("deploy commands", this.deployCommands)
-
       const execTwo = workerUtils.getExecPromise();
 
       const { stdout, stderr } = await execTwo(commandsToBuild.join(' && '));
@@ -237,8 +232,6 @@ class GitHubJobClass {
         });
       });
     } catch (errResult) {
-      console.log("inside github job 1 catch!!! ", errResult)
-
       if (
         errResult.hasOwnProperty('code') ||
         errResult.hasOwnProperty('signal') ||
