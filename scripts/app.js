@@ -247,7 +247,6 @@ function validateConfiguration() {
   const missingConfigs = [];
 
   if (process.env.DB_NAME === undefined || process.env.DB_NAME === '') {
-    console.log(process.env.DB_NAME )
     missingConfigs.push('DB_NAME');
   }
   if (process.env.COL_NAME === undefined || process.env.COL_NAME === '') {
