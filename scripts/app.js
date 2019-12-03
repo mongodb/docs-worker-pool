@@ -186,8 +186,9 @@ async function getGitCommits() {
   });
 }
 async function getGitPatchFromLocal(branchName) {
+  
   return new Promise((resolve, reject) => {
-    exec(`git diff origin/${branchName} > myPatch.patch`, (error) => {
+    exec(`git diff origin/test2 --ignore-submodules > myPatch.patch`, (error) => {
       if (error !== null) {
         console.log('error generating patch: ', error);
         reject(error);
