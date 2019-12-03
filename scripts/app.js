@@ -259,7 +259,7 @@ function validateConfiguration() {
     missingConfigs.push('SECRET');
   }
   if (missingConfigs.length !== 0) {
-    console.log(`The .env file is found but does not contain the following required fields: ${missingConfigs.toString()}`);
+    console.log(`The ~/.config/.snootyenv file is found but does not contain the following required fields: ${missingConfigs.toString()}`);
   }
 }
 
