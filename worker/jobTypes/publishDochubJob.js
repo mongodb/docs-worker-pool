@@ -8,8 +8,8 @@ const FastlyJob = require('../jobTypes/fastlyJob').FastlyJobClass
 //we use the term sanitize here lightly -- in this instance this // ////validates
 function safeString(stringToCheck) {
   return (
-    validator.isAscii(stringToCheck) &&
-    validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
+    validator.isAscii(stringToCheck) //&&
+    //validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
   );
 }
 
