@@ -50,7 +50,6 @@ class GitHubJobClass {
     try {
       workerUtils.removeDirectory(`repos/${this.getRepoDirName(currentJob)}`);
     } catch (errResult) {
-      console.log("inside github job 2 catch!!! ", errResult)
       logger.save(`${'(CLEANUP)'.padEnd(15)}failed cleaning repo directory`);
       throw errResult;
     }
@@ -79,7 +78,6 @@ class GitHubJobClass {
           throw err;
         });
     } catch (errResult) {
-      console.log("inside github job 3 catch!!! ", errResult)
       if (
         errResult.hasOwnProperty('code') ||
         errResult.hasOwnProperty('signal') ||
@@ -97,19 +95,14 @@ class GitHubJobClass {
   }
 
   async applyPatch(patch, currentJobDir) {
-    console.log("inside apply patch!!!")
-
     const exec = workerUtils.getExecPromise();
 
     try {
       await fs.writeFileSync(`/tmp/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
     } catch (error) {
-      console.log("yo error!!!!!! ", error)
     }
     //create patch file
     try {
-
-      console.log("inside apply patch 2222222!!!")
       const commandsToBuild = [
         `cd repos/${currentJobDir}`,
         `ls -l`,
@@ -122,21 +115,18 @@ class GitHubJobClass {
             console.log("exec error: " + error);
             reject(error);
           } else {
-            console.log("no error????")
-            console.log(stdout);
             resolve();
           }
         });
       });
 
     } catch (error) {
-      console.log("we have error inside the apply patch!!! ", error)
+      console.log("Error applying patch: ", error)
     }
   }
   
   async deletePatchFile() {
     const exec = workerUtils.getExecPromise();
-      console.log("wer insider delete patch file!!!!!")
       return new Promise((resolve, reject) => {
         exec(`rm /tmp/myPatch.patch`, function(error, stdout, stderr) {
           if (error !== null) {
