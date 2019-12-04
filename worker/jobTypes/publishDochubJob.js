@@ -57,7 +57,7 @@ async function runPublishDochub(currentJob) {
     !currentJob.payload ||
     !currentJob.payload.source ||
     !currentJob.payload.target ||
-    !currentJob.payload.email
+    !currentJob.email
   ) {
     workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
     throw invalidJobDef;
