@@ -2,6 +2,7 @@ const workerUtils = require('../utils/utils');
 const validator = require('validator');
 
 const invalidJobDef = new Error('job not valid');
+const invalidEnvironment = new Error('environment variables missing for jobtype');
 const FastlyJob = require('../jobTypes/fastlyJob').FastlyJobClass
 
 //anything that is passed to an exec must be validated or sanitized
@@ -51,6 +52,11 @@ async function startFastly(job) {
 async function runPublishDochub(currentJob) {
 
   workerUtils.logInMongo(currentJob, ' ** Running dochub-fastly migration');
+
+  if (process.env.FASTLY_TOKEN === undefined) {
+    workerUtils.logInMongo(currentJob, 'missing env variable: fastly token');
+    throw invalidEnvironment;
+  }
 
   if (
     !currentJob ||
