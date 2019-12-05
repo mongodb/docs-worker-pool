@@ -11,7 +11,7 @@ class S3PublishClass {
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
     try {
       const exec = workerUtils.getExecPromise();
-      const command = this.GitHubJob.deployCommands.join(' && ');
+      const command = this.GitHubJob.stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
       let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link

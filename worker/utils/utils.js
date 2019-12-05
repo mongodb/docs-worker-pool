@@ -132,6 +132,8 @@ module.exports = {
           returnObject['status'] = 'failure';
           returnObject['content'] = response;
         }
+        console.log(returnObject);
+        console.log(returnObject['content']['git']['branches']['published']);
         resolve(returnObject);
       });
     });

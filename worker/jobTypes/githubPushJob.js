@@ -64,6 +64,7 @@ async function startGithubBuild(job, logger) {
   }
 }
 
+//log pushToProd, wrap it here but it will call prodDeployJob
 async function pushToStage(publisher, logger) {
   const stageOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,

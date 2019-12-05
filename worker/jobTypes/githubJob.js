@@ -8,7 +8,7 @@ class GitHubJobClass {
   // pass in a job payload to setup class
   constructor(currentJob) {
     this.currentJob = currentJob;
-    this.deployCommands = [];
+    this.stageCommands = [];
   }
 
   // get base path for public/private repos
@@ -96,7 +96,7 @@ class GitHubJobClass {
 
   async buildRepo(logger) {
     const currentJob = this.currentJob;
-
+    const ispublishable = this.verifyBranchConfiguredForPublish();
     // setup for building
     await this.cleanup(logger);
     await this.cloneRepo(logger);
@@ -125,7 +125,7 @@ class GitHubJobClass {
         `make html`,
       ];
 
-      const deployCommands = [
+      const stageCommands = [
         `. /venv/bin/activate`,
         `cd repos/${this.getRepoDirName(currentJob)}`,
         `make stage`,
@@ -148,13 +148,13 @@ class GitHubJobClass {
       for (let i = 0; i < workerLines.length; i++) {
         if (workerLines[i] === '"build-and-stage-next-gen"') {
           commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-          deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
+          stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
           break;
         }
       }
 
-      // set this to data property so deploy class can pick it up later
-      this.deployCommands = deployCommands;
+      // set this to data property so stage class can pick it up later
+      this.stageCommands = stageCommands;
 
       const execTwo = workerUtils.getExecPromise();
 
@@ -183,6 +183,7 @@ class GitHubJobClass {
   }
 
 }
+
 
 module.exports = {
   GitHubJobClass: GitHubJobClass
