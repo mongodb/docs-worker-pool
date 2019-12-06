@@ -185,7 +185,7 @@ async function getGitCommits() {
     });
   });
 }
-async function getGitPatchFromLocal(branchName) {
+async function getGitPatchFromLocal() {
   
   return new Promise((resolve, reject) => {
     exec(`git diff origin/test2 --ignore-submodules > myPatch.patch`, (error) => {
