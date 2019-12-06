@@ -25,7 +25,8 @@ function insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
     logs: {},
   };
 
-  // we are looking for jobs in the queue with the same payload that have not yet started (startTime == null)
+  // we are looking for jobs in the queue with the same payload
+  // that have not yet started (startTime == null)
   const filterDoc = { payload: payloadObj, startTime: null };
   const updateDoc = { $setOnInsert: newJob };
 
@@ -43,7 +44,7 @@ function insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
           console.log('You successfully enqued a staging job to docs autobuilder. This is the record id: ', result.upsertedId);
           return result.upsertedId;
         }
-        console.log('Already existed ', newJob)
+        console.log('Already existed ', newJob);
         return 'Already Existed';
       },
       ((error) => {
@@ -84,19 +85,7 @@ function createPayload(
   return payload;
 }
 
-async function getBranchName() {
-  return new Promise((resolve, reject) => {
-    exec('git rev-parse --abbrev-ref HEAD', (error, stdout) => {
-      if (error !== null) {
-        console.log(`exec error: ${error}`);
-        reject(error);
-      }
-      resolve(stdout.replace('\n', ''));
-    });
-  });
-}
-
-//extract repo name from url
+// extract repo name from url
 function getRepoName(url) {
   let repoName = url.split('/');
   repoName = repoName[repoName.length - 1];
@@ -105,8 +94,7 @@ function getRepoName(url) {
   return repoName;
 }
 
-//delete patch file
-
+// delete patch file
 async function deletePatchFile() {
   return new Promise((resolve, reject) => {
     exec('rm myPatch.patch', (error) => {
@@ -116,7 +104,7 @@ async function deletePatchFile() {
       }
       resolve();
     });
-  })
+  });
 }
 async function getRepoInfo() {
   return new Promise((resolve, reject) => {
@@ -167,7 +155,7 @@ async function getGitCommits() {
       } else {
         const cleanedup = stdout.replace(/\+ /g, '');
         const commitarray = cleanedup.split(/\r\n|\r|\n/);
-        commitarray.pop(); //remove the last, dummy element that results from splitting on newline
+        commitarray.pop(); // remove the last, dummy element that results from splitting on newline
         if (commitarray.length === 0) {
           console.log('You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again');
           reject();
@@ -224,7 +212,8 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
         }
       });
     } else {
-      const patchCommand =  "git diff " + firstCommit + "^..." + lastCommit + " > myPatch.patch";
+      const patchCommand = `git diff ${firstCommit}^...${lastCommit} > myPatch.patch`
+      //const patchCommand =  "git diff " + firstCommit + "^..." + lastCommit + " > myPatch.patch";
       exec(patchCommand, (error) => {
         if (error !== null) {
           console.log('error generating patch: ', error);
@@ -260,6 +249,7 @@ function validateConfiguration() {
   }
   if (missingConfigs.length !== 0) {
     console.log(`The ~/.config/.snootyenv file is found but does not contain the following required fields: ${missingConfigs.toString()}`);
+    process.exit()
   }
 }
 
@@ -276,7 +266,7 @@ async function main() {
 
   let invalidFlag = false;
 
-  if (buildSize!== undefined && buildSize !== 'world' && buildSize !== 'repo') {
+  if (buildSize!== undefined && buildSize !== 'repo') {
     console.log('Invalid build size. Use "world" or "repo"');
     invalidFlag = true;
   }
@@ -294,7 +284,6 @@ async function main() {
   const userEmail = await getGitEmail();
   const url = await getRepoInfo();
   const repoName = getRepoName(url);
-  const branchName = await getBranchName();
   const newHead = 'genericscsss';
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === 'commit') {
