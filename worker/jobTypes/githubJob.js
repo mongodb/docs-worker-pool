@@ -208,7 +208,7 @@ class GitHubJobClass {
 
       // set this to data property so deploy class can pick it up later
       this.deployCommands = deployCommands;
-      
+
       const execTwo = workerUtils.getExecPromise();
 
       const { stdout, stderr } = await execTwo(commandsToBuild.join(' && '));
