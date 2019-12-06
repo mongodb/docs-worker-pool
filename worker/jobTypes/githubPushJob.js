@@ -138,7 +138,7 @@ async function runGithubPush(currentJob) {
   const files = workerUtils.getFilesInDir(
     './' + currentJob.payload.repoName + '/build/public' + branchext
   );
-  
+
   return files;
 }
 
