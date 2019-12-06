@@ -85,6 +85,18 @@ function createPayload(
   return payload;
 }
 
+async function getBranchName() {
+  return new Promise((resolve, reject) => {
+    exec('git rev-parse --abbrev-ref HEAD', (error, stdout) => {
+      if (error !== null) {
+        console.log(`exec error: ${error}`);
+        reject(error);
+      }
+      resolve(stdout.replace('\n', ''));
+    });
+  });
+}
+
 // extract repo name from url
 function getRepoName(url) {
   let repoName = url.split('/');
@@ -195,7 +207,9 @@ async function getGitPatchFromLocal(branchName) {
 async function getGitPatchFromCommits(firstCommit, lastCommit) {
   //need to delete patch file?
   return new Promise((resolve, reject) => {
+    
     if (lastCommit === null) {
+      console.log("last commit is null!!!")
       const patchCommand = 'git show HEAD > myPatch.patch';
       exec(patchCommand, (error) => {
         if (error !== null) {
@@ -213,7 +227,6 @@ async function getGitPatchFromCommits(firstCommit, lastCommit) {
       });
     } else {
       const patchCommand = `git diff ${firstCommit}^...${lastCommit} > myPatch.patch`
-      //const patchCommand =  "git diff " + firstCommit + "^..." + lastCommit + " > myPatch.patch";
       exec(patchCommand, (error) => {
         if (error !== null) {
           console.log('error generating patch: ', error);
@@ -284,6 +297,7 @@ async function main() {
   const userEmail = await getGitEmail();
   const url = await getRepoInfo();
   const repoName = getRepoName(url);
+  const branchName = await getBranchName();
   const newHead = 'genericscsss';
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === 'commit') {
