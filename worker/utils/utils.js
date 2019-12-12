@@ -137,6 +137,24 @@ module.exports = {
     return mongo.getMetaCollection().find({}).toArray();
   },
 
+  // gets entitlements for user when deploying
+  // similar to the `getUserEntitlements` function on stitch
+  async getUserEntitlements(githubUsername) {
+    const returnObject = { status: 'failure' };
+    const entitlementsCollection = mongo.getEntitlementsCollection();
+    if (entitlementsCollection) {
+      const query = { 'github_username': githubUsername };
+      const entitlementsObject = await entitlementsCollection.findOne(query);
+      // if user has specific entitlements
+      if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.length > 0) {
+        returnObject.repos = entitlementsObject.repos;
+        returnObject.github_username = entitlementsObject.github_username;
+        returnObject.status = 'success';
+      }
+    }
+    return returnObject;
+  },
+
   async getRepoPublishedBranches(repoObject) {
     const pubBranchesFile = `https://raw.githubusercontent.com/${repoObject.repoOwner}/${repoObject.repoName}/meta/published-branches.yaml`;
     const returnObject = {};

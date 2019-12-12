@@ -95,8 +95,8 @@ async function runGithubPush(currentJob) {
 
   // master branch cannot run through staging build
   if (currentJob.payload.branchName === 'master') {
-    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, master branch not supported on staging builds`);
-    throw new Error('master branches not supported');
+    //workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, master branch not supported on staging builds`);
+    //throw new Error('master branches not supported');
   }
 
   // TODO: create logging class somewhere else.. for now it's here
@@ -110,6 +110,9 @@ async function runGithubPush(currentJob) {
       },
     };
   };
+
+  const repoOwner = currentJob.payload.repoOwner;
+  const repoName = currentJob.payload.repoName;
 
   // instantiate github job class and logging class
   const job = new GitHubJob(currentJob);
@@ -129,7 +132,15 @@ async function runGithubPush(currentJob) {
   }
 
   if (isMaster) {
-    // TODO: push to prod
+    // make sure user is entitled to deploy this repo
+    const user = currentJob.user;
+    const entitlementsObject = await workerUtils.getUserEntitlements(user);
+    if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
+      // continue build and deploy because user is entitled
+    } else {
+      workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${repoOwner}/${repoName}) for master branch`);
+      throw new Error('entitlement failed');
+    }
   } else {
     console.log('pushing to stage');
     await pushToStage(publisher, logger);
