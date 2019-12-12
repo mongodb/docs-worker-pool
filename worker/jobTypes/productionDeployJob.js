@@ -1,25 +1,24 @@
 
-class ProductionDeployJobClass{
-    constructor(currentJob) {
-        this.currentJob = currentJob;
-        this.deployCommands = [];
+const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
+const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
+const simpleGit = require('simple-git/promise');
+const validator = require('validator');
+
+const buildTimeout = 60 * 450;
+const uploadToS3Timeout = 20;
+
+const invalidJobDef = new Error('job not valid');
+
+async function verifyUserEntitlements(){
+    const entitlementsObject = await workerUtils.getUserEntitlements(user);
+    if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
+      return true;
+    } else {
+      return false;
     }
-
-    // get base path for public/private repos
-  getBasePath() {
-    const currentJob = this.currentJob;
-    let basePath = `https://github.com`;
-    if (currentJob.payload.private) {
-      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
-    }
-    return basePath;
   }
-
-  verifyUserEntitlements(){
-      //todo
-  }
-
-  async verifyBranchConfiguredForPublish(){
+  
+  async function verifyBranchConfiguredForPublish() {
     const currentJob = this.currentJob;
     const repoObject = { repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName};
     const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
@@ -32,175 +31,169 @@ class ProductionDeployJobClass{
     return false
     
   }
+//anything that is passed to an exec must be validated or sanitized
+//we use the term sanitize here lightly -- in this instance this // ////validates
+function safeString(stringToCheck) {
+  return (
+    validator.isAscii(stringToCheck) &&
+    validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
+  );
+}
 
-  getRepoDirName() {
-    return `${this.currentJob.payload.repoName}_${this.currentJob.payload.newHead}`;
+function safeGithubProdPush(currentJob) {
+  if (
+    !currentJob ||
+    !currentJob.payload ||
+    !currentJob.payload.repoName ||
+    !currentJob.payload.repoOwner ||
+    !currentJob.payload.branchName
+  ) {
+    workerUtils.logInMongo(
+      currentJob,
+      `${'    (sanitize)'.padEnd(15)}failed due to insufficient job definition`
+    );
+    throw invalidJobDef;
   }
 
-  // our maintained directory of makefiles
-  async downloadMakefile() {
-    const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
-    const returnObject = {};
-    return new Promise(function(resolve, reject) {
-      request(makefileLocation, function(error, response, body) {
-        if (!error && body && response.statusCode === 200) {
-          returnObject['status'] = 'success';
-          returnObject['content'] = body;
-        } else {
-          returnObject['status'] = 'failure';
-          returnObject['content'] = response;
-        }
-        resolve(returnObject);
-      });
-    });
+  if (
+    safeString(currentJob.payload.repoName) &&
+    safeString(currentJob.payload.repoOwner) &&
+    safeString(currentJob.payload.branchName)
+  ) {
+    return true;
   }
+  throw invalidJobDef;
+}
 
-  // cleanup before pulling repo
-  async cleanup(logger) {
-    const currentJob = this.currentJob;
-    logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
-    try {
-      workerUtils.removeDirectory(`repos/${this.getRepoDirName(currentJob)}`);
-    } catch (errResult) {
-      logger.save(`${'(CLEANUP)'.padEnd(15)}failed cleaning repo directory`);
-      throw errResult;
+async function startGithubBuild(job, logger) {
+  const buildOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    job.buildRepo(logger),
+    'Timed out on build'
+  );
+  // checkout output of build
+  if (buildOutput && buildOutput.status === 'success') {
+    // only post entire build output to slack if there are warnings
+    const buildOutputToSlack = buildOutput.stdout + '\n\n' + buildOutput.stderr;
+    if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
+      await logger.sendSlackMsg(buildOutputToSlack);
     }
+
     return new Promise(function(resolve, reject) {
-      logger.save(`${'(rm)'.padEnd(15)}Finished cleaning repo`);
       resolve(true);
     });
   }
+}
 
-  async cloneRepo(logger) {
-    const currentJob = this.currentJob;
-    logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
-    logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
-    try {
-      if (!currentJob.payload.branchName) {
-        logger.save(`${'(CLONE)'.padEnd(15)}failed due to insufficient definition`);
-        throw new Error('branch name not indicated');
-      }
-      const basePath = this.getBasePath();
-      const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
-      await simpleGit('repos')
-        .silent(false)
-        .clone(repoPath, `${this.getRepoDirName(currentJob)}`)
-        .catch(err => {
-          console.error('failed: ', err);
-          throw err;
-        });
-    } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
-        logger.save(`${'(GIT)'.padEnd(15)}failed with code: ${errResult.code}`);
-        logger.save(`${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
-    }
+async function pushToProduction(publisher, logger) {
+  const prodOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    publisher.pushToProduction(logger),
+    'Timed out on push to production'
+  );
+  // checkout output of build
+  if (prodOutput && prodOutput.status === 'success') {
+    await logger.sendSlackMsg(prodOutput.stdout);
+
     return new Promise(function(resolve, reject) {
-      logger.save(`${'(GIT)'.padEnd(15)}Finished git clone`);
       resolve(true);
     });
   }
+}
 
-  async buildRepo(logger) {
-    const currentJob = this.currentJob;
-    const ispublishable = this.verifyBranchConfiguredForPublish();
+//log pushToProd, wrap it here but it will call prodDeployJob
+async function pushToStage(publisher, logger) {
+  const stageOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    publisher.pushToStage(logger),
+    'Timed out on push to stage'
+  );
+  // checkout output of build
+  if (stageOutput && stageOutput.status === 'success') {
+    await logger.sendSlackMsg(stageOutput.stdout);
 
-    if (ispublishable === false){
-        console.log("You are trying to push to production a branch that is not configured for publishing")
-        process.exit
-    }
-    // setup for building
-    await this.cleanup(logger);
-    await this.cloneRepo(logger);
+    return new Promise(function(resolve, reject) {
+      resolve(true);
+    });
+  }
+}
 
-    logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
-    logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
+async function runGithubProdPush(currentJob) {
+  console.log("inside production deploy job")
+  const ispublishable = this.verifyBranchConfiguredForPublish();
+  const userIsEntitled = this.verifyUserEntitlements();
 
-    try {
-      const exec = workerUtils.getExecPromise();
-      const basePath = this.getBasePath();
-      const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
-
-      const pullRepoCommands = [
-        `cd repos/${this.getRepoDirName(currentJob)}`,
-        `git checkout ${currentJob.payload.branchName}`,
-        `git pull origin ${currentJob.payload.branchName}`,
-      ];
-
-      await exec(pullRepoCommands.join(' && '));
-
-      // default commands to run to build repo
-      const commandsToBuild = [
-        `. /venv/bin/activate`,
-        `cd repos/${this.getRepoDirName(currentJob)}`,
-        `rm -f makefile`,
-        `make html`,
-      ];
-
-      const deployCommands = [
-        `. /venv/bin/activate`,
-        `cd repos/${this.getRepoDirName(currentJob)}`,
-        `make stage`,
-      ];
-
-      // the way we now build is to search for a specific function string in worker.sh
-      // which then maps to a specific target that we run
-      const workerContents = fs.readFileSync(`repos/${this.getRepoDirName(currentJob)}/worker.sh`, { encoding: 'utf8' });
-      const workerLines = workerContents.split(/\r?\n/);
-
-      // overwrite repo makefile with the one our team maintains
-      const makefileContents = await this.downloadMakefile();
-      if (makefileContents && makefileContents.status === 'success') {
-        await fs.writeFileSync(`repos/${this.getRepoDirName(currentJob)}/Makefile`, makefileContents.content, { encoding: 'utf8', flag: 'w' });
-      } else {
-        console.log('ERROR: makefile does not exist in /makefiles directory on meta branch.');
-      }
-      
-      // check if need to build next-gen instead
-      for (let i = 0; i < workerLines.length; i++) {
-        if (workerLines[i] === '"build-and-stage-next-gen"') {
-          commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-          deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
-          break;
-        }
-      }
-
-      // set this to data property so deploy class can pick it up later
-      this.deployCommands = deployCommands;
-
-      const execTwo = workerUtils.getExecPromise();
-
-      const { stdout, stderr } = await execTwo(commandsToBuild.join(' && '));
-
-      return new Promise(function(resolve, reject) {
-        logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
-        logger.save(`${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${stdout}\n---\n${stderr}`);
-        resolve({
-          'status': 'success',
-          'stdout': stdout,
-          'stderr': stderr,
-        });
-      });
-    } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
-        logger.save(`${'(BUILD)'.padEnd(15)}failed with code: ${errResult.code}`);
-        logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
-    }
+  if (ispublishable === false){
+    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to 
+    
+    to production a branch that is not configured for publishing`)
+    throw new Error('entitlement failed');
+    process.exit
+  }
+  if(userIsEntitled === false){
+    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${repoOwner}/${repoName}) for master branch`);
+    throw new Error('entitlement failed');
+    process.exit
   }
 
+  workerUtils.logInMongo(currentJob, ' ** Running github push function');
+
+  if (
+    !currentJob ||
+    !currentJob.payload ||
+    !currentJob.payload.repoName ||
+    !currentJob.payload.branchName
+  ) {
+    workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
+    throw invalidJobDef;
+  }
+
+
+  // TODO: create logging class somewhere else.. for now it's here
+  const Logger = function(currentJob) {
+    return {
+      save: function(message) {
+        workerUtils.logInMongo(currentJob, message);
+      },
+      sendSlackMsg: function(message) {
+        workerUtils.populateCommunicationMessageInMongo(currentJob, message);
+      },
+    };
+  };
+
+  // instantiate github job class and logging class
+  const job = new GitHubJob(currentJob);
+  const logger = new Logger(currentJob);
+  const publisher = new S3Publish(job);
+
+  await startGithubBuild(job, logger);
+
+  console.log('completed build');
+
+  let branchext = '';
+  let isMaster = true;
+
+  if (currentJob.payload.branchName !== 'master') {
+    branchext = '-' + currentJob.payload.branchName;
+    isMaster = false;
+  }
+
+  if (isMaster) {
+    console.log('pushing to prod')
+    await pushToProduction(publisher, logger);
+  } else {
+    console.log('pushing to stage');
+    await pushToStage(publisher, logger);
+  }
+
+  const files = workerUtils.getFilesInDir(
+    './' + currentJob.payload.repoName + '/build/public' + branchext
+  );
+
+  return files;
 }
 
 module.exports = {
-    ProductionDeployJobClass: ProductionDeployJobClass
-}
+  runGithubProdPush,
+  safeGithubProdPush,
+};
