@@ -1,7 +1,7 @@
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const fs = require("fs");
-const { MongoClient } = require("mongodb");
+const { MongoClient } = require('mongodb');
 
 module.exports = {
   insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {

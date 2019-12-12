@@ -169,10 +169,6 @@ describe("Test Class", () => {
       )
     ).toEqual(payload);
   });
-
-  it("insertJob", () => {
-
-  });
   
   it("deletePatchFile", async () => {
     serverScript.deletePatchFile = jest
