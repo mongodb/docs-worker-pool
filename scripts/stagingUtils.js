@@ -36,7 +36,7 @@ module.exports = {
     client.connect(err => {
       if (err) {
         console.log("error connecting to Mongo");
-        return false;
+        return err;
       }
       const collection = client.db(dbName).collection(collName);
       collection.updateOne(filterDoc, updateDoc, { upsert: true }).then(
@@ -46,7 +46,7 @@ module.exports = {
               "You successfully enqued a staging job to docs autobuilder. This is the record id: ",
               result.upsertedId
             );
-            return [true, result.upsertedId];
+            return true;
           }
           console.log("Already existed ", newJob);
           return "Already Existed";
@@ -56,7 +56,7 @@ module.exports = {
             "There was an error enqueing a staging job to docs autobuilder. Here is the error: ",
             error
           );
-          return [false, error];
+          return error;
         }
       );
       client.close();

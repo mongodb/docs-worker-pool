@@ -38,6 +38,7 @@ async function main() {
   const repoName = StagingUtils.getRepoName(url);
   const branchName = await StagingUtils.getBranchName();
   const newHead = "newHead";
+  
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === "commit") {
     const { firstCommit, lastCommit } = await StagingUtils.getGitCommits();
@@ -56,8 +57,10 @@ async function main() {
       `Github Push: ${userName}/repoName`,
       userName,
       userEmail
-    )[0];
-    return success;
+    )
+    if (success !== true){
+      console.log("Failure!")
+    }
   }
 
   if (patchFlag === "local") {
@@ -76,8 +79,12 @@ async function main() {
       `Github Push: ${userName}/repoName`,
       userName,
       userEmail
-    )[0];
-    return success;
+    );
+
+    if (success !== true){
+      console.log("Failure!")
+    }
+    
   }
 
   await StagingUtils.deletePatchFile();
