@@ -1,10 +1,10 @@
-const StagingUtils = require('stagingUtils');
+const StagingUtils = require('./stagingUtils');
 
 async function main() {
   const patchFlag = process.argv[2];
   const buildSize = process.argv[3];
 
-  validateConfiguration();
+  this.validateConfiguration();
 
   if (patchFlag === undefined) {
     console.log(
