@@ -27,9 +27,7 @@ describe('Test Class', () => {
    
   });
   console.log("before tests")
-//   it('validateConfiguration', () => {
-//     serverScript.validateConfiguration().resolves.toBeTruthy()
-//   });
+
 it('getRepoName', () => {
     const repoName = serverScript.getRepoName("git@github.com:madelinezec/docs-bi-connector");
     execpt(repoName.toBe('docs-bi-connector')); 
