@@ -3,13 +3,14 @@ const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
 const simpleGit = require('simple-git/promise');
 const validator = require('validator');
-
+const workerUtils = require('../utils/utils');
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
 
 const invalidJobDef = new Error('job not valid');
 
-async function verifyUserEntitlements(){
+async function verifyUserEntitlements(currentJob){
+    const user = currentJob.user;
     const entitlementsObject = await workerUtils.getUserEntitlements(user);
     if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
       return true;
@@ -18,8 +19,7 @@ async function verifyUserEntitlements(){
     }
   }
   
-  async function verifyBranchConfiguredForPublish() {
-    const currentJob = this.currentJob;
+  async function verifyBranchConfiguredForPublish(currentJob) {
     const repoObject = { repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName};
     const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
     const publishedBranches = repoContent['content']['git']['branches']['published']
@@ -120,8 +120,8 @@ async function pushToStage(publisher, logger) {
 
 async function runGithubProdPush(currentJob) {
   console.log("inside production deploy job")
-  const ispublishable = this.verifyBranchConfiguredForPublish();
-  const userIsEntitled = this.verifyUserEntitlements();
+  const ispublishable = verifyBranchConfiguredForPublish(currentJob);
+  const userIsEntitled = verifyUserEntitlements(currentJob);
 
   if (ispublishable === false){
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to 
