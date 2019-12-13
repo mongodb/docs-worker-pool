@@ -1,12 +1,14 @@
-const fs = require("fs-extra");
-const workerUtils = require("../utils/utils");
+const fs = require('fs-extra');
+const workerUtils = require('../utils/utils');
 
 class S3PublishClass {
+
   constructor(GitHubJob) {
     this.GitHubJob = GitHubJob;
   }
 
   async pushToStage(logger) {
+    logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
     const stageCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName(GitHubJob.currentJob)}`,
@@ -53,9 +55,9 @@ class S3PublishClass {
       });
     } catch (errResult) {
       if (
-        errResult.hasOwnProperty("code") ||
-        errResult.hasOwnProperty("signal") ||
-        errResult.hasOwnProperty("killed")
+        errResult.hasOwnProperty('code') ||
+        errResult.hasOwnProperty('signal') ||
+        errResult.hasOwnProperty('killed')
       ) {
         logger.save(
           `${"(stage)".padEnd(15)}failed with code: ${errResult.code}`
