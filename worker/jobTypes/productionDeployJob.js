@@ -101,23 +101,6 @@ async function pushToProduction(publisher, logger) {
   }
 }
 
-//log pushToProd, wrap it here but it will call prodDeployJob
-async function pushToStage(publisher, logger) {
-  const stageOutput = await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    publisher.pushToStage(logger),
-    'Timed out on push to stage'
-  );
-  // checkout output of build
-  if (stageOutput && stageOutput.status === 'success') {
-    await logger.sendSlackMsg(stageOutput.stdout);
-
-    return new Promise(function(resolve, reject) {
-      resolve(true);
-    });
-  }
-}
-
 async function runGithubProdPush(currentJob) {
   console.log("inside production deploy job")
   const ispublishable = verifyBranchConfiguredForPublish(currentJob);
