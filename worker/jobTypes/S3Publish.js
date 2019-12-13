@@ -66,9 +66,7 @@ class S3PublishClass {
     }
   }
 
-  async pushToProduction(logger) {
-    console.log("I am in pushtoprod!!!!");
-    
+  async pushToProduction(logger) {    
     const deployCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName(this.GitHubJob.currentJob)}`,

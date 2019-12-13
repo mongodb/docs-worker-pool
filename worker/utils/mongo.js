@@ -11,6 +11,7 @@ const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/ad
 const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
 const META_NAME = 'meta';
+const ENTITLEMENTS_NAME = 'entitlements';
 
 // Hold onto the client
 let client;
@@ -37,6 +38,12 @@ module.exports = {
     return null;
   },
 
+  getEntitlementsCollection() {
+    if (client) {
+      return client.db(DB_NAME).collection(ENTITLEMENTS_NAME);
+    }
+    return null;
+  },
   // Gets the Next Job Off The Queue And Sets It To inProgress
   async getNextJob(queueCollection) {
     const query = {

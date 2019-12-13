@@ -96,7 +96,7 @@ class GitHubJobClass {
 
   async buildRepo(logger) {
     const currentJob = this.currentJob;
-    const ispublishable = this.verifyBranchConfiguredForPublish();
+
     // setup for building
     await this.cleanup(logger);
     await this.cloneRepo(logger);
