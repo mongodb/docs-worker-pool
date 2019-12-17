@@ -137,12 +137,12 @@ class GitHubJobClass {
       const workerLines = workerContents.split(/\r?\n/);
 
       // overwrite repo makefile with the one our team maintains
-      const makefileContents = await this.downloadMakefile();
-      if (makefileContents && makefileContents.status === 'success') {
-        await fs.writeFileSync(`repos/${this.getRepoDirName(currentJob)}/Makefile`, makefileContents.content, { encoding: 'utf8', flag: 'w' });
-      } else {
-        console.log('ERROR: makefile does not exist in /makefiles directory on meta branch.');
-      }
+      // const makefileContents = await this.downloadMakefile();
+      // if (makefileContents && makefileContents.status === 'success') {
+      //   await fs.writeFileSync(`repos/${this.getRepoDirName(currentJob)}/Makefile`, makefileContents.content, { encoding: 'utf8', flag: 'w' });
+      // } else {
+      //   console.log('ERROR: makefile does not exist in /makefiles directory on meta branch.');
+      // }
       
       // check if need to build next-gen instead
       for (let i = 0; i < workerLines.length; i++) {

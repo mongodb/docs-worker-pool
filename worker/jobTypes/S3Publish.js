@@ -69,9 +69,15 @@ class S3PublishClass {
   }
 
   async pushToProduction(logger) {    
+    const publishPrepCommands = [
+      `. /venv/bin/activate`,
+      `cd repos/${this.GitHubJob.getRepoDirName(this.GitHubJob.currentJob)}`,
+      `make publish`
+    ]
     const deployCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName(this.GitHubJob.currentJob)}`,
+      `make publish`,
       `make stage`
     ];
 
