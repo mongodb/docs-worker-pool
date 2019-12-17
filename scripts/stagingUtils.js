@@ -1,7 +1,7 @@
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const fs = require("fs");
-const { MongoClient } = require('mongodb');
+const { MongoClient } = require("mongodb");
 
 module.exports = {
   insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
@@ -195,6 +195,32 @@ module.exports = {
     });
   },
 
+  async getUpstreamBranch(branchName) {
+    return new Promise((resolve, reject) => {
+      try {
+        exec(
+          `git rev-parse --abbrev-ref --symbolic-full-name ${branchName}@{upstream}`,
+          error => {
+            if (error === null) {
+              resolve(data);
+              return true;
+            } else {
+              if (error.code === 128) {
+                console.log(
+                  'You have not set an upstream for your local branch. Please do so with this command:','\n\n', 'git branch -u origin',
+                  '\n\n');
+              } else {
+                console.log('error finding upstream for local branch: ', error);
+              }
+            }
+          }
+        );
+      } catch (error) {
+        reject(error);
+        return false;
+      }
+    });
+  },
   async getGitPatchFromLocal(branchName) {
     return new Promise((resolve, reject) => {
       exec(
@@ -277,6 +303,5 @@ module.exports = {
       );
       process.exit();
     }
-
   }
 };
