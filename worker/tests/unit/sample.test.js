@@ -4,7 +4,7 @@
 
 // const job = require('../jobTypes/githubPushJob');
 
-describe('Test Class', () => {
+describe("Test Class", () => {
   beforeAll(() => {});
 
   afterAll(() => {});
@@ -13,7 +13,7 @@ describe('Test Class', () => {
 
   afterEach(() => {});
 
-  it('sampleTest', async () => {
+  it("sampleTest", async () => {
     expect(1 + 1).toEqual(2);
   });
 });

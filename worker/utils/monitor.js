@@ -1,17 +1,17 @@
-const ip = require('ip');
+const ip = require("ip");
 
 class Monitor {
   // pass in a job payload to setup class
   constructor(config, logger) {
     if (!logger) {
-      console.log('log mechanism empty');
+      console.log("log mechanism empty");
     }
     if (!config) {
-      console.log('no config for monitor');
+      console.log("no config for monitor");
     }
     this.config = config;
     this.ip = ip.address();
-    this.status = 'initializing';
+    this.status = "initializing";
     this.logger = logger;
   }
 

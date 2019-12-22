@@ -1,4 +1,4 @@
-const worker = require('./worker');
+const worker = require("./worker");
 
 // Setup the server with startServer()
 worker
@@ -12,14 +12,14 @@ worker
   });
 
 // Handle SIGINT / SIGTERM from KUBERNETES
-process.on('SIGINT', async () => {
-  console.log('Received SIGINT');
+process.on("SIGINT", async () => {
+  console.log("Received SIGINT");
   await worker.gracefulShutdown();
   process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('Received SIGTERM');
+process.on("SIGTERM", async () => {
+  console.log("Received SIGTERM");
   await worker.gracefulShutdown();
   process.exit(0);
 });

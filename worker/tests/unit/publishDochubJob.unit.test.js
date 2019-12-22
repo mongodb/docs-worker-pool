@@ -1,100 +1,90 @@
-const job = require('../../jobTypes/publishDochubJob');
-const workerUtils = require('../../utils/utils');
+const job = require("../../jobTypes/publishDochubJob");
+const workerUtils = require("../../utils/utils");
+const mongo = require("../../utils/mongo");
 
 const payloadObj = {
-  source: 'someSource',
-  target: 'someTarget',
-  email: 'email@gmail.com'
+  source: "someSource",
+  target: "someTarget",
+  email: "email@gmail.com"
 };
 
 const payloadObjBadSource = {
-  source: 'some source',
-  target: 'someTarget'
+  source: "some source",
+  target: "someTarget"
 };
 
 const payloadObjBadTarget = {
-  source: 'someSource',
-  target: 'some target'
+  source: "someSource",
+  target: "some target"
 };
 
 const payloadNoSource = {
-  target: 'someTarget',
+  target: "someTarget"
 };
 
 const payloadNoTarget = {
-  source: 'someSource',
+  source: "someSource"
 };
 
 const payloadNoEmail = {
-  source: 'someSource',
-  target: 'someTarget'
+  source: "someSource",
+  target: "someTarget"
 };
 
 const testPayloadGood = {
-  payload: payloadObj,
-};
-
-const testPayloadWithoutSource = {
-  payload: payloadNoSource,
-};
-
-const testPayloadWithoutTarget = {
-  payload: payloadNoTarget,
+  payload: payloadObj
 };
 
 const testPayloadWithoutEmail = {
-  payload: payloadNoEmail,
+  payload: payloadNoEmail
 };
 
 const testPayloadBadSource = {
-  payload: payloadObjBadSource,
+  payload: payloadObjBadSource
 };
 
 const testPayloadBadTarget = {
-  payload: payloadObjBadTarget,
+  payload: payloadObjBadTarget
 };
 
-const error = new Error('job not valid');
+const doc = [
+  {
+    _id: { $oid: "4db32eacdbd1ff5a7a24ff17" },
+    url: "http://www.mongodb.org/display/DOCS/Collections",
+    name: "collections"
+  }
+];
 
+const error = new Error("job not valid");
 
-describe('Test Class', () => {
+describe("Test Class", () => {
   // Dont actually reset the directory and dont care about the logging
   beforeAll(() => {
     workerUtils.resetDirectory = jest.fn().mockResolvedValue();
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
     jest.useFakeTimers();
-    console.log(job);
   });
 
-  // Tests for build() function
+  // Tests for dochubpublish() function
 
-  it('build() rejects properly killed', async () => {
-    const execMock = jest.fn().mockRejectedValue({ killed: true });
-    workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.runPublishDochub(testPayloadGood)).resolves.toBeUndefined();
+  it("runPublishDochub() rejects properly killed", async () => {
+    mongo.getDochubArray = jest.fn().mockResolvedValue(doc);
+    expect(await job.runPublishDochub(testPayloadGood)).toBeUndefined();
   });
-
   // Tests for RunPublishDochub Function
 
-  it('runPublishDochub(): no source --> should fail to run', async () => {
-    job.build = jest.fn().mockRejectedValue(error);
-    await expect(job.runPublishDochub(testPayloadWithoutSource)).rejects.toEqual(
-      error
-    );
-    jest.runAllTimers();
-    expect(job.build).toHaveBeenCalledTimes(0);
+  it("runPublishDochub() rejects lack of map", async () => {
+    mongo.getDochubArray = jest.fn().mockResolvedValue(undefined);
+    let thrownError;
+    try {
+      job.safePublishDochub(testPayloadGood).toBeCalled();
+    } catch (e) {
+      thrownError = e;
+    }
+    expect(thrownError).toEqual(error);
   });
 
-  it('runPublishDochub(): no target --> should fail to run', async () => {
-    job.build = jest.fn().mockRejectedValue(error);
-    await expect(job.runPublishDochub(testPayloadWithoutTarget)).rejects.toEqual(
-      error
-    );
-    jest.runAllTimers();
-    expect(job.build).toHaveBeenCalledTimes(0);
-  });
-
-  it('runPublishDochub(): no email --> should fail to run', async () => {
+  it("runPublishDochub(): no email --> should fail to run", async () => {
     job.build = jest.fn().mockRejectedValue(error);
     await expect(job.runPublishDochub(testPayloadWithoutEmail)).rejects.toEqual(
       error
@@ -105,23 +95,23 @@ describe('Test Class', () => {
 
   // Sanitize
 
-  it('sanitize(): If source invalid --> should reject', async () => {
+  it("sanitize(): If source invalid --> should reject", async () => {
     let thrownError;
     try {
-        job.safePublishDochub(testPayloadBadSource);
+      job.safePublishDochub(testPayloadBadSource);
     } catch (e) {
-        thrownError = e;
+      thrownError = e;
     }
     await expect(thrownError).toEqual(error);
   });
-  
-  it('sanitize(): If target invalid --> should reject', async () => {
-      let thrownError;
-      try {
-        job.safePublishDochub(testPayloadBadTarget);
-      } catch (e) {
-        thrownError = e;
-      }
-      await expect(thrownError).toEqual(error);
+
+  it("sanitize(): If target invalid --> should reject", async () => {
+    let thrownError;
+    try {
+      job.safePublishDochub(testPayloadBadTarget);
+    } catch (e) {
+      thrownError = e;
+    }
+    await expect(thrownError).toEqual(error);
   });
 });
