@@ -10,7 +10,7 @@ const jobDb = process.env.DB_NAME;
 class EnvironmentClass {
   static getDB() {
     if (jobDb === undefined) {
-      return "pool_test";
+      return 'pool_test';
     }
     return jobDb;
   }
@@ -24,42 +24,42 @@ class EnvironmentClass {
 
   static getFastlyToken() {
     if (fastlyToken === undefined) {
-      return "testToken";
+      return 'testToken';
     }
     return fastlyToken;
   }
 
   static getDochubMap() {
     if (dochubMap === undefined) {
-      return "dochubMap";
+      return 'dochubMap';
     }
     return dochubMap;
   }
 
   static getDochubDB() {
     if (dochubDB === undefined) {
-      return "dochub";
+      return 'dochub';
     }
     return dochubDB;
   }
 
   static getAtlasUsername() {
     if (atlasUsername === undefined) {
-      return "usernameTest";
+      return 'usernameTest';
     }
     return atlasUsername;
   }
 
   static getAtlasPassword() {
     if (atlasPassword == undefined) {
-      return "passwordTest";
+      return 'passwordTest';
     }
     return atlasPassword;
   }
 
   static getFastlyServiceId() {
     if (fastlyServiceId === undefined) {
-      return "testId";
+      return 'testId';
     }
     return fastlyServiceId;
   }

@@ -1,5 +1,5 @@
-const { MongoClient } = require("mongodb");
-const EnvironmentClass = require("../utils/environment").EnvironmentClass;
+const { MongoClient } = require('mongodb');
+const EnvironmentClass = require('../utils/environment').EnvironmentClass;
 
 // Get username password credentials
 const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
@@ -10,10 +10,10 @@ const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/ad
 
 // Collection information
 const DB_NAME = EnvironmentClass.getDB(); // Database name of the queue in MongoDB Atlas
-const COLL_NAME = "queue"; // Collection name of the queue in MongoDB Atlas
-const META_NAME = "meta";
-const MONITOR_NAME = "monitor";
-const FASTLY_NAME = "keys";
+const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
+const META_NAME = 'meta';
+const MONITOR_NAME = 'monitor';
+const FASTLY_NAME = 'keys';
 const DOCHUB_NAME = EnvironmentClass.getDochubDB();
 
 // Hold onto the client
@@ -78,7 +78,7 @@ module.exports = {
         console.log(`Error in reportStatus(): ${err}`);
       }
     } else {
-      console.log("Error in reportStatus(): monitorCollection does not exist");
+      console.log('Error in reportStatus(): monitorCollection does not exist');
     }
   },
 
@@ -92,16 +92,16 @@ module.exports = {
   // Gets the Next Job Off The Queue And Sets It To inProgress
   async getNextJob(queueCollection) {
     const query = {
-      status: "inQueue",
-      "payload.isXlarge": runXlarge,
+      status: 'inQueue',
+      'payload.isXlarge': runXlarge,
       createdTime: { $lte: new Date() }
       // We may eventually want to add in the following logic
       // payLoad.jobName: {$in: [jobs]}
     };
 
-    const update = { $set: { startTime: new Date(), status: "inProgress" } };
+    const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 } };
-    await queueCollection.findOne({ status: "inQueue" });
+    await queueCollection.findOne({ status: 'inQueue' });
     return queueCollection.findOneAndUpdate(query, update, options);
   },
 
@@ -110,7 +110,7 @@ module.exports = {
     const query = { _id: job._id };
     const update = {
       $set: {
-        status: "completed",
+        status: 'completed',
         result,
         endTime: new Date()
       }
@@ -125,13 +125,13 @@ module.exports = {
   async finishJobWithFailure(queueCollection, job, reason) {
     const query = { _id: job._id };
     const update = {
-      $set: { startTime: null, status: "inQueue" },
+      $set: { startTime: null, status: 'inQueue' },
       $push: { failures: { time: new Date(), reason } },
       $inc: { numFailures: 1 }
     };
 
     if (job.numFailures >= 2) {
-      update.$set.status = "failed";
+      update.$set.status = 'failed';
     }
 
     const updateResult = await queueCollection.updateOne(query, update);
@@ -155,7 +155,7 @@ module.exports = {
         console.log(`Error in logInMongo(): ${err}`);
       }
     } else {
-      console.log("Error in logInMongo(): queueCollection does not exist");
+      console.log('Error in logInMongo(): queueCollection does not exist');
     }
   },
   // Adds Log Message To Job In The Queue
@@ -173,7 +173,7 @@ module.exports = {
       }
     } else {
       console.log(
-        "Error in populateCommunicationMessageInMongo(): queueCollection does not exist"
+        'Error in populateCommunicationMessageInMongo(): queueCollection does not exist'
       );
     }
   }

@@ -1,8 +1,8 @@
-const worker = require("../../worker");
-const mongo = require("../../utils/mongo");
-const workerUtils = require("../../utils/utils");
+const worker = require('../../worker');
+const mongo = require('../../utils/mongo');
+const workerUtils = require('../../utils/utils');
 
-describe("Test Class", () => {
+describe('Test Class', () => {
   beforeAll(() => {
     workerUtils.resetDirectory = jest.fn().mockResolvedValue();
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
@@ -11,7 +11,7 @@ describe("Test Class", () => {
   /** ******************************************************************
    *                          express()                               *
    ******************************************************************* */
-  it("testLiveness()", async () => {
+  it('testLiveness()', async () => {
     mongo.initMongoClient = jest.fn().mockResolvedValue();
     worker.setLastCheckIn(new Date());
     expect(worker.getLiveness().status).toEqual(200);
@@ -25,7 +25,7 @@ describe("Test Class", () => {
   /** ******************************************************************
    *                          startServer()                           *
    ******************************************************************* */
-  it("startServer()", async () => {
+  it('startServer()', async () => {
     mongo.initMongoClient = jest.fn().mockResolvedValue();
     await expect(worker.startServer()).resolves.toBeTruthy();
   });
@@ -33,8 +33,8 @@ describe("Test Class", () => {
   /** ******************************************************************
    *                          gracefulShutdown()                      *
    ******************************************************************* */
-  it("onSignal()", async () => {
-    worker.setCurrentJob({ job: "doesnt matter" });
+  it('onSignal()', async () => {
+    worker.setCurrentJob({ job: 'doesnt matter' });
     workerUtils.promiseTimeoutS = jest.fn().mockResolvedValue();
     mongo.finishJobWithFailure = jest.fn().mockResolvedValue();
 

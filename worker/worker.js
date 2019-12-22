@@ -1,21 +1,21 @@
 // Imports
-const express = require("express");
-const fs = require("fs-extra");
-const retry = require("async-retry");
-const mongo = require("./utils/mongo");
-const { Monitor } = require("./utils/monitor");
-const workerUtils = require("./utils/utils");
+const express = require('express');
+const fs = require('fs-extra');
+const retry = require('async-retry');
+const mongo = require('./utils/mongo');
+const { Monitor } = require('./utils/monitor');
+const workerUtils = require('./utils/utils');
 
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
-const { runGithubPush, safeGithubPush } = require("./jobTypes/githubPushJob");
+const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
 const {
   runPublishDochub,
   safePublishDochub
-} = require("./jobTypes/publishDochubJob");
+} = require('./jobTypes/publishDochubJob');
 
 // add some application monitoring
-const monitorInstance = new Monitor({ component: "worker" }, mongo);
+const monitorInstance = new Monitor({ component: 'worker' }, mongo);
 
 // Variables
 let queueCollection; // Holder for the queueCollection in MongoDB Atlas
@@ -46,7 +46,7 @@ const jobTypeToFunc = {
 
 // route for liveness check
 const app = express();
-app.get("/liveness", (req, res) => {
+app.get('/liveness', (req, res) => {
   const result = module.exports.getLiveness();
   res.status(result.status).send({ msg: result.msg });
 });
@@ -80,30 +80,30 @@ module.exports = {
 
   // Function to handle server shutdown
   async gracefulShutdown() {
-    console.log("\nServer is starting cleanup");
+    console.log('\nServer is starting cleanup');
     shouldStop = true;
 
     if (currentJob) {
-      const logMsg = `${"    (ERROR)".padEnd(
+      const logMsg = `${'    (ERROR)'.padEnd(
         LOG_PADDING
       )}Resetting Job with ID: ${
         currentJob._id
       } because server is being shut down`;
       workerUtils.logInMongo(currentJob, logMsg);
 
-      workerUtils.resetDirectory("work/");
+      workerUtils.resetDirectory('work/');
       await workerUtils.promiseTimeoutS(
         MONGO_TIMEOUT_S,
         await mongo.finishJobWithFailure(
           queueCollection,
           currentJob,
-          "Server is being shutdown"
+          'Server is being shutdown'
         ),
         `Mongo Timeout Error: Timed out finishing failed job with jobId: ${currentJob._id}`
       );
     }
     if (mongoClient) {
-      monitorInstance.reportStatus("closed connection");
+      monitorInstance.reportStatus('closed connection');
       mongoClient.close();
     }
   },
@@ -116,10 +116,10 @@ module.exports = {
     if (mongoClient) {
       queueCollection = mongo.getQueueCollection();
     }
-    monitorInstance.reportStatus("start server");
+    monitorInstance.reportStatus('start server');
 
     // Clean up the work folder
-    workerUtils.resetDirectory("work/");
+    workerUtils.resetDirectory('work/');
 
     // Setup http server
     return app.listen(PORT);
@@ -133,8 +133,8 @@ module.exports = {
       let logMsg;
 
       if (shouldStop) {
-        monitorInstance.reportStatus("shutting down");
-        throw new Error("Shutting Down --> Should not get new jobs");
+        monitorInstance.reportStatus('shutting down');
+        throw new Error('Shutting Down --> Should not get new jobs');
       }
 
       // Get a new job
@@ -142,10 +142,10 @@ module.exports = {
         .promiseTimeoutS(
           MONGO_TIMEOUT_S,
           mongo.getNextJob(queueCollection),
-          "Mongo Timeout Error: Timed out getting next job from queue collection"
+          'Mongo Timeout Error: Timed out getting next job from queue collection'
         )
         .catch(error => {
-          console.log("connection timeout");
+          console.log('connection timeout');
           monitorInstance.reportStatus(`error getting job ${error}`);
         });
 
@@ -153,7 +153,7 @@ module.exports = {
       if (job && job.value) {
         currentJob = job.value;
 
-        monitorInstance.reportStatus("running job");
+        monitorInstance.reportStatus('running job');
 
         logMsg = `* Starting Job with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
         workerUtils.logInMongo(currentJob, logMsg);
@@ -196,7 +196,7 @@ module.exports = {
           });
 
         // Log that we are done with this job
-        logMsg = `${"    (DONE)".padEnd(LOG_PADDING)}Finished Job with ID: ${
+        logMsg = `${'    (DONE)'.padEnd(LOG_PADDING)}Finished Job with ID: ${
           currentJob._id
         }`;
         workerUtils.logInMongo(currentJob, logMsg);
@@ -205,8 +205,8 @@ module.exports = {
         setTimeout(module.exports.work, MIN_TIMEOUT_MS);
       } else {
         // Log that no jobs were found
-        console.log("No Jobs Found....: ", new Date());
-        monitorInstance.reportStatus("No Jobs Found");
+        console.log('No Jobs Found....: ', new Date());
+        monitorInstance.reportStatus('No Jobs Found');
 
         // Wait retryMs milliseconds and then try work() again
         setTimeout(module.exports.work, RETRY_TIMEOUT_MS);
@@ -229,7 +229,7 @@ module.exports = {
           // Log the error:
           workerUtils.logInMongo(
             lastJob,
-            "    (ERROR)".padEnd(LOG_PADDING) + err.toString()
+            '    (ERROR)'.padEnd(LOG_PADDING) + err.toString()
           );
 
           // If we end up here, then the folder work/jobId will still be there --> delete

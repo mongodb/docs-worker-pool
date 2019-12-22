@@ -1,14 +1,14 @@
-const utils = require("../utils/utils");
-const environment = require("../utils/environment").EnvironmentClass;
+const utils = require('../utils/utils');
+const environment = require('../utils/environment').EnvironmentClass;
 
-const fastly = require("fastly")(environment.getFastlyToken());
+const fastly = require('fastly')(environment.getFastlyToken());
 
 class FastlyJobClass {
   // pass in a job payload to setup class
   constructor(currentJob) {
     this.currentJob = currentJob;
     if (fastly == undefined) {
-      utils.logInMongo(currentJob, "fastly connectivity not found");
+      utils.logInMongo(currentJob, 'fastly connectivity not found');
     }
   }
 
@@ -42,7 +42,7 @@ class FastlyJobClass {
       });
     };
 
-    promise1("POST", connectString, options)
+    promise1('POST', connectString, options)
       .then()
       .catch(error => {
         throw error;
