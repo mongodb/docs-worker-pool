@@ -1,6 +1,6 @@
 # Docs Worker Pool
 
-As part of the Docs Tools Next Generation Project, the Worker Pool seeks to make the build process for developers both easier and more scalable for developers. 
+As part of the Docs Tools Next Generation Project, the Docs Worker Pool seeks to make the build process for developers both easier and more scalable for developers. 
 
 ## Build and Run Docker Image
 ```
@@ -18,7 +18,7 @@ docker run \
 * `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are needed for uploading to S3 via [mut](https://github.com/mongodb/mut)
 * `GITHUB_BOT_USERNAME` and `GITHUB_BOT_PASSWORD` are needed so builder can access private repos
 
-If you are running a local version of the docker image for testing, we have a separate staging environment setup. Add the following env variables to the `docker run` command:
+If you are running a local version of the docker image for testing, we have a separate staging environment setup. Testing in this environment is automated through the stage branch. Add the following env variables to the `docker run` command:
 ```
 --env DB_NAME
 ```
@@ -36,5 +36,3 @@ cd worker
 npm install --dev
 ./node_modules/.bin/eslint .
 ```
-
-See the [spec doc](https://docs.google.com/document/d/1XZOuuGmozcLQRSDitx0UWhZzJaS4opR1JVwZqDp-N4g/edit?usp=sharing) for more details. 
