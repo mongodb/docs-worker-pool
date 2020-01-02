@@ -53,7 +53,6 @@ module.exports = {
   // Functions Used For Testing
   //
   setCurrentJob(job) {
-    console.log("yes him in current job")
     currentJob = job;
   },
 

@@ -12,44 +12,44 @@ class S3PublishClass {
     const stageCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName(GitHubJob.currentJob)}`,
-      `make stage`
+      `make stage`, 
     ];
 
     // the way we now build is to search for a specific function string in worker.sh
     // which then maps to a specific target that we run
     const workerContents = fs.readFileSync(
       `repos/${this.GitHubJob.getRepoDirName(GitHubJob.currentJob)}/worker.sh`,
-      { encoding: "utf8" }
+      { encoding: 'utf8' }
     );
     const workerLines = workerContents.split(/\r?\n/);
 
     // check if need to build next-gen instead
     for (let i = 0; i < workerLines.length; i++) {
       if (workerLines[i] === '"build-and-stage-next-gen"') {
-        commandsToBuild[commandsToBuild.length - 1] = "make next-gen-html";
-        stageCommands[stageCommands.length - 1] = "make next-gen-stage";
+        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+        stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
         break;
       }
     }
 
-    logger.save(`${"(stage)".padEnd(15)}Pushing to staging`);
+    logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
 
     try {
       const exec = workerUtils.getExecPromise();
-      const command = stageCommands.join(" && ");
+      const command = stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
-      let stdoutMod = "";
+      let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
-      if (stdout.indexOf("Summary") !== -1) {
-        stdoutMod = stdout.substr(stdout.indexOf("Summary"));
+      if (stdout.indexOf('Summary') !== -1) {
+        stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       }
       return new Promise(function(resolve, reject) {
-        logger.save(`${"(stage)".padEnd(15)}Finished pushing to staging`);
+        logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
         logger.save(
-          `${"(stage)".padEnd(15)}Staging push details:\n\n${stdoutMod}`
+          `${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
         );
         resolve({
-          status: "success",
+          status: 'success',
           stdout: stdoutMod
         });
       });
@@ -60,9 +60,9 @@ class S3PublishClass {
         errResult.hasOwnProperty('killed')
       ) {
         logger.save(
-          `${"(stage)".padEnd(15)}failed with code: ${errResult.code}`
+          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
         );
-        logger.save(`${"(stage)".padEnd(15)}stdErr: ${errResult.stderr}`);
+        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
         throw errResult;
       }
     }
@@ -85,50 +85,50 @@ class S3PublishClass {
     // which then maps to a specific target that we run
     const workerContents = fs.readFileSync(
       `repos/${this.GitHubJob.getRepoDirName(this.GitHubJob.currentJob)}/worker.sh`,
-      { encoding: "utf8" }
+      { encoding: 'utf8' }
     );
     const workerLines = workerContents.split(/\r?\n/);
 
     // check if need to build next-gen instead -- does this need to happen for make deploy as well???
     for (let i = 0; i < workerLines.length; i++) {
       if (workerLines[i] === '"build-and-stage-next-gen"') {
-        commandsToBuild[commandsToBuild.length - 1] = "make next-gen-html";
-        deployCommands[deployCommands.length - 1] = "make next-gen-stage";
+        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+        deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
         break;
       }
     }
 
-    logger.save(`${"(stage)".padEnd(15)}Pushing to staging`);
+    logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
 
     try {
       const exec = workerUtils.getExecPromise();
-      const command = deployCommands.join(" && ");
+      const command = deployCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
-      let stdoutMod = "";
+      let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
-      if (stdout.indexOf("Summary") !== -1) {
-        stdoutMod = stdout.substr(stdout.indexOf("Summary"));
+      if (stdout.indexOf('Summary') !== -1) {
+        stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       }
       return new Promise(function(resolve, reject) {
-        logger.save(`${"(stage)".padEnd(15)}Finished pushing to staging`);
+        logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
         logger.save(
-          `${"(stage)".padEnd(15)}Staging push details:\n\n${stdoutMod}`
+          `${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
         );
         resolve({
-          status: "success",
+          status: 'success',
           stdout: stdoutMod
         });
       });
     } catch (errResult) {
       if (
-        errResult.hasOwnProperty("code") ||
-        errResult.hasOwnProperty("signal") ||
-        errResult.hasOwnProperty("killed")
+        errResult.hasOwnProperty('code') ||
+        errResult.hasOwnProperty('signal') ||
+        errResult.hasOwnProperty('killed')
       ) {
         logger.save(
-          `${"(stage)".padEnd(15)}failed with code: ${errResult.code}`
+          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
         );
-        logger.save(`${"(stage)".padEnd(15)}stdErr: ${errResult.stderr}`);
+        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
         throw errResult;
       }
     }
