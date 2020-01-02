@@ -95,36 +95,42 @@ class GitHubJobClass {
   }
 
   async applyPatch(patch, currentJobDir) {
-    const exec = workerUtils.getExecPromise();
-
     try {
       await fs.writeFileSync(`/tmp/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
+      
     } catch (error) {
+      console.log("we have an error!!!! ", error)
+      throw error
     }
     //create patch file
     try {
       const commandsToBuild = [
         `cd repos/${currentJobDir}`,
-        `ls -l`,
         `patch -p1 < /tmp/myPatch.patch`
       ];
-
-      return new Promise((resolve, reject) => {
-        exec(commandsToBuild.join(" && "), function(error, stdout, stderr) {
-          if (error !== null) {
-            console.log("exec error: " + error);
-            reject(error);
-          } else {
-            resolve();
-          }
-        });
-      });
+        const exec = workerUtils.getExecPromise();
+      // return new Promise((resolve, reject) => {
+        const {stdout, stderr} = await exec(commandsToBuild.join(" && "))
 
     } catch (error) {
+      this.dumpError(error);
       console.log("Error applying patch: ", error)
     }
   }
-  
+  dumpError(err) {
+    if (typeof err === 'object') {
+      if (err.message) {
+        console.log('\nMessage: ' + err.message)
+      }
+      if (err.stack) {
+        console.log('\nStacktrace:')
+        console.log('====================')
+        console.log(err.stack);
+      }
+    } else {
+      console.log('dumpError :: argument is not an object');
+    }
+  }
   async deletePatchFile() {
     const exec = workerUtils.getExecPromise();
       return new Promise((resolve, reject) => {
@@ -164,6 +170,7 @@ class GitHubJobClass {
 
       //check for patch
       if (currentJob.payload.patch !== undefined) {
+        console.log(currentJob.payload.patch);
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)

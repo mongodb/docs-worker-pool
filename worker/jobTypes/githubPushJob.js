@@ -65,6 +65,7 @@ async function startGithubBuild(job, logger) {
 }
 
 async function pushToStage(publisher, logger) {
+  console.log("we about to push to stage!!!!!")
   const stageOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
     publisher.pushToStage(logger),
@@ -91,12 +92,6 @@ async function runGithubPush(currentJob) {
   ) {
     workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
     throw invalidJobDef;
-  }
-
-  // master branch cannot run through staging build
-  if (currentJob.payload.branchName === 'master') {
-    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, master branch not supported on staging builds`);
-    throw new Error('master branches not supported');
   }
 
   // TODO: create logging class somewhere else.. for now it's here
@@ -128,12 +123,12 @@ async function runGithubPush(currentJob) {
     isMaster = false;
   }
 
-  if (isMaster) {
-    // TODO: push to prod
-  } else {
+  // if (isMaster) {
+  //   // TODO: push to prod
+  // } else {
     console.log('pushing to stage');
     await pushToStage(publisher, logger);
-  }
+  // }
 
   const files = workerUtils.getFilesInDir(
     './' + currentJob.payload.repoName + '/build/public' + branchext

@@ -46,6 +46,7 @@ module.exports = {
               "You successfully enqued a staging job to docs autobuilder. This is the record id: ",
               result.upsertedId
             );
+            console.log(newJob);
             return true;
           }
           console.log("Already existed ", newJob);
@@ -65,7 +66,7 @@ module.exports = {
 
   createPayload(
     repoNameArg,
-    branchNameArg,
+    upstreamBranchName,
     repoOwnerArg,
     urlArg,
     patchArg,
@@ -77,14 +78,13 @@ module.exports = {
       source: "github",
       action: "push",
       repoName: repoNameArg,
-      branchName: branchNameArg,
+      branchName: upstreamBranchName,
       isFork: true,
       private: false,
       isXlarge: false,
       repoOwner: repoOwnerArg,
       url: urlArg,
       newHead: lastCommit,
-      buildSize: buildSizeArg,
       patch: patchArg
     };
 
@@ -166,65 +166,119 @@ module.exports = {
   },
 
   async getGitCommits() {
-    return new Promise((resolve, reject) => {
-      exec("git cherry", (error, stdout) => {
-        if (error !== null) {
-          console.log(`exec error: ${error}`);
-          reject(error);
-        } else {
-          const cleanedup = stdout.replace(/\+ /g, "");
-          const commitarray = cleanedup.split(/\r\n|\r|\n/);
-          commitarray.pop(); // remove the last, dummy element that results from splitting on newline
-          if (commitarray.length === 0) {
-            console.log(
-              "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
-            );
-            reject();
-          }
-          if (commitarray.length === 1) {
-            const firstCommit = commitarray[0];
-            const lastCommit = null;
-            resolve({ firstCommit, lastCommit });
-          } else {
-            const firstCommit = commitarray[0];
-            const lastCommit = commitarray[commitarray.length - 1];
-            resolve({ firstCommit, lastCommit });
-          }
-        }
-      });
-    });
+    try {
+      const { stdout, stderr } = await exec("git cherry");
+      const cleanedup = stdout.replace(/\+ /g, "");
+      const commitarray = cleanedup.split(/\r\n|\r|\n/);
+      commitarray.pop(); // remove the last, dummy element that results from splitting on newline
+      if (commitarray.length === 0) {
+        console.log(
+          "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
+        );
+        process.exit();
+      }
+      if (commitarray.length === 1) {
+        const firstCommit = commitarray[0];
+        const lastCommit = null;
+        return { firstCommit, lastCommit };
+      } else {
+        const firstCommit = commitarray[0];
+        const lastCommit = commitarray[commitarray.length - 1];
+        return { firstCommit, lastCommit }
+      }
+    } catch (error) {
+      throw error;
+    }
+
+    // return new Promise((resolve, reject) => {
+    //   exec("git cherry", (error, stdout) => {
+    //     if (error !== null) {
+    //       console.log(`exec error: ${error}`);
+    //       reject(error);
+    //     } else {
+    //       const cleanedup = stdout.replace(/\+ /g, "");
+    //       const commitarray = cleanedup.split(/\r\n|\r|\n/);
+    //       commitarray.pop(); // remove the last, dummy element that results from splitting on newline
+    //       if (commitarray.length === 0) {
+    //         console.log(
+    //           "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
+    //         );
+    //         reject();
+    //       }
+    //       if (commitarray.length === 1) {
+    //         const firstCommit = commitarray[0];
+    //         const lastCommit = null;
+    //         resolve({ firstCommit, lastCommit });
+    //       } else {
+    //         const firstCommit = commitarray[0];
+    //         const lastCommit = commitarray[commitarray.length - 1];
+    //         resolve({ firstCommit, lastCommit });
+    //       }
+    //     }
+    //   });
+    // });
   },
 
-  async getUpstreamBranch(branchName) {
-    return new Promise((resolve, reject) => {
-      try {
-        exec(
-          `git rev-parse --abbrev-ref --symbolic-full-name ${branchName}@{upstream}`,
-          error => {
-            if (error === null) {
-              resolve(data);
-              return true;
-            } else {
-              if (error.code === 128) {
-                console.log(
-                  'You have not set an upstream for your local branch. Please do so with this command:','\n\n', 'git branch -u origin',
-                  '\n\n');
-              } else {
-                console.log('error finding upstream for local branch: ', error);
-              }
-            }
-          }
-        );
-      } catch (error) {
-        reject(error);
-        return false;
-      }
-    });
+  getUpstreamName(upstream) {
+    const upstreamInd = upstream.indexOf("origin/");
+    console.log("hi we are this!!!! ", upstreamInd, upstreamInd !== -1);
+    if (upstreamInd === -1) {
+      console.log(upstream);
+      return upstream;
+    } else {
+      console.log("we here");
+      const upstream = "master";
+      return upstream;
+    }
   },
-  async getGitPatchFromLocal(branchName) {
+
+  async checkUpstreamConfiguration(branchName) {
+    console.log("we are here!!!!!");
+    try {
+      const { stdout, stderr } = await exec(
+        `git rev-parse --abbrev-ref --symbolic-full-name ${branchName}@{upstream}`
+      );
+      console.log(3333, stdout);
+      return stdout;
+    } catch (error) {
+      if (error.code === 128) {
+        const errormsg =
+          "You have not set an upstream for your local branch. Please do so with this command: \
+          \n\n \
+          git branch -u <upstream-branch-name>\
+          \n\n";
+        throw errormsg;
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  async doesRemoteHaveLocalBranch(branchName) {
+    try {
+      const { stdout, stderr } = await exec(
+        `git diff ${branchName} remotes/origin/${branchName}`
+      );
+      console.log(stdout);
+      return true;
+    } catch (error) {
+      if (error.code === 128) {
+        return false;
+        //we dont want to cancel the program
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  async getGitPatchFromLocal(upstreamBranchName) {
+    console.log("we are hereeeeeeee");
+    console.log(
+      `git diff ${upstreamBranchName} --ignore-submodules > myPatch.patch`
+    );
     return new Promise((resolve, reject) => {
       exec(
-        `git diff origin/${branchName} --ignore-submodules > myPatch.patch`,
+        `git diff ${upstreamBranchName} --ignore-submodules > myPatch.patch`,
         error => {
           if (error !== null) {
             console.log("error generating patch: ", error);

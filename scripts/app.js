@@ -1,4 +1,4 @@
-const StagingUtils = require('./stagingUtils');
+const StagingUtils = require("./stagingUtils");
 
 async function main() {
   const patchFlag = process.argv[2];
@@ -31,21 +31,33 @@ async function main() {
     return;
   }
 
-
   const userName = await StagingUtils.getGitUser();
   const userEmail = await StagingUtils.getGitEmail();
   const url = await StagingUtils.getRepoInfo();
   const repoName = StagingUtils.getRepoName(url);
   const branchName = await StagingUtils.getBranchName();
   const newHead = "newHead";
-  
+
+  const upstreamConfig = await StagingUtils.checkUpstreamConfiguration(branchName);
+  console.log(upstreamConfig)
+  const upstreamName = StagingUtils.getUpstreamName(upstreamConfig).trim(); //remove \n
+
+  console.log(upstreamName);
+  const doesRemoteHaveLocalBranch = await StagingUtils.doesRemoteHaveLocalBranch(branchName);
+  console.log(doesRemoteHaveLocalBranch, doesRemoteHaveLocalBranch ? upstreamName : branchName);
+  const branchNameForPayload = doesRemoteHaveLocalBranch ? branchName : upstreamName;
+
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === "commit") {
+
     const { firstCommit, lastCommit } = await StagingUtils.getGitCommits();
-    const patch = await StagingUtils.getGitPatchFromCommits(firstCommit, lastCommit);
+    const patch = await StagingUtils.getGitPatchFromCommits(
+      firstCommit,
+      lastCommit
+    );
     const payLoad = await StagingUtils.createPayload(
       repoName,
-      branchName,
+      branchNameForPayload,
       userName,
       url,
       patch,
@@ -57,27 +69,24 @@ async function main() {
       `Github Push: ${userName}/repoName`,
       userName,
       userEmail
-    )
-    if (success !== true){
-      console.log("Failure!")
+    );
+    if (success !== true) {
+      console.log("Failure!");
     }
   }
 
   if (patchFlag === "local") {
-    const upstreamBranchSet = await StagingUtils.getUpstreamBranch(branchName)
-    if (upstreamBranchSet === false){
-      return;
-    }
-    const patch = await StagingUtils.getGitPatchFromLocal(branchName);
+    const patch = await StagingUtils.getGitPatchFromLocal(upstreamName);
     const payLoad = await StagingUtils.createPayload(
       repoName,
-      branchName,
+      branchNameForPayload,
       userName,
       url,
       patch,
       buildSize,
       newHead
     );
+    console.log(payLoad)
     const success = StagingUtils.insertJob(
       payLoad,
       `Github Push: ${userName}/repoName`,
@@ -85,13 +94,12 @@ async function main() {
       userEmail
     );
 
-    if (success !== true){
-      console.log("Failure!")
+    if (success !== true) {
+      console.log("Failure!");
     }
-    
   }
 
-  await StagingUtils.deletePatchFile();
+  //await StagingUtils.deletePatchFile();
 }
 
 main();
