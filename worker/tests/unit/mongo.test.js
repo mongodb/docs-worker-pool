@@ -1,8 +1,8 @@
 const { MongoClient } = require('mongodb');
 const mongo = require('../../utils/mongo');
+const env = require('../../utils/environment');
 
-const runXlarge =
-  process.env.XLARGE === undefined ? false : Boolean(process.env.XLARGE);
+const runXlarge = env.EnvironmentClass.getXlarge();
 const Monitor = require('../../utils/monitor').Monitor;
 
 // Helper function to add n days to the current date

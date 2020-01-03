@@ -1,7 +1,6 @@
 const fastlyToken = process.env.FASTLY_TOKEN;
 const fastlyServiceId = process.env.FASTLY_SERVICE_ID;
 const dochubMap = process.env.FASTLY_DOCHUB_MAP;
-const dochubDB = process.env.DOCHUB_DB;
 const atlasUsername = process.env.MONGO_ATLAS_USERNAME;
 const atlasPassword = process.env.MONGO_ATLAS_PASSWORD;
 const xlarge = process.env.XLARGE;
@@ -19,13 +18,13 @@ class EnvironmentClass {
     if (xlarge === undefined) {
       return false;
     }
-    return Boolean(xlarge);
+    if (xlarge === 'true') {
+      return true;
+    }
+    return false;
   }
 
   static getFastlyToken() {
-    if (fastlyToken === undefined) {
-      return 'testToken';
-    }
     return fastlyToken;
   }
 
@@ -34,13 +33,6 @@ class EnvironmentClass {
       return 'dochubMap';
     }
     return dochubMap;
-  }
-
-  static getDochubDB() {
-    if (dochubDB === undefined) {
-      return 'dochub';
-    }
-    return dochubDB;
   }
 
   static getAtlasUsername() {

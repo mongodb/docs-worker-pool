@@ -1,21 +1,19 @@
 const job = require('../../jobTypes/publishDochubJob');
 const workerUtils = require('../../utils/utils');
-const mongo = require('../../utils/mongo');
 
 const payloadObj = {
   source: 'someSource',
   target: 'someTarget',
-  email: 'email@gmail.com'
 };
 
 const payloadObjBadSource = {
-  source: 'some source',
+  sourcebad: 'some source',
   target: 'someTarget'
 };
 
 const payloadObjBadTarget = {
   source: 'someSource',
-  target: 'some target'
+  targetbad: 'some target'
 };
 
 const payloadNoEmail = {
@@ -24,7 +22,8 @@ const payloadNoEmail = {
 };
 
 const testPayloadGood = {
-  payload: payloadObj
+  payload: payloadObj,
+  email: 'testemail'
 };
 
 const testPayloadWithoutEmail = {
@@ -32,20 +31,14 @@ const testPayloadWithoutEmail = {
 };
 
 const testPayloadBadSource = {
-  payload: payloadObjBadSource
+  payload: payloadObjBadSource,
+  email: 'testemail'
 };
 
 const testPayloadBadTarget = {
-  payload: payloadObjBadTarget
+  payload: payloadObjBadTarget,
+  email: 'testemail'
 };
-
-const doc = [
-  {
-    _id: { $oid: '4db32eacdbd1ff5a7a24ff17' },
-    url: 'http://www.mongodb.org/display/DOCS/Collections',
-    name: 'collections'
-  }
-];
 
 const error = new Error('job not valid');
 
@@ -60,29 +53,18 @@ describe('Test Class', () => {
   // Tests for dochubpublish() function
 
   it('runPublishDochub() rejects properly killed', async () => {
-    mongo.getDochubArray = jest.fn().mockResolvedValue(doc);
     expect(await job.runPublishDochub(testPayloadGood)).toBeUndefined();
   });
   // Tests for RunPublishDochub Function
 
   it('runPublishDochub() rejects lack of map', async () => {
-    mongo.getDochubArray = jest.fn().mockResolvedValue(undefined);
-    let thrownError;
-    try {
-      job.safePublishDochub(testPayloadGood).toBeCalled();
-    } catch (e) {
-      thrownError = e;
-    }
-    expect(thrownError).toEqual(error);
+    expect(job.safePublishDochub(testPayloadGood)).toBeTruthy();
   });
 
   it('runPublishDochub(): no email --> should fail to run', async () => {
-    job.build = jest.fn().mockRejectedValue(error);
     await expect(job.runPublishDochub(testPayloadWithoutEmail)).rejects.toEqual(
       error
     );
-    jest.runAllTimers();
-    expect(job.build).toHaveBeenCalledTimes(0);
   });
 
   // Sanitize

@@ -94,8 +94,13 @@ module.exports = {
   },
 
   async validateUrl(url) {
+    console.log(`running validation for url ${url}`);
     const request = require('request');
-    request.get(url, function(err, res) {
+    request.get(url, function (err, res) {
+      if (err) {
+        console.log('error getting url');
+        return false;
+      }
       if (res != null) {
         return res.status != 404;
       }

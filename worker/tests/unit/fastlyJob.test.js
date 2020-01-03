@@ -7,7 +7,6 @@ const FastlyJob = require('../../utils/fastlyJob').FastlyJobClass;
 const payloadObj = {
   source: 'someSource',
   target: 'someTarget',
-  email: 'email@gmail.com'
 };
 
 const goodDochuhJob = {
@@ -20,6 +19,11 @@ const doc = {
   name: 'collections'
 };
 
+const map = {
+  'source': 'source',
+  'target': 'target'
+};
+
 describe('Fastly Job Test Class', () => {
   beforeAll(() => {});
 
@@ -29,16 +33,10 @@ describe('Fastly Job Test Class', () => {
 
   afterEach(() => {});
 
-  it('Fastly Job Class Test', async () => {
-    const fastlyJob = new FastlyJob(goodDochuhJob);
-    fastlyJob.connectAndUpsert = jest.fn().mockImplementation(() => {
-      return { success: true };
-    });
-    expect(fastlyJob.connectAndUpsert([doc])).toEqual({ success: true });
-  });
-
   it('FastlyJob test connect and upsert', async () => {
-    const fastlyJob = new FastlyJob(goodDochuhJob);
-    expect(fastlyJob.connectAndUpsert([doc])).toBeDefined();
+    const fastly = new FastlyJob(this.goodDochuhJob);
+    return fastly.connectAndUpsert(map).catch(error => {
+      expect(error).toBeDefined();
+    });
   });
 });

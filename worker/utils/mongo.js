@@ -13,8 +13,6 @@ const DB_NAME = EnvironmentClass.getDB(); // Database name of the queue in Mongo
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
 const META_NAME = 'meta';
 const MONITOR_NAME = 'monitor';
-const FASTLY_NAME = 'keys';
-const DOCHUB_NAME = EnvironmentClass.getDochubDB();
 
 // Hold onto the client
 let client;
@@ -48,19 +46,6 @@ module.exports = {
       return client.db(DB_NAME).collection(META_NAME);
     }
     return null;
-  },
-
-  getDochubCollection() {
-    if (client) {
-      return client.db(DOCHUB_NAME).collection(FASTLY_NAME);
-    }
-    return null;
-  },
-
-  async getDochubArray() {
-    return await this.getDochubCollection()
-      .find({})
-      .toArray();
   },
 
   async reportStatus(monitor) {
