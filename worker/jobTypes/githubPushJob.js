@@ -129,12 +129,8 @@ async function runGithubPush(currentJob) {
     isMaster = false;
   }
 
-  if (isMaster) {
-    // TODO: push to prod
-  } else {
-    console.log('pushing to stage');
-    await pushToStage(publisher, logger);
-  }
+  console.log('pushing to stage');
+  await pushToStage(publisher, logger);
 
   const files = workerUtils.getFilesInDir(
     './' + currentJob.payload.repoName + '/build/public' + branchext
