@@ -32,10 +32,10 @@ module.exports = {
     const updateDoc = { $setOnInsert: newJob };
 
     const uri = `mongodb+srv://${username}:${secret}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
-    const client = new MongoClient(uri, { useNewUrlParser: true });
+    const client = new MongoClient(uri, { useUnifiedTopology: true, useNewUrlParser: true });
     client.connect(err => {
       if (err) {
-        console.log("error connecting to Mongo");
+        console.err("error connecting to Mongo");
         return err;
       }
       const collection = client.db(dbName).collection(collName);
@@ -46,14 +46,13 @@ module.exports = {
               "You successfully enqued a staging job to docs autobuilder. This is the record id: ",
               result.upsertedId
             );
-            console.log(newJob);
             return true;
           }
-          console.log("Already existed ", newJob);
+          console.log("This job already exists ");
           return "Already Existed";
         },
         error => {
-          console.log(
+          console.err(
             "There was an error enqueing a staging job to docs autobuilder. Here is the error: ",
             error
           );
@@ -95,7 +94,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       exec("git rev-parse --abbrev-ref HEAD", (error, stdout) => {
         if (error !== null) {
-          console.log(`exec error: ${error}`);
+          console.err(`exec error: ${error}`);
           reject(error);
         }
         resolve(stdout.replace("\n", ""));
@@ -117,7 +116,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       exec("rm myPatch.patch", error => {
         if (error !== null) {
-          console.log("exec error deleting patch file: ", error);
+          console.err("exec error deleting patch file: ", error);
           reject(error);
         }
         resolve("successfully removed patch file");
@@ -129,7 +128,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       exec("git config --get remote.origin.url", (error, stdout) => {
         if (error !== null) {
-          console.log(`exec error: ${error}`);
+          console.err(`exec error: ${error}`);
           reject(error);
         }
 
@@ -143,7 +142,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       exec("git config --global user.email", (error, stdout) => {
         if (error !== null) {
-          console.log(`exec error: ${error}`);
+          console.err(`exec error: ${error}`);
           reject(error);
         } else {
           resolve(stdout.replace("\n", ""));
@@ -156,7 +155,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       exec("git config --global user.name", (error, stdout) => {
         if (error !== null) {
-          console.log(`exec error: ${error}`);
+          console.err(`exec error: ${error}`);
           reject(error);
         } else {
           resolve(stdout.replace("\n", ""));
@@ -190,55 +189,25 @@ module.exports = {
       throw error;
     }
 
-    // return new Promise((resolve, reject) => {
-    //   exec("git cherry", (error, stdout) => {
-    //     if (error !== null) {
-    //       console.log(`exec error: ${error}`);
-    //       reject(error);
-    //     } else {
-    //       const cleanedup = stdout.replace(/\+ /g, "");
-    //       const commitarray = cleanedup.split(/\r\n|\r|\n/);
-    //       commitarray.pop(); // remove the last, dummy element that results from splitting on newline
-    //       if (commitarray.length === 0) {
-    //         console.log(
-    //           "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
-    //         );
-    //         reject();
-    //       }
-    //       if (commitarray.length === 1) {
-    //         const firstCommit = commitarray[0];
-    //         const lastCommit = null;
-    //         resolve({ firstCommit, lastCommit });
-    //       } else {
-    //         const firstCommit = commitarray[0];
-    //         const lastCommit = commitarray[commitarray.length - 1];
-    //         resolve({ firstCommit, lastCommit });
-    //       }
-    //     }
-    //   });
-    // });
   },
 
   getUpstreamName(upstream) {
     const upstreamInd = upstream.indexOf("origin/");
-    console.log("hi we are this!!!! ", upstreamInd, upstreamInd !== -1);
     if (upstreamInd === -1) {
-      console.log(upstream);
       return upstream;
     } else {
-      console.log("we here");
       const upstream = "master";
       return upstream;
     }
   },
 
   async checkUpstreamConfiguration(branchName) {
-    console.log("we are here!!!!!");
+
     try {
       const { stdout, stderr } = await exec(
         `git rev-parse --abbrev-ref --symbolic-full-name ${branchName}@{upstream}`
       );
-      console.log(3333, stdout);
+
       return stdout;
     } catch (error) {
       if (error.code === 128) {
@@ -259,7 +228,7 @@ module.exports = {
       const { stdout, stderr } = await exec(
         `git diff ${branchName} remotes/origin/${branchName}`
       );
-      console.log(stdout);
+
       return true;
     } catch (error) {
       if (error.code === 128) {
@@ -272,16 +241,13 @@ module.exports = {
   },
 
   async getGitPatchFromLocal(upstreamBranchName) {
-    console.log("we are hereeeeeeee");
-    console.log(
-      `git diff ${upstreamBranchName} --ignore-submodules > myPatch.patch`
-    );
+
     return new Promise((resolve, reject) => {
       exec(
         `git diff ${upstreamBranchName} --ignore-submodules > myPatch.patch`,
         error => {
           if (error !== null) {
-            console.log("error generating patch: ", error);
+            console.err("error generating patch: ", error);
             reject(error);
           } else {
             fs.readFile("myPatch.patch", "utf8", (err, data) => {
@@ -303,7 +269,7 @@ module.exports = {
         const patchCommand = "git show HEAD > myPatch.patch";
         exec(patchCommand, error => {
           if (error !== null) {
-            console.log("error generating patch: ", error);
+            console.err("error generating patch: ", error);
             reject(error);
           } else {
             fs.readFile("myPatch.patch", "utf8", (err, data) => {
@@ -319,7 +285,7 @@ module.exports = {
         const patchCommand = `git diff ${firstCommit}^...${lastCommit} > myPatch.patch`;
         exec(patchCommand, error => {
           if (error !== null) {
-            console.log("error generating patch: ", error);
+            console.err("error generating patch: ", error);
             reject(error);
           } else {
             fs.readFile("myPatch.patch", "utf8", (err, data) => {
@@ -351,8 +317,7 @@ module.exports = {
       missingConfigs.push("SECRET");
     }
     if (missingConfigs.length !== 0) {
-      console.log(missingConfigs);
-      console.log(
+      console.err(
         `The ~/.config/.snootyenv file is found but does not contain the following required fields: ${missingConfigs.toString()}`
       );
       process.exit();
