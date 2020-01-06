@@ -1,4 +1,3 @@
-
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
 const simpleGit = require('simple-git/promise');
@@ -24,11 +23,7 @@ async function verifyUserEntitlements(currentJob){
     const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
     const publishedBranches = repoContent['content']['git']['branches']['published']
 
-    if (publishedBranches.includes(currentJob.payload.branchName)) {
-      return true
-    }
-    
-    return false
+    return publishedBranches.includes(currentJob.payload.branchName);
     
   }
 //anything that is passed to an exec must be validated or sanitized
@@ -154,20 +149,9 @@ async function runGithubProdPush(currentJob) {
   console.log('completed build');
 
   let branchext = '';
-  let isMaster = true;
 
-  if (currentJob.payload.branchName !== 'master') {
-    branchext = '-' + currentJob.payload.branchName;
-    isMaster = false;
-  }
-
-  if (isMaster) {
-    console.log('pushing to prod')
-    await pushToProduction(publisher, logger);
-  } else {
-    console.log('pushing to stage');
-    await pushToStage(publisher, logger);
-  }
+  console.log('pushing to prod')
+  await pushToProduction(publisher, logger);
 
   const files = workerUtils.getFilesInDir(
     './' + currentJob.payload.repoName + '/build/public' + branchext
