@@ -1,14 +1,14 @@
-const fs = require('fs-extra');
+//const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
-const simpleGit = require('simple-git/promise');
 const validator = require('validator');
 
 const buildTimeout = 60 * 450;
-const uploadToS3Timeout = 20;
 
 const invalidJobDef = new Error('job not valid');
+
+
 
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
@@ -60,6 +60,7 @@ async function startGithubBuild(job, logger) {
 
     return new Promise(function(resolve, reject) {
       resolve(true);
+      reject(false);
     });
   }
 }
@@ -76,6 +77,7 @@ async function pushToStage(publisher, logger) {
 
     return new Promise(function(resolve, reject) {
       resolve(true);
+      reject(false);
     });
   }
 }
@@ -89,13 +91,21 @@ async function runGithubPush(currentJob) {
     !currentJob.payload.repoName ||
     !currentJob.payload.branchName
   ) {
-    workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
+    workerUtils.logInMongo(
+      currentJob,
+      `${'(BUILD)'.padEnd(15)}failed due to insufficient definition`
+    );
     throw invalidJobDef;
   }
 
   // master branch cannot run through staging build
   if (currentJob.payload.branchName === 'master') {
-    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, master branch not supported on staging builds`);
+    workerUtils.logInMongo(
+      currentJob,
+      `${'(BUILD)'.padEnd(
+        15
+      )} failed, master branch not supported on staging builds`
+    );
     throw new Error('master branches not supported');
   }
 
@@ -107,7 +117,7 @@ async function runGithubPush(currentJob) {
       },
       sendSlackMsg: function(message) {
         workerUtils.populateCommunicationMessageInMongo(currentJob, message);
-      },
+      }
     };
   };
 
@@ -144,5 +154,5 @@ async function runGithubPush(currentJob) {
 
 module.exports = {
   runGithubPush,
-  safeGithubPush,
+  safeGithubPush
 };

@@ -1,17 +1,16 @@
 const workerUtils = require('../utils/utils');
 const validator = require('validator');
-
 const invalidJobDef = new Error('job not valid');
-const invalidEnvironment = new Error('environment variables missing for jobtype');
-const FastlyJob = require('../jobTypes/fastlyJob').FastlyJobClass
+const invalidEnvironment = new Error(
+  'environment variables missing for jobtype'
+);
+const FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
+const EnvironmentClass = require('../utils/environment').EnvironmentClass;
 
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
 function safeString(stringToCheck) {
-  return (
-    validator.isAscii(stringToCheck) //&&
-    //validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
-  );
+  return validator.isAscii(stringToCheck);
 }
 
 function safePublishDochub(currentJob) {
@@ -38,22 +37,10 @@ function safePublishDochub(currentJob) {
   throw invalidJobDef;
 }
 
-async function startFastly(job) {
-  // retrieve Fastly service
-  var fastly = require('fastly')(`${process.env.FASTLY_TOKEN}`)
-
-  // connect to MongoDB dochub database
-  const MongoClient = require("mongodb").MongoClient;
-  assert = require("assert")
-
-  job.connectAndUpsert(MongoClient, fastly, "dochub", "keys");
-}
-
 async function runPublishDochub(currentJob) {
-
   workerUtils.logInMongo(currentJob, ' ** Running dochub-fastly migration');
 
-  if (process.env.FASTLY_TOKEN === undefined) {
+  if (EnvironmentClass.getFastlyToken() === undefined) {
     workerUtils.logInMongo(currentJob, 'missing env variable: fastly token');
     throw invalidEnvironment;
   }
@@ -65,16 +52,34 @@ async function runPublishDochub(currentJob) {
     !currentJob.payload.target ||
     !currentJob.email
   ) {
-    workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
+    workerUtils.logInMongo(
+      currentJob,
+      `${'(DOCHUB)'.padEnd(15)}failed due to insufficient definition`
+    );
     throw invalidJobDef;
   }
 
-  const job = new FastlyJob(currentJob);
+  let map = {
+    'source': currentJob.payload.source,
+    'target': currentJob.payload.target
+  };
 
-  await startFastly(job);
+  if (map === undefined) {
+    workerUtils.logInMongo(
+      currentJob,
+      `${'(DOCHUB)'.padEnd(15)}failed due to no targets defined`
+    );
+    throw invalidJobDef;
+  }
+  
+  const initFastly = new FastlyJob(currentJob);
+  await initFastly.connectAndUpsert(map).then().catch (err => {
+    workerUtils.logInMongo(currentJob, `could not complete map ${err}`);
+    throw invalidEnvironment;
+  });
 }
 
 module.exports = {
   runPublishDochub,
-  safePublishDochub,
+  safePublishDochub
 };
