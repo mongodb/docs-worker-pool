@@ -26,7 +26,6 @@ class S3PublishClass {
     // check if need to build next-gen instead
     for (let i = 0; i < workerLines.length; i++) {
       if (workerLines[i] === '"build-and-stage-next-gen"') {
-        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
         stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
         break;
       }
@@ -92,7 +91,6 @@ class S3PublishClass {
     // check if need to build next-gen instead -- does this need to happen for make deploy as well???
     for (let i = 0; i < workerLines.length; i++) {
       if (workerLines[i] === '"build-and-stage-next-gen"') {
-        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
         deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
         break;
       }
