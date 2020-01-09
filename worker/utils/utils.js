@@ -165,17 +165,17 @@ module.exports = {
             const yamlParsed = yaml.safeLoad(body);
             returnObject['status'] = 'success';
             returnObject['content'] = yamlParsed;
+            resolve(returnObject)
           } catch(e) {
             console.log('ERROR parsing yaml file!', repoObject, e);
             returnObject['status'] = 'failure';
+            reject(returnObject)
           }
         } else {
           returnObject['status'] = 'failure';
           returnObject['content'] = response;
+          resolve(returnObject)
         }
-        console.log(returnObject);
-        console.log(returnObject['content']['git']['branches']['published']);
-        resolve(returnObject);
       });
     });
   },

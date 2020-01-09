@@ -11,6 +11,8 @@ const invalidJobDef = new Error('job not valid');
 async function verifyUserEntitlements(currentJob){
     const user = currentJob.user;
     const entitlementsObject = await workerUtils.getUserEntitlements(user);
+    const repoOwner = currentJob.payload.repoOwner;
+    const repoName = currentJob.payload.repoName
     if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
       return true;
     } else {
@@ -22,7 +24,6 @@ async function verifyUserEntitlements(currentJob){
     const repoObject = { repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName};
     const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
     const publishedBranches = repoContent['content']['git']['branches']['published']
-
     return publishedBranches.includes(currentJob.payload.branchName);
     
   }
@@ -97,10 +98,8 @@ async function pushToProduction(publisher, logger) {
 }
 
 async function runGithubProdPush(currentJob) {
-  console.log("inside production deploy job")
   const ispublishable = verifyBranchConfiguredForPublish(currentJob);
   const userIsEntitled = verifyUserEntitlements(currentJob);
-
   if (ispublishable === false){
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to 
     
@@ -109,7 +108,7 @@ async function runGithubProdPush(currentJob) {
     process.exit
   }
   if(userIsEntitled === false){
-    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${repoOwner}/${repoName}) for master branch`);
+    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${currentJob.repoOwner}/${currentJob.repoName}) for master branch`);
     throw new Error('entitlement failed');
     process.exit
   }
@@ -163,4 +162,7 @@ async function runGithubProdPush(currentJob) {
 module.exports = {
   runGithubProdPush,
   safeGithubProdPush,
+  verifyBranchConfiguredForPublish, 
+  verifyUserEntitlements, 
+  pushToProduction
 };
