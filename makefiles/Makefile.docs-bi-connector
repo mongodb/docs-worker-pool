@@ -34,7 +34,8 @@ next-gen-html:
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	npm run build; \
-	mut-redirects config/redirects -o build/public/.htaccess; \
+	mut-redirects config/redirects -o public/.htaccess; \
+	cd public && ls && cat .htaccess; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
