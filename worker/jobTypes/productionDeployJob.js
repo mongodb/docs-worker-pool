@@ -5,6 +5,7 @@ const validator = require('validator');
 const workerUtils = require('../utils/utils');
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
+const Logger = require("../utils/logger").LoggerClass;
 
 const invalidJobDef = new Error('job not valid');
 
@@ -124,19 +125,6 @@ async function runGithubProdPush(currentJob) {
     workerUtils.logInMongo(currentJob,`${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
     throw invalidJobDef;
   }
-
-
-  // TODO: create logging class somewhere else.. for now it's here
-  const Logger = function(currentJob) {
-    return {
-      save: function(message) {
-        workerUtils.logInMongo(currentJob, message);
-      },
-      sendSlackMsg: function(message) {
-        workerUtils.populateCommunicationMessageInMongo(currentJob, message);
-      },
-    };
-  };
 
   // instantiate github job class and logging class
   const job = new GitHubJob(currentJob);

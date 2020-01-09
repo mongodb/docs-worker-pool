@@ -4,6 +4,7 @@ const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
 const simpleGit = require('simple-git/promise');
 const validator = require('validator');
+const Logger = require("../utils/logger").LoggerClass;
 
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
@@ -99,18 +100,6 @@ async function runGithubPush(currentJob) {
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, master branch not supported on staging builds`);
     throw new Error('master branches not supported');
   }
-
-  // TODO: create logging class somewhere else.. for now it's here
-  const Logger = function(currentJob) {
-    return {
-      save: function(message) {
-        workerUtils.logInMongo(currentJob, message);
-      },
-      sendSlackMsg: function(message) {
-        workerUtils.populateCommunicationMessageInMongo(currentJob, message);
-      },
-    };
-  };
 
   // instantiate github job class and logging class
   const job = new GitHubJob(currentJob);
