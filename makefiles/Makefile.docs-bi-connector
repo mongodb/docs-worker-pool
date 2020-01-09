@@ -34,14 +34,14 @@ next-gen-html:
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR}; \
-	cd ../; \
-	mut-redirects config/redirects -o public/.htaccess; \
-	cd public && ls && cat .htaccess; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+	
+next-gen-publish:
+	mut-redirects config/redirects -o public/.htaccess;
 
 publish: ## Builds this branch's publishable HTML and other artifacts under build/public
 	giza make publish
