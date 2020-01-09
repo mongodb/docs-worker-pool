@@ -11,14 +11,14 @@ class S3PublishClass {
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
     const stageCommands = [
       `. /venv/bin/activate`,
-      `cd repos/${this.GitHubJob.getRepoDirName(GitHubJob.currentJob)}`,
+      `cd repos/${this.GitHubJob.getRepoDirName()}`,
       `make stage`, 
     ];
 
     // the way we now build is to search for a specific function string in worker.sh
     // which then maps to a specific target that we run
     const workerContents = fs.readFileSync(
-      `repos/${this.GitHubJob.getRepoDirName(GitHubJob.currentJob)}/worker.sh`,
+      `repos/${this.GitHubJob.getRepoDirName()}/worker.sh`,
       { encoding: 'utf8' }
     );
     const workerLines = workerContents.split(/\r?\n/);
@@ -70,12 +70,12 @@ class S3PublishClass {
   async pushToProduction(logger) {    
     const publishPrepCommands = [
       `. /venv/bin/activate`,
-      `cd repos/${this.GitHubJob.getRepoDirName(this.GitHubJob.currentJob)}`,
+      `cd repos/${this.GitHubJob.getRepoDirName()}`,
       `make publish`
     ]
     const deployCommands = [
       `. /venv/bin/activate`,
-      `cd repos/${this.GitHubJob.getRepoDirName(this.GitHubJob.currentJob)}`,
+      `cd repos/${this.GitHubJob.getRepoDirName()}`,
       `make publish`,
       `make stage`
     ];
@@ -83,7 +83,7 @@ class S3PublishClass {
     // the way we now build is to search for a specific function string in worker.sh
     // which then maps to a specific target that we run
     const workerContents = fs.readFileSync(
-      `repos/${this.GitHubJob.getRepoDirName(this.GitHubJob.currentJob)}/worker.sh`,
+      `repos/${this.GitHubJob.getRepoDirName()}/worker.sh`,
       { encoding: 'utf8' }
     );
     const workerLines = workerContents.split(/\r?\n/);
