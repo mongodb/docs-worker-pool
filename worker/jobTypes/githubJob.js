@@ -8,7 +8,7 @@ class GitHubJobClass {
   // pass in a job payload to setup class
   constructor(currentJob) {
     this.currentJob = currentJob;
-    this.stageCommands = [];
+    this.deployCommands = [];
   }
 
   // get base path for public/private repos
@@ -48,7 +48,7 @@ class GitHubJobClass {
     const currentJob = this.currentJob;
     logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
     try {
-      workerUtils.removeDirectory(`repos/${this.getRepoDirName()}`);
+      workerUtils.removeDirectory(`repos/${this.getRepoDirName(currentJob)}`);
     } catch (errResult) {
       logger.save(`${'(CLEANUP)'.padEnd(15)}failed cleaning repo directory`);
       throw errResult;
@@ -72,7 +72,7 @@ class GitHubJobClass {
       const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
       await simpleGit('repos')
         .silent(false)
-        .clone(repoPath, `${this.getRepoDirName()}`)
+        .clone(repoPath, `${this.getRepoDirName(currentJob)}`)
         .catch(err => {
           console.error('failed: ', err);
           throw err;
@@ -110,7 +110,7 @@ class GitHubJobClass {
       const repoPath = basePath + '/' + currentJob.payload.repoOwner + '/' + currentJob.payload.repoName;
 
       const pullRepoCommands = [
-        `cd repos/${this.getRepoDirName()}`,
+        `cd repos/${this.getRepoDirName(currentJob)}`,
         `git checkout ${currentJob.payload.branchName}`,
         `git pull origin ${currentJob.payload.branchName}`,
       ];
@@ -120,26 +120,26 @@ class GitHubJobClass {
       // default commands to run to build repo
       const commandsToBuild = [
         `. /venv/bin/activate`,
-        `cd repos/${this.getRepoDirName()}`,
+        `cd repos/${this.getRepoDirName(currentJob)}`,
         `rm -f makefile`,
         `make html`,
       ];
 
-      const stageCommands = [
+      const deployCommands = [
         `. /venv/bin/activate`,
-        `cd repos/${this.getRepoDirName()}`,
+        `cd repos/${this.getRepoDirName(currentJob)}`,
         `make stage`,
       ];
 
       // the way we now build is to search for a specific function string in worker.sh
       // which then maps to a specific target that we run
-      const workerContents = fs.readFileSync(`repos/${this.getRepoDirName()}/worker.sh`, { encoding: 'utf8' });
+      const workerContents = fs.readFileSync(`repos/${this.getRepoDirName(currentJob)}/worker.sh`, { encoding: 'utf8' });
       const workerLines = workerContents.split(/\r?\n/);
 
       // overwrite repo makefile with the one our team maintains
       const makefileContents = await this.downloadMakefile();
       if (makefileContents && makefileContents.status === 'success') {
-        await fs.writeFileSync(`repos/${this.getRepoDirName()}/Makefile`, makefileContents.content, { encoding: 'utf8', flag: 'w' });
+        await fs.writeFileSync(`repos/${this.getRepoDirName(currentJob)}/Makefile`, makefileContents.content, { encoding: 'utf8', flag: 'w' });
       } else {
         console.log('ERROR: makefile does not exist in /makefiles directory on meta branch.');
       }
@@ -148,13 +148,13 @@ class GitHubJobClass {
       for (let i = 0; i < workerLines.length; i++) {
         if (workerLines[i] === '"build-and-stage-next-gen"') {
           commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-          stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
+          deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
           break;
         }
       }
 
-      // set this to data property so stage class can pick it up later
-      this.stageCommands = stageCommands;
+      // set this to data property so deploy class can pick it up later
+      this.deployCommands = deployCommands;
 
       const execTwo = workerUtils.getExecPromise();
 
@@ -183,7 +183,6 @@ class GitHubJobClass {
   }
 
 }
-
 
 module.exports = {
   GitHubJobClass: GitHubJobClass

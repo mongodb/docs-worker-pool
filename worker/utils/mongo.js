@@ -12,8 +12,6 @@ const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database 
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
 const META_NAME = 'meta';
 const MONITOR_NAME = 'monitor';
-const ENTITLEMENTS_NAME = 'entitlements';
-
 
 // Hold onto the client
 let client;
@@ -43,14 +41,6 @@ module.exports = {
   getMetaCollection() {
     if (client) {
       return client.db(DB_NAME).collection(META_NAME);
-    }
-    return null;
-  },
-
-
-  getEntitlementsCollection() {
-    if (client) {
-      return client.db(DB_NAME).collection(ENTITLEMENTS_NAME);
     }
     return null;
   },

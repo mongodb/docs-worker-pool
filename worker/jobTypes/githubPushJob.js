@@ -64,7 +64,6 @@ async function startGithubBuild(job, logger) {
   }
 }
 
-
 async function pushToStage(publisher, logger) {
   const stageOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
@@ -129,8 +128,12 @@ async function runGithubPush(currentJob) {
     isMaster = false;
   }
 
-  console.log('pushing to stage');
-  await pushToStage(publisher, logger);
+  if (isMaster) {
+    // TODO: push to prod
+  } else {
+    console.log('pushing to stage');
+    await pushToStage(publisher, logger);
+  }
 
   const files = workerUtils.getFilesInDir(
     './' + currentJob.payload.repoName + '/build/public' + branchext
