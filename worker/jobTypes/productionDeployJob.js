@@ -5,7 +5,7 @@ const validator = require('validator');
 const workerUtils = require('../utils/utils');
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
-const Logger = require("../utils/logger").LoggerClass;
+const Logger = require('../utils/logger').LoggerClass;
 
 const invalidJobDef = new Error('job not valid');
 

@@ -4,13 +4,12 @@ const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
 const simpleGit = require('simple-git/promise');
 const validator = require('validator');
-const Logger = require("../utils/logger").LoggerClass;
+const Logger = require('../utils/logger').LoggerClass;
 
 const buildTimeout = 60 * 450;
 const uploadToS3Timeout = 20;
 
 const invalidJobDef = new Error('job not valid');
-
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
 function safeString(stringToCheck) {
