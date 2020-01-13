@@ -13,6 +13,15 @@ const metaObject = {
   ]
 };
 
+const entitlementObject = {
+  'github_username': 'danielborowski',
+  'slack_user_id': 'UCM6QGECD',
+  'repos': [
+    'mongodb/docs-realm',
+    'mongodb/docs-bi-connector',
+  ]
+};
+
 const publishedBranchObject = {
   repoOwner: 'danielborowski',
   repoName: 'docs-spark-connector',
@@ -31,6 +40,10 @@ describe('Mongo Tests', () => {
     // add repos for meta collection
     const metaColl = db.collection('meta');
     await metaColl.insertMany([metaObject]);
+
+    // add mock entitlements
+    const entitlementsColl = db.collection('entitlements');
+    await entitlementsColl.insertMany([entitlementObject]);
 
     await expect(workerUtils.resetDirectory('work/')).resolves.toBeUndefined();
   });
@@ -81,6 +94,17 @@ describe('Mongo Tests', () => {
   it('getExecPromise()', async () => {
     const exec = workerUtils.getExecPromise();
     await expect(exec('lssss')).rejects.toBeTruthy();
+  });
+
+  it('getUserEntitlements function is validated', async () => {
+    const entitlementCollection = db.collection('entitlements');
+    mongo.getEntitlementsCollection = jest.fn().mockReturnValue(entitlementCollection);
+    const githubUsername = 'danielborowski';
+    const entitlements = await workerUtils.getUserEntitlements(githubUsername);
+    expect(entitlements).toBeDefined();
+    expect(entitlements).toBeTruthy();
+    expect(entitlements).toBeInstanceOf(Object);
+    expect(entitlements).toHaveProperty('repos');
   });
 
   it('get all repos from meta collection', async () => {
