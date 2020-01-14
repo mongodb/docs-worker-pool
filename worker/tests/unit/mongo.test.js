@@ -1,7 +1,8 @@
 const { MongoClient } = require('mongodb');
 const mongo = require('../../utils/mongo');
+const env = require('../../utils/environment');
 
-const runXlarge = process.env.XLARGE === undefined ? false : Boolean(process.env.XLARGE);
+const runXlarge = env.EnvironmentClass.getXlarge();
 const Monitor = require('../../utils/monitor').Monitor;
 
 // Helper function to add n days to the current date
@@ -22,7 +23,7 @@ const job1 = {
   numFailures: 0,
   failures: [],
   result: null,
-  logs: {},
+  logs: {}
 };
 
 // Job2 should be the second job taken off the queue because it has the earliest createdTime

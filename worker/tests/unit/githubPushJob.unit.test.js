@@ -1,8 +1,6 @@
 const job = require('../../jobTypes/githubPushJob');
 const workerUtils = require('../../utils/utils');
 
-const fs = require('fs-extra');
-
 const payloadObj = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test',
@@ -37,23 +35,23 @@ const payloadNoBranch = {
 };
 
 const testPayloadWithRepo = {
-  payload: payloadObj,
+  payload: payloadObj
 };
 
 const testPayloadWithoutBranch = {
-  payload: payloadNoBranch,
+  payload: payloadNoBranch
 };
 
 const testPayloadBadRepo = {
-  payload: payloadObjBadRepo,
+  payload: payloadObjBadRepo
 };
 
 const testPayloadBadBranch = {
-  payload: payloadObjBadBranch,
+  payload: payloadObjBadBranch
 };
 
 const testPayloadBadOwner = {
-  payload: payloadObjBadOwner,
+  payload: payloadObjBadOwner
 };
 
 const error = new Error('job not valid');
@@ -75,7 +73,7 @@ describe('Test Class', () => {
     const execMock = jest.fn().mockRejectedValue({ killed: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
     await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
-      killed: true,
+      killed: true
     });
   });
 
@@ -83,7 +81,7 @@ describe('Test Class', () => {
     const execMock = jest.fn().mockRejectedValue({ code: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
     await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
-      code: true,
+      code: true
     });
   });
 
@@ -91,14 +89,16 @@ describe('Test Class', () => {
     const execMock = jest.fn().mockRejectedValue({ signal: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
     await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
-      signal: true,
+      signal: true
     });
   });
 
   it('build() resolves properly notsignal', async () => {
     const execMock = jest.fn().mockRejectedValue({ notSignal: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.runGithubPush(testPayloadWithRepo)).resolves.toBeUndefined();
+    await expect(
+      job.runGithubPush(testPayloadWithRepo)
+    ).resolves.toBeUndefined();
   });
 
   // Tests for RunGithubPush Function
@@ -132,11 +132,9 @@ describe('Test Class', () => {
   //sanitize
   it('sanitize(): If repo invalid --> should reject', async () => {
     job.safeGithubPush = jest.fn().mockRejectedValue(error);
-    await expect(job.safeGithubPush(testPayloadBadRepo)).rejects.toEqual(
-      error
-    );
+    await expect(job.safeGithubPush(testPayloadBadRepo)).rejects.toEqual(error);
   });
-  
+
   it('sanitize(): If branch invalid --> should reject', async () => {
     await expect(job.safeGithubPush(testPayloadBadBranch)).rejects.toEqual(
       error

@@ -9,6 +9,10 @@ const workerUtils = require('./utils/utils');
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
+const {
+  runPublishDochub,
+  safePublishDochub
+} = require('./jobTypes/publishDochubJob');
 
 // add some application monitoring
 const monitorInstance = new Monitor({ component: 'worker' }, mongo);
@@ -36,7 +40,8 @@ const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60 * 10) * 1000;
 // **** IF YOU ARE ADDING A FUNCTION --> ADD IT TO THIS DICTIONARY
 // Dictionary of possible jobs for this node
 const jobTypeToFunc = {
-  githubPush: { function: runGithubPush, safe: safeGithubPush }
+  githubPush: { function: runGithubPush, safe: safeGithubPush },
+  publishDochub: { function: runPublishDochub, safe: safePublishDochub }
 };
 
 // route for liveness check
@@ -65,8 +70,8 @@ module.exports = {
   getLiveness() {
     const timeSince = new Date().getTime() - lastCheckIn.getTime();
     if (timeSince > maxCheckIn) {
-      const errMsg = `Server has not checked in ${timeSince
-        / 1000} seconds (maxCheckin = ${maxCheckIn})`;
+      const errMsg = `Server has not checked in ${timeSince /
+        1000} seconds (maxCheckin = ${maxCheckIn})`;
       return { status: 500, msg: errMsg };
     }
     const success = `Server checked in ${timeSince / 1000} seconds ago`;
@@ -139,7 +144,7 @@ module.exports = {
           mongo.getNextJob(queueCollection),
           'Mongo Timeout Error: Timed out getting next job from queue collection'
         )
-        .catch((error) => {
+        .catch(error => {
           console.log('connection timeout');
           monitorInstance.reportStatus(`error getting job ${error}`);
         });
@@ -155,8 +160,8 @@ module.exports = {
 
         // Throw error if we cannot perform this job / it is not a valid job
         if (
-          !currentJob.payload.jobType
-          || !(currentJob.payload.jobType in jobTypeToFunc)
+          !currentJob.payload.jobType ||
+          !(currentJob.payload.jobType in jobTypeToFunc)
         ) {
           throw new Error(
             `Job type of (${currentJob.payload.jobType}) not recognized`
@@ -186,7 +191,7 @@ module.exports = {
             mongo.finishJobWithResult(queueCollection, currentJob, result),
             `Mongo Timeout Error: Timed out finishing successful job with jobId: ${currentJob._id}`
           )
-          .catch((error) => {
+          .catch(error => {
             console.log(error);
           });
 
@@ -242,7 +247,7 @@ module.exports = {
             {
               retries: 3
             }
-          ).catch((errObj) => {
+          ).catch(errObj => {
             console.log(
               `****** finishJobWithFailure failed for job ${
                 lastJob._id
