@@ -95,14 +95,15 @@ class GitHubJobClass {
   }
 
   async applyPatch(patch, currentJobDir) {
+    //create patch file
     try {
       await fs.writeFileSync(`/tmp/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
       
     } catch (error) {
-      console.log("we have an error!!!! ", error)
+      console.log("Error creating patch ", error)
       throw error
     }
-    //create patch file
+    //apply patch
     try {
       const commandsToBuild = [
         `cd repos/${currentJobDir}`,
@@ -170,7 +171,6 @@ class GitHubJobClass {
 
       //check for patch
       if (currentJob.payload.patch !== undefined) {
-        console.log(currentJob.payload.patch);
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)

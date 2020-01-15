@@ -11,7 +11,6 @@ class S3PublishClass {
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
     
     try {
-      console.log("we gonna try something!!!")
       const exec = workerUtils.getExecPromise();
       const command = this.GitHubJob.deployCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
@@ -21,7 +20,6 @@ class S3PublishClass {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       } 
       return new Promise(function(resolve, reject) {
-        console.log("we are in the resolve so it should be good!!!1");
         logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
         logger.save(`${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`);
         resolve({
