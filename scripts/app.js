@@ -69,7 +69,7 @@ async function main() {
         userEmail
       );
     } catch (error) {
-      console.err(err);
+      console.error(err);
     }
   }
 
@@ -93,7 +93,7 @@ async function main() {
         userEmail
       );
     } catch (error) {
-      console.err(err);
+      console.error(err);
     }
 
 
