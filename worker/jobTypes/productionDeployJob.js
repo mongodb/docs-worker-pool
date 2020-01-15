@@ -10,24 +10,28 @@ const Logger = require('../utils/logger').LoggerClass;
 const invalidJobDef = new Error('job not valid');
 
 async function verifyUserEntitlements(currentJob){
-    const user = currentJob.user;
-    const entitlementsObject = await workerUtils.getUserEntitlements(user);
-    const repoOwner = currentJob.payload.repoOwner;
-    const repoName = currentJob.payload.repoName
-    if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
-      return true;
-    } else {
-      return false;
-    }
+  const user = currentJob.user;
+  const entitlementsObject = await workerUtils.getUserEntitlements(user);
+  const repoOwner = currentJob.payload.repoOwner;
+  const repoName = currentJob.payload.repoName
+  if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
+    return true;
+  } else {
+    return false;
   }
+}
   
-  async function verifyBranchConfiguredForPublish(currentJob) {
-    const repoObject = { repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName};
-    const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
-    const publishedBranches = repoContent['content']['git']['branches']['published']
+async function verifyBranchConfiguredForPublish(currentJob) {
+  const repoObject = { repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName};
+  const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
+  if (repoContent && repoContent.status === 'success') {
+    const publishedBranches = repoContent['content']['git']['branches']['published'];
     return publishedBranches.includes(currentJob.payload.branchName);
-    
+  } else {
+    return false;
   }
+}
+
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
 function safeString(stringToCheck) {
@@ -101,17 +105,13 @@ async function pushToProduction(publisher, logger) {
 async function runGithubProdPush(currentJob) {
   const ispublishable = verifyBranchConfiguredForPublish(currentJob);
   const userIsEntitled = verifyUserEntitlements(currentJob);
-  if (ispublishable === false){
-    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to 
-    
-    to production a branch that is not configured for publishing`)
+  if (!ispublishable) {
+    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to run in production a branch that is not configured for publishing`)
     throw new Error('entitlement failed');
-    process.exit
   }
-  if(userIsEntitled === false){
+  if (!userIsEntitled) {
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${currentJob.repoOwner}/${currentJob.repoName}) for master branch`);
     throw new Error('entitlement failed');
-    process.exit
   }
 
   workerUtils.logInMongo(currentJob, ' ** Running github push function');

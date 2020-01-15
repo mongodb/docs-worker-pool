@@ -9,7 +9,7 @@ const workerUtils = require('./utils/utils');
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
-const {runGithubProdPush, safeGithubProdPush} = require('./jobTypes/productionDeployJob')
+const { runGithubProdPush, safeGithubProdPush } = require('./jobTypes/productionDeployJob')
 // add some application monitoring
 const monitorInstance = new Monitor({ component: 'worker' }, mongo);
 

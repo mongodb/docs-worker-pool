@@ -8,7 +8,6 @@ class GitHubJobClass {
   // pass in a job payload to setup class
   constructor(currentJob) {
     this.currentJob = currentJob;
-    this.stageCommands = [];
   }
 
   // get base path for public/private repos
@@ -125,12 +124,6 @@ class GitHubJobClass {
         `make html`,
       ];
 
-      const stageCommands = [
-        `. /venv/bin/activate`,
-        `cd repos/${this.getRepoDirName(currentJob)}`,
-        `make stage`,
-      ];
-
       // the way we now build is to search for a specific function string in worker.sh
       // which then maps to a specific target that we run
       const workerContents = fs.readFileSync(`repos/${this.getRepoDirName(currentJob)}/worker.sh`, { encoding: 'utf8' });
@@ -148,13 +141,9 @@ class GitHubJobClass {
       for (let i = 0; i < workerLines.length; i++) {
         if (workerLines[i] === '"build-and-stage-next-gen"') {
           commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-          stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
           break;
         }
       }
-
-      // set this to data property so stage class can pick it up later
-      this.stageCommands = stageCommands;
 
       const execTwo = workerUtils.getExecPromise();
 

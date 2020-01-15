@@ -137,7 +137,7 @@ module.exports = {
     return mongo.getMetaCollection().find({}).toArray();
   },
   
-    // gets entitlements for user when deploying
+  // gets entitlements for user when deploying
   // similar to the `getUserEntitlements` function on stitch
   async getUserEntitlements(githubUsername) {
     const returnObject = { status: 'failure' };

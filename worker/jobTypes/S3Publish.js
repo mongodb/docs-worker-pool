@@ -17,10 +17,7 @@ class S3PublishClass {
 
     // the way we now build is to search for a specific function string in worker.sh
     // which then maps to a specific target that we run
-    const workerContents = fs.readFileSync(
-      `repos/${this.GitHubJob.getRepoDirName()}/worker.sh`,
-      { encoding: 'utf8' }
-    );
+    const workerContents = fs.readFileSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`, { encoding: 'utf8' });
     const workerLines = workerContents.split(/\r?\n/);
 
     // check if need to build next-gen instead
@@ -68,11 +65,7 @@ class S3PublishClass {
   }
 
   async pushToProduction(logger) {    
-    const publishPrepCommands = [
-      `. /venv/bin/activate`,
-      `cd repos/${this.GitHubJob.getRepoDirName()}`,
-      `make publish`
-    ]
+    logger.save(`${'(stage)'.padEnd(15)}Pushing to prod (JUST STAGING FOR NOW)`);
     const deployCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
@@ -82,15 +75,13 @@ class S3PublishClass {
 
     // the way we now build is to search for a specific function string in worker.sh
     // which then maps to a specific target that we run
-    const workerContents = fs.readFileSync(
-      `repos/${this.GitHubJob.getRepoDirName()}/worker.sh`,
-      { encoding: 'utf8' }
-    );
+    const workerContents = fs.readFileSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`, { encoding: 'utf8' });
     const workerLines = workerContents.split(/\r?\n/);
 
     // check if need to build next-gen instead -- does this need to happen for make deploy as well???
     for (let i = 0; i < workerLines.length; i++) {
       if (workerLines[i] === '"build-and-stage-next-gen"') {
+        deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
         deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
         break;
       }
