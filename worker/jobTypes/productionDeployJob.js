@@ -14,6 +14,7 @@ async function verifyUserEntitlements(currentJob){
   const entitlementsObject = await workerUtils.getUserEntitlements(user);
   const repoOwner = currentJob.payload.repoOwner;
   const repoName = currentJob.payload.repoName
+
   if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
     return true;
   } else {
@@ -103,8 +104,9 @@ async function pushToProduction(publisher, logger) {
 }
 
 async function runGithubProdPush(currentJob) {
-  const ispublishable = verifyBranchConfiguredForPublish(currentJob);
-  const userIsEntitled = verifyUserEntitlements(currentJob);
+  const ispublishable = await verifyBranchConfiguredForPublish(currentJob);
+  const userIsEntitled = await verifyUserEntitlements(currentJob);
+  
   if (!ispublishable) {
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to run in production a branch that is not configured for publishing`)
     throw new Error('entitlement failed');
