@@ -106,7 +106,6 @@ async function pushToProduction(publisher, logger) {
 async function runGithubProdPush(currentJob) {
   const ispublishable = await verifyBranchConfiguredForPublish(currentJob);
   const userIsEntitled = await verifyUserEntitlements(currentJob);
-  console.log(userIsEntitled, !userIsEntitled, userIsEntitled === false)
   
   if (!ispublishable) {
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to run in production a branch that is not configured for publishing`)
