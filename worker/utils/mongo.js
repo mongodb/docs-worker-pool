@@ -25,7 +25,13 @@ module.exports = {
     client = new MongoClient(url, { useNewUrlParser: true });
     return client.connect();
   },
-
+  
+  getEntitlementsCollection() {
+    if (client) {
+      return client.db(DB_NAME).collection(ENTITLEMENTS_NAME);
+    }
+    return null;
+  },
   // Gets the Queue Collection
   getQueueCollection() {
     if (client) {
