@@ -14,12 +14,10 @@ async function verifyUserEntitlements(currentJob){
   const entitlementsObject = await workerUtils.getUserEntitlements(user);
   const repoOwner = currentJob.payload.repoOwner;
   const repoName = currentJob.payload.repoName
-  console.log(repoName, repoOwner, user, entitlementsObject.repos)
+
   if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
-    console.log("the heck this is true???")
     return true;
   } else {
-    console.log("this is false!")
     return false;
   }
 }
