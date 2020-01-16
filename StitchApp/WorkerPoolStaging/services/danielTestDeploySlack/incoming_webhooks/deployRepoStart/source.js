@@ -12,6 +12,9 @@ exports = async function(payload, response) {
   var parsed = JSON.parse(payload.query.payload);
   var stateValues = parsed.view.state.values; 
   
+  console.log(3333, JSON.stringify(parsed));
+  console.log(3333, JSON.stringify(Object.keys(parsed)));
+  
   // get repo options for this user from slack and send over
   var entitlement = await context.functions.execute("getUserEntitlements", {
     'query': {
@@ -24,17 +27,10 @@ exports = async function(payload, response) {
   
   console.log('user deploying job', JSON.stringify(entitlement));
   
-  /*
-    // sample of how stateValues looks
-    // https://api.slack.com/reference/interaction-payloads/views#view_submission
-    "{\"block_branch_option\":{\"branch_option\":{\"type\":\"external_select\"}},\"block_hash_option\":{\"hash_option\":{\"type\":\"plain_text_input\"}},\"block_repo_option\":{\"repo_option\":{\"selected_option\":{\"text\":{\"emoji\":true,\"text\":\"mongodb/docs-bi-connector\",\"type\":\"pl",
-  */
-  
   // mapping of block id -> input id
   var values = {};
   var inputMapping = {
     'block_repo_option': 'repo_option',
-    'block_branch_option': 'branch_option',
     'block_hash_option': 'hash_option',
   };
   
@@ -46,6 +42,10 @@ exports = async function(payload, response) {
     if (stateValuesObj && stateValuesObj.selected_option && stateValuesObj.selected_option.value) {
       values[blockInputKey] = stateValuesObj.selected_option.value;
     } 
+    // multi select is an array
+    else if (stateValuesObj && stateValuesObj.selected_options && stateValuesObj.selected_options.length > 0) {
+      values[blockInputKey] = stateValuesObj.selected_options;
+    }
     // input value
     else if (stateValuesObj && stateValuesObj.value) {
       values[blockInputKey] = stateValuesObj.value;
@@ -56,8 +56,43 @@ exports = async function(payload, response) {
     }
   }
   
+  console.log(1001, JSON.stringify(entitlement));
   console.log(11, JSON.stringify(stateValues));
   console.log(22, JSON.stringify(values));
-  return 'success';
+  
+  for (let i = 0; i < values.repo_option.length; i++) {
+    // // e.g. mongodb/docs-realm/master => (site/repo/branch)
+    var thisRepo = values.repo_option[i].value;
+    var buildDetails = thisRepo.split('/');
+    try {
+      let jobTitle     = "Github Push: " + 'Slack deploy';
+      let jobUserName  = entitlement.github_username;
+      let jobUserEmail = entitlement.email ? entitlement.email : 'split@nothing.com';
+      const newPayload = {
+        jobType:    "githubPush",
+        source:     "github", 
+        action:     "push", 
+        repoName:   buildDetails[1], 
+        branchName: buildDetails[2],
+        isFork:     true, 
+        private:    false,
+        isXlarge:   false,
+        repoOwner:  entitlement.github_username,
+        url:        'https://github.com/' + jobUserName + '/' + buildDetails[1],
+        newHead:    values.hash_option ? values.hash_option : null,
+      }; 
+      
+      console.log(4, jobUserEmail);
+      console.log(JSON.stringify(newPayload));
+      
+      context.functions.execute("addJobToQueue", newPayload, jobTitle, jobUserName, jobUserEmail);  
+    } catch(err) {
+      console.log(err);
+    }
+  }
+  
+  // respond to modal
+  response.setHeader("Content-Type", "application/json");
+  response.setStatusCode(200);
     
 };

@@ -1,5 +1,11 @@
 exports = async function(payload, response) {
   
+  // node module (in beta)
+  const yaml = require('js-yaml');
+  
+  // http service
+  const httpService = context.services.get("slackHTTPService");
+
   // verify slack auth
   var slackAuth = context.functions.execute("validateSlackAPICall", payload);
   if (!slackAuth || slackAuth.status !== 'success') {
@@ -15,38 +21,35 @@ exports = async function(payload, response) {
   // modify list for slack dropdown
   const repos = [];
   for (let i = 0; i < entitlement.repos.length; i++) {
-    repos.push({
-      "text": {
-        "type": "plain_text",
-        "text": entitlement.repos[i],
-      },
-      "value": entitlement.repos[i]
+    // get published branches for this repo
+    let pubBranches = [];
+    const thisRepo = entitlement.repos[i];
+    const repoOwner = 'danielborowski'; // CHANGE THIS, hardcoded for now until published-branches.yaml file exists
+    const repoName = thisRepo.split('/')[1];
+    const getPubBranches = await httpService.get({ 
+      url: `https://raw.githubusercontent.com/${repoOwner}/${repoName}/meta/published-branches.yaml`
     });
-  }
-  
-  const branches = [
-    {
-      "text": {
-        "type": "plain_text",
-        "text": "master",
-      },
-      "value": "master"
-    },
-    {
-      "text": {
-        "type": "plain_text",
-        "text": "v2.3",
-      },
-      "value": "v2.3"
-    },
-    {
-      "text": {
-        "type": "plain_text",
-        "text": "v2.2"
-      },
-      "value": "v2.2"
+    if (getPubBranches && getPubBranches.statusCode == '200') {
+      const yamlParsed = yaml.safeLoad(getPubBranches.body.text());
+      if (yamlParsed && yamlParsed.git && yamlParsed.git.branches && yamlParsed.git.branches.published.length > 0) {
+        pubBranches = pubBranches.concat(yamlParsed.git.branches.published);
+      }
+    } else {
+      pubBranches = ['master'];
     }
-  ];
+    // construct option for slack
+    for (var k = 0; k < pubBranches.length; k++) {
+      pubBranches[k] = `${thisRepo}/${pubBranches[k]}`;
+      var opt = {
+        "text": {
+          "type": "plain_text",
+          "text": pubBranches[k],
+        },
+        "value": pubBranches[k]
+      };
+      repos.push(opt);
+    }
+  }
 
   const block = {
     "trigger_id": payload.query.trigger_id,
@@ -72,7 +75,7 @@ exports = async function(payload, response) {
     			"type": "input",
     			"block_id": "block_repo_option",
     			"element": {
-    				"type": "static_select",
+    				"type": "multi_static_select",
     				"action_id": "repo_option",
     				"placeholder": {
     					"type": "plain_text",
@@ -84,25 +87,6 @@ exports = async function(payload, response) {
     			"label": {
     				"type": "plain_text",
     				"text": "Select Repo",
-    				"emoji": true
-    			}
-    		},
-    		{
-    			"type": "input",
-    			"block_id": "block_branch_option",
-    			"element": {
-    				"type": "external_select",
-    				"action_id": "branch_option",
-    				"placeholder": {
-    					"type": "plain_text",
-    					"text": "Select a branch to build",
-    					"emoji": true
-    				},
-    			},
-    			"optional": true,
-    			"label": {
-    				"type": "plain_text",
-    				"text": "Select Branch",
     				"emoji": true
     			}
     		},

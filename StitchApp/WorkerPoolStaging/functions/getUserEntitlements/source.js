@@ -13,7 +13,7 @@ exports = async function(payload) {
   // if user has specific entitlements
   if (entitlementMapping && entitlementMapping.repos && entitlementMapping.repos.length > 0) {
     returnObject.repos = entitlementMapping.repos;
-    returnObject.email = entitlementMapping.email;
+    returnObject.github_username = entitlementMapping.github_username;
     returnObject.status = 'success';
   }
   
