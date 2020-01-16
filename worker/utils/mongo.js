@@ -13,6 +13,7 @@ const DB_NAME = EnvironmentClass.getDB(); // Database name of the queue in Mongo
 const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
 const META_NAME = 'meta';
 const MONITOR_NAME = 'monitor';
+const ENTITLEMENTS_NAME = 'entitlements';
 
 // Hold onto the client
 let client;
