@@ -2,9 +2,9 @@ const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 
 class S3PublishClass {
-
   constructor(GitHubJob) {
     this.GitHubJob = GitHubJob;
+    fs.pathExists();
   }
 
   async pushToStage(logger) {
@@ -32,8 +32,9 @@ class S3PublishClass {
 
     try {
       const exec = workerUtils.getExecPromise();
-      const command = stageCommands.join(' && ');
+      const command = this.GitHubJob.deployCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
+      console.log(stderr);
       let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
@@ -48,6 +49,10 @@ class S3PublishClass {
           status: 'success',
           stdout: stdoutMod
         });
+        reject({
+          status: 'failre',
+          stdout: stderr
+        })
       });
     } catch (errResult) {
       if (

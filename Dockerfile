@@ -33,10 +33,11 @@ WORKDIR /home/docsworker
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
 RUN python3 -m pip install --upgrade pip flit
-RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser && \
+RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
-	git fetch --all && \
-	git reset --hard origin/master && \
+	git fetch --tags && \
+	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+	git checkout "$latestTag" && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 ENV PATH="${PATH}:/home/docsworker/.local/bin"
 
@@ -56,7 +57,7 @@ COPY worker/ .
 RUN npm install
 
 # where repo work will happen
-RUN mkdir repos && chmod 777 repos
+RUN mkdir repos && chmod 755 repos
 
 # entry to kick-off the worker
 EXPOSE 3000
