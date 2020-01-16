@@ -14,9 +14,12 @@ async function verifyUserEntitlements(currentJob){
   const entitlementsObject = await workerUtils.getUserEntitlements(user);
   const repoOwner = currentJob.payload.repoOwner;
   const repoName = currentJob.payload.repoName
+  console.log(repoName, repoOwner, user, entitlementsObject.repos)
   if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
+    console.log("the heck this is true???")
     return true;
   } else {
+    console.log("this is false!")
     return false;
   }
 }
@@ -103,13 +106,16 @@ async function pushToProduction(publisher, logger) {
 }
 
 async function runGithubProdPush(currentJob) {
-  const ispublishable = verifyBranchConfiguredForPublish(currentJob);
-  const userIsEntitled = verifyUserEntitlements(currentJob);
+  const ispublishable = await verifyBranchConfiguredForPublish(currentJob);
+  const userIsEntitled = await verifyUserEntitlements(currentJob);
+  console.log(userIsEntitled, !userIsEntitled, userIsEntitled === false)
+  
   if (!ispublishable) {
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to run in production a branch that is not configured for publishing`)
     throw new Error('entitlement failed');
   }
   if (!userIsEntitled) {
+    console.log("I am in here!!!")
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${currentJob.repoOwner}/${currentJob.repoName}) for master branch`);
     throw new Error('entitlement failed');
   }
