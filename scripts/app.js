@@ -15,11 +15,6 @@ async function main() {
 
   let invalidFlag = false;
 
-  if (buildSize !== undefined && buildSize !== "repo") {
-    console.log('Invalid build size. Use "world" or "repo"');
-    invalidFlag = true;
-  }
-
   if (patchFlag !== "local" && patchFlag !== "commit") {
     console.log(
       'Invalid patch flag. Use "commit" to stage a build from the committed work you have locally or use "local" to stage a build from the uncommitted work you have locally'
@@ -36,10 +31,12 @@ async function main() {
   const url = await StagingUtils.getRepoInfo();
   const repoName = StagingUtils.getRepoName(url);
   const branchName = await StagingUtils.getBranchName();
+  
   const newHead = "newHead";
 
   const upstreamConfig = await StagingUtils.checkUpstreamConfiguration(branchName);
   const upstreamName = StagingUtils.getUpstreamName(upstreamConfig).trim(); //remove \n
+  
   const doesRemoteHaveLocalBranch = await StagingUtils.doesRemoteHaveLocalBranch(branchName);
   const branchNameForPayload = doesRemoteHaveLocalBranch ? branchName : upstreamName;
 

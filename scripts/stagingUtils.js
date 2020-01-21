@@ -28,7 +28,7 @@ module.exports = {
 
     // we are looking for jobs in the queue with the same payload
     // that have not yet started (startTime == null)
-    const filterDoc = { payload: payloadObj, startTime: null };
+    const filterDoc = { payload: payloadObj, status: {$in: ["inProgress", "inQueue"] } }
     const updateDoc = { $setOnInsert: newJob };
 
     const uri = `mongodb+srv://${username}:${secret}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
@@ -104,6 +104,9 @@ module.exports = {
 
   // extract repo name from url
   getRepoName(url) {
+    if (url === undefined){
+      console.error(`getRepoName error: repository url is undefined`)
+    }
     let repoName = url.split("/");
     repoName = repoName[repoName.length - 1];
     repoName = repoName.replace(".git", "");
@@ -171,7 +174,7 @@ module.exports = {
       const commitarray = cleanedup.split(/\r\n|\r|\n/);
       commitarray.pop(); // remove the last, dummy element that results from splitting on newline
       if (commitarray.length === 0) {
-        console.log(
+        console.error(
           "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
         );
         process.exit();
@@ -207,7 +210,6 @@ module.exports = {
       const { stdout, stderr } = await exec(
         `git rev-parse --abbrev-ref --symbolic-full-name ${branchName}@{upstream}`
       );
-
       return stdout;
     } catch (error) {
       if (error.code === 128) {
@@ -216,9 +218,9 @@ module.exports = {
           \n\n \
           git branch -u <upstream-branch-name>\
           \n\n";
-        throw errormsg;
+        console.error(errormsg);
       } else {
-        throw error;
+        console.error(error);
       }
     }
   },
@@ -235,13 +237,12 @@ module.exports = {
         return false;
         //we dont want to cancel the program
       } else {
-        throw error;
+        console.error(error);
       }
     }
   },
 
   async getGitPatchFromLocal(upstreamBranchName) {
-
     return new Promise((resolve, reject) => {
       exec(
         `git diff ${upstreamBranchName} --ignore-submodules > myPatch.patch`,
@@ -255,6 +256,7 @@ module.exports = {
                 console.log("error reading patch file: ", err);
                 reject(err);
               }
+              console.log(data)
               resolve(data);
             });
           }

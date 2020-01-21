@@ -10,10 +10,6 @@ RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
 RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
 
-
-# install git
-RUN apt-get update && apt-get -y install git
-
 # helper libraries for docs builds
 RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
 RUN apt-get -y install git pkg-config libxml2-dev
