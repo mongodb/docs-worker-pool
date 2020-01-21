@@ -28,36 +28,31 @@ module.exports = {
 
     // we are looking for jobs in the queue with the same payload
     // that have not yet started (startTime == null)
-    const filterDoc = { payload: payloadObj, status: {$in: ["inProgress", "inQueue"] } }
+    const filterDoc = { payload: payloadObj, status: { $in: ['inProgress', 'inQueue'] } };
     const updateDoc = { $setOnInsert: newJob };
 
     const uri = `mongodb+srv://${username}:${secret}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
     const client = new MongoClient(uri, { useUnifiedTopology: true, useNewUrlParser: true });
-    client.connect(err => {
+    client.connect((err) => {
       if (err) {
-        console.error("error connecting to Mongo");
+        console.error('error connecting to Mongo');
         return err;
       }
       const collection = client.db(dbName).collection(collName);
+
       collection.updateOne(filterDoc, updateDoc, { upsert: true }).then(
-        result => {
+        (result) => {
           if (result.upsertedId) {
-            console.log(
-              "You successfully enqued a staging job to docs autobuilder. This is the record id: ",
-              result.upsertedId
-            );
+            console.log(`You successfully enqued a staging job to docs autobuilder. This is the record id: ${result.upsertedId}`);
             return true;
           }
-          console.log("This job already exists ");
-          return "Already Existed";
+          console.log('This job already exists ');
+          return 'Already Existed';
         },
-        error => {
-          console.error(
-            "There was an error enqueing a staging job to docs autobuilder. Here is the error: ",
-            error
-          );
+        (error) => {
+          console.error(`There was an error enqueing a staging job to docs autobuilder. Here is the error: ${error}`);
           return error;
-        }
+        },
       );
       client.close();
     });
