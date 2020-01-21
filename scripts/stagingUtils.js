@@ -92,14 +92,14 @@ module.exports = {
 
   async getBranchName() {
     return new Promise((resolve, reject) => {
-      exec("git rev-parse --abbrev-ref HEAD", (error, stdout) => {
-        if (error !== null) {
-          console.error(`exec error: ${error}`);
-          reject(error);
+      exec("git rev-parse --abbrev-ref HEAD")
+      .then(result => {
+        console.log(result.stdout)
+        resolve(result.stdout.replace("\n", ""))
         }
-        resolve(stdout.replace("\n", ""));
-      });
-    });
+        )
+        .catch(console.error)
+    })
   },
 
   // extract repo name from url
