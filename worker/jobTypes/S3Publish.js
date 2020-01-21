@@ -32,9 +32,8 @@ class S3PublishClass {
 
     try {
       const exec = workerUtils.getExecPromise();
-      const command = this.GitHubJob.deployCommands.join(' && ');
+      const command = stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
-      console.log(stderr);
       logger.save(
         `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
       );
@@ -53,7 +52,7 @@ class S3PublishClass {
           stdout: stdoutMod
         });
         reject({
-          status: 'failre',
+          status: 'failure',
           stdout: stderr
         })
       });
