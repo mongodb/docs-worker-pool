@@ -1,7 +1,7 @@
-const { promisify } = require("util");
-const exec = promisify(require("child_process").exec);
-const fs = require("fs");
-const { MongoClient } = require("mongodb");
+const { promisify } = require('util');
+const exec = promisify(require('child_process').exec);
+const fs = require('fs');
+const { MongoClient } = require('mongodb');
 
 module.exports = {
   insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
@@ -14,7 +14,7 @@ module.exports = {
       title: jobTitle,
       user: jobUserName,
       email: jobUserEmail,
-      status: "inQueue",
+      status: 'inQueue',
       createdTime: new Date(),
       startTime: null,
       endTime: null,
@@ -23,7 +23,7 @@ module.exports = {
       failures: [],
       result: null,
       payload: payloadObj,
-      logs: {}
+      logs: {},
     };
 
     // we are looking for jobs in the queue with the same payload
@@ -68,9 +68,9 @@ module.exports = {
     lastCommit
   ) {
     const payload = {
-      jobType: "githubPush",
-      source: "github",
-      action: "push",
+      jobType: 'githubPush',
+      source: 'github',
+      action: 'push',
       repoName: repoNameArg,
       branchName: upstreamBranchName,
       isFork: true,
@@ -79,221 +79,206 @@ module.exports = {
       repoOwner: repoOwnerArg,
       url: urlArg,
       newHead: lastCommit,
-      patch: patchArg
+      patch: patchArg,
     };
 
     return payload;
   },
 
   async getBranchName() {
-    return new Promise((resolve, reject) => {
-      exec("git rev-parse --abbrev-ref HEAD")
-      .then(result => {
-        console.log(result.stdout)
-        resolve(result.stdout.replace("\n", ""))
-        }
-        )
-        .catch(console.error)
-    })
+    return new Promise((resolve) => {
+      exec('git rev-parse --abbrev-ref HEAD')
+        .then((result) => {
+          resolve(result.stdout.replace('\n', ''));
+        })
+        .catch(console.error);
+    });
   },
 
   // extract repo name from url
   getRepoName(url) {
-    if (url === undefined){
-      console.error(`getRepoName error: repository url is undefined`)
+    if (url === undefined) {
+      console.error('getRepoName error: repository url is undefined');
     }
-    let repoName = url.split("/");
+    let repoName = url.split('/');
     repoName = repoName[repoName.length - 1];
-    repoName = repoName.replace(".git", "");
-    repoName = repoName.replace("\n", "");
+    repoName = repoName.replace('.git', '');
+    repoName = repoName.replace('\n', '');
     return repoName;
   },
 
   // delete patch file
   async deletePatchFile() {
     return new Promise((resolve, reject) => {
-      exec("rm myPatch.patch", error => {
-        if (error !== null) {
-          console.error("exec error deleting patch file: ", error);
+      exec('rm myPatch.patch')
+        .then(() => {
+          resolve('successfully removed patch file');
+        })
+        .catch((error) => {
+          console.error(`exec error deleting patch file: ${error}`);
           reject(error);
-        }
-        resolve("successfully removed patch file");
-      });
+        });
     });
   },
 
   async getRepoInfo() {
     return new Promise((resolve, reject) => {
-      exec("git config --get remote.origin.url", (error, stdout) => {
-        if (error !== null) {
+      exec('git config --get remote.origin.url')
+        .then((result) => {
+          const repoUrl = result.stdout.replace('\n', '');
+          resolve(repoUrl);
+        })
+        .catch((error) => {
           console.error(`exec error: ${error}`);
           reject(error);
-        }
-
-        const repoUrl = stdout.replace("\n", "");
-        resolve(repoUrl);
-      });
+        });
     });
   },
 
   async getGitEmail() {
     return new Promise((resolve, reject) => {
-      exec("git config --global user.email", (error, stdout) => {
-        if (error !== null) {
+      exec('git config --global user.email')
+        .then((result) => {
+          resolve(result.stdout.replace('\n', ''));
+        })
+        .catch((error) => {
           console.error(`exec error: ${error}`);
           reject(error);
-        } else {
-          resolve(stdout.replace("\n", ""));
-        }
-      });
+        });
     });
   },
 
   async getGitUser() {
     return new Promise((resolve, reject) => {
-      exec("git config --global user.name", (error, stdout) => {
-        if (error !== null) {
+      exec('git config --global user.name')
+        .then((result) => {
+          resolve(result.stdout.replace('\n', ''));
+        })
+        .catch((error) => {
           console.error(`exec error: ${error}`);
           reject(error);
-        } else {
-          resolve(stdout.replace("\n", ""));
-        }
-      });
+        });
     });
   },
 
   async getGitCommits() {
-    try {
-      const { stdout, stderr } = await exec("git cherry");
-      const cleanedup = stdout.replace(/\+ /g, "");
-      const commitarray = cleanedup.split(/\r\n|\r|\n/);
-      commitarray.pop(); // remove the last, dummy element that results from splitting on newline
-      if (commitarray.length === 0) {
-        console.error(
-          "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
-        );
-        process.exit();
-      }
-      if (commitarray.length === 1) {
-        const firstCommit = commitarray[0];
-        const lastCommit = null;
-        return { firstCommit, lastCommit };
-      } else {
-        const firstCommit = commitarray[0];
-        const lastCommit = commitarray[commitarray.length - 1];
-        return { firstCommit, lastCommit }
-      }
-    } catch (error) {
-      throw error;
+    const stdout = await exec('git cherry');
+    const cleanedup = stdout.replace(/\+ /g, '');
+    const commitarray = cleanedup.split(/\r\n|\r|\n/);
+    commitarray.pop(); // remove the last, dummy element that results from splitting on newline
+    if (commitarray.length === 0) {
+      console.error(
+        'You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again'
+      );
+      process.exit();
     }
-
+    if (commitarray.length === 1) {
+      const firstCommit = commitarray[0];
+      const lastCommit = null;
+      return { firstCommit, lastCommit };
+    }
+    const firstCommit = commitarray[0];
+    const lastCommit = commitarray[commitarray.length - 1];
+    return { firstCommit, lastCommit };
   },
 
   getUpstreamName(upstream) {
-    const upstreamInd = upstream.indexOf("origin/");
+    console.log("yoooo ", upstream)
+    const upstreamInd = upstream.indexOf('origin/');
     if (upstreamInd === -1) {
       return upstream;
-    } else {
-      const upstream = "master";
-      return upstream;
     }
+    return 'master';
   },
 
   async checkUpstreamConfiguration(branchName) {
 
     try {
-      const { stdout, stderr } = await exec(
+      const result = await exec(
         `git rev-parse --abbrev-ref --symbolic-full-name ${branchName}@{upstream}`
       );
-      return stdout;
+      return result.stdout;
     } catch (error) {
       if (error.code === 128) {
-        const errormsg =
-          "You have not set an upstream for your local branch. Please do so with this command: \
+        const errormsg = "You have not set an upstream for your local branch. Please do so with this command: \
           \n\n \
           git branch -u <upstream-branch-name>\
           \n\n";
         console.error(errormsg);
-      } else {
-        console.error(error);
+        return errormsg;
       }
+      console.error(error);
+      return error;
     }
   },
 
   async doesRemoteHaveLocalBranch(branchName) {
     try {
-      const { stdout, stderr } = await exec(
-        `git diff ${branchName} remotes/origin/${branchName}`
-      );
-
+      await exec(`git diff ${branchName} remotes/origin/${branchName}`);
       return true;
     } catch (error) {
       if (error.code === 128) {
+        // we dont want to cancel the program
         return false;
-        //we dont want to cancel the program
-      } else {
-        console.error(error);
       }
+      console.error(error);
+      return false;
     }
   },
 
   async getGitPatchFromLocal(upstreamBranchName) {
     return new Promise((resolve, reject) => {
-      exec(
-        `git diff ${upstreamBranchName} --ignore-submodules > myPatch.patch`,
-        error => {
-          if (error !== null) {
-            console.error("error generating patch: ", error);
-            reject(error);
-          } else {
-            fs.readFile("myPatch.patch", "utf8", (err, data) => {
+      exec(`git diff ${upstreamBranchName} --ignore-submodules > myPatch.patch`)
+        .then(() => {
+          fs.readFile('myPatch.patch', 'utf8', (err, data) => {
               if (err) {
                 console.log("error reading patch file: ", err);
                 reject(err);
               }
-              console.log(data)
               resolve(data);
             });
-          }
-        }
-      );
+        })
+        .catch((error) => {
+          console.error('error generating patch: ', error);
+          reject(error);
+        });
     });
   },
   async getGitPatchFromCommits(firstCommit, lastCommit) {
-    //need to delete patch file?
+    // need to delete patch file?
     return new Promise((resolve, reject) => {
       if (lastCommit === null) {
-        const patchCommand = "git show HEAD > myPatch.patch";
-        exec(patchCommand, error => {
-          if (error !== null) {
-            console.error("error generating patch: ", error);
-            reject(error);
-          } else {
-            fs.readFile("myPatch.patch", "utf8", (err, data) => {
+        const patchCommand = 'git show HEAD > myPatch.patch';
+        exec(patchCommand)
+          .then(() => {
+            fs.readFile('myPatch.patch', 'utf8', (err, data) => {
               if (err) {
-                console.log("error reading patch file", err);
+                console.log("error reading patch file: ", err);
                 reject(err);
               }
               resolve(data);
             });
-          }
-        });
+          })
+          .catch((error) => {
+            console.error('error generating patch: ', error);
+            reject(error);
+          });
       } else {
         const patchCommand = `git diff ${firstCommit}^...${lastCommit} > myPatch.patch`;
-        exec(patchCommand, error => {
-          if (error !== null) {
-            console.error("error generating patch: ", error);
-            reject(error);
-          } else {
-            fs.readFile("myPatch.patch", "utf8", (err, data) => {
+        exec(patchCommand)
+          .then(() => {
+            fs.readFile('myPatch.patch', 'utf8', (err, data) => {
               if (err) {
-                console.log("error reading patch file ", err);
+                console.log("error reading patch file: ", err);
                 reject(err);
               }
               resolve(data);
             });
-          }
-        });
+          })
+          .catch((error) => {
+            console.error('error generating patch: ', error);
+            reject(error);
+          });
       }
     });
   },
@@ -301,17 +286,17 @@ module.exports = {
   validateConfiguration() {
     const missingConfigs = [];
 
-    if (process.env.DB_NAME === undefined || process.env.DB_NAME === "") {
-      missingConfigs.push("DB_NAME");
+    if (process.env.DB_NAME === undefined || process.env.DB_NAME === '') {
+      missingConfigs.push('DB_NAME');
     }
-    if (process.env.COL_NAME === undefined || process.env.COL_NAME === "") {
-      missingConfigs.push("COL_NAME");
+    if (process.env.COL_NAME === undefined || process.env.COL_NAME === '') {
+      missingConfigs.push('COL_NAME');
     }
-    if (process.env.USERNAME === undefined || process.env.USERNAME === "") {
-      missingConfigs.push("USERNAME");
+    if (process.env.USERNAME === undefined || process.env.USERNAME === '') {
+      missingConfigs.push('USERNAME');
     }
-    if (process.env.SECRET === undefined || process.env.SECRET === "") {
-      missingConfigs.push("SECRET");
+    if (process.env.SECRET === undefined || process.env.SECRET === '') {
+      missingConfigs.push('SECRET');
     }
     if (missingConfigs.length !== 0) {
       console.error(
@@ -319,5 +304,5 @@ module.exports = {
       );
       process.exit();
     }
-  }
+  },
 };
