@@ -8,7 +8,7 @@ class S3PublishClass {
   }
 
   async pushToStage(logger) {
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
+    logger.save(`${'(stage)'.padEnd(15)}Setting up push to staging function`);
     const stageCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
@@ -35,6 +35,9 @@ class S3PublishClass {
       const command = this.GitHubJob.deployCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
       console.log(stderr);
+      logger.save(
+        `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
+      );
       let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
