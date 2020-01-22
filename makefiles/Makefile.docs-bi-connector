@@ -39,7 +39,7 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT}/${COMMIT_HASH} --stage ${ARGS}
+	mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${COMMIT_HASH}/${USER}/${GIT_BRANCH}/"
 	
 next-gen-publish:
