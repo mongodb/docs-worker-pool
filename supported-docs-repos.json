@@ -1,0 +1,10 @@
+{ repos: ["docs-bi-connector", 
+"docs-ecoystsem", 
+"docs-spark-connector", 
+"docs-node",
+"docs-realm", 
+"docs-compass",
+"docs",
+]
+}
+
