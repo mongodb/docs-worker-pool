@@ -3,15 +3,24 @@ const express = require('express');
 const fs = require('fs-extra');
 const retry = require('async-retry');
 const mongo = require('./utils/mongo');
+const { Monitor } = require('./utils/monitor');
 const workerUtils = require('./utils/utils');
 
 // **** IF YOU ARE ADDING A FUNCTION --> IMPORT IT HERE
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
+const { runGithubProdPush, safeGithubProdPush } = require('./jobTypes/productionDeployJob')
+const {
+  runPublishDochub,
+  safePublishDochub
+} = require('./jobTypes/publishDochubJob');
+
+// add some application monitoring
+const monitorInstance = new Monitor({ component: 'worker' }, mongo);
 
 // Variables
 let queueCollection; // Holder for the queueCollection in MongoDB Atlas
-let metaCollection; // Holder for the meta collection which holds repos/branches to build
+
 let currentJob; // Holder for the job currently executing
 let lastCheckIn = new Date(); // Variable used to see if the worker has failed
 let shouldStop = false;
@@ -33,6 +42,8 @@ const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60 * 10) * 1000;
 // Dictionary of possible jobs for this node
 const jobTypeToFunc = {
   githubPush: { function: runGithubPush, safe: safeGithubPush },
+  productionDeploy : {function: runGithubProdPush, safe: safeGithubProdPush},
+  publishDochub: { function: runPublishDochub, safe: safePublishDochub }
 };
 
 // route for liveness check
@@ -90,25 +101,24 @@ module.exports = {
           currentJob,
           'Server is being shutdown'
         ),
-        `Mongo Timeout Error: Timed out finishing failed job with jobId: ${
-          currentJob._id
-        }`
+        `Mongo Timeout Error: Timed out finishing failed job with jobId: ${currentJob._id}`
       );
     }
     if (mongoClient) {
+      monitorInstance.reportStatus('closed connection');
       mongoClient.close();
     }
   },
 
   //  Start the server and set everything up
   async startServer() {
-
     // Initialize MongoDB Collection
     // This is the collection that houses the work tickets
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
       queueCollection = mongo.getQueueCollection();
     }
+    monitorInstance.reportStatus('start server');
 
     // Clean up the work folder
     workerUtils.resetDirectory('work/');
@@ -125,28 +135,34 @@ module.exports = {
       let logMsg;
 
       if (shouldStop) {
+        monitorInstance.reportStatus('shutting down');
         throw new Error('Shutting Down --> Should not get new jobs');
       }
 
       // Get a new job
-      const job = await workerUtils.promiseTimeoutS(
-        MONGO_TIMEOUT_S,
-        mongo.getNextJob(queueCollection),
-        'Mongo Timeout Error: Timed out getting next job from queue collection'
-      );
+      const job = await workerUtils
+        .promiseTimeoutS(
+          MONGO_TIMEOUT_S,
+          mongo.getNextJob(queueCollection),
+          'Mongo Timeout Error: Timed out getting next job from queue collection'
+        )
+        .catch(error => {
+          console.log('connection timeout');
+          monitorInstance.reportStatus(`error getting job ${error}`);
+        });
 
       // If there was a job in the queue
       if (job && job.value) {
         currentJob = job.value;
 
-        logMsg = `* Starting Job with ID: ${currentJob._id} and type: ${
-          currentJob.payload.jobType
-        }`;
+        monitorInstance.reportStatus('running job');
+
+        logMsg = `* Starting Job with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
         workerUtils.logInMongo(currentJob, logMsg);
 
         // Throw error if we cannot perform this job / it is not a valid job
         if (
-          !currentJob.payload.hasOwnProperty('jobType') ||
+          !currentJob.payload.jobType ||
           !(currentJob.payload.jobType in jobTypeToFunc)
         ) {
           throw new Error(
@@ -157,31 +173,29 @@ module.exports = {
         // Sanitize the job (note that jobs that do not implement the sanitize function
         // will not proceed
 
-        const sanitize = await workerUtils.promiseTimeoutS(
+        await workerUtils.promiseTimeoutS(
           JOB_TIMEOUT_S,
           jobTypeToFunc[currentJob.payload.jobType].safe(currentJob),
-          `Worker Timeout Error: Timed out performing ${
-            currentJob.payload.jobType
-          } for jobId: ${currentJob._id}`
+          `Worker Timeout Error: Timed out performing ${currentJob.payload.jobType} for jobId: ${currentJob._id}`
         );
 
         // Perform the job
         const result = await workerUtils.promiseTimeoutS(
           JOB_TIMEOUT_S,
           jobTypeToFunc[currentJob.payload.jobType].function(currentJob),
-          `Worker Timeout Error: Timed out performing ${
-            currentJob.payload.jobType
-          } for jobId: ${currentJob._id}`
+          `Worker Timeout Error: Timed out performing ${currentJob.payload.jobType} for jobId: ${currentJob._id}`
         );
 
         // Update the job to be successful
-        await workerUtils.promiseTimeoutS(
-          MONGO_TIMEOUT_S,
-          mongo.finishJobWithResult(queueCollection, currentJob, result),
-          `Mongo Timeout Error: Timed out finishing successful job with jobId: ${
-            currentJob._id
-          }`
-        );
+        await workerUtils
+          .promiseTimeoutS(
+            MONGO_TIMEOUT_S,
+            mongo.finishJobWithResult(queueCollection, currentJob, result),
+            `Mongo Timeout Error: Timed out finishing successful job with jobId: ${currentJob._id}`
+          )
+          .catch(error => {
+            console.log(error);
+          });
 
         // Log that we are done with this job
         logMsg = `${'    (DONE)'.padEnd(LOG_PADDING)}Finished Job with ID: ${
@@ -194,6 +208,7 @@ module.exports = {
       } else {
         // Log that no jobs were found
         console.log('No Jobs Found....: ', new Date());
+        monitorInstance.reportStatus('No Jobs Found');
 
         // Wait retryMs milliseconds and then try work() again
         setTimeout(module.exports.work, RETRY_TIMEOUT_MS);
@@ -232,7 +247,7 @@ module.exports = {
               );
             },
             {
-              retries: 3,
+              retries: 3
             }
           ).catch(errObj => {
             console.log(
@@ -246,5 +261,5 @@ module.exports = {
         console.log(`  Error caught by second catch: ${err2}`);
       }
     }
-  },
+  }
 };

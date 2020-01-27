@@ -1,5 +1,9 @@
 const { MongoClient } = require('mongodb');
 const mongo = require('../../utils/mongo');
+const env = require('../../utils/environment');
+
+const runXlarge = env.EnvironmentClass.getXlarge();
+const Monitor = require('../../utils/monitor').Monitor;
 
 // Helper function to add n days to the current date
 function newDateInNDays(n) {
@@ -10,7 +14,7 @@ function newDateInNDays(n) {
 
 // Job 1 should be the first job taken off the queue because of its priority
 const job1 = {
-  payload: { jobType: 'job1', isXlarge:false },
+  payload: { jobType: 'job1', isXlarge: runXlarge },
   createdTime: newDateInNDays(0),
   startTime: null,
   endTime: null,
@@ -19,14 +23,14 @@ const job1 = {
   numFailures: 0,
   failures: [],
   result: null,
-  logs: {},
+  logs: {}
 };
 
 // Job2 should be the second job taken off the queue because it has the earliest createdTime
 const job2 = JSON.parse(JSON.stringify(job1));
 job2.payload.jobType = 'job2';
 job2.priority = 1;
-job2.payload.isXlarge = false;
+job2.payload.isXlarge = runXlarge;
 job2.createdTime = newDateInNDays(-2);
 
 // Job 3 should be the third job taken off the queue because it has the oldest createdTime
@@ -42,13 +46,13 @@ job4.createdTime = newDateInNDays(10);
 describe('Mongo Tests', () => {
   let connection;
   let db;
+  let monitorColl;
 
   // Use the mongo in-memory storage engine for testing
   // See tests/mongo/ for details on setup/teardown of this.
   beforeAll(async () => {
-    console.log('***** running setup for mongo db unit tests *****');
     connection = await MongoClient.connect(global.__MONGO_URI__, {
-      useNewUrlParser: true,
+      useNewUrlParser: true
     });
     db = await connection.db(global.__MONGO_DB_NAME__);
 
@@ -56,6 +60,12 @@ describe('Mongo Tests', () => {
     db.dropCollection('jobs').catch(err => {
       console.log(err);
     });
+
+    db.dropCollection('monitor').catch(err => {
+      console.log(err);
+    });
+
+    monitorColl = db.collection('monitor');
 
     // Put jobs in a random order (shouldnt matter)
     const jobsColl = db.collection('jobs');
@@ -93,13 +103,17 @@ describe('Mongo Tests', () => {
    ******************************************************************* */
   it('getNextJob() should dequeue correct job', async () => {
     const jobsColl = db.collection('jobs');
+    console.log(jobsColl);
 
     // First job out should be job1 because of its priority
     let jobUpdate = await mongo.getNextJob(jobsColl);
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty('ok', 1);
     expect(jobUpdate).toHaveProperty('value');
-    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job1' , isXlarge:false});
+    expect(jobUpdate.value).toHaveProperty('payload', {
+      jobType: 'job1',
+      isXlarge: runXlarge
+    });
     job1._id = jobUpdate.value._id;
 
     // Second job out should be job2 because of its createdTime
@@ -107,7 +121,10 @@ describe('Mongo Tests', () => {
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty('ok', 1);
     expect(jobUpdate).toHaveProperty('value');
-    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job2', isXlarge: false});
+    expect(jobUpdate.value).toHaveProperty('payload', {
+      jobType: 'job2',
+      isXlarge: runXlarge
+    });
     job2._id = jobUpdate.value._id;
 
     // Third item out should be job3 because it is the last possible job
@@ -115,7 +132,10 @@ describe('Mongo Tests', () => {
     expect(jobUpdate).toBeDefined();
     expect(jobUpdate).toHaveProperty('ok', 1);
     expect(jobUpdate).toHaveProperty('value');
-    expect(jobUpdate.value).toHaveProperty('payload', { jobType: 'job3', isXlarge: false });
+    expect(jobUpdate.value).toHaveProperty('payload', {
+      jobType: 'job3',
+      isXlarge: runXlarge
+    });
     job3._id = jobUpdate.value._id;
 
     // Fourth job shouldnt be dequeued because its createdTime is in 10 days
@@ -273,5 +293,20 @@ describe('Mongo Tests', () => {
 
     mongo.getQueueCollection = jest.fn().mockReturnValue();
     await mongo.logMessageInMongo(job2, 'message 1');
+  }, 5000);
+
+  /** ******************************************************************
+   *                       reportStatus()                               *
+   ******************************************************************* */
+  it('reportStatus works properly', async () => {
+    const monitor = new Monitor(
+      { config: { component: 'worker', isXlarge: true, envType: 'pool_test' } },
+      mongo
+    );
+    mongo.getMonitorCollection = jest.fn().mockReturnValue(monitorColl);
+    await monitor.reportStatus('job failed');
+    let message = await monitorColl.findOne({});
+    expect(message.monitor).toHaveProperty('ip');
+    expect(message.monitor.ip).toEqual(monitor.ip);
   }, 5000);
 });

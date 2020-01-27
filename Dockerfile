@@ -27,19 +27,28 @@ RUN apt-get install --yes build-essential
 RUN useradd -ms /bin/bash docsworker
 RUN npm -g config set user root
 USER docsworker
+
 WORKDIR /home/docsworker
 
 
 	
 # install snooty parser
+RUN python3 -m pip uninstall -y snooty
 RUN python3 -m pip install --upgrade pip flit
-RUN git clone https://github.com/mongodb/snooty-parser.git snooty-parser
-RUN cd snooty-parser && FLIT_ROOT_INSTALL=1 python3 -m flit install
+RUN git clone https://github.com/mongodb/snooty-parser.git && \
+	cd snooty-parser && \
+	git fetch --tags && \
+	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+	git checkout "$latestTag" && \
+	FLIT_ROOT_INSTALL=1 python3 -m flit install
 ENV PATH="${PATH}:/home/docsworker/.local/bin"
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
+	git fetch --all && \
+	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+	git checkout "$latestTag" && \	
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
@@ -51,7 +60,7 @@ COPY worker/ .
 RUN npm install
 
 # where repo work will happen
-RUN mkdir repos && chmod 777 repos
+RUN mkdir repos && chmod 755 repos
 
 # entry to kick-off the worker
 EXPOSE 3000

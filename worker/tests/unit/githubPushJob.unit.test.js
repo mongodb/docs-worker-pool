@@ -1,8 +1,6 @@
 const job = require('../../jobTypes/githubPushJob');
 const workerUtils = require('../../utils/utils');
 
-const fs = require('fs-extra');
-
 const payloadObj = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test',
@@ -37,23 +35,23 @@ const payloadNoBranch = {
 };
 
 const testPayloadWithRepo = {
-  payload: payloadObj,
+  payload: payloadObj
 };
 
 const testPayloadWithoutBranch = {
-  payload: payloadNoBranch,
+  payload: payloadNoBranch
 };
 
 const testPayloadBadRepo = {
-  payload: payloadObjBadRepo,
+  payload: payloadObjBadRepo
 };
 
 const testPayloadBadBranch = {
-  payload: payloadObjBadBranch,
+  payload: payloadObjBadBranch
 };
 
 const testPayloadBadOwner = {
-  payload: payloadObjBadOwner,
+  payload: payloadObjBadOwner
 };
 
 const error = new Error('job not valid');
@@ -74,63 +72,33 @@ describe('Test Class', () => {
   it('build() rejects properly killed', async () => {
     const execMock = jest.fn().mockRejectedValue({ killed: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.build(testPayloadWithRepo)).rejects.toEqual({
-      killed: true,
+    await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
+      killed: true
     });
   });
 
   it('build() rejects properly code', async () => {
     const execMock = jest.fn().mockRejectedValue({ code: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.build(testPayloadWithRepo)).rejects.toEqual({
-      code: true,
+    await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
+      code: true
     });
   });
 
   it('build() rejects properly signal', async () => {
     const execMock = jest.fn().mockRejectedValue({ signal: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.build(testPayloadWithRepo)).rejects.toEqual({
-      signal: true,
+    await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
+      signal: true
     });
   });
 
   it('build() resolves properly notsignal', async () => {
     const execMock = jest.fn().mockRejectedValue({ notSignal: true });
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.build(testPayloadWithRepo)).resolves.toBeUndefined();
-  });
-
-  //pushToStage
-
-  it('pushToStage() rejects properly killed', async () => {
-    const execMock = jest.fn().mockRejectedValue({ killed: true });
-    workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.pushToStage(testPayloadWithRepo)).rejects.toEqual({
-      killed: true,
-    });
-  });
-
-  it('pushToStage() rejects properly code', async () => {
-    const execMock = jest.fn().mockRejectedValue({ code: true });
-    workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.pushToStage(testPayloadWithRepo)).rejects.toEqual({
-      code: true,
-    });
-  });
-
-  it('pushToStage() rejects properly signal', async () => {
-    const execMock = jest.fn().mockRejectedValue({ signal: true });
-    workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.pushToStage(testPayloadWithRepo)).rejects.toEqual({
-      signal: true,
-    });
-  });
-
-  it('pushToStage() resolves properly notsignal', async () => {
-    const execMock = jest.fn().mockRejectedValue({ notSignal: true });
-    workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-    await expect(job.pushToStage(testPayloadWithRepo)).resolves.toBeUndefined();
+    await expect(
+      job.runGithubPush(testPayloadWithRepo)
+    ).resolves.toBeUndefined();
   });
 
   // Tests for RunGithubPush Function
@@ -161,24 +129,12 @@ describe('Test Class', () => {
     expect(job.cleanup).toHaveBeenCalledTimes(0);
   });
 
-  it('runGithubPush():  to push to stage --> should reject', async () => {
-    jest.setTimeout(300000);
-    const execMock = jest.fn().mockRejectedValue({ killed: true });
-    workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
-
-    await expect(job.pushToStage(testPayloadWithRepo)).rejects.toEqual({
-      killed: true,
-    });
-  });
-
   //sanitize
   it('sanitize(): If repo invalid --> should reject', async () => {
     job.safeGithubPush = jest.fn().mockRejectedValue(error);
-    await expect(job.safeGithubPush(testPayloadBadRepo)).rejects.toEqual(
-      error
-    );
+    await expect(job.safeGithubPush(testPayloadBadRepo)).rejects.toEqual(error);
   });
-  
+
   it('sanitize(): If branch invalid --> should reject', async () => {
     await expect(job.safeGithubPush(testPayloadBadBranch)).rejects.toEqual(
       error
