@@ -1,10 +1,25 @@
 const StagingUtils = require("./stagingUtils");
 
 async function main() {
+
   const patchFlag = process.argv[2];
   const buildSize = process.argv[3];
-
-  StagingUtils.validateConfiguration();
+  
+  let url;
+  let upstreamConfig;
+  let upstreamName;
+  let doesRemoteHaveLocalBranch;
+  let branchName;
+  let repoName;
+  let userName;
+  let userEmail;
+  const newHead = "newHead";
+  
+  try {
+    StagingUtils.validateConfiguration();
+  } catch (error) {
+    return
+  }
 
   if (patchFlag === undefined) {
     console.log(
@@ -26,24 +41,70 @@ async function main() {
     return;
   }
 
-  const userName = await StagingUtils.getGitUser();
-  const userEmail = await StagingUtils.getGitEmail();
-  const url = await StagingUtils.getRepoInfo();
-  const repoName = StagingUtils.getRepoName(url);
-  const branchName = await StagingUtils.getBranchName();
+  try {
+    userName = await StagingUtils.getGitUser();
+  } catch (error) {
+    return
+  }
   
-  const newHead = "newHead";
+  try {
+    userEmail = await StagingUtils.getGitEmail();
+  } catch (error) {
+    return
+  }
+  
+  try {
+    url = await StagingUtils.getRepoInfo();
+  } catch (error) {
+    return
+  }
+  
+  try {
+    repoName = StagingUtils.getRepoName(url);
+  } catch (error) {
+    return
+  }
 
-  const upstreamConfig = await StagingUtils.checkUpstreamConfiguration(branchName);
-  const upstreamName = StagingUtils.getUpstreamName(upstreamConfig).trim(); //remove \n
+  try {
+    branchName = await StagingUtils.getBranchName();
+  } catch (error) {
+    return
+  }
+
+  try {
+    upstreamConfig = await StagingUtils.checkUpstreamConfiguration(branchName);
+  } catch (error) {
+    return
+  }
   
-  const doesRemoteHaveLocalBranch = await StagingUtils.doesRemoteHaveLocalBranch(branchName);
+  try {
+    upstreamName = StagingUtils.getUpstreamName(upstreamConfig).trim(); //remove \n
+  } catch (error) {
+    return
+  }
+  
+  try {
+    doesRemoteHaveLocalBranch = await StagingUtils.doesRemoteHaveLocalBranch(branchName);
+  } catch (error) {
+    return;
+  }
+  
   const branchNameForPayload = doesRemoteHaveLocalBranch ? branchName : upstreamName;
 
   // toggle btwn create patch from commits or what you have saved locally
   if (patchFlag === "commit") {
+    let firstCommit; 
+    let lastCommit;
 
-    const { firstCommit, lastCommit } = await StagingUtils.getGitCommits();
+    try {
+      const commits = await StagingUtils.getGitCommits();
+      firstCommit = commits[0];
+      lastCommit = commits[1];
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+
     const patch = await StagingUtils.getGitPatchFromCommits(
       firstCommit,
       lastCommit

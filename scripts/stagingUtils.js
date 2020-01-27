@@ -5,6 +5,7 @@ const { MongoClient } = require("mongodb");
 
 module.exports = {
   async insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
+
     const dbName = process.env.DB_NAME;
     const collName = process.env.COL_NAME;
     const username = process.env.USERNAME;
@@ -171,16 +172,49 @@ module.exports = {
   },
 
   async getGitCommits() {
+    return new Promise((resolve, reject) => {
+      exec("git cherry")
+        .then((result) => {
+          const cleanedup = result.stdout.replace(/\+ /g, "");
+          const commitarray = cleanedup.split(/\r\n|\r|\n/);
+          commitarray.pop(); // remove the last, dummy element that results from splitting on newline
+          if (commitarray.length === 0) {
+            const err = 
+              "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again";
+            
+            reject(err);
+          }
+          if (commitarray.length === 1) {
+            const firstCommit = commitarray[0];
+            const lastCommit = null;
+            resolve([firstCommit, lastCommit]);
+          }
+          const firstCommit = commitarray[0];
+          const lastCommit = commitarray[commitarray.length - 1];
+          resolve([firstCommit, lastCommit]);
+        }
+        )
+        .catch(error => {
+          console.error("error generating patch: ", error);
+          reject(error);
+        });
+    });
+
+
+
+    let commitarray;
+
     try {
       const result = await exec("git cherry");
       const cleanedup = result.stdout.replace(/\+ /g, "");
-      const commitarray = cleanedup.split(/\r\n|\r|\n/);
+      commitarray = cleanedup.split(/\r\n|\r|\n/);
       commitarray.pop(); // remove the last, dummy element that results from splitting on newline
       if (commitarray.length === 0) {
-        console.error(
+        const err = new Error(
           "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
         );
-        process.exit();
+        console.error(err)
+        return null;
       }
       if (commitarray.length === 1) {
         const firstCommit = commitarray[0];
@@ -191,7 +225,10 @@ module.exports = {
       const lastCommit = commitarray[commitarray.length - 1];
       return { firstCommit, lastCommit };
     } catch (error) {
-      console.log("error getting git commits cherry")
+      const err = new Error("error getting git commits cherry")
+      console.error(err);
+      throw err
+      
     }
 
   },
@@ -217,11 +254,13 @@ module.exports = {
           \n\n \
           git branch -u <upstream-branch-name>\
           \n\n";
-        console.error(errormsg);
-        process.exit();
+        console.error(errormsg)
+        throw errormsg
+        //return something or throw exception and catch it - inside of app.js catch, return instead of process.exit()
+        
       }
       console.error(error);
-      process.exit();
+      throw error
     }
   },
 
@@ -312,10 +351,11 @@ module.exports = {
       missingConfigs.push("SECRET");
     }
     if (missingConfigs.length !== 0) {
-      console.error(
+      const err = new Error(
         `The ~/.config/.snootyenv file is found but does not contain the following required fields: ${missingConfigs.toString()}`
       );
-      process.exit();
+      console.error(err)
+      throw err;
     }
   }
 };
