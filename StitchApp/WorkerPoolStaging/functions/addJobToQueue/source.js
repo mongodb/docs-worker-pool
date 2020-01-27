@@ -26,7 +26,7 @@ exports = function(payload, jobTitle, jobUserName, jobUserEmail){
   };
   
   // we are looking for jobs in the queue with the same payload that have not yet started (startTime == null)
-  const filterDoc = {payload: payload, startTime: null};
+  const filterDoc = {payload: payload, status: "inQueue"};
   const updateDoc = {$setOnInsert: newJob};
   
   // upsert the new job and return if the upsertedId if the job was added to the queue
