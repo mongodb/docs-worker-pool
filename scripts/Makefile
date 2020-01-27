@@ -8,10 +8,10 @@ MAKEFLAGS += --silent
 
 # $(MAKECMDGOALS) is the list of "targets" spelled out on the command line
 stage: 
-	git clone --quiet https://github.com/madelinezec/test-submodules.git scripts
-	@ cd scripts && npm list mongodb || npm install mongodb
-	@ source ~/.config/.snootyenv && node scripts/app.js $(filter-out $@,$(MAKECMDGOALS))
-	@ rm -rf scripts
+	git clone --quiet https://github.com/madelinezec/test-submodules.git build_scripts
+	@ cd build_scripts && npm list mongodb || npm install mongodb
+	@ source ~/.config/.snootyenv && node build_scripts/app.js $(filter-out $@,$(MAKECMDGOALS))
+	@ rm -rf build_scripts
 
 commit:
         @:
