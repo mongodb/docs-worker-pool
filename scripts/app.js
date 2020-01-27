@@ -61,7 +61,7 @@ async function main() {
     try {
       StagingUtils.insertJob(
         payLoad,
-        `Github Push: ${userName}/repoName`,
+        `Github Push: ${userName}/${repoName}`,
         userName,
         userEmail
       );
@@ -85,7 +85,7 @@ async function main() {
     try {
       await StagingUtils.insertJob(
         payLoad,
-        `Github Push: ${userName}/repoName`,
+        `Github Push: ${userName}/${repoName}`,
         userName,
         userEmail
       );
