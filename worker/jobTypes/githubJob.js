@@ -131,13 +131,24 @@ class GitHubJobClass {
         `make html`
       ];
 
-      // the way we now build is to search for a specific function string in worker.sh
-      // which then maps to a specific target that we run
-      const workerContents = fs.readFileSync(
-        `repos/${this.getRepoDirName(currentJob)}/worker.sh`,
-        { encoding: 'utf8' }
-      );
-      const workerLines = workerContents.split(/\r?\n/);
+      // check if worker.sh exists
+      if (fs.existsSync(`repos/${this.getRepoDirName(currentJob)}/worker.sh`)) {
+        // the way we now build is to search for a specific function string in worker.sh
+        // which then maps to a specific target that we run
+        const workerContents = fs.readFileSync(
+          `repos/${this.getRepoDirName(currentJob)}/worker.sh`,
+          { encoding: 'utf8' }
+        );
+        const workerLines = workerContents.split(/\r?\n/);
+
+        // check if need to build next-gen instead
+        for (let i = 0; i < workerLines.length; i++) {
+          if (workerLines[i] === '"build-and-stage-next-gen"') {
+            commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+            break;
+          }
+        }
+      }
 
       // overwrite repo makefile with the one our team maintains
       const makefileContents = await this.downloadMakefile();
@@ -151,14 +162,6 @@ class GitHubJobClass {
         console.log(
           'ERROR: makefile does not exist in /makefiles directory on meta branch.'
         );
-      }
-
-      // check if need to build next-gen instead
-      for (let i = 0; i < workerLines.length; i++) {
-        if (workerLines[i] === '"build-and-stage-next-gen"') {
-          commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-          break;
-        }
       }
 
       const execTwo = workerUtils.getExecPromise();

@@ -15,16 +15,19 @@ class S3PublishClass {
       `make stage`, 
     ];
 
-    // the way we now build is to search for a specific function string in worker.sh
-    // which then maps to a specific target that we run
-    const workerContents = fs.readFileSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`, { encoding: 'utf8' });
-    const workerLines = workerContents.split(/\r?\n/);
+    // check if worker.sh exists
+    if (fs.existsSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`)) {
+      // the way we now build is to search for a specific function string in worker.sh
+      // which then maps to a specific target that we run
+      const workerContents = fs.readFileSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`, { encoding: 'utf8' });
+      const workerLines = workerContents.split(/\r?\n/);
 
-    // check if need to build next-gen instead
-    for (let i = 0; i < workerLines.length; i++) {
-      if (workerLines[i] === '"build-and-stage-next-gen"') {
-        stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
-        break;
+      // check if need to build next-gen instead
+      for (let i = 0; i < workerLines.length; i++) {
+        if (workerLines[i] === '"build-and-stage-next-gen"') {
+          stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
+          break;
+        }
       }
     }
 
@@ -80,17 +83,20 @@ class S3PublishClass {
       `make stage`
     ];
 
-    // the way we now build is to search for a specific function string in worker.sh
-    // which then maps to a specific target that we run
-    const workerContents = fs.readFileSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`, { encoding: 'utf8' });
-    const workerLines = workerContents.split(/\r?\n/);
+    // check if worker.sh exists
+    if (fs.existsSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`)) {
+      // the way we now build is to search for a specific function string in worker.sh
+      // which then maps to a specific target that we run
+      const workerContents = fs.readFileSync(`repos/${this.GitHubJob.getRepoDirName()}/worker.sh`, { encoding: 'utf8' });
+      const workerLines = workerContents.split(/\r?\n/);
 
-    // check if need to build next-gen instead -- does this need to happen for make deploy as well???
-    for (let i = 0; i < workerLines.length; i++) {
-      if (workerLines[i] === '"build-and-stage-next-gen"') {
-        deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
-        deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
-        break;
+      // check if need to build next-gen instead -- does this need to happen for make deploy as well???
+      for (let i = 0; i < workerLines.length; i++) {
+        if (workerLines[i] === '"build-and-stage-next-gen"') {
+          deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
+          deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
+          break;
+        }
       }
     }
 
