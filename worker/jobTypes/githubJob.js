@@ -23,6 +23,24 @@ class GitHubJobClass {
     return `${this.currentJob.payload.repoName}_${this.currentJob.payload.newHead}`;
   }
 
+  buildNextGen() {
+    const workerPath = `repos/${this.getRepoDirName()}/worker.sh`;
+    if (fs.existsSync(workerPath)) {
+      // the way we now build is to search for a specific function string in worker.sh
+      // which then maps to a specific target that we run
+      const workerContents = fs.readFileSync(workerPath, { encoding: 'utf8' });
+      const workerLines = workerContents.split(/\r?\n/);
+
+      // check if need to build next-gen instead
+      for (let i = 0; i < workerLines.length; i++) {
+        if (workerLines[i] === '"build-and-stage-next-gen"') {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   // our maintained directory of makefiles
   async downloadMakefile() {
     const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
@@ -47,7 +65,7 @@ class GitHubJobClass {
     const currentJob = this.currentJob;
     logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
     try {
-      workerUtils.removeDirectory(`repos/${this.getRepoDirName(currentJob)}`);
+      workerUtils.removeDirectory(`repos/${this.getRepoDirName()}`);
     } catch (errResult) {
       logger.save(`${'(CLEANUP)'.padEnd(15)}failed cleaning repo directory`);
       throw errResult;
@@ -79,7 +97,7 @@ class GitHubJobClass {
         currentJob.payload.repoName;
       await simpleGit('repos')
         .silent(false)
-        .clone(repoPath, `${this.getRepoDirName(currentJob)}`)
+        .clone(repoPath, `${this.getRepoDirName()}`)
         .catch(err => {
           console.error('failed: ', err);
           throw err;
@@ -114,35 +132,45 @@ class GitHubJobClass {
 
     try {
       const exec = workerUtils.getExecPromise();
+      
       const pullRepoCommands = [
-        `cd repos/${this.getRepoDirName(currentJob)}`,
-        `git checkout ${currentJob.payload.branchName}`,
-        `git pull origin ${currentJob.payload.branchName}`
+        `cd repos/${this.getRepoDirName()}`,
       ];
+
+      // if commit hash is provided, use that
+      if (currentJob.payload.newHead) {
+        pullRepoCommands.push(...[
+          `git checkout ${currentJob.payload.newHead}`,
+          `git checkout -b ${currentJob.payload.branchName}`,
+          `git pull origin ${currentJob.payload.branchName}`,
+        ]);
+      } else {
+        pullRepoCommands.push(...[
+          `git checkout ${currentJob.payload.branchName}`,
+          `git pull origin ${currentJob.payload.branchName}`,
+        ]);
+      }
 
       await exec(pullRepoCommands.join(' && '));
 
       // default commands to run to build repo
       const commandsToBuild = [
         `. /venv/bin/activate`,
-        `cd repos/${this.getRepoDirName(currentJob)}`,
+        `cd repos/${this.getRepoDirName()}`,
         `rm -f makefile`,
         `make html`
       ];
 
-      // the way we now build is to search for a specific function string in worker.sh
-      // which then maps to a specific target that we run
-      const workerContents = fs.readFileSync(
-        `repos/${this.getRepoDirName(currentJob)}/worker.sh`,
-        { encoding: 'utf8' }
-      );
-      const workerLines = workerContents.split(/\r?\n/);
+      // check if need to build next-gen
+      if (this.buildNextGen()) {
+        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+      }
 
       // overwrite repo makefile with the one our team maintains
       const makefileContents = await this.downloadMakefile();
       if (makefileContents && makefileContents.status === 'success') {
         await fs.writeFileSync(
-          `repos/${this.getRepoDirName(currentJob)}/Makefile`,
+          `repos/${this.getRepoDirName()}/Makefile`,
           makefileContents.content,
           { encoding: 'utf8', flag: 'w' }
         );
@@ -150,14 +178,6 @@ class GitHubJobClass {
         console.log(
           'ERROR: makefile does not exist in /makefiles directory on meta branch.'
         );
-      }
-
-      // check if need to build next-gen instead
-      for (let i = 0; i < workerLines.length; i++) {
-        if (workerLines[i] === '"build-and-stage-next-gen"') {
-          commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-          break;
-        }
       }
 
       const execTwo = workerUtils.getExecPromise();
