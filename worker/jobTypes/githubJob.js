@@ -116,7 +116,8 @@ class GitHubJobClass {
       const exec = workerUtils.getExecPromise();
       const pullRepoCommands = [
         `cd repos/${this.getRepoDirName(currentJob)}`,
-        `git checkout ${currentJob.payload.branchName}`,
+        `git checkout ${currentJob.payload.newHead}`,
+        `git checkout -b ${currentJob.payload.branchName}`,
         `git pull origin ${currentJob.payload.branchName}`
       ];
 
