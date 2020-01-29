@@ -11,9 +11,10 @@ const mongo = require('./mongo');
 const EnvironmentClass = require('./environment').EnvironmentClass;
 const dbName = EnvironmentClass.getDB();
 const invalidJobDef = new Error("job not valid");
-const collName = process.env.COL_NAME;
-const username = process.env.USERNAME;
-const secret = process.env.SECRET;
+const collName = 'queue'
+// Get username password credentials
+const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
+const password = encodeURIComponent(EnvironmentClass.getAtlasPassword());
 
 async function insertJobInTestEnvironment(payloadObj) {
     // create the new job document
@@ -37,7 +38,7 @@ async function insertJobInTestEnvironment(payloadObj) {
       const filterDoc = { payload: payloadObj, status: { $in: ['inProgress', 'inQueue'] } };
       const updateDoc = { $setOnInsert: newJob };
 
-      const uri = `mongodb+srv://${username}:${secret}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
+      const uri = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
       const client = new MongoClient(uri, { useUnifiedTopology: true, useNewUrlParser: true });
       client.connect((err) => {
         if (err) {
@@ -68,7 +69,7 @@ async function insertJobInTestEnvironment(payloadObj) {
 
 
 async function changeStream(currentJob) {
-  const uri = `mongodb+srv://${username}:${secret}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
+  const uri = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
   const client = new MongoClient(uri, {
     useUnifiedTopology: true,
     useNewUrlParser: true
@@ -82,7 +83,7 @@ async function changeStream(currentJob) {
   
 
   return new Promise( async function(resolve, reject) {
-    console.log("inside here!!!")
+    console.log("inside here!!! ", dbName, collName, password);
     client.connect(async function(err){
       console.log("it appears we have connected!!!!")
       if (err) {
