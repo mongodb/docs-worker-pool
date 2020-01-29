@@ -1,0 +1,12 @@
+{
+    "id": "5e287968af68f65f93c2c1e9",
+    "name": "regressionTestWebHook",
+    "run_as_authed_user": false,
+    "run_as_user_id": "",
+    "run_as_user_id_script_source": "",
+    "options": {
+        "secret": "regressionTestingMongo"
+    },
+    "respond_result": true,
+    "disable_arg_logs": true
+}
