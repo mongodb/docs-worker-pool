@@ -7,6 +7,8 @@ STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_URL="https://docs.mongodb.com"
 PRODUCTION_BUCKET=docs-node
 
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
+
 PREFIX=node
 PROJECT=node
 REPO_DIR=$(shell pwd)
