@@ -12,13 +12,31 @@ function safeRegressionTest(currentJob) {
 }
 
 async function runRegressionTests(currentJob) {
+  /*create jobs for testing*/
+  let fileContents;
+  let reposApprovedForTesting;
+
+  /*Staging*/
+  try {
+    fileContents = fs.readFileSync("./json/supported-docs-repos.json", "utf8");
+  } catch (err) {
+    const errorReadFile = new Error("error reading file: ", err);
+    throw errorReadFile;
+  }
+
+  try {
+    reposApprovedForTesting = JSON.parse(fileContents)["repos"];
+  } catch (error) {
+    const errorParsingJson = new Error("error parsing json: ", error);
+  }
+
   /*open change stream so we can make sure we are monitoring all regression jobs */
   return new Promise(async function(resolve, reject) {
-    const result = await regressionUtils.changeStream(currentJob);
-    if (result === true){
-      resolve()
+    const result = await regressionUtils.createAndMonitorChildJobs(currentJob, reposApprovedForTesting);
+    if (result === true) {
+      resolve();
     }
-    reject()
+    reject();
   });
 }
 
