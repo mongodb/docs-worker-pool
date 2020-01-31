@@ -16,7 +16,7 @@ const collName = 'queue'
 const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
 const password = encodeURIComponent(EnvironmentClass.getAtlasPassword());
 
-async function insertJobInTestEnvironment(payloadObj) {
+async function insertJob(payloadObj) {
     // create the new job document
     const newJob = {
       title: 'Regression Test',
@@ -71,6 +71,7 @@ function evaluateJobArrays(reposApprovedForTesting, completedJobs){
 
   let completedJobCounter = 0;
   let arraysAreEqual = false
+  
   reposApprovedForTesting.forEach(function(repository) {
     console.log(repository.name);
     if(completedJobs.includes(repository.name)){
@@ -78,6 +79,7 @@ function evaluateJobArrays(reposApprovedForTesting, completedJobs){
       console.log("increase complete job counter ", completedJobCounter, reposApprovedForTesting.length, completedJobCounter === reposApprovedForTesting.length);
       if(completedJobCounter === reposApprovedForTesting.length){        
         arraysAreEqual = true;
+
       }
     }
   })
@@ -85,7 +87,7 @@ function evaluateJobArrays(reposApprovedForTesting, completedJobs){
   return arraysAreEqual;
 }
 
-async function createAndMonitorChildJobs(currentJob, reposApprovedForTesting) {
+async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
   const uri = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/test?retryWrites=true&w=majority`;
   const client = new MongoClient(uri, {
     useUnifiedTopology: true,
@@ -100,7 +102,7 @@ async function createAndMonitorChildJobs(currentJob, reposApprovedForTesting) {
       }
       const db = client.db(dbName);
       const collection = db.collection(collName);
-     // const createAndMonitorChildJobs = collection.watch({ fullDocument: 'updateLookup' });
+
      const changeStream = collection.watch(
       [{
         $match: {
@@ -117,18 +119,22 @@ async function createAndMonitorChildJobs(currentJob, reposApprovedForTesting) {
 
       let completedChildJobs = [];
       changeStream.on("change", (updatedJob, error) => {
-        console.log(updatedJob.fullDocument["status"], updatedJob.fullDocument.payload.parentID, currentJob["_id"], JSON.stringify(updatedJob.fullDocument.payload.parentID) === JSON.stringify(currentJob["_id"]));
+        
         if(error){
-          console.log("error!!!! ", error);
+          //how to handle error? throw something?
+          console.log("error ", error);
         }
+        //stringify obj? compare ids in mongo?toString()
+        //def set a var here 
+        var idEquality = updatedJob.fullDocument.payload.parentID.toString() === currentJob.id.toString();
         if (
-          JSON.stringify(updatedJob.fullDocument.payload.parentID) === JSON.stringify(currentJob["_id"]) &&
+          idEquality &&
           updatedJob.fullDocument["status"] != "inProgress" &&
           updatedJob.fullDocument["status"] != "inQueue"
         ) {
           completedChildJobs.push(updatedJob.fullDocument.payload.repoName);
           var result = evaluateJobArrays(reposApprovedForTesting, completedChildJobs)
-          console.log(result)
+
           if (evaluateJobArrays(reposApprovedForTesting, completedChildJobs)){
             resolve(true);
           }
@@ -136,8 +142,7 @@ async function createAndMonitorChildJobs(currentJob, reposApprovedForTesting) {
       });
 
       var stagePayloads = [];
-    
-      var counter = 0;
+
       reposApprovedForTesting.forEach(function(repository) {
         stagePayloads.push(
           createPayload(
@@ -148,8 +153,6 @@ async function createAndMonitorChildJobs(currentJob, reposApprovedForTesting) {
             currentJob["_id"]
           )
         );
-        counter = counter++;
-        console.log(counter);
       });
     
       let poolTestJobs = [];
@@ -157,7 +160,7 @@ async function createAndMonitorChildJobs(currentJob, reposApprovedForTesting) {
     
       /*insert jobs */
       for (const payload of stagePayloads) {
-        const testResult = insertJobInTestEnvironment(
+        const testResult = insertJobIn(
           payload
         );
       }
@@ -196,29 +199,9 @@ function createPayload(
   return payload;
 }
 
-  // Look Up Job In The Queue
-  async function lookUpJob(jobId) {
-    const queueCollection = mongo.getQueueCollection();
-
-    if (queueCollection) {
-      //we want to wait for the jobs to complete before we compare
-        try {
-          const item = await queueCollection.findOne({ _id: jobId });
-          console.log("this is the item we found in queueCollection?", item)
-          return  item
-        } catch (err) {
-          console.log(`Error in logInMongo(): ${err}`);
-        }
-      
-    } else {
-      console.log('Error in logInMongo(): queueCollection does not exist');
-    }
-
-  }
 
 module.exports = {
   createPayload, 
-  insertJobInTestEnvironment,
-  lookUpJob,
-  createAndMonitorChildJobs
+  insertJob,
+  monitorAndCreateChildJobs
 }

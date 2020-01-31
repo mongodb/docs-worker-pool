@@ -32,7 +32,7 @@ async function runRegressionTests(currentJob) {
 
   /*open change stream so we can make sure we are monitoring all regression jobs */
   return new Promise(async function(resolve, reject) {
-    const result = await regressionUtils.createAndMonitorChildJobs(currentJob, reposApprovedForTesting);
+    const result = await regressionUtils.monitorAndCreateChildJobs(currentJob, reposApprovedForTesting);
     if (result === true) {
       resolve();
     }
