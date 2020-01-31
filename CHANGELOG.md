@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.2.1] - 2020-01-31
+
+### Fixed
+
+- change addJobToQueue function to accommodate multiple builds of the same (DOCSP-8567)
+
+- one job per repo-branch-commit should be in-queue or in-progress (DOCSP-8451)
+
+### added
+
+- use commit hash for builds (DOCSP-8566)
+
+- run commit based builds (DOCSP-8278)
+
+- validation of user permissions to publish (DOCSP-7930)
+
+
 ## [v0.2.0] - 2020-01-24
 
 ### Fixed
