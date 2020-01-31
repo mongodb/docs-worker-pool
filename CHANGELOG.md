@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- change addJobToQueue function to accommodate multiple builds of the same (DOCSP-8567)
+- change addJobToQueue function to accommodate multiple builds of the same status (DOCSP-8567)
 
 - one job per repo-branch-commit should be in-queue or in-progress (DOCSP-8451)
 
