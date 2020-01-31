@@ -17,6 +17,7 @@ envSecrets:
   FASTLY_DOCHUB_MAP: docs-worker-pool
   XLARGE: docs-worker-pool
   DB_NAME: docs-worker-pool
+  SNOOTY_ENV: docs-worker-pool
 
 service:
   type: ClusterIP
