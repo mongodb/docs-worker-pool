@@ -21,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - validation of user permissions to publish (DOCSP-7930)
 
-
 ## [v0.2.0] - 2020-01-24
 
 ### Fixed
