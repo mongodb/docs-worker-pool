@@ -44,7 +44,7 @@ update-snooty:
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
 	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
-next-gen-html: examples update-snooty
+next-gen-html: examples
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
 	# cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
@@ -81,7 +81,7 @@ deploy-search-index: ## Update the search index for this branch
 		-s \
 		--exclude build/public/index.html
 
-examples:
+examples: update-snooty
 	mkdir -p ${DRIVERS_PATH}
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-python-driver/master/test/test_examples.py -o ${DRIVERS_PATH}/test_examples.py
 	curl -SfL https://raw.githubusercontent.com/mongodb/motor/master/test/asyncio_tests/test_examples.py -o ${DRIVERS_PATH}/test_examples_motor.py
