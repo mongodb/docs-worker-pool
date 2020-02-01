@@ -10,6 +10,7 @@ PRODUCTION_URL=https://docs.mongodb.com/guides
 PROJECT=guides
 PREFIX=guides
 REPO_DIR=$(shell pwd)
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -33,16 +34,28 @@ publish: examples install-resources ## Builds this branch's publishable HTML and
 	giza make publish
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
 
-next-gen-html: examples
+update-snooty:
+	git clone https://github.com/mongodb/snooty.git snooty && \
+	cd snooty && \
+	git checkout devhub-frontend-staging && \
+	npm install && \
+	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
+	mkdir -p ./static/images && \
+	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
+	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+
+next-gen-html: examples update-snooty
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
-	cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
+	# cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
 
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
