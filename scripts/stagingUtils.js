@@ -5,7 +5,6 @@ const { MongoClient } = require("mongodb");
 
 module.exports = {
   async insertJob(payloadObj, jobTitle, jobUserName, jobUserEmail) {
-
     const dbName = process.env.DB_NAME;
     const collName = process.env.COL_NAME;
     const username = process.env.USERNAME;
@@ -42,7 +41,7 @@ module.exports = {
 
     // specify the DB's name
     const collection = client.db(dbName).collection(collName);
-    
+
     let resultOfQuery;
     // execute update query
     try {
@@ -55,17 +54,18 @@ module.exports = {
           `You successfully enqued a staging job to docs autobuilder. This is the record id: ${result.upsertedId._id}`
         );
         client.close();
-        return true
+        return true;
       }
       client.close();
       console.log("This job already exists ");
-      return "Already Existed"
+      return "Already Existed";
     } catch (error) {
-      console.error(`There was an error enqueing a staging job to docs autobuilder. Here is the error: ${error}`);
+      console.error(
+        `There was an error enqueing a staging job to docs autobuilder. Here is the error: ${error}`
+      );
       client.close();
       return error;
     }
-
   },
 
   createPayload(
@@ -158,30 +158,23 @@ module.exports = {
     });
   },
 
-  async getGitUser() {
-    return new Promise((resolve, reject) => {
-      exec("git config --global user.name")
-        .then(result => {
-          resolve(result.stdout.replace("\n", ""));
-        })
-        .catch(error => {
-          console.error(`exec error: ${error}`);
-          reject(error);
-        });
-    });
+  getGitUser(url) {
+    let repoOwner = url.split("/");
+    repoOwner = repoOwner[repoOwner.length - 2];
+    return repoOwner;
   },
 
   async getGitCommits() {
     return new Promise((resolve, reject) => {
       exec("git cherry")
-        .then((result) => {
+        .then(result => {
           const cleanedup = result.stdout.replace(/\+ /g, "");
           const commitarray = cleanedup.split(/\r\n|\r|\n/);
           commitarray.pop(); // remove the last, dummy element that results from splitting on newline
           if (commitarray.length === 0) {
-            const err = 
+            const err =
               "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again";
-            
+
             reject(err);
           }
           if (commitarray.length === 1) {
@@ -192,15 +185,12 @@ module.exports = {
           const firstCommit = commitarray[0];
           const lastCommit = commitarray[commitarray.length - 1];
           resolve([firstCommit, lastCommit]);
-        }
-        )
+        })
         .catch(error => {
           console.error("error generating patch: ", error);
           reject(error);
         });
     });
-
-
 
     let commitarray;
 
@@ -213,7 +203,7 @@ module.exports = {
         const err = new Error(
           "You have tried to create a staging job from local commits but you have no committed work. Please make commits and then try again"
         );
-        console.error(err)
+        console.error(err);
         return null;
       }
       if (commitarray.length === 1) {
@@ -225,12 +215,10 @@ module.exports = {
       const lastCommit = commitarray[commitarray.length - 1];
       return { firstCommit, lastCommit };
     } catch (error) {
-      const err = new Error("error getting git commits cherry")
+      const err = new Error("error getting git commits cherry");
       console.error(err);
-      throw err
-      
+      throw err;
     }
-
   },
 
   getUpstreamName(upstream) {
@@ -254,13 +242,12 @@ module.exports = {
           \n\n \
           git branch -u <upstream-branch-name>\
           \n\n";
-        console.error(errormsg)
-        throw errormsg
+        console.error(errormsg);
+        throw errormsg;
         //return something or throw exception and catch it - inside of app.js catch, return instead of process.exit()
-        
       }
       console.error(error);
-      throw error
+      throw error;
     }
   },
 
@@ -354,7 +341,7 @@ module.exports = {
       const err = new Error(
         `The ~/.config/.snootyenv file is found but does not contain the following required fields: ${missingConfigs.toString()}`
       );
-      console.error(err)
+      console.error(err);
       throw err;
     }
   }
