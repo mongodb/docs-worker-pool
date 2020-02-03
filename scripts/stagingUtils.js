@@ -85,7 +85,7 @@ module.exports = {
       branchName: upstreamBranchName,
       isFork: true,
       private: false,
-      isXlarge: false,
+      isXlarge: true,
       repoOwner: repoOwnerArg,
       url: urlArg,
       newHead: lastCommit,
