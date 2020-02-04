@@ -38,6 +38,7 @@ update-snooty:
 	git clone https://github.com/10gen/dev-hub snooty && \
 	cd snooty && \
 	git checkout staging && \
+	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
