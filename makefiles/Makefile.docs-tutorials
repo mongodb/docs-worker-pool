@@ -35,10 +35,9 @@ publish: examples install-resources ## Builds this branch's publishable HTML and
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
 
 update-snooty:
-	git clone https://github.com/mongodb/snooty.git snooty && \
+	git clone https://github.com/10gen/dev-hub snooty && \
 	cd snooty && \
-	git checkout devhub-frontend-staging && \
-	npm install && \
+	git checkout staging && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
