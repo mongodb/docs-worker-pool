@@ -12,6 +12,8 @@ PREFIX=devhub
 REPO_DIR=$(shell pwd)
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
+GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
+GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
@@ -24,7 +26,7 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 update-snooty:
-	git clone https://github.com/10gen/dev-hub snooty && \
+	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/dev-hub snooty && \
 	cd snooty && \
 	git checkout staging && \
 	npm install && \
