@@ -1,4 +1,3 @@
-//const fs = require('fs-extra');
 const workerUtils = require("./utils");
 const GitHubJob = require("../jobTypes/githubJob").GitHubJobClass;
 const S3Publish = require("../jobTypes/S3Publish").S3PublishClass;
@@ -12,6 +11,7 @@ const EnvironmentClass = require("./environment").EnvironmentClass;
 const dbName = EnvironmentClass.getDB();
 const invalidJobDef = new Error("job not valid");
 const collName = "queue";
+
 // Get username password credentials
 const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
 const password = encodeURIComponent(EnvironmentClass.getAtlasPassword());
@@ -170,7 +170,8 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
             repository["owner"],
             "nothing",
             "githubPush",
-            currentJob["_id"]
+            currentJob["_id"], 
+            currentJob["payload"]["newHead"]
           )
         );
       });
@@ -191,7 +192,8 @@ function createPayload(
   repoOwnerArg,
   urlArg,
   typeOfJob,
-  parentArg
+  parentArg, 
+  commitHash
 ) {
   const payload = {
     jobType: typeOfJob,
@@ -205,7 +207,7 @@ function createPayload(
     isXlarge: false,
     repoOwner: repoOwnerArg,
     url: `https://github.com/${repoOwnerArg}/${repoNameArg}`,
-    newHead: "regressionTesting"
+    newHead: commitHash
   };
 
   return payload;
