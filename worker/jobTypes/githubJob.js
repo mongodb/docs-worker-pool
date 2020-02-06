@@ -1,7 +1,7 @@
-const fs = require("fs-extra");
-const workerUtils = require("../utils/utils");
-const simpleGit = require("simple-git/promise");
-const request = require("request");
+const fs = require('fs-extra');
+const workerUtils = require('../utils/utils');
+const simpleGit = require('simple-git/promise');
+const request = require('request');
 
 class GitHubJobClass {
   // pass in a job payload to setup class
@@ -28,7 +28,7 @@ class GitHubJobClass {
     if (fs.existsSync(workerPath)) {
       // the way we now build is to search for a specific function string in worker.sh
       // which then maps to a specific target that we run
-      const workerContents = fs.readFileSync(workerPath, { encoding: "utf8" });
+      const workerContents = fs.readFileSync(workerPath, { encoding: 'utf8' });
       const workerLines = workerContents.split(/\r?\n/);
 
       // check if need to build next-gen instead
@@ -48,11 +48,11 @@ class GitHubJobClass {
     return new Promise(function(resolve, reject) {
       request(makefileLocation, function(error, response, body) {
         if (!error && body && response.statusCode === 200) {
-          returnObject["status"] = "success";
-          returnObject["content"] = body;
+          returnObject['status'] = 'success';
+          returnObject['content'] = body;
         } else {
-          returnObject["status"] = "failure";
-          returnObject["content"] = response;
+          returnObject['status'] = 'failure';
+          returnObject['content'] = response;
         }
         resolve(returnObject);
         reject(error);
@@ -63,15 +63,15 @@ class GitHubJobClass {
   // cleanup before pulling repo
   async cleanup(logger) {
     const currentJob = this.currentJob;
-    logger.save(`${"(rm)".padEnd(15)}Cleaning up repository`);
+    logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
     try {
       workerUtils.removeDirectory(`repos/${this.getRepoDirName()}`);
     } catch (errResult) {
-      logger.save(`${"(CLEANUP)".padEnd(15)}failed cleaning repo directory`);
+      logger.save(`${'(CLEANUP)'.padEnd(15)}failed cleaning repo directory`);
       throw errResult;
     }
     return new Promise(function(resolve, reject) {
-      logger.save(`${"(rm)".padEnd(15)}Finished cleaning repo`);
+      logger.save(`${'(rm)'.padEnd(15)}Finished cleaning repo`);
       resolve(true);
       reject(false);
     });
@@ -79,42 +79,42 @@ class GitHubJobClass {
 
   async cloneRepo(logger) {
     const currentJob = this.currentJob;
-    logger.save(`${"(GIT)".padEnd(15)}Cloning repository`);
-    logger.save(`${"(GIT)".padEnd(15)}running fetch`);
+    logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
+    logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
     try {
       if (!currentJob.payload.branchName) {
         logger.save(
-          `${"(CLONE)".padEnd(15)}failed due to insufficient definition`
+          `${'(CLONE)'.padEnd(15)}failed due to insufficient definition`
         );
-        throw new Error("branch name not indicated");
+        throw new Error('branch name not indicated');
       }
       const basePath = this.getBasePath();
       const repoPath =
         basePath +
-        "/" +
+        '/' +
         currentJob.payload.repoOwner +
-        "/" +
+        '/' +
         currentJob.payload.repoName;
-      await simpleGit("repos")
+      await simpleGit('repos')
         .silent(false)
         .clone(repoPath, `${this.getRepoDirName()}`)
         .catch(err => {
-          console.error("failed: ", err);
+          console.error('failed: ', err);
           throw err;
         });
     } catch (errResult) {
       if (
-        errResult.hasOwnProperty("code") ||
-        errResult.hasOwnProperty("signal") ||
-        errResult.hasOwnProperty("killed")
+        errResult.hasOwnProperty('code') ||
+        errResult.hasOwnProperty('signal') ||
+        errResult.hasOwnProperty('killed')
       ) {
-        logger.save(`${"(GIT)".padEnd(15)}failed with code: ${errResult.code}`);
-        logger.save(`${"(GIT)".padEnd(15)}stdErr: ${errResult.stderr}`);
+        logger.save(`${'(GIT)'.padEnd(15)}failed with code: ${errResult.code}`);
+        logger.save(`${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
         throw errResult;
       }
     }
     return new Promise(function(resolve, reject) {
-      logger.save(`${"(GIT)".padEnd(15)}Finished git clone`);
+      logger.save(`${'(GIT)'.padEnd(15)}Finished git clone`);
       resolve(true);
       reject(false);
     });
@@ -127,8 +127,8 @@ class GitHubJobClass {
     await this.cleanup(logger);
     await this.cloneRepo(logger);
 
-    logger.save(`${"(BUILD)".padEnd(15)}Running Build`);
-    logger.save(`${"(BUILD)".padEnd(15)}running worker.sh`);
+    logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
+    logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
     const exec = workerUtils.getExecPromise();
     const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
 
@@ -144,7 +144,7 @@ class GitHubJobClass {
           `git branch ${currentJob.payload.branchName} --contains ${currentJob.payload.newHead}`
         ];
 
-        const result = await exec(commitCheckCommands.join("&&"));
+        const result = await exec(commitCheckCommands.join('&&'));
         const returnObject = {};
         
         if (!result.stdout.includes(`* ${currentJob.payload.branchName}`)) {
@@ -152,7 +152,7 @@ class GitHubJobClass {
             `Specified commit does not exist on ${currentJob.payload.branchName} branch`
           );
           logger.save(
-            `${"(BUILD)".padEnd(
+            `${'(BUILD)'.padEnd(
               15
             )} failed. The specified commit does not exist on ${
               currentJob.payload.branchName
@@ -180,7 +180,7 @@ class GitHubJobClass {
         );
       }
 
-      await exec(pullRepoCommands.join(" && "));
+      await exec(pullRepoCommands.join(' && '));
 
       // default commands to run to build repo
       const commandsToBuild = [
@@ -192,54 +192,54 @@ class GitHubJobClass {
 
       // check if need to build next-gen
       if (this.buildNextGen()) {
-        commandsToBuild[commandsToBuild.length - 1] = "make next-gen-html";
+        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
       }
 
       // overwrite repo makefile with the one our team maintains
       const makefileContents = await this.downloadMakefile();
-      if (makefileContents && makefileContents.status === "success") {
+      if (makefileContents && makefileContents.status === 'success') {
         await fs.writeFileSync(
           `repos/${this.getRepoDirName()}/Makefile`,
           makefileContents.content,
-          { encoding: "utf8", flag: "w" }
+          { encoding: 'utf8', flag: 'w' }
         );
       } else {
         console.log(
-          "ERROR: makefile does not exist in /makefiles directory on meta branch."
+          'ERROR: makefile does not exist in /makefiles directory on meta branch.'
         );
       }
 
       const execTwo = workerUtils.getExecPromise();
 
-      const { stdout, stderr } = await execTwo(commandsToBuild.join(" && "));
+      const { stdout, stderr } = await execTwo(commandsToBuild.join(' && '));
 
       return new Promise(function(resolve, reject) {
-        logger.save(`${"(BUILD)".padEnd(15)}Finished Build`);
+        logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
         logger.save(
-          `${"(BUILD)".padEnd(
+          `${'(BUILD)'.padEnd(
             15
           )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
         );
         resolve({
-          status: "success",
+          status: 'success',
           stdout: stdout,
           stderr: stderr
         });
         reject({
-          status: "success",
+          status: 'success',
           stderr: stderr
         });
       });
     } catch (errResult) {
       if (
-        errResult.hasOwnProperty("code") ||
-        errResult.hasOwnProperty("signal") ||
-        errResult.hasOwnProperty("killed")
+        errResult.hasOwnProperty('code') ||
+        errResult.hasOwnProperty('signal') ||
+        errResult.hasOwnProperty('killed')
       ) {
         logger.save(
-          `${"(BUILD)".padEnd(15)}failed with code: ${errResult.code}`
+          `${'(BUILD)'.padEnd(15)}failed with code: ${errResult.code}`
         );
-        logger.save(`${"(BUILD)".padEnd(15)}stdErr: ${errResult.stderr}`);
+        logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${errResult.stderr}`);
         throw errResult;
       }
     }
