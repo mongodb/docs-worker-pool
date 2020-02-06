@@ -140,9 +140,10 @@ class GitHubJobClass {
       // if commit hash is provided, use that
       if (currentJob.payload.newHead) {
         pullRepoCommands.push(...[
-          `git checkout ${currentJob.payload.newHead}`,
-          `git checkout -b ${currentJob.payload.branchName}`,
-          `git pull origin ${currentJob.payload.branchName}`,
+          `git fetch`,
+          `git checkout ${currentJob.payload.branchName}`,
+          `git branch ${currentJob.payload.branchName} --contains ${currentJob.payload.newHead}`
+          
         ]);
       } else {
         pullRepoCommands.push(...[
