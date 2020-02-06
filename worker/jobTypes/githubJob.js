@@ -129,10 +129,9 @@ class GitHubJobClass {
 
     logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
     logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
-    const exec = workerUtils.getExecPromise();
-    const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
 
     try {
+      const exec = workerUtils.getExecPromise();
       const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
 
       // if commit hash is provided, use that
