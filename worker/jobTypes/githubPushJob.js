@@ -8,9 +8,30 @@ const Logger = require('../utils/logger').LoggerClass;
 const buildTimeout = 60 * 450;
 
 const invalidJobDef = new Error('job not valid');
+
+function safeBranch(currentJob){
+  if (currentJob.payload.upstream) {
+    return currentJob.payload.upstream === currentJob.payload.branchName;
+  }
+
+  // master branch cannot run through github push, unless upstream for server docs repo
+  if (currentJob.payload.branchName === 'master') {
+    workerUtils.logInMongo(
+      currentJob,
+      `${'(BUILD)'.padEnd(
+        15
+      )} failed, master branch not supported on staging builds`
+    );
+    throw new Error('master branches not supported');
+    return false;
+  }
+
+  return true;
+}
+
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
-function safeString(stringToCheck) {
+function safeString(safeString) {
   return (
     validator.isAscii(stringToCheck) &&
     validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
@@ -35,7 +56,7 @@ function safeGithubPush(currentJob) {
   if (
     safeString(currentJob.payload.repoName) &&
     safeString(currentJob.payload.repoOwner) &&
-    safeString(currentJob.payload.branchName)
+    // safeString(currentJob.payload.branchName)
   ) {
     return true;
   }
@@ -96,16 +117,6 @@ async function runGithubPush(currentJob) {
     throw invalidJobDef;
   }
 
-  // master branch cannot run through staging build
-  // if (currentJob.payload.branchName === 'master') {
-  //   workerUtils.logInMongo(
-  //     currentJob,
-  //     `${'(BUILD)'.padEnd(
-  //       15
-  //     )} failed, master branch not supported on staging builds`
-  //   );
-  //   throw new Error('master branches not supported');
-  // }
 
   // instantiate github job class and logging class
   const job = new GitHubJob(currentJob);
