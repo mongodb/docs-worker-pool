@@ -11,7 +11,7 @@ const invalidJobDef = new Error('job not valid');
 
 function safeBranch(currentJob){
   if (currentJob.payload.upstream) {
-    return currentJob.payload.upstream === currentJob.payload.branchName;
+    return currentJob.payload.upstream.includes(currentJob.payload.branchName);
   }
 
   // master branch cannot run through github push, unless upstream for server docs repo
@@ -31,7 +31,7 @@ function safeBranch(currentJob){
 
 //anything that is passed to an exec must be validated or sanitized
 //we use the term sanitize here lightly -- in this instance this // ////validates
-function safeString(safeString) {
+function safeString(stringToCheck) {
   return (
     validator.isAscii(stringToCheck) &&
     validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
@@ -56,7 +56,7 @@ function safeGithubPush(currentJob) {
   if (
     safeString(currentJob.payload.repoName) &&
     safeString(currentJob.payload.repoOwner) &&
-    // safeString(currentJob.payload.branchName)
+    safeBranch(currentJob)
   ) {
     return true;
   }
