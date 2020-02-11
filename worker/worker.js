@@ -28,7 +28,7 @@ let mongoClient;
 
 // Constants
 const MONGO_TIMEOUT_S = 15; // Reject any mongo operation taking longer than this number of seconds
-const JOB_TIMEOUT_S = 60 * 60; // Reject any job taking longer than this number of seconds
+const JOB_TIMEOUT_S = 15 * 60; // Reject any job taking longer than this number of seconds
 const RETRY_TIMEOUT_MS = 5 * 1000; // Number of seconds to wait after not finding one
 const MIN_TIMEOUT_MS = 1; // Small timeout to re-call the work() function
 const LOG_PADDING = 15; // For formatting the log output
