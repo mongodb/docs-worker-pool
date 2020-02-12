@@ -69,16 +69,16 @@ class S3PublishClass {
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
       `make publish`,
-      `make stage`
+      `make deploy`
     ];
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
-      deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
+      deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
 
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
+    logger.save(`${'(stage)'.padEnd(15)}Pushing to production`);
 
     try {
       const exec = workerUtils.getExecPromise();
@@ -90,9 +90,9 @@ class S3PublishClass {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       }
       return new Promise(function(resolve, reject) {
-        logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
+        logger.save(`${'(stage)'.padEnd(15)}Finished pushing to production`);
         logger.save(
-          `${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
+          `${'(stage)'.padEnd(15)}Production push details:\n\n${stdoutMod}`
         );
         resolve({
           status: 'success',
@@ -106,9 +106,9 @@ class S3PublishClass {
         errResult.hasOwnProperty('killed')
       ) {
         logger.save(
-          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
+          `${'(prod)'.padEnd(15)}failed with code: ${errResult.code}`
         );
-        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+        logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
         throw errResult;
       }
     }
