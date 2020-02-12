@@ -49,17 +49,8 @@ class S3PublishClass {
         })
       });
     } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
-        logger.save(
-          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
-        );
-        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
+      logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      throw errResult;
     }
   }
 
@@ -78,7 +69,7 @@ class S3PublishClass {
       deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
     }
 
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
+    logger.save(`${'(stage)'.padEnd(15)}Pushing to production`);
 
     try {
       const exec = workerUtils.getExecPromise();
@@ -90,9 +81,9 @@ class S3PublishClass {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       }
       return new Promise(function(resolve, reject) {
-        logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
+        logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
         logger.save(
-          `${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
+          `${'(prod)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
         );
         resolve({
           status: 'success',
@@ -100,17 +91,8 @@ class S3PublishClass {
         });
       });
     } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
-        logger.save(
-          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
-        );
-        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
+      logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      throw errResult;
     }
   }
 }
