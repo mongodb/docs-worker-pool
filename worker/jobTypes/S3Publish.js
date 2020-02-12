@@ -69,13 +69,13 @@ class S3PublishClass {
       `. /venv/bin/activate`,
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
       `make publish`,
-      `make stage`
+      `make deploy`
     ];
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
-      deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
+      deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
 
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
