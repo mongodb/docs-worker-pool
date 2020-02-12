@@ -5,7 +5,7 @@ STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 
 PRODUCTION_URL="https://docs.mongodb.com"
-PRODUCTION_BUCKET=docs-node
+PRODUCTION_BUCKET=docs-node-prod
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
@@ -23,10 +23,8 @@ help: ## Show this help message
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
-publish: remote-includes ## Builds this branch's publishable HTML and other artifacts under build/public
-	if [ ${GIT_BRANCH} = master ]; then rm -rf build/master build/public; fi
-	giza make publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
+next-gen-publish: next-gen-html
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -47,14 +45,8 @@ next-gen-stage: ## Host online for review
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
-### fake-deloy in the stitch case pushes the html not dirhtml into bucket
-## must make html on master branch first
-fake-deploy: build/public ## Create a fake deployment in the staging bucket
-	mut-publish build/master/html ${STAGING_BUCKET} --prefix=${PROJECT}/draft-wip --deploy --verbose  --all-subdirectories  ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${PROJECT}/draft-wip/index.html"
-
-deploy: build/public api-docs ## Deploy to the production bucket
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
+next-gen-deploy:
+	mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
 
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
@@ -64,7 +56,4 @@ deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT} -g -s --exclude build/public/sdk/iOS
 
-devbuild: docstools-build-theme
-	rm -rf build/${GIT_BRANCH}
-	make html
-	make stage
+
