@@ -20,7 +20,7 @@ class GitHubJobClass {
     }
 
     getRepoDirName() {
-        return `${this.currentJob.payload.repoName}_${this.currentJob.payload.newHead}`;
+        return `${this.currentJob.payload.repoName}`;
     }
 
     buildNextGen() {
