@@ -105,15 +105,8 @@ class GitHubJobClass {
                     throw err;
                 });
         } catch (errResult) {
-            if (
-                errResult.hasOwnProperty('code') ||
-                errResult.hasOwnProperty('signal') ||
-                errResult.hasOwnProperty('killed')
-            ) {
-                logger.save(`${'(GIT)'.padEnd(15)}failed with code: ${errResult.code}`);
-                logger.save(`${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-                throw errResult;
-            }
+            logger.save(`${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+            throw errResult;
         }
         return new Promise(function(resolve, reject) {
             logger.save(`${'(GIT)'.padEnd(15)}Finished git clone`);

@@ -49,17 +49,8 @@ class S3PublishClass {
         })
       });
     } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
-        logger.save(
-          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
-        );
-        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
+      logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      throw errResult;
     }
   }
 
