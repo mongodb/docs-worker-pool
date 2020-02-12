@@ -12,7 +12,7 @@ docker run \
 	--env AWS_SECRET_ACCESS_KEY \
 	--env GITHUB_BOT_USERNAME \
 	--env GITHUB_BOT_PASSWORD \
-	--env DB_NAME \
+	--env DBNAME \
 	--env XLARGE \
 	--env SNOOTY_ENV \
 	--env FASTLY_TOKEN \
