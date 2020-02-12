@@ -232,42 +232,37 @@ class GitHubJobClass {
         }
 
         const execTwo = workerUtils.getExecPromise();
-
-        const {
-            stdout,
-            stderr
-        } = await execTwo(commandsToBuild.join(' && '));
-
-        return new Promise(function(resolve, reject) {
-            logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
+        try {
+            const {
+                stdout,
+                stderr
+            } = await execTwo(commandsToBuild.join(' && '));
+    
+            return new Promise(function(resolve, reject) {
+                logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
+                logger.save(
+                    `${'(BUILD)'.padEnd(
+                15
+              )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
+                );
+                resolve({
+                    status: 'success',
+                    stdout: stdout,
+                    stderr: stderr
+                });
+                reject({
+                    status: 'success',
+                    stderr: stderr
+                });
+            });
+        } catch (error) {
             logger.save(
-                `${'(BUILD)'.padEnd(
-            15
-          )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
+                `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
             );
-            resolve({
-                status: 'success',
-                stdout: stdout,
-                stderr: stderr
-            });
-            reject({
-                status: 'success',
-                stderr: stderr
-            });
-        });
-        // } catch (errResult) {
-        //   if (
-        //     errResult.hasOwnProperty('code') ||
-        //     errResult.hasOwnProperty('signal') ||
-        //     errResult.hasOwnProperty('killed')
-        //   ) {
-        //     logger.save(
-        //       `${'(BUILD)'.padEnd(15)}failed with code: ${errResult.code}`
-        //     );
-        //     logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        //     throw errResult;
-        //   }
-        // }
+            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+            throw error;
+        }
+
     }
 }
 
