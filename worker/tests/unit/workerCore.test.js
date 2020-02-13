@@ -2,14 +2,12 @@ const worker = require('../../worker');
 const mongo = require('../../utils/mongo');
 const workerUtils = require('../../utils/utils');
 
-const runXlarge = process.env.XLARGE === undefined ? false : Boolean(process.env.XLARGE);
-
 // Valid job with jobType for testing purposes
 const validJob = {
   _id: 'sampleId',
   payload: {
     jobType: 'githubPush',
-    isXlarge: runXlarge,
+    isXlarge: false,
     branchName: 'DOCSP_hi',
     repoOwner: 'docsworker',
     repoName: 'docs-worker-fake'
@@ -21,7 +19,7 @@ const validJob = {
   status: 'inQueue',
   numFailures: 0,
   failures: [],
-  result: null
+  result: null,
 };
 
 // Invalid job for testing purposes
@@ -35,7 +33,7 @@ const invalidJob = {
   status: 'inQueue',
   numFailures: 0,
   failures: [],
-  result: null
+  result: null,
 };
 
 // For testing purposes
@@ -46,7 +44,6 @@ describe('Worker.Work() Tests', () => {
   beforeAll(() => {
     workerUtils.resetDirectory('work/');
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
-    mongo.reportStatus = jest.fn().mockResolvedValue();
   });
 
   afterAll(() => {
@@ -59,9 +56,7 @@ describe('Worker.Work() Tests', () => {
     // Set Mongo Jobs to resolve automatically
     mongo.getNextJob = jest.fn().mockResolvedValue({ value: validJob });
     mongo.finishJobWithResult = jest.fn().mockResolvedValue();
-    mongo.reportStatus = jest.fn().mockResolvedValue();
     mongo.finishJobWithFailure = jest.fn().mockResolvedValue();
-    mongo.getMonitorCollection = jest.fn().mockResolvedValue();
     workerUtils.retry = jest.fn().mockResolvedValue();
 
     // Change the gitHubPushJob to be our mock
@@ -177,13 +172,10 @@ describe('Worker.Work() Tests', () => {
    *                 finishJobWithResult() rejects                    *
    ******************************************************************* */
   it('work() --> finishJobWithResult() rejects', async () => {
-    console.log('running test that keeps failing');
     // Set finishJobWithResult to reject
     mongo.finishJobWithResult = jest
       .fn()
       .mockRejectedValue('finishJobWithResult failed');
-
-    mongo.getNextJob = jest.fn().mockResolvedValue({ value: validJob });
 
     // Run worker and clear all timers
     await worker.work();
@@ -193,7 +185,7 @@ describe('Worker.Work() Tests', () => {
     expect(mongo.getNextJob).toHaveBeenCalledTimes(1);
     expect(runGithubPushMock).toHaveBeenCalledTimes(1);
     expect(mongo.finishJobWithResult).toHaveBeenCalledTimes(1);
-    //expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
+    expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
     //expect(mongo.finishJobWithFailure.mock.calls[0][2]).toMatch(/finishJobWithResult failed/);
     expect(promiseTimeoutSSpy).toHaveBeenCalledTimes(4);
   });

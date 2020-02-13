@@ -6,7 +6,6 @@ const fs = require('fs-extra');
 const payloadObj = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test',
-  newHead: '123',
   repoOwner: 'mongodb',
   isXlarge: false
 };
@@ -32,7 +31,6 @@ describe('Test Class', () => {
 
   it('integration build', async () => {
     jest.setTimeout(300000);
-    // comment out for now until we resolve docker command issue
-    //await expect(job.runGithubPush(testPayloadWithRepo)).resolves.toBeDefined();
+    await expect(job.runGithubPush(testPayloadWithRepo)).resolves.toBeDefined();
   });
 });
