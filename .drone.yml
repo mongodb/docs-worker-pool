@@ -14,7 +14,7 @@ pipeline:
       event: push
 
   deploy-staging:
-    image: quay.io/mongodb/drone-helm:v2
+    image: quay.io/ipedrazas/drone-helm
     release: docs-worker-pool
     namespace: docs
     environment:
@@ -44,7 +44,7 @@ pipeline:
       event: tag
 
   deploy-prod:
-    image: quay.io/mongodb/drone-helm:v2
+    image: quay.io/ipedrazas/drone-helm
     release: docs-worker-pool
     namespace: docs
     environment:

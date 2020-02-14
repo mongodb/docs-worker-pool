@@ -75,7 +75,7 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(asy
 	const options = {
 		projection: {_id: 1, title: 1, createdTime: 1, status: 1}, 
 		limit: 10, 
-		sort: {_id: -1}, //sort: {createdTime: -1}
+		sort: {createdTime: -1}
 	}
 
 	itemsCollection.find({}, options).asArray().then(results => {
