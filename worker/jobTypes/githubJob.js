@@ -228,10 +228,9 @@ class GitHubJobClass {
         ];
 
         // check if need to build next-gen
-        if (this.buildNextGen() ) {
+        if (this.buildNextGen()) {
             commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-        }
-        
+           }
          //overwrite gatsby config file
         if (currentJob.payload.jobType === 'productionDeploy'){
             const gatsbyConfigFileContents = await this.downloadGatsbyConfig();
@@ -249,7 +248,6 @@ class GitHubJobClass {
                 );
             }
         }
-
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
         if (makefileContents && makefileContents.status === 'success') {
