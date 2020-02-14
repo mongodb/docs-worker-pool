@@ -62,6 +62,23 @@ class GitHubJobClass {
         });
     }
 
+    async downloadGatsbyConfig(){
+        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const returnObject = {};
+        return new Promise(function(resolve, reject) {
+            request(makefileLocation, function(error, response, body) {
+                if (!error && body && response.statusCode === 200) {
+                    returnObject['status'] = 'success';
+                    returnObject['content'] = body;
+                } else {
+                    returnObject['status'] = 'failure';
+                    returnObject['content'] = response;
+                }
+                resolve(returnObject);
+                reject(error);
+            });
+        }); 
+    }
     // cleanup before pulling repo
     async cleanup(logger) {
         const currentJob = this.currentJob;
@@ -212,16 +229,11 @@ class GitHubJobClass {
 
         // check if need to build next-gen
         if (this.buildNextGen() ) {
-
-            //check job type to give correct makefile target
-            if (currentJob.payload.jobType === 'productionDeploy') {
-               commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html-prod';
-            }
-            else{
-               commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html-stage';
-            }
+            commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
            }
 
+        //overwrite gatsby config file
+        const gatsbyConfigFileContents = await this.downloadGatsbyConfig();
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
         if (makefileContents && makefileContents.status === 'success') {
