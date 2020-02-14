@@ -45,9 +45,8 @@ ENV PATH="${PATH}:/home/docsworker/.local/bin"
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	git pull origin master && \
-	#latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
-	#git checkout "$latestTag" && \	
+	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+	git checkout "$latestTag" && \	
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
