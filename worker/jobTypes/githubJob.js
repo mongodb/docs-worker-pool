@@ -230,10 +230,26 @@ class GitHubJobClass {
         // check if need to build next-gen
         if (this.buildNextGen() ) {
             commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-           }
+        }
+        
+         //overwrite gatsby config file
+        if (currentJob.payload.jobType === 'productionDeploy'){
+            const gatsbyConfigFileContents = await this.downloadGatsbyConfig();
+            if (makefileContents && makefileContents.status === 'success') {
+                await fs.writeFileSync(
+                    `repos/${this.getRepoDirName()}/snooty/gatsby-config.js`,
+                    makefileContents.content, {
+                        encoding: 'utf8',
+                        flag: 'w'
+                    }
+                );
+            } else {
+                console.log(
+                    'ERROR: gatsby config file does not exist in /configfiles directory on meta branch.'
+                );
+            }
+        }
 
-        //overwrite gatsby config file
-        const gatsbyConfigFileContents = await this.downloadGatsbyConfig();
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
         if (makefileContents && makefileContents.status === 'success') {
