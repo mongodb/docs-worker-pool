@@ -46,7 +46,7 @@ html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
 next-gen-deploy:
-	echo -yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
+	@echo -yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 	$(MAKE) deploy-search-index
 
