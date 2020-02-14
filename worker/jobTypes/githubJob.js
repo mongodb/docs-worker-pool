@@ -228,7 +228,7 @@ class GitHubJobClass {
         ];
 
         // check if need to build next-gen
-        if (this.buildNextGen() ) {
+        if (this.buildNextGen()) {
             commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
            }
          //overwrite gatsby config file
