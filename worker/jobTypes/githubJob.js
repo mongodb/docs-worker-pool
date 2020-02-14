@@ -211,9 +211,16 @@ class GitHubJobClass {
         ];
 
         // check if need to build next-gen
-        if (this.buildNextGen()) {
-            commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-        }
+        if (this.buildNextGen() ) {
+
+            //check job type to give correct makefile target
+            if (currentJob.payload.jobType === 'productionDeploy') {
+               commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html-prod';
+            }
+            else{
+               commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html-stage';
+            }
+           }
 
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
