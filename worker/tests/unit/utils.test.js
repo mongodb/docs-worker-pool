@@ -2,18 +2,20 @@ const workerUtils = require('../../utils/utils');
 const { MongoClient } = require('mongodb');
 const mongo = require('../../utils/mongo');
 
+const numFilesInTestsMongo = 5;
+
 const metaObject = {
   repos: [
     {
       name: 'docs-spark-connector',
-      url: 'https://github.com/danielborowski/docs-spark-connector'
-    }
+      url: 'https://github.com/danielborowski/docs-spark-connector',
+    },
   ]
 };
 
 const publishedBranchObject = {
   repoOwner: 'danielborowski',
-  repoName: 'docs-spark-connector'
+  repoName: 'docs-spark-connector',
 };
 
 describe('Mongo Tests', () => {
@@ -22,7 +24,7 @@ describe('Mongo Tests', () => {
 
   beforeAll(async () => {
     connection = await MongoClient.connect(global.__MONGO_URI__, {
-      useNewUrlParser: true
+      useNewUrlParser: true,
     });
     db = await connection.db(global.__MONGO_DB_NAME__);
 
@@ -48,10 +50,6 @@ describe('Mongo Tests', () => {
     ).rejects.toBeTruthy();
   });
 
-  it('validateUrl() works', async () => {
-    expect(workerUtils.validateUrl('docs.mongodb.com')).toBeTruthy();
-  });
-
   // resolveAfterNSeconds For getFilesInDir()
   it('resolveAfterNSeconds()', () => {
     jest.useFakeTimers();
@@ -59,29 +57,7 @@ describe('Mongo Tests', () => {
     expect(setTimeout).toHaveBeenCalledTimes(1);
   });
 
-  //test encrypt job and validate job
-  it('encryptJob()', () => {
-    workerUtils.retrievePassword = jest.fn().mockReturnValue('password');
-    const salt = workerUtils.generateSalt();
-    const encryptedJob = workerUtils.encryptJob(
-      salt,
-      'test string1',
-      'test string2'
-    );
-
-    encryptedJob.then(function(digest) {
-      const success = workerUtils.validateJob(
-        digest,
-        salt,
-        'test string1',
-        'test string2'
-      );
-      success.then(()=> {
-        expect(success).toBeTruthy();
-      });
-    });
-  });
-
+  // Testing For getExecPromise()
   it('getExecPromise()', async () => {
     const exec = workerUtils.getExecPromise();
     await expect(exec('ls')).resolves.toBeTruthy();
@@ -103,9 +79,7 @@ describe('Mongo Tests', () => {
   });
 
   it('get published branches for each repo', async () => {
-    const pubBranches = await workerUtils.getRepoPublishedBranches(
-      publishedBranchObject
-    );
+    const pubBranches = await workerUtils.getRepoPublishedBranches(publishedBranchObject);
     expect(pubBranches).toBeDefined();
     expect(pubBranches).toBeInstanceOf(Object);
     expect(pubBranches).toHaveProperty('status', 'success');
