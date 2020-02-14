@@ -63,7 +63,7 @@ class GitHubJobClass {
     }
 
     async downloadGatsbyConfig(){
-        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/configfiles/${this.currentJob.payload.repoName}/gatsby-config.js`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -234,10 +234,15 @@ class GitHubJobClass {
          //overwrite gatsby config file
         if (currentJob.payload.jobType === 'productionDeploy'){
             const gatsbyConfigFileContents = await this.downloadGatsbyConfig();
-            if (makefileContents && makefileContents.status === 'success') {
+            console.log(gatsbyConfigFileContents)
+            const snootyDir = `repos/${this.getRepoDirName()}/snooty`;
+            if (!fs.existsSync(snootyDir)){
+                fs.mkdirSync(snootyDir);
+            }
+            if (gatsbyConfigFileContents && gatsbyConfigFileContents.status === 'success') {
                 await fs.writeFileSync(
-                    `repos/${this.getRepoDirName()}/snooty/gatsby-config.js`,
-                    makefileContents.content, {
+                    `${snootyDir}/gatsby-config.js`,
+                    gatsbyConfigFileContents.content, {
                         encoding: 'utf8',
                         flag: 'w'
                     }
