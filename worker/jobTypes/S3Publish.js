@@ -21,7 +21,6 @@ class S3PublishClass {
     }
 
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
-
     try {
       const exec = workerUtils.getExecPromise();
       const command = stageCommands.join(' && ');
@@ -51,6 +50,7 @@ class S3PublishClass {
     } catch (errResult) {
       logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
+
     }
   }
 

@@ -43,6 +43,59 @@ class GitHubJobClass {
         return false;
     }
 
+    async applyPatch(patch, currentJobDir) {
+        //create patch file
+        try {
+          await fs.writeFileSync(`/tmp/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
+          
+        } catch (error) {
+          console.log("Error creating patch ", error)
+          throw error
+        }
+        //apply patch
+        try {
+          const commandsToBuild = [
+            `cd repos/${currentJobDir}`,
+            `patch -p1 < /tmp/myPatch.patch`
+          ];
+            const exec = workerUtils.getExecPromise();
+          // return new Promise((resolve, reject) => {
+            const {stdout, stderr} = await exec(commandsToBuild.join(" && "))
+    
+        } catch (error) {
+          this.dumpError(error);
+          console.log("Error applying patch: ", error)
+        }
+    }
+
+    dumpError(err) {
+        if (typeof err === 'object') {
+          if (err.message) {
+            console.log('\nMessage: ' + err.message)
+          }
+          if (err.stack) {
+            console.log('\nStacktrace:')
+            console.log('====================')
+            console.log(err.stack);
+          }
+        } else {
+          console.log('dumpError :: argument is not an object');
+        }
+    }
+    
+    async deletePatchFile() {
+        const exec = workerUtils.getExecPromise();
+          return new Promise((resolve, reject) => {
+            exec(`rm /tmp/myPatch.patch`, function(error, stdout, stderr) {
+              if (error !== null) {
+                console.log("exec error: " + error);
+                reject(error);
+              }
+              resolve(true);
+            });
+          });
+    }
+
     // our maintained directory of makefiles
     async downloadMakefile() {
         const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
@@ -167,8 +220,6 @@ class GitHubJobClass {
                 throw error;
             }
 
-
-
             pullRepoCommands.push(
                 ...[
                     `git checkout ${currentJob.payload.branchName}`,
@@ -201,7 +252,14 @@ class GitHubJobClass {
             throw error;
         }
 
-
+              //check for patch
+      if (currentJob.payload.patch !== undefined) {
+        await this.applyPatch(
+          currentJob.payload.patch,
+          this.getRepoDirName(currentJob)
+        );
+        await this.deletePatchFile();
+      }
         // default commands to run to build repo
         const commandsToBuild = [
             `. /venv/bin/activate`,
