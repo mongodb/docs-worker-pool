@@ -25,6 +25,7 @@ help: ## Show this help message
 
 next-gen-publish: next-gen-html
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+	curl https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/configfiles/docs-node/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 
 next-gen-html:
 	# snooty parse and then build-front-end
