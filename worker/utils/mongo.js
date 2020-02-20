@@ -1,5 +1,5 @@
 const { MongoClient } = require('mongodb');
-const { EnvironmentClass } = require('../utils/environment').EnvironmentClass;
+const EnvironmentClass = require('../utils/environment').EnvironmentClass;
 
 // Get username password credentials
 const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
