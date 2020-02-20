@@ -28,12 +28,12 @@ help: ## Show this help message
 update-snooty:
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/dev-hub snooty && \
 	cd snooty && \
-	git checkout staging && \
-	npm install && \
-	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
-	mkdir -p ./static/images && \
-	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
-	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+	git checkout master && \
+	npm install
+	#  git clone https://github.com/mongodb/docs-tools.git docs-tools && \
+	# mkdir -p ./static/images && \
+	# mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
+	# mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
 next-gen-html: update-snooty
 	# snooty parse and then build-front-end
