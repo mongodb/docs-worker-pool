@@ -10,9 +10,9 @@ class S3PublishClass {
   async pushToStage(logger) {
     logger.save(`${'(stage)'.padEnd(15)}Setting up push to staging function`);
     const stageCommands = [
-      `. /venv/bin/activate`,
+      '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
-      `make stage`, 
+      'make stage',
     ];
 
     // check if need to build next-gen
@@ -21,7 +21,6 @@ class S3PublishClass {
     }
 
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
-
     try {
       const exec = workerUtils.getExecPromise();
       const command = stageCommands.join(' && ');
@@ -34,87 +33,66 @@ class S3PublishClass {
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       }
-      return new Promise(function(resolve, reject) {
+      return new Promise((resolve) => {
         logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
         logger.save(
           `${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
         );
         resolve({
           status: 'success',
-          stdout: stdoutMod
+          stdout: stdoutMod,
         });
-        reject({
-          status: 'failure',
-          stdout: stderr
-        })
       });
     } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
-        logger.save(
-          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
-        );
-        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
+      logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      throw errResult;
+
     }
   }
 
-  async pushToProduction(logger) {    
+  async pushToProduction(logger) {
     logger.save(`${'(stage)'.padEnd(15)}Pushing to prod (JUST STAGING FOR NOW)`);
     const deployCommands = [
-      `. /venv/bin/activate`,
+      '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
-      `make publish`,
-      `make stage`
+      'make publish',
+      'make deploy',
     ];
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
-      deployCommands[deployCommands.length - 1] = 'make next-gen-stage';
+      deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
 
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
+    logger.save(`${'(stage)'.padEnd(15)}Pushing to production`);
 
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
-      const { stdout, stderr } = await exec(command);
+      const stdout = await exec(command);
       let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
       }
-      return new Promise(function(resolve, reject) {
-        logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
+      return new Promise((resolve) => {
+        logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
         logger.save(
-          `${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
+          `${'(prod)'.padEnd(15)}Production deploy details:\n\n${stdoutMod}`
         );
         resolve({
           status: 'success',
-          stdout: stdoutMod
+          stdout: stdoutMod,
         });
       });
     } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
-        logger.save(
-          `${'(stage)'.padEnd(15)}failed with code: ${errResult.code}`
-        );
-        logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
+      logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      throw errResult;
     }
   }
 }
 
 module.exports = {
-  S3PublishClass: S3PublishClass
+  S3PublishClass,
 };
