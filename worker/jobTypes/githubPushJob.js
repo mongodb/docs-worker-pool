@@ -1,286 +1,150 @@
-const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
-const simpleGit = require('simple-git/promise');
-const request = require('request');
+const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
+const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
+const validator = require('validator');
+const Logger = require('../utils/logger').LoggerClass;
+
+const invalidJobDef = new Error('job not valid');
+const buildTimeout = 60 * 450;
 
 
-async function deletePatchFile() {
-  const exec = workerUtils.getExecPromise();
-  return new Promise((resolve, reject) => {
-    exec('rm /tmp/myPatch.patch', (error, stdout, stderr) => {
-      if (error !== null) {
-        console.log(`exec error: ${error}`);
-        reject(error);
-      }
-      if (stderr !== null) {
-        console.log(`exec error: ${stderr}`);
-        reject(stderr);
-      }
+function safeBranch(currentJob) {
+  if (currentJob.payload.upstream) {
+    return currentJob.payload.upstream.includes(currentJob.payload.branchName);
+  }
+
+  // master branch cannot run through github push, unless upstream for server docs repo
+  if (currentJob.payload.branchName === 'master') {
+    workerUtils.logInMongo(
+      currentJob,
+      `${'(BUILD)'.padEnd(
+        15
+      )} failed, master branch not supported on staging builds`
+    );
+    throw new Error('master branches not supported');
+  }
+  return true;
+}
+
+// anything that is passed to an exec must be validated or sanitized
+// we use the term sanitize here lightly -- in this instance this // ////validates
+function safeString(stringToCheck) {
+  return (
+    validator.isAscii(stringToCheck) &&
+    validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
+  );
+}
+
+function safeGithubPush(currentJob) {
+  if (
+    !currentJob
+    || !currentJob.payload
+    || !currentJob.payload.repoName
+    || !currentJob.payload.repoOwner
+    || !currentJob.payload.branchName
+  ) {
+    workerUtils.logInMongo(
+      currentJob,
+      `${'    (sanitize)'.padEnd(15)}failed due to insufficient job definition`
+    );
+    throw invalidJobDef;
+  }
+
+  if (
+    safeString(currentJob.payload.repoName)
+    && safeString(currentJob.payload.repoOwner)
+    && safeBranch(currentJob)
+  ) {
+    return true;
+  }
+  throw invalidJobDef;
+}
+
+async function startGithubBuild(job, logger) {
+  const buildOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    job.buildRepo(logger),
+    'Timed out on build',
+  );
+  // checkout output of build
+  if (buildOutput && buildOutput.status === 'success') {
+    // only post entire build output to slack if there are warnings
+    const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
+    if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
+      await logger.sendSlackMsg(buildOutputToSlack);
+    }
+
+    return new Promise((resolve) => {
       resolve(true);
     });
+  }
+
+  return new Promise((reject) => {
+    reject(false);
   });
 }
 
-async function applyPatch(patch, currentJobDir) {
-  // create patch file
-  try {
-    fs.writeFileSync('/tmp/myPatch.patch', patch, { encoding: 'utf8', flag: 'w' });
-  } catch (error) {
-    console.log('Error creating patch ', error);
-    throw error;
+async function pushToStage(publisher, logger) {
+  const stageOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    publisher.pushToStage(logger),
+    'Timed out on push to stage',
+  );
+  // checkout output of build
+  if (stageOutput && stageOutput.status === 'success') {
+    await logger.sendSlackMsg(stageOutput.stdout);
+
+    return new Promise((resolve) => {
+      resolve(true);
+    });
   }
-  // apply patch
-  try {
-    const commandsToBuild = [
-      `cd repos/${currentJobDir}`,
-      'patch -p1 < /tmp/myPatch.patch',
-    ];
-    const exec = workerUtils.getExecPromise();
-    // return new Promise((resolve, reject) => {
-    await exec(commandsToBuild.join(" && "));
-  } catch (error) {
-    console.log(`Error applying patch: ${error}`);
-    throw error;
-  }
+  return new Promise((reject) => {
+    reject(false);
+  });
 }
-class GitHubJobClass {
-  // pass in a job payload to setup class
-  constructor(currentJob) {
-    this.currentJob = currentJob;
+
+async function runGithubPush(currentJob) {
+  workerUtils.logInMongo(currentJob, ' ** Running github push function');
+
+  if (
+    !currentJob ||
+    !currentJob.payload ||
+    !currentJob.payload.repoName ||
+    !currentJob.payload.branchName
+  ) {
+    workerUtils.logInMongo(
+      currentJob,
+      `${'(BUILD)'.padEnd(15)}failed due to insufficient definition`
+    );
+    throw invalidJobDef;
   }
 
-  // get base path for public/private repos
-  getBasePath() {
-    const [currentJob] = this.currentJob;
-    let basePath = 'https://github.com';
-    if (currentJob.payload.private) {
-      basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
-    }
-    return basePath;
+
+  // instantiate github job class and logging class
+  const job = new GitHubJob(currentJob);
+  const logger = new Logger(currentJob);
+  const publisher = new S3Publish(job);
+
+  await startGithubBuild(job, logger);
+
+  console.log('completed build');
+
+  let branchext = '';
+
+  if (currentJob.payload.branchName !== 'master') {
+    branchext = `-${currentJob.payload.branchName}`;
   }
+  console.log('pushing to stage');
+  await pushToStage(publisher, logger);
 
-  getRepoDirName() {
-    return `${this.currentJob.payload.repoName}`;
-  }
+  const files = workerUtils.getFilesInDir(
+    `./${currentJob.payload.repoName}/build/public${branchext}`,
+  );
 
-  buildNextGen() {
-    const workerPath = `repos/${this.getRepoDirName()}/worker.sh`;
-    if (fs.existsSync(workerPath)) {
-    // the way we now build is to search for a specific function string in worker.sh
-    // which then maps to a specific target that we run
-      const workerContents = fs.readFileSync(workerPath, {
-        encoding: 'utf8',
-      });
-      const workerLines = workerContents.split(/\r?\n/);
-
-      // check if need to build next-gen instead
-      for (let i = 0; i < workerLines.length; i += 1) {
-        if (workerLines[i] === '"build-and-stage-next-gen"') {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  // our maintained directory of makefiles
-  async downloadMakefile() {
-    const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
-    const returnObject = {};
-    return new Promise((resolve, reject) => {
-      request(makefileLocation, (error, response, body) => {
-        if (!error && body && response.statusCode === 200) {
-          returnObject.status = 'success';
-          returnObject.content = body;
-        } else {
-          returnObject.status = 'failure';
-          returnObject.content = response;
-        }
-        resolve(returnObject);
-        reject(error);
-      });
-    });
-  }
-
-  // cleanup before pulling repo
-  async cleanup(logger) {
-    logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
-    try {
-      workerUtils.removeDirectory(`repos/${this.getRepoDirName()}`);
-    } catch (errResult) {
-      logger.save(`${'(CLEANUP)'.padEnd(15)}failed cleaning repo directory`);
-      throw errResult;
-    }
-    return new Promise((resolve) => {
-      logger.save(`${'(rm)'.padEnd(15)}Finished cleaning repo`);
-      resolve(true);
-    });
-  }
-
-  async cloneRepo(logger) {
-    const [currentJob] = this.currentJob;
-    logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
-    logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
-    try {
-      if (!currentJob.payload.branchName) {
-        logger.save(
-          `${'(CLONE)'.padEnd(15)}failed due to insufficient definition`,
-        );
-        throw new Error('branch name not indicated');
-      }
-      const basePath = this.getBasePath();
-      const repoPath = `${basePath}/${currentJob.payload.repoOwner}/${currentJob.payload.repoName}`;
-      await simpleGit('repos')
-        .silent(false)
-        .clone(repoPath, `${this.getRepoDirName()}`)
-        .catch((err) => {
-          console.error('failed: ', err);
-          throw err;
-        });
-    } catch (errResult) {
-      logger.save(`${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-      throw errResult;
-    }
-    return new Promise((resolve) => {
-      logger.save(`${'(GIT)'.padEnd(15)}Finished git clone`);
-      resolve(true);
-    });
-  }
-
-  async buildRepo(logger) {
-    const [currentJob] = this.currentJob;
-
-    // setup for building
-    await this.cleanup(logger);
-    await this.cloneRepo(logger);
-
-    logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
-    logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
-
-
-    const exec = workerUtils.getExecPromise();
-    const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
-
-    // if commit hash is provided, use that
-    if (currentJob.payload.newHead) {
-      const commitCheckCommands = [
-        `cd repos/${this.getRepoDirName()}`,
-        'git fetch',
-        `git checkout ${currentJob.payload.branchName}`,
-        `git branch ${currentJob.payload.branchName} --contains ${currentJob.payload.newHead}`,
-      ];
-
-      try {
-        const stdout = await exec(commitCheckCommands.join('&&'));
-        if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
-          const err = new Error(
-            `Specified commit does not exist on ${currentJob.payload.branchName} branch`
-          );
-          logger.save(
-            `${'(BUILD)'.padEnd(15)} failed. The specified commit does not exist on ${currentJob.payload.branchName} branch.`
-          );
-          return new Promise((resolve, reject) => {
-            reject(err);
-          });
-        }
-      } catch (error) {
-        logger.save(
-          `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
-        );
-        logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-        throw error;
-      }
-
-      pullRepoCommands.push(
-        ...[
-          `git checkout ${currentJob.payload.branchName}`,
-          `git pull origin ${currentJob.payload.branchName}`,
-          `git checkout ${currentJob.payload.newHead}`,
-        ],
-      );
-    } else {
-      pullRepoCommands.push(
-        ...[
-          `git checkout ${currentJob.payload.branchName}`,
-          `git pull origin ${currentJob.payload.branchName}`,
-        ],
-      );
-    }
-
-    try {
-      await exec(pullRepoCommands.join(' && '));
-    } catch (error) {
-      logger.save(
-        `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
-      );
-      logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-
-      throw error;
-    }
-
-    // check for patch
-    if (currentJob.payload.patch !== undefined) {
-      await applyPatch(
-        currentJob.payload.patch,
-        this.getRepoDirName(currentJob),
-      );
-      await deletePatchFile();
-    }
-    // default commands to run to build repo
-    const commandsToBuild = [
-      '. /venv/bin/activate',
-      `cd repos/${this.getRepoDirName()}`,
-      'rm -f makefile',
-      'make html',
-    ];
-
-    // check if need to build next-gen
-    if (this.buildNextGen()) {
-      commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-    }
-
-    // overwrite repo makefile with the one our team maintains
-    const makefileContents = await this.downloadMakefile();
-    if (makefileContents && makefileContents.status === 'success') {
-      await fs.writeFileSync(
-        `repos/${this.getRepoDirName()}/Makefile`,
-        makefileContents.content, {
-          encoding: 'utf8',
-          flag: 'w',
-        },
-      );
-    } else {
-      console.log(
-        'ERROR: makefile does not exist in /makefiles directory on meta branch.'
-      );
-    }
-
-    const execTwo = workerUtils.getExecPromise();
-    try {
-      const {
-        stdout,
-        stderr,
-      } = await execTwo(commandsToBuild.join(' && '));
-
-      return new Promise((resolve) => {
-        logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
-        logger.save(
-          `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${stdout}\n---\n${stderr}`,
-        );
-        resolve({
-          status: 'success',
-          stdout,
-          stderr,
-        });
-      });
-    } catch (error) {
-      logger.save(`${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`);
-      logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-      throw error;
-    }
-  }
+  return files;
 }
 
 module.exports = {
-  GitHubJobClass,
+  runGithubPush,
+  safeGithubPush
 };
