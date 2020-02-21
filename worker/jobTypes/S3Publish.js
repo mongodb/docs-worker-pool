@@ -51,7 +51,7 @@ class S3PublishClass {
   }
 
   async pushToProduction(logger) {
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to prod (JUST STAGING FOR NOW)`);
+    logger.save(`${'(prod)'.padEnd(15)}Pushing to production`);
     const deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
@@ -64,8 +64,6 @@ class S3PublishClass {
       deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
       deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
-
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to production`);
 
     try {
       const exec = workerUtils.getExecPromise();
