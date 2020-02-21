@@ -2,11 +2,11 @@
  *                  Testing StagingUtils Class                       *
  ******************************************************************* */
 
-const serverScript = require("../../../scripts/stagingUtils");
+const serverScript = require('../../../scripts/stagingUtils');
 
-describe("Test Class", () => {
+describe('Test Class', () => {
   const commitPatch =
-  "diff --git a/README.rst b/README.rst\
+  'diff --git a/README.rst b/README.rst\
   index 845a0ce..057c4bd 100644\
   --- a/README.rst\
   +++ b/README.rst\
@@ -30,82 +30,82 @@ describe("Test Class", () => {
   -sdfsdf!!!\
    .. default-domain:: mongodb\
    \
-   .. contents:: On this page";
+   .. contents:: On this page';
 
-   const urlArg = "git@github.com:madelinezec/docs-bi-connector";
-   const repoNameArg = "docs-bi-connector";
-   const branchNameArg = "test2";
-   const lastCommit = "0989f60b8addddbbfe8c8ee415812b6783ae00e";
+  const urlArg = 'git@github.com:madelinezec/docs-bi-connector';
+  const repoNameArg = 'docs-bi-connector';
+  const branchNameArg = 'test2';
+  const lastCommit = '0989f60b8addddbbfe8c8ee415812b6783ae00e';
 
   const payload = {
-    jobType: "githubPush",
-    source: "github",
-    action: "push",
+    jobType: 'githubPush',
+    source: 'github',
+    action: 'push',
     repoName: repoNameArg,
     branchName: branchNameArg,
     isFork: true,
     private: false,
     isXlarge: false,
-    repoOwner: "mongodb",
+    repoOwner: 'mongodb',
     url: urlArg,
     newHead: lastCommit,
-    buildSize: "repo",
-    patch: commitPatch
+    buildSize: 'repo',
+    patch: commitPatch,
   };
 
-  console.log("before tests");
+  console.log('before tests');
 
-  it("getRepoName", () => {
+  it('getRepoName', () => {
     const repoName = serverScript.getRepoName(
-      "git@github.com:madelinezec/docs-bi-connector"
+      'git@github.com:madelinezec/docs-bi-connector'
     );
     expect(repoName).toBe(repoNameArg);
   });
 
 
-  it("getGitUser", async () => {
+  it('getGitUser', async () => {
     serverScript.getGitUser = jest
       .fn()
-      .mockReturnValue(Promise.resolve("mez2113@columbia.edu"));
+      .mockReturnValue(Promise.resolve('mez2113@columbia.edu'));
   });
 
-  it("getGitEmail", async () => {
+  it('getGitEmail', async () => {
     serverScript.getGitEmail = jest
       .fn()
-      .mockReturnValue(Promise.resolve("mez2113@columbia.edu"));
+      .mockReturnValue(Promise.resolve('mez2113@columbia.edu'));
   });
 
-  it("getRepoInfo", async () => {
+  it('getRepoInfo', async () => {
     serverScript.getRepoInfo = jest
       .fn()
       .mockReturnValue(
-        Promise.resolve(urlArg)
+        Promise.resolve(urlArg),
       );
   });
 
-  it("getBranchName", async () => {
+  it('getBranchName', async () => {
     serverScript.getBranchName = jest
       .fn()
       .mockReturnValue(Promise.resolve(branchNameArg));
   });
 
-  it("getGitCommits", async () => {
+  it('getGitCommits', async () => {
     serverScript.getGitCommits = jest
       .fn()
       .mockReturnValue(
         Promise.resolve([
-          "+ 7c7ca2c4284719c278f66eb61301daaa133a51fb",
-          "+ 60989f60b8addddbbfe8c8ee415812b6783ae00e"
-        ])
+          '+ 7c7ca2c4284719c278f66eb61301daaa133a51fb',
+          '+ 60989f60b8addddbbfe8c8ee415812b6783ae00e',
+        ]),
       );
   });
 
-  it("getGitPatchFromLocal", async () => {
+  it('getGitPatchFromLocal', async () => {
     serverScript.getGitPatchFromLocal = jest
       .fn()
       .mockReturnValue(
         Promise.resolve(
-          "diff --git a/Makefile b/Makefile\
+          'diff --git a/Makefile b/Makefile\
     index 411cc21..fd24145 100644\
     --- a/Makefile\
     +++ b/Makefile\
@@ -143,12 +143,11 @@ describe("Test Class", () => {
      .. default-domain:: mongodb\
      \
      .. contents:: On this page\
-    "
-        )
+    ')
       );
   });
 
-  it("getGitPatchFromCommits", async () => {
+  it('getGitPatchFromCommits', async () => {
     serverScript.getGitPatchFromCommits = jest
       .fn()
       .mockReturnValue(
@@ -156,23 +155,23 @@ describe("Test Class", () => {
       );
   });
 
-  it("createPayload", () => {
+  it('createPayload', () => {
     expect(
       serverScript.createPayload(
         repoNameArg,
         branchNameArg,
-        "mongodb",
+        'mongodb',
         urlArg,
         commitPatch,
-        "repo",
+        'repo',
         lastCommit
       )
     ).toEqual(payload);
   });
   
-  it("deletePatchFile", async () => {
+  it('deletePatchFile', async () => {
     serverScript.deletePatchFile = jest
       .fn()
-      .mockReturnValue(Promise.resolve("successfully removed patch file"));
+      .mockReturnValue(Promise.resolve('successfully removed patch file'));
   });
 });
