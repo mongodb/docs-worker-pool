@@ -70,7 +70,7 @@ class S3PublishClass {
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
-      const stdout = await exec(command);
+      const { stdout } = await exec(command);
       let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
