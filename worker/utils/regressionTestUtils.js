@@ -84,12 +84,6 @@ function evaluateJobArrays(reposApprovedForTesting, completedJobs) {
     console.log(repository.name);
     if (completedJobs.includes(repository.name)) {
       completedJobCounter++;
-      console.log(
-        "increase complete job counter ",
-        completedJobCounter,
-        reposApprovedForTesting.length,
-        completedJobCounter === reposApprovedForTesting.length
-      );
       if (completedJobCounter === reposApprovedForTesting.length) {
         arraysAreEqual = true;
       }
@@ -134,10 +128,9 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
       let completedChildJobs = [];
       changeStream.on("change", (updatedJob, error) => {
         if (error) {
-          //how to handle error? throw something?
           console.log("error ", error);
+          throw error;
         }
-        //stringify obj? compare ids in mongo?toString()
         //def set a var here
         var strign1  = updatedJob.fullDocument.payload.parentID.toString();
         var str2 = currentJob._id.toString();
