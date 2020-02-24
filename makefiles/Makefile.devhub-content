@@ -28,7 +28,7 @@ help: ## Show this help message
 update-snooty:
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/dev-hub snooty && \
 	cd snooty && \
-	git checkout master  && \
+	git checkout f74655735c3ecb378bb07ed9bc1f8c52df09946a  && \
 	npm install
 	#  git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	# mkdir -p ./static/images && \
