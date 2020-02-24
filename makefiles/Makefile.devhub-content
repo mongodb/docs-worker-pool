@@ -26,7 +26,7 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 update-snooty:
-	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/dev-hub snooty && \
+	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/mongodb/devhub snooty && \
 	cd snooty && \
 	git checkout f74655735c3ecb378bb07ed9bc1f8c52df09946a  && \
 	npm install
