@@ -11,10 +11,7 @@ exports = async function(payload, response) {
   // https://api.slack.com/interactivity/handling#payloads
   var parsed = JSON.parse(payload.query.payload);
   var stateValues = parsed.view.state.values; 
-  
-  console.log(3333, JSON.stringify(parsed));
-  console.log(3333, JSON.stringify(Object.keys(parsed)));
-  
+    
   // get repo options for this user from slack and send over
   var entitlement = await context.functions.execute("getUserEntitlements", {
     'query': {
@@ -55,11 +52,7 @@ exports = async function(payload, response) {
       values[blockInputKey] = null;
     }
   }
-  
-  console.log(1001, JSON.stringify(entitlement));
-  console.log(11, JSON.stringify(stateValues));
-  console.log(22, JSON.stringify(values));
-  
+    
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     var thisRepo = values.repo_option[i].value;
