@@ -120,7 +120,7 @@ async function runGithubPush(currentJob) {
   }
 
   // master branch cannot run through staging build
-  if (currentJob.payload.branchName === 'master' && currentJob.title != 'Regression Test') {
+  if (currentJob.payload.branchName === 'master' && currentJob.title !== 'Regression Test') {
     workerUtils.logInMongo(
       currentJob,
       `${'(BUILD)'.padEnd(

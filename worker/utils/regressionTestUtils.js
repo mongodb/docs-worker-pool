@@ -132,8 +132,6 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
           throw error;
         }
         //def set a var here
-        var strign1  = updatedJob.fullDocument.payload.parentID.toString();
-        var str2 = currentJob._id.toString();
         var idEquality =
            updatedJob.fullDocument.payload.parentID.toString() ===
            currentJob._id.toString();
