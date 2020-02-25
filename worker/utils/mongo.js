@@ -19,14 +19,13 @@ const ENTITLEMENTS_NAME = 'entitlements';
 let client;
 
 module.exports = {
-  url: url,
-
+  url,
   // Initializes the Mongo Client
   async initMongoClient() {
     client = new MongoClient(url, { useNewUrlParser: true });
     return client.connect();
   },
-  
+
   getEntitlementsCollection() {
     if (client) {
       return client.db(DB_NAME).collection(ENTITLEMENTS_NAME);
@@ -76,7 +75,7 @@ module.exports = {
 
   async getDochubTargets() {
     const arrayList = await this.getDochubArray();
-    arrayList.forEach(function(doc) {
+    arrayList.forEach((doc) => {
       console.log(doc);
     });
   },
@@ -86,7 +85,7 @@ module.exports = {
     const query = {
       status: 'inQueue',
       'payload.isXlarge': runXlarge,
-      createdTime: { $lte: new Date() }
+      createdTime: { $lte: new Date() },
       // We may eventually want to add in the following logic
       // payLoad.jobName: {$in: [jobs]}
     };
@@ -104,8 +103,8 @@ module.exports = {
       $set: {
         status: 'completed',
         result,
-        endTime: new Date()
-      }
+        endTime: new Date(),
+      },
     };
     const updateResult = await queueCollection.updateOne(query, update);
     if (updateResult.result.n < 1) {
@@ -119,7 +118,7 @@ module.exports = {
     const update = {
       $set: { startTime: null, status: 'inQueue' },
       $push: { failures: { time: new Date(), reason } },
-      $inc: { numFailures: 1 }
+      $inc: { numFailures: 1 },
     };
 
     if (job.numFailures >= 2) {
@@ -138,7 +137,7 @@ module.exports = {
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
-        $push: { [`logs.try${currentJob.numFailures}`]: message }
+        $push: { [`logs.try${currentJob.numFailures}`]: message },
       };
 
       try {
@@ -156,7 +155,7 @@ module.exports = {
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
-        $push: { comMessage: message }
+        $push: { comMessage: message },
       };
       try {
         await queueCollection.updateOne(query, update);
@@ -168,5 +167,5 @@ module.exports = {
         'Error in populateCommunicationMessageInMongo(): queueCollection does not exist'
       );
     }
-  }
+  },
 };

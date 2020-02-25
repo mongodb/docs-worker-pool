@@ -12,7 +12,7 @@ docker run \
 	--env AWS_SECRET_ACCESS_KEY \
 	--env GITHUB_BOT_USERNAME \
 	--env GITHUB_BOT_PASSWORD \
-	--env DBNAME \
+	--env DB_NAME \
 	--env XLARGE \
 	--env SNOOTY_ENV \
 	--env FASTLY_TOKEN \
@@ -48,3 +48,5 @@ cd worker
 npm install --dev
 ./node_modules/.bin/eslint .
 ```
+
+See the [spec doc](https://docs.google.com/document/d/1XZOuuGmozcLQRSDitx0UWhZzJaS4opR1JVwZqDp-N4g/edit?usp=sharing) for more details. 
