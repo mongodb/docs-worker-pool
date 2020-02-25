@@ -47,6 +47,21 @@ next-gen-html: update-snooty
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
+next-gen-html-publish:
+	# snooty parse and then build-front-end
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-node/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+  
+next-gen-publish: next-gen-html-publish
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
