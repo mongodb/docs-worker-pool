@@ -33,7 +33,7 @@ async function insertJob(payloadObj, userArg, emailArg) {
     payload: payloadObj,
     logs: {}
   };
-  console.log("this is new job!!!! ", newJob);
+
   return new Promise(function(resolve, reject) {
     const filterDoc = {
       payload: payloadObj,
