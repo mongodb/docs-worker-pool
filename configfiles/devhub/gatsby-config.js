@@ -16,7 +16,7 @@ const metadata = {
 };
 
 module.exports = {
-  pathPrefix: 'drivers/node',
+  pathPrefix: 'devhub',
   plugins: ['gatsby-plugin-react-helmet'],
   siteMetadata: {
     ...metadata,
