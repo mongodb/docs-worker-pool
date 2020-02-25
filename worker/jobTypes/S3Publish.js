@@ -51,7 +51,7 @@ class S3PublishClass {
   }
 
   async pushToProduction(logger) {
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to prod (JUST STAGING FOR NOW)`);
+    logger.save(`${'(prod)'.padEnd(15)}Pushing to production`);
     const deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
@@ -65,12 +65,10 @@ class S3PublishClass {
       deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
 
-    logger.save(`${'(stage)'.padEnd(15)}Pushing to production`);
-
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
-      const stdout = await exec(command);
+      const { stdout } = await exec(command);
       let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {

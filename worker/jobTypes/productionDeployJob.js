@@ -8,10 +8,10 @@ const buildTimeout = 60 * 450;
 const invalidJobDef = new Error('job not valid');
 
 async function verifyUserEntitlements(currentJob) {
-  const [user] = currentJob.user;
+  const user = currentJob.user;
   const entitlementsObject = await workerUtils.getUserEntitlements(user);
-  const [repoOwner] = currentJob.payload.repoOwner;
-  const [repoName] = currentJob.payload.repoName;
+  const repoOwner = currentJob.payload.repoOwner;
+  const repoName = currentJob.payload.repoName;
 
   if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.indexOf(`${repoOwner}/${repoName}`) !== -1) {
     return true;
@@ -138,9 +138,6 @@ async function runGithubProdPush(currentJob) {
 
   await startGithubBuild(job, logger);
 
-  console.log('completed build');
-
-  console.log('pushing to prod');
   await pushToProduction(publisher, logger);
 
   const files = workerUtils.getFilesInDir(
