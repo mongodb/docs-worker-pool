@@ -16,12 +16,12 @@ const collName = "queue";
 const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
 const password = encodeURIComponent(EnvironmentClass.getAtlasPassword());
 
-async function insertJob(payloadObj) {
+async function insertJob(payloadObj, userArg, emailArg) {
   // create the new job document
   const newJob = {
     title: "Regression Test",
-    user: "madelinezec",
-    email: "mez2113@columbia.edu",
+    user: userArg,
+    email: emailArg,
     status: "inQueue",
     createdTime: new Date(),
     startTime: null,
@@ -164,7 +164,7 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
             "nothing",
             "githubPush",
             currentJob["_id"], 
-            currentJob["payload"]["newHead"]
+            currentJob["payload"]["newHead"], 
           )
         );
       });
@@ -174,7 +174,7 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
 
       /*insert jobs */
       for (const payload of stagePayloads) {
-        const testResult = insertJob(payload);
+        const testResult = insertJob(payload, currentJob["user"], currentJob["email"],);
       }
     });
   });
@@ -186,7 +186,7 @@ function createPayload(
   urlArg,
   typeOfJob,
   parentArg, 
-  commitHash
+  commitHash, 
 ) {
   const payload = {
     jobType: typeOfJob,
