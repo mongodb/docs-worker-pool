@@ -24,8 +24,7 @@ exports = async function(payload, response) {
     // get published branches for this repo
     let pubBranches = [];
     const thisRepo = entitlement.repos[i];
-    const repoOwner = 'danielborowski'; // CHANGE THIS, hardcoded for now until published-branches.yaml file exists
-    const repoName = thisRepo.split('/')[1];
+    const [repoOwner, repoName] = thisRepo.split('/');
     const getPubBranches = await httpService.get({ 
       url: `https://raw.githubusercontent.com/${repoOwner}/${repoName}/meta/published-branches.yaml`
     });
