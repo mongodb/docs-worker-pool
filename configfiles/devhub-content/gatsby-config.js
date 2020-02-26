@@ -1,8 +1,7 @@
-const { generatePathPrefix } = require('./src/utils/generate-path-prefix');
 const { getMetadata } = require('./src/utils/get-metadata');
 
 const runningEnv = process.env.NODE_ENV || 'production';
-å
+
 require('dotenv').config({
     path: `.env.${runningEnv}`,
 });
