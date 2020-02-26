@@ -2,9 +2,6 @@
 
 As part of the Docs Tools Next Generation Project, the Docs Worker Pool seeks to make the build process for developers both easier and more scalable for developers. 
 
-
-
-
 ## Build and Run Docker Image
 ```
 docker build --tag=workerpool .
