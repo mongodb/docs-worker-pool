@@ -12,9 +12,6 @@ exports = async function(payload, response) {
   var parsed = JSON.parse(payload.query.payload);
   var stateValues = parsed.view.state.values; 
   
-  console.log(3333, JSON.stringify(parsed));
-  console.log(3333, JSON.stringify(Object.keys(parsed)));
-  
   // get repo options for this user from slack and send over
   var entitlement = await context.functions.execute("getUserEntitlements", {
     'query': {
@@ -56,10 +53,6 @@ exports = async function(payload, response) {
     }
   }
   
-  console.log(1001, JSON.stringify(entitlement));
-  console.log(11, JSON.stringify(stateValues));
-  console.log(22, JSON.stringify(values));
-  
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     var thisRepo = values.repo_option[i].value;
@@ -82,17 +75,12 @@ exports = async function(payload, response) {
         newHead:    values.hash_option ? values.hash_option : null,
       }; 
       
-      console.log(4, jobUserEmail);
-      console.log(JSON.stringify(newPayload));
-      
       context.functions.execute("addJobToQueue", newPayload, jobTitle, jobUserName, jobUserEmail);  
     } catch(err) {
       console.log(err);
     }
   }
-  
   // respond to modal
   response.setHeader("Content-Type", "application/json");
   response.setStatusCode(200);
-    
 };
