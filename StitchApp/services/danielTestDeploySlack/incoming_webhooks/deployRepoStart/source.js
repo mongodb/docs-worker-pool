@@ -76,7 +76,7 @@ exports = async function(payload, response) {
         branchName: buildDetails[2],
         isFork:     true, 
         private:    false,
-        isXlarge:   true,
+        isXlarge:   false,
         repoOwner:  entitlement.github_username,
         url:        'https://github.com/' + jobUserName + '/' + buildDetails[1],
         newHead:    values.hash_option ? values.hash_option : null,
