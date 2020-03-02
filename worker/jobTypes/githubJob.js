@@ -130,91 +130,152 @@ class GitHubJobClass {
     logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
     logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
 
+
+    const exec = workerUtils.getExecPromise();
+    const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
+
+    // if commit hash is provided, use that
+    if (currentJob.payload.newHead) {
+        const commitCheckCommands = [
+            `cd repos/${this.getRepoDirName()}`,
+            `git fetch`,
+            `git checkout ${currentJob.payload.branchName}`,
+            `git branch ${currentJob.payload.branchName} --contains ${currentJob.payload.newHead}`
+        ];
+
+        try {
+            const {
+                stdout,
+                stderr
+            } = await exec(commitCheckCommands.join('&&'));
+            const rewsr = await exec (`cd repos/${this.getRepoDirName()} && git rev-parse --abbrev-ref HEAD`);
+            console.log('yoooo ', rewsr);
+            if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
+                const err = new Error(
+                    `Specified commit does not exist on ${currentJob.payload.branchName} branch`
+                );
+                logger.save(
+                    `${'(BUILD)'.padEnd(
+          15
+        )} failed. The specified commit does not exist on ${
+          currentJob.payload.branchName
+        } branch.`
+                );
+                return new Promise(function(resolve, reject) {
+                    reject(err);
+                });
+            }
+        } catch (error) {
+            logger.save(
+                `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
+            );
+            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+            throw error;
+        }
+
+        pullRepoCommands.push(
+            ...[
+                `git checkout ${currentJob.payload.branchName}`,
+                `git pull origin ${currentJob.payload.branchName}`,
+                `git checkout ${currentJob.payload.newHead} .`
+            ]
+        );
+
+    } else {
+        pullRepoCommands.push(
+            ...[
+                `git checkout ${currentJob.payload.branchName}`,
+                `git pull origin ${currentJob.payload.branchName}`
+            ]
+        );
+    }
+
     try {
-      const exec = workerUtils.getExecPromise();
-      
-      const pullRepoCommands = [
-        `cd repos/${this.getRepoDirName()}`,
-      ];
+        const {
+            stdout,
+            stderr
+        } = await exec(pullRepoCommands.join(' && '));
+        const rewsr2 = await exec (`cd repos/${this.getRepoDirName()} && git rev-parse --abbrev-ref HEAD`);
+        console.log('yoooo 2 ', rewsr2);
+    } catch (error) {
+        logger.save(
+            `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
+        );
+        logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
 
-      // if commit hash is provided, use that
-      if (currentJob.payload.newHead) {
-        pullRepoCommands.push(...[
-          `git checkout ${currentJob.payload.newHead}`,
-          `git checkout -b ${currentJob.payload.branchName}`,
-          `git pull origin ${currentJob.payload.branchName}`,
-        ]);
-      } else {
-        pullRepoCommands.push(...[
-          `git checkout ${currentJob.payload.branchName}`,
-          `git pull origin ${currentJob.payload.branchName}`,
-        ]);
-      }
+        throw error;
+    }
 
-      await exec(pullRepoCommands.join(' && '));
-
-      // default commands to run to build repo
-      const commandsToBuild = [
+          //check for patch
+  if (currentJob.payload.patch !== undefined) {
+    await this.applyPatch(
+      currentJob.payload.patch,
+      this.getRepoDirName(currentJob)
+    );
+    await this.deletePatchFile();
+  }
+    // default commands to run to build repo
+    const commandsToBuild = [
         `. /venv/bin/activate`,
         `cd repos/${this.getRepoDirName()}`,
         `rm -f makefile`,
         `make html`
-      ];
+    ];
 
-      // check if need to build next-gen
-      if (this.buildNextGen()) {
+    // check if need to build next-gen
+    if (this.buildNextGen()) {
         commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-      }
+    }
 
-      // overwrite repo makefile with the one our team maintains
-      const makefileContents = await this.downloadMakefile();
-      if (makefileContents && makefileContents.status === 'success') {
+    // overwrite repo makefile with the one our team maintains
+    const makefileContents = await this.downloadMakefile();
+    if (makefileContents && makefileContents.status === 'success') {
         await fs.writeFileSync(
-          `repos/${this.getRepoDirName()}/Makefile`,
-          makefileContents.content,
-          { encoding: 'utf8', flag: 'w' }
+            `repos/${this.getRepoDirName()}/Makefile`,
+            makefileContents.content, {
+                encoding: 'utf8',
+                flag: 'w'
+            }
         );
-      } else {
+    } else {
         console.log(
-          'ERROR: makefile does not exist in /makefiles directory on meta branch.'
+            'ERROR: makefile does not exist in /makefiles directory on meta branch.'
         );
-      }
+    }
 
-      const execTwo = workerUtils.getExecPromise();
+    const execTwo = workerUtils.getExecPromise();
+    try {
+        const {
+            stdout,
+            stderr
+        } = await execTwo(commandsToBuild.join(' && '));
 
-      const { stdout, stderr } = await execTwo(commandsToBuild.join(' && '));
-
-      return new Promise(function(resolve, reject) {
-        logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
-        logger.save(
-          `${'(BUILD)'.padEnd(
+        return new Promise(function(resolve, reject) {
+            logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
+            logger.save(
+                `${'(BUILD)'.padEnd(
             15
           )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
-        );
-        resolve({
-          status: 'success',
-          stdout: stdout,
-          stderr: stderr
+            );
+            resolve({
+                status: 'success',
+                stdout: stdout,
+                stderr: stderr
+            });
+            reject({
+                status: 'success',
+                stderr: stderr
+            });
         });
-        reject({
-          status: 'success',
-          stderr: stderr
-        });
-      });
-    } catch (errResult) {
-      if (
-        errResult.hasOwnProperty('code') ||
-        errResult.hasOwnProperty('signal') ||
-        errResult.hasOwnProperty('killed')
-      ) {
+    } catch (error) {
         logger.save(
-          `${'(BUILD)'.padEnd(15)}failed with code: ${errResult.code}`
+            `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
         );
-        logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-        throw errResult;
-      }
+        logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+        throw error;
     }
-  }
+
+}
 }
 
 module.exports = {
