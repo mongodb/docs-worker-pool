@@ -148,8 +148,7 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await exec(commitCheckCommands.join('&&'));
-            const rewsr = await exec (`cd repos/${this.getRepoDirName()} && git rev-parse --abbrev-ref HEAD`);
-            console.log('yoooo ', rewsr);
+
             if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
                 const err = new Error(
                     `Specified commit does not exist on ${currentJob.payload.branchName} branch`
@@ -195,8 +194,6 @@ class GitHubJobClass {
             stdout,
             stderr
         } = await exec(pullRepoCommands.join(' && '));
-        const rewsr2 = await exec (`cd repos/${this.getRepoDirName()} && git rev-parse --abbrev-ref HEAD`);
-        console.log('yoooo 2 ', rewsr2);
     } catch (error) {
         logger.save(
             `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
