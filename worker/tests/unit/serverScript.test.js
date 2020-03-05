@@ -3,6 +3,7 @@
  ******************************************************************* */
 
 const serverScript = require('../../../scripts/stagingUtils');
+const workerUtils = require('../../utils/utils');
 
 describe('Test Class', () => {
   const commitPatch =
@@ -153,6 +154,13 @@ describe('Test Class', () => {
       .mockReturnValue(
         Promise.resolve(commitPatch)
       );
+  });
+
+  it('get upstream repo', async () => {
+    workerUtils.exec = jest
+    .fn()
+    .mockReturnValue('git@github.com:mongodb/docs-bi-connector.git');
+    expect(serverScript.getUpstreamRepo()).toEqual('git@github.com:mongodb/docs-bi-connector');
   });
 
   it('createPayload', () => {
