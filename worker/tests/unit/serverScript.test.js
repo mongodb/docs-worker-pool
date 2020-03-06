@@ -156,7 +156,7 @@
   //     );
   // });
 
-    //public repo -> should resolve true
+    //check upstream repo
   it('check upstream repo', async () => {
     child_process.exec.mockImplentation(jest.fn().mockReturnValueOnce('git@github.com:mongodb/docs-bi-connector.git'))
     await expect(serverScript.getUpstreamRepo()).resolves.toEqual('mongodb/docs-bi-connector.git');
