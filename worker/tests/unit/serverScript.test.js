@@ -1,37 +1,37 @@
-/** ******************************************************************
- *                  Testing StagingUtils Class                       *
- ******************************************************************* */
+  /** ******************************************************************
+   *                  Testing StagingUtils Class                       *
+   ******************************************************************* */
+  jest.mock('child_process');
+  const serverScript = require('../../../scripts/build/stagingUtils');
+  const child_process = require('child_process');
 
-const serverScript = require('../../../scripts/stagingUtils');
-const workerUtils = require('../../utils/utils');
-
-describe('Test Class', () => {
+  describe('Test Class', () => {
   const commitPatch =
   'diff --git a/README.rst b/README.rst\
   index 845a0ce..057c4bd 100644\
   --- a/README.rst\
   +++ b/README.rst\
   @@ -2,7 +2,7 @@\
-   MongoDB Connector for Business Intelligence Documentation\
-   =========================================================\
-   \
+    MongoDB Connector for Business Intelligence Documentation\
+    =========================================================\
+    \
   -kjshdfksjdhThis repository contains documentation regarding components of the\
   +This repository contains documentation regarding components of the\
-   the MongoDB Connector for BI (Business Intelligence). This documentation\
-   builds on the work of the `MongoDB Manual <http://docs.mongodb.org/manual/>`_.\
-   \
+    the MongoDB Connector for BI (Business Intelligence). This documentation\
+    builds on the work of the `MongoDB Manual <http://docs.mongodb.org/manual/>`_.\
+    \
   diff --git a/source/tutorial/install-bi-connector-windows.txt b/source/tutorial/install-bi-connector-windows.txt\
   index 562d172..65d13a2 100644\
   --- a/source/tutorial/install-bi-connector-windows.txt\
   +++ b/source/tutorial/install-bi-connector-windows.txt\
   @@ -5,7 +5,6 @@\
-   ===============================\
-   Install {+bi-short+} on Windows\
-   ===============================\
+    ===============================\
+    Install {+bi-short+} on Windows\
+    ===============================\
   -sdfsdf!!!\
-   .. default-domain:: mongodb\
-   \
-   .. contents:: On this page';
+    .. default-domain:: mongodb\
+    \
+    .. contents:: On this page';
 
   const urlArg = 'git@github.com:madelinezec/docs-bi-connector';
   const repoNameArg = 'docs-bi-connector';
@@ -156,29 +156,27 @@ describe('Test Class', () => {
   //     );
   // });
 
-  it('get upstream repo', () => {
-    workerUtils.exec = jest
-    .fn()
-    .mockReturnValue('git@github.com:mongodb/docs-bi-connector.git');
-    expect(serverScript.getUpstreamRepo()).toEqual('git@github.com:mongodb/docs-bi-connector');
+    //public repo -> should resolve true
+  it('check upstream repo', async () => {
+    child_process.exec.mockImplentation(jest.fn().mockReturnValueOnce('git@github.com:mongodb/docs-bi-connector.git'))
+    await expect(serverScript.getUpstreamRepo()).resolves.toEqual('mongodb/docs-bi-connector.git');
+  });
+  //public repo -> should resolve true
+  it('check public repo', () => {
+    return serverScript.checkIfPrivateRepo('https://github.com/mongodb/docs-bi-connector')
+      .then(result => {
+        expect(result).toBeTruthy();
+      })
+  });
+  //private repo --> should resolve false
+  it('check private repo', () => {
+    return serverScript.checkIfPrivateRepo('https://github.com/10gen/docs-tutorials')
+      .then(result => {
+        expect(result).toBeFalsy();
+      })
   });
 
-    //public repo -> should resolve true
-    it('check public repo', () => {
-      return expect(serverScript.checkVisibility('https://github.com/mongodb/docs-bi-connector'))
-        .then(result => {
-          expect(result).toBeTruthy();
-        })
-    });
-    //private repo --> should resolve false
-    it('check private repo', () => {
-      return expect(serverScript.checkVisibility('https://github.com/10gen/docs-tutorials'))
-        .then(result => {
-          expect(result).toBeFalsy();
-        })
-    });
 
-  
 
 
   // it('createPayload', () => {
@@ -194,10 +192,10 @@ describe('Test Class', () => {
   //     )
   //   ).toEqual(payload);
   // });
-  
+
   // it('deletePatchFile', async () => {
   //   serverScript.deletePatchFile = jest
   //     .fn()
   //     .mockReturnValue(Promise.resolve('successfully removed patch file'));
   // });
-});
+  });
