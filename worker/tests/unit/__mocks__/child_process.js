@@ -1,7 +1,5 @@
 'use strict';
 
-const path = require('path');
-
 const child_process = jest.genMockFromModule('child_process');
 
 // A custom version of `exec` 
