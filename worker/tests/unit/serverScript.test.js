@@ -6,11 +6,6 @@
   const child_process = require('child_process');
 
   describe('Test Class', () => {
-
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
     const commitPatch =
     "diff --git a/README.rst b/README.rst    index 845a0ce..057c4bd 100644    --- a/README.rst    +++ b/README.rst    @@ -2,7 +2,7 @@      MongoDB Connector for Business Intelligence Documentation      =========================================================          -kjshdfksjdhThis repository contains documentation regarding components of the    +This repository contains documentation regarding components of the      the MongoDB Connector for BI (Business Intelligence). This documentation      builds on the work of the `MongoDB Manual <http://docs.mongodb.org/manual/>`_.          diff --git a/source/tutorial/install-bi-connector-windows.txt b/source/tutorial/install-bi-connector-windows.txt    index 562d172..65d13a2 100644    --- a/source/tutorial/install-bi-connector-windows.txt    +++ b/source/tutorial/install-bi-connector-windows.txt    @@ -5,7 +5,6 @@      ===============================      Install {+bi-short+} on Windows      ===============================    -Test      .. default-domain:: mongodb            .. contents:: On this page";
 
