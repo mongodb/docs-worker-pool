@@ -224,7 +224,7 @@ class GitHubJobClass {
                 ...[
                     `git checkout ${currentJob.payload.branchName}`,
                     `git pull origin ${currentJob.payload.branchName}`,
-                    `git checkout ${currentJob.payload.newHead}`
+                    `git checkout ${currentJob.payload.newHead} .`
                 ]
             );
 
