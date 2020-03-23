@@ -23,7 +23,7 @@ docker run \
 * `MONGO_ATLAS_USERNAME` and `MONGO_ATLAS_PASSWORD` is username/password of atlas database
 * `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are needed for uploading to S3 via [mut](https://github.com/mongodb/mut)
 * `GITHUB_BOT_USERNAME` and `GITHUB_BOT_PASSWORD` are needed so builder can access private repos
-* `DBNAME` allows the indication of a pool database (pool, pool_test)
+* `DB_NAME` allows the indication of a pool database (pool, pool_test)
 * `XLARGE` true or false indicates whether this instance will run on an XLARGE server or not
 * `SNOOTY_ENV` indicates whether the build environment is stage, prod, or dev
 * `FASTLY_TOKEN` is needed for connecting to the Fastly edge dictionary
