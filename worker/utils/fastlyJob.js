@@ -3,7 +3,6 @@ const utils = require('../utils/utils');
 const environment = require('../utils/environment').EnvironmentClass;
 const fastly = require('fastly')(environment.getFastlyToken());
 
-
 class FastlyJobClass {
   // pass in a job payload to setup class
   constructor(currentJob) {
@@ -19,9 +18,11 @@ class FastlyJobClass {
       throw new Error('Parameter `urlArray` needs to be an array of urls');
     }
 
+    let that = this;
     let urlCounter = urlArray.length;
     let purgeMessages = [];
 
+    // the 1 is just "some" value needed for this header: https://docs.fastly.com/en/guides/soft-purges
     const headers = {
       'fastly-key': environment.getFastlyToken(),
       'accept': 'application/json',
@@ -36,21 +37,24 @@ class FastlyJobClass {
           url: urlArray[i],
           headers: headers,
         }, function(err, response, body) {
-          urlCounter--;
           if (response.headers['content-type'].indexOf('application/json') === 0) {
             try {
               body = JSON.parse(body);
               purgeMessages.push(body);
-              // when we are done purging all urls
-              if (urlCounter <= 0) {
-                resolve({
-                  'status': 'success',
-                  'fastlyMessages': purgeMessages,
-                });
-              }
             } catch(er) {
-              throw new Error('failed parsing output from fastly');
+              utils.logInMongo(that.currentJob, `Error: failed parsing output from fastly for url ${urlArray[i]}`);
+              console.log(`Error: failed parsing output from fastly for url ${urlArray[i]}`);
             }
+          }
+          // when we are done purging all urls
+          // this is outside of the conditional above because if some url fails to purge
+          // we do not want to actually have this entire build fail, just show warning
+          urlCounter--;
+          if (urlCounter <= 0) {
+            resolve({
+              'status': 'success',
+              'fastlyMessages': purgeMessages,
+            });
           }
         });
       }

@@ -24,8 +24,19 @@ const map = {
   'target': 'target'
 };
 
+// test purge urls
+const opsmanagerUrls = [
+  'https://docs.opsmanager.mongodb.com/current/installation/',
+  'https://docs.opsmanager.mongodb.com/current/core/requirements/',
+];
+
 describe('Fastly Job Test Class', () => {
-  beforeAll(() => {});
+
+  let fastly;
+
+  beforeAll(() => {
+    fastly = new FastlyJob(this.goodDochuhJob);
+  });
 
   afterAll(() => {});
 
@@ -34,9 +45,16 @@ describe('Fastly Job Test Class', () => {
   afterEach(() => {});
 
   it('FastlyJob test connect and upsert', async () => {
-    const fastly = new FastlyJob(this.goodDochuhJob);
     return fastly.connectAndUpsert(map).catch(error => {
       expect(error).toBeDefined();
     });
   });
+
+  it('FastlyJob test purge', async () => {
+    return fastly.purgeCache(opsmanagerUrls).then(output => {
+      expect(output.status).toEqual('success');
+      expect(output).toHaveProperty('fastlyMessages');
+    });
+  });
+
 });
