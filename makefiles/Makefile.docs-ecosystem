@@ -1,15 +1,15 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-PRODUCTION_URL="https://docs.mongodb.com/ecosystem"
+PRODUCTION_URL="https://docs.mongodb.com/drivers"
 STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongodb-org-prod
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 # "PROJECT" currently exists to support having multiple projects
 # within one bucket.
-PREFIX=ecosystem
-PROJECT=ecosystem
+PREFIX=drivers
+PROJECT=drivers
 REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
@@ -46,6 +46,20 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
+next-gen-html-publish:
+	# snooty parse and then build-front-end
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/ecosystem/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	
+
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
 	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
@@ -59,6 +73,11 @@ deploy: build/public ## Deploy to the production bucket
 
 	@echo "Hosted at ${PRODUCTION_URL}/index.html"
 
+	$(MAKE) deploy-search-index
+
+next-gen-deploy:
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
+	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 	$(MAKE) deploy-search-index
 
 deploy-search-index: ## Update the search index for this branch
