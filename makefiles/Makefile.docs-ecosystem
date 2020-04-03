@@ -26,6 +26,12 @@ help: ## Show this help message
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
+assets: ## pulls assets from the docs-assets
+	rm -rf source/figures docs-assets
+	mkdir source/figures
+	git clone http://github.com/mongodb/docs-assets.git
+	cd docs-assets; git checkout ecosystem; cp * ../source/figures
+
 publish: ## Builds this branch's publishable HTML and other artifacts under build/public
 	if [ ${GIT_BRANCH} = master ]; then rm -rf build/master build/public; fi
 	giza make publish
@@ -34,7 +40,7 @@ publish: ## Builds this branch's publishable HTML and other artifacts under buil
 lint: ## Checks URLs in the built corpus underneath build/<branch>/html
 	mut-lint --linters=links ./build/master/source/ ${ARGS}
 
-next-gen-html:
+next-gen-html: assets
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
@@ -46,7 +52,7 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
-next-gen-html-publish:
+next-gen-html-publish: assets
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
