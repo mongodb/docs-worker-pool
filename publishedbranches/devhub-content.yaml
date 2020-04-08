@@ -1,0 +1,6 @@
+git:
+  branches:
+    manual: 'master'
+    published:
+      - 'master'
+...
