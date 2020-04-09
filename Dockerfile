@@ -29,8 +29,6 @@ RUN npm -g config set user root
 USER docsworker
 
 WORKDIR /home/docsworker
-
-
 	
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
@@ -38,7 +36,7 @@ RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+	latestTag=$(git describe --tags `git tag --sort=-v:refname` | head -n 1) && \
 	git checkout "$latestTag" && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 ENV PATH="${PATH}:/home/docsworker/.local/bin"
