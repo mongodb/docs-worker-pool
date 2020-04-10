@@ -28,6 +28,7 @@ const map = {
 const opsmanagerUrls = [
   'https://docs.opsmanager.mongodb.com/current/installation/',
   'https://docs.opsmanager.mongodb.com/current/core/requirements/',
+  'https://docs.mongodb.com/drivers/cxx/'
 ];
 
 describe('Fastly Job Test Class', () => {
