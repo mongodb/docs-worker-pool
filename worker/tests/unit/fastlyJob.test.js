@@ -25,10 +25,14 @@ const map = {
 };
 
 // test purge urls
-const opsmanagerUrls = [
+const urlsExistInFastly = [
   'https://docs.opsmanager.mongodb.com/current/installation/',
   'https://docs.opsmanager.mongodb.com/current/core/requirements/',
   'https://docs.mongodb.com/drivers/cxx/'
+];
+
+const urlsNoExist = [
+  'https://docs_DOES_NOT_EXIST.opsmanager.mongodb.com/index.txt',
 ];
 
 describe('Fastly Job Test Class', () => {
@@ -52,9 +56,17 @@ describe('Fastly Job Test Class', () => {
   });
 
   it('FastlyJob test purge', async () => {
-    return fastly.purgeCache(opsmanagerUrls).then(output => {
+    return fastly.purgeCache(urlsExistInFastly).then(output => {
       expect(output.status).toEqual('success');
       expect(output).toHaveProperty('fastlyMessages');
+    });
+  });
+
+  it('FastlyJob test purge for url service that does not exist', async () => {
+    return fastly.purgeCache(urlsNoExist).then(output => {
+      expect(output.status).toEqual('success');
+      expect(output).toHaveProperty('fastlyMessages');
+      expect(output.fastlyMessages[0].status).toEqual('failure');
     });
   });
 
