@@ -29,7 +29,7 @@ update-snooty:
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/mongodb/devhub snooty && \
 	cd snooty && \
 	git checkout master  && \
-	npm install
+	npm install --production
 	#  git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	# mkdir -p ./static/images && \
 	# mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
