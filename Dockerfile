@@ -1,4 +1,4 @@
-FROM ubuntu:disco
+FROM ubuntu:eoan
 
 # install legacy build environment for docs
 RUN apt-get -o Acquire::Check-Valid-Until=false update
