@@ -9,11 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### added
 
-- the :spec: role (DOP-881)
+- update autobuilder to work with new published_branches location (DOP-967)
 
-- fixes to the driver homepage footer (DOP-335)
-
-- fixing the :doc: role (DOP-968)
+- update autobuilder dockerfiles to use lexigraphic ordering for pulling releasees (DOP-943)
 
 ## [v0.3.1] - 2020-01-31
 
