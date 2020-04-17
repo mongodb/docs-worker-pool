@@ -10,6 +10,11 @@ STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongocli-prod
 PROJECT=datalake
 
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
+REPO_DIR=$(shell pwd)
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
@@ -23,63 +28,23 @@ help:
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
-#################################################################
-####                                                         ####
-####             BUILD DOCUMENTATION ARTIFACTS               ####
-####                                                         ####
-#################################################################
-
-
-#################################################################
-####                  BUILD STAGING ARTIFACTS                ####
-#################################################################
-
 ## Builds this branch's HTML under build/<branch>/html
 html:
-	time giza make html
-
-
-#################################################################
-####       BUILD STAGING ARTIFACTS TO CLEAN DIRECTORY        ####
-#################################################################
+	giza make html
 
 ## Build this branch's HTML files to a fresh build directory
 clean-html:
 	rm -rf build/${GIT_BRANCH}
-	time giza make html
-
-
-#################################################################
-####                 BUILD PRODUCTION ARTIFACTS              ####
-#################################################################
-
-## Builds this branch's publishable HTML and other artifacts under
-## build/public
+	giza make html
+	
 publish:
 	giza make publish
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
-
-
-#################################################################
-####                                                         ####
-####        DEPLOY KUBERNETES OPERATOR DOCUMENTATION         ####
-####                                                         ####
-#################################################################
-
-
-#################################################################
-####   DEPLOY KUBERNETES OPERATOR DOCUMENTATION TO STAGING   ####
-#################################################################
 
 ## Host online for review
 stage:
 	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
 	@echo "\n\nHosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
-
-
-#################################################################
-####  DEPLOY KUBERNETES OPERATOR DOCUMENTATION TO PRODUCTION ####
-#################################################################
 
 ## Deploy to the production bucket
 deploy: build/public
@@ -97,3 +62,19 @@ deploy-search-index:
 	else \
 		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
 	fi
+	
+next-gen-html: assets
+	# snooty parse and then build-front-end
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
+next-gen-stage: ## Host online for review
+	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
