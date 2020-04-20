@@ -28,7 +28,7 @@ const map = {
 const urlsExistInFastly = [
   'https://docs.opsmanager.mongodb.com/current/installation/',
   'https://docs.opsmanager.mongodb.com/current/core/requirements/',
-  'https://docs.mongodb.com/drivers/cxx/'
+  'https://docs.mongodb.com/drivers/cxx/',
 ];
 
 const urlsNoExist = [
