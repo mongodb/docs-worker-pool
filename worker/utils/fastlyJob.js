@@ -42,7 +42,7 @@ class FastlyJobClass {
             utils.logInMongo(that.currentJob, `Error: service for this url does not exist in fastly for purging ${urlArray[i]}`);
             purgeMessages.push({
               'status': 'failure',
-              'message': `url ${urlArray[i]} does not exist in fastly`
+              'message': `service with url ${urlArray[i]} does not exist in fastly`
             });
           } else if (response.headers['content-type'].indexOf('application/json') === 0) {
             try {
