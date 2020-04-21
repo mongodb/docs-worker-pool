@@ -17,7 +17,8 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
-STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
+STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJEC
+T}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
 .PHONY: help html publish stage deploy deploy-search-index
 
@@ -79,7 +80,7 @@ next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
 	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
 	
-next-gen-publish: assets
+next-gen-publish:
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
