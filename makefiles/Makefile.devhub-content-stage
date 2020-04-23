@@ -36,11 +36,11 @@ next-gen-html: update-snooty
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR} && \
 	cd snooty-devhub && \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production \
-	npm run build; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production && \ 
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production && \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production && \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
+	npm run build && \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR}
 
 next-gen-html-publish: update-snooty
