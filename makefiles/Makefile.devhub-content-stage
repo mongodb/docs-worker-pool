@@ -26,11 +26,10 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 update-snooty:
-	cd ../snooty-devhub && \
+	cd ../../snooty-devhub && \
 	git checkout master  && \
 	git pull && \
 	npm install --production
-
 
 next-gen-html: update-snooty
 	# snooty parse and then build-front-end
