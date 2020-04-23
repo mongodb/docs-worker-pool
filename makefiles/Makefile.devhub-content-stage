@@ -26,22 +26,23 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 update-snooty:
-	cd ../../snooty-devhub && \
-	git checkout master  && \
-	git pull && \
+	cd ../../snooty-devhub; \
+	git checkout master; \
+	git pull; \
 	npm install --production
 
 next-gen-html: update-snooty
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	# cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; \
-	cd snooty-devhub; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \ 
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR}
+	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
 
 next-gen-html-publish: update-snooty
 	# snooty parse and then build-front-end
