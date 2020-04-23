@@ -47,7 +47,7 @@ RUN cd snooty && \
 	git fetch --all && \
 	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
 	git checkout "$latestTag" && \	
-	npm install && \
+	npm install --production && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
@@ -61,7 +61,7 @@ RUN cd snooty-devhub && \
 
 # install the node dependencies for worker pool
 COPY worker/ . 
-RUN npm install
+RUN npm install --production
 
 # where repo work will happen
 RUN mkdir repos && chmod 755 repos
