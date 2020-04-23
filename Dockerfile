@@ -53,6 +53,12 @@ RUN cd snooty && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
 	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
+RUN git clone https://github.com/mongodb/devhub.git snooty-devhub
+RUN cd snooty-devhub && \
+	git fetch --all && \
+	git checkout master && \	
+	npm install --production
+
 # install the node dependencies for worker pool
 COPY worker/ . 
 RUN npm install
