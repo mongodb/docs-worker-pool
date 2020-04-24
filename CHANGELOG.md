@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - update autobuilder to work with new published_branches location (DOP-967)
 
-- update autobuilder dockerfiles to use lexigraphic ordering for pulling releasees (DOP-943)
+- update autobuilder dockerfiles to use lexigraphic ordering for pulling releases (DOP-943)
 
 ## [v0.3.1] - 2020-01-31
 
