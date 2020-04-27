@@ -94,7 +94,7 @@ deploy-search-index: ## Update the search index for this branch
 
 next-gen-html: examples
 	# snooty parse and then build-front-end
-	@echo "${SNOOTY_DB_PWD}" | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" --patchid "NONE" || exit 0;
+	@echo "${SNOOTY_DB_PWD}" | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" --patch "NONE" || exit 0;
 	cp -r "${REPO_DIR}/../../snooty" ${REPO_DIR};
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
