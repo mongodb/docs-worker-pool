@@ -61,7 +61,7 @@ RUN cd snooty-devhub && \
 
 # install the node dependencies for worker pool
 COPY worker/ . 
-RUN npm install --production
+RUN npm install
 
 # where repo work will happen
 RUN mkdir repos && chmod 755 repos
