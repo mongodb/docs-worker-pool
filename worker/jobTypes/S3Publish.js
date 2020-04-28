@@ -27,10 +27,10 @@ class S3PublishClass {
       const exec = workerUtils.getExecPromise();
       const command = stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
+      let stdoutMod = stdout;
       logger.save(
         `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
       );
-      let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
