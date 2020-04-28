@@ -71,13 +71,12 @@ class S3PublishClass {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
       const { stdout } = await exec(command);
-      let stdoutMod = '';
+      let stdoutMod = stdout;
 
       // check if json was returned from mut
       try {
         const stdoutJSON = JSON.parse(stdout);
         const urls = stdoutJSON.urls;
-        stdoutMod = stdout;
         // pass in urls to fastly function to purge cache
         this.fastly.purgeCache(urls);
       } catch(e) {
