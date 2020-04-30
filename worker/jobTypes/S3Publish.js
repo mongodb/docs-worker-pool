@@ -78,7 +78,10 @@ class S3PublishClass {
         const stdoutJSON = JSON.parse(stdout);
         const urls = stdoutJSON.urls;
         // pass in urls to fastly function to purge cache
-        this.fastly.purgeCache(urls);
+        this.fastly.purgeCache(urls).then(function(data) {
+          logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
+          logger.sendSlackMsg(`All URL's finished purging for your deploy`);
+        });
       } catch(e) {
         // if not JSON, then it's a normal string output from mut
         // get only last part of message which includes # of files changes + s3 link
