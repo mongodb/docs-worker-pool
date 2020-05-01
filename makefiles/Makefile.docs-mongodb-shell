@@ -5,10 +5,10 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-PRODUCTION_URL="https://docs.mongodb.com/datalake"
+PRODUCTION_URL="https://docs.mongodb.com/mongodb-shell"
 STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongodb-org-prod
-PROJECT=datalake
+PROJECT=mongodb-shell
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 REPO_DIR=$(shell pwd)
@@ -84,7 +84,7 @@ next-gen-publish:
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-datalake/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-mongodb-shell/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
