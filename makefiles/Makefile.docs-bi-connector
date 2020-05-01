@@ -51,7 +51,6 @@ publish: ## Builds this branch's publishable HTML and other artifacts under buil
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
 
 stage: ## Host online for review
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-bi-connector.yaml > ${REPO_DIR}/published-branches.yaml
 	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 
