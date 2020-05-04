@@ -39,7 +39,7 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
-STABLE_BRANCH_NEXT_GEN = STABLE_BRANCH=`grep 'manual' ${REPO_DIR}/published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
+STABLE_BRANCH_NEXT_GEN = `grep 'manual' ${REPO_DIR}/published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
