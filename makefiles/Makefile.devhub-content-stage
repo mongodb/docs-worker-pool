@@ -27,8 +27,8 @@ help: ## Show this help message
 
 update-snooty:
 	cd ../../snooty-devhub; \
-	git checkout master; \
-	git pull; \
+	git fetch --all; \
+	git reset --hard origin/master; \
 	npm install --production
 
 next-gen-html: update-snooty
