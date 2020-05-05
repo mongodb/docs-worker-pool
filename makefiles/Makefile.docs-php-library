@@ -10,6 +10,8 @@ PROJECT=php-library
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
+
 .PHONY: help publish stage deploy deploy-search-index
 
 help: ## Show this help message

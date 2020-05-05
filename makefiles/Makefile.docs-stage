@@ -19,6 +19,8 @@ DRIVERS_PATH=source/driver-examples
 BLOCKS_FILE=./build/${GIT_BRANCH}/tests.blocks
 TEST_FILE=./build/${GIT_BRANCH}/tests.js
 
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
+
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
