@@ -43,7 +43,7 @@ class EnvironmentClass {
   }
 
   static getAtlasPassword() {
-    if (atlasPassword == undefined) {
+    if (atlasPassword === undefined) {
       return 'passwordTest';
     }
     return atlasPassword;
@@ -58,5 +58,5 @@ class EnvironmentClass {
 }
 
 module.exports = {
-  EnvironmentClass: EnvironmentClass
+  EnvironmentClass,
 };

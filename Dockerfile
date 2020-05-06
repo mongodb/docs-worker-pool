@@ -1,4 +1,4 @@
-FROM ubuntu:disco
+FROM ubuntu:eoan
 
 # install legacy build environment for docs
 RUN apt-get -o Acquire::Check-Valid-Until=false update
@@ -29,14 +29,14 @@ RUN npm -g config set user root
 USER docsworker
 
 WORKDIR /home/docsworker
-
+	
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
 RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+	latestTag=$(git describe --tags `git tag --sort=-v:refname` | head -n 1) && \
 	git checkout "$latestTag" && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 ENV PATH="${PATH}:/home/docsworker/.local/bin"
@@ -47,15 +47,21 @@ RUN cd snooty && \
 	git fetch --all && \
 	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
 	git checkout "$latestTag" && \	
-	npm install && \
+	npm install --production && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
 	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
+RUN git clone https://github.com/mongodb/devhub.git snooty-devhub
+RUN cd snooty-devhub && \
+	git fetch --all && \
+	git checkout master && \	
+	npm install --production
+
 # install the node dependencies for worker pool
 COPY worker/ . 
-RUN npm install
+RUN npm install --production
 
 # where repo work will happen
 RUN mkdir repos && chmod 755 repos
