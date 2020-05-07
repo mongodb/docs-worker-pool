@@ -42,6 +42,7 @@ next-gen-html: update-snooty
 	echo "GATSBY_SITE=devhub" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=master" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
