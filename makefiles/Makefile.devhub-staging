@@ -1,0 +1,80 @@
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+USER=$(shell whoami)
+
+STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
+STAGING_BUCKET=docs-devhub-staging
+
+PRODUCTION_BUCKET=docs-devhub-prod
+PRODUCTION_URL=https://developer.mongodb.com
+
+PROJECT=devhub
+PREFIX=devhub
+REPO_DIR=$(shell pwd)
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
+
+GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
+GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+.PHONY: examples help html publish stage deploy deploy-search-index
+
+help: ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo
+	@echo 'Variables'
+	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
+
+update-snooty:
+	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/mongodb/devhub snooty && \
+	cd snooty && \
+	git checkout master  && \
+	npm install --production
+	#  git clone https://github.com/mongodb/docs-tools.git docs-tools && \
+	# mkdir -p ./static/images && \
+	# mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
+	# mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+
+next-gen-html: update-snooty
+	# snooty parse and then build-front-end
+	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	# cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
+next-gen-html-publish:
+	# snooty parse and then build-front-end
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod.js > ${REPO_DIR}/snooty/gatsby-config.js
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+  
+next-gen-publish: next-gen-html-publish
+	# if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+
+next-gen-stage: ## Host online for review
+	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+
+next-gen-deploy:
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=/ --deploy --all-subdirectories ${ARGS}
+	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+
+deploy-search-index: ## Update the search index for this branch
+	@echo "Building search index"
+	mut-index upload build/public \
+		-o ${PROJECT}-${GIT_BRANCH}.json \
+		-u ${PRODUCTION_URL} \
+		-g \
+		-s \
+		--exclude build/public/index.html
