@@ -48,8 +48,7 @@ next-gen-html-publish:
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	npm run build;
   
 next-gen-publish: next-gen-html-publish
 	# if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
