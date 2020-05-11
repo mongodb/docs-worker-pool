@@ -25,7 +25,7 @@ help: ## Show this help message
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
-next-gen-html: update-snooty
+next-gen-html:
 	# get latest devhub-content to test the front-end
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
 	# for parser to work we need the "content" which exists in source and templates dirs
