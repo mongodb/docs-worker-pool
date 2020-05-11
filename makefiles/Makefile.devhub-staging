@@ -17,7 +17,7 @@ GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-.PHONY: examples help html publish stage deploy deploy-search-index
+.PHONY: help html publish stage deploy deploy-search-index next-gen-html
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
