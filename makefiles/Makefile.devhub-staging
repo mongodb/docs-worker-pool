@@ -25,20 +25,14 @@ help: ## Show this help message
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
-update-snooty:
-	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/mongodb/devhub snooty && \
-	cd snooty && \
-	git checkout master  && \
-	npm install --production
-
 next-gen-html: update-snooty
 	# get latest devhub-content to test the front-end
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
+	# for parser to work we need the "content" which exists in source and templates dirs
 	cp -r devhub-content/source source && \
 	cp -r devhub-content/templates templates;
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
-	cd snooty; \
 	echo "GATSBY_SITE=devhub" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
