@@ -28,7 +28,6 @@ help: ## Show this help message
 next-gen-html:
 	# get latest devhub-content to test the front-end
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
-	# for parser to work we need the "content" which exists in source and templates directories
 	cp -r devhub-content/source source && \
 	cp -r devhub-content/templates templates;
 	# snooty parse and then build-front-end
