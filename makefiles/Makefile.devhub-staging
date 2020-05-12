@@ -30,8 +30,8 @@ prepare-devhub-snooty:
 
 next-gen-html: prepare-devhub-snooty
 	# get latest devhub-content to test the front-end
-	@rm -rf devhub-content && \
-	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
+	rm -rf devhub-content && \
+	git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
 	cp -r devhub-content/source source; \
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
