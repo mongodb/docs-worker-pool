@@ -26,10 +26,11 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 	
 prepare-devhub-snooty:
-	npm install --production
+	@npm install --production
 
 next-gen-html: prepare-devhub-snooty
 	# get latest devhub-content to test the front-end
+	@rm -rf devhub-content && \
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
 	cp -r devhub-content/source source; \
 	# snooty parse and then build-front-end
