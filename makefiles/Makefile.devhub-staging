@@ -26,7 +26,7 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 	
 prepare-devhub-snooty:
-	@npm install --production
+	npm install --production > /dev/null 2>&1
 
 next-gen-html: prepare-devhub-snooty
 	# get latest devhub-content to test the front-end
