@@ -1,4 +1,5 @@
 const job = require('../../jobTypes/githubPushJob');
+const githubJob = require('../../jobTypes/githubJob');
 const workerUtils = require('../../utils/utils');
 
 var fs = require('fs');
@@ -41,6 +42,13 @@ const payloadNoBranch = {
   isXlargs: false
 };
 
+const payloadDevhubContent = {
+  repoName: 'docs_buil_test', 
+  repoOwner: 'mongodb',
+  branchName: 'DOCSP-test',
+  isXlarge: true
+}
+
 const testPayloadWithRepo = {
   payload: payloadObj
 };
@@ -61,6 +69,9 @@ const testPayloadBadOwner = {
   payload: payloadObjBadOwner
 };
 
+const testPayloadWithDevhubRepo = {
+  payload: payloadDevhubContent
+}
 const error = new Error('job not valid');
 
 /** these tests focus on exec-heavy operations of the githubpush worker */
@@ -71,10 +82,11 @@ describe('Test Class', () => {
     workerUtils.resetDirectory = jest.fn().mockResolvedValue();
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
     jest.useFakeTimers();
-    console.log(job);
+    jest.setTimeout(300000);
+
   });
 
-  // Tests for build() function
+//  Tests for build() function
 
   it('build() rejects properly killed', async () => {
     const execMock = jest.fn().mockRejectedValue({ killed: true });
@@ -98,6 +110,20 @@ describe('Test Class', () => {
     await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
       signal: true
     });
+  });
+  
+  //test
+  it('buildRepo() rejects', async () => {
+    const execMock = jest.fn().mockResolvedValueOnce({stdout: 'success!!', stderr: ''})
+    workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(execMock);
+    const makefile = jest.fn().mockResolvedValueOnce({status: 'success', content: 'makefile'})
+    githubJob.downloadMakefile = jest.fn().mockReturnValueOnce(makefile)
+    // const mockError2 = new Error({code: 2})
+    // const execMock2 = jest.fn().mockRejectedValueOnce(mockError2);
+    // workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(execMock2);
+
+    await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toThrow(mockError2); 
+
   });
 
   it('build() resolves properly notsignal', async () => {

@@ -98,7 +98,8 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        console.log(makefileLocation)
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -169,6 +170,7 @@ class GitHubJobClass {
     }
 
     async buildRepo(logger) {
+        console.log("we have made it to build repo!!!")
         const currentJob = this.currentJob;
 
         // setup for building
@@ -213,6 +215,7 @@ class GitHubJobClass {
                     });
                 }
             } catch (error) {
+                onsole.log("you have entered the first error catch oh no!! ", error)
                 logger.save(
                     `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
                 );
@@ -242,8 +245,13 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await exec(pullRepoCommands.join(' && '));
-
+          console.log(stderr, stdout)
         } catch (error) {
+            console.log("keys ", Object.keys(error))
+            for(var property in Object.keys(error)) {
+              console.log(property + "=" + error[property]);
+            }
+            
             logger.save(
                 `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
             );
@@ -275,6 +283,7 @@ class GitHubJobClass {
 
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
+        console.log(makefileContents.status)
         if (makefileContents && makefileContents.status === 'success') {
             await fs.writeFileSync(
                 `repos/${this.getRepoDirName()}/Makefile`,
@@ -288,14 +297,14 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-
+        console.log("here!")
         const execTwo = workerUtils.getExecPromise();
         try {
             const {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-    
+            console.log("this is stder!! ", stderr)
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
@@ -303,6 +312,7 @@ class GitHubJobClass {
                 15
               )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
                 );
+                console.log("we are inside here")
                 resolve({
                     status: 'success',
                     stdout: stdout,
@@ -314,6 +324,8 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
+            console.log("yooo!!!")
+            console.log("we have caught the error! ", error.code)
             logger.save(
                 `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
             );

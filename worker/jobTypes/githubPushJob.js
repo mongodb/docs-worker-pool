@@ -61,6 +61,7 @@ function safeGithubPush(currentJob) {
 }
 
 async function startGithubBuild(job, logger) {
+  console.log("start github build~!!")
   const buildOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
     job.buildRepo(logger),
@@ -75,6 +76,7 @@ async function startGithubBuild(job, logger) {
     }
 
     return new Promise((resolve) => {
+      console.log("we are truthy!!!")
       resolve(true);
     });
   }
@@ -105,7 +107,7 @@ async function pushToStage(publisher, logger) {
 
 async function runGithubPush(currentJob) {
   workerUtils.logInMongo(currentJob, ' ** Running github push function');
-
+  console.log("run github push!!!")
   if (
     !currentJob ||
     !currentJob.payload ||
