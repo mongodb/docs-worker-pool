@@ -85,7 +85,7 @@ describe('Test Class', () => {
     jest.setTimeout(30000)
   });
 
-//  Tests for build() function
+  //  Tests for build() function
 
   it('build() rejects properly killed', async () => {
     const execMock = jest.fn().mockRejectedValue({ killed: true });
@@ -111,24 +111,18 @@ describe('Test Class', () => {
     });
   });
   
-  //test
-  it('buildRepo() rejects', async () => {
-
+  it('buildRepo() catches error thrown during make next-gen-html', async () => {
     const devhubjob = new GitHubJob(testPayloadWithDevhubRepo);
     devhubjob.cleanup = jest.fn().mockResolvedValue();
     devhubjob.cloneRepo = jest.fn().mockResolvedValue();
-
-    //mock first exec call
+    
+    const mockError2 = new Error()
+    mockError2.code = 2
+    const execMock2 = jest.fn().mockRejectedValueOnce(mockError2)
     const execMock = jest.fn().mockResolvedValueOnce({stdout: 'success!!', stderr: ''});
     workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock)
-
-    devhubjob.downloadMakefile = jest.fn().mockReturnValueOnce(Promise.resolve({status: 'success', content: 'makefile'}))
-    
-    //mock second exec call
-    const mockError2 = new Error({code: 2})
-    const execMock2 = jest.fn().mockResolvedValueOnce(mockError2)
-    workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock2);
-    
+                                          .mockReturnValue(() => { throw mockError2});
+                                       
     await expect(job.runGithubPush(testPayloadWithDevhubRepo)).rejects.toThrow(mockError2); 
   });
 
