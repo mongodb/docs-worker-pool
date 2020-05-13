@@ -1,6 +1,13 @@
 const job = require('../../jobTypes/githubPushJob');
 const workerUtils = require('../../utils/utils');
 
+var fs = require('fs');
+var dir = './repos';
+
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+}
+
 const payloadObj = {
   repoName: 'docs_build_test',
   branchName: 'DOCSP-test',
@@ -98,7 +105,9 @@ describe('Test Class', () => {
     workerUtils.getExecPromise = jest.fn().mockReturnValue(execMock);
     await expect(
       job.runGithubPush(testPayloadWithRepo)
-    ).resolves.toBeUndefined();
+    ).rejects.toEqual({
+      notSignal: true
+    });
   });
 
   // Tests for RunGithubPush Function

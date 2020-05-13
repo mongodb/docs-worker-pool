@@ -1,8 +1,10 @@
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
+const FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
 
 class S3PublishClass {
   constructor(GitHubJob) {
+    this.fastly = new FastlyJob(GitHubJob);
     this.GitHubJob = GitHubJob;
     fs.pathExists();
   }
@@ -25,10 +27,10 @@ class S3PublishClass {
       const exec = workerUtils.getExecPromise();
       const command = stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
+      let stdoutMod = stdout;
       logger.save(
         `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
       );
-      let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
@@ -70,12 +72,26 @@ class S3PublishClass {
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
-      const stdout = await exec(command);
-      let stdoutMod = '';
-      // get only last part of message which includes # of files changes + s3 link
-      if (stdout.indexOf('Summary') !== -1) {
-        stdoutMod = stdout.substr(stdout.indexOf('Summary'));
+      const { stdout } = await exec(command);
+      let stdoutMod = stdout;
+
+      // check if json was returned from mut
+      try {
+        const stdoutJSON = JSON.parse(stdout);
+        const urls = stdoutJSON.urls;
+        // pass in urls to fastly function to purge cache
+        this.fastly.purgeCache(urls).then(function(data) {
+          logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
+          logger.sendSlackMsg(`Fastly Summary: All URL's finished purging for your deploy`);
+        });
+      } catch(e) {
+        // if not JSON, then it's a normal string output from mut
+        // get only last part of message which includes # of files changes + s3 link
+        if (stdout.indexOf('Summary') !== -1) {
+          stdoutMod = stdout.substr(stdout.indexOf('Summary'));
+        }
       }
+
       return new Promise((resolve) => {
         logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
         logger.save(
