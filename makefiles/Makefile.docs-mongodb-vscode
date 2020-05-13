@@ -7,7 +7,7 @@ endif
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 PRODUCTION_URL="https://docs.mongodb.com/mongodb-vscode"
 STAGING_BUCKET=docs-mongodb-org-staging
-PRODUCTION_BUCKET=docs-mongodb-org-prod
+PRODUCTION_BUCKET=docs-mongodb-vscode-prod
 PROJECT=mongodb-vscode
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
