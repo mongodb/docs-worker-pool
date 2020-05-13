@@ -170,7 +170,6 @@ class GitHubJobClass {
     }
 
     async buildRepo(logger) {
-        console.log("we have made it to build repo!!!")
         const currentJob = this.currentJob;
 
         // setup for building
@@ -193,35 +192,35 @@ class GitHubJobClass {
                 `git branch ${currentJob.payload.branchName} --contains ${currentJob.payload.newHead}`
             ];
 
-            try {
-                const {
-                    stdout,
-                    stderr
-                } = await exec(commitCheckCommands.join('&&'));
-
-                if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
-                    const err = new Error(
-                        `Specified commit does not exist on ${currentJob.payload.branchName} branch`
-                    );
-                    logger.save(
-                        `${'(BUILD)'.padEnd(
-              15
-            )} failed. The specified commit does not exist on ${
-              currentJob.payload.branchName
-            } branch.`
-                    );
-                    return new Promise(function(resolve, reject) {
-                        reject(err);
-                    });
-                }
-            } catch (error) {
-                onsole.log("you have entered the first error catch oh no!! ", error)
-                logger.save(
-                    `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
-                );
-                logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-                throw error;
-            }
+  try {
+      const {
+          stdout,
+          stderr
+      } = await exec(commitCheckCommands.join('&&'));
+      
+      if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
+          const err = new Error(
+              `Specified commit does not exist on ${currentJob.payload.branchName} branch`
+          );
+          logger.save(
+              `${'(BUILD)'.padEnd(
+    15
+  )} failed. The specified commit does not exist on ${
+    currentJob.payload.branchName
+  } branch.`
+          );
+          return new Promise(function(resolve, reject) {
+              reject(err);
+          });
+      }
+  } catch (error) {
+      onsole.log("you have entered the first error catch oh no!! ", error)
+      logger.save(
+          `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
+      );
+      logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+      throw error;
+  }
 
             pullRepoCommands.push(
                 ...[
@@ -245,9 +244,7 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await exec(pullRepoCommands.join(' && '));
-          console.log(stderr, stdout)
         } catch (error) {
-            console.log("keys ", Object.keys(error))
             for(var property in Object.keys(error)) {
               console.log(property + "=" + error[property]);
             }
@@ -297,14 +294,14 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-        console.log("here!")
+
         const execTwo = workerUtils.getExecPromise();
         try {
             const {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-            console.log("this is stder!! ", stderr)
+
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
@@ -324,8 +321,6 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
-            console.log("yooo!!!")
-            console.log("we have caught the error! ", error.code)
             logger.save(
                 `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
             );

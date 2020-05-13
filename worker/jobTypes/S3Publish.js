@@ -46,7 +46,6 @@ class S3PublishClass {
     } catch (errResult) {
       logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
-
     }
   }
 
