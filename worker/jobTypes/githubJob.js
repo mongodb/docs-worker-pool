@@ -99,7 +99,6 @@ class GitHubJobClass {
     // our maintained directory of makefiles
     async downloadMakefile() {
         const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
-        console.log(makefileLocation)
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -280,7 +279,6 @@ class GitHubJobClass {
 
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
-        console.log(makefileContents.status)
         if (makefileContents && makefileContents.status === 'success') {
             await fs.writeFileSync(
                 `repos/${this.getRepoDirName()}/Makefile`,
@@ -321,6 +319,7 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
+            console.log("we threw the error! ", error.code)
             logger.save(
                 `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
             );
