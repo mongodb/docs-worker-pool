@@ -105,6 +105,7 @@ async function pushToStage(publisher, logger) {
 
 async function runGithubPush(currentJob) {
   workerUtils.logInMongo(currentJob, ' ** Running github push function');
+
   if (
     !currentJob ||
     !currentJob.payload ||
