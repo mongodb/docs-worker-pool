@@ -17,8 +17,7 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
-STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJEC
-T}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
+STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
 .PHONY: help html publish stage deploy deploy-search-index
 
@@ -55,14 +54,6 @@ deploy: build/public
 
 	$(MAKE) deploy-search-index
 
-## Update the search index for this branch
-deploy-search-index:
-	@echo "Building search index"
-	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
-	else \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
-	fi
 	
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -82,6 +73,7 @@ next-gen-stage: ## Host online for review
 	
 next-gen-publish:
 	# snooty parse and then build-front-end
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-datalake.yaml > ${REPO_DIR}/published-branches.yaml
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-datalake/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
@@ -96,8 +88,24 @@ next-gen-publish:
 next-gen-deploy:
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
-	$(MAKE) deploy-search-index
-	
-deploy-search-index: ## Update the search index for this branch
+	$(MAKE) next-gen-deploy-search-index
+
+STABLE_BRANCH_NEXT_GEN=`grep 'manual' ${REPO_DIR}/published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
+
+## Update the search index for this branch
+deploy-search-index:
 	@echo "Building search index"
-	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
+	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
+		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
+	else \
+		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
+	fi
+
+## Update the search index for this branch
+next-gen-deploy-search-index:
+	@echo "Building search index"
+	if [ ${STABLE_BRANCH_NEXT_GEN} = ${GIT_BRANCH} ]; then \
+		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
+	else \
+		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
+	fi

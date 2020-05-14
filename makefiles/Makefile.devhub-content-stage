@@ -27,26 +27,24 @@ help: ## Show this help message
 
 update-snooty:
 	cd ../../snooty-devhub; \
-	git checkout master; \
-	git pull; \
+	git fetch --all; \
+	git reset --hard origin/master; \
 	npm install --production
 
 next-gen-html: update-snooty
 	# snooty parse and then build-front-end
-	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" --patch "NONE" || exit 0;
-	# cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
+	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; \
 	cd snooty-devhub; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
 
 next-gen-html-publish: update-snooty
 	# snooty parse and then build-front-end
-	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR} && \
 	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod.js > ${REPO_DIR}/snooty-devhub/gatsby-config.js
 	cd snooty-devhub; \
@@ -61,8 +59,8 @@ next-gen-publish: next-gen-html-publish
 	# if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+	mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"
 
 next-gen-deploy:
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=/ --deploy --all-subdirectories ${ARGS}

@@ -1,0 +1,7 @@
+{
+    "id": "5e2b1634df5d79a63891c047",
+    "name": "retrieveRegressionChildJobs",
+    "private": true,
+    "run_as_system": true,
+    "can_evaluate": {}
+}
