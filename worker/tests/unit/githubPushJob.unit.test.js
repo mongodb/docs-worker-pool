@@ -108,8 +108,7 @@ describe('Test Class', () => {
     
     const mockError = new Error()
     mockError.code = 1
-    const execMock2 = jest.fn().mockRejectedValueOnce(mockError)
-    const execMock = jest.fn().mockResolvedValueOnce({stdout: 'success!!', stderr: ''});
+    const execMock = jest.fn().mockResolvedValueOnce({stdout: 'success', stderr: ''});
     workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock)
                                           .mockReturnValue(() => { throw mockError});
                                        
