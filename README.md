@@ -2,9 +2,6 @@
 
 As part of the Docs Tools Next Generation Project, the Docs Worker Pool seeks to make the build process for developers both easier and more scalable for developers. 
 
-
-
-
 ## Build and Run Docker Image
 ```
 docker build --tag=workerpool .
@@ -26,7 +23,7 @@ docker run \
 * `MONGO_ATLAS_USERNAME` and `MONGO_ATLAS_PASSWORD` is username/password of atlas database
 * `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are needed for uploading to S3 via [mut](https://github.com/mongodb/mut)
 * `GITHUB_BOT_USERNAME` and `GITHUB_BOT_PASSWORD` are needed so builder can access private repos
-* `DB_NAME` allows the indication of a pool database (pool, pool_test)
+* `DBNAME` allows the indication of a pool database (pool, pool_test)
 * `XLARGE` true or false indicates whether this instance will run on an XLARGE server or not
 * `SNOOTY_ENV` indicates whether the build environment is stage, prod, or dev
 * `FASTLY_TOKEN` is needed for connecting to the Fastly edge dictionary
@@ -52,4 +49,4 @@ npm install --dev
 ./node_modules/.bin/eslint .
 ```
 
-See the [spec doc](https://docs.google.com/document/d/1XZOuuGmozcLQRSDitx0UWhZzJaS4opR1JVwZqDp-N4g/edit?usp=sharing) for more details.
+See the [spec doc](https://docs.google.com/document/d/1XZOuuGmozcLQRSDitx0UWhZzJaS4opR1JVwZqDp-N4g/edit?usp=sharing) for more details. 

@@ -98,7 +98,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -191,40 +191,40 @@ class GitHubJobClass {
                 `git branch ${currentJob.payload.branchName} --contains ${currentJob.payload.newHead}`
             ];
 
-  try {
-      const {
-          stdout,
-          stderr
-      } = await exec(commitCheckCommands.join('&&'));
-      
-      if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
-          const err = new Error(
-              `Specified commit does not exist on ${currentJob.payload.branchName} branch`
-          );
-          logger.save(
-              `${'(BUILD)'.padEnd(
-    15
-  )} failed. The specified commit does not exist on ${
-    currentJob.payload.branchName
-  } branch.`
-          );
-          return new Promise(function(resolve, reject) {
-              reject(err);
-          });
-      }
-  } catch (error) {
-      logger.save(
-          `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
-      );
-      logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-      throw error;
-  }
+            try {
+                const {
+                    stdout,
+                    stderr
+                } = await exec(commitCheckCommands.join('&&'));
+
+                if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
+                    const err = new Error(
+                        `Specified commit does not exist on ${currentJob.payload.branchName} branch`
+                    );
+                    logger.save(
+                        `${'(BUILD)'.padEnd(
+              15
+            )} failed. The specified commit does not exist on ${
+              currentJob.payload.branchName
+            } branch.`
+                    );
+                    return new Promise(function(resolve, reject) {
+                        reject(err);
+                    });
+                }
+            } catch (error) {
+                logger.save(
+                    `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
+                );
+                logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+                throw error;
+            }
 
             pullRepoCommands.push(
                 ...[
                     `git checkout ${currentJob.payload.branchName}`,
                     `git pull origin ${currentJob.payload.branchName}`,
-                    `git checkout ${currentJob.payload.newHead} .`
+                    `git checkout ${currentJob.payload.newHead}`
                 ]
             );
 
@@ -242,7 +242,8 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await exec(pullRepoCommands.join(' && '));
-        } catch (error) {            
+
+        } catch (error) {
             logger.save(
                 `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
             );
@@ -294,7 +295,7 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-
+    
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
@@ -302,7 +303,6 @@ class GitHubJobClass {
                 15
               )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
                 );
-                console.log("we are inside here")
                 resolve({
                     status: 'success',
                     stdout: stdout,
@@ -314,15 +314,14 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
-            if (error.code === 1) {
-              logger.save(
-                `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
-              );
-              logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-              logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
-              throw error;              
-            }
-
+          if (error.code === 1) {
+            logger.save(
+              `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
+            );
+            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+            logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
+            throw error;              
+          }
         }
 
     }
