@@ -213,7 +213,6 @@ class GitHubJobClass {
           });
       }
   } catch (error) {
-      onsole.log("you have entered the first error catch oh no!! ", error)
       logger.save(
           `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `
       );
@@ -243,11 +242,7 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await exec(pullRepoCommands.join(' && '));
-        } catch (error) {
-            for(var property in Object.keys(error)) {
-              console.log(property + "=" + error[property]);
-            }
-            
+        } catch (error) {            
             logger.save(
                 `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
             );
@@ -319,12 +314,15 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
-            console.log("we threw the error! ", error.code)
-            logger.save(
+            if (error.code === 1) {
+              logger.save(
                 `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
-            );
-            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-            throw error;
+              );
+              logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+              logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
+              throw error;              
+            }
+
         }
 
     }

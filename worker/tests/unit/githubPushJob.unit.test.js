@@ -116,14 +116,14 @@ describe('Test Class', () => {
     devhubjob.cleanup = jest.fn().mockResolvedValue();
     devhubjob.cloneRepo = jest.fn().mockResolvedValue();
     
-    const mockError2 = new Error()
-    mockError2.code = 2
-    const execMock2 = jest.fn().mockRejectedValueOnce(mockError2)
+    const mockError = new Error()
+    mockError.code = 1
+    const execMock2 = jest.fn().mockRejectedValueOnce(mockError)
     const execMock = jest.fn().mockResolvedValueOnce({stdout: 'success!!', stderr: ''});
     workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock)
-                                          .mockReturnValue(() => { throw mockError2});
+                                          .mockReturnValue(() => { throw mockError});
                                        
-    await expect(job.runGithubPush(testPayloadWithDevhubRepo)).rejects.toThrow(mockError2); 
+    await expect(job.runGithubPush(testPayloadWithDevhubRepo)).rejects.toThrow(mockError); 
   });
 
   it('build() resolves properly notsignal', async () => {
