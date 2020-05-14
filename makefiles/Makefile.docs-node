@@ -60,7 +60,7 @@ html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
 next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --json --all-subdirectories ${ARGS}
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --deployed-url-prefix=https://docs.mongodb.com/node --json --all-subdirectories ${ARGS}
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 	$(MAKE) deploy-search-index
 
