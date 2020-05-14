@@ -42,13 +42,6 @@ const payloadNoBranch = {
   isXlargs: false
 };
 
-const payloadDevhubContent = {
-  repoName: 'docs_build_test', 
-  repoOwner: 'mongodb',
-  branchName: 'DOCSP-test',
-  isXlarge: true
-}
-
 const testPayloadWithRepo = {
   payload: payloadObj
 };
@@ -69,9 +62,6 @@ const testPayloadBadOwner = {
   payload: payloadObjBadOwner
 };
 
-const testPayloadWithDevhubRepo = {
-  payload: payloadDevhubContent
-}
 const error = new Error('job not valid');
 
 /** these tests focus on exec-heavy operations of the githubpush worker */
@@ -112,7 +102,7 @@ describe('Test Class', () => {
   });
   
   it('buildRepo() catches error thrown during make next-gen-html', async () => {
-    const devhubjob = new GitHubJob(testPayloadWithDevhubRepo);
+    const devhubjob = new GitHubJob(testPayloadWithRepo);
     devhubjob.cleanup = jest.fn().mockResolvedValue();
     devhubjob.cloneRepo = jest.fn().mockResolvedValue();
     
@@ -123,7 +113,7 @@ describe('Test Class', () => {
     workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock)
                                           .mockReturnValue(() => { throw mockError});
                                        
-    await expect(job.runGithubPush(testPayloadWithDevhubRepo)).rejects.toThrow(mockError); 
+    await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toThrow(mockError); 
   });
 
   it('build() resolves properly notsignal', async () => {
@@ -180,4 +170,4 @@ describe('Test Class', () => {
       error
     );
   });
- });
+});
