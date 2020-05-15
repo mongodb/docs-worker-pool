@@ -17,44 +17,41 @@ GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-.PHONY: examples help html publish stage deploy deploy-search-index
+.PHONY: help html publish stage deploy deploy-search-index next-gen-html
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
+	
+prepare-devhub-snooty:
+	npm install --production > /dev/null 2>&1
 
-update-snooty:
-	cd ../../snooty-devhub; \
-	git fetch --all; \
-	git reset --hard origin/master; \
-	npm install --production
-
-next-gen-html: update-snooty
+next-gen-html: prepare-devhub-snooty
+	# get latest devhub-content to test the front-end
+	rm -rf devhub-content && \
+	git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
+	cp devhub-content/snooty.toml snooty.toml && \
+	cp -r devhub-content/source source; \
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; \
-	cd snooty-devhub; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_SITE=devhub" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
+	npm run build;
 
-next-gen-html-publish: update-snooty
+next-gen-html-publish:
 	# snooty parse and then build-front-end
-	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"  --patch "NONE" || exit 0;
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR} && \
-	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod.js > ${REPO_DIR}/snooty-devhub/gatsby-config.js
-	cd snooty-devhub; \
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod.js > ${REPO_DIR}/snooty/gatsby-config.js
+	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
+	npm run build;
   
 next-gen-publish: next-gen-html-publish
 	# if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi

@@ -73,7 +73,8 @@ next-gen-stage: ## Host online for review
 	
 next-gen-publish:
 	# snooty parse and then build-front-end
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-datalake.yaml > ${REPO_DIR}/published-branches.yaml
+	# no published branches for now on this repo
+	# curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-datalake.yaml > ${REPO_DIR}/published-branches.yaml
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-datalake/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
