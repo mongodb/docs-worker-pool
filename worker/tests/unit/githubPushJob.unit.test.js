@@ -1,4 +1,5 @@
 const job = require('../../jobTypes/githubPushJob');
+const GitHubJob = require('../../jobTypes/githubJob').GitHubJobClass;
 const workerUtils = require('../../utils/utils');
 
 var fs = require('fs');
@@ -71,10 +72,10 @@ describe('Test Class', () => {
     workerUtils.resetDirectory = jest.fn().mockResolvedValue();
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
     jest.useFakeTimers();
-    console.log(job);
+    jest.setTimeout(30000)
   });
 
-  // Tests for build() function
+  //  Tests for build() function
 
   it('build() rejects properly killed', async () => {
     const execMock = jest.fn().mockRejectedValue({ killed: true });
@@ -98,6 +99,20 @@ describe('Test Class', () => {
     await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toEqual({
       signal: true
     });
+  });
+  
+  it('buildRepo() catches error thrown during make next-gen-html', async () => {
+    const devhubjob = new GitHubJob(testPayloadWithRepo);
+    devhubjob.cleanup = jest.fn().mockResolvedValue();
+    devhubjob.cloneRepo = jest.fn().mockResolvedValue();
+    
+    const mockError = new Error()
+    mockError.code = 1
+    const execMock = jest.fn().mockResolvedValueOnce({stdout: 'success', stderr: ''});
+    workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock)
+                                          .mockReturnValue(() => { throw mockError});
+                                       
+    await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toThrow(mockError); 
   });
 
   it('build() resolves properly notsignal', async () => {
