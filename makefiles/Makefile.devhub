@@ -26,26 +26,21 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 update-snooty:
-	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/mongodb/devhub snooty && \
-	cd snooty && \
-	git checkout master  && \
-	npm install --production
-	#  git clone https://github.com/mongodb/docs-tools.git docs-tools && \
-	# mkdir -p ./static/images && \
-	# mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
-	# mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
-
+	npm install --production > /dev/null 2>&1
+	
 next-gen-html: update-snooty
+	# get latest devhub-content to test the front-end
+	rm -rf devhub-content && \
+	git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \
+	cp devhub-content/snooty.toml snooty.toml && \
+	cp -r devhub-content/source source; \
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
-	# cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_SITE=devhub" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	npm run build;
 
 next-gen-html-publish:
 	# snooty parse and then build-front-end
