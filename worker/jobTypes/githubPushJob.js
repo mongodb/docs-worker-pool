@@ -13,8 +13,9 @@ function safeBranch(currentJob) {
     return currentJob.payload.upstream.includes(currentJob.payload.branchName);
   }
 
+  console.log("this is the parent id: ", currentJob.payload.parentID)
   // master branch cannot run through github push, unless upstream for server docs repo
-  if (currentJob.payload.branchName === 'master') {
+  if (currentJob.payload.branchName === 'master' && currentJob.title !== 'Regression Test') {
     workerUtils.logInMongo(
       currentJob,
       `${'(BUILD)'.padEnd(
@@ -117,17 +118,6 @@ async function runGithubPush(currentJob) {
       `${'(BUILD)'.padEnd(15)}failed due to insufficient definition`
     );
     throw invalidJobDef;
-  }
-
-  // master branch cannot run through staging build
-  if (currentJob.payload.branchName === 'master' && currentJob.title !== 'Regression Test') {
-    workerUtils.logInMongo(
-      currentJob,
-      `${'(BUILD)'.padEnd(
-        15
-      )} failed, master branch not supported on staging builds`
-    );
-    throw new Error('master branches not supported');
   }
 
   // instantiate github job class and logging class

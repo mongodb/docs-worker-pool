@@ -98,7 +98,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -150,6 +150,7 @@ class GitHubJobClass {
                 currentJob.payload.repoOwner +
                 '/' +
                 currentJob.payload.repoName;
+            console.log("this is the repo path ", repoPath)
             await simpleGit('repos')
                 .silent(false)
                 .clone(repoPath, `${this.getRepoDirName()}`)
@@ -183,7 +184,7 @@ class GitHubJobClass {
         const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
 
         // if commit hash is provided, use that
-        if (currentJob.payload.newHead) {
+        if (currentJob.payload.newHead && currentJob.title !== 'Regression Test') {
             const commitCheckCommands = [
                 `cd repos/${this.getRepoDirName()}`,
                 `git fetch`,
@@ -267,7 +268,7 @@ class GitHubJobClass {
             `rm -f makefile`,
             `make html`
         ];
-
+        console.log("this builds next gen? ", this.buildNextGen())
         // check if need to build next-gen
         if (this.buildNextGen()) {
             commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
@@ -291,11 +292,13 @@ class GitHubJobClass {
 
         const execTwo = workerUtils.getExecPromise();
         try {
+            console.log("yeah we are building!!!!")
             const {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-    
+            console.log("THIS IS MAKE'S STDERR \n", stderr)
+
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
@@ -314,6 +317,8 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
+          console.log("WE HAVE AN ERROR!!!", error.code)
+          console.log(error)
           if (error.code === 1) {
             logger.save(
               `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`

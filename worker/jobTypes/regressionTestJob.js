@@ -12,6 +12,7 @@ function safeRegressionTest(currentJob) {
 }
 
 async function runRegressionTests(currentJob) {
+  console.log("HI!!!!")
   /*create jobs for testing*/
   let fileContents;
   let reposApprovedForTesting;

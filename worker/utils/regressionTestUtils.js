@@ -155,6 +155,7 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
       var stagePayloads = [];
 
       reposApprovedForTesting.forEach(function(repository) {
+        console.log(currentJob["_id"], typeof(currentJob["_id"]))
         stagePayloads.push(
           createPayload(
             repository["name"],
@@ -186,6 +187,7 @@ function createPayload(
   parentArg, 
   commitHash, 
 ) {
+  console.log("this is the parent arg! " , parentArg, typeof(parentArg))
   const payload = {
     jobType: typeOfJob,
     source: "github",

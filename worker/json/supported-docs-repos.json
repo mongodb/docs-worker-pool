@@ -1,6 +1,5 @@
 { "repos": 
     [
-        {"name" : "docs-compass", "owner": "mongodb"}, 
-        {"name" : "docs-realm", "owner": "mongodb"}
+        {"name" : "docs-bi-connector", "owner": "madelinezec"} 
     ]
 }
