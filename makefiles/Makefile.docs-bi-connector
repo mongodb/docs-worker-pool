@@ -33,8 +33,8 @@ next-gen-html:
             if [ $? -eq 0 ]; then \
 	    	echo "PASS"; \
                 exit 0; \
-            if [ $? -eq 2]; then
-                echo "PASS 2"; \
+            if [ $? -eq 2]; then \
+            	echo "PASS 2"; \
 		exit 0; \
             if [ $? -eq 1]; then
 	    	echo "FAIL 1 "; \
