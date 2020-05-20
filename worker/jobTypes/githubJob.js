@@ -314,14 +314,12 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
-          if (error.code === 1) {
-            logger.save(
-              `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
-            );
-            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-            logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
-            throw error;              
-          }
+          logger.save(
+            `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
+          );
+          logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+          logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
+          throw error;              
         }
 
     }
