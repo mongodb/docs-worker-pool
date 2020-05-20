@@ -107,7 +107,6 @@ describe('Test Class', () => {
     devhubjob.cloneRepo = jest.fn().mockResolvedValue();
     
     const mockError = new Error()
-    mockError.code = 1
     const execMock = jest.fn().mockResolvedValueOnce({stdout: 'success', stderr: ''});
     workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock)
                                           .mockReturnValue(() => { throw mockError});
