@@ -24,7 +24,7 @@ TEST_FILE=./build/${GIT_BRANCH}/tests.js
 
 PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |  cut -d ' ' -f 1; fi)
 
-PATCH_CLAUSE=$(shell if [ -z "${PATCH_ID}" ]; then echo ""; else echo "--patch ${PATCH_ID}"; fi)
+PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "--patchid ${PATCH_ID}"; fi)
 
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
