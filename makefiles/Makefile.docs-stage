@@ -1,5 +1,3 @@
-.EXPORT_ALL_VARIABLES:
-
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
