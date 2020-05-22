@@ -82,19 +82,6 @@ class GitHubJobClass {
           console.log('dumpError :: argument is not an object');
         }
     }
-    
-    async deletePatchFile() {
-        const exec = workerUtils.getExecPromise();
-          return new Promise((resolve, reject) => {
-            exec(`rm /tmp/myPatch.patch`, function(error, stdout, stderr) {
-              if (error !== null) {
-                console.log("exec error: " + error);
-                reject(error);
-              }
-              resolve(true);
-            });
-          });
-    }
 
     // our maintained directory of makefiles
     async downloadMakefile() {
@@ -258,7 +245,6 @@ class GitHubJobClass {
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
         );
-        await this.deletePatchFile();
       }
         // default commands to run to build repo
         const commandsToBuild = [
