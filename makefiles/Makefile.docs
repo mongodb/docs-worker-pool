@@ -98,9 +98,6 @@ deploy-search-index: ## Update the search index for this branch
 		mut-index upload build/public/${GIT_BRANCH} -o manual-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${GIT_BRANCH} -s; \
 	fi
 
-testpatch:
-	echo ${PATCH_ID}
-
 patchapply:
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
