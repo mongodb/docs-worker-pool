@@ -49,6 +49,7 @@ test: html ## Runs test framework over the corpus
 	./build/docs-tools/tools/rst-testing/rst_tester.py ${TEST_FILE}
 
 html: examples ## Builds this branch's HTML under build/<branch>/html
+	if [ ! -z "${PATCH_ID}" ]; then git checkout -b ${GIT_BRANCH}-${PATCH_ID}; fi;
 	giza make html
 	# TEMP copy of video file. Remove once video infrastructure in place.
 	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}/html/_images/; fi 
