@@ -44,12 +44,6 @@ module.exports = {
     return fs.existsSync(dir);
   },
 
-  writeToFile(fileName, text) {
-    fs.outputFile(fileName, text, function(err) {
-      console.log(err); //null
-    });
-  },
-
   async encryptJob(salt, string1, string2) {
     const secret = this.retrievePassword() + string1 + string2;
     const digest = crypto.scryptSync(secret, salt, 64);
@@ -70,12 +64,6 @@ module.exports = {
   retrievePassword() {
     return process.env.crypto_secret;
   },
-  printFile(fileName) {
-    fs.readFile(fileName, function(err, data) {
-      /* If an error exists, show it, otherwise show the file */
-      err ? Function('error', 'throw error')(err) : console.log(data);
-    });
-  },
 
   async removeDirectory(dir) {
     if (fs.existsSync('./' + dir)) {
@@ -94,11 +82,9 @@ module.exports = {
   },
 
   async validateUrl(url) {
-    console.log(`running validation for url ${url}`);
     const request = require('request');
     request.get(url, function (err, res) {
       if (err) {
-        console.log('error getting url');
         return false;
       }
       if (res != null) {
@@ -169,7 +155,6 @@ module.exports = {
 
   async getRepoPublishedBranches(repoObject) {
     const pubBranchesFile = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${repoObject.repoName}.yaml`;
-    console.log("log:" + pubBranchesFile);
     const returnObject = {};
     return new Promise(function(resolve, reject) {
       request(pubBranchesFile, function(error, response, body) {
@@ -179,7 +164,6 @@ module.exports = {
             returnObject['status'] = 'success';
             returnObject['content'] = yamlParsed;
           } catch (e) {
-            console.log('ERROR parsing yaml file!', repoObject, e);
             returnObject['status'] = 'failure';
             reject(error);
           }
