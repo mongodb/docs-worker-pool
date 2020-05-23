@@ -46,7 +46,7 @@ class GitHubJobClass {
     async applyPatch(patch, currentJobDir) {
         //create patch file
         try {
-          await fs.writeFileSync(`tmp/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
+          await fs.writeFileSync(`myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
           
         } catch (error) {
             throw error
@@ -55,7 +55,7 @@ class GitHubJobClass {
         try {
           const commandsToBuild = [
             `cd repos/${currentJobDir}`,
-            `patch -p1 < tmp/myPatch.patch`
+            `patch -p1 < myPatch.patch`
           ];
             const exec = workerUtils.getExecPromise();
           // return new Promise((resolve, reject) => {
