@@ -169,6 +169,7 @@ module.exports = {
 
   async getRepoPublishedBranches(repoObject) {
     const pubBranchesFile = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${repoObject.repoName}.yaml`;
+    console.log("log:" + pubBranchesFile);
     const returnObject = {};
     return new Promise(function(resolve, reject) {
       request(pubBranchesFile, function(error, response, body) {

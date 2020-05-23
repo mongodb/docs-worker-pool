@@ -49,8 +49,7 @@ class GitHubJobClass {
           await fs.writeFileSync(`/tmp/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
           
         } catch (error) {
-          console.log("Error creating patch ", error)
-          throw error
+            throw error
         }
         //apply patch
         try {
@@ -60,26 +59,10 @@ class GitHubJobClass {
           ];
             const exec = workerUtils.getExecPromise();
           // return new Promise((resolve, reject) => {
-            const {stdout, stderr} = await exec(commandsToBuild.join(" && "))
+            await exec(commandsToBuild.join(" && "))
     
         } catch (error) {
-          this.dumpError(error);
-          console.log("Error applying patch: ", error)
-        }
-    }
-
-    dumpError(err) {
-        if (typeof err === 'object') {
-          if (err.message) {
-            console.log('\nMessage: ' + err.message)
-          }
-          if (err.stack) {
-            console.log('\nStacktrace:')
-            console.log('====================')
-            console.log(err.stack);
-          }
-        } else {
-          console.log('dumpError :: argument is not an object');
+            throw error;
         }
     }
 
@@ -104,7 +87,6 @@ class GitHubJobClass {
 
     // cleanup before pulling repo
     async cleanup(logger) {
-        const currentJob = this.currentJob;
         logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
         try {
             workerUtils.removeDirectory(`repos/${this.getRepoDirName()}`);
@@ -141,7 +123,6 @@ class GitHubJobClass {
                 .silent(false)
                 .clone(repoPath, `${this.getRepoDirName()}`)
                 .catch(err => {
-                    console.error('failed: ', err);
                     throw err;
                 });
         } catch (errResult) {
@@ -180,8 +161,7 @@ class GitHubJobClass {
 
             try {
                 const {
-                    stdout,
-                    stderr
+                    stdout
                 } = await exec(commitCheckCommands.join('&&'));
 
                 if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
@@ -225,10 +205,7 @@ class GitHubJobClass {
         }
 
         try {
-            const {
-                stdout,
-                stderr
-            } = await exec(pullRepoCommands.join(' && '));
+            await exec(pullRepoCommands.join(' && '));
 
         } catch (error) {
             logger.save(
@@ -260,19 +237,18 @@ class GitHubJobClass {
         }
 
         // overwrite repo makefile with the one our team maintains
-        const makefileContents = await this.downloadMakefile();
-        if (makefileContents && makefileContents.status === 'success') {
-            await fs.writeFileSync(
+        const { stdout, stderr } = await this.downloadMakefile();
+        if (stdout && stdout.status === 'success') {
+            fs.writeFileSync(
                 `repos/${this.getRepoDirName()}/Makefile`,
-                makefileContents.content, {
+                stdout.content, {
                     encoding: 'utf8',
                     flag: 'w'
                 }
             );
         } else {
-            console.log(
-                'ERROR: makefile does not exist in /makefiles directory on meta branch.'
-            );
+            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${stderr}`);
+            throw new Error(stderr);
         }
 
         const execTwo = workerUtils.getExecPromise();

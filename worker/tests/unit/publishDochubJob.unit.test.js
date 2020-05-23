@@ -1,5 +1,6 @@
 const job = require('../../jobTypes/publishDochubJob');
 const workerUtils = require('../../utils/utils');
+const EnvironmentClass = require('../../utils/environment');
 
 const payloadObj = {
   source: 'someSource',
@@ -41,6 +42,7 @@ const testPayloadBadTarget = {
 };
 
 const error = new Error('job not valid');
+const envError = new Error('environment variables missing for jobtype');
 
 describe('Test Class', () => {
   // Dont actually reset the directory and dont care about the logging
@@ -53,7 +55,9 @@ describe('Test Class', () => {
   // Tests for dochubpublish() function
 
   it('runPublishDochub() rejects properly killed', async () => {
-    expect(await job.runPublishDochub(testPayloadGood)).toBeUndefined();
+    await expect(job.runPublishDochub(testPayloadGood)).rejects.toEqual(
+      envError
+    )
   });
   // Tests for RunPublishDochub Function
 

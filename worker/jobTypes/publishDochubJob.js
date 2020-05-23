@@ -40,11 +40,6 @@ function safePublishDochub(currentJob) {
 async function runPublishDochub(currentJob) {
   workerUtils.logInMongo(currentJob, ' ** Running dochub-fastly migration');
 
-  if (EnvironmentClass.getFastlyToken() === undefined) {
-    workerUtils.logInMongo(currentJob, 'missing env variable: fastly token');
-    throw invalidEnvironment;
-  }
-
   if (
     !currentJob ||
     !currentJob.payload ||
@@ -57,6 +52,11 @@ async function runPublishDochub(currentJob) {
       `${'(DOCHUB)'.padEnd(15)}failed due to insufficient definition`
     );
     throw invalidJobDef;
+  }
+
+  if (EnvironmentClass.getFastlyToken() === undefined) {
+    workerUtils.logInMongo(currentJob, 'missing env variable: fastly token');
+    throw invalidEnvironment;
   }
 
   let map = {
