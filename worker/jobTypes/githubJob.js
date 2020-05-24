@@ -69,6 +69,7 @@ class GitHubJobClass {
     // our maintained directory of makefiles
     async downloadMakefile() {
         const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        console.log(makefileLocation);
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -247,7 +248,7 @@ class GitHubJobClass {
                 }
             );
         } else {
-            logger.save(`${'(COPY MAKEFILE)'.padEnd(15)}stdErr: ${stderr} ${stdout.content}`);
+            logger.save(`${'(COPY MAKEFILE)'.padEnd(15)}stdErr: ${stderr}`);
             throw new Error(stderr);
         }
 
