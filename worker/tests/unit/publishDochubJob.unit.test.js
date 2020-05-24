@@ -1,5 +1,6 @@
 const job = require('../../jobTypes/publishDochubJob');
 const workerUtils = require('../../utils/utils');
+const EnvironmentClass = require('../../utils/environment').EnvironmentClass;
 
 const payloadObj = {
   source: 'someSource',
@@ -45,16 +46,12 @@ const error = new Error('job not valid');
 describe('Test Class', () => {
   // Dont actually reset the directory and dont care about the logging
   beforeAll(() => {
+    EnvironmentClass.setFastlyToken('test');
     workerUtils.resetDirectory = jest.fn().mockResolvedValue();
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
     jest.useFakeTimers();
   });
 
-  // Tests for dochubpublish() function
-
-  it('runPublishDochub() rejects properly killed', async () => {
-    expect(await job.runPublishDochub(testPayloadGood)).toBeUndefined();
-  });
   // Tests for RunPublishDochub Function
 
   it('runPublishDochub() rejects lack of map', async () => {
