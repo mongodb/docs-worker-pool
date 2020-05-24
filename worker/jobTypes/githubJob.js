@@ -247,7 +247,7 @@ class GitHubJobClass {
                 }
             );
         } else {
-            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${stderr}`);
+            logger.save(`${'(COPY MAKEFILE)'.padEnd(15)}stdErr: ${stderr} ${stdout}`);
             throw new Error(stderr);
         }
 
