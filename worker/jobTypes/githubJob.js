@@ -49,8 +49,8 @@ class GitHubJobClass {
           await fs.writeFileSync(`/tmp/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
           
         } catch (error) {
-          console.log("Error creating patch ", error)
-          throw error
+            console.log("Error creating patch ", error);
+            throw error;
         }
         //apply patch
         try {
@@ -60,11 +60,11 @@ class GitHubJobClass {
           ];
             const exec = workerUtils.getExecPromise();
           // return new Promise((resolve, reject) => {
-            const {stdout, stderr} = await exec(commandsToBuild.join(" && "))
+            await exec(commandsToBuild.join(" && "));
     
         } catch (error) {
-          this.dumpError(error);
-          console.log("Error applying patch: ", error)
+            console.log("Error applying patch: ", error);
+            throw error;
         }
     }
 
@@ -83,19 +83,6 @@ class GitHubJobClass {
         }
     }
     
-    async deletePatchFile() {
-        const exec = workerUtils.getExecPromise();
-          return new Promise((resolve, reject) => {
-            exec(`rm /tmp/myPatch.patch`, function(error, stdout, stderr) {
-              if (error !== null) {
-                console.log("exec error: " + error);
-                reject(error);
-              }
-              resolve(true);
-            });
-          });
-    }
-
     // our maintained directory of makefiles
     async downloadMakefile() {
         const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
@@ -117,7 +104,6 @@ class GitHubJobClass {
 
     // cleanup before pulling repo
     async cleanup(logger) {
-        const currentJob = this.currentJob;
         logger.save(`${'(rm)'.padEnd(15)}Cleaning up repository`);
         try {
             workerUtils.removeDirectory(`repos/${this.getRepoDirName()}`);
@@ -193,8 +179,7 @@ class GitHubJobClass {
 
             try {
                 const {
-                    stdout,
-                    stderr
+                    stdout
                 } = await exec(commitCheckCommands.join('&&'));
 
                 if (!stdout.includes(`* ${currentJob.payload.branchName}`)) {
@@ -238,10 +223,8 @@ class GitHubJobClass {
         }
 
         try {
-            const {
-                stdout,
-                stderr
-            } = await exec(pullRepoCommands.join(' && '));
+        
+            await exec(pullRepoCommands.join(' && '));
 
         } catch (error) {
             logger.save(
@@ -258,7 +241,6 @@ class GitHubJobClass {
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
         );
-        await this.deletePatchFile();
       }
         // default commands to run to build repo
         const commandsToBuild = [
