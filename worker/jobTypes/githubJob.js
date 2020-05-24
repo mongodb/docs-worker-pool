@@ -46,7 +46,7 @@ class GitHubJobClass {
     async applyPatch(patch, currentJobDir) {
         //create patch file
         try {
-          await fs.writeFileSync(`/repos/${this.currentJob.payload.repoName}/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
+          await fs.writeFileSync(`repos/${this.currentJob.payload.repoName}/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
           
         } catch (error) {
             throw error
