@@ -20,7 +20,7 @@ DRIVERS_PATH=source/driver-examples
 BLOCKS_FILE=./build/${GIT_BRANCH}/tests.blocks
 TEST_FILE=./build/${GIT_BRANCH}/tests.js
 
-PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |  cut -d ' ' -f 1; fi)
+PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
 
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "--patchid ${PATCH_ID}"; fi)
 
