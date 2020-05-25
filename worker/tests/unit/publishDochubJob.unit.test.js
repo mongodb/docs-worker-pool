@@ -46,7 +46,6 @@ const error = new Error('job not valid');
 describe('Test Class', () => {
   // Dont actually reset the directory and dont care about the logging
   beforeAll(() => {
-    EnvironmentClass.setFastlyToken('test');
     workerUtils.resetDirectory = jest.fn().mockResolvedValue();
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
     jest.useFakeTimers();

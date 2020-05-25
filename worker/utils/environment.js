@@ -28,10 +28,6 @@ class EnvironmentClass {
     return fastlyToken;
   }
 
-  static setFastlyToken(token) {
-    this.fastlyToken = token;
-  }
-
   static getDochubMap() {
     if (dochubMap === undefined) {
       return 'dochubMap';
