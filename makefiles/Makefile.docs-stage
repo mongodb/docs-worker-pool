@@ -7,7 +7,7 @@ PRODUCTION_BUCKET=docs-mongodb-org-prod
 PREFIX=docs
 PROJECT=docs
 REPO_DIR=$(shell pwd)
-PATCH_FILE="tmp/myPatch.patch"
+PATCH_FILE="myPatch.patch"
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -20,9 +20,11 @@ DRIVERS_PATH=source/driver-examples
 BLOCKS_FILE=./build/${GIT_BRANCH}/tests.blocks
 TEST_FILE=./build/${GIT_BRANCH}/tests.js
 
-PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |  cut -d ' ' -f 1; fi)
+PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
 
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "--patchid ${PATCH_ID}"; fi)
+
+URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
@@ -52,7 +54,8 @@ html: examples ## Builds this branch's HTML under build/<branch>/html
 	if [ ! -z "${PATCH_ID}" ]; then git checkout -b ${GIT_BRANCH}-${PATCH_ID}; fi;
 	giza make html
 	# TEMP copy of video file. Remove once video infrastructure in place.
-	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}/html/_images/; fi 
+	if [ ! -z "${PATCH_ID}" ]; then mkdir -p build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi;
+	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi 
 	
 
 publish: examples ## Builds this branch's publishable HTML and other artifacts under build/public
@@ -97,9 +100,6 @@ deploy-search-index: ## Update the search index for this branch
 	else \
 		mut-index upload build/public/${GIT_BRANCH} -o manual-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${GIT_BRANCH} -s; \
 	fi
-
-testpatch:
-	echo ${PATCH_ID}
 
 patchapply:
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
