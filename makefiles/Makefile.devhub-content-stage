@@ -24,17 +24,17 @@ help: ## Show this help message
 	@echo
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
-
-update-snooty:
-	cd ../../snooty-devhub; \
-	git fetch --all; \
-	git reset --hard origin/master; \
+	
+update-snooty:	next-gen-html:
+	cd ../../snooty-devhub; \	
+	git fetch --all; \	
+	git reset --hard origin/master; \	
 	npm install --production
 
 next-gen-html: update-snooty
 	# snooty parse and then build-front-end
-	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; \
+	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"  --patch "NONE" || exit 0;
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; \	
 	cd snooty-devhub; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
