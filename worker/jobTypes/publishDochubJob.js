@@ -4,7 +4,7 @@ const invalidJobDef = new Error('job not valid');
 const invalidEnvironment = new Error(
   'environment variables missing for jobtype'
 );
-let FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
+const FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
 const EnvironmentClass = require('../utils/environment').EnvironmentClass;
 
 //anything that is passed to an exec must be validated or sanitized
