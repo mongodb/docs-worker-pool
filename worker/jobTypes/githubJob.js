@@ -319,16 +319,13 @@ class GitHubJobClass {
         } catch (error) {
           console.log("WE HAVE AN ERROR!!!", error.code)
           console.log(error)
-          if (error.code === 1) {
-            logger.save(
-              `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
-            );
-            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-            logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
-            throw error;              
-          }
+          logger.save(
+            `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
+          );
+          logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+          logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
+          throw error;              
         }
-
     }
 }
 
