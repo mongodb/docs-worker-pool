@@ -6,14 +6,14 @@ const metaObject = {
   repos: [
     {
       name: 'docs-spark-connector',
-      url: 'https://github.com/danielborowski/docs-spark-connector'
+      url: 'https://github.com/mongodb/docs-bi-connector'
     }
   ]
 };
 
 const publishedBranchObject = {
-  repoOwner: 'danielborowski',
-  repoName: 'docs-spark-connector'
+  repoOwner: 'mongodb',
+  repoName: 'docs-bi-connector'
 };
 
 describe('Mongo Tests', () => {
