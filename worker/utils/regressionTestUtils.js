@@ -131,7 +131,7 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
           console.log("error ", error);
           throw error;
         }
-        //def set a var here
+        
         var idEquality =
            updatedJob.fullDocument.payload.parentID.toString() ===
            currentJob._id.toString();
@@ -162,7 +162,7 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
             repository["owner"],
             "nothing",
             "githubPush",
-            currentJob["_id"], 
+            repository["private"],
             currentJob["payload"]["newHead"], 
           )
         );
@@ -184,19 +184,18 @@ function createPayload(
   repoOwnerArg,
   urlArg,
   typeOfJob,
-  parentArg, 
-  commitHash, 
+  privacy,
+  commitHash 
 ) {
-  console.log("this is the parent arg! " , parentArg, typeof(parentArg))
+
   const payload = {
     jobType: typeOfJob,
     source: "github",
     action: "push",
     repoName: repoNameArg,
     branchName: "master",
-    parentID: parentArg,
     isFork: true,
-    private: false,
+    private: privacy,
     isXlarge: false,
     repoOwner: repoOwnerArg,
     url: `https://github.com/${repoOwnerArg}/${repoNameArg}`,

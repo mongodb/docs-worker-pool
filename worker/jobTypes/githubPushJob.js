@@ -13,7 +13,6 @@ function safeBranch(currentJob) {
     return currentJob.payload.upstream.includes(currentJob.payload.branchName);
   }
 
-  console.log("this is the parent id: ", currentJob.payload.parentID)
   // master branch cannot run through github push, unless upstream for server docs repo
   if (currentJob.payload.branchName === 'master' && currentJob.title !== 'Regression Test') {
     workerUtils.logInMongo(

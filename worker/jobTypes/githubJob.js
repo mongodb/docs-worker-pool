@@ -12,10 +12,7 @@ class GitHubJobClass {
     // get base path for public/private repos
     getBasePath() {
         const currentJob = this.currentJob;
-        let basePath = `https://github.com`;
-        if (currentJob.payload.private) {
-            basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
-        }
+        var basePath = (currentJob.payload.private) ? `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`:"https://github.com";
         return basePath;
     }
 
