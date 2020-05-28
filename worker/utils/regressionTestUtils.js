@@ -132,11 +132,11 @@ async function monitorAndCreateChildJobs(currentJob, reposApprovedForTesting) {
           throw error;
         }
         
-        var idEquality =
-           updatedJob.fullDocument.payload.parentID.toString() ===
-           currentJob._id.toString();
+        var hashEquality =
+           updatedJob.fullDocument.payload.newHead ===
+           currentJob.payload.newHead;
         if (
-          idEquality &&
+          hashEquality &&
           updatedJob.fullDocument["status"] != "inProgress" &&
           updatedJob.fullDocument["status"] != "inQueue"
         ) {
