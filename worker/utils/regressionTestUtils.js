@@ -196,7 +196,7 @@ function createPayload(
     branchName: "master",
     isFork: true,
     private: privacy,
-    isXlarge: false,
+    isXlarge: true,
     repoOwner: repoOwnerArg,
     url: `https://github.com/${repoOwnerArg}/${repoNameArg}`,
     newHead: commitHash
