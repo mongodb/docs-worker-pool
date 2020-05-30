@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
 
+
 class S3PublishClass {
   constructor(GitHubJob) {
     this.fastly = new FastlyJob(GitHubJob);
