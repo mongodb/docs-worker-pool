@@ -20,6 +20,8 @@ DRIVERS_PATH=source/driver-examples
 BLOCKS_FILE=./build/${GIT_BRANCH}/tests.blocks
 TEST_FILE=./build/${GIT_BRANCH}/tests.js
 
+# "PATCH_ID" related shell commands to manage commitless builds
+
 PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
 
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "--patchid ${PATCH_ID}"; fi)
@@ -118,9 +120,6 @@ next-gen-html: examples patchapply
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-
-stage: ## Host online for review
-
 
 redirects:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
