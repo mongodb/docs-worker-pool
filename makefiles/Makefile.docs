@@ -102,9 +102,9 @@ deploy-search-index: ## Update the search index for this branch
 	fi
 
 patchapply:
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production;
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production;
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production;
 	#apply patch id to snooty string if exists
 	if [ -z "${PATCH_ID}" ]; then echo "no patch found"; else  echo "GATSBY_PARSER_PATCHID=${PATCH_ID}" >> .env.production; fi;
 
