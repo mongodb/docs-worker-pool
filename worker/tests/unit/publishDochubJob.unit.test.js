@@ -1,5 +1,6 @@
 const job = require('../../jobTypes/publishDochubJob');
 const workerUtils = require('../../utils/utils');
+const EnvironmentClass = require('../../utils/environment').EnvironmentClass;
 
 const payloadObj = {
   source: 'someSource',
@@ -50,11 +51,6 @@ describe('Test Class', () => {
     jest.useFakeTimers();
   });
 
-  // Tests for dochubpublish() function
-
-  it('runPublishDochub() rejects properly killed', async () => {
-    expect(await job.runPublishDochub(testPayloadGood)).toBeUndefined();
-  });
   // Tests for RunPublishDochub Function
 
   it('runPublishDochub() rejects lack of map', async () => {

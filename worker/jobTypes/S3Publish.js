@@ -1,8 +1,11 @@
 const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
+const FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
+
 
 class S3PublishClass {
   constructor(GitHubJob) {
+    this.fastly = new FastlyJob(GitHubJob);
     this.GitHubJob = GitHubJob;
     fs.pathExists();
   }
@@ -25,10 +28,10 @@ class S3PublishClass {
       const exec = workerUtils.getExecPromise();
       const command = stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
+      let stdoutMod = stdout;
       logger.save(
         `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
       );
-      let stdoutMod = '';
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
@@ -69,11 +72,39 @@ class S3PublishClass {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
       const { stdout } = await exec(command);
-      let stdoutMod = '';
-      // get only last part of message which includes # of files changes + s3 link
-      if (stdout.indexOf('Summary') !== -1) {
-        stdoutMod = stdout.substr(stdout.indexOf('Summary'));
+      let stdoutMod = stdout;
+
+      // check if json was returned from mut
+      try {
+        const stdoutJSON = JSON.parse(stdout);
+        const urls = stdoutJSON.urls;
+        // pass in urls to fastly function to purge cache
+        this.fastly.purgeCache(urls).then(function(data) {
+          logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
+          logger.sendSlackMsg(`Fastly Summary: The following pages were purged from cache for your deploy`);
+          // when finished purging
+          // batch urls to send as single slack message
+          let batchedUrls = [];
+          for (let i = 0; i < urls.length; i++) {
+            const purgedUrl = urls[i];
+            if (purgedUrl && purgedUrl.indexOf('.html') !== -1) {
+              batchedUrls.push(purgedUrl);
+            }
+            // if over certain length, send as a single slack message and reset the array
+            if (batchedUrls.length > 20 || i >= (urls.length - 1)) {
+              logger.sendSlackMsg(`${batchedUrls.join('\n')}`);
+              batchedUrls = [];
+            }
+          }
+        });
+      } catch(e) {
+        // if not JSON, then it's a normal string output from mut
+        // get only last part of message which includes # of files changes + s3 link
+        if (stdout.indexOf('Summary') !== -1) {
+          stdoutMod = stdout.substr(stdout.indexOf('Summary'));
+        }
       }
+
       return new Promise((resolve) => {
         logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
         logger.save(
