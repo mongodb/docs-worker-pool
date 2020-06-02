@@ -37,8 +37,10 @@ next-gen-html-publish:
 	@npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 	
-next-gen-publish: next-gen-html-publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+#next-gen-publish: next-gen-html-publish
+#	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+
+next-gen-publish: ;
 	
 next-gen-html:
 	# snooty parse and then build-front-end
