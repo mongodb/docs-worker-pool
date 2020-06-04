@@ -64,12 +64,16 @@ class S3PublishClass {
 
     // this is the final command to deploy
     // will either return summary message from mut or json
-    let deployCommand = 'make deploy';
+    const deployCommands = [
+      '. /venv/bin/activate',
+      `cd repos/${this.GitHubJob.getRepoDirName()}`,
+      'make deploy',
+    ];
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
       publishCommands[publishCommands.length - 1] = 'make next-gen-publish';
-      deployCommand = 'make next-gen-deploy';
+      deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
 
     // first publish
@@ -88,7 +92,7 @@ class S3PublishClass {
     // finally deploy site
     try {
       const exec = workerUtils.getExecPromise();
-      const command = deployCommand;
+      const command = deployCommands.join(' && ');
       const { stdout } = await exec(command);
       let stdoutMod = stdout;
 
