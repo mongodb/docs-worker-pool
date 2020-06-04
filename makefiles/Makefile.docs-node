@@ -61,8 +61,6 @@ html: ## Builds this branch's HTML under build/<branch>/html
 
 next-gen-deploy:
 	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
-	$(MAKE) deploy-search-index
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
