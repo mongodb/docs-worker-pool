@@ -96,9 +96,12 @@ class S3PublishClass {
       const { stdout } = await exec(command);
       let stdoutMod = stdout;
 
+      // check for json string output from mut
+      const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
+
       // check if json was returned from mut
       try {
-        const stdoutJSON = JSON.parse(stdout);
+        const stdoutJSON = JSON.parse(validateJsonOutput);
         const urls = stdoutJSON.urls;
         // pass in urls to fastly function to purge cache
         this.fastly.purgeCache(urls).then(function(data) {
