@@ -24,7 +24,7 @@ TEST_FILE=./build/${GIT_BRANCH}/tests.js
 
 PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
 
-PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "--patchid ${PATCH_ID}"; fi)
+PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "--patch ${PATCH_ID}"; fi)
 
 URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 
@@ -183,6 +183,12 @@ examples:
 
 # c++
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-cxx-driver/master/src/mongocxx/test/transactions.cpp -o ${DRIVERS_PATH}/cpp-transactions.cpp 
+	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-cxx-driver/master/examples/mongocxx/with_transaction.cpp -o ${DRIVERS_PATH}/cpp-with-transaction.cpp 
 
 # go
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/examples/documentation_examples/examples.go -o ${DRIVERS_PATH}/go_examples.go
+
+# swift
+
+	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-swift-driver/master/Examples/Docs/Sources/AsyncExamples/main.swift -o ${DRIVERS_PATH}/swiftAsync.swift
+	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-swift-driver/master/Examples/Docs/Sources/SyncExamples/main.swift -o ${DRIVERS_PATH}/swiftSync.swift
