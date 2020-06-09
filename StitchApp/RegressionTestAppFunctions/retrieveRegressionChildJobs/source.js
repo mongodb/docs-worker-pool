@@ -25,13 +25,14 @@ exports = async function(changeEvent) {
     const commitHash = fullDocument.payload.newHead;
 
     //insert test child jobs to regression test db, regardless of completion   
-      await collection_test.find({"status": { $ne: ["inProgress", "inQueue"]}, "payload.newHead": commitHash})
+      await collection_test.find({"status": { $nin: ["inProgress", "inQueue"]}, "payload.newHead": commitHash})
       .toArray()
       .then(items => {
+        console.log(items.length)
         if(items.length === numOfReposTested){
           stageDbComplete = true
           items.forEach(function(childJob) {
-          //regression_collection.insertOne(childJob);
+            regression_collection.insertOne(childJob);
             testJobs[childJob.payload.repoName] = childJob;
           })
         }
@@ -39,15 +40,14 @@ exports = async function(changeEvent) {
   .catch(err => console.error(`Failed to find documents: ${err}`));
 
     //insert prod child jobs to regression test db, regardless of completion    
-    //await collection_prod.find({"status": {$or: ["completed", "failed"]},{ "payload.newHead": commitHash})
-    await collection_test.find({"status": { $ne: ["inProgress", "inQueue"]}, "payload.newHead": commitHash})
+    await collection_test.find({"status": { $nin: ["inProgress", "inQueue"]}, "payload.newHead": commitHash})
       .toArray()
       .then(items => {
         console.log(items.length)
         if(items.length === numOfReposTested){
           prodDbComplete = true;
           items.forEach(function(childJob) {
-          //regression_collection.insertOne(childJob);
+            regression_collection.insertOne(childJob);
             prodJobs[childJob.payload.repoName] = childJob;
           })
         }
