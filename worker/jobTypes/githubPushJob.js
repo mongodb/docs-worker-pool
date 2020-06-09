@@ -14,7 +14,7 @@ function safeBranch(currentJob) {
   }
 
   // master branch cannot run through github push, unless upstream for server docs repo
-  if (currentJob.payload.branchName === 'master' && currentJob.title !== 'Regression Test') {
+  if (currentJob.payload.branchName === 'master' && currentJob.title !== 'Regression Test Child Process') {
     workerUtils.logInMongo(
       currentJob,
       `${'(BUILD)'.padEnd(
@@ -47,6 +47,7 @@ function safeGithubPush(currentJob) {
       currentJob,
       `${'    (sanitize)'.padEnd(15)}failed due to insufficient job definition`
     );
+    console.log("here we are!!!!")
     throw invalidJobDef;
   }
 
@@ -57,6 +58,7 @@ function safeGithubPush(currentJob) {
   ) {
     return true;
   }
+  console.log("its a safety issue!!!", currentJob.payload.repoOwner, currentJob.payload.repoName)
   throw invalidJobDef;
 }
 

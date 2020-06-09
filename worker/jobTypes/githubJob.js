@@ -131,6 +131,7 @@ class GitHubJobClass {
 
     async cloneRepo(logger) {
         const currentJob = this.currentJob;
+        console.log()
         logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
         logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
         try {
@@ -181,7 +182,7 @@ class GitHubJobClass {
         const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
 
         // if commit hash is provided, use that
-        if (currentJob.payload.newHead && currentJob.title !== 'Regression Test') {
+        if (currentJob.payload.newHead && currentJob.title !== 'Regression Test Child Process') {
             const commitCheckCommands = [
                 `cd repos/${this.getRepoDirName()}`,
                 `git fetch`,
