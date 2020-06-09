@@ -68,7 +68,6 @@ class S3PublishClass {
     }
 
     logger.save(`${'(stage)'.padEnd(15)}Pushing to production`);
-
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');

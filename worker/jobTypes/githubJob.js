@@ -131,7 +131,6 @@ class GitHubJobClass {
 
     async cloneRepo(logger) {
         const currentJob = this.currentJob;
-
         logger.save(`${'(GIT)'.padEnd(15)}Cloning repository`);
         logger.save(`${'(GIT)'.padEnd(15)}running fetch`);
         try {
@@ -148,7 +147,6 @@ class GitHubJobClass {
                 currentJob.payload.repoOwner +
                 '/' +
                 currentJob.payload.repoName;
- 
             await simpleGit('repos')
                 .silent(false)
                 .clone(repoPath, `${this.getRepoDirName()}`)
@@ -287,7 +285,6 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-
         const execTwo = workerUtils.getExecPromise();
         try {
             const {
@@ -320,6 +317,7 @@ class GitHubJobClass {
           logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
           throw error;              
         }
+
     }
 }
 
