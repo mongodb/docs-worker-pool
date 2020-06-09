@@ -1,15 +1,13 @@
-exports = function(payload, jobTitle, jobUserName, jobUserEmail, db_name){
-  
-  console.log(JSON.stringify(context.user));
-  
+exports = function(payloadArg, jobUserName, jobUserEmail){
+  const db_name_test = context.values.get("db_name_test_env");
   const coll_name = context.values.get("coll_name");
   
   // get the queue collection
-  var queue = context.services.get("mongodb-atlas").db(db_name).collection(coll_name);
+  var queue = context.services.get("mongodb-atlas").db(db_name_test).collection(coll_name);
   
   // create the new job document
   const newJob = {
-    title: jobTitle,
+    title: "Regression Test Child Process",
     user: jobUserName, 
     email: jobUserEmail,
     status: "inQueue",
@@ -20,12 +18,12 @@ exports = function(payload, jobTitle, jobUserName, jobUserEmail, db_name){
     numFailures: 0, 
     failures: [], 
     result: null, 
-    payload: payload, 
+    payload: payloadArg, 
     logs: {},
   };
   
   // we are looking for jobs in the queue with the same payload that have not yet started (startTime == null)
-  const filterDoc = {payload: payload, startTime: null};
+  const filterDoc = {payload: payloadArg, startTime: null};
   const updateDoc = {$setOnInsert: newJob};
   
   // upsert the new job and return if the upsertedId if the job was added to the queue

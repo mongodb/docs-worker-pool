@@ -3,8 +3,9 @@ exports = function(commitHash, testJobs, prodJobs){
   var summaryMsg = 'This is the summary of the regression tests:\n'
 
   repos.forEach((repo) => {
-    const testJob = testJobs[repo];
-    const prodJob = prodJobs[repo];
+    console.log(repo.name)
+    const testJob = testJobs[repo.name];
+    const prodJob = prodJobs[repo.name];
     let testTime;
     let prodTime;
     let testLink;
@@ -16,7 +17,7 @@ exports = function(commitHash, testJobs, prodJobs){
     const testStatus = testJob.status;
     const prodStatus = prodJob.status;
   
-    summaryMsg += `${repo} on staging: ${testStatus} \n ${repo} on production: ${prodStatus}\n\n`
+    summaryMsg += `${repo.name} on staging: ${testStatus} \n ${repo.name} on production: ${prodStatus}\n\n`
   });
   
   context.functions.execute('sendSummaryOnSlack', summaryMsg);
