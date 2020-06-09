@@ -10,7 +10,6 @@ const workerUtils = require('./utils/utils');
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
 const { runGithubProdPush, safeGithubProdPush } = require('./jobTypes/productionDeployJob')
-const {runRegressionTests, safeRegressionTest} = require('./jobTypes/regressionTestJob')
 const {
   runPublishDochub,
   safePublishDochub
@@ -45,7 +44,6 @@ const jobTypeToFunc = {
   githubPush: { function: runGithubPush, safe: safeGithubPush },
   productionDeploy : {function: runGithubProdPush, safe: safeGithubProdPush},
   publishDochub: { function: runPublishDochub, safe: safePublishDochub }, 
-  regressionTest: {function: runRegressionTests, safe: safeRegressionTest},
 };
 
 // route for liveness check
