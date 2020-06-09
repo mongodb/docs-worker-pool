@@ -47,7 +47,6 @@ function safeGithubPush(currentJob) {
       currentJob,
       `${'    (sanitize)'.padEnd(15)}failed due to insufficient job definition`
     );
-    console.log("here we are!!!!")
     throw invalidJobDef;
   }
 
@@ -58,7 +57,6 @@ function safeGithubPush(currentJob) {
   ) {
     return true;
   }
-  console.log("its a safety issue!!!", currentJob.payload.repoOwner, currentJob.payload.repoName)
   throw invalidJobDef;
 }
 
