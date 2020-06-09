@@ -33,7 +33,7 @@ exports = async function(payload) {
       branchName: "master",
       isFork: true,
       private: repo["private"],
-      isXlarge: false,
+      isXlarge: true,
       repoOwner: repoOwnerArg,
       url: `https://github.com/${repoOwnerArg}/${repoNameArg}`,
       newHead: payload.after
