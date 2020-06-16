@@ -1,3 +1,12 @@
+/* this function is associated with the regressionTestJobCompleted trigger.
+   Whenever a regression test child process in the staging db finishes, this is 
+   code is executed. This function checks if there are any other regression test 
+   child processes still in progress. 
+
+   If all child processes have finished, the app will begin to compare the jobs 
+   between the two environments. 
+
+*/
 exports = async function(changeEvent) {
     const fullDocument = changeEvent.fullDocument;
 
@@ -21,14 +30,11 @@ exports = async function(changeEvent) {
     let stageDbComplete;
     let prodDbComplete;
     const numOfReposTested = context.functions.execute('getReposApprovedForTesting').length;
-    console.log(numOfReposTested)
     const commitHash = fullDocument.payload.newHead;
-
-    //insert test child jobs to regression test db, regardless of completion   
+    //count completed child jobs in the staging server to see if regression testing is complete 
       await collection_test.find({"status": { $nin: ["inProgress", "inQueue"]}, "payload.newHead": commitHash})
       .toArray()
       .then(items => {
-        console.log(items.length)
         if(items.length === numOfReposTested){
           stageDbComplete = true
           items.forEach(function(childJob) {
@@ -39,11 +45,10 @@ exports = async function(changeEvent) {
       })
   .catch(err => console.error(`Failed to find documents: ${err}`));
 
-    //insert prod child jobs to regression test db, regardless of completion    
+    //count completed child jobs in the prod server to see if regression testing is complete    
     await collection_test.find({"status": { $nin: ["inProgress", "inQueue"]}, "payload.newHead": commitHash})
       .toArray()
       .then(items => {
-        console.log(items.length)
         if(items.length === numOfReposTested){
           prodDbComplete = true;
           items.forEach(function(childJob) {
@@ -54,8 +59,7 @@ exports = async function(changeEvent) {
       })
   .catch(err => console.error(`Failed to find documents: ${err}`));
   if(stageDbComplete === true && prodDbComplete === true){
-    console.log("hi!")
-    context.functions.execute("compareChildJobs", commitHash, testJobs, prodJobs);  
+    context.functions.execute("compareChildJobs", testJobs, prodJobs);  
   }
   
    

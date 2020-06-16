@@ -1,4 +1,13 @@
-exports = function(commitHash, testJobs, prodJobs){
+/* Once all child processes have finished, retrieveChildJob()calls this function. 
+  This function takes in two arrays of completed jobs, one for each of the environments.
+  
+  Currently, it only compares the status outcomes (completed or failed) between building 
+  a job in staging vs in prod.
+  
+  Once comparisons are complete, the results are sent to the admins via slackbot message.
+  
+*/
+exports = function(testJobs, prodJobs){
   const repos = context.functions.execute('getReposApprovedForTesting');
   var summaryMsg = 'This is the summary of the regression tests:\n'
 
@@ -6,12 +15,6 @@ exports = function(commitHash, testJobs, prodJobs){
     console.log(repo.name)
     const testJob = testJobs[repo.name];
     const prodJob = prodJobs[repo.name];
-    let testTime;
-    let prodTime;
-    let testLink;
-    let prodLink;
-    let testLinkCode;
-    let prodLinkCode;
 
     //compare status
     const testStatus = testJob.status;

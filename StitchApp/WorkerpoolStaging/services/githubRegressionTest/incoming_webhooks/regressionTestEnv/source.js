@@ -11,7 +11,7 @@ exports = async function(payload) {
     return result.error ;
   }
   const coll_name = context.values.get("coll_name");
-  const db_name_test = context.values.get("db_name_test_env");
+  const db_name_test = context.values.get("db_name");
   
   const collection_test = await context.services.get("mongodb-atlas").db(db_name_test).collection(coll_name);
   const reposApprovedForTesting = context.functions.execute("getReposApprovedForTesting")
@@ -19,12 +19,13 @@ exports = async function(payload) {
 
   const jobUserName  = payload.pusher.name;
   const jobUserEmail = payload.pusher.email;
+  const jobTitle = "Regression Test Child Process";
   
   /*create payloads */
   reposApprovedForTesting.forEach((repo) => {
     const repoOwnerArg = repo["owner"];
     const repoNameArg = repo["name"];
-    console.log("hi!")
+
     const newPayload = {
       jobType: "githubPush",
       source: "github",
@@ -39,9 +40,8 @@ exports = async function(payload) {
       newHead: payload.after
       };
     console.log(JSON.stringify(newPayload))
-    /* call functions to insert child jobs in respective db */
-    context.functions.execute("insertJobinTestDB", newPayload, jobUserName, jobUserEmail);
-    //context.functions.execute("insertJobinProdDB", payload, jobUserName, jobUserEmail);
+
+    context.functions.execute("addJobToQueue", newPayload, jobTitle, jobUserName, jobUserEmail);
   });
 
 };
