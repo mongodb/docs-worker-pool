@@ -1,7 +1,7 @@
 /*
 This function is called when the payload is hit from the github webhook 
 
-It creates a payload for each docs repo and then calls a function to create a job with the supplied payload and insert it in the respective database
+It creates a payload for each docs repo and then calls a function to create a job with the supplied payload and insert it in the staging database.
 */
   
 exports = async function(payload) {

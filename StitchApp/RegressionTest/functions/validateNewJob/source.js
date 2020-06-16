@@ -1,6 +1,5 @@
 exports = function(payload) {
   
-  // do some kind of validation'
   var returnObject = {
     valid: true,
   };
