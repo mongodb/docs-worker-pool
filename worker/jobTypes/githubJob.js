@@ -274,7 +274,6 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
@@ -293,12 +292,14 @@ class GitHubJobClass {
                 });
             });
         } catch (error) {
-          logger.save(
-            `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
-          );
-          logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
-          logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
-          throw error;              
+          if (error.code === 1) {
+            logger.save(
+              `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}`
+            );
+            logger.save(`${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+            logger.save(`${'(BUILD)'.padEnd(15)}stdout: ${error.stdout}`);
+            throw error;              
+          }          
         }
 
     }
