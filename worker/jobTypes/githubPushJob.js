@@ -14,7 +14,7 @@ function safeBranch(currentJob) {
   }
 
   // master branch cannot run through github push, unless upstream for server docs repo
-  if (currentJob.payload.branchName === 'master') {
+  if (currentJob.payload.branchName === 'master' && currentJob.title !== 'Regression Test Child Process') {
     workerUtils.logInMongo(
       currentJob,
       `${'(BUILD)'.padEnd(
@@ -118,7 +118,6 @@ async function runGithubPush(currentJob) {
     );
     throw invalidJobDef;
   }
-
 
   // instantiate github job class and logging class
   const job = new GitHubJob(currentJob);

@@ -55,28 +55,53 @@ class S3PublishClass {
 
   async pushToProduction(logger) {
     logger.save(`${'(prod)'.padEnd(15)}Pushing to production`);
-    const deployCommands = [
+
+    const publishCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
       'make publish',
+    ];
+
+    // this is the final command to deploy
+    // will either return summary message from mut or json
+    const deployCommands = [
+      '. /venv/bin/activate',
+      `cd repos/${this.GitHubJob.getRepoDirName()}`,
       'make deploy',
     ];
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      deployCommands[deployCommands.length - 2] = 'make next-gen-publish';
+      publishCommands[publishCommands.length - 1] = 'make next-gen-publish';
       deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
 
+    // first publish
+    try {
+      const exec = workerUtils.getExecPromise();
+      const command = publishCommands.join(' && ');
+      const { stdout } = await exec(command);
+      logger.save(
+        `${'(prod)'.padEnd(15)}Production publish details:\n\n${stdout}`
+      );
+    } catch (errResult) {
+      logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      throw errResult;
+    }
+
+    // finally deploy site
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
       const { stdout } = await exec(command);
       let stdoutMod = stdout;
 
+      // check for json string output from mut
+      const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
+
       // check if json was returned from mut
       try {
-        const stdoutJSON = JSON.parse(stdout);
+        const stdoutJSON = JSON.parse(validateJsonOutput);
         const urls = stdoutJSON.urls;
         // pass in urls to fastly function to purge cache
         this.fastly.purgeCache(urls).then(function(data) {
@@ -116,7 +141,7 @@ class S3PublishClass {
         });
       });
     } catch (errResult) {
-      logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
     }
   }

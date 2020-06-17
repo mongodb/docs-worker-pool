@@ -13,10 +13,7 @@ class GitHubJobClass {
     // get base path for public/private repos
     getBasePath() {
         const currentJob = this.currentJob;
-        let basePath = `https://github.com`;
-        if (currentJob.payload.private) {
-            basePath = `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`;
-        }
+        var basePath = (currentJob.payload.private) ? `https://${process.env.GITHUB_BOT_USERNAME}:${process.env.GITHUB_BOT_PASSWORD}@github.com`:"https://github.com";
         return basePath;
     }
 
@@ -170,7 +167,7 @@ class GitHubJobClass {
         const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
 
         // if commit hash is provided, use that
-        if (currentJob.payload.newHead) {
+        if (currentJob.payload.newHead && currentJob.title !== 'Regression Test Child Process') {
             const commitCheckCommands = [
                 `cd repos/${this.getRepoDirName()}`,
                 `git fetch`,
@@ -278,7 +275,7 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-    
+
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
