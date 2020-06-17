@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [v0.4.2] - 2020-06-01
+
+### added
+
+- commitless/pushless staging now uses patch_id in url to prevent build collision (DOP-1089)
+
+### Fixed
+
+- Fastly purge cache functionality (DOP-857)
+
+- Parser failures now propagate to build status (DOP-64) 
+
+
 ## [v0.4.1] - 2020-04-29
 
 ### added
@@ -88,11 +102,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for next-gen builds (DOCSP-6545).
+- Support for next-gen builds (DOCSP-6545)
 
-- Integrate snooty parser with autobuilder (DOCSP-6658).
+- Integrate snooty parser with autobuilder (DOCSP-6658)
 
-- Support for baas-docs slack output (DOCSP-6399).
+- Support for baas-docs slack output (DOCSP-6399)
 
 - Support for key generation for machine-created builds (DOCSP-7344)
 
@@ -102,7 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Refactored build pipeline to accommodate common build path for deploy and stage (DOCSP-7001).
+- Refactored build pipeline to accommodate common build path for deploy and stage (DOCSP-7001)
 
 ### Fixed
 
@@ -115,11 +129,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for next-gen builds (DOCSP-6545).
+- Support for next-gen builds (DOCSP-6545)
 
-- Integrate snooty parser with autobuilder (DOCSP-6658).
+- Integrate snooty parser with autobuilder (DOCSP-6658)
 
-- Support for baas-docs slack output (DOCSP-6399).
+- Support for baas-docs slack output (DOCSP-6399)
 
 - Support for key generation for machine-created builds (DOCSP-7344)
 
@@ -129,7 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Refactored build pipeline to accommodate common build path for deploy and stage (DOCSP-7001).
+- Refactored build pipeline to accommodate common build path for deploy and stage (DOCSP-7001)
 
 ### Fixed
 

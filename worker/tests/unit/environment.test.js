@@ -19,7 +19,6 @@ describe('Test Class', () => {
     expect(env.EnvironmentClass.getDB()).toBeDefined();
     expect(env.EnvironmentClass.getDochubMap()).toBeDefined();
     expect(env.EnvironmentClass.getFastlyServiceId()).toBeDefined();
-    expect(env.EnvironmentClass.getFastlyToken()).toBeDefined();
     expect(env.EnvironmentClass.getXlarge()).toBeDefined();
 
   });
