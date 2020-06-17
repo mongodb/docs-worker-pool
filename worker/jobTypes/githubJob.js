@@ -268,7 +268,7 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-        
+
         const execTwo = workerUtils.getExecPromise();
         try {
             const {
