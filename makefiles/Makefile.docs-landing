@@ -42,7 +42,7 @@ next-gen-publish: build
 	# snooty parse and then build-front-end
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-ecosystem/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-landing/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
@@ -52,7 +52,7 @@ next-gen-publish: build
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=/ --deploy --all-subdirectories ${ARGS}
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 	$(MAKE) deploy-search-index
 

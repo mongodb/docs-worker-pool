@@ -25,7 +25,7 @@ help: ## Show this help message
 
 next-gen-html-publish:
 	# snooty parse and then build-front-end
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-node/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
@@ -34,7 +34,7 @@ next-gen-html-publish:
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	npm run build; \
+	@npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 	
 next-gen-publish: next-gen-html-publish
@@ -60,9 +60,7 @@ html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
 next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --deployed-url-prefix=https://docs.mongodb.com/node --json --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
-	$(MAKE) deploy-search-index
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"

@@ -1,9 +1,9 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-PRODUCTION_URL="https://docs.mongodb.com/realm"
+PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
-PRODUCTION_BUCKET=docs-mongodb-org-prod
+PRODUCTION_BUCKET=docs-cloud-realm-prod
 PROJECT=realm
 REPO_DIR=$(shell pwd)
 
@@ -49,7 +49,7 @@ stage: ## Host online for review
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 
 deploy: build/public ## Deploy to the production bucket
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='ecosystem' --all-subdirectories  ${ARGS}
+	yes | mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy ${ARGS}
 
 	@echo "Hosted at ${PRODUCTION_URL}/index.html"
 

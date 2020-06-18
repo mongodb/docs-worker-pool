@@ -25,10 +25,10 @@ help: ## Show this help message
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 	
-prepare-devhub-snooty:
+update-snooty:
 	npm install --production > /dev/null 2>&1
 
-next-gen-html: prepare-devhub-snooty
+next-gen-html: update-snooty
 	# get latest devhub-content to test the front-end
 	rm -rf devhub-content && \
 	git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/10gen/devhub-content devhub-content && \

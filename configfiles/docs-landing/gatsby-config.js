@@ -1,10 +1,7 @@
 const { siteMetadata } = require('./src/utils/site-metadata');
 
 module.exports = {
-  pathPrefix: 'devhub',
+  pathPrefix: '',
   plugins: ['gatsby-plugin-react-helmet', `gatsby-plugin-emotion`],
-  siteMetadata: {
-        ...siteMetadata,
-        title: 'MongoDB Developer Hub',
-    },
+  siteMetadata,
 };

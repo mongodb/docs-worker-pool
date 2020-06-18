@@ -42,7 +42,7 @@ lint: ## Checks URLs in the built corpus underneath build/<branch>/html
 
 next-gen-html: assets
 	# snooty parse and then build-front-end
-	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}";
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
@@ -55,7 +55,7 @@ next-gen-html: assets
 next-gen-publish: assets
 	# snooty parse and then build-front-end
 	# curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-ecosystem.yaml > ${REPO_DIR}/published-branches.yaml
-	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}";
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-ecosystem/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cd snooty; \
@@ -65,7 +65,7 @@ next-gen-publish: assets
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-
+	
 
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
@@ -80,6 +80,8 @@ deploy: build/public ## Deploy to the production bucket
 
 	@echo "Hosted at ${PRODUCTION_URL}/index.html"
 
+	$(MAKE) deploy-search-index
+
 next-gen-deploy:
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
@@ -87,4 +89,4 @@ next-gen-deploy:
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
-	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
+	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
