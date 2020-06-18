@@ -5,7 +5,7 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 
-STAGING_URL="https://docs-staging.atlas.mongodb.com"
+STAGING_URL="https://docs-atlas-staging.mongodb.com"
 STAGING_BUCKET=docs-atlas-staging
 
 PRODUCTION_URL="https://docs.atlas.mongodb.com"
