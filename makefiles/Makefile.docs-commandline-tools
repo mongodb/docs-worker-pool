@@ -65,7 +65,7 @@ deploy-search-index:
 next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
-	if [ $? -eq 1 ]; then \
+	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
 		exit 0; \
