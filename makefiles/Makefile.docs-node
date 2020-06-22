@@ -53,6 +53,7 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
