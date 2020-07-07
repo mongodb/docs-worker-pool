@@ -9,7 +9,7 @@ PRODUCTION_BUCKET=docs-node-prod
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
-PREFIX=node
+PREFIX=node-stage
 PROJECT=node
 REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
