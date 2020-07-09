@@ -32,7 +32,7 @@ next-gen-html:
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	if [ ${PATH_PREFIX} ]; then echo "PATH_PREFIX=${PATH_PREFIX}" >> .env.production; fi \
+	if [ -z ${PATH_PREFIX+x} ]; then echo "PATH_PREFIX=${PATH_PREFIX}" >> .env.production; fi \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
