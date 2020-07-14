@@ -87,7 +87,7 @@ stage:
 
 ## Deploy to the production bucket
 deploy: build/public
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='${PROJECT}' ${ARGS}
+	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --json --redirect-prefix='${PROJECT}' ${ARGS}
 
 	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
