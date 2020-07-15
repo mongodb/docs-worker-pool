@@ -79,7 +79,7 @@ stage: build
 	@echo "Hosted at ${URL}/${PREFIX}/${USER}/${GIT_BRANCH}/tools/index.html"
 
 deploy: build
-	mut-publish build ${PRODUCTION_BUCKET} --prefix='/' --deploy --all-subdirectories ${ARGS}
+	mut-publish build ${PRODUCTION_BUCKET} --prefix='/' --deploy --json --all-subdirectories ${ARGS}
 
 	@echo "Deployed"
 
