@@ -113,6 +113,7 @@ patchapply:
 
 next-gen-html: examples patchapply
 	# snooty parse and then build-front-end
+	echo snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${PATCH_CLAUSE}" ;
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${PATCH_CLAUSE}" ;\
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
@@ -124,6 +125,8 @@ next-gen-html: examples patchapply
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
