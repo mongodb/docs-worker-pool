@@ -8,6 +8,7 @@ PREFIX=docs
 PROJECT=docs
 REPO_DIR=$(shell pwd)
 PATCH_FILE="myPatch.patch"
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
