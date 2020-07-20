@@ -60,29 +60,29 @@ function safeGithubPush(currentJob) {
   throw invalidJobDef;
 }
 
-// async function startGithubBuild(job, logger) {
-//   const buildOutput = await workerUtils.promiseTimeoutS(
-//     buildTimeout,
-//     job.buildRepo(logger),
-//     'Timed out on build',
-//   );
-//   // checkout output of build
-//   if (buildOutput && buildOutput.status === 'success') {
-//     // only post entire build output to slack if there are warnings
-//     const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
-//     if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
-//       await logger.sendSlackMsg(buildOutputToSlack);
-//     }
+async function startGithubBuild(job, logger) {
+  const buildOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    job.buildRepo(logger),
+    'Timed out on build',
+  );
+  // checkout output of build
+  if (buildOutput && buildOutput.status === 'success') {
+    // only post entire build output to slack if there are warnings
+    const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
+    if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
+      await logger.sendSlackMsg(buildOutputToSlack);
+    }
 
-//     return new Promise((resolve) => {
-//       resolve(true);
-//     });
-//   }
+    return new Promise((resolve) => {
+      resolve(true);
+    });
+  }
 
-//   return new Promise((reject) => {
-//     reject(false);
-//   });
-// }
+  return new Promise((reject) => {
+    reject(false);
+  });
+}
 
 async function pushToStage(publisher, logger) {
   const stageOutput = await workerUtils.promiseTimeoutS(
@@ -124,7 +124,7 @@ async function runGithubPush(currentJob) {
   const logger = new Logger(currentJob);
   const publisher = new S3Publish(job);
 
-  // await startGithubBuild(job, logger);
+  await startGithubBuild(job, logger);
 
   // console.log('completed build');
 

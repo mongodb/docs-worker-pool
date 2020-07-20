@@ -15,6 +15,7 @@ class S3PublishClass {
     const stageCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
+
       'make stage',
     ];
 
@@ -72,24 +73,10 @@ class S3PublishClass {
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      publishCommands[publishCommands.length - 1] = 'make next-gen-publish';
       deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
     }
 
-    // first publish
-    try {
-      const exec = workerUtils.getExecPromise();
-      const command = publishCommands.join(' && ');
-      const { stdout } = await exec(command);
-      logger.save(
-        `${'(prod)'.padEnd(15)}Production publish details:\n\n${stdout}`
-      );
-    } catch (errResult) {
-      logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-      throw errResult;
-    }
-
-    // finally deploy site
+    // deploy site
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');

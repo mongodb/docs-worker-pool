@@ -152,7 +152,7 @@ class GitHubJobClass {
         });
     }
 
-    async buildRepo(logger) {
+    async buildRepo(logger, isProdDeployJob) {
         const currentJob = this.currentJob;
 
         // setup for building
@@ -240,18 +240,6 @@ class GitHubJobClass {
           this.getRepoDirName(currentJob)
         );
       }
-        // default commands to run to build repo
-        const commandsToBuild = [
-            `. /venv/bin/activate`,
-            `cd repos/${this.getRepoDirName()}`,
-            `rm -f makefile`,
-            `make html`
-        ];
-
-        // check if need to build next-gen
-        if (this.buildNextGen()) {
-            commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-        }
 
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
@@ -268,6 +256,25 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
+
+        // default commands to run to build repo
+        const commandsToBuild = [
+          `. /venv/bin/activate`,
+          `cd repos/${this.getRepoDirName()}`,
+          `rm -f makefile`,
+          `make html`
+      ];
+
+      // check if need to build next-gen
+      if (this.buildNextGen() && !isProdDeployJob) {
+        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+      }
+
+      //check if prod deploy job
+      if (this.buildNextGen() && isProdDeployJob) {
+          commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html-publish';
+      }
+      // we only deploy next gen right???
 
         const execTwo = workerUtils.getExecPromise();
         try {
