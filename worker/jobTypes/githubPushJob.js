@@ -126,7 +126,7 @@ async function runGithubPush(currentJob) {
 
   await startGithubBuild(job, logger);
 
-  // console.log('completed build');
+  console.log('completed build');
 
   let branchext = '';
 
