@@ -24,10 +24,10 @@ help: ## Show this help message
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 	
 next-gen-publish: 
-  @curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
-  value=$(yq -r 'recurse | select(.name? == "CALICO_IPV4POOL_CIDR") | .value' "calico.yaml")
-  echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" > .env.production; \
-  next-gen-html
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
+	value=$(yq -r 'recurse | select(.name? == "CALICO_IPV4POOL_CIDR") | .value' "calico.yaml")
+	echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" > .env.production; \
+	next-gen-html
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	
 next-gen-html:
