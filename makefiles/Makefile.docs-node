@@ -23,10 +23,11 @@ help: ## Show this help message
 	@echo 'Variables'
 	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 	
-next-gen-publish: 
+set-version:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
 	echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" >> .env.production; \
-	next-gen-html;
+
+next-gen-publish: next-gen-html;
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	
 next-gen-html:
