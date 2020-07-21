@@ -27,8 +27,10 @@ set-version:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
 	echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" >> .env.production; \
 
-next-gen-publish: next-gen-html;
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+next-gen-publish:
+  set-version;
+  next-gen-html;
+  if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	
 next-gen-html:
 	# snooty parse and then build-front-end
