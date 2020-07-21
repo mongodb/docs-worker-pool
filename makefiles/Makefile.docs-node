@@ -25,9 +25,9 @@ help: ## Show this help message
 	
 next-gen-publish: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
-	value=$(yq -r 'recurse | select(.name? == "CALICO_IPV4POOL_CIDR") | .value' "calico.yaml")
-	echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" > .env.production; \
-	next-gen-html
+	value=$(yq -r 'recurse | select(.name? == "CALICO_IPV4POOL_CIDR") | .value' "calico.yaml");
+	echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" >> .env.production; \
+	next-gen-html;
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	
 next-gen-html:
