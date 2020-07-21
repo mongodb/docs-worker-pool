@@ -25,8 +25,8 @@ help: ## Show this help message
 	
 next-gen-publish: next-gen-html
         @curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
-        echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" >> .env.production; \
         next-gen-html;
+	echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" >> .env.production; \
         if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	
 next-gen-html:
