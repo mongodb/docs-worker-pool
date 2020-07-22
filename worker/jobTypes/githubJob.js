@@ -275,7 +275,6 @@ class GitHubJobClass {
           commandsToBuild[commandsToBuild.length - 1] = 'make download-published-branches';
           commandsToBuild.concat([`make next-gen-html publish`, `make configure-mut-redirects:`])
       }
-      // we only deploy next gen right???
 
         const execTwo = workerUtils.getExecPromise();
         try {
