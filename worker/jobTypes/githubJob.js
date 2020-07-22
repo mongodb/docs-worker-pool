@@ -80,7 +80,7 @@ class GitHubJobClass {
           console.log('dumpError :: argument is not an object');
         }
     }
-    
+
     // our maintained directory of makefiles
     async downloadMakefile() {
         const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-DOP-1238/makefiles/Makefile.${this.currentJob.payload.repoName}`;
@@ -267,13 +267,13 @@ class GitHubJobClass {
 
       // check if need to build next-gen
       if (this.buildNextGen() && !isProdDeployJob) {
-        console.log("haha we are here!!")
         commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
       }
 
       //check if prod deploy job
-      if (this.buildNextGen() && isProdDeployJob) {
-          commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html-publish';
+      if (isProdDeployJob) {
+          commandsToBuild[commandsToBuild.length - 1] = 'make download-published-branches';
+          commandsToBuild.concat([`make next-gen-html publish`, `make configure-mut-redirects:`])
       }
       // we only deploy next gen right???
 
