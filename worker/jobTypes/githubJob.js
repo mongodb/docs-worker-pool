@@ -42,11 +42,13 @@ class GitHubJobClass {
         return false;
     }
     async writeEnvProdFile(){
+
       const envVars = `
-      GATSBY_PARSER_USER=${user}; 
-      GATSBY_PARSER_BRANCH=${currentJob.payload.localbranch};  
-      COMMIT_HASH=${currentJob.payload.newHead};`
-      fs.writeFile(".env.production", envVars, function(err) {
+      GATSBY_PARSER_USER=${this.currentJob.user}; 
+      GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName};  
+      COMMIT_HASH=${this.currentJob.payload.newHead};`
+
+      fs.writeFile("~/tmp/.env.production", envVars, function(err) {
           if(err) {
               return console.log(err);
           }
