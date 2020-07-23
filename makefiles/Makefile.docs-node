@@ -42,7 +42,7 @@ next-gen-html:
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	cp /tmp/.env.production snooty
+	cp ~/tmp/.env.production snooty
   cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	npm run build; \
