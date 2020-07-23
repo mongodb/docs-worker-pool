@@ -41,12 +41,38 @@ class GitHubJobClass {
         }
         return false;
     }
-    async writeEnvProdFile(){
+    async writeEnvProdFile(isProdDeployJob){
+      var pathPrefix;
 
+      if(isProdDeployJob){
+        //download published branches file to check if repo is versioned 
+        const repoObject = {
+          repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
+        };
+        const repoContent = workerUtils.getRepoPublishedBranches(repoObject)
+        //versioned repo
+        if(repoContent && repoContent.content.version.active.length() > 1){
+          pathPrefix = `${this.currentJob.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
+        }
+        //non-versioned repo
+        else{
+          pathPrefix = `${this.currentJob.repoName.replace('docs-','')}`
+        }
+      }
+      // server staging jobs
+      else if(this.currentJob.patch){
+        pathPrefix = `${this.currentJob.user}/${this.currentJob.localbranch}` 
+      }
+      // regular staging jobs via githubPush 
+      else{
+        pathPrefix = `${this.currentJob.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
+      }
+      
       const envVars = `
       GATSBY_PARSER_USER=${this.currentJob.user}; 
       GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName};  
-      COMMIT_HASH=${this.currentJob.payload.newHead};`
+      COMMIT_HASH="${this.currentJob.payload.newHead}";
+      PATH_PREFIX=${pathPrefix}`
 
       fs.writeFile("~/tmp/.env.production", envVars, function(err) {
           if(err) {
