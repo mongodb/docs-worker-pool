@@ -32,8 +32,6 @@ deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT} -g -s --exclude build/public/sdk/iOS
 
-%:
-	@:
 
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -44,14 +42,9 @@ next-gen-html:
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	cd snooty; \
+	cp /tmp/.env.production snooty
+  cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	if [ $(filter-out $@,$(MAKECMDGOALS)) = publish]; then \
-		echo "PATH_PREFIX=${PREFIX}/${GIT_BRANCH}" >> .env.production; \
-	fi
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
