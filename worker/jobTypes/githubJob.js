@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const fs = require('fs');
 const workerUtils = require('../utils/utils');
 const simpleGit = require('simple-git/promise');
 const request = require('request');
@@ -39,6 +40,18 @@ class GitHubJobClass {
             }
         }
         return false;
+    }
+    async writeEnvProdFile(){
+      const envVars = `
+      GATSBY_PARSER_USER=${user}; 
+      GATSBY_PARSER_BRANCH=${currentJob.payload.localbranch};  
+      COMMIT_HASH=${currentJob.payload.newHead};`
+      fs.writeFile(".env.production", envVars, function(err) {
+          if(err) {
+              return console.log(err);
+          }
+          console.log("The file was saved!");
+      }); 
     }
 
     async applyPatch(patch, currentJobDir) {
@@ -256,7 +269,8 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-
+        //set up env vars 
+        await this.writeEnvProdFile()
         // default commands to run to build repo
         const commandsToBuild = [
           `. /venv/bin/activate`,
