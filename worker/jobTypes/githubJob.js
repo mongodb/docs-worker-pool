@@ -1,5 +1,4 @@
 const fs = require('fs-extra');
-const fs = require('fs');
 const workerUtils = require('../utils/utils');
 const simpleGit = require('simple-git/promise');
 const request = require('request');
@@ -43,38 +42,39 @@ class GitHubJobClass {
     }
     async writeEnvProdFile(isProdDeployJob){
       var pathPrefix;
-
+      console.log(this.currentJob.payload.repoName)
       if(isProdDeployJob){
         //download published branches file to check if repo is versioned 
+        console.log("this is a prod job what??")
         const repoObject = {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
         const repoContent = workerUtils.getRepoPublishedBranches(repoObject)
         //versioned repo
         if(repoContent && repoContent.content.version.active.length() > 1){
-          pathPrefix = `${this.currentJob.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
+          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.payload.branchName}` 
         }
         //non-versioned repo
         else{
-          pathPrefix = `${this.currentJob.repoName.replace('docs-','')}`
+          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}`
         }
       }
-      // server staging jobs
-      else if(this.currentJob.patch){
-        pathPrefix = `${this.currentJob.user}/${this.currentJob.localbranch}` 
+      // server staging commit jobs
+      else if(this.currentJob.patch && this.currentJob.payload.patchType === 'commit'){
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localbranch}` 
       }
-      // regular staging jobs via githubPush 
+      // regular staging jobs via githubPush && commitless server staging jobs
       else{
-        pathPrefix = `${this.currentJob.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
       }
-      
+
       const envVars = `
       GATSBY_PARSER_USER=${this.currentJob.user}; 
       GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName};  
       COMMIT_HASH="${this.currentJob.payload.newHead}";
       PATH_PREFIX=${pathPrefix}`
 
-      fs.writeFile("~/tmp/.env.production", envVars, function(err) {
+      fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {
               return console.log(err);
           }
@@ -298,7 +298,7 @@ class GitHubJobClass {
             );
         }
         //set up env vars 
-        await this.writeEnvProdFile()
+        await this.writeEnvProdFile(isProdDeployJob)
         // default commands to run to build repo
         const commandsToBuild = [
           `. /venv/bin/activate`,
