@@ -114,7 +114,7 @@ patchapply:
 next-gen-html: examples patchapply
 	# snooty parse and then build-front-end
 	@if [ ! -z "${PATCH_ID}" ]; then \
-		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${PATCH_CLAUSE}"; \
+		echo ${SNOOTY_DB_PWD} | echo snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${PATCH_CLAUSE}"; \
 		if [ $$? -ne 0 ]; then \
 			exit 1; \
 		else \
