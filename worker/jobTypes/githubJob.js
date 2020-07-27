@@ -42,9 +42,10 @@ class GitHubJobClass {
     }
     async writeEnvProdFile(isProdDeployJob){
       var pathPrefix;
-
+      console.log(this.currentJob.payload.repoName)
       if(isProdDeployJob){
         //download published branches file to check if repo is versioned 
+        console.log("this is a prod job what??")
         const repoObject = {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
@@ -60,10 +61,13 @@ class GitHubJobClass {
       }
       // server staging commit jobs
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
+        console.log(`${this.currentJob.payload.repoName.replace('docs-','')}`)
+        console.log(`${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}`)
         pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}` 
       }
       // regular staging jobs via githubPush && commitless server staging jobs
       else{
+        console.log(this.currentJob.payload.patchType, this.currentJob.payload.patchType === 'commit')
         pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
       }
 
@@ -122,7 +126,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-DOP-1238/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -315,6 +319,7 @@ class GitHubJobClass {
           commandsToBuild[commandsToBuild.length - 1] = 'make download-published-branches';
           commandsToBuild.concat([`make next-gen-html publish`, `make configure-mut-redirects:`])
       }
+      // we only deploy next gen right???
 
         const execTwo = workerUtils.getExecPromise();
         try {
