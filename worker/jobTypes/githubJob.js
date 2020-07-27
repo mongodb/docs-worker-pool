@@ -42,10 +42,9 @@ class GitHubJobClass {
     }
     async writeEnvProdFile(isProdDeployJob){
       var pathPrefix;
-      console.log(this.currentJob.payload.repoName)
+
       if(isProdDeployJob){
         //download published branches file to check if repo is versioned 
-        console.log("this is a prod job what??")
         const repoObject = {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
@@ -60,8 +59,8 @@ class GitHubJobClass {
         }
       }
       // server staging commit jobs
-      else if(this.currentJob.patch && this.currentJob.payload.patchType === 'commit'){
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localbranch}` 
+      else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}` 
       }
       // regular staging jobs via githubPush && commitless server staging jobs
       else{
@@ -78,7 +77,6 @@ class GitHubJobClass {
           if(err) {
               return console.log(err);
           }
-          console.log("The file was saved!");
       }); 
     }
 
