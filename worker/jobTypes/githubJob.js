@@ -75,7 +75,8 @@ class GitHubJobClass {
       GATSBY_PARSER_USER=${this.currentJob.user}; 
       GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName};  
       COMMIT_HASH="${this.currentJob.payload.newHead}";
-      PATH_PREFIX=${pathPrefix}`
+      PATH_PREFIX=${pathPrefix}
+      `
 
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {
