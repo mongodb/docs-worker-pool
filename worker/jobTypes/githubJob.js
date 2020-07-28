@@ -327,7 +327,8 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-
+            print(stdout)
+            print(stderr)
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
