@@ -134,7 +134,9 @@ next-gen-html: examples patchapply
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+	if [ ! -z "${PATCH_ID}" ]; then \
+		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+	fi
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
