@@ -37,11 +37,11 @@ next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	cp "${REPO_DIR}/.env.production" "${REPO_DIR}/snooty"; \
+#	cp "${REPO_DIR}/.env.production" "${REPO_DIR}/snooty"; \
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+#	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
 	@echo "test test test"
