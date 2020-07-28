@@ -36,23 +36,28 @@ deploy-search-index: ## Update the search index for this branch
 next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
+	if [ $$? -eq 1 ]; then \
+		exit 1; \
+	else \
+		exit 0; \
+	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-#	cp "${REPO_DIR}/.env.production" "${REPO_DIR}/snooty"; \
+	cp "${REPO_DIR}/.env.production" snooty
 	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	npm run build; \
-#	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	@echo "test test test"
+  @echo "test test test"
 	mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}/madelinezec/jul23" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${PROJECT}/madelinezec/jul23"
+  @echo "Hosted at ${STAGING_URL}/${PROJECT}/madelinezec/jul23"
 
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
 next-gen-deploy:
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${PROJECT}/madelinezec/jul23" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
