@@ -44,7 +44,7 @@ next-gen-html:
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 	cp "${REPO_DIR}/.env.production" snooty
 	cd snooty; \
-#	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
