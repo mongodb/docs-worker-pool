@@ -70,7 +70,7 @@ class GitHubJobClass {
         console.log(this.currentJob.payload.patchType, this.currentJob.payload.patchType === 'commit')
         pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
       }
-
+      console.log(pathPrefix)
       const envVars = `
       GATSBY_PARSER_USER=${this.currentJob.user}; 
       GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName};  
