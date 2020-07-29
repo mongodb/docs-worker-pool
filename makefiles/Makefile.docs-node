@@ -9,8 +9,8 @@ PRODUCTION_BUCKET=docs-node-prod
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
-PREFIX=node
-PROJECT=drivers/node
+PREFIX=drivers/node
+PROJECT=node
 REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -70,10 +70,10 @@ html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
 next-gen-deploy:
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PREFIX} --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
-	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT} -g -s --exclude build/public/sdk/iOS
+	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX} -g -s --exclude build/public/sdk/iOS
 
 
