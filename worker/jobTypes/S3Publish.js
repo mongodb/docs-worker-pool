@@ -11,6 +11,8 @@ class S3PublishClass {
   }
 
   async pushToStage(logger) {
+    console.log(this.GitHubJob.currentJob.payload)
+    console.log(`make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`)
     logger.save(`${'(stage)'.padEnd(15)}Setting up push to staging function`);
     const stageCommands = [
       '. /venv/bin/activate',
@@ -21,7 +23,8 @@ class S3PublishClass {
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      stageCommands[stageCommands.length - 1] = 'make next-gen-stage';
+      console.log("yes builds next gen")
+      stageCommands[stageCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`;
     }
 
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);

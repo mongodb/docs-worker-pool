@@ -71,18 +71,18 @@ class GitHubJobClass {
         pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
       }
       console.log(pathPrefix)
-      const envVars = `
-      GATSBY_PARSER_USER=${this.currentJob.user}; 
-      GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName};  
-      COMMIT_HASH="${this.currentJob.payload.newHead}";
-      PATH_PREFIX=${pathPrefix}
-      `
+      const envVars = 
+`GATSBY_PARSER_USER=docsworker-xlarge
+GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName}
+PATH_PREFIX=${pathPrefix}
+`
 
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {
               return console.log(err);
           }
       }); 
+      return pathPrefix
     }
 
     async applyPatch(patch, currentJobDir) {
@@ -301,7 +301,9 @@ class GitHubJobClass {
             );
         }
         //set up env vars 
-        await this.writeEnvProdFile(isProdDeployJob)
+        const pathPrefix = await this.writeEnvProdFile(isProdDeployJob)
+        this.currentJob.payload.pathPrefix = pathPrefix;
+        console.log(this.currentJob.payload.pathPrefix)
         // default commands to run to build repo
         const commandsToBuild = [
           `. /venv/bin/activate`,
@@ -318,7 +320,7 @@ class GitHubJobClass {
       //check if prod deploy job
       if (isProdDeployJob) {
           commandsToBuild[commandsToBuild.length - 1] = 'make download-published-branches';
-          commandsToBuild.concat([`make next-gen-html publish`, `make configure-mut-redirects:`])
+          commandsToBuild.concat([`make next-gen-html publish`])
       }
       // we only deploy next gen right???
 
@@ -328,8 +330,8 @@ class GitHubJobClass {
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-            print(stdout)
-            print(stderr)
+            // console.log(stdout)
+            // console.log(stderr)
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
