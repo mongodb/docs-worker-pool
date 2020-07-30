@@ -51,13 +51,15 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 %:
-    @:
+	@:
     
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}
 	echo $(filter-out $@,$(MAKECMDGOALS))
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/madelinezec/jul23"
-
+%:
+	@:
+	
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
