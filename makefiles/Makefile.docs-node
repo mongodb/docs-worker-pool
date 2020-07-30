@@ -50,10 +50,14 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
+%:
+    @:
+
+
 next-gen-stage: ## Host online for review
 	@echo "test test test"
-	mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}/madelinezec/jul23" --stage ${ARGS}
-	echo ${ARGS}
+	mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}
+	echo $(filter-out $@,$(MAKECMDGOALS))
 	@echo "Hosted at ${STAGING_URL}/${PROJECT}/madelinezec/jul23"
 
 html: ## Builds this branch's HTML under build/<branch>/html
