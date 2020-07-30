@@ -52,8 +52,7 @@ next-gen-html:
 
 %:
     @:
-
-
+    
 next-gen-stage: ## Host online for review
 	@echo "test test test"
 	mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}
