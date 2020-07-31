@@ -23,7 +23,7 @@ class S3PublishClass {
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      console.log("yes builds next gen")
+      console.log(`here we are: ${this.GitHubJob.currentJob.payload.pathPrefix}`)
       stageCommands[stageCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`;
     }
 

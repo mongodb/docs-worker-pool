@@ -52,7 +52,7 @@ class GitHubJobClass {
         const repoContent = workerUtils.getRepoPublishedBranches(repoObject)
         //versioned repo
         if(repoContent && repoContent.content.version.active.length() > 1){
-          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.payload.branchName}` 
+          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}` 
         }
         //non-versioned repo
         else{
@@ -61,14 +61,13 @@ class GitHubJobClass {
       }
       // server staging commit jobs
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
-        console.log(`${this.currentJob.payload.repoName.replace('docs-','')}`)
-        console.log(`${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}`)
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}` 
+        console.log(`${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.user}/${this.currentJob.payload.localBranchName}`)
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.user}/${this.currentJob.payload.localBranchName}` 
       }
       // regular staging jobs via githubPush && commitless server staging jobs
       else{
         console.log(this.currentJob.payload.patchType, this.currentJob.payload.patchType === 'commit')
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.branchName}` 
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.branchName}` 
       }
       console.log(pathPrefix)
       const envVars = 
@@ -82,6 +81,7 @@ PATH_PREFIX=${pathPrefix}
               return console.log(err);
           }
       }); 
+      console.log(pathPrefix)
       return pathPrefix
     }
 
