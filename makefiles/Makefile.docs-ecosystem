@@ -86,7 +86,7 @@ deploy: build/public ## Deploy to the production bucket
 	@echo "Hosted at ${PRODUCTION_URL}/index.html"
 
 next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --all-subdirectories ${ARGS}
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --json --all-subdirectories ${ARGS}
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 	$(MAKE) deploy-search-index
 
