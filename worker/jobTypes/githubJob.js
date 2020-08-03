@@ -81,8 +81,8 @@ PATH_PREFIX=${pathPrefix}
               return console.log(err);
           }
       }); 
-      console.log(pathPrefix)
-      return pathPrefix
+      console.log(pathPrefix.split['docsworker-xlarge'][0])
+      return pathPrefix.split['docsworker-xlarge'][0]
     }
 
     async applyPatch(patch, currentJobDir) {
