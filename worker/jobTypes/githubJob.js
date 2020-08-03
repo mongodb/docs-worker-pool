@@ -67,7 +67,7 @@ class GitHubJobClass {
       // regular staging jobs via githubPush && commitless server staging jobs
       else{
         console.log(this.currentJob.payload.patchType, this.currentJob.payload.patchType === 'commit')
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.branchName}` 
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}` 
       }
       console.log(pathPrefix)
       const envVars = 
