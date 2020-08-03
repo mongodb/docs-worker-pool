@@ -61,8 +61,8 @@ class GitHubJobClass {
       }
       // server staging commit jobs
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
-        console.log(`${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.user}/${this.currentJob.payload.localBranchName}`)
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}` 
+        //console.log(`${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.user}/${this.currentJob.payload.localBranchName}`)
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master` 
       }
       // regular staging jobs via githubPush && commitless server staging jobs
       else{
