@@ -8,12 +8,8 @@ PRODUCTION_URL="https://docs.mongodb.com"
 PRODUCTION_BUCKET=docs-node-prod
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
-<<<<<<< HEAD
-PREFIX=node
-=======
 
 PREFIX=drivers/node
->>>>>>> 95c5e62da06fdb7404d17ccb9a7516e416eb7573
 PROJECT=node
 REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
@@ -57,8 +53,8 @@ next-gen-html:
 
 next-gen-stage: ## Host online for review
 	@echo "test test test"
-	mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}/madelinezec/jul23" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${PROJECT}/madelinezec/jul23"
+	mut-publish public ${STAGING_BUCKET} --prefix="drivers/$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}
+  @echo "Hosted at ${STAGING_URL}/${PROJECT}/madelinezec/jul23"
 
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
