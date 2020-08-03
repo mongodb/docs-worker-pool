@@ -1,3 +1,4 @@
+MAKEFLAGS += --silent
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
@@ -51,11 +52,16 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
+%:
+	@:
+    
 next-gen-stage: ## Host online for review
-	@echo "test test test"
-	mut-publish public ${STAGING_BUCKET} --prefix="drivers/$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}
-  @echo "Hosted at ${STAGING_URL}/${PROJECT}/madelinezec/jul23"
-
+	mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}
+	echo $(filter-out $@,$(MAKECMDGOALS))
+	@echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))"
+%:
+	@:
+	
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
