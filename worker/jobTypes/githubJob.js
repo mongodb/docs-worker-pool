@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const simpleGit = require('simple-git/promise');
 const request = require('request');
+const logger = require('../utils/logger');
 
 
 class GitHubJobClass {
@@ -41,7 +42,7 @@ class GitHubJobClass {
         return false;
     }
     async writeEnvProdFile(isProdDeployJob){
-      var pathPrefix;
+      let pathPrefix;
       console.log(this.currentJob.payload.repoName)
       if(isProdDeployJob){
         //download published branches file to check if repo is versioned 
@@ -62,8 +63,8 @@ class GitHubJobClass {
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
         pathPrefix = `drivers/${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master` 
       }
-
-      var envVars;
+      logger.save(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
+      let envVars;
       if(pathPrefix){
         logger.save(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
         envVars = 
