@@ -56,7 +56,7 @@ next-gen-html:
 	@:
     
 next-gen-stage: ## Host online for review
-	echo $(filter-out $@,$(MAKECMDGOALS))
+	echo "HERE!!!"
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
 		echo "we have args!!"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
