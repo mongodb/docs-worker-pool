@@ -45,7 +45,6 @@ class GitHubJobClass {
       console.log(this.currentJob.payload.repoName)
       if(isProdDeployJob){
         //download published branches file to check if repo is versioned 
-        console.log("this is a prod job what??")
         const repoObject = {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
@@ -61,24 +60,24 @@ class GitHubJobClass {
       }
       // server staging commit jobs
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
-        //console.log(`${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.user}/${this.currentJob.payload.localBranchName}`)
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master` 
+        pathPrefix = `drivers/${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master` 
       }
 
-      console.log(pathPrefix)
+      var envVars;
       if(pathPrefix){
-        const envVars = 
+        logger.save(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
+        envVars = 
         `GATSBY_PARSER_USER=docsworker-xlarge
-        GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-        PATH_PREFIX=${pathPrefix}
-        `
+GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+PATH_PREFIX=${pathPrefix}
+`
       }
       //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
       else{
-        const envVars = 
+        envVars = 
         `GATSBY_PARSER_USER=docsworker-xlarge
-        GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-        `
+GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+`
       }
 
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
@@ -86,10 +85,10 @@ class GitHubJobClass {
               return console.log(err);
           }
       }); 
-      logger.save(`${'(TYPE)'.padEnd(15)} ${typeof(pathPrefix)}`);
-      const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0]
-      logger.save(`${'(TYPE)'.padEnd(15)} ${mutPrefix}`);
-      return mutPrefix
+      if(pathPrefix){
+        const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0]
+        return mutPrefix
+      }
     }
 
     async applyPatch(patch, currentJobDir, logger) {
