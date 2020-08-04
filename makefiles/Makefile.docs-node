@@ -60,7 +60,7 @@ next-gen-stage: ## Host online for review
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PREFIX}" --stage ${ARGS}; \
 	fi
 	@echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"
 %:
