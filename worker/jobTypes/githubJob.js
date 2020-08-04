@@ -64,17 +64,22 @@ class GitHubJobClass {
         //console.log(`${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.user}/${this.currentJob.payload.localBranchName}`)
         pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master` 
       }
-      // regular staging jobs via githubPush && commitless server staging jobs
-      else{
-        console.log(this.currentJob.payload.patchType, this.currentJob.payload.patchType === 'commit')
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}` 
-      }
+
       console.log(pathPrefix)
-      const envVars = 
-`GATSBY_PARSER_USER=docsworker-xlarge
-GATSBY_PARSER_BRANCH=${this.currentJob.payload.patch ? this.currentJob.payload.localBranchName : this.currentJob.payload.branchName}
-PATH_PREFIX=${pathPrefix}
-`
+      if(pathPrefix){
+        const envVars = 
+        `GATSBY_PARSER_USER=docsworker-xlarge
+        GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+        PATH_PREFIX=${pathPrefix}
+        `
+      }
+      //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
+      else{
+        const envVars = 
+        `GATSBY_PARSER_USER=docsworker-xlarge
+        GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+        `
+      }
 
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {

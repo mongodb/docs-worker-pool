@@ -24,7 +24,15 @@ class S3PublishClass {
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
       console.log(`here we are: ${this.GitHubJob.currentJob.payload.pathPrefix}`)
-      stageCommands[stageCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`;
+      
+      if(this.GitHubJob.currentJob.payload.pathPrefix){
+        stageCommands[stageCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`;
+      }
+      //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
+      else{
+        stageCommands[stageCommands.length - 1] = `make next-gen-stage`
+      }
+
     }
 
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
