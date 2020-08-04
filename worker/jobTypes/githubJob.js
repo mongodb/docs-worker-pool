@@ -72,7 +72,7 @@ class GitHubJobClass {
       console.log(pathPrefix)
       const envVars = 
 `GATSBY_PARSER_USER=docsworker-xlarge
-GATSBY_PARSER_BRANCH=${this.currentJob.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName}
+GATSBY_PARSER_BRANCH=${this.currentJob.payload.patch ? this.currentJob.payload.localbranch : this.currentJob.payload.branchName}
 PATH_PREFIX=${pathPrefix}
 `
 
