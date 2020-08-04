@@ -61,7 +61,7 @@ next-gen-stage: ## Host online for review
 		echo "we have args!!"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 	else \
-		echo "we dont have args!!!"; \
+		echo "we dont have args!!! ${COMMIT_HASH}/${PREFIX}"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PREFIX}" --stage ${ARGS}; \
 	fi
 	@echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"
