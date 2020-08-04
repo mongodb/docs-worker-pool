@@ -81,10 +81,10 @@ PATH_PREFIX=${pathPrefix}
               return console.log(err);
           }
       }); 
-      console.log("do i show up")
       logger.save(`${'(TYPE)'.padEnd(15)} ${typeof(pathPrefix)}`);
-      console.log(pathPrefix.split['docsworker-xlarge'][0])
-      return pathPrefix
+      const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0]
+      logger.save(`${'(TYPE)'.padEnd(15)} ${mutPrefix}`);
+      return mutPrefix
     }
 
     async applyPatch(patch, currentJobDir, logger) {
