@@ -56,14 +56,13 @@ next-gen-html:
 	@:
     
 next-gen-stage: ## Host online for review
-	echo "HERE!!!"
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
-		@echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"
+		@echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
 		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
 	else \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PREFIX}" --stage ${ARGS}; \
-		@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+		@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
 		echo "we dont have args!!! ${COMMIT_HASH}/${PREFIX}"; \
 	fi
 %:
