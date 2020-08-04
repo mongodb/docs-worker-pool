@@ -81,11 +81,13 @@ PATH_PREFIX=${pathPrefix}
               return console.log(err);
           }
       }); 
+      console.log("do i show up")
+      logger.save(`${'(TYPE)'.padEnd(15)} ${typeof(pathPrefix)}`);
       console.log(pathPrefix.split['docsworker-xlarge'][0])
-      return pathPrefix.split['docsworker-xlarge'][0]
+      return pathPrefix
     }
 
-    async applyPatch(patch, currentJobDir) {
+    async applyPatch(patch, currentJobDir, logger) {
         //create patch file
         try {
           await fs.writeFileSync(`repos/${currentJobDir}/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
@@ -102,7 +104,12 @@ PATH_PREFIX=${pathPrefix}
           ];
             const exec = workerUtils.getExecPromise();
           // return new Promise((resolve, reject) => {
-            await exec(commandsToBuild.join(" && "));
+            const {
+              stdout,
+              stderr
+          } = await exec(commandsToBuild.join(" && "));
+            
+            logger.save(`${'(PATCH)'.padEnd(15)}:${stdout}`);
     
         } catch (error) {
             console.log("Error applying patch: ", error);
@@ -281,7 +288,7 @@ PATH_PREFIX=${pathPrefix}
       if (currentJob.payload.patch !== undefined) {
         await this.applyPatch(
           currentJob.payload.patch,
-          this.getRepoDirName(currentJob)
+          this.getRepoDirName(currentJob), logger
         );
       }
 
