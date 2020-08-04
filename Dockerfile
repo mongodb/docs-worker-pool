@@ -11,15 +11,13 @@ RUN python2 -m pip install python-dateutil
 RUN python -m pip install --upgrade --force pip
 RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
-RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tool
-s/master/giza/requirements.txt
+RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
 
 # helper libraries for docs builds
 RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
 RUN apt-get -y install git pkg-config libxml2-dev
 RUN python3 -m pip install mut
-ENV PATH="${PATH}:/home/docsworker/.local/bin:/usr/local/lib/python2.7/di
-st-packages/virtualenv/bin"
+ENV PATH="${PATH}:/home/docsworker/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 12
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -41,8 +39,7 @@ RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	latestTag=$(git describe --tags `git tag --sort=-v:refname` | head -n 1)
- && \
+	latestTag=$(git describe --tags `git tag --sort=-v:refname` | head -n 1) && \
 	git checkout "$latestTag" && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
@@ -50,15 +47,13 @@ RUN git clone https://github.com/mongodb/snooty-parser.git && \
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && 
-\
+	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
 	git checkout "$latestTag" && \	
 	npm install --production && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
-	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-
-tools/images/bg-accent.svg
+	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
 RUN git clone https://github.com/mongodb/devhub.git snooty-devhub
 RUN cd snooty-devhub && \
