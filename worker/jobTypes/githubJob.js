@@ -3,6 +3,7 @@ const workerUtils = require('../utils/utils');
 const simpleGit = require('simple-git/promise');
 const request = require('request');
 const logger = require('../utils/logger');
+const S3Publish = require('./S3Publish');
 
 
 class GitHubJobClass {
@@ -41,7 +42,8 @@ class GitHubJobClass {
         }
         return false;
     }
-    async writeEnvProdFile(isProdDeployJob){
+    
+    async writeEnvFile(isProdDeployJob){
       let pathPrefix;
       console.log(this.currentJob.payload.repoName)
       if(isProdDeployJob){
@@ -52,7 +54,7 @@ class GitHubJobClass {
         const repoContent = workerUtils.getRepoPublishedBranches(repoObject)
         //versioned repo
         if(repoContent && repoContent.content.version.active.length() > 1){
-          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}` 
+          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}`; 
         }
         //non-versioned repo
         else{
@@ -61,9 +63,8 @@ class GitHubJobClass {
       }
       // server staging commit jobs
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
-        pathPrefix = `drivers/${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master` 
+        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master`; 
       }
-      logger.save(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
       let envVars;
       if(pathPrefix){
         logger.save(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
@@ -71,14 +72,14 @@ class GitHubJobClass {
         `GATSBY_PARSER_USER=docsworker-xlarge
 GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 PATH_PREFIX=${pathPrefix}
-`
+`;
       }
       //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
       else{
         envVars = 
         `GATSBY_PARSER_USER=docsworker-xlarge
 GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-`
+`;
       }
 
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
@@ -87,12 +88,12 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           }
       }); 
       if(pathPrefix){
-        const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0]
-        return mutPrefix
+        const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
+        return mutPrefix;
       }
     }
 
-    async applyPatch(patch, currentJobDir, logger) {
+    async applyPatch(patch, currentJobDir) {
         //create patch file
         try {
           await fs.writeFileSync(`repos/${currentJobDir}/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
@@ -112,12 +113,9 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
             const {
               stdout,
               stderr
-          } = await exec(commandsToBuild.join(" && "));
-            
-            logger.save(`${'(PATCH)'.padEnd(15)}:${stdout}`);
-    
+          } = await exec(commandsToBuild.join(" && "));    
         } catch (error) {
-            console.log("Error applying patch: ", error);
+            console.log("Error applying patch: ", error)
             throw error;
         }
     }
@@ -218,7 +216,6 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
         logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
         logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
 
-
         const exec = workerUtils.getExecPromise();
         const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
 
@@ -291,9 +288,10 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
               //check for patch
       if (currentJob.payload.patch !== undefined) {
+	logger.save('we applied the patch???')
         await this.applyPatch(
           currentJob.payload.patch,
-          this.getRepoDirName(currentJob), logger
+          this.getRepoDirName(currentJob)
         );
       }
 
@@ -312,9 +310,16 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-        //set up env vars 
-        const pathPrefix = await this.writeEnvProdFile(isProdDeployJob)
-        this.currentJob.payload.pathPrefix = pathPrefix;
+        //set up env vars for all jobs
+        const pathPrefix = await this.writeEnvFile(isProdDeployJob)
+        
+        // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
+        // save to job object to pass to mut in S3Publish.js. Front end constructs path for regular staging jobs 
+        // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
+        if(pathPrefix){
+          this.currentJob.payload.pathPrefix = pathPrefix;
+        }
+        
         console.log(this.currentJob.payload.pathPrefix)
         // default commands to run to build repo
         const commandsToBuild = [
