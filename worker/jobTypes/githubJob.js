@@ -67,7 +67,7 @@ class GitHubJobClass {
       }
       let envVars;
       if(pathPrefix){
-        logger.save(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
+        console.log(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
         envVars = 
         `GATSBY_PARSER_USER=docsworker-xlarge
 GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
@@ -84,10 +84,10 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {
-            logger.save(`${'(HTML)'.padEnd(15)}stdErr: ${err.stderr}`);
+            console.log(`${'(HTML)'.padEnd(15)}stdErr: ${err.stderr}`);
             throw errResult;
           }
-          logger.save(`${'(HTML)'.padEnd(15)}: successfully wrote to file`);
+          console.log(`${'(HTML)'.padEnd(15)}: successfully wrote to file`);
       }); 
       if(pathPrefix){
         const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
