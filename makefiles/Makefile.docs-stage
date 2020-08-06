@@ -123,18 +123,18 @@ snooty-parse:
 	fi
 
 snooty-frontend-load:
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; \
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
 
 next-gen-html: examples snooty-parse snooty-frontend-load
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	cd snooty; &&
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; &&
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; &&
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; &&
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; &&
 	if [ ! -z "${PATCH_ID}" ]; then \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
-	fi \
-	npm run build; \
+	fi &&
+	npm run build; &&
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 redirects:
