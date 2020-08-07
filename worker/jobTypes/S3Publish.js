@@ -84,7 +84,7 @@ class S3PublishClass {
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      deployCommands[deployCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`;
+      deployCommands[deployCommands.length - 1] = `make next-gen-deploy ${this.GitHubJob.currentJob.payload.pathPrefix}`;
     }
 
     // deploy site
