@@ -84,7 +84,7 @@ class S3PublishClass {
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      deployCommands[deployCommands.length - 1] = 'make next-gen-deploy';
+      deployCommands[deployCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`;
     }
 
     // deploy site
@@ -93,7 +93,7 @@ class S3PublishClass {
       const command = deployCommands.join(' && ');
       const { stdout } = await exec(command);
       let stdoutMod = stdout;
-
+      console.log(stdout)
       // check for json string output from mut
       const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
 
