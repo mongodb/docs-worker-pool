@@ -90,10 +90,11 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           }
           console.log(`${'(HTML)'.padEnd(15)}: successfully wrote to file`);
       }); 
-
-      const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
-      return mutPrefix;
-      
+      if(pathPrefix){
+        console.log("path prefix defined???")
+        const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
+        return mutPrefix;
+      }
     }
 
     async applyPatch(patch, currentJobDir) {
