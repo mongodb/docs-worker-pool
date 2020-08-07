@@ -139,7 +139,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-DOP-1238/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-path-prefix/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -318,11 +318,11 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
         // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
         // save to job object to pass to mut in S3Publish.js. Front end constructs path for regular staging jobs 
         // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
-        if(pathPrefix){
+        if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           this.currentJob.payload.pathPrefix = pathPrefix;
         }
         
-        console.log(this.currentJob.payload.pathPrefix)
+        console.log("this is the path prefix: ", this.currentJob.payload.pathPrefix)
         // default commands to run to build repo
         const commandsToBuild = [
           `. /venv/bin/activate`,

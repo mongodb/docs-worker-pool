@@ -12,7 +12,7 @@ class S3PublishClass {
 
   async pushToStage(logger) {
     console.log(this.GitHubJob.currentJob.payload)
-    console.log(`make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`)
+    
     logger.save(`${'(stage)'.padEnd(15)}Setting up push to staging function`);
     const stageCommands = [
       '. /venv/bin/activate',
