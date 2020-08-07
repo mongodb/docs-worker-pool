@@ -69,7 +69,7 @@ html: ## Builds this branch's HTML under build/<branch>/html
 
 next-gen-deploy:
 	echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS} \
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PREFIX} --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
 	echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))"; \
 	echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
 %:
