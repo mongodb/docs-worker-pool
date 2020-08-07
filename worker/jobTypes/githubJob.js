@@ -81,7 +81,8 @@ PATH_PREFIX=${pathPrefix}
 GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 `;
       }
-
+      console.log(`repos/${this.getRepoDirName()}/.env.production`)
+      console.log(`this env vars: ${envVars}`)
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {
             console.log(`${'(HTML)'.padEnd(15)}stdErr: ${err.stderr}`);
@@ -89,10 +90,10 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           }
           console.log(`${'(HTML)'.padEnd(15)}: successfully wrote to file`);
       }); 
-      if(pathPrefix){
-        const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
-        return mutPrefix;
-      }
+
+      const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
+      return mutPrefix;
+      
     }
 
     async applyPatch(patch, currentJobDir) {
@@ -139,7 +140,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-path-prefix/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-prefix-work/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
