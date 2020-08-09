@@ -106,9 +106,9 @@ deploy-search-index: ## Update the search index for this branch
 
 next-gen-html: examples
 	# snooty parse and then build-front-end
-	echo 'snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${PATCH_CLAUSE}"';
+	echo 'snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}';
 	@if [ ! -z "${PATCH_ID}" ]; then \
-		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${PATCH_CLAUSE}"; \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
