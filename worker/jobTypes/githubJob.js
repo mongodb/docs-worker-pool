@@ -294,7 +294,6 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
               //check for patch
       if (currentJob.payload.patch !== undefined) {
-	logger.save('we applied the patch???')
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
@@ -343,8 +342,9 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
       //check if prod deploy job
       if (isProdDeployJob) {
           commandsToBuild[commandsToBuild.length - 1] = 'make download-published-branches';
-          commandsToBuild.concat([`make next-gen-html publish`])
+          commandsToBuild.push(`make next-gen-html`)
       }
+      console.log("commands to build ??", commandsToBuild)
       // we only deploy next gen right???
 
         const execTwo = workerUtils.getExecPromise();
