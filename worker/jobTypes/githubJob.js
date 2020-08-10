@@ -344,7 +344,8 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-
+            console.log(stdout + '\n\n')
+            console.log(stderr)
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
