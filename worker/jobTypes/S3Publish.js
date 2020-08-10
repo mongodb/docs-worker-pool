@@ -11,8 +11,6 @@ class S3PublishClass {
   }
 
   async pushToStage(logger) {
-    console.log(this.GitHubJob.currentJob.payload)
-    
     logger.save(`${'(stage)'.padEnd(15)}Setting up push to staging function`);
     const stageCommands = [
       '. /venv/bin/activate',
@@ -23,8 +21,6 @@ class S3PublishClass {
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      console.log(`here we are: ${this.GitHubJob.currentJob.payload.pathPrefix}`)
-      
       if(this.GitHubJob.currentJob.payload.pathPrefix){
         stageCommands[stageCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.pathPrefix}`;
       }
@@ -93,7 +89,6 @@ class S3PublishClass {
       const command = deployCommands.join(' && ');
       const { stdout } = await exec(command);
       let stdoutMod = stdout;
-      console.log(stdout)
       // check for json string output from mut
       const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
 
