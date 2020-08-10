@@ -45,7 +45,7 @@ class GitHubJobClass {
     
     async writeEnvFile(isProdDeployJob){
       let pathPrefix;
-      console.log(this.currentJob.payload.repoName)
+
       if(isProdDeployJob){
         //download published branches file to check if repo is versioned 
         const repoObject = {
@@ -53,8 +53,6 @@ class GitHubJobClass {
         };
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         //versioned repo
-        console.log("type of ", typeof repoContent.content.version.active)
-        console.log("length? ", repoContent.content.version.active.length)
         if(repoContent && repoContent.content.version.active.length > 1){
           pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}`; 
         }
@@ -69,7 +67,6 @@ class GitHubJobClass {
       }
       let envVars;
       if(pathPrefix){
-        console.log(`${'(PATH PREFIX)'.padEnd(15)} ${pathPrefix}`);
         envVars = 
         `GATSBY_PARSER_USER=docsworker-xlarge
 GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
@@ -83,17 +80,14 @@ PATH_PREFIX=${pathPrefix}
 GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 `;
       }
-      console.log(`repos/${this.getRepoDirName()}/.env.production`)
-      console.log(`this env vars: ${envVars}`)
+
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {
             console.log(`${'(HTML)'.padEnd(15)}stdErr: ${err.stderr}`);
             throw errResult;
           }
-          console.log(`${'(HTML)'.padEnd(15)}: successfully wrote to file`);
       }); 
       if(pathPrefix){
-        console.log("path prefix defined???")
         const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
         return mutPrefix;
       }
@@ -325,7 +319,6 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           this.currentJob.payload.pathPrefix = pathPrefix;
         }
         
-        console.log("this is the path prefix: ", this.currentJob.payload.pathPrefix)
         // default commands to run to build repo
         const commandsToBuild = [
           `. /venv/bin/activate`,
@@ -344,8 +337,6 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           commandsToBuild[commandsToBuild.length - 1] = 'make download-published-branches';
           commandsToBuild.push(`make next-gen-html`)
       }
-      console.log("commands to build ??", commandsToBuild)
-      // we only deploy next gen right???
 
         const execTwo = workerUtils.getExecPromise();
         try {
@@ -353,8 +344,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-            // console.log(stdout)
-            // console.log(stderr)
+
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(
