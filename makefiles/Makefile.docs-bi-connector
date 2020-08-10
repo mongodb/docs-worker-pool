@@ -42,7 +42,7 @@ next-gen-html:
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
-  cp .env.production snooty/.env.production;
+	cp .env.production snooty/.env.production;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	npm run build; \
@@ -65,9 +65,6 @@ next-gen-stage: ## Host online for review
 %:
 	@:
 	
-next-gen-publish:
-	mut-redirects config/redirects -o public/.htaccess;
-
 publish: ## Builds this branch's publishable HTML and other artifacts under build/public
 	giza make publish
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
@@ -84,12 +81,11 @@ deploy: build/public ## Deploy to the production bucket
 
 	$(MAKE) deploy-search-index
 
-next-gen-deploy: build/public ## Deploy to the production bucket
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='bi-connector' ${ARGS}
-
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
-
-	$(MAKE) next-gen-deploy-search-index
+next-gen-deploy:
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))"; 
+%:
+	@:
 	
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
