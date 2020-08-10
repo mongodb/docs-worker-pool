@@ -24,12 +24,12 @@ RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
 # setup user and root directory
-RUN useradd -ms /bin/bash docsworker-xlarge
+RUN useradd -ms /bin/bash docsworker
 RUN npm -g config set user root
-USER docsworker-xlarge
+USER docsworker
 
-WORKDIR /home/docsworker-xlarge
-
+WORKDIR /home/docsworker
+	
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
 RUN python3 -m pip install --upgrade pip flit
@@ -39,7 +39,7 @@ RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	latestTag=$(git describe --tags `git tag --sort=-v:refname` | head -n 1) && \
 	git checkout "$latestTag" && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
-ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin"
+ENV PATH="${PATH}:/home/docsworker/.local/bin"
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
