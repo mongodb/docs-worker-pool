@@ -53,11 +53,13 @@ class GitHubJobClass {
         };
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         //versioned repo
+        console.log(repoContent.content.version.active)
         if(repoContent && repoContent.content.version.active.length > 1){
           pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}`; 
         }
         //non-versioned repo
         else{
+          console.log("non versioned???")
           pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}`
         }
       }
