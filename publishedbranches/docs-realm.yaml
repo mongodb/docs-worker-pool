@@ -1,3 +1,4 @@
+prefix: 'realm'
 version:
   published:
     - 'master'

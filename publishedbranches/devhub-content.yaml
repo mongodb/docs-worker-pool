@@ -1,3 +1,4 @@
+prefix: 'devhub'
 version:
   published:
     - 'master'

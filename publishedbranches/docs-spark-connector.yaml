@@ -1,3 +1,4 @@
+prefix: 'spark-connector'
 version:
   published:
     - '2.4'
