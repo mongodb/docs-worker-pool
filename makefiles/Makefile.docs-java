@@ -47,18 +47,27 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-	
+  
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
+		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+		echo "we dont have args!!!!"; \
+	fi
+%:
+	@:
 
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
