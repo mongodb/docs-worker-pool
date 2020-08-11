@@ -44,29 +44,27 @@ class GitHubJobClass {
     }
     
     async writeEnvFile(isProdDeployJob){
-      let pathPrefix;
-
+      //download published branches file to retrieve prefix and check if repo is versioned 
+      const repoObject = {
+        repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
+      };
+      const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
+      var pathPrefix = repoContent.content.prefix
+      console.log(repoContent)
+      console.log(isProdDeployJob)
       if(isProdDeployJob){
-        //download published branches file to check if repo is versioned 
-        const repoObject = {
-          repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
-        };
-        const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         //versioned repo
-        console.log(repoContent.content.version.active)
         if(repoContent && repoContent.content.version.active.length > 1){
-          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.payload.branchName}`; 
-          console.log("path preefix in first if: ", pathPrefix)
-        }
-        //non-versioned repo
-        else{
-          console.log("non versioned???")
-          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}`
+          pathPrefix += `/${this.currentJob.payload.branchName}`; 
+          console.log("path prefix here: ", pathPrefix)
         }
       }
       // server staging commit jobs
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
-        pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/docsworker-xlarge/master`; 
+        const server_user = await this.getUser()
+        console.log("we are inside server staging! ", pathPrefix)
+        pathPrefix += `/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/master`; 
+        console.log("after i try to concat with += ", pathPrefix)
       }
       let envVars;
       if(pathPrefix){
@@ -90,13 +88,14 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
             throw errResult;
           }
       }); 
-      if(pathPrefix){
-        const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
-        console.log(`this is path prefix: ${pathPrefix} and this is mut prefix ${mutPrefix}`)
-        return mutPrefix;
-      }
+      //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
+      const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
+      console.log(`this is path prefix: ${pathPrefix} and this is mut prefix ${mutPrefix}`)
+      return mutPrefix;
+      
     }
     async getUser(){
+      console.log("get user called!")
       try {
         const commands = [
           `whoami`
@@ -105,9 +104,9 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
         const {
           stdout,
           stderr
-        } = await exec(commandsToBuild.join(" && ")); 
+        } = await exec(commands.join(" && ")); 
         console.log(stdout)
-
+        return stdout
       } catch (error) {
         console.log(error)
         throw error
