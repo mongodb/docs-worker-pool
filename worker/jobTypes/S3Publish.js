@@ -64,12 +64,6 @@ class S3PublishClass {
   async pushToProduction(logger) {
     logger.save(`${'(prod)'.padEnd(15)}Pushing to production`);
 
-    const publishCommands = [
-      '. /venv/bin/activate',
-      `cd repos/${this.GitHubJob.getRepoDirName()}`,
-      'make publish',
-    ];
-
     // this is the final command to deploy
     // will either return summary message from mut or json
     const deployCommands = [
