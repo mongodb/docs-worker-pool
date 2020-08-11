@@ -9,6 +9,12 @@ version:
     - '2.7'
     - '2.6'
     - '2.5'
+    - '2.4'
+    - '2.3'
+    - '2.2'
+    - '2.1'
+    - '2.0'
+    - '1.1'
   active:
     - '2.13'
     - '2.12'
@@ -34,6 +40,12 @@ git:
       - 'v2.7'
       - 'v2.6'
       - 'v2.5'
+      - 'v2.4'
+      - 'v2.3'
+      - 'v2.2'
+      - 'v2.1'
+      - 'v2.0'
+      - 'v1.1'
       # the branches/published list **must** be ordered from most to
       # least recent release.
 ...
