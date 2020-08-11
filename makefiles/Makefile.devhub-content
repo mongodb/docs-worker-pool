@@ -31,24 +31,7 @@ update-snooty:
 	git reset --hard origin/master; \
 	npm install --production
 
-next-gen-html: update-snooty
-	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ; \
-	if [ $$? -eq 1 ]; then \
-		exit 1; \
-	else \
-		exit 0; \
-	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; \
-	cd snooty-devhub; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
-
-next-gen-html-publish: update-snooty
+next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	if [ $$? -eq 1 ]; then \
@@ -56,26 +39,33 @@ next-gen-html-publish: update-snooty
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR} && \
-	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod.js > ${REPO_DIR}/snooty-devhub/gatsby-config.js
-	cd snooty-devhub; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
-next-gen-publish: next-gen-html-publish
-	# if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
-
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
+		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+		echo "we dont have args!!!!"; \
+	fi
+%:
+	@:
 
 next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=/ --deploy --json --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))"; 
+%:
+	@:
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
