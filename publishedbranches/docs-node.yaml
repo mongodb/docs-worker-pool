@@ -1,4 +1,4 @@
-prefix: 'node'
+prefix: 'drivers/node'
 version:
   published:
     - 'master'
