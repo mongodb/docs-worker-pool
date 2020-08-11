@@ -105,8 +105,8 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           stdout,
           stderr
         } = await exec(commands.join(" && ")); 
-        console.log(stdout)
-        return stdout
+        console.log(stdout.trim())
+        return stdout.trim()
       } catch (error) {
         console.log(error)
         throw error
