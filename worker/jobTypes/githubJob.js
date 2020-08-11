@@ -55,7 +55,8 @@ class GitHubJobClass {
         //versioned repo
         console.log(repoContent.content.version.active)
         if(repoContent && repoContent.content.version.active.length > 1){
-          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/docsworker-xlarge/${this.currentJob.payload.branchName}`; 
+          pathPrefix = `${this.currentJob.payload.repoName.replace('docs-','')}/${this.currentJob.payload.branchName}`; 
+          console.log("path preefix in first if: ", pathPrefix)
         }
         //non-versioned repo
         else{
@@ -91,10 +92,27 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
       }); 
       if(pathPrefix){
         const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
+        console.log(`this is path prefix: ${pathPrefix} and this is mut prefix ${mutPrefix}`)
         return mutPrefix;
       }
     }
+    async getUser(){
+      try {
+        const commands = [
+          `whoami`
+        ];
+        const exec = workerUtils.getExecPromise();
+        const {
+          stdout,
+          stderr
+        } = await exec(commandsToBuild.join(" && ")); 
+        console.log(stdout)
 
+      } catch (error) {
+        console.log(error)
+        throw error
+      }
+    }
     async applyPatch(patch, currentJobDir) {
         //create patch file
         try {
@@ -313,7 +331,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
         }
         //set up env vars for all jobs
         const pathPrefix = await this.writeEnvFile(isProdDeployJob)
-        
+        console.log("this is the path prefix in build repo: ", pathPrefix)
         // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
         // save to job object to pass to mut in S3Publish.js. Front end constructs path for regular staging jobs 
         // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
