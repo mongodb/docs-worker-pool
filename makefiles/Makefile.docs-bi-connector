@@ -35,7 +35,7 @@ configure-mut-redirects:
   
 next-gen-html:
 	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
+	@echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
@@ -45,6 +45,7 @@ next-gen-html:
 	cp .env.production snooty/.env.production;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 	
@@ -53,14 +54,11 @@ STABLE_BRANCH_NEXT_GEN = `grep 'manual' ${REPO_DIR}/published-branches.yaml | cu
 
 next-gen-stage: ## Host online for review
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
-		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
-		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
 	else \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-		echo "we dont have args!!!!"; \
 	fi
 %:
 	@:

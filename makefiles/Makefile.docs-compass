@@ -37,7 +37,7 @@ publish: migrate-assets ## Builds this branch's publishable HTML and other artif
 
 next-gen-html:
 	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
+	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true""; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
@@ -52,14 +52,11 @@ next-gen-html:
   
 next-gen-stage: ## Host online for review
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
-		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
-		echo "we have args!!!  $(filter-out $@,$(MAKECMDGOALS))"; \
 	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-		echo "we dont have args!!!!"; \
+		mut-publish public ${STAGING_BUCKET} --prefix="/${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
 	fi
 %:
 	@:
