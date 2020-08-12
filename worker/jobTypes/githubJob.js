@@ -50,21 +50,17 @@ class GitHubJobClass {
       };
       const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
       var pathPrefix = repoContent.content.prefix
-      console.log(repoContent)
-      console.log(isProdDeployJob)
+
       if(isProdDeployJob){
         //versioned repo
         if(repoContent && repoContent.content.version.active.length > 1){
           pathPrefix += `/${this.currentJob.payload.branchName}`; 
-          console.log("path prefix here: ", pathPrefix)
         }
       }
       // server staging commit jobs
       else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
         const server_user = await this.getUser()
-        console.log("we are inside server staging! ", pathPrefix)
         pathPrefix += `/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/master`; 
-        console.log("after i try to concat with += ", pathPrefix)
       }
       let envVars;
       if(pathPrefix){
@@ -84,31 +80,25 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
       fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
           if(err) {
-            console.log(`${'(HTML)'.padEnd(15)}stdErr: ${err.stderr}`);
+            console.log(`error writing .env.production file: ${err.stderr}`);
             throw errResult;
           }
       }); 
       //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
       const mutPrefix = pathPrefix.split('/docsworker-xlarge')[0];
-      console.log(`this is path prefix: ${pathPrefix} and this is mut prefix ${mutPrefix}`)
       return mutPrefix;
       
     }
     async getUser(){
-      console.log("get user called!")
       try {
-        const commands = [
-          `whoami`
-        ];
         const exec = workerUtils.getExecPromise();
         const {
           stdout,
           stderr
-        } = await exec(commands.join(" && ")); 
-        console.log(stdout.trim())
+        } = await exec(`whoami`); 
         return stdout.trim()
       } catch (error) {
-        console.log(error)
+        console.log("Error running shell command whoami", error)
         throw error
       }
     }
@@ -305,7 +295,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
             throw error;
         }
 
-              //check for patch
+       //check for patch
       if (currentJob.payload.patch !== undefined) {
         await this.applyPatch(
           currentJob.payload.patch,
@@ -330,9 +320,11 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
         }
         //set up env vars for all jobs
         const pathPrefix = await this.writeEnvFile(isProdDeployJob)
-        console.log("this is the path prefix in build repo: ", pathPrefix)
+        
         // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
-        // save to job object to pass to mut in S3Publish.js. Front end constructs path for regular staging jobs 
+        // save to job object to pass to mut in S3Publish.js. 
+        
+        // Front end constructs path for regular staging jobs 
         // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           this.currentJob.payload.pathPrefix = pathPrefix;
@@ -353,7 +345,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
       //check if prod deploy job
       if (isProdDeployJob) {
-          commandsToBuild[commandsToBuild.length - 1] = 'make download-published-branches';
+          commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
           commandsToBuild.push(`make next-gen-html`)
       }
 
@@ -363,8 +355,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
                 stdout,
                 stderr
             } = await execTwo(commandsToBuild.join(' && '));
-            console.log(stdout + '\n\n')
-            console.log(stderr)
+
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
                 logger.save(

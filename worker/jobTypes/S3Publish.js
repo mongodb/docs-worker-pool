@@ -71,7 +71,7 @@ class S3PublishClass {
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
       'make deploy',
     ];
-    console.log(`this is the path prefix: ${this.GitHubJob.currentJob.payload.pathPrefix}`)
+
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 1] = `make next-gen-deploy ${this.GitHubJob.currentJob.payload.pathPrefix}`;
