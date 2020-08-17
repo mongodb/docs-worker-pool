@@ -8,7 +8,8 @@ PRODUCTION_URL="https://docs.mongodb.com"
 PRODUCTION_BUCKET=docs-node-prod
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
-PREFIX=node
+
+PREFIX=drivers/node
 PROJECT=node
 REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
@@ -86,5 +87,5 @@ next-gen-deploy:
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
-	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT} -g -s --exclude build/public/sdk/iOS
+	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX} -g -s --exclude build/public/sdk/iOS
 
