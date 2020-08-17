@@ -39,13 +39,13 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
