@@ -2,8 +2,6 @@ const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const simpleGit = require('simple-git/promise');
 const request = require('request');
-const logger = require('../utils/logger');
-const S3Publish = require('./S3Publish');
 
 
 class GitHubJobClass {
@@ -42,15 +40,13 @@ class GitHubJobClass {
         }
         return false;
     }
-    
-    async writeEnvFile(isProdDeployJob){
+    async constructPrefix(isProdDeployJob){
       //download published branches file to retrieve prefix and check if repo is versioned 
       const repoObject = {
         repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
       };
       const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
       var pathPrefix = repoContent.content.prefix
-
       if(isProdDeployJob){
         //versioned repo
         if(repoContent && repoContent.content.version.active.length > 1){
@@ -62,6 +58,10 @@ class GitHubJobClass {
         const server_user = await this.getUser()
         pathPrefix += `/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/master`; 
       }
+    }
+    async writeEnvFile(isProdDeployJob){
+      const pathPrefix = this.constructPrefix(isProdDeployJob)
+
       let envVars;
       if(pathPrefix){
         envVars = 
@@ -318,17 +318,20 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-        //set up env vars for all jobs
-        const pathPrefix = await this.writeEnvFile(isProdDeployJob)
+        //set up env vars for all next-gen jobs
+        if(this.buildNextGen()){
+          const pathPrefix = await this.writeEnvFile(isProdDeployJob)
         
-        // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
-        // save to job object to pass to mut in S3Publish.js. 
-        
-        // Front end constructs path for regular staging jobs 
-        // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
-        if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
-          this.currentJob.payload.pathPrefix = pathPrefix;
+          // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
+          // save to job object to pass to mut in S3Publish.js. 
+          
+          // Front end constructs path for regular staging jobs 
+          // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
+          if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
+            this.currentJob.payload.pathPrefix = pathPrefix;
+          }
         }
+
         
         // default commands to run to build repo
         const commandsToBuild = [
@@ -344,7 +347,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
       }
 
       //check if prod deploy job
-      if (isProdDeployJob) {
+      if (this.buildNextGen() && isProdDeployJob) {
           commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
           commandsToBuild.push(`make next-gen-html`)
       }
