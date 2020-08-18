@@ -41,8 +41,9 @@ class GitHubJobClass {
         return false;
     }
 
-    async constructPrefix(isProdDeployJob){
-      //download published branches file to retrieve prefix and check if repo is versioned 
+    async constructPrefix(isProdDeployJob){        
+      try{
+        //download published branches file to retrieve prefix and check if repo is versioned 
         const repoObject = {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
@@ -64,25 +65,25 @@ class GitHubJobClass {
         //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-          
-          return new Promise((resolve) => {
-            resolve([pathPrefix, mutPrefix]);
-          });
-
+          return[pathPrefix, mutPrefix, server_user]
+        }else{
+          return [null, null, server_user]
         }
-        return new Promise((reject) => {
-          reject(false);
-        });
+      }catch(error){
+        console.log(error)
+        throw error
+      }
+        
     }
 
     async writeEnvFile(isProdDeployJob){
         try {
-          const [pathPrefix, mutPrefix] = await this.constructPrefix(isProdDeployJob)
+          const [pathPrefix, mutPrefix, server_user] = await this.constructPrefix(isProdDeployJob)
           let envVars;
   
           if(pathPrefix !== null){
             envVars = 
-            `GATSBY_PARSER_USER=docsworker-xlarge
+            `GATSBY_PARSER_USER=${server_user}
     GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
     PATH_PREFIX=${pathPrefix}
     `;
@@ -90,7 +91,7 @@ class GitHubJobClass {
           //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
           else{
             envVars = 
-            `GATSBY_PARSER_USER=docsworker-xlarge
+            `GATSBY_PARSER_USER=${server_user}
     GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
     `;
           }
