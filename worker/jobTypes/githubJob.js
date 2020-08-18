@@ -40,10 +40,9 @@ class GitHubJobClass {
         }
         return false;
     }
+
     async constructPrefix(isProdDeployJob){
       //download published branches file to retrieve prefix and check if repo is versioned 
-      
-      try {
         const repoObject = {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
@@ -64,53 +63,53 @@ class GitHubJobClass {
         console.log("path prefix in construct", pathPrefix)
         //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
-          const mutPrefix = pathPrefix.split(server_user)[0];
-          return [pathPrefix, mutPrefix];
+          const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
+          
+          return new Promise((resolve) => {
+            resolve([pathPrefix, mutPrefix]);
+          });
+
         }
-
-        return [null, null]
-      } catch (error) {
-        console.log(error)
-        throw error
-      }
-
+        return new Promise((reject) => {
+          reject(false);
+        });
     }
+
     async writeEnvFile(isProdDeployJob){
-
-      try {
-        const [pathPrefix, mutPrefix] = await this.constructPrefix(isProdDeployJob)
-        let envVars;
-
-        if(pathPrefix !== null){
-          envVars = 
-          `GATSBY_PARSER_USER=docsworker-xlarge
-  GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-  PATH_PREFIX=${pathPrefix}
-  `;
-        }
-        //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
-        else{
-          envVars = 
-          `GATSBY_PARSER_USER=docsworker-xlarge
-  GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-  `;
-        }
+        try {
+          const [pathPrefix, mutPrefix] = await this.constructPrefix(isProdDeployJob)
+          let envVars;
   
-        fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
-            if(err) {
-              console.log(`error writing .env.production file: ${err.stderr}`);
-              throw errResult;
-            }
-        }); 
-        //pass mutprefix back to caller to save in prefix field of currentJob, which we pass to stage and deploy targets
-        if(mutPrefix !== null){
-          return mutPrefix;
+          if(pathPrefix !== null){
+            envVars = 
+            `GATSBY_PARSER_USER=docsworker-xlarge
+    GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+    PATH_PREFIX=${pathPrefix}
+    `;
+          }
+          //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
+          else{
+            envVars = 
+            `GATSBY_PARSER_USER=docsworker-xlarge
+    GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+    `;
+          }
+    
+          fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
+              if(err) {
+                console.log(`error writing .env.production file: ${err.stderr}`);
+                throw errResult;
+              }
+          }); 
+          //pass mutprefix back to caller to save in prefix field of currentJob, which we pass to stage and deploy targets
+          if(mutPrefix !== null){
+            return mutPrefix
+          }
+          return null
+        } catch (error) {
+         console.log(error)
+         throw error 
         }
-      } catch (error) {
-        console.log(error)
-        throw error
-      }
-
 
   }
     async getUser(){
@@ -146,7 +145,8 @@ class GitHubJobClass {
             const {
               stdout,
               stderr
-          } = await exec(commandsToBuild.join(" && "));    
+          } = await exec(commandsToBuild.join(" && "));   
+          console.log("this is output from patch apply ", stdout) 
         } catch (error) {
             console.log("Error applying patch: ", error)
             throw error;
@@ -321,6 +321,7 @@ class GitHubJobClass {
 
        //check for patch
       if (currentJob.payload.patch !== undefined) {
+        console.log("we are about to apply patch!!!")
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
