@@ -14,6 +14,18 @@ REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
+
+# "PATCH_ID" related shell commands to manage commitless builds
+PATCH_FILE="myPatch.patch"
+
+PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
+
+PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
+
+URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
+
+
+
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
@@ -56,23 +68,42 @@ deploy: build/public
 
 next-gen-html:
 	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
-	if [ $$? -eq 1 ]; then \
-		exit 1; \
+	echo 'snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}';
+	@if [ ! -z "${PATCH_ID}" ]; then \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
 	else \
-		exit 0; \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
-	npm run build; \
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR} && \
+	cd snooty && \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production && \
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production && \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production && \
+	if [ ! -z "${PATCH_ID}" ]; then \
+		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
+		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+	fi && \
+	npm run build && \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+	if [ ! -z "${PATCH_ID}" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS} \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/" \
+	fi
 
 next-gen-publish:
 	# snooty parse and then build-front-end
