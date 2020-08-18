@@ -41,7 +41,8 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; 
 		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; 
 	#stagel local jobs
-	elif [ -z "${PATCH_ID}", ! $(filter-out $@,$(MAKECMDGOALS)) ]; then 
+	elif [ ! -z "${PATCH_ID}", ! $(filter-out $@,$(MAKECMDGOALS)) ]; then 
+    echo "stagel local job!!!!"
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; 
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; 
 	# reg github push jobs
@@ -122,51 +123,29 @@ next-gen-html: examples
 	# snooty parse and then build-front-end
 	echo 'snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}';
 	@if [ ! -z "${PATCH_ID}" ]; then \
-<<<<<<< HEAD
-		echo 'snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${PATCH_CLAUSE}"'; \
-		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
-		if [ $$? -ne 0 ]; then \
-=======
 		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
 		if [ $$? -eq 1 ]; then \
->>>>>>> cf3280e313f16973090375355fa5d3da7132cc83
 			exit 1; \
 		else \
 			exit 0; \
 		fi \
 	else \
 		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
-<<<<<<< HEAD
-		if [ $$? -ne 0 ]; then \
-=======
 		if [ $$? -eq 1 ]; then \
->>>>>>> cf3280e313f16973090375355fa5d3da7132cc83
 			exit 1; \
 		else \
 			exit 0; \
 		fi \
 	fi
-<<<<<<< HEAD
-	cp -r "${REPO_DIR}/../../snooty" ${REPO_DIR};
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
-	npm run build; \
-=======
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR} && \
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR} 
+  cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty && \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production && \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production && \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production && \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 	if [ ! -z "${PATCH_ID}" ]; then \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
-	npm run build && \
->>>>>>> cf3280e313f16973090375355fa5d3da7132cc83
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	npm run build
 
 redirects:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
