@@ -147,6 +147,7 @@ next-gen-html: examples
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
 	npm run build
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 redirects:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
