@@ -1,4 +1,4 @@
-prefix: 'docs'
+prefix: 'manual'
 version:
   published:
     - 'master'
