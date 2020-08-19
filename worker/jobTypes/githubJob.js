@@ -83,22 +83,22 @@ class GitHubJobClass {
           if(pathPrefix !== null){
             envVars = 
             `GATSBY_PARSER_USER=${server_user}
-    GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-    PATH_PREFIX=${pathPrefix}
-    `;
+GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+PATH_PREFIX=${pathPrefix}
+`;
           }
           //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
           else{
             envVars = 
             `GATSBY_PARSER_USER=${server_user}
-    GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-    `;
+GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
+`;
           }
     
           fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
               if(err) {
                 console.log(`error writing .env.production file: ${err.stderr}`);
-                throw errResult;
+                throw err;
               }
           }); 
           //pass mutprefix back to caller to save in prefix field of currentJob, which we pass to stage and deploy targets
@@ -121,7 +121,7 @@ class GitHubJobClass {
         } = await exec(`whoami`); 
         return stdout.trim()
       } catch (error) {
-        console.log("Error running shell command whoami", error)
+        console.log('Error running shell command whoami', error)
         throw error
       }
     }
@@ -131,7 +131,7 @@ class GitHubJobClass {
           await fs.writeFileSync(`repos/${currentJobDir}/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
           
         } catch (error) {
-            console.log("Error creating patch ", error);
+            console.log('Error creating patch ', error);
             throw error;
         }
         //apply patch
@@ -141,14 +141,10 @@ class GitHubJobClass {
             `patch -p1 < myPatch.patch`
           ];
             const exec = workerUtils.getExecPromise();
-          // return new Promise((resolve, reject) => {
-            const {
-              stdout,
-              stderr
-          } = await exec(commandsToBuild.join(" && "));   
+            await exec(commandsToBuild.join('&&'));   
           
         } catch (error) {
-            console.log("Error applying patch: ", error)
+            console.log('Error applying patch: ', error)
             throw error;
         }
     }
@@ -170,7 +166,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-prefix-work/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -321,7 +317,6 @@ class GitHubJobClass {
 
        //check for patch
       if (currentJob.payload.patch !== undefined) {
-        console.log("we are about to apply patch!!!")
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
@@ -344,7 +339,6 @@ class GitHubJobClass {
             );
         }
         //set up env vars for all next-gen jobs
-        console.log("this builds next gen? ", this.buildNextGen())
         if(this.buildNextGen()){
           const pathPrefix = await this.writeEnvFile(isProdDeployJob)
         
