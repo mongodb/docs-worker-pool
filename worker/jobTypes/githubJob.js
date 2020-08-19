@@ -61,7 +61,6 @@ class GitHubJobClass {
         else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
           pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/master`; 
         }
-        console.log("path prefix in construct", pathPrefix)
         //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
@@ -80,7 +79,7 @@ class GitHubJobClass {
         try {
           const [pathPrefix, mutPrefix, server_user] = await this.constructPrefix(isProdDeployJob)
           let envVars;
-  
+
           if(pathPrefix !== null){
             envVars = 
             `GATSBY_PARSER_USER=${server_user}
@@ -147,7 +146,7 @@ class GitHubJobClass {
               stdout,
               stderr
           } = await exec(commandsToBuild.join(" && "));   
-          console.log("this is output from patch apply ", stdout) 
+          
         } catch (error) {
             console.log("Error applying patch: ", error)
             throw error;
@@ -345,6 +344,7 @@ class GitHubJobClass {
             );
         }
         //set up env vars for all next-gen jobs
+        console.log("this builds next gen? ", this.buildNextGen())
         if(this.buildNextGen()){
           const pathPrefix = await this.writeEnvFile(isProdDeployJob)
         
