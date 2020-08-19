@@ -15,7 +15,6 @@ class S3PublishClass {
     const stageCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
-
       'make stage',
     ];
 
@@ -83,6 +82,7 @@ class S3PublishClass {
       const command = deployCommands.join(' && ');
       const { stdout } = await exec(command);
       let stdoutMod = stdout;
+      
       // check for json string output from mut
       const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
 

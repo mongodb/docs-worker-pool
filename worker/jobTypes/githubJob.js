@@ -411,4 +411,4 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
 module.exports = {
     GitHubJobClass: GitHubJobClass
-};
+}; 
