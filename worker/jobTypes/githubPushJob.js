@@ -63,7 +63,7 @@ function safeGithubPush(currentJob) {
 async function startGithubBuild(job, logger) {
   const buildOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
-    job.buildRepo(logger, false),
+    job.buildRepo(logger),
     'Timed out on build',
   );
   // checkout output of build

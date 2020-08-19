@@ -41,97 +41,13 @@ class GitHubJobClass {
         return false;
     }
 
-    async constructPrefix(isProdDeployJob){        
-      try{
-        //download published branches file to retrieve prefix and check if repo is versioned 
-        const repoObject = {
-          repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
-        };
-        const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
-        const server_user = await this.getUser()
-        let pathPrefix; 
-        if(isProdDeployJob){
-          //versioned repo
-          if(repoContent && repoContent.content.version.active.length > 1){
-            repoContent.content.prefix
-            pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
-          }
-        }
-        // server staging commit jobs
-        else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
-          pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/master`; 
-        }
-        //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
-        if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
-          const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-          return[pathPrefix, mutPrefix, server_user]
-        }else{
-          return [null, null, server_user]
-        }
-      }catch(error){
-        console.log(error)
-        throw error
-      }
-        
-    }
-
-    async writeEnvFile(isProdDeployJob){
-        try {
-          const [pathPrefix, mutPrefix, server_user] = await this.constructPrefix(isProdDeployJob)
-          let envVars;
-
-          if(pathPrefix !== null){
-            envVars = 
-            `GATSBY_PARSER_USER=${server_user}
-GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-PATH_PREFIX=${pathPrefix}
-`;
-          }
-          //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
-          else{
-            envVars = 
-            `GATSBY_PARSER_USER=${server_user}
-GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-`;
-          }
-    
-          fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
-              if(err) {
-                console.log(`error writing .env.production file: ${err.stderr}`);
-                throw err;
-              }
-          }); 
-          //pass mutprefix back to caller to save in prefix field of currentJob, which we pass to stage and deploy targets
-          if(mutPrefix !== null){
-            return mutPrefix
-          }
-          return null
-        } catch (error) {
-         console.log(error)
-         throw error 
-        }
-
-  }
-    async getUser(){
-      try {
-        const exec = workerUtils.getExecPromise();
-        const {
-          stdout,
-          stderr
-        } = await exec(`whoami`); 
-        return stdout.trim()
-      } catch (error) {
-        console.log('Error running shell command whoami', error)
-        throw error
-      }
-    }
     async applyPatch(patch, currentJobDir) {
         //create patch file
         try {
           await fs.writeFileSync(`repos/${currentJobDir}/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
           
         } catch (error) {
-            console.log('Error creating patch ', error);
+            console.log("Error creating patch ", error);
             throw error;
         }
         //apply patch
@@ -141,10 +57,11 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
             `patch -p1 < myPatch.patch`
           ];
             const exec = workerUtils.getExecPromise();
-            await exec(commandsToBuild.join('&&'));   
-          
+          // return new Promise((resolve, reject) => {
+            await exec(commandsToBuild.join(" && "));
+    
         } catch (error) {
-            console.log('Error applying patch: ', error)
+            console.log("Error applying patch: ", error);
             throw error;
         }
     }
@@ -163,7 +80,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           console.log('dumpError :: argument is not an object');
         }
     }
-
+    
     // our maintained directory of makefiles
     async downloadMakefile() {
         const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
@@ -235,7 +152,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
         });
     }
 
-    async buildRepo(logger, isProdDeployJob) {
+    async buildRepo(logger) {
         const currentJob = this.currentJob;
 
         // setup for building
@@ -244,6 +161,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
 
         logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
         logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
+
 
         const exec = workerUtils.getExecPromise();
         const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
@@ -315,13 +233,25 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
             throw error;
         }
 
-       //check for patch
+              //check for patch
       if (currentJob.payload.patch !== undefined) {
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
         );
       }
+        // default commands to run to build repo
+        const commandsToBuild = [
+            `. /venv/bin/activate`,
+            `cd repos/${this.getRepoDirName()}`,
+            `rm -f makefile`,
+            `make html`
+        ];
+
+        // check if need to build next-gen
+        if (this.buildNextGen()) {
+            commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+        }
 
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
@@ -338,40 +268,6 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-        //set up env vars for all next-gen jobs
-        if(this.buildNextGen()){
-          const pathPrefix = await this.writeEnvFile(isProdDeployJob)
-        
-          // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
-          // save to job object to pass to mut in S3Publish.js. 
-          
-          // Front end constructs path for regular staging jobs 
-          // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
-          
-          if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
-            this.currentJob.payload.pathPrefix = pathPrefix;
-          }
-        }
-
-        
-        // default commands to run to build repo
-        const commandsToBuild = [
-          `. /venv/bin/activate`,
-          `cd repos/${this.getRepoDirName()}`,
-          `rm -f makefile`,
-          `make html`
-      ];
-
-      // check if need to build next-gen
-      if (this.buildNextGen() && !isProdDeployJob) {
-        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-      }
-
-      //check if prod deploy job
-      if (this.buildNextGen() && isProdDeployJob) {
-          commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
-          commandsToBuild.push(`make next-gen-html`)
-      }
 
         const execTwo = workerUtils.getExecPromise();
         try {
