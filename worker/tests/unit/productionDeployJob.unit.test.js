@@ -1,6 +1,6 @@
 const deployjob = require('../../jobTypes/productionDeployJob');
 const workerUtils = require('../../utils/utils');
-const githubJob = require('../../jobTypes/githubJob');
+const githubJob = require('../../jobTypes/githubJob').GitHubJobClass;
 
 describe('Test Class', () => {
     // Dont actually reset the directory and dont care about the logging
@@ -16,6 +16,10 @@ describe('Test Class', () => {
     });
 
     it('startGithubBuild(: If build is successful --> return true', async () => {
-        deployjob.startGithubBuild(null, null);
+        try {
+            deployjob.startGithubBuild(null, null);
+        } catch (e) {
+            throw e;
+        }
     });
 });
