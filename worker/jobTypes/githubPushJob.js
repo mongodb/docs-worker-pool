@@ -62,9 +62,10 @@ function safeGithubPush(currentJob) {
 }
 
 async function startGithubBuild(job, logger) {
+  const gatsbyAdapter = new GatsbyAdapter(job);
   const buildOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
-    job.buildRepo(logger, false),
+    job.buildRepo(logger, gatsbyAdapter, false),
     'Timed out on build',
   );
   // checkout output of build
@@ -127,6 +128,7 @@ async function runGithubPush(currentJob) {
   const publisher = new S3Publish(job);
   const gatsbyAdapter = new GatsbyAdapter(job);
 
+ 
   await startGithubBuild(job, logger);
 
   console.log('completed build');

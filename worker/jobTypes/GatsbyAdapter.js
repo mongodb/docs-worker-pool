@@ -12,7 +12,7 @@ class GatsbyAdapterClass {
       try {
         let server_user = workerUtils.getServerUser();
         let envVars = `GATSBY_PARSER_USER=${server_user}
-        GATSBY_PARSER_BRANCH=${this.GitHubJob.currentJob.payload.branchName}`;
+GATSBY_PARSER_BRANCH=${this.GitHubJob.currentJob.payload.branchName}`;
         const pathPrefix = this.GitHubJob.currentJob.payload.pathPrefix;
 
         if(pathPrefix){

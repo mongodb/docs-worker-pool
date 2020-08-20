@@ -41,7 +41,7 @@ class GitHubJobClass {
         return false;
     }
 
-    async constructPrefix(isProdDeployJob){        
+    async constructPrefix(isProdDeployJob){    
       try{
         //download published branches file to retrieve prefix and check if repo is versioned 
         const repoObject = {
@@ -63,10 +63,9 @@ class GitHubJobClass {
         }
         //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
+          this.currentJob.payload.pathPrefix = pathPrefix;
           const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-          return[pathPrefix, mutPrefix]
-        }else{
-          return [null, null]
+          this.currentJob.payload.mutPrefix = mutPrefix;
         }
       }catch(error){
         console.log(error)
@@ -116,7 +115,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-prefix-work/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -185,7 +184,7 @@ class GitHubJobClass {
         });
     }
 
-    async buildRepo(logger, isProdDeployJob) {
+    async buildRepo(logger, gatsbyAdapter, isProdDeployJob) {
         const currentJob = this.currentJob;
 
         // setup for building
@@ -288,25 +287,6 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
-        //set up env vars for all next-gen jobs
-        if(this.buildNextGen()){
-          const [pathPrefix, mutPrefix] = await this.constructPrefix(isProdDeployJob)
-        
-          // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
-          // save to job object to pass to mut in S3Publish.js. 
-          
-          // Front end constructs path for regular staging jobs 
-          // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
-          
-          if(pathPrefix !== null && mutPrefix !== null){
-            this.currentJob.payload.pathPrefix = pathPrefix;
-            //do we have to check for mutprefix? shouldnt we throw an error if it doesnt save?
-            //also save mutprefix
-            this.currentJob.payload.mutPrefix = mutPrefix
-          }
-        
-        }
-
         
         // default commands to run to build repo
         const commandsToBuild = [
@@ -315,8 +295,17 @@ class GitHubJobClass {
           `rm -f makefile`,
           `make html`
       ];
-
+      
+      // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
+      // save to job object to pass to mut in S3Publish.js. 
+        
+      // Front end constructs path for regular staging jobs 
+      // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
       // check if need to build next-gen
+      if(this.buildNextGen()){
+        await this.constructPrefix(isProdDeployJob);
+        await gatsbyAdapter.initEnv();
+      }
       if (this.buildNextGen() && !isProdDeployJob) {
         commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
       }
