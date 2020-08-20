@@ -70,7 +70,6 @@ next-gen-html:
 
 next-gen-stage: ## Host online for review
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
-		echo "made it to this clause!!!!"
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
 	else \
