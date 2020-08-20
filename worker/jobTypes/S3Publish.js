@@ -8,7 +8,6 @@ class S3PublishClass {
     this.fastly = new FastlyJob(GitHubJob);
     this.GitHubJob = GitHubJob;
     fs.pathExists();
-    console.log("constructor called for s3 publish!!!")
   }
 
   async pushToStage(logger) {
