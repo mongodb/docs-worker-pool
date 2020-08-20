@@ -36,9 +36,8 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yam
 .PHONY: help lint html markdown stage deploy deploy-search-index examples redirects
 
 next-gen-stage: ## Host online for review
-  # stagel commit jobs
+  # stagel commit jobs \
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
-		echo "stagel commit job!!"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
 	#stagel local jobs \
