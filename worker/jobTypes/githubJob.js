@@ -304,7 +304,7 @@ class GitHubJobClass {
             //also save mutprefix
             this.currentJob.payload.mutPrefix = mutPrefix
           }
-          await 
+        
         }
 
         
