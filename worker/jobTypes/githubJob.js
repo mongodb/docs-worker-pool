@@ -48,7 +48,7 @@ class GitHubJobClass {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
-        const server_user = await this.getUser()
+        const server_user = await workerUtils.getUser()
         let pathPrefix; 
         if(isProdDeployJob){
           //versioned repo
@@ -59,14 +59,14 @@ class GitHubJobClass {
         }
         // server staging commit jobs
         else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
-          pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/master`; 
+          pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/${this.currentJob.payload.branchName}`; 
         }
         //mut only expects prefix or prefix/version for versioned repos, have to remove user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-          return[pathPrefix, mutPrefix, server_user]
+          return[pathPrefix, mutPrefix]
         }else{
-          return [null, null, server_user]
+          return [null, null]
         }
       }catch(error){
         console.log(error)
@@ -75,56 +75,6 @@ class GitHubJobClass {
         
     }
 
-    async writeEnvFile(isProdDeployJob){
-        try {
-          const [pathPrefix, mutPrefix, server_user] = await this.constructPrefix(isProdDeployJob)
-          let envVars;
-
-          if(pathPrefix !== null){
-            envVars = 
-            `GATSBY_PARSER_USER=${server_user}
-GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-PATH_PREFIX=${pathPrefix}
-`;
-          }
-          //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
-          else{
-            envVars = 
-            `GATSBY_PARSER_USER=${server_user}
-GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
-`;
-          }
-    
-          fs.writeFile(`repos/${this.getRepoDirName()}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
-              if(err) {
-                console.log(`error writing .env.production file: ${err.stderr}`);
-                throw err;
-              }
-          }); 
-          //pass mutprefix back to caller to save in prefix field of currentJob, which we pass to stage and deploy targets
-          if(mutPrefix !== null){
-            return mutPrefix
-          }
-          return null
-        } catch (error) {
-         console.log(error)
-         throw error 
-        }
-
-  }
-    async getUser(){
-      try {
-        const exec = workerUtils.getExecPromise();
-        const {
-          stdout,
-          stderr
-        } = await exec(`whoami`); 
-        return stdout.trim()
-      } catch (error) {
-        console.log('Error running shell command whoami', error)
-        throw error
-      }
-    }
     async applyPatch(patch, currentJobDir) {
         //create patch file
         try {
@@ -340,7 +290,7 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
         }
         //set up env vars for all next-gen jobs
         if(this.buildNextGen()){
-          const pathPrefix = await this.writeEnvFile(isProdDeployJob)
+          const [pathPrefix, mutPrefix] = await this.constructPrefix(isProdDeployJob)
         
           // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
           // save to job object to pass to mut in S3Publish.js. 
@@ -348,9 +298,13 @@ GATSBY_PARSER_BRANCH=${this.currentJob.payload.branchName}
           // Front end constructs path for regular staging jobs 
           // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
           
-          if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
+          if(pathPrefix !== null && mutPrefix !== null){
             this.currentJob.payload.pathPrefix = pathPrefix;
+            //do we have to check for mutprefix? shouldnt we throw an error if it doesnt save?
+            //also save mutprefix
+            this.currentJob.payload.mutPrefix = mutPrefix
           }
+          await 
         }
 
         

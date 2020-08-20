@@ -148,7 +148,22 @@ module.exports = {
   async getAllRepos() {
     return mongo.getMetaCollection().find({}).toArray();
   },
-  
+
+  //either xlarge workerpool or regular
+  async getServerUser(){
+    try {
+      const exec = workerUtils.getExecPromise();
+      const {
+        stdout,
+        stderr
+      } = await exec(`whoami`); 
+      return stdout.trim()
+    } catch (error) {
+      console.log('Error running shell command whoami', error)
+      throw error
+    }
+  },
+
   // gets entitlements for user when deploying
   // similar to the `getUserEntitlements` function on stitch
   async getUserEntitlements(githubUsername) {

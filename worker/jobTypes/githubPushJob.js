@@ -1,6 +1,7 @@
 const workerUtils = require('../utils/utils');
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
+const GatsbyAdapter = require('../jobTypes/GatsbyAdapter').GatsbyAdapterClass;
 const validator = require('validator');
 const Logger = require('../utils/logger').LoggerClass;
 
@@ -84,6 +85,7 @@ async function startGithubBuild(job, logger) {
   });
 }
 
+
 async function pushToStage(publisher, logger) {
   const stageOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
@@ -123,11 +125,14 @@ async function runGithubPush(currentJob) {
   const job = new GitHubJob(currentJob);
   const logger = new Logger(currentJob);
   const publisher = new S3Publish(job);
+  const gatsbyAdapter = new GatsbyAdapter(job);
 
   await startGithubBuild(job, logger);
 
   console.log('completed build');
-
+  //do i need to wrap this in a function like startGithubBuild??
+  await gatsbyAdapter.initEnv()
+  
   let branchext = '';
 
   if (currentJob.payload.branchName !== 'master') {
