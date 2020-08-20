@@ -48,7 +48,7 @@ class GitHubJobClass {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
         };
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
-        const server_user = await workerUtils.getUser()
+        const server_user = await workerUtils.getServerUser()
         let pathPrefix; 
         if(isProdDeployJob){
           //versioned repo
