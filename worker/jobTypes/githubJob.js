@@ -50,6 +50,7 @@ class GitHubJobClass {
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         const server_user = await workerUtils.getServerUser()
         let pathPrefix; 
+        console.log(this.currentJob.payload.patchType, this.currentJob.payload.patchType === 'commit')
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
@@ -58,7 +59,7 @@ class GitHubJobClass {
           }
         }
         // server staging commit jobs
-        else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){
+        else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 
           pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/${this.currentJob.payload.branchName}`; 
         }
         //mut only expects prefix or prefix/version for versioned repos, have to remove server user from staging prefix
@@ -303,6 +304,7 @@ class GitHubJobClass {
       // via the env vars defined/written in GatsbyAdapter.initEnv(), so the server doesn't have to create one here
       // check if need to build next-gen
       if(this.buildNextGen()){
+        console.log("i am called!!!")
         await this.constructPrefix(isProdDeployJob);
         await gatsbyAdapter.initEnv();
       }
@@ -325,11 +327,11 @@ class GitHubJobClass {
 
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
-                logger.save(
-                    `${'(BUILD)'.padEnd(
-                15
-              )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
-                );
+              //   logger.save(
+              //       `${'(BUILD)'.padEnd(
+              //   15
+              // )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
+              //   );
                 resolve({
                     status: 'success',
                     stdout: stdout,
