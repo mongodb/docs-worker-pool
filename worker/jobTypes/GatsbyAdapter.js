@@ -15,7 +15,7 @@ class GatsbyAdapterClass {
         if(pathPrefix){
           envVars += `PATH_PREFIX=${pathPrefix}\n`
         }
-        console.log(envVars)
+
         fs.writeFile(`repos/${this.GitHubJob.currentJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
             if(err) {
               console.log(`error writing .env.production file: ${err.stderr}`);
