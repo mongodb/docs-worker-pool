@@ -50,7 +50,7 @@ class GitHubJobClass {
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         const server_user = await workerUtils.getServerUser()
         let pathPrefix; 
-        console.log(this.currentJob.payload.patchType, this.currentJob.payload.patchType === 'commit')
+
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
@@ -116,7 +116,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-prefix-work/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
@@ -304,7 +304,6 @@ class GitHubJobClass {
       // via the env vars defined/written in GatsbyAdapter.initEnv(), so the server doesn't have to create one here
       // check if need to build next-gen
       if(this.buildNextGen()){
-        console.log("i am called!!!")
         await this.constructPrefix(isProdDeployJob);
         await gatsbyAdapter.initEnv();
       }

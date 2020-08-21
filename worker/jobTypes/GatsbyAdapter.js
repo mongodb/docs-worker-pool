@@ -7,7 +7,6 @@ class GatsbyAdapterClass {
   }
 
   async initEnv(){
-      console.log("we are initing!!")
       try {
         let server_user = await workerUtils.getServerUser();
         let envVars = `GATSBY_PARSER_USER=${server_user}\nGATSBY_PARSER_BRANCH=${this.GitHubJob.currentJob.payload.branchName}\n`;
@@ -22,7 +21,6 @@ class GatsbyAdapterClass {
               console.log(`error writing .env.production file: ${err.stderr}`);
               throw err;
             }
-            console.log("no error here!")
         }); 
       } catch (error) {
        console.log(error)
