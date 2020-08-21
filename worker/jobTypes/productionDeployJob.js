@@ -66,9 +66,10 @@ function safeGithubProdPush(currentJob) {
 }
 
 async function startGithubBuild(job, logger) {
+  const builder = new GatsbyAdapter(job);
   const buildOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
-    job.buildRepo(logger, true),
+    job.buildRepo(logger, builder, true),
     'Timed out on build',
   );
   // checkout output of build
