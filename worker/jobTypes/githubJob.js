@@ -300,7 +300,7 @@ class GitHubJobClass {
       // save to job object to pass to mut in S3Publish.js. 
         
       // Front end constructs path for regular staging jobs 
-      // via the env vars defined/written in writeEnvProdFile, so the server doesn't have to create one here
+      // via the env vars defined/written in GatsbyAdapter.initEnv(), so the server doesn't have to create one here
       // check if need to build next-gen
       if(this.buildNextGen()){
         await this.constructPrefix(isProdDeployJob);
