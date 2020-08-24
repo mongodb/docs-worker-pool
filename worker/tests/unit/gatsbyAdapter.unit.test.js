@@ -64,7 +64,7 @@ describe('Test Class', () => {
   it('path prefix for non-versioned repo', async () => {
     const execMock = jest.fn().mockRejectedValue({ killed: true });
     const testJob = new GitHubJob(testProdDeployNoVersion);
-    console.log(testJob)
+
     const publishedBranchesObj = {};
     const body = `prefix: 'drivers/node'
 version:
@@ -95,13 +95,13 @@ git:
     //check string written to .env.production
     const builder = new GatsbyAdapter(testJob);
     const envVars = `GATSBY_PARSER_USER=docsworker-xlarge\nGATSBY_PARSER_BRANCH=master\nPATH_PREFIX=drivers/node\n`;
-    expect(await builder.writeEnvVars()).toEqual(envVars);     
+    expect(await builder.constructEnvVars()).toEqual(envVars);     
   });
 
   it('path prefix for versioned repo', async () => {
     const execMock = jest.fn().mockRejectedValue({ killed: true });
     const testJob = new GitHubJob(testProdDeployVersioned);
-    console.log(testJob)
+
     const publishedBranchesObj = {};
     const body = `prefix: 'bi-connector'
 version:
@@ -137,7 +137,7 @@ git:
     //check string written to .env.production
     const builder = new GatsbyAdapter(testJob);
     const envVars = `GATSBY_PARSER_USER=docsworker-xlarge\nGATSBY_PARSER_BRANCH=master\nPATH_PREFIX=bi-connector/master\n`;
-    expect(await builder.writeEnvVars()).toEqual(envVars);        
+    expect(await builder.constructEnvVars()).toEqual(envVars);        
   });
 
   it('path prefix for stagel commit job', async () => {
@@ -179,7 +179,7 @@ git:
     //check string written to .env.production
     const builder = new GatsbyAdapter(testJob);
     const envVars = `GATSBY_PARSER_USER=docsworker-xlarge\nGATSBY_PARSER_BRANCH=master\nPATH_PREFIX=spark-connector/madelinezec/DOP-1253/docsworker-xlarge/master\n`;
-    expect(await builder.writeEnvVars()).toEqual(envVars); 
+    expect(await builder.constructEnvVars()).toEqual(envVars); 
   });
 
   it('reg push job should not generate path prefix field in job', async () => {
@@ -221,7 +221,7 @@ git:
     //check string written to .env.production
     const builder = new GatsbyAdapter(testJob);
     const envVars = `GATSBY_PARSER_USER=docsworker-xlarge\nGATSBY_PARSER_BRANCH=master\n`;
-    expect(await builder.writeEnvVars()).toEqual(envVars); 
+    expect(await builder.constructEnvVars()).toEqual(envVars); 
   
   });
 });
