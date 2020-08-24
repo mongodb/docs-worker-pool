@@ -76,7 +76,7 @@ async function startGithubBuild(job, logger) {
   if (buildOutput && buildOutput.status === 'success') {
     // only post entire build output to slack if there are warnings
     const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
-    if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
+    if (buildOutputToSlack.indexOf('WARNING') !== -1) {
       await logger.sendSlackMsg(buildOutputToSlack);
     }
     return new Promise((resolve) => {

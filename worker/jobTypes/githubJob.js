@@ -55,6 +55,7 @@ class GitHubJobClass {
           if(repoContent && repoContent.content.version.active.length > 1){
             pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
           }
+          //non versioned repo
           else{
             pathPrefix = `${repoContent.content.prefix}`;
           }
