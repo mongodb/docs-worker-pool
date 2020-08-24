@@ -54,7 +54,6 @@ class GitHubJobClass {
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
-            repoContent.content.prefix
             pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
           }
         }
