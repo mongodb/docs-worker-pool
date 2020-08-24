@@ -111,8 +111,7 @@ describe('Test Class', () => {
     workerUtils.getExecPromise = jest.fn().mockReturnValueOnce(() => execMock)
                                           .mockReturnValue(() => { throw mockError});
                                        
-    job.runGithubPush(testPayloadWithRepo)
-    expect(job.constructPrefix).toHaveBeenCalledTimes(1);
+    await expect(job.runGithubPush(testPayloadWithRepo)).rejects.toThrow(mockError); 
   });
 
   it('build() resolves properly notsignal', async () => {
