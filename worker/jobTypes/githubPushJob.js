@@ -2,6 +2,7 @@ const validator = require('validator');
 const workerUtils = require('../utils/utils');
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
+const GatsbyAdapter = require('../jobTypes/GatsbyAdapter').GatsbyAdapterClass;
 const Logger = require('../utils/logger').LoggerClass;
 
 const invalidJobDef = new Error('job not valid');
@@ -59,13 +60,14 @@ function safeGithubPush(currentJob) {
 }
 
 async function startGithubBuild(job, logger) {
-    const buildOutput = await workerUtils.promiseTimeoutS(
-        buildTimeout,
-        job.buildRepo(logger),
-        'Timed out on build',
-    );
-    // checkout output of build
-    if (buildOutput && buildOutput.status === 'success') {
+  const builder = new GatsbyAdapter(job);
+  const buildOutput = await workerUtils.promiseTimeoutS(
+    buildTimeout,
+    job.buildRepo(logger, builder, false),
+    'Timed out on build',
+  );
+  // checkout output of build
+  if (buildOutput && buildOutput.status === 'success') {
     // only post entire build output to slack if there are warnings
         const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
         if (buildOutputToSlack.indexOf('WARNING') !== -1) {
@@ -81,6 +83,7 @@ async function startGithubBuild(job, logger) {
         reject(false);
     });
 }
+
 
 async function pushToStage(publisher, logger) {
     const stageOutput = await workerUtils.promiseTimeoutS(
@@ -117,16 +120,19 @@ async function runGithubPush(currentJob) {
         throw invalidJobDef;
     }
 
-    // instantiate github job class and logging class
-    const job = new GitHubJob(currentJob);
-    const logger = new Logger(currentJob);
-    const publisher = new S3Publish(job);
+  // instantiate github job class and logging class
+  const job = new GitHubJob(currentJob);
+  const logger = new Logger(currentJob);
+  const publisher = new S3Publish(job);
+  const gatsbyAdapter = new GatsbyAdapter(job);
 
-    await startGithubBuild(job, logger);
+ 
+  await startGithubBuild(job, logger);
 
-    console.log('completed build');
-
-    let branchext = '';
+  console.log('completed build');
+  await gatsbyAdapter.initEnv()
+  
+  let branchext = '';
 
     if (currentJob.payload.branchName !== 'master') {
         branchext = `-${currentJob.payload.branchName}`;
