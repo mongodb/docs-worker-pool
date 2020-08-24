@@ -41,7 +41,8 @@ class GitHubJobClass {
         return false;
     }
 
-    async constructPrefix(isProdDeployJob){    
+    async constructPrefix(isProdDeployJob){  
+      console.log("this is it!!!")  
       try{
         //download published branches file to retrieve prefix and check if repo is versioned 
         const repoObject = {
@@ -49,9 +50,10 @@ class GitHubJobClass {
         };
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         const server_user = await workerUtils.getServerUser()
-        let pathPrefix; 
-
+        let pathPrefix = `${repoContent.content.prefix}`
+        console.log("this is repo content!! ", repoContent.content.version.active, repoContent.content.version.active.length, )
         if(isProdDeployJob){
+          console.log("woah!!!")
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
             pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
