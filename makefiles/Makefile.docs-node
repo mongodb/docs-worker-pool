@@ -41,9 +41,13 @@ next-gen-html-publish:
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
 	
-next-gen-publish: next-gen-html-publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+#next-gen-publish: next-gen-html-publish
+#	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -76,7 +80,13 @@ html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
 next-gen-deploy:
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PREFIX} --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS}
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))";
+	#does this work??
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+%:
+	@:
+
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
