@@ -1,4 +1,4 @@
-prefix: 'landing'
+prefix: ''
 version:
   published:
     - 'master'
