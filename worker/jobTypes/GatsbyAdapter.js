@@ -6,15 +6,20 @@ class GatsbyAdapterClass {
     this.GitHubJob = GitHubJob;
   }
 
+  async constructEnvVars(){
+    let server_user = await workerUtils.getServerUser();
+    let envVars = `GATSBY_PARSER_USER=${server_user}\nGATSBY_PARSER_BRANCH=${this.GitHubJob.currentJob.payload.branchName}\n`;
+    const pathPrefix = this.GitHubJob.currentJob.payload.pathPrefix;
+
+    if(pathPrefix){
+      envVars += `PATH_PREFIX=${pathPrefix}\n`
+    }
+    return envVars
+  }
+
   async initEnv(){
       try {
-        let server_user = await workerUtils.getServerUser();
-        let envVars = `GATSBY_PARSER_USER=${server_user}\nGATSBY_PARSER_BRANCH=${this.GitHubJob.currentJob.payload.branchName}\n`;
-        const pathPrefix = this.GitHubJob.currentJob.payload.pathPrefix;
-
-        if(pathPrefix){
-          envVars += `PATH_PREFIX=${pathPrefix}\n`
-        }
+        const envVars = await this.writeEnvVars();
 
         fs.writeFile(`repos/${this.GitHubJob.currentJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
             if(err) {

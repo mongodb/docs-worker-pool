@@ -329,11 +329,11 @@ class GitHubJobClass {
 
             return new Promise(function(resolve, reject) {
                 logger.save(`${'(BUILD)'.padEnd(15)}Finished Build`);
-              //   logger.save(
-              //       `${'(BUILD)'.padEnd(
-              //   15
-              // )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
-              //   );
+                logger.save(
+                    `${'(BUILD)'.padEnd(
+                15
+              )}worker.sh run details:\n\n${stdout}\n---\n${stderr}`
+                );
                 resolve({
                     status: 'success',
                     stdout: stdout,

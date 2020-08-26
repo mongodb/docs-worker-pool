@@ -2,6 +2,7 @@ const validator = require('validator');
 const workerUtils = require('../utils/utils');
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
+const GatsbyAdapter = require('../jobTypes/GatsbyAdapter').GatsbyAdapterClass;
 const Logger = require('../utils/logger').LoggerClass;
 
 const buildTimeout = 60 * 450;
@@ -149,9 +150,10 @@ async function runGithubProdPush(currentJob) {
 }
 
 module.exports = {
+	startGithubBuild,
   runGithubProdPush,
   safeGithubProdPush,
   verifyBranchConfiguredForPublish,
   verifyUserEntitlements,
-  pushToProduction,
+	pushToProduction,
 };
