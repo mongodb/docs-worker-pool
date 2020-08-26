@@ -62,10 +62,14 @@ next-gen-publish: build
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
-next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=/ --deploy --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+next-gen-deploy:	
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))";
 	$(MAKE) deploy-search-index
+%:
+	@:
+
 
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
