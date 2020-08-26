@@ -27,6 +27,7 @@ next-gen-html:
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-realm/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
@@ -45,9 +46,15 @@ next-gen-stage: ## Host online for review
 	@:
 
 
+get-build-dependencies: 
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-realm.yaml > ${REPO_DIR}/published-branches.yaml
+
 next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=/ --deploy --json --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi	
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+%:
+	@:
 
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html

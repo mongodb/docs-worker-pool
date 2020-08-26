@@ -63,6 +63,7 @@ next-gen-html:
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-mongodb-vscode/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
@@ -80,27 +81,15 @@ next-gen-stage: ## Host online for review
 %:
 	@:
 
-next-gen-publish:
-	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
-	if [ $$? -eq 1 ]; then \
-		exit 1; \
-	else \
-		exit 0; \
-	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-mongodb-vscode/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongodb-vscode.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --json --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+next-gen-deploy:	
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
 	$(MAKE) deploy-search-index
+%:
+	@:
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
