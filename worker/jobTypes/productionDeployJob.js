@@ -150,9 +150,10 @@ async function runGithubProdPush(currentJob) {
 }
 
 module.exports = {
+	startGithubBuild,
   runGithubProdPush,
   safeGithubProdPush,
   verifyBranchConfiguredForPublish,
   verifyUserEntitlements,
-  pushToProduction,
+	pushToProduction,
 };
