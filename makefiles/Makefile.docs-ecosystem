@@ -49,7 +49,6 @@ next-gen-html:
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-ecosystem/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
