@@ -139,7 +139,7 @@ next-gen-html: examples
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR} && \
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty && \
 	cd snooty && \
-	echo "GATSBY_SITE=${PREFIX}" >> .env.production && \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production && \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 	if [ ! -z "${PATCH_ID}" ]; then \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
