@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.4.5] - 2020-08-13
+
+### changed
+- remove build call (`make next-gen-html`) from S3Publish.js and remove next-gen-publish and next-gen-html-publish targets from all makefiles (DOP-1238)
+- next-gen-deploy is always passed the path prefix from the command line
+
+### added
+- server writes env.production file for all jobs, but only constructs PATH_PREFIX for production deploy and stagel commit jobs (DOP-1238, DOP-1253) 
+
+
 ## [v0.4.4] - 2020-08-13
 
 ### changed
