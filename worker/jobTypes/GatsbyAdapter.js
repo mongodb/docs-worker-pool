@@ -19,7 +19,7 @@ class GatsbyAdapterClass {
 
   async initEnv(){
       try {
-        const envVars = await this.writeEnvVars();
+        const envVars = await this.constructEnvVars();
 
         fs.writeFile(`repos/${this.GitHubJob.currentJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
             if(err) {
