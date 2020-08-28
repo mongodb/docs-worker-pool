@@ -41,13 +41,50 @@ class GitHubJobClass {
         return false;
     }
 
+    async constructPrefix(isProdDeployJob){    
+      try{
+        //download published branches file to retrieve prefix and check if repo is versioned 
+        const repoObject = {
+          repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
+        };
+        const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
+        const server_user = await workerUtils.getServerUser()
+        let pathPrefix; 
+
+        if(isProdDeployJob){
+          //versioned repo
+          if(repoContent && repoContent.content.version.active.length > 1){
+            pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
+          }
+          //non versioned repo
+          else{
+            pathPrefix = `${repoContent.content.prefix}`;
+          }
+        }
+        // server staging commit jobs
+        else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 
+          pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/${this.currentJob.payload.branchName}`; 
+        }
+        //mut only expects prefix or prefix/version for versioned repos, have to remove server user from staging prefix
+        if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
+          this.currentJob.payload.pathPrefix = pathPrefix;
+          const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
+          this.currentJob.payload.mutPrefix = mutPrefix;
+        }
+      }catch(error){
+        console.log(error)
+        throw error
+      }
+        
+    }
+
     async applyPatch(patch, currentJobDir) {
         //create patch file
         try {
           await fs.writeFileSync(`repos/${currentJobDir}/myPatch.patch`, patch, { encoding: 'utf8', flag: 'w' });
           
         } catch (error) {
-            console.log("Error creating patch ", error);
+            console.log('Error creating patch ', error);
             throw error;
         }
         //apply patch
@@ -57,11 +94,10 @@ class GitHubJobClass {
             `patch -p1 < myPatch.patch`
           ];
             const exec = workerUtils.getExecPromise();
-          // return new Promise((resolve, reject) => {
-            await exec(commandsToBuild.join(" && "));
-    
+            await exec(commandsToBuild.join('&&'));   
+          
         } catch (error) {
-            console.log("Error applying patch: ", error);
+            console.log('Error applying patch: ', error)
             throw error;
         }
     }
@@ -80,7 +116,7 @@ class GitHubJobClass {
           console.log('dumpError :: argument is not an object');
         }
     }
-    
+
     // our maintained directory of makefiles
     async downloadMakefile() {
         const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
@@ -152,7 +188,7 @@ class GitHubJobClass {
         });
     }
 
-    async buildRepo(logger) {
+    async buildRepo(logger, gatsbyAdapter, isProdDeployJob) {
         const currentJob = this.currentJob;
 
         // setup for building
@@ -161,7 +197,6 @@ class GitHubJobClass {
 
         logger.save(`${'(BUILD)'.padEnd(15)}Running Build`);
         logger.save(`${'(BUILD)'.padEnd(15)}running worker.sh`);
-
 
         const exec = workerUtils.getExecPromise();
         const pullRepoCommands = [`cd repos/${this.getRepoDirName()}`];
@@ -233,25 +268,13 @@ class GitHubJobClass {
             throw error;
         }
 
-              //check for patch
+       //check for patch
       if (currentJob.payload.patch !== undefined) {
         await this.applyPatch(
           currentJob.payload.patch,
           this.getRepoDirName(currentJob)
         );
       }
-        // default commands to run to build repo
-        const commandsToBuild = [
-            `. /venv/bin/activate`,
-            `cd repos/${this.getRepoDirName()}`,
-            `rm -f makefile`,
-            `make html`
-        ];
-
-        // check if need to build next-gen
-        if (this.buildNextGen()) {
-            commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
-        }
 
         // overwrite repo makefile with the one our team maintains
         const makefileContents = await this.downloadMakefile();
@@ -268,6 +291,34 @@ class GitHubJobClass {
                 'ERROR: makefile does not exist in /makefiles directory on meta branch.'
             );
         }
+        
+        // default commands to run to build repo
+        const commandsToBuild = [
+          `. /venv/bin/activate`,
+          `cd repos/${this.getRepoDirName()}`,
+          `rm -f makefile`,
+          `make html`
+      ];
+      
+      // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
+      // save to job object to pass to mut in S3Publish.js. 
+        
+      // Front end constructs path for regular staging jobs 
+      // via the env vars defined/written in GatsbyAdapter.initEnv(), so the server doesn't have to create one here
+      // check if need to build next-gen
+      if(this.buildNextGen()){
+        await this.constructPrefix(isProdDeployJob);
+        await gatsbyAdapter.initEnv();
+      }
+      if (this.buildNextGen() && !isProdDeployJob) {
+        commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
+      }
+
+      //check if prod deploy job
+      if (this.buildNextGen() && isProdDeployJob) {
+          commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
+          commandsToBuild.push(`make next-gen-html`)
+      }
 
         const execTwo = workerUtils.getExecPromise();
         try {

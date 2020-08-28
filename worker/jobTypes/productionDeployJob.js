@@ -2,6 +2,7 @@ const validator = require('validator');
 const workerUtils = require('../utils/utils');
 const GitHubJob = require('../jobTypes/githubJob').GitHubJobClass;
 const S3Publish = require('../jobTypes/S3Publish').S3PublishClass;
+const GatsbyAdapter = require('../jobTypes/GatsbyAdapter').GatsbyAdapterClass;
 const Logger = require('../utils/logger').LoggerClass;
 
 const buildTimeout = 60 * 450;
@@ -66,16 +67,17 @@ function safeGithubProdPush(currentJob) {
 }
 
 async function startGithubBuild(job, logger) {
+  const builder = new GatsbyAdapter(job);
   const buildOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
-    job.buildRepo(logger),
+    job.buildRepo(logger, builder, true),
     'Timed out on build',
   );
   // checkout output of build
   if (buildOutput && buildOutput.status === 'success') {
     // only post entire build output to slack if there are warnings
     const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
-    if (buildOutputToSlack.indexOf('WARNING:') !== -1) {
+    if (buildOutputToSlack.indexOf('WARNING') !== -1) {
       await logger.sendSlackMsg(buildOutputToSlack);
     }
     return new Promise((resolve) => {
@@ -148,9 +150,10 @@ async function runGithubProdPush(currentJob) {
 }
 
 module.exports = {
+	startGithubBuild,
   runGithubProdPush,
   safeGithubProdPush,
   verifyBranchConfiguredForPublish,
   verifyUserEntitlements,
-  pushToProduction,
+	pushToProduction,
 };
