@@ -39,6 +39,7 @@ next-gen-stage: ## Host online for review
 	# stagel commit jobs \
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "It thinks this is a stagel commit job"; \
 		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
 	#stagel local jobs \
 	elif [ ! -z "${PATCH_ID}", ! $(filter-out $@,$(MAKECMDGOALS)) ]; then \
