@@ -40,11 +40,12 @@ next-gen-stage: ## Host online for review
 	if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
-	#stagel local jobs and reg github push jobs \
+	# stagel local jobs \
 	if [! -z "${PATCH_ID}", ! "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
 		echo "push!!"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	# reg github push jobs \
 	else \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"; \
