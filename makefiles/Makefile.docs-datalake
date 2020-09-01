@@ -89,8 +89,8 @@ next-gen-html:
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 	if [ ! -z "${PATCH_ID}" ]; then \
+		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
 	npm run build; \
