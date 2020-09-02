@@ -5,7 +5,7 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-PRODUCTION_URL="https://docs.mongodb.com/datalake"
+PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongodb-org-prod
 PROJECT=datalake
@@ -85,45 +85,46 @@ next-gen-html:
 			exit 0; \
 		fi \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR} && \
-	cd snooty && \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production && \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production && \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production && \
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	if [ ! -z "${PATCH_ID}" ]; then \
 		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
-	npm run build && \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-
-next-gen-stage: ## Host online for review
-	if [ ! -z "${PATCH_ID}" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-	fi
-
-next-gen-publish:
-	# snooty parse and then build-front-end
-
-	# curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-datalake.yaml > ${REPO_DIR}/published-branches.yaml
-	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" || exit 0;
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-datalake/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+  
+next-gen-stage: ## Host online for review
+	# stagel commit jobs \
+	if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+	# stagel local jobs \
+	elif [ ! -z "${PATCH_ID}" ] && [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	# reg github push jobs \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	fi
+%:
+	@:
+
+
+get-build-dependencies: 
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-datalake.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --json --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
 	$(MAKE) next-gen-deploy-search-index
+%:
+	@:
+
 
 ## Update the search index for this branch
 next-gen-deploy-search-index:

@@ -1,3 +1,5 @@
+
+prefix: 'datalake'
 version:
   published:
     - 'master'

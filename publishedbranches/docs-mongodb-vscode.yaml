@@ -1,3 +1,4 @@
+prefix: 'mongodb-vscode'
 version:
   published:
     - 'master'
