@@ -1,4 +1,3 @@
-prefix: 'manual'
 version:
   published:
     - 'master'
