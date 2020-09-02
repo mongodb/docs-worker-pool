@@ -1,4 +1,3 @@
-prefix: 'drivers'
 version:
   published:
     - 'master'
