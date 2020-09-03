@@ -1,4 +1,3 @@
-prefix: 'bi-connector'
 version:
   published:
     - '2.13'
