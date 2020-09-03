@@ -23,6 +23,10 @@ help:
 	@echo 'Variables'
 	@echo '  ARGS         - Arguments to pass to mut-publish'
 
+
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
+
 next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
