@@ -10,10 +10,11 @@ class GatsbyAdapterClass {
     let server_user = await workerUtils.getServerUser();
     let envVars = `GATSBY_PARSER_USER=${server_user}\nGATSBY_PARSER_BRANCH=${this.GitHubJob.currentJob.payload.branchName}\n`;
     const pathPrefix = this.GitHubJob.currentJob.payload.pathPrefix;
-
-    if(pathPrefix){
+		
+    if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
       envVars += `PATH_PREFIX=${pathPrefix}\n`
-    }
+		}
+
     return envVars
   }
 
