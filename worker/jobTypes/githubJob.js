@@ -43,7 +43,6 @@ class GitHubJobClass {
 
     async constructPrefix(isProdDeployJob){    
       try{
-				console.log("we are inside path prefix")
         //download published branches file to retrieve prefix and check if repo is versioned 
         const repoObject = {
           repoOwner: this.currentJob.payload.repoOwner, repoName: this.currentJob.payload.repoName,
@@ -53,16 +52,13 @@ class GitHubJobClass {
         let pathPrefix; 
 
         if(isProdDeployJob){
-					console.log("indeed a prod deploy job")
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
             pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
           }
           //non versioned repo
           else{
-
-						pathPrefix = `${repoContent.content.prefix}`;
-						console.log("path prefix: ", pathPrefix)
+            pathPrefix = `${repoContent.content.prefix}`;
           }
         }
         // server staging commit jobs
@@ -72,8 +68,7 @@ class GitHubJobClass {
         //mut only expects prefix or prefix/version for versioned repos, have to remove server user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           this.currentJob.payload.pathPrefix = pathPrefix;
-					const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-					console.log("this current job payload path prefix: ", this.currentJob.payload.pathPrefix, typeof this.currentJob.payload.pathPrefix)
+          const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
           this.currentJob.payload.mutPrefix = mutPrefix;
         }
       }catch(error){
@@ -124,7 +119,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-prefix-work/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
