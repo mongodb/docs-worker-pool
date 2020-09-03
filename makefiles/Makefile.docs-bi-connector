@@ -27,21 +27,20 @@ help: ## Show this help message
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html 
 
-configure-mut-redirects:
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
-  
 next-gen-html:
 	# snooty parse and then build-front-end
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-bi-connector.yaml > ${REPO_DIR}/published-branches.yaml
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
-	cp ${REPO_DIR}/.env.production snooty/.env.production;
+	cp -r ${REPO_DIR}/../../snooty ${REPO_DIR};
 	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
+	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
+	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
@@ -50,16 +49,11 @@ next-gen-html:
 STABLE_BRANCH_NEXT_GEN = `grep 'manual' ${REPO_DIR}/published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
 next-gen-stage: ## Host online for review
-	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
-	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-	fi
-%:
-	@:
+	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
 	
+next-gen-publish:
+	mut-redirects config/redirects -o public/.htaccess;
 
 publish: ## Builds this branch's publishable HTML and other artifacts under build/public
 	giza make publish
@@ -77,16 +71,12 @@ deploy: build/public ## Deploy to the production bucket
 
 	$(MAKE) deploy-search-index
 
-get-build-dependencies: 
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-bi-connector.yaml > ${REPO_DIR}/published-branches.yaml
+next-gen-deploy: build/public ## Deploy to the production bucket
+	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='bi-connector' ${ARGS}
 
-next-gen-deploy:
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+
 	$(MAKE) next-gen-deploy-search-index
-%:
-	@:
 	
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
