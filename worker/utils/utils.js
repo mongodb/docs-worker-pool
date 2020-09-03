@@ -181,7 +181,7 @@ module.exports = {
     return returnObject;
   },
 
-  async getRepoPublishedBranches(repoObject) {
+  async getRepoPublishedBranches(repoObject) { 
     const pubBranchesFile = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-prefix-work/publishedbranches/${repoObject.repoName}.yaml`;
     const returnObject = {};
     return new Promise(function(resolve, reject) {
