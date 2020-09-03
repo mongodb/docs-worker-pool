@@ -1,4 +1,4 @@
-prefix: 'devhub'
+prefix: 'mongocli'
 version:
   published:
     - 'master'

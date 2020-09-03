@@ -1,4 +1,4 @@
-prefix: 'devhub'
+prefix: 'kubernetes-operator'
 version:
   published:
     - 'master'

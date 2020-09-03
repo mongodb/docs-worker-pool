@@ -57,7 +57,6 @@ next-gen-publish: assets
 	# curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-ecosystem.yaml > ${REPO_DIR}/published-branches.yaml
 	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}";
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/configfiles/docs-ecosystem/gatsby-config.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \

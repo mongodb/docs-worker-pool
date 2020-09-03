@@ -1,4 +1,4 @@
-prefix: 'devhub'
+prefix: 'kafka-connector'
 version:
   published:
     - 'master'
