@@ -1,4 +1,4 @@
-prefix: 'devhub'
+prefix: 'guides'
 version:
   published:
     - 'master'
