@@ -63,7 +63,7 @@ next-gen-stage: ## Host online for review
 
 next-gen-deploy:	
 	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+	@echo "Hosted at ${PRODUCTION_URL}/index.html";
 %:
 	@:
 
