@@ -32,7 +32,7 @@ update-snooty:
 	npm install --production
 
 get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/devhub-content.yaml > ${REPO_DIR}/published-branches.yaml
+	@curl https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta-prefix-work/publishedbranches/devhub-content.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-html:
 	# snooty parse and then build-front-end
