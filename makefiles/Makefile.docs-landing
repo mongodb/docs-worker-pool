@@ -68,7 +68,7 @@ next-gen-publish: build
 
 next-gen-deploy: build
 	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))";
+	@echo "Hosted at ${PRODUCTION_URL}";
 	$(MAKE) deploy-search-index
 %:
 	@:
