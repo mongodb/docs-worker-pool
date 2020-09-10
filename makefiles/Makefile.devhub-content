@@ -62,11 +62,12 @@ next-gen-stage: ## Host online for review
 	@:
 
 next-gen-deploy:	
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
-	$(MAKE) deploy-search-index
 %:
 	@:
+
+
 
 
 deploy-search-index: ## Update the search index for this branch
