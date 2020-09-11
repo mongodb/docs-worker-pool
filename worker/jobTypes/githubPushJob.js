@@ -60,20 +60,18 @@ function safeGithubPush(currentJob) {
 }
 
 async function startGithubBuild(job, logger) {
-  const builder = new GatsbyAdapter(job);
-  const buildOutput = await workerUtils.promiseTimeoutS(
-    buildTimeout,
-    job.buildRepo(logger, builder, false),
-    'Timed out on build',
-  );
-  // checkout output of build
-  if (buildOutput && buildOutput.status === 'success') {
-    // only post entire build output to slack if there are warnings
-        const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
-        if (buildOutputToSlack.indexOf('WARNING') !== -1) {
-            await logger.sendSlackMsg(buildOutputToSlack);
-        }
+    const builder = new GatsbyAdapter(job);
+    const buildOutput = await workerUtils.promiseTimeoutS(
+        buildTimeout,
+        job.buildRepo(logger, builder, false),
+        'Timed out on build',
+    );
 
+    // checkout output of build
+    if (buildOutput && buildOutput.status === 'success') {
+        // only post entire build output to slack if there are warnings
+        const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
+        logger.filterOutputForUserLogs(buildOutputToSlack, job);
         return new Promise((resolve) => {
             resolve(true);
         });
@@ -91,6 +89,7 @@ async function pushToStage(publisher, logger) {
         publisher.pushToStage(logger),
         'Timed out on push to stage',
     );
+
     // checkout output of build
     if (stageOutput && stageOutput.status === 'success') {
         await logger.sendSlackMsg(stageOutput.stdout);
@@ -119,27 +118,18 @@ async function runGithubPush(currentJob) {
         );
         throw invalidJobDef;
     }
+    // instantiate github job class and logging class
+    const job = new GitHubJob(currentJob);
+    const logger = new Logger(currentJob);
+    const publisher = new S3Publish(job);
 
-  // instantiate github job class and logging class
-  const job = new GitHubJob(currentJob);
-  const logger = new Logger(currentJob);
-  const publisher = new S3Publish(job);
-  const gatsbyAdapter = new GatsbyAdapter(job);
-
- 
-  await startGithubBuild(job, logger);
-
-  console.log('completed build');
-  await gatsbyAdapter.initEnv()
-  
-  let branchext = '';
-
+    await startGithubBuild(job, logger);
+    let branchext = '';
     if (currentJob.payload.branchName !== 'master') {
         branchext = `-${currentJob.payload.branchName}`;
     }
     console.log('pushing to stage');
     await pushToStage(publisher, logger);
-
     const files = workerUtils.getFilesInDir(
         `./${currentJob.payload.repoName}/build/public${branchext}`,
     );
