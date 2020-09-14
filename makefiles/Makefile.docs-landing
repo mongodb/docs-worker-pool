@@ -27,8 +27,7 @@ help:
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-html:
-	# snooty parse and then build-front-end
+next-gen-html: ## snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
@@ -43,64 +42,31 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
-next-gen-stage: ## Host online for review
+next-gen-stage: build  ## Host online for review
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
 	else \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+      @echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/cloud"; \
+	   @echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/tools";
 	fi
 %:
 	@:
-	
-next-gen-publish: build
-	# snooty parse and then build-front-end
-	@-echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" > .env.production; \
-	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
-	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
-next-gen-deploy: build
+next-gen-deploy: build  ## Deploy site to production
 	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}";
 	$(MAKE) deploy-search-index
 %:
 	@:
 
-
-html: ## Builds this branch's HTML under build/<branch>/html
-	giza make html
-
-publish: ## Builds this branch's publishable HTML and other artifacts under build/public
-	if [ ${GIT_BRANCH} = master ]; then rm -rf build/master build/public; fi
-	giza make publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
-
-lint: ## Checks URLs in the built corpus underneath build/<branch>/html
-	mut-lint --linters=links ./build/master/source/ ${ARGS}
-
-stage: build
-	mut-publish build/ docs-mongodb-org-staging --prefix=${PREFIX} --stage --verbose ${ARGS}
-	@echo "Hosted at ${URL}/${PREFIX}/${USER}/${GIT_BRANCH}/index.html"
-	@echo "Hosted at ${URL}/${PREFIX}/${USER}/${GIT_BRANCH}/cloud/index.html"
-	@echo "Hosted at ${URL}/${PREFIX}/${USER}/${GIT_BRANCH}/tools/index.html"
-
-deploy: build
-	mut-publish build ${PRODUCTION_BUCKET} --prefix='/' --deploy --json --all-subdirectories ${ARGS}
-
-	@echo "Deployed"
-
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
 	
-build:
+build: ## Generate the legacy HTML pages (i.e. /cloud and /tools)
 	# Clean build directory
 	rm -rf $@
 	# Create output directories
