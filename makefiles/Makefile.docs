@@ -46,8 +46,8 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
 	# reg github push jobs \
 	else \
-		mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+		mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT}/${COMMIT_HASH} --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${COMMIT_HASH}/${USER}/${GIT_BRANCH}/"; \
 	fi
 %:
 	@:
