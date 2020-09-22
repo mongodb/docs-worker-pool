@@ -75,20 +75,29 @@ deploy-search-index: ## Update the search index for this branch
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
 	
 build-legacy-pages:
-	# Clean build directory
+	@# Pull docs-tools updates
+	git submodule init
+	git submodule update --remote
+
+	@# Clean build directory
 	rm -rf $@
-	# Create output directories
+
+	@# Create output directories
 	mkdir -p $@
 	mkdir -p $@/cloud
 	mkdir -p $@/tools
-	mkdir -p $@/images
-	mkdir -p $@/announcements/login-and-access-changes
+
 	@# Copy CSS and JS files to output directories
 	cp static/favicon.png $@/favicon.ico
-	cp -r static/images static/css static/js $@/
-	cp -r static/images static/css static/js $@/tools
-	cp -r static/images static/css static/js $@/cloud
-	cp -r static/images static/css static/js $@/announcements/login-and-access-changes
-	cp -r src/images/announcements/* $@/announcements/login-and-access-changes/images
+	for prefix in $@/ $@/tools $@/cloud; do \
+		mkdir -p $$prefix/js || exit 1; \
+		cp -r static/images $$prefix || exit 1; \
+		cp -r static/css $$prefix || exit 1; \
+		cp ${DOCS_TOOLS_THEME}/landing.min.js* $$prefix/js || exit 1; \
+		cp ${DOCS_TOOLS_THEME}/navbar.min.js* $$prefix/js || exit 1; \
+		cp ${DOCS_TOOLS_THEME}/landing.css $$prefix/css || exit 1; \
+		cp ${DOCS_TOOLS_THEME}/navbar.min.css $$prefix/css || exit 1; \
+	done
+
 	@# Run the script to generate each landing page
 	python3 ./gen_landings.py $@
