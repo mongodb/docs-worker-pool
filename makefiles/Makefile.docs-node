@@ -67,5 +67,5 @@ next-gen-deploy:
 
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
-	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX} -s
+	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX} -g -s
 
