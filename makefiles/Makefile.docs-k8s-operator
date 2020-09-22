@@ -84,8 +84,8 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; \
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; \
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	npm run build; \
@@ -134,7 +134,7 @@ deploy: build/public
 deploy-search-index:
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
+		mut-index upload public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
 	else \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
+		mut-index upload public/${GIT_BRANCH} -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
 	fi
