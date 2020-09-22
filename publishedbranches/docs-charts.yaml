@@ -1,11 +1,11 @@
 prefix: 'charts'
 version:
   published:
-    - 'Atlas'
+    - 'Cloud'
     - '19.12 (On-Prem)'
     - '19.09 (On-Prem)'
   active:
-    - 'Atlas'
+    - 'Cloud'
     - '19.12 (On-Prem)'
     - '19.09 (On-Prem)'
   stable: ''
