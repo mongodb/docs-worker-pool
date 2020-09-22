@@ -44,11 +44,10 @@ next-gen-html: build-legacy-pages
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-  
-next-gen-stage: 
 	mv build-legacy-pages/tools public/
 	mv build-legacy-pages/cloud public/
-	mv build-legacy-pages/images/* public/images
+  
+next-gen-stage: 
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
