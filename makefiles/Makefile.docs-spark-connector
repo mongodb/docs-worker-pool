@@ -32,8 +32,8 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; \
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; \
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	npm run build; \
@@ -91,9 +91,9 @@ deploy: ## Deploys the DIR (dirhtml) artifacts generated from "publish" to the p
 deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PREFIX}-current.json --aliases ${PREFIX}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PREFIX}/current -g -s; \
+		mut-index upload public/${GIT_BRANCH} -o ${PREFIX}-current.json --aliases ${PREFIX}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PREFIX}/current -g -s; \
 	else \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PREFIX}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX}/${GIT_BRANCH} -s; \
+		mut-index upload public/${GIT_BRANCH} -o ${PREFIX}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX}/${GIT_BRANCH} -s; \
 	fi
 
 #This workaround is because the redirects for symlink version does not prefix with ruby-driver.

@@ -1,0 +1,86 @@
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+USER=$(shell whoami)
+STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+PRODUCTION_URL="https://docs.mongodb.com"
+STAGING_BUCKET=docs-mongodb-org-staging
+PRODUCTION_BUCKET=docs-mongodb-org-prod
+PROJECT=landing
+REPO_DIR=$(shell pwd)
+COMMIT_HASH=$(shell git rev-parse --short HEAD)
+
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+.PHONY: help lint html stage deploy deploy-search-index
+
+help:
+	@echo 'Targets'
+	@echo '  help         - Show this help message'
+	@echo '  build        - Build HTML artifacts for upload'
+	@echo '  stage        - Host online for review'
+	@echo '  deploy       - Deploy into production'
+	@echo ''
+	@echo 'Variables'
+	@echo '  ARGS         - Arguments to pass to mut-publish'
+
+
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
+
+next-gen-html: ## snooty parse and then build-front-end
+	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
+	if [ $$? -eq 1 ]; then \
+		exit 1; \
+	else \
+		exit 0; \
+	fi
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
+next-gen-stage: build  ## Host online for review
+	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/cloud"; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/tools"; \
+	fi
+%:
+	@:
+
+next-gen-deploy: build  ## Deploy site to production
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}";
+	$(MAKE) deploy-search-index
+%:
+	@:
+
+deploy-search-index: ## Update the search index for this branch
+	@echo "Building search index"
+	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
+	
+build: ## Generate the legacy HTML pages (i.e. /cloud and /tools)
+	# Clean build directory
+	rm -rf $@
+	# Create output directories
+	mkdir -p $@
+	mkdir -p $@/cloud
+	mkdir -p $@/tools
+	mkdir -p $@/images
+	mkdir -p $@/announcements/login-and-access-changes
+	@# Copy CSS and JS files to output directories
+	cp static/favicon.png $@/favicon.ico
+	cp -r static/images static/css static/js $@/
+	cp -r static/images static/css static/js $@/tools
+	cp -r static/images static/css static/js $@/cloud
+	cp -r static/images static/css static/js $@/announcements/login-and-access-changes
+	cp -r src/images/announcements/* $@/announcements/login-and-access-changes/images
+	@# Run the script to generate each landing page
+	python3 ./gen_landings.py $@
