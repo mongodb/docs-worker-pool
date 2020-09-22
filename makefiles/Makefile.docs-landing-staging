@@ -27,7 +27,7 @@ help:
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-html:
+next-gen-html: build
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	if [ $$? -eq 1 ]; then \
@@ -43,7 +43,7 @@ next-gen-html:
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
-next-gen-stage: build
+next-gen-stage: 
 	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
@@ -59,7 +59,7 @@ next-gen-stage: build
 	@:
 	
 
-next-gen-deploy: build
+next-gen-deploy: 
 	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}";
 	$(MAKE) deploy-search-index
