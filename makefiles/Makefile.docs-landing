@@ -87,7 +87,7 @@ build-legacy-pages:
 	mkdir -p $@/cloud
 	mkdir -p $@/tools
 	
-	@curl https://github.com/mongodb/docs-landing/blob/master/.gitmodules > ${REPO_DIR}/.gitmodules
+	@curl https://raw.githubusercontent.com/mongodb/docs-landing/blob/master/.gitmodules > ${REPO_DIR}/.gitmodules
 	
 	@# Copy CSS and JS files to output directories
 	cp static/favicon.png $@/favicon.ico
