@@ -75,8 +75,8 @@ deploy-search-index: ## Update the search index for this branch
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
 	
 build-legacy-pages:
-	curl https://github.com/mongodb/docs-landing/blob/master/.gitmodules
-	
+	@curl https://github.com/mongodb/docs-landing/blob/master/.gitmodules > ${REPO_DIR}/.gitmodules
+
 	@# Pull docs-tools updates
 	git submodule init
 	git submodule update --remote
