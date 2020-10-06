@@ -52,6 +52,7 @@ function safeGithubPush(currentJob) {
     if (
         safeString(currentJob.payload.repoName)
         && safeString(currentJob.payload.repoOwner)
+        && safeString(currentJob.payload.branchName)
         && safeBranch(currentJob)
     ) {
         return true;
