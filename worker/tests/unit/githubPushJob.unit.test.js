@@ -24,7 +24,7 @@ const payloadObjBadRepo = {
 
 const payloadObjBadBranch = {
   repoName: 'docs_build_test',
-  branchName: 'DOCSP-test(); ',
+  branchName: 'DOCS&P-test; ',
   repoOwner: 'mongodb',
   isXlarge: false
 };
