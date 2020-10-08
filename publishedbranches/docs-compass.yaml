@@ -4,7 +4,7 @@ version:
     - 'latest stable'
     - 'beta'
   active:
-    - 'master'
+    - 'latest stable'
     - 'beta'
   stable: ''
   upcoming: beta
