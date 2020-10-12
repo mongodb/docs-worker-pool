@@ -73,17 +73,16 @@ async function startGithubBuild(job, logger) {
     job.buildRepo(logger, builder, true),
     'Timed out on build',
   );
-  // checkout output of build
-  if (buildOutput && buildOutput.status === 'success') {
-    // only post entire build output to slack if there are warnings
-    const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
-    if (buildOutputToSlack.indexOf('WARNING') !== -1) {
-      await logger.sendSlackMsg(buildOutputToSlack);
+    // checkout output of build
+    if (buildOutput && buildOutput.status === 'success') {
+      // only post entire build output to slack if there are warnings
+      const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
+      logger.filterOutputForUserLogs(buildOutputToSlack, job);
+      return new Promise((resolve) => {
+          resolve(true);
+      });
     }
-    return new Promise((resolve) => {
-      resolve(true);
-    });
-  }
+  
   return new Promise((reject) => {
     reject(false);
   });

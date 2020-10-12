@@ -2,7 +2,6 @@ const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
 
-
 class S3PublishClass {
   constructor(GitHubJob) {
     this.fastly = new FastlyJob(GitHubJob);
@@ -118,10 +117,11 @@ class S3PublishClass {
       }
 
       return new Promise((resolve) => {
-        logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-        logger.save(
-          `${'(prod)'.padEnd(15)}Production deploy details:\n\n${stdoutMod}`
-        );
+        logger.filterOutputForUserLogs(stdoutMod, this.GitHubJob);
+        // logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
+        // logger.save(
+        //   `${'(prod)'.padEnd(15)}Production deploy details:\n\n${stdoutMod}`
+        // );
         resolve({
           status: 'success',
           stdout: stdoutMod,
