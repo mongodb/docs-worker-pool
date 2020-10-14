@@ -35,9 +35,11 @@ class S3PublishClass {
       const command = stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-      logger.save(
-        `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
-      );
+      if(stderr) {
+        logger.save(
+          `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
+        );
+      }
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
@@ -79,9 +81,13 @@ class S3PublishClass {
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
-      const { stdout } = await exec(command);
+      const { stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-      
+      if(stderr) {
+        logger.save(
+          `${'(prod)'.padEnd(15)}Deploying stderr details:\n\n${stderr}`
+        );
+      }
       // check for json string output from mut
       const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
 
@@ -117,11 +123,10 @@ class S3PublishClass {
       }
 
       return new Promise((resolve) => {
-        logger.filterOutputForUserLogs(stdoutMod, this.GitHubJob);
-        // logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-        // logger.save(
-        //   `${'(prod)'.padEnd(15)}Production deploy details:\n\n${stdoutMod}`
-        // );
+        logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
+        logger.save(
+          `${'(prod)'.padEnd(15)}Production deploy details:\n\n${stdoutMod}`
+        );
         resolve({
           status: 'success',
           stdout: stdoutMod,
