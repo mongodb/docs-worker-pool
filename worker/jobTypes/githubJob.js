@@ -54,7 +54,7 @@ class GitHubJobClass {
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
-            pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName != 'master' ? this.currentJob.payload.branchName : 'main'}`; 
+            pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
           }
           //non versioned repo
           else{
@@ -119,7 +119,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
