@@ -8,7 +8,7 @@ const Logger = require('../utils/logger').LoggerClass;
 const buildTimeout = 60 * 450;
 const invalidJobDef = new Error('job not valid');
 
-async function verifyUserEntitlements(currentJob) {
+async function verifyUserEntitlements (currentJob) {
   const user = currentJob.user;
   const entitlementsObject = await workerUtils.getUserEntitlements(user);
   const repoOwner = currentJob.payload.repoOwner;
@@ -20,9 +20,9 @@ async function verifyUserEntitlements(currentJob) {
   return false;
 }
 
-async function verifyBranchConfiguredForPublish(currentJob) {
+async function verifyBranchConfiguredForPublish (currentJob) {
   const repoObject = {
-    repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName,
+    repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName
   };
   const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
   if (repoContent && repoContent.status === 'success') {
@@ -34,20 +34,20 @@ async function verifyBranchConfiguredForPublish(currentJob) {
 
 // anything that is passed to an exec must be validated or sanitized
 // we use the term sanitize here lightly -- in this instance this // ////validates
-function safeString(stringToCheck) {
+function safeString (stringToCheck) {
   return (
     validator.isAscii(stringToCheck) &&
     validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
   );
 }
 
-function safeGithubProdPush(currentJob) {
+function safeGithubProdPush (currentJob) {
   if (
-    !currentJob
-    || !currentJob.payload
-    || !currentJob.payload.repoName
-    || !currentJob.payload.repoOwner
-    || !currentJob.payload.branchName
+    !currentJob ||
+    !currentJob.payload ||
+    !currentJob.payload.repoName ||
+    !currentJob.payload.repoOwner ||
+    !currentJob.payload.branchName
   ) {
     workerUtils.logInMongo(
       currentJob,
@@ -66,29 +66,29 @@ function safeGithubProdPush(currentJob) {
   throw invalidJobDef;
 }
 
-async function startGithubBuild(job, logger) {
+async function startGithubBuild (job, logger) {
   const builder = new GatsbyAdapter(job);
   const buildOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
     job.buildRepo(logger, builder, true),
-    'Timed out on build',
+    'Timed out on build'
   );
     // checkout output of build
-    if (buildOutput && buildOutput.status === 'success') {
-      // only post entire build output to slack if there are warnings
-      const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
-      logger.filterOutputForUserLogs(buildOutputToSlack, job);
-      return new Promise((resolve) => {
-          resolve(true);
-      });
-    }
-  
-  return new Promise((reject) => {
+  if (buildOutput && buildOutput.status === 'success') {
+    // only post entire build output to slack if there are warnings
+    const buildOutputToSlack = `${buildOutput.stdout}\n\n${buildOutput.stderr}`;
+    logger.filterOutputForUserLogs(buildOutputToSlack, job);
+    return new Promise((resolve) => {
+      resolve(true);
+    });
+  }
+
+  return new Promise((resolve, reject) => {
     reject(false);
   });
 }
 
-async function pushToProduction(publisher, logger) {
+async function pushToProduction (publisher, logger) {
   const prodOutput = await workerUtils.promiseTimeoutS(
     buildTimeout,
     publisher.pushToProduction(logger),
@@ -102,12 +102,12 @@ async function pushToProduction(publisher, logger) {
       resolve(true);
     });
   }
-  return new Promise((reject) => {
+  return new Promise((resolve, reject) => {
     reject(false);
   });
 }
 
-async function runGithubProdPush(currentJob) {
+async function runGithubProdPush (currentJob) {
   const ispublishable = await verifyBranchConfiguredForPublish(currentJob);
   const userIsEntitled = await verifyUserEntitlements(currentJob);
 
@@ -123,10 +123,10 @@ async function runGithubProdPush(currentJob) {
   workerUtils.logInMongo(currentJob, ' ** Running github push function');
 
   if (
-    !currentJob
-    || !currentJob.payload
-    || !currentJob.payload.repoName
-    || !currentJob.payload.branchName
+    !currentJob ||
+    !currentJob.payload ||
+    !currentJob.payload.repoName ||
+    !currentJob.payload.branchName
   ) {
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)}failed due to insufficient definition`);
     throw invalidJobDef;
@@ -142,17 +142,17 @@ async function runGithubProdPush(currentJob) {
   await pushToProduction(publisher, logger);
 
   const files = workerUtils.getFilesInDir(
-    `./${currentJob.payload.repoName}/build/public`,
+    `./${currentJob.payload.repoName}/build/public`
   );
 
   return files;
 }
 
 module.exports = {
-	startGithubBuild,
+  startGithubBuild,
   runGithubProdPush,
   safeGithubProdPush,
   verifyBranchConfiguredForPublish,
   verifyUserEntitlements,
-	pushToProduction,
+  pushToProduction
 };
