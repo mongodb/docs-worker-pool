@@ -33,12 +33,14 @@ class S3PublishClass {
     try {
       const exec = workerUtils.getExecPromise();
       const command = stageCommands.join(' && ');
-      const { stdout, stderr } = await exec(command);
+      const {stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-      if(stderr) {
+      
+      if(stderr && stderr.indexOf('ERROR') !== -1) {
         logger.save(
-          `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
+          `${'(stage)'.padEnd(15)}Failed to push to staging`
         );
+        throw new Error(`Failed pushing to staging: ${stderr}`)
       }
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
@@ -78,12 +80,14 @@ class S3PublishClass {
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
-      const { stdout, stderr } = await exec(command);
+      const {stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-      if(stderr) {
+
+      if(stderr && stderr.indexOf('ERROR') !== -1) {
         logger.save(
-          `${'(prod)'.padEnd(15)}Deploying stderr details:\n\n${stderr}`
+          `${'(stage)'.padEnd(15)}Failed to push to staging`
         );
+        throw new Error(`Failed pushing to staging: ${stderr}`)
       }
       // check for json string output from mut
       const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
