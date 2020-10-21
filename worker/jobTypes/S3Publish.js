@@ -46,6 +46,9 @@ class S3PublishClass {
       }
       return new Promise((resolve) => {
         logger.save(`${'(stage)'.padEnd(15)}Finished pushing to staging`);
+        logger.save(
+          `${'(stage)'.padEnd(15)}Staging push details:\n\n${stdoutMod}`
+        );
         resolve({
           status: 'success',
           stdout: stdoutMod
