@@ -2,32 +2,29 @@ const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const FastlyJob = require('../utils/fastlyJob').FastlyJobClass;
 
-
 class S3PublishClass {
-  constructor(GitHubJob) {
+  constructor (GitHubJob) {
     this.fastly = new FastlyJob(GitHubJob);
     this.GitHubJob = GitHubJob;
     fs.pathExists();
   }
 
-  async pushToStage(logger) {
+  async pushToStage (logger) {
     logger.save(`${'(stage)'.padEnd(15)}Setting up push to staging function`);
     const stageCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
-      'make stage',
+      'make stage'
     ];
 
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
-      if(this.GitHubJob.currentJob.payload.pathPrefix){
+      if (this.GitHubJob.currentJob.payload.pathPrefix) {
         stageCommands[stageCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.mutPrefix}`;
+      } else {
+        // front end constructs path prefix for regular githubpush jobs and commitless staging jobs
+        stageCommands[stageCommands.length - 1] = 'make next-gen-stage'
       }
-      //front end constructs path prefix for regular githubpush jobs and commitless staging jobs
-      else{
-        stageCommands[stageCommands.length - 1] = `make next-gen-stage`
-      }
-
     }
 
     logger.save(`${'(stage)'.padEnd(15)}Pushing to staging`);
@@ -36,9 +33,13 @@ class S3PublishClass {
       const command = stageCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-      logger.save(
-        `${'(stage)'.padEnd(15)}Staging stderr details:\n\n${stderr}`
-      );
+
+      if (stderr && stderr.indexOf('ERROR') !== -1) {
+        logger.save(
+          `${'(stage)'.padEnd(15)}Failed to push to staging`
+        );
+        throw new Error(`Failed pushing to staging: ${stderr}`)
+      }
       // get only last part of message which includes # of files changes + s3 link
       if (stdout.indexOf('Summary') !== -1) {
         stdoutMod = stdout.substr(stdout.indexOf('Summary'));
@@ -50,17 +51,16 @@ class S3PublishClass {
         );
         resolve({
           status: 'success',
-          stdout: stdoutMod,
+          stdout: stdoutMod
         });
       });
     } catch (errResult) {
       logger.save(`${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
-
     }
   }
 
-  async pushToProduction(logger) {
+  async pushToProduction (logger) {
     logger.save(`${'(prod)'.padEnd(15)}Pushing to production`);
 
     // this is the final command to deploy
@@ -68,7 +68,7 @@ class S3PublishClass {
     const deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
-      'make deploy',
+      'make deploy'
     ];
 
     // check if need to build next-gen
@@ -80,9 +80,15 @@ class S3PublishClass {
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
-      const { stdout } = await exec(command);
+      const { stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-      
+
+      if (stderr && stderr.indexOf('ERROR') !== -1) {
+        logger.save(
+          `${'(stage)'.padEnd(15)}Failed to push to staging`
+        );
+        throw new Error(`Failed pushing to staging: ${stderr}`)
+      }
       // check for json string output from mut
       const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
 
@@ -91,9 +97,9 @@ class S3PublishClass {
         const stdoutJSON = JSON.parse(validateJsonOutput);
         const urls = stdoutJSON.urls;
         // pass in urls to fastly function to purge cache
-        this.fastly.purgeCache(urls).then(function(data) {
+        this.fastly.purgeCache(urls).then(function (data) {
           logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
-          logger.sendSlackMsg(`Fastly Summary: The following pages were purged from cache for your deploy`);
+          logger.sendSlackMsg('Fastly Summary: The following pages were purged from cache for your deploy');
           // when finished purging
           // batch urls to send as single slack message
           let batchedUrls = [];
@@ -109,7 +115,7 @@ class S3PublishClass {
             }
           }
         });
-      } catch(e) {
+      } catch (e) {
         // if not JSON, then it's a normal string output from mut
         // get only last part of message which includes # of files changes + s3 link
         if (stdout.indexOf('Summary') !== -1) {
@@ -119,12 +125,9 @@ class S3PublishClass {
 
       return new Promise((resolve) => {
         logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-        logger.save(
-          `${'(prod)'.padEnd(15)}Production deploy details:\n\n${stdoutMod}`
-        );
         resolve({
           status: 'success',
-          stdout: stdoutMod,
+          stdout: stdoutMod
         });
       });
     } catch (errResult) {
@@ -135,5 +138,5 @@ class S3PublishClass {
 }
 
 module.exports = {
-  S3PublishClass,
+  S3PublishClass
 };
