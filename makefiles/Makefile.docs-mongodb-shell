@@ -95,7 +95,6 @@ get-build-dependencies:
 next-gen-deploy:	
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
-	$(MAKE) deploy-search-index
 %:
 	@:
 	
