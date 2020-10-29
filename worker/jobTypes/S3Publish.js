@@ -85,9 +85,9 @@ class S3PublishClass {
 
       if (stderr && stderr.indexOf('ERROR') !== -1) {
         logger.save(
-          `${'(stage)'.padEnd(15)}Failed to push to staging`
+          `${'(prod)'.padEnd(15)}Failed to push to prod`
         );
-        throw new Error(`Failed pushing to staging: ${stderr}`)
+        throw new Error(`Failed pushing to prod: ${stderr}`)
       }
       // check for json string output from mut
       const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
@@ -125,6 +125,9 @@ class S3PublishClass {
 
       return new Promise((resolve) => {
         logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
+        logger.save(
+          `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
+        );
         resolve({
           status: 'success',
           stdout: stdoutMod
