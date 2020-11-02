@@ -297,7 +297,7 @@ class GitHubJobClass {
           `. /venv/bin/activate`,
           `cd repos/${this.getRepoDirName()}`,
           `rm -f makefile`,
-          `make html`
+          `make html && make publish`
       ];
       
       // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
