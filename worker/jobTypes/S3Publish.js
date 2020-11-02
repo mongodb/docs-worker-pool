@@ -68,7 +68,7 @@ class S3PublishClass {
     const deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.GitHubJob.getRepoDirName()}`,
-      'make deploy'
+      'make publish && make deploy'
     ];
 
     // check if need to build next-gen
