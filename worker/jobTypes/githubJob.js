@@ -54,7 +54,7 @@ class GitHubJobClass {
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
-            pathPrefix = `${repoContent.content.prefix}/ ${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`; 
+            pathPrefix = `${repoContent.content.prefix}/${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`; 
           }
           //non versioned repo
           else{
