@@ -17,7 +17,7 @@ RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tool
 RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
 RUN apt-get -y install git pkg-config libxml2-dev
 RUN python3 -m pip install mut
-ENV PATH="${PATH}:/home/docsworker/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
+ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 12
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -27,11 +27,11 @@ RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
 # setup user and root directory
-RUN useradd -ms /bin/bash docsworker
+RUN useradd -ms /bin/bash docsworker-xlarge
 RUN npm -g config set user root
-USER docsworker
+USER docsworker-xlarge
 
-WORKDIR /home/docsworker
+WORKDIR /home/docsworker-xlarge
 
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
@@ -39,16 +39,14 @@ RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	latestTag=$(git describe --tags `git tag --sort=-v:refname` | head -n 1) && \
-	git checkout "$latestTag" && \
+	git checkout v0.8.0 && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
-	git checkout "$latestTag" && \	
+	git checkout v0.8.0 && \	
 	npm install --production && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \

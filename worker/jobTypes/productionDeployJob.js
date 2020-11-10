@@ -116,7 +116,7 @@ async function runGithubProdPush (currentJob) {
     throw new Error('entitlement failed');
   }
   if (!userIsEntitled) {
-    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${currentJob.repoOwner}/${currentJob.repoName}) for master branch`);
+    workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} failed, you are not entitled to build or deploy (${currentJob.payload.repoOwner}/${currentJob.payload.repoName}) for master branch`);
     throw new Error('entitlement failed');
   }
 

@@ -121,9 +121,9 @@ module.exports = {
       $inc: { numFailures: 1 },
     };
 
-    if (job.numFailures >= 2) {
+    // if (job.numFailures >= 2) {
       update.$set.status = 'failed';
-    }
+    // }
 
     const updateResult = await queueCollection.updateOne(query, update);
     if (updateResult.result.n < 1) {
