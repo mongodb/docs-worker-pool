@@ -13,7 +13,6 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PREFIX}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
-echo ${STABLE_BRANCH}
 
 # Informs make that these are not file names and that they are a recipe below
 .PHONY: html help stage fake-deploy deploy deploy-search-index check-redirects
