@@ -64,7 +64,7 @@ deploy: build/public
 ## Update the search index for this branch
 deploy-search-index:
 	@echo "Building search index"
-	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/atlas-open-service-broker -s
+	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/atlas-open-service-broker -s;
 
 next-gen-html:
 	# snooty parse and then build-front-end
