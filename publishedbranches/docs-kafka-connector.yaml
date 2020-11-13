@@ -2,13 +2,11 @@ prefix: 'kafka-connector'
 version:
   published:
     - 'master'
-    - 'master'
     - 'v1.0'
     - 'v1.1'
     - 'v1.2'
     - 'v1.3'
   active:
-    - 'master'
     - 'master'
     - 'v1.0'
     - 'v1.1'
