@@ -10,7 +10,6 @@ PREFIX=charts
 PROJECT=charts
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
-COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
@@ -18,7 +17,7 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 next-gen-html:
 	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
+	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
@@ -28,7 +27,6 @@ next-gen-html:
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; \
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
