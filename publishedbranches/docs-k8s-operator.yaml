@@ -25,7 +25,7 @@ version:
     - '1.2'
     - '1.1'
     - '1.0'
-  stable: '1.7'
+  stable: '1.8'
   upcoming: '1.8'
 git:
   branches:
