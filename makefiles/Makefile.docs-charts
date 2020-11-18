@@ -68,6 +68,7 @@ get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-charts.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-deploy:	
+	echo "${MUT_PREFIX}"
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
@@ -77,12 +78,9 @@ next-gen-deploy:
 
 
 deploy-search-index: ## Update the search index for this branch
-	echo "${GLOBAL_SEARCH}"
 	@echo "Building search index"
-	ifneq (${GLOBAL_SEARCH})
-		mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_SUFFIX} -s -g
-	else
-		mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT} -s
+	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+
 
 screenshots:
 	giza generate assets
