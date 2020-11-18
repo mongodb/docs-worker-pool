@@ -60,7 +60,7 @@ class GitHubJobClass {
           // MUST CHECK FOR PUBLISHING ALIASES OF THE MANUAL!!
           //non versioned repo
           else{
-            pathPrefix = `${repoContent.content.prefix}` ? this.currentJob.payload.alias === null : `${repoContent.content.prefix}/${this.currentJob.payload.alias}`
+            pathPrefix = `${this.currentJob.payload.alias === null ? repoContent.content.prefix :  repoContent.content.prefix}/${this.currentJob.payload.alias}`
             manifestPrefix = `${repoContent.content.prefix}-${this.currentJob.payload.branchName}`
           }
           

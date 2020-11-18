@@ -30,7 +30,8 @@ async function verifyBranchConfiguredForPublish (currentJob) {
     console.log(repoContent.content.version["stable"], repoContent.content.version.stable, )
     //if primary alias, check if this is stable branch
     if (currentJob.payload.primaryAlias) {
-      currentJob.payload["stableBranch"] = (repoContent.content.version.stable === currentJob.payload.branchName)
+      console.log(repoContent.content.version.stable === currentJob.payload.branchName ? '-g' : '')
+      currentJob.payload["stableBranch"] = repoContent.content.version.stable === currentJob.payload.branchName ? '-g' : '';
     }
     
     return publishedBranches.includes(currentJob.payload.branchName);
