@@ -64,7 +64,7 @@ deploy: build/public
 
 	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
-	$(MAKE) deploy-search-index
+	$(MAKE) next-gen-deploy-search-index
 
 
 next-gen-html:
@@ -98,11 +98,11 @@ next-gen-html:
   
 next-gen-stage: ## Host online for review
 	# stagel commit jobs \
-	if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+	if [ "${MUT_PREFIX}" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	# stagel local jobs \
-	elif [ ! -z "${PATCH_ID}" ] && [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+	elif [ ! -z "${PATCH_ID}" ] && [ -z "${MUT_PREFIX}" ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
 	# reg github push jobs \
@@ -110,8 +110,7 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
 	fi
-%:
-	@:
+
 
 
 get-build-dependencies: 
@@ -119,14 +118,13 @@ get-build-dependencies:
 
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
 	$(MAKE) next-gen-deploy-search-index
-%:
-	@:
+
 
 
 ## Update the search index for this branch
-next-gen-deploy-search-index:
+next-gen-deploy-search-index::
 	@echo "Building search index"
-	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/datalake -s
+	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}

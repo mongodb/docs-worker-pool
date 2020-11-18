@@ -54,10 +54,10 @@ deploy: build/public
 
 	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
-	$(MAKE) deploy-search-index
+	$(MAKE) next-gen-deploy-search-index
 
 ## Update the search index for this branch
-deploy-search-index:
+next-gen-deploy-search-index:
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
 		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
@@ -101,6 +101,6 @@ next-gen-publish:
 next-gen-deploy:
 	echo "DEPLOYING TEST"
 	
-deploy-search-index: ## Update the search index for this branch
+next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s

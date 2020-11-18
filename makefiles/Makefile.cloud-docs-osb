@@ -53,7 +53,7 @@ deploy: build/public
 
 	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
-	$(MAKE) deploy-search-index
+	$(MAKE) next-gen-deploy-search-index
 
 #################################################################
 ####                                                         ####
@@ -62,7 +62,7 @@ deploy: build/public
 #################################################################
 
 ## Update the search index for this branch
-deploy-search-index:
+next-gen-deploy-search-index:
 	@echo "Building search index"
 	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/atlas-open-service-broker -s;
 
@@ -89,8 +89,7 @@ next-gen-stage: ## Host online for review
 
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
 	$(MAKE) next-gen-deploy-search-index
-%:
-	@:
+

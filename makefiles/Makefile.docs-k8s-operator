@@ -92,15 +92,14 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
-	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+	if [ ${MUT_PREFIX} ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	else \
 		mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
 	fi
-%:
-	@:
+
 
 
 get-build-dependencies: 
@@ -108,11 +107,10 @@ get-build-dependencies:
 
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
-	$(MAKE) deploy-search-index
-%:
-	@:
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
+	$(MAKE) next-gen-deploy-search-index
+
 
 #################################################################
 ####  DEPLOY KUBERNETES OPERATOR DOCUMENTATION TO PRODUCTION ####
@@ -128,10 +126,10 @@ deploy: build/public
 
 	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
-	$(MAKE) deploy-search-index
+	$(MAKE) next-gen-deploy-search-index
 
 ## Update the search index for this branch
-deploy-search-index:
+next-gen-deploy-search-index:
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
 		mut-index upload public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \

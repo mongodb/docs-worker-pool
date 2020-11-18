@@ -72,9 +72,9 @@ deploy: publish ## Deploy to the production bucket
 
 	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
-	$(MAKE) deploy-search-index
+	$(MAKE) next-gen-deploy-search-index
 
-deploy-search-index: ## Update the search index for this branch
+next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
 		mut-index upload build/public/${GIT_BRANCH} -o docs-php-library-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -g -s; \

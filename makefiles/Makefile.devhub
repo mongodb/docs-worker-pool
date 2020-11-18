@@ -51,13 +51,12 @@ get-build-dependencies:
 
 next-gen-deploy:	
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))";
-	$(MAKE) deploy-search-index
-%:
-	@:
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
+	$(MAKE) next-gen-deploy-search-index
 
-deploy-search-index: ## Update the search index for this branch
+
+next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload build/public \
 		-o ${PROJECT}-${GIT_BRANCH}.json \
