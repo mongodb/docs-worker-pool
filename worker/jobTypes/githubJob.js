@@ -50,16 +50,20 @@ class GitHubJobClass {
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         const server_user = await workerUtils.getServerUser()
         let pathPrefix; 
-
+        let manifestPrefix;
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
             pathPrefix = `${repoContent.content.prefix}/${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`; 
-          }
+            manifestPrefix = `${repoContent.content.prefix}-${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`
+        }
+          // MUST CHECK FOR PUBLISHING ALIASES OF THE MANUAL!!
           //non versioned repo
           else{
-            pathPrefix = `${repoContent.content.prefix}`;
+            pathPrefix = `${repoContent.content.prefix}` ? this.currentJob.payload.alias === null : `${repoContent.content.prefix}/${this.currentJob.payload.alias}`
+            manifestPrefix = `${repoContent.content.prefix}-${this.currentJob.payload.branchName}`
           }
+          
         }
         // server staging commit jobs
         else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 
@@ -70,6 +74,7 @@ class GitHubJobClass {
           this.currentJob.payload.pathPrefix = pathPrefix;
           const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
           this.currentJob.payload.mutPrefix = mutPrefix;
+          this.currentJob.payload.manifestPrefix = manifestPrefix;
         }
       }catch(error){
         console.log(error)

@@ -72,7 +72,7 @@ class S3PublishClass {
     ];
 
     // check if need to build next-gen
-    console.log(`make next-gen-deploy MUT_SUFFIX=${this.GitHubJob.currentJob.payload.mutPrefix} MARIAN_SUFFIX=${this.GitHubJob.currentJob.payload.mutPrefix} GLOBAL_SEARCH=${this.GitHubJob.currentJob.payload.stableBranch}`)
+    console.log(`make next-gen-deploy MUT_SUFFIX=${this.GitHubJob.currentJob.payload.mutPrefix} MARIAN_SUFFIX=${this.GitHubJob.currentJob.payload.manifestPrefix} GLOBAL_SEARCH=${this.GitHubJob.currentJob.payload.stableBranch}`)
     
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 1] = `make next-gen-deploy ${this.GitHubJob.currentJob.payload.mutPrefix}`;
