@@ -7,6 +7,7 @@ PRODUCTION_BUCKET=docs-mongodb-org-prod
 PREFIX=manual
 PROJECT=docs-stage
 REPO_DIR=$(shell pwd)
+MUT_PREFIX ?= $PROJECT
 PATCH_FILE="myPatch.patch"
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 

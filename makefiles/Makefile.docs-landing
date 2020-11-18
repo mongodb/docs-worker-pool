@@ -6,6 +6,7 @@ STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongodb-org-prod
 PROJECT=landing
 REPO_DIR=$(shell pwd)
+MUT_PREFIX ?= $PROJECT
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)

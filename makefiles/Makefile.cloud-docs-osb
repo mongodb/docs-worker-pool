@@ -7,6 +7,7 @@ PRODUCTION_BUCKET=docs-atlas-osb-prod
 PROJECT=atlas-open-service-broker
 # PREFIX=atlas-open-service-broker -> doesn't seem to be used anywhere
 REPO_DIR=$(shell pwd)
+MUT_PREFIX ?= $PROJECT
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
