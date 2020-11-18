@@ -27,8 +27,15 @@ async function verifyBranchConfiguredForPublish (currentJob) {
   const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
   if (repoContent && repoContent.status === 'success') {
     const publishedBranches = repoContent.content.git.branches.published;
+ 
+    //if primary alias, check if this is stable branch
+    if (currentJob.payload.primaryAlias) {
+      currentJob.payload["stableBranch"] = (repoContent.version.stable === currentJob.payload.branchName)
+    }
+    
     return publishedBranches.includes(currentJob.payload.branchName);
   }
+
   return false;
 }
 
