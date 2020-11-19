@@ -8,7 +8,7 @@ version:
     - 'Cloud'
     - '19.12 (On-Prem)'
     - '19.09 (On-Prem)'
-  stable: 'master'
+  stable: ''
 git:
   branches:
     manual: 'master'

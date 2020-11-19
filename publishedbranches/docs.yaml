@@ -4,7 +4,7 @@ version:
     - 'master'
   active:
     - 'master'
-  stable: 'master'
+  stable: ''
   upcoming: master
 git:
   branches:

@@ -6,7 +6,7 @@ version:
   active:
     - 'latest stable'
     - 'beta'
-  stable: 'master'
+  stable: ''
   upcoming: beta
 git:
   branches:
