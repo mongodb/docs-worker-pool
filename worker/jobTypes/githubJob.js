@@ -57,7 +57,6 @@ class GitHubJobClass {
             pathPrefix = `${repoContent.content.prefix}/${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`; 
             manifestPrefix = `${repoContent.content.prefix}-${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`
         }
-          // MUST CHECK FOR PUBLISHING ALIASES OF THE MANUAL!!
           //non versioned repo
           else{
             pathPrefix = `${this.currentJob.payload.alias === null ? repoContent.content.prefix :  repoContent.content.prefix}/${this.currentJob.payload.alias}`
