@@ -20,7 +20,7 @@ class S3PublishClass {
     // check if need to build next-gen
     if (this.GitHubJob.buildNextGen()) {
       if (this.GitHubJob.currentJob.payload.pathPrefix) {
-        stageCommands[stageCommands.length - 1] = `make next-gen-stage ${this.GitHubJob.currentJob.payload.mutPrefix}`;
+        stageCommands[stageCommands.length - 1] = `make next-gen-stage MUT_PREFIX=${this.GitHubJob.currentJob.payload.mutPrefix}`;
       } else {
         // front end constructs path prefix for regular githubpush jobs and commitless staging jobs
         stageCommands[stageCommands.length - 1] = 'make next-gen-stage'
@@ -72,8 +72,6 @@ class S3PublishClass {
     ];
 
     // check if need to build next-gen
-    console.log(`make next-gen-deploy MUT_PREFIX=${this.GitHubJob.currentJob.payload.mutPrefix} MANIFEST_PREFIX=${this.GitHubJob.currentJob.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${this.GitHubJob.currentJob.payload.stableBranch}`)
-    
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 1] = `make next-gen-deploy MUT_PREFIX=${this.GitHubJob.currentJob.payload.mutPrefix} MANIFEST_PREFIX=${this.GitHubJob.currentJob.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${this.GitHubJob.currentJob.payload.stableBranch}`;
     }
