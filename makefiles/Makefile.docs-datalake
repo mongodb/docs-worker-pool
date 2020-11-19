@@ -12,9 +12,9 @@ PROJECT=datalake
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
 
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
@@ -24,6 +24,48 @@ PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
 URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
+
+
+
+# Parse our published-branches configuration file to get the name of
+# the current "stable" branch. This is weird and dumb, yes.
+STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
+
+.PHONY: help html publish stage deploy deploy-search-index
+
+## Show this help message
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo
+	@echo 'Variables'
+	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
+
+## Builds this branch's HTML under build/<branch>/html
+html:
+	giza make html
+
+## Build this branch's HTML files to a fresh build directory
+clean-html:
+	rm -rf build/${GIT_BRANCH}
+	giza make html
+
+publish:
+	giza make publish
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
+
+## Host online for review
+stage:
+	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "\n\nHosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+
+## Deploy to the production bucket
+deploy: build/public
+	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='${PROJECT}' ${ARGS}
+
+	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+
+	$(MAKE) deploy-search-index
+
 
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -55,26 +97,36 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
+	# stagel commit jobs \
+	if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
 	# stagel local jobs \
-	if [ ! -z "${PATCH_ID}" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
-	# reg github push jobs and stagel commit jobs \
+	elif [ ! -z "${PATCH_ID}" ] && [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	# reg github push jobs \
 	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+		mut-publish public ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
 	fi
+%:
+	@:
+
 
 get-build-dependencies: 
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-datalake.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
 	$(MAKE) next-gen-deploy-search-index
+%:
+	@:
+
 
 ## Update the search index for this branch
-next-gen-deploy-search-index::
+next-gen-deploy-search-index:
 	@echo "Building search index"
-	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/datalake -g -s

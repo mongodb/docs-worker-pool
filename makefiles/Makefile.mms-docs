@@ -21,7 +21,6 @@ PREFIX=
 
 PROJECT=mms
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -34,7 +33,11 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/mms-published-branches.yaml |
 ## fake-deploy-cloud, ... but eh
 .PHONY: help html publish publish-cloud publish-onprem stage-cloud fake-deploy-cloud deploy-cloud stage-onprem fake-deploy-onprem deploy-onprem deploy-opsmgr-current deploy-opsmgr-upcoming deploy-cloud-search-index deploy-opsmgr-search-index
 
-
+help: ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo
+	@echo 'Variables'
+	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 stage: stage-cloud stage-opsmgr ## Stage both Cloud and On-Prem
 
@@ -81,18 +84,25 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; 
-	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
-
+	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	fi
+%:
+	@:
 
 get-build-dependencies: 
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/mms-docs.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
-
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+%:
+	@:
 
 ##########################################################
 ####   BUILD STAGING ARTIFACTS TO CLEAN DIRECTORY     ####

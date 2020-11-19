@@ -7,10 +7,22 @@ PRODUCTION_BUCKET=docs-mongodb-org-prod
 PREFIX=spark-connector
 PROJECT=spark-connector
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+# Parse our published-branches configuration file to get the name of
+# the current "stable" branch. This is weird and dumb, yes.
+STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PREFIX}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
+
+# Informs make that these are not file names and that they are a recipe below
+.PHONY: html help stage fake-deploy deploy deploy-search-index check-redirects
+
+help: ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo
+	@echo 'Variables'
+	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -28,20 +40,61 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; 
-	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
+	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	fi
+%:
+	@:
 
 get-build-dependencies: 
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-spark-connector.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
-	$(MAKE) next-gen-deploy-search-index
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+	$(MAKE) deploy-search-index
+%:
+	@:
 
-next-gen-deploy-search-index: ## Update the search index for this branch
-	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+stage: ## Host online for review
+	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+
+html: ## Builds the html files
+	giza make html
+
+# Builds the DIR artifacts for publishing (DOES NOT PUBLISH), also builds HTML.
+# If baster branch, giza will create any symlinks needed for integrations.yaml
+# If master branch, giza will create redirects per build_conf.yaml htaccess field.
+publish: ## Builds this branch's publishable HTML and other artifacts under build/public
+	#rm -r build/public/${GIT_BRANCH}
+	#rm -r build/${GIT_BRANCH}
+	giza make publish
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
+
+fake-deploy: ## Deploys the DIR (dirhtml) artifacts generated from "publish" to the staging bucket. Mimics production deployment by using the same arguments as "deploy".
+	mut-publish build/public/${GIT_BRANCH} ${STAGING_BUCKET} --prefix=${PREFIX}/${GIT_BRANCH} --deploy --verbose  --redirects build/public/.htaccess --dry-run ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${PREFIX}/index.html"
+
+deploy: ## Deploys the DIR (dirhtml) artifacts generated from "publish" to the production bucket.
+	mut-publish build/public/ ${PRODUCTION_BUCKET} --prefix=${PREFIX} --deploy --redirects build/public/.htaccess  ${ARGS}
+
+	@echo "Hosted at ${PRODUCTION_URL}/${PREFIX}/${GIT_BRANCH}/index.html"
+
+	$(MAKE) deploy-search-index
+
+deploy-search-index: ## Update the search index for this branch
+	@echo "Building search index"
+	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
+		mut-index upload public/${GIT_BRANCH} -o ${PREFIX}-current.json --aliases ${PREFIX}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PREFIX}/current -g -s; \
+	else \
+		mut-index upload public/${GIT_BRANCH} -o ${PREFIX}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX}/${GIT_BRANCH} -s; \
+	fi
 
 #This workaround is because the redirects for symlink version does not prefix with ruby-driver.
 check-redirects:

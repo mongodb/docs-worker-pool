@@ -10,7 +10,6 @@ PRODUCTION_URL=https://developer.mongodb.com
 PROJECT=devhub
 PREFIX=devhub
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
@@ -20,7 +19,11 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 .PHONY: examples help html publish stage deploy deploy-search-index
 
-
+help: ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo
+	@echo 'Variables'
+	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 update-snooty:
 	npm install --production > /dev/null 2>&1
@@ -48,6 +51,17 @@ get-build-dependencies:
 
 next-gen-deploy:	
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))";
+	$(MAKE) deploy-search-index
+%:
+	@:
 
+deploy-search-index: ## Update the search index for this branch
+	@echo "Building search index"
+	mut-index upload build/public \
+		-o ${PROJECT}-${GIT_BRANCH}.json \
+		-u ${PRODUCTION_URL} \
+		-g \
+		-s \
+		--exclude build/public/index.html

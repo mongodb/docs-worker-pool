@@ -13,7 +13,6 @@ PRODUCTION_BUCKET=docs-atlas-prod
 PREFIX=cloud-docs
 PROJECT=cloud-docs
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -95,18 +94,15 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS};
-	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
-
-next-gen-deploy:
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
-	$(MAKE) next-gen-deploy-search-index
-
-next-gen-deploy-search-index:
-	@echo "Building search index"
-	mut-index upload build/public -o atlas-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -g -s
+	if [ $(filter-out $@,$(MAKECMDGOALS)) ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${PROJECT}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
+	fi
+%:
+	@:
 
 ##########################################################
 ####     DEPLOY ATLAS DOCUMENTATION TO PRODUCTION     ####
@@ -130,6 +126,7 @@ deploy: build/public
 deploy-search-index:
 	@echo "Building search index"
 	mut-index upload build/public -o atlas-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -g -s
+
 
 ##########################################################
 ####                    PULL ASSETS                   ####

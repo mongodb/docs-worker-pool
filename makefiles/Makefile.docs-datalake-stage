@@ -13,7 +13,6 @@ PROJECT=datalake
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
@@ -24,7 +23,12 @@ T}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
 .PHONY: help html publish stage deploy deploy-search-index
 
-
+## Show this help message
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo
+	@echo 'Variables'
+	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
 
 ## Builds this branch's HTML under build/<branch>/html
 html:
@@ -50,10 +54,10 @@ deploy: build/public
 
 	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
 
-	$(MAKE) next-gen-deploy-search-index
+	$(MAKE) deploy-search-index
 
 ## Update the search index for this branch
-next-gen-deploy-search-index:
+deploy-search-index:
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
 		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
@@ -97,6 +101,6 @@ next-gen-publish:
 next-gen-deploy:
 	echo "DEPLOYING TEST"
 	
-next-gen-deploy-search-index: ## Update the search index for this branch
+deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
