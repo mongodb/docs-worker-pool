@@ -8,9 +8,10 @@ PRODUCTION_BUCKET=docs-devhub-prod
 PRODUCTION_URL=https://developer.mongodb.com
 
 PROJECT=devhub
+MUT_PREFIX ?= $PROJECT
 PREFIX=devhub
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
+
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)

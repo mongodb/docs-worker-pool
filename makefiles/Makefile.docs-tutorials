@@ -8,9 +8,10 @@ PRODUCTION_BUCKET=docs-mongodb-org-prod
 PRODUCTION_URL=https://docs.mongodb.com/guides
 
 PROJECT=guides
+MUT_PREFIX ?= $PROJECT
 PREFIX=guides
 REPO_DIR=$(shell pwd)
-MUT_PREFIX ?= $PROJECT
+
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
