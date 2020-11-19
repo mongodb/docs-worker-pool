@@ -14,19 +14,6 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
 
-.PHONY: help lint html stage deploy deploy-search-index
-
-help:
-	@echo 'Targets'
-	@echo '  help         - Show this help message'
-	@echo '  build        - Build HTML artifacts for upload'
-	@echo '  stage        - Host online for review'
-	@echo '  deploy       - Deploy into production'
-	@echo ''
-	@echo 'Variables'
-	@echo '  ARGS         - Arguments to pass to mut-publish'
-
-
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
 
@@ -47,28 +34,17 @@ next-gen-html: build-legacy-pages
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 	mv build-legacy-pages/tools public/
 	mv build-legacy-pages/cloud public/
-  
-next-gen-stage:
-	if [ ${MUT_PREFIX} ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
-		echo "Hosted at ${STAGING_URL}${MUT_PREFIX}/${USER}/${GIT_BRANCH}/cloud"; \
-		echo "Hosted at ${STAGING_URL}${MUT_PREFIX}/${USER}/${GIT_BRANCH}/tools"; \
-	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/cloud"; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/tools"; \
-	fi
 
-	
+next-gen-stage:
+	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS};
+	echo "Hosted at ${STAGING_URL}${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
+	echo "Hosted at ${STAGING_URL}${MUT_PREFIX}/${USER}/${GIT_BRANCH}/cloud";
+	echo "Hosted at ${STAGING_URL}${MUT_PREFIX}/${USER}/${GIT_BRANCH}/tools";
 
 next-gen-deploy: 
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}";
 
-
-	
 build-legacy-pages:
 	@# Pull docs-tools updates
 	git submodule init

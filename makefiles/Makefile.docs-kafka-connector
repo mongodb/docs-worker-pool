@@ -11,13 +11,6 @@ MUT_PREFIX ?= $PROJECT
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-# Parse our published-branches configuration file to get the name of
-# the current "stable" branch. This is weird and dumb, yes.
-STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PREFIX}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
-
-# Informs make that these are not file names and that they are a recipe below
-.PHONY: html help stage fake-deploy deploy deploy-search-index check-redirects
-
 next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
@@ -37,7 +30,6 @@ next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; 
 	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; 
 
-
 get-build-dependencies: 
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-kafka-connector.yaml > ${REPO_DIR}/published-branches.yaml
 
@@ -47,6 +39,7 @@ next-gen-deploy:
 	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
 	$(MAKE) next-gen-deploy-search-index
 
-next-gen-deploy-search-index: ## Update the search index for this branch
+## Update the search index for this branch
+next-gen-deploy-search-index:
 	@echo "Building search index"
 	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
