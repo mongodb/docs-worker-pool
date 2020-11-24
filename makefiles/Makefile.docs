@@ -37,6 +37,10 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yam
 
 .PHONY: help lint html markdown stage deploy deploy-search-index examples redirects
 
+
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
+
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
 	if [ ! -z "${PATCH_ID}" ]; then \
@@ -46,9 +50,6 @@ next-gen-stage: ## Host online for review
 	else \
 		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
-
-
-
 
 lint: ## Checks URLs in the built corpus underneath build/<branch>/html
 	mut-lint --linters=links ./build/master/source/ ${ARGS}
@@ -64,7 +65,6 @@ html: examples ## Builds this branch's HTML under build/<branch>/html
 	# TEMP copy of video file. Remove once video infrastructure in place.
 	if [ ! -z "${PATCH_ID}" ]; then mkdir -p build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi;
 	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi 
-	
 
 publish: examples ## Builds this branch's publishable HTML and other artifacts under build/public
 	if [ ${GIT_BRANCH} = master ]; then rm -rf build/master build/public; fi
