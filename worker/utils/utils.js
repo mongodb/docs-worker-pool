@@ -183,6 +183,7 @@ module.exports = {
 
   async getRepoPublishedBranches(repoObject) {
     const pubBranchesFile = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/fix-search-publishedBranches-only/publishedbranches/${repoObject.repoName}.yaml`;
+    console.log(pubBranchesFile)
     const returnObject = {};
     return new Promise(function(resolve, reject) {
       request(pubBranchesFile, function(error, response, body) {

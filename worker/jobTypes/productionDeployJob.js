@@ -28,6 +28,7 @@ async function verifyBranchConfiguredForPublish (currentJob) {
   const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
   if (repoContent && repoContent.status === 'success') {
     const publishedBranches = repoContent.content.git.branches.published;
+    console.log(publishedBranches)
     //if this is stable branch AND the primary alias, then we want to use this build's manifest for global search
     currentJob.payload["stableBranch"] = (repoContent.content.version.stable === currentJob.payload.branchName && currentJob.payload.primaryAlias ) ? '-g' : "";
     console.log("this is the global flag: ", currentJob.payload["stableBranch"])
