@@ -21,21 +21,20 @@ async function verifyUserEntitlements (currentJob) {
 }
 
 async function verifyBranchConfiguredForPublish (currentJob) {
+  console.log("test test test")
   const repoObject = {
     repoOwner: currentJob.payload.repoOwner, repoName: currentJob.payload.repoName
   };
   const repoContent = await workerUtils.getRepoPublishedBranches(repoObject);
   if (repoContent && repoContent.status === 'success') {
     const publishedBranches = repoContent.content.git.branches.published;
-    //if primary alias, check if this is stable branch
-    if (currentJob.payload.primaryAlias) {
-      console.log(repoContent.content.version.stable === currentJob.payload.branchName ? '-g' : '')
-      currentJob.payload["stableBranch"] = repoContent.content.version.stable === currentJob.payload.branchName ? '-g' : '';
-    }
+    //if this is stable branch AND the primary alias, then we want to use this build's manifest for global search
+    currentJob.payload["stableBranch"] = (repoContent.content.version.stable === currentJob.payload.branchName && currentJob.payload.primaryAlias ) ? '-g' : "";
+    console.log("this is the global flag: ", currentJob.payload["stableBranch"])
     
     return publishedBranches.includes(currentJob.payload.branchName);
   }
-
+  console.log(repoContent, repoContent.status, repoContent.content.git.branches.published)
   return false;
 }
 
@@ -120,6 +119,7 @@ async function runGithubProdPush (currentJob) {
 
   if (!ispublishable) {
     workerUtils.logInMongo(currentJob, `${'(BUILD)'.padEnd(15)} You are trying to run in production a branch that is not configured for publishing`)
+    console.log()
     throw new Error('entitlement failed');
   }
   if (!userIsEntitled) {

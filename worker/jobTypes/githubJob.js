@@ -55,12 +55,15 @@ class GitHubJobClass {
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
             pathPrefix = `${repoContent.content.prefix}/${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`; 
-            manifestPrefix = `${repoContent.content.prefix}-${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`
+            manifestPrefix = `${repoContent.content.prefix ? `${repoContent.content.prefix}-` : ''}` + `${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`
+            console.log("this is the manifest prefix ", manifestPrefix)
         }
           //non versioned repo
           else{
             pathPrefix = `${this.currentJob.payload.alias === null ? repoContent.content.prefix :  repoContent.content.prefix}/${this.currentJob.payload.alias}`
-            manifestPrefix = `${repoContent.content.prefix}-${this.currentJob.payload.branchName}`
+            
+            manifestPrefix = `${repoContent.content.prefix ? `${repoContent.content.prefix}-` : ''}` + `${this.currentJob.payload.branchName}`
+            console.log("this is the manifest prefix ", manifestPrefix)
           }
           
         }
@@ -123,7 +126,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/fix-search-makefile-portion/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {

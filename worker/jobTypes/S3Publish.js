@@ -75,14 +75,15 @@ class S3PublishClass {
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 1] = `make next-gen-deploy MUT_PREFIX=${this.GitHubJob.currentJob.payload.mutPrefix} MANIFEST_PREFIX=${this.GitHubJob.currentJob.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${this.GitHubJob.currentJob.payload.stableBranch}`;
     }
-
+    console.log(deployCommands)
     // deploy site
     try {
       const exec = workerUtils.getExecPromise();
       const command = deployCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-
+      
+      console.log(stdoutMod)
       if (stderr && stderr.indexOf('ERROR') !== -1) {
         logger.save(
           `${'(prod)'.padEnd(15)}Failed to push to prod`
