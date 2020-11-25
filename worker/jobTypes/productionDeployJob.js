@@ -29,8 +29,8 @@ async function verifyBranchConfiguredForPublish (currentJob) {
   if (repoContent && repoContent.status === 'success') {
     const publishedBranches = repoContent.content.git.branches.published;
     console.log(publishedBranches)
-    //if this is stable branch AND the primary alias, then we want to use this build's manifest for global search
-    currentJob.payload["stableBranch"] = (repoContent.content.version.stable === currentJob.payload.branchName && currentJob.payload.primaryAlias ) ? '-g' : "";
+    //if this is stable branch AND [its the primary alias OR no aliases exist], then we want to use this build's manifest for global search
+    currentJob.payload["stableBranch"] = (repoContent.content.version.stable === currentJob.payload.branchName && (currentJob.payload.primaryAlias || ! currentJob.payload.aliased) )   ? '-g' : "";
     console.log("this is the global flag: ", currentJob.payload["stableBranch"])
     
     return publishedBranches.includes(currentJob.payload.branchName);
