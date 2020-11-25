@@ -129,4 +129,4 @@ next-gen-deploy:
 ## Update the search index for this branch
 next-gen-deploy-search-index:
 	@echo "Building search index"
-	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/datalake -s
+	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/datalake -g -s
