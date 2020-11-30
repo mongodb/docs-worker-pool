@@ -16,48 +16,6 @@ REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
-
-# Parse our published-branches configuration file to get the name of
-# the current "stable" branch. This is weird and dumb, yes.
-STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJEC
-T}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
-
-.PHONY: help html publish stage deploy deploy-search-index
-
-
-
-## Builds this branch's HTML under build/<branch>/html
-html:
-	giza make html
-
-## Build this branch's HTML files to a fresh build directory
-clean-html:
-	rm -rf build/${GIT_BRANCH}
-	giza make html
-	
-publish:
-	giza make publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
-
-## Host online for review
-stage:
-	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
-	@echo "\n\nHosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
-
-## Deploy to the production bucket
-deploy: build/public
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='${PROJECT}' ${ARGS}
-	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
-	$(MAKE) next-gen-deploy-search-index
-
-## Update the search index for this branch
-next-gen-deploy-search-index:
-	@echo "Building search index"
-	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-current.json --aliases ${PROJECT}-${GIT_BRANCH} -u ${PRODUCTION_URL}/${PROJECT}/stable -g -s; \
-	else \
-		mut-index upload build/public/${GIT_BRANCH} -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
-	fi
 	
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -88,7 +46,6 @@ next-gen-deploy:
 	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
 	$(MAKE) next-gen-deploy-search-index
 
-	
 next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -s
