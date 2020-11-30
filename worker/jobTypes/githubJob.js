@@ -59,10 +59,10 @@ class GitHubJobClass {
         }
           //non versioned repo
           else{
-            pathPrefix = `${this.currentJob.payload.alias ? this.currentJob.payload.alias :  repoContent.content.prefix}`
+            pathPrefix = `${this.currentJob.payload.alias ? this.currentJob.payload.alias :  repoContent.content.prefix}`;
           }
           //used for the deploy-search-index
-          this.currentJob.payload.manifestPrefix= `${repoContent.content.prefix !== `\n` ? `${repoContent.content.prefix}-` : ''}` + `${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`
+          this.currentJob.payload.manifestPrefix= `${repoContent.content.prefix !== `\n` ? `${repoContent.content.prefix}-` : ''}` + `${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`;
         }
         // server staging commit jobs
         else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 

@@ -81,7 +81,7 @@ class S3PublishClass {
       const command = deployCommands.join(' && ');
       const { stdout, stderr } = await exec(command);
       let stdoutMod = stdout;
-      
+
       if (stderr && stderr.indexOf('ERROR') !== -1) {
         logger.save(
           `${'(prod)'.padEnd(15)}Failed to push to prod`
