@@ -8,7 +8,7 @@ PRODUCTION_BUCKET=docs-devhub-prod
 PRODUCTION_URL=https://developer.mongodb.com
 
 PROJECT=devhub
-MUT_PREFIX ?= $PROJECT
+MUT_PREFIX ?= ($PROJECT)
 PREFIX=devhub
 REPO_DIR=$(shell pwd)
 

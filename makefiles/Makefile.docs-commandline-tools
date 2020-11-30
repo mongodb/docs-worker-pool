@@ -9,7 +9,7 @@ PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongodb-org-prod
 PROJECT=database-tools
-MUT_PREFIX ?= $PROJECT
+MUT_PREFIX ?= ($PROJECT)
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 REPO_DIR=$(shell pwd)

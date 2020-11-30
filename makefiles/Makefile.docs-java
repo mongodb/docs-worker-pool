@@ -11,7 +11,7 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 PREFIX=java
 PROJECT=java
-MUT_PREFIX ?= $PROJECT
+MUT_PREFIX ?= ($PROJECT)
 REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)

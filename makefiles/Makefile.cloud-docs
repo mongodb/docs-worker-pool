@@ -12,7 +12,7 @@ PRODUCTION_URL="https://docs.atlas.mongodb.com"
 PRODUCTION_BUCKET=docs-atlas-prod
 PREFIX=cloud-docs
 PROJECT=cloud-docs
-MUT_PREFIX ?= $PROJECT
+MUT_PREFIX ?= ($PROJECT)
 REPO_DIR=$(shell pwd)
 
 

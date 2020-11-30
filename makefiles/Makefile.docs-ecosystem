@@ -10,7 +10,7 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 # within one bucket.
 PREFIX=drivers
 PROJECT=drivers
-MUT_PREFIX ?= $PROJECT
+MUT_PREFIX ?= ($PROJECT)
 REPO_DIR=$(shell pwd)
 
 
