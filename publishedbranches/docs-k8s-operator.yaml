@@ -26,7 +26,7 @@ version:
     - '1.1'
     - '1.0'
   stable: 'v1.8'
-  upcoming: 'v1.8'
+  upcoming: 'v1.9'
 git:
   branches:
     manual: 'v1.8'
