@@ -181,42 +181,6 @@
       "publishOriginalBranchName": true,
       "active": true,
       "aliases": null
-    },
-    {
-      "name": "v1.1",
-      "publishOriginalBranchName": true,
-      "active": true,
-      "aliases": null
-    },
-    {
-      "name": "v0.12",
-      "publishOriginalBranchName": true,
-      "active": true,
-      "aliases": null
-    },
-    {
-      "name": "v0.11",
-      "publishOriginalBranchName": true,
-      "active": true,
-      "aliases": null
-    },
-    {
-      "name": "v0.10",
-      "publishOriginalBranchName": true,
-      "active": true,
-      "aliases": null
-    },
-    {
-      "name": "v0.9",
-      "publishOriginalBranchName": true,
-      "active": true,
-      "aliases": null
-    },
-    {
-      "name": "v0.8",
-      "publishOriginalBranchName": true,
-      "active": true,
-      "aliases": null
     }
   ]
 },{
