@@ -9,7 +9,7 @@ PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongodb-shell-prod
 PROJECT=mongodb-shell
-MUT_PREFIX ?= ($PROJECT)
+MUT_PREFIX ?= $(PROJECT)
 
 REPO_DIR=$(shell pwd)
 

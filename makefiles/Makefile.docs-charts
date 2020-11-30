@@ -8,7 +8,7 @@ PRODUCTION_URL="https://docs.mongodb.com"
 PRODUCTION_BUCKET=docs-compass-prod
 PREFIX=charts
 PROJECT=charts
-MUT_PREFIX ?= ($PROJECT)
+MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
 
