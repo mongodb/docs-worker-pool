@@ -75,7 +75,6 @@ class S3PublishClass {
     if (this.GitHubJob.buildNextGen()) {
       deployCommands[deployCommands.length - 1] = `make next-gen-deploy MUT_PREFIX=${this.GitHubJob.currentJob.payload.mutPrefix} MANIFEST_PREFIX=${this.GitHubJob.currentJob.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${this.GitHubJob.currentJob.payload.stableBranch}`;
     }
-
     // deploy site
     try {
       const exec = workerUtils.getExecPromise();
