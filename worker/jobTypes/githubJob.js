@@ -51,7 +51,6 @@ class GitHubJobClass {
         const server_user = await workerUtils.getServerUser()
         let pathPrefix; 
         let manifestPrefix;
-        
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
@@ -73,6 +72,7 @@ class GitHubJobClass {
           this.currentJob.payload.pathPrefix = pathPrefix;
           const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
           this.currentJob.payload.mutPrefix = mutPrefix;
+          this.currentJob.payload.manifestPrefix = manifestPrefix;
         }
       }catch(error){
         console.log(error)
@@ -122,7 +122,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
