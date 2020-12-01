@@ -259,6 +259,59 @@
       "aliases": [
         "stable"
       ]
+        {
+      "name": "v1.8",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.7",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.6",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.5",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.4.0",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.3.0",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.2.0",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.1.0",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
+    },
+    {
+      "name": "v1.0.0",
+      "publishOriginalBranchName": true,
+      "active": true,
+      "aliases": null
     }
   ]
 },{
