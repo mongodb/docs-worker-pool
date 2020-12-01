@@ -144,7 +144,10 @@
       "name": "master",
       "publishOriginalBranchName": true,
       "active": true,
-      "aliases": null
+      "aliases": [
+        "v1.9",
+        "upcoming"
+      ]
     },
     {
       "name": "v1.8",
