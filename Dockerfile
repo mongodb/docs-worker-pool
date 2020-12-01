@@ -35,7 +35,7 @@ WORKDIR /home/docsworker-xlarge
 
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
-RUN python3 -m pip install --upgrade pip flit
+RUN python3 -m pip install pip==20.2 flit==3.0.0
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
