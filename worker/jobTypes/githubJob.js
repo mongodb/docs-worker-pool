@@ -50,16 +50,18 @@ class GitHubJobClass {
         const repoContent = await workerUtils.getRepoPublishedBranches(repoObject)
         const server_user = await workerUtils.getServerUser()
         let pathPrefix; 
-
+        let manifestPrefix;
         if(isProdDeployJob){
           //versioned repo
           if(repoContent && repoContent.content.version.active.length > 1){
-            pathPrefix = `${repoContent.content.prefix}/${this.currentJob.payload.branchName}`; 
-          }
+            pathPrefix = `${repoContent.content.prefix}/${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`; 
+        }
           //non versioned repo
           else{
-            pathPrefix = `${repoContent.content.prefix}`;
+            pathPrefix = `${this.currentJob.payload.alias ? this.currentJob.payload.alias :  repoContent.content.prefix}`;
           }
+          //used for the deploy-search-index
+          this.currentJob.payload.manifestPrefix= `${repoContent.content.prefix !== `\n` ? `${repoContent.content.prefix}-` : ''}` + `${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`;
         }
         // server staging commit jobs
         else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 
@@ -70,6 +72,7 @@ class GitHubJobClass {
           this.currentJob.payload.pathPrefix = pathPrefix;
           const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
           this.currentJob.payload.mutPrefix = mutPrefix;
+          this.currentJob.payload.manifestPrefix = manifestPrefix;
         }
       }catch(error){
         console.log(error)
@@ -119,7 +122,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
+        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
