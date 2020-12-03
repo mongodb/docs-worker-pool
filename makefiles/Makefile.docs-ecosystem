@@ -40,8 +40,8 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS};
-	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
+	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
+	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 get-build-dependencies: assets
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-ecosystem.yaml > ${REPO_DIR}/published-branches.yaml
