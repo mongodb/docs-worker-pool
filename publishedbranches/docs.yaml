@@ -1,10 +1,10 @@
-prefix: 'manual'
+prefix: ''
 version:
   published:
     - 'master'
   active:
     - 'master'
-  stable: ''
+  stable: 'master'
   upcoming: master
 git:
   branches:
