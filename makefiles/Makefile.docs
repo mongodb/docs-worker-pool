@@ -6,7 +6,9 @@ STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-mongodb-org-prod
 PREFIX=manual
 PROJECT=docs
+MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
+
 PATCH_FILE="myPatch.patch"
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
@@ -35,29 +37,19 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yam
 
 .PHONY: help lint html markdown stage deploy deploy-search-index examples redirects
 
+
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
+
 next-gen-stage: ## Host online for review
-	# stagel commit jobs \
-	if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/$(filter-out $@,$(MAKECMDGOALS))/${USER}/${GIT_BRANCH}/"; \
 	# stagel local jobs \
-	elif [ ! -z "${PATCH_ID}" ] && [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${PROJECT}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-	# reg github push jobs \
+	if [ ! -z "${PATCH_ID}" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	# reg github push jobs and stagel commit jobs \
 	else \
-		mut-publish public ${STAGING_BUCKET} --prefix=${COMMIT_HASH}/${PROJECT} --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"; \
-	fi
-%:
-	@:
-
-
-help: ## Show this help message
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
-	@echo
-	@echo 'Variables'
-	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 
 lint: ## Checks URLs in the built corpus underneath build/<branch>/html
 	mut-lint --linters=links ./build/master/source/ ${ARGS}
@@ -73,7 +65,6 @@ html: examples ## Builds this branch's HTML under build/<branch>/html
 	# TEMP copy of video file. Remove once video infrastructure in place.
 	if [ ! -z "${PATCH_ID}" ]; then mkdir -p build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi;
 	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi 
-	
 
 publish: examples ## Builds this branch's publishable HTML and other artifacts under build/public
 	if [ ${GIT_BRANCH} = master ]; then rm -rf build/master build/public; fi
@@ -108,15 +99,17 @@ deploy: build/public ## Deploy to the production bucket
 
 	@echo "Hosted at ${PRODUCTION_URL}/index.html"
 
-	$(MAKE) deploy-search-index
+	$(MAKE) next-gen-deploy-search-index
 
-deploy-search-index: ## Update the search index for this branch
+## Update the search index for this branch
+next-gen-deploy-search-index:
 	@echo "Building search index"
-	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o manual-current.json --aliases manual-${GIT_BRANCH} -u ${PRODUCTION_URL}/manual -g -s; \
-	else \
-		mut-index upload build/public/${GIT_BRANCH} -o manual-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${GIT_BRANCH} -s; \
-	fi
+	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+
+next-gen-deploy:	
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
+	$(MAKE) next-gen-deploy-search-index
 
 next-gen-html: examples
 	# snooty parse and then build-front-end

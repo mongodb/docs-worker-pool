@@ -5,66 +5,14 @@ PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 PRODUCTION_BUCKET=docs-atlas-osb-prod
 PROJECT=atlas-open-service-broker
-# PREFIX=atlas-open-service-broker -> doesn't seem to be used anywhere
+MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
+
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-.PHONY: help html publish stage deploy deploy-search-index
-
-## Show this help message
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
-	@echo
-	@echo 'Variables'
-	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
-
-#################################################################
-####                                                         ####
-####             LEGACY MAKE TARGETS                         ####
-####                                                         ####
-#################################################################
-
-## Builds this branch's HTML under build/<branch>/html
-html:
-	time giza make html
-
-## Build this branch's HTML files to a fresh build directory
-clean-html:
-	rm -rf build/${GIT_BRANCH}
-	time giza make html
-
-## Builds this branch's publishable HTML and other artifacts under
-## build/public
-publish:
-	giza make publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
-
-## Host online for review
-stage:
-	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
-	@echo "\n\nHosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
-
-## Deploy to the production bucket
-deploy: build/public
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='${PROJECT}' ${ARGS}
-
-	@echo "\n\nHosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
-
-	$(MAKE) deploy-search-index
-
-#################################################################
-####                                                         ####
-####             SNOOTY MAKE TARGETS                         ####
-####                                                         ####
-#################################################################
-
-## Update the search index for this branch
-deploy-search-index:
-	@echo "Building search index"
-	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/atlas-open-service-broker -s;
 
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -84,13 +32,16 @@ next-gen-html:
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
+	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="$(filter-out $@,$(MAKECMDGOALS))" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/$(filter-out $@,$(MAKECMDGOALS))/index.html";
+	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
 	$(MAKE) next-gen-deploy-search-index
-%:
-	@:
+
+## Update the search index for this branch
+next-gen-deploy-search-index:
+	@echo "Building search index"
+	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
