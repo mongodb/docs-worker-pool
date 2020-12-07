@@ -8,8 +8,10 @@ PRODUCTION_BUCKET=docs-devhub-prod
 PRODUCTION_URL=https://developer.mongodb.com
 
 PROJECT=devhub
+MUT_PREFIX ?= $(PROJECT)
 PREFIX=devhub
 REPO_DIR=$(shell pwd)
+
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
@@ -19,11 +21,7 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 .PHONY: examples help html publish stage deploy deploy-search-index
 
-help: ## Show this help message
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
-	@echo
-	@echo 'Variables'
-	@printf "  \033[36m%-18s\033[0m %s\n" 'ARGS' 'Arguments to pass to mut-publish'
+
 
 update-snooty:
 	@git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/mongodb/devhub snooty && \
@@ -58,23 +56,13 @@ next-gen-html-publish:
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-  
-next-gen-publish: next-gen-html-publish
-	# if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PROJECT}" --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PROJECT}/${USER}/${GIT_BRANCH}/"
+	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
+	echo "${COMMIT_HASH}/${MUT_PREFIX}"
+	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
-next-gen-deploy:
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix=/ --deploy --all-subdirectories ${ARGS}
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+next-gen-deploy:	
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://developer.mongodb.com --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/index.html";
 
-deploy-search-index: ## Update the search index for this branch
-	@echo "Building search index"
-	mut-index upload build/public \
-		-o ${PROJECT}-${GIT_BRANCH}.json \
-		-u ${PRODUCTION_URL} \
-		-g \
-		-s \
-		--exclude build/public/index.html
