@@ -5,7 +5,6 @@ version:
   active:
     - 'master'
   stable: 'master'
-  upcoming: master
 git:
   branches:
     manual: 'master'
