@@ -43,13 +43,18 @@ get-build-dependencies:
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
-	if [ ! -z "${PATCH_ID}" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
-	# reg github push jobs and stagel commit jobs \
-	else \
+	if [ ! -z "${PATCH_ID}"] && ["${MUT_PREFIX}" == "${PROJECT}"]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	# stagel commit jobs \
+	elif [ "${MUT_PREFIX}" != "${PROJECT}" ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	# reg github push \
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	fi
 
 lint: ## Checks URLs in the built corpus underneath build/<branch>/html
 	mut-lint --linters=links ./build/master/source/ ${ARGS}
