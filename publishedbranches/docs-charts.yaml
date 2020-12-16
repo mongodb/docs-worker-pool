@@ -3,11 +3,9 @@ version:
   published:
     - 'Cloud'
     - '19.12 (On-Prem)'
-    - '19.09 (On-Prem)'
   active:
     - 'Cloud'
     - '19.12 (On-Prem)'
-    - '19.09 (On-Prem)'
   stable: 'master'
 git:
   branches:
@@ -15,7 +13,6 @@ git:
     published:
       - 'master'
       - '19.12'
-      - '19.09'
 
       # the branches/published list **must** be ordered from most to
       # least recent release.
