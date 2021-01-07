@@ -11,6 +11,7 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 PREFIX=govcloud
 PROJECT=govcloud
+MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
