@@ -40,7 +40,7 @@ next-gen-html: update-snooty
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production \
+	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
 	npm run build;
 
 next-gen-stage: ## Host online for review
