@@ -14,6 +14,8 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
+include ~/shared.mk
+
 # "PROJECT" currently exists to support having multiple projects
 # within one bucket. For the manual it is empty.
 

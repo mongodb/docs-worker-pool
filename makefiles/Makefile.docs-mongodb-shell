@@ -23,11 +23,8 @@ REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-## Update the search index for this branch
-next-gen-deploy-search-index:
-	@echo "Building search index"
-	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
-	
+include ~/shared.mk
+
 next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
@@ -52,9 +49,4 @@ get-build-dependencies:
 
 next-gen-deploy:	
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
-
-	
-next-gen-deploy-search-index: ## Update the search index for this branch
-	@echo "Building search index"
-	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
