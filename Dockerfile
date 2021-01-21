@@ -16,7 +16,7 @@ RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tool
 # helper libraries for docs builds
 RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
 RUN apt-get -y install git pkg-config libxml2-dev
-RUN python3 -m pip install mut
+RUN python3 -m pip install -r https://raw.githubusercontent.com/mongodb/mut/master/requirements.txt
 ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 12
