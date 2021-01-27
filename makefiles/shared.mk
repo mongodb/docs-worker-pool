@@ -1,23 +1,4 @@
-GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
-
-STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-staging
-
-ifeq ($(SNOOTY_INTEGRATION),false)
-  PRODUCTION_URL="https://docs.mongodb.com"
-  PRODUCTION_BUCKET=docs-node-prod;
-else
-  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
-  PRODUCTION_BUCKET=docs-node-integration
-endif
-
-COMMIT_HASH=$(shell git rev-parse --short HEAD)
-
-PREFIX=drivers/node
-PROJECT=node
-MUT_PREFIX ?= $(PROJECT)
-REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -25,6 +6,8 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-node.yaml > ${REPO_DIR}/published-branches.yaml
 
+
+ifndef CUSTOM_NEXT_GEN_HTML
 next-gen-html:
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
@@ -40,19 +23,22 @@ next-gen-html:
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+endif
+
 
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
+html: ## Builds this branch's HTML under build/<branch>/html
+	giza make html
+
 next-gen-deploy:	
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=PRODUCTION_URL --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
 	$(MAKE) next-gen-deploy-search-index
 
 next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
-
-include shared.mk
