@@ -10,7 +10,6 @@ const workerUtils = require('./utils/utils');
 // Import job function
 const { runGithubPush, safeGithubPush } = require('./jobTypes/githubPushJob');
 const { runGithubProdPush, safeGithubProdPush } = require('./jobTypes/productionDeployJob')
-const {runRegressionTests, safeRegressionTest} = require('./jobTypes/regressionTestJob')
 const {
   runPublishDochub,
   safePublishDochub
@@ -44,8 +43,7 @@ const maxCheckIn = (2 * MONGO_TIMEOUT_S + JOB_TIMEOUT_S + 60 * 10) * 1000;
 const jobTypeToFunc = {
   githubPush: { function: runGithubPush, safe: safeGithubPush },
   productionDeploy : {function: runGithubProdPush, safe: safeGithubProdPush},
-  publishDochub: { function: runPublishDochub, safe: safePublishDochub }, 
-  regressionTest: {function: runRegressionTests, safe: safeRegressionTest},
+  publishDochub: { function: runPublishDochub, safe: safePublishDochub }
 };
 
 // route for liveness check
