@@ -62,4 +62,4 @@ next-gen-deploy:
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=PRODUCTION_URL --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
 
-include shared.mk
+include ../shared.mk
