@@ -1,7 +1,7 @@
 prefix: 'mongocli'
 version:
   published:
-    - '1.12' (upcoming)
+    - '1.12 (upcoming)'
     - '1.11 (stable)'
     - '1.10'
     - '1.9'
