@@ -38,6 +38,7 @@ next-gen-html:
   
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="integration/${MUT_PREFIX}" --stage ${ARGS}; \
+	echo "this is mut prefix: integration/${MUT_PREFIX}"
 	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 
 get-build-dependencies: 
