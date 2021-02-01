@@ -6,7 +6,7 @@ STAGING_BUCKET=docs-mongodb-org-staging
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
-  PRODUCTION_BUCKET=ocs-govcloud-prod;
+  PRODUCTION_BUCKET=docs-govcloud-prod;
 else
   PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
   PRODUCTION_BUCKET=docs-govcloud-integration
