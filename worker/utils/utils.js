@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const request = require('request');
 const yaml = require('js-yaml');
-// const git  = require('nodegit');
+const toml = require('toml');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const mongo = require('./mongo');
@@ -179,6 +179,27 @@ module.exports = {
       }
     }
     return returnObject;
+  },
+  
+  async getSnootyProjectName(repoDirName){
+    try {
+      const commands = [
+        `. /venv/bin/activate`,
+        `cd ~/repos/${repoDirName}`,
+        `make get-project-name`
+      ]
+
+      const { stdout, stderr } = await exec(commands.join(' && '));
+      // etc etc
+      console.log(stdout)
+
+    }
+    catch (error) {
+      console.log('Error running command', error)
+      throw error
+      //catch errors
+    }
+
   },
 
   async getRepoPublishedBranches(repoObject) {
