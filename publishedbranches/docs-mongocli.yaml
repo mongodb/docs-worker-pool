@@ -1,8 +1,9 @@
 prefix: 'mongocli'
 version:
   published:
-    - '1.12 (upcoming)'
-    - '1.11 (stable)'
+    - '1.13 (upcoming)'
+    - '1.12 (stable)'
+    - '1.11'
     - '1.10'
     - '1.9'
     - '1.8'
@@ -20,8 +21,9 @@ version:
     - '0.0.4'
     - '0.0.3'
   active:
-    - '1.12 (upcoming)'
-    - '1.11 (stable)'
+    - '1.13 (upcoming)'
+    - '1.12 (stable)'
+    - '1.11'
     - '1.10'
     - '1.9'
     - '1.8'
@@ -33,13 +35,14 @@ version:
     - '1.2'
     - '1.1'
     - '1.0'
-  stable: 'v1.11'
-  upcoming: 'v1.12'
+  stable: 'v1.12'
+  upcoming: 'v1.13'
 git:
   branches:
-    manual: 'v1.12'
+    manual: 'v1.13'
     published:
       - 'master'
+      - 'v1.12'
       - 'v1.11'
       - 'v1.10'
       - 'v1.9'
