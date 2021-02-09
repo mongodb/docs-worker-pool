@@ -21,8 +21,6 @@ PROJECT=cloud-docs
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
-echo "${MUT_PREFIX}";
-
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
@@ -40,6 +38,7 @@ help:
 	@echo '  ARGS         - Arguments to pass to mut-publish'
 
 next-gen-html:
+	echo "this is mut prefix: ${MUT_PREFIX}";
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
 	if [ $$? -eq 1 ]; then \
@@ -59,6 +58,7 @@ next-gen-stage: ## Host online for review
 	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 next-gen-deploy:
+	echo "this is: ${MUT_PREFIX}";
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
 	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
