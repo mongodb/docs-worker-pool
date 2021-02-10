@@ -8,14 +8,8 @@ endif
 STAGING_URL="https://docs-atlas-staging.mongodb.com"
 STAGING_BUCKET=docs-atlas-staging
 
-ifeq ($(SNOOTY_INTEGRATION),false)
-  PRODUCTION_URL="https://docs.atlas.mongodb.com"
-  PRODUCTION_BUCKET=docs-atlas-prod;
-else
-  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
-  PRODUCTION_BUCKET=docs-node-integration
-endif
-
+PRODUCTION_URL="https://docs.atlas.mongodb.com"
+PRODUCTION_BUCKET=docs-atlas-prod
 PREFIX=cloud-docs
 PROJECT=cloud-docs
 MUT_PREFIX ?= $(PROJECT)
@@ -47,7 +41,7 @@ next-gen-html:
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	npm run build; \
