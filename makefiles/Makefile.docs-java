@@ -6,7 +6,7 @@ STAGING_BUCKET=docs-mongodb-org-staging
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
-  PRODUCTION_BUCKET=docs-java-prod;
+  PRODUCTION_BUCKET=docs-java-prod
 else
   PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
   PRODUCTION_BUCKET=docs-java-integration
@@ -30,7 +30,7 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
