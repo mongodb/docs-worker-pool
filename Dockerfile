@@ -19,10 +19,10 @@ RUN apt-get -y install git pkg-config libxml2-dev
 RUN python3 -m pip install -r https://raw.githubusercontent.com/mongodb/mut/master/requirements.txt
 ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
-# get node 12
+# get node 14
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
 RUN apt-get install --yes curl
-RUN curl --location https://deb.nodesource.com/setup_12.x | bash -
+RUN curl --location https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
