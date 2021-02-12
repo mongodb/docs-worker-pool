@@ -4,8 +4,13 @@ USER=$(shell whoami)
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 
-PRODUCTION_URL="https://docs.mongodb.com"
-PRODUCTION_BUCKET=docs-node-prod
+ifeq ($(SNOOTY_INTEGRATION),false)
+  PRODUCTION_URL="https://docs.mongodb.com"
+  PRODUCTION_BUCKET=docs-node-prod
+else
+  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
+  PRODUCTION_BUCKET=docs-node-integration
+endif
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
@@ -28,7 +33,7 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR};
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
@@ -39,9 +44,6 @@ next-gen-html:
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
-
-html: ## Builds this branch's HTML under build/<branch>/html
-	giza make html
 
 next-gen-deploy:	
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi

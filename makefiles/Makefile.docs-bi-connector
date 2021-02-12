@@ -1,9 +1,16 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
-PRODUCTION_BUCKET=docs-bi-connector-prod
+
+ifeq ($(SNOOTY_INTEGRATION),false)
+  PRODUCTION_URL="https://docs.mongodb.com"
+  PRODUCTION_BUCKET=docs-bi-connector-prod
+else
+  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
+  PRODUCTION_BUCKET=docs-bi-connector-integration
+endif
+
 PROJECT=bi-connector
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
@@ -22,7 +29,7 @@ next-gen-html: get-build-dependencies
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; \
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production snooty/.env.production; \
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
