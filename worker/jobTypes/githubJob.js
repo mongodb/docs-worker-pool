@@ -42,16 +42,15 @@ class GitHubJobClass {
         return false;
     }
     async constructManifestIndexPath(){
-        var snootyName;
         try {
-            snootyName = await utils.getSnootyProjectName(this.getRepoDirName());
-
+            const snootyName = await utils.getSnootyProjectName(this.getRepoDirName());
+            this.currentJob.payload.manifestPrefix = snootyName + '-' + (this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName)
+            console.log(this.currentJob.payload.manifestPrefix, "!!!")
         } catch (error) {
             console.log(error)
             throw error
         }
         
-        this.currentJob.payload.manifestPrefix = snootyName + '-' + (this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName)
     }
     async constructPrefix(isProdDeployJob){    
       try{

@@ -192,6 +192,7 @@ module.exports = {
       const { stdout, stderr } = await exec(commands.join(' && '));
       // etc etc
       console.log(stdout)
+      return stdout.trim();
 
     }
     catch (error) {
