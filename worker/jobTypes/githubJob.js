@@ -45,7 +45,6 @@ class GitHubJobClass {
         try {
             const snootyName = await utils.getSnootyProjectName(this.getRepoDirName());
             this.currentJob.payload.manifestPrefix = snootyName + '-' + (this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName)
-            console.log(this.currentJob.payload.manifestPrefix, "!!!")
         } catch (error) {
             console.log(error)
             throw error
