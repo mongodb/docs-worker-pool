@@ -34,7 +34,7 @@ USER docsworker-xlarge
 WORKDIR /home/docsworker-xlarge
 
 # get shared.mk
-RUN curl https://raw.githubusercontent.com/madelinezec/docs-worker-pool/DOP-1915/makefiles/shared.mk >> shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk >> shared.mk
 
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
