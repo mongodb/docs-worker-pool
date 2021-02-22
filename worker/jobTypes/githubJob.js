@@ -46,7 +46,7 @@ class GitHubJobClass {
             const snootyName = await utils.getSnootyProjectName(this.getRepoDirName());
             this.currentJob.payload.manifestPrefix = snootyName + '-' + (this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName)
         } catch (error) {
-            console.log(error)
+            logger.save(error)
             throw error
         }
         
@@ -337,7 +337,7 @@ class GitHubJobClass {
             await this.constructManifestIndexPath(); 
         }
         commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
-        commandsToBuild.push(`make next-gen-html`)
+        commandsToBuild.push('make next-gen-html')
           
       }
 

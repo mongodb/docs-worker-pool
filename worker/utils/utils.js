@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs-extra');
 const request = require('request');
 const yaml = require('js-yaml');
-const toml = require('toml');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const mongo = require('./mongo');
