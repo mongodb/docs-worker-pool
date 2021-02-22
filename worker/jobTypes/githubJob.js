@@ -41,7 +41,7 @@ class GitHubJobClass {
         }
         return false;
     }
-    async constructManifestIndexPath(){
+    async constructManifestIndexPath(logger){
         try {
             const snootyName = await utils.getSnootyProjectName(this.getRepoDirName());
             this.currentJob.payload.manifestPrefix = snootyName + '-' + (this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName)
@@ -334,7 +334,7 @@ class GitHubJobClass {
         // duplicate indexes === only differ by the suffix of the url, /atlas vs /saas vs /master
         // if a branch is not aliased (and therefore not duplicated) or if this is the primary alias of a branch, construct a path for search index
         if( ! this.currentJob.payload.aliased || ( this.currentJob.payload.aliased && this.currentJob.payload.primaryAlias ) ) {
-            await this.constructManifestIndexPath(); 
+            await this.constructManifestIndexPath(logger); 
         }
         commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
         commandsToBuild.push('make next-gen-html')
