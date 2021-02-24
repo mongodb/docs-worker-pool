@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const workerUtils = require('../utils/utils');
 const simpleGit = require('simple-git/promise');
 const request = require('request');
+const utils = require('../utils/utils');
 
 
 class GitHubJobClass {
@@ -40,7 +41,16 @@ class GitHubJobClass {
         }
         return false;
     }
-
+    async constructManifestIndexPath(logger){
+        try {
+            const snootyName = await utils.getSnootyProjectName(this.getRepoDirName());
+            this.currentJob.payload.manifestPrefix = snootyName + '-' + (this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName)
+        } catch (error) {
+            logger.save(error)
+            throw error
+        }
+        
+    }
     async constructPrefix(isProdDeployJob){    
       try{
         //download published branches file to retrieve prefix and check if repo is versioned 
@@ -60,8 +70,7 @@ class GitHubJobClass {
           else{
             pathPrefix = `${this.currentJob.payload.alias ? this.currentJob.payload.alias :  repoContent.content.prefix}`;
           }
-          //used for the deploy-search-index
-          this.currentJob.payload.manifestPrefix= `${repoContent.content.prefix !== `\n` ? `${repoContent.content.prefix}-` : ''}` + `${ this.currentJob.payload.alias ? this.currentJob.payload.alias : this.currentJob.payload.branchName}`;
+
         }
         // server staging commit jobs
         else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 
@@ -312,14 +321,24 @@ class GitHubJobClass {
         await this.constructPrefix(isProdDeployJob);
         await gatsbyAdapter.initEnv();
       }
+
+      // staging jobs do not need to retrieve the published branches yaml file for front-end
+      // thus why the series of makefile targets are slightly different btwn prod and staging jobs
       if (this.buildNextGen() && !isProdDeployJob) {
         commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
       }
 
       //check if prod deploy job
       if (this.buildNextGen() && isProdDeployJob) {
-          commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
-          commandsToBuild.push(`make next-gen-html`)
+        // we only generate a single search index per branch to ensure we do not have duplicate search indexes
+        // duplicate indexes === only differ by the suffix of the url, /atlas vs /saas vs /master
+        // if a branch is not aliased (and therefore not duplicated) or if this is the primary alias of a branch, construct a path for search index
+        if( ! this.currentJob.payload.aliased || ( this.currentJob.payload.aliased && this.currentJob.payload.primaryAlias ) ) {
+            await this.constructManifestIndexPath(logger); 
+        }
+        commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
+        commandsToBuild.push('make next-gen-html')
+          
       }
 
         const execTwo = workerUtils.getExecPromise();
