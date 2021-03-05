@@ -44,6 +44,7 @@ next-gen-html: build-legacy-pages
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	mv build-legacy-pages/sitemap-index.xml public/
 	mv build-legacy-pages/tools public/
 	mv build-legacy-pages/cloud public/
 
