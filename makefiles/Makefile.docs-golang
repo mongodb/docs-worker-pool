@@ -12,8 +12,6 @@ else
   PRODUCTION_BUCKET=docs-go-integration
 endif
 
-COMMIT_HASH=$(shell git rev-parse --short HEAD)
-
 PREFIX=/drivers/go
 PROJECT=golang
 MUT_PREFIX ?= $(PROJECT)
@@ -29,7 +27,7 @@ get-build-dependencies:
 
 next-gen-html:
 	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
+	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
@@ -39,13 +37,12 @@ next-gen-html:
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
-	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
+	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS};
+	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 next-gen-deploy:	
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
