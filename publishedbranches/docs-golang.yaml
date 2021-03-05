@@ -1,0 +1,15 @@
+prefix: '/drivers/go'
+ version:
+   published:
+     - 'main'
+   active:
+     - 'main'
+   stable: 'main'
+ git:
+   branches:
+     manual: 'main'
+     published:
+       - 'main'
+       # the branches/published list **must** be ordered from most to
+       # least recent release.
+ ...
