@@ -58,6 +58,7 @@ next-gen-deploy:
 	@yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
 	if [ ${MANIFEST_PREFIX} ]; then $(MAKE) next-gen-deploy-search-index; fi
+	mut-index upload public -o atlas-${GIT_BRANCH}.json -u ${PRODUCTION_URL} -g -s --exclude public/performance-advisor/autopilot.html
 
 
 get-build-dependencies: 
