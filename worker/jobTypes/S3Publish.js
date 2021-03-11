@@ -94,18 +94,18 @@ class S3PublishClass {
         throw new Error(`Failed pushing to prod: ${stderr}`)
       }
       // check for json string output from mut
-      const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
-
       // check if json was returned from mut
       try {
-        const stdoutJSON = JSON.parse(validateJsonOutput);
+
+        const makefileOutput = stdout.replace(/\r/g, "").split(/\n/);
+        // the surrogate keys are always third line returned bc of the makefile target
+        const stdoutJSON = JSON.parse(makefileOutput[2]);
         const urls = stdoutJSON.urls;
-        // pass in urls to fastly function to purge cache
         this.fastly.purgeCache(urls).then(function (data) {
           logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
           logger.sendSlackMsg('Fastly Summary: The following pages were purged from cache for your deploy');
           // when finished purging
-          // batch urls to send as single slack message
+          // batch surrogate keys to send as single slack message
           let batchedUrls = [];
           for (let i = 0; i < urls.length; i++) {
             const purgedUrl = urls[i];
@@ -119,14 +119,11 @@ class S3PublishClass {
             }
           }
         });
-      } catch (e) {
-        // if not JSON, then it's a normal string output from mut
-        // get only last part of message which includes # of files changes + s3 link
-        if (stdout.indexOf('Summary') !== -1) {
-          stdoutMod = stdout.substr(stdout.indexOf('Summary'));
-        }
+      } catch (error) {
+        console.trace(error)
+        throw(error)
       }
-
+            
       return new Promise((resolve) => {
         logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
         logger.save(
