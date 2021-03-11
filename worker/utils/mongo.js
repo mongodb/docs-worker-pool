@@ -9,8 +9,14 @@ const runXlarge = EnvironmentClass.getXlarge();
 const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
 
 // Collection information
+<<<<<<< HEAD
 const DB_NAME = EnvironmentClass.getDB(); // Database name for autobuilder in MongoDB Atlas
 const COLL_NAME = EnvironmentClass.getCollection(); // Collection name in MongoDB Atlas
+=======
+const DB_NAME = EnvironmentClass.getDB(); // Database name of the queue in MongoDB Atlas
+const COLL_NAME = EnvironmentClass.getCollection(); // Collection name of the queue in MongoDB Atlas
+console.log("collection name inside mongo.js ", COLL_NAME)
+>>>>>>> testing
 const META_NAME = 'meta';
 const MONITOR_NAME = 'monitor';
 const ENTITLEMENTS_NAME = 'entitlements';
@@ -92,11 +98,20 @@ module.exports = {
 
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
+<<<<<<< HEAD
 
     try {
       return queueCollection.findOneAndUpdate(query, update, options);
     } catch (error) {
       console.trace(error)
+=======
+    //await queueCollection.findOne({ status: 'inQueue' });
+    //console.log(await queueCollection.findOne({ status: 'inQueue' }))
+    try {
+      return queueCollection.findOneAndUpdate(query, update, options);
+    } catch (error) {
+      console.log(error)
+>>>>>>> testing
       throw error
     }
   },

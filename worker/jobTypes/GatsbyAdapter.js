@@ -1,5 +1,6 @@
 const workerUtils = require('../utils/utils');
 const fs = require('fs-extra');
+const { Logger } = require('mongodb');
 
 class GatsbyAdapterClass {
   constructor(GitHubJob) {
@@ -23,13 +24,15 @@ class GatsbyAdapterClass {
         const envVars = await this.constructEnvVars();
 
         fs.writeFile(`repos/${this.GitHubJob.currentJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' }, function(err) {
+            console.log("we are writing the .env.production file!")
             if(err) {
               console.log(`error writing .env.production file: ${err.stderr}`);
               throw err;
             }
         }); 
       } catch (error) {
-       console.log(error)
+      
+       Logger.save(error)
        throw error 
       }
   }
