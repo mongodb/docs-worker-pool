@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -o Acquire::Check-Valid-Until=false update
 RUN apt-get -y install libpython2.7-dev python2.7 git rsync
 RUN apt-get -y install curl
-RUN curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py
+RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 RUN python2.7 get-pip.py
 RUN pip install requests virtualenv virtualenvwrapper py-dateutil
 RUN python2.7 -m pip install python-dateutil 
@@ -39,17 +39,15 @@ RUN python3 -m pip install --upgrade pip flit
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	latestTag=$(git describe --tags `git tag --sort=-v:refname` | head -n 1) && \
-	git checkout "$latestTag" && \
+	git checkout <TAG> && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) && \
-	git checkout "$latestTag" && \	
-	npm install --production && \
+	git checkout <TAG> && \	
+	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
 	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
