@@ -5,6 +5,7 @@ const atlasUsername = process.env.MONGO_ATLAS_USERNAME;
 const atlasPassword = process.env.MONGO_ATLAS_PASSWORD;
 const xlarge = process.env.XLARGE;
 const jobDb = process.env.DB_NAME;
+const jobCol = process.env.COL_NAME;
 
 class EnvironmentClass {
   static getDB() {
@@ -12,6 +13,15 @@ class EnvironmentClass {
       return 'pool_test';
     }
     return jobDb;
+  }
+
+  /* collection name is dynamic to allow mult staging autobuilder instances running
+     at same time without picking up each other's jobs */
+  static getCollection() {
+    if (jobCol === undefined) {
+      return 'queue';
+    }
+    return jobCol;
   }
 
   static getXlarge() {

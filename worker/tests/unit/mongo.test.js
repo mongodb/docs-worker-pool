@@ -269,7 +269,7 @@ describe('Mongo Tests', () => {
    ******************************************************************* */
   it('logInMongoWorks', async () => {
     const jobsColl = db.collection('jobs');
-    mongo.getQueueCollection = jest.fn().mockReturnValue(jobsColl);
+    mongo.getCollection = jest.fn().mockReturnValue(jobsColl);
     job2.numFailures = 0;
 
     await mongo.logMessageInMongo(job2, 'message 1');
@@ -291,7 +291,7 @@ describe('Mongo Tests', () => {
     expect(currJob.logs.try1).toHaveLength(1);
     expect(currJob.logs.try1[0]).toEqual('message 3');
 
-    mongo.getQueueCollection = jest.fn().mockReturnValue();
+    mongo.getCollection = jest.fn().mockReturnValue();
     await mongo.logMessageInMongo(job2, 'message 1');
   }, 5000);
 

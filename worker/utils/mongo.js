@@ -9,8 +9,8 @@ const runXlarge = EnvironmentClass.getXlarge();
 const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
 
 // Collection information
-const DB_NAME = EnvironmentClass.getDB(); // Database name of the queue in MongoDB Atlas
-const COLL_NAME = 'queue'; // Collection name of the queue in MongoDB Atlas
+const DB_NAME = EnvironmentClass.getDB(); // Database name for autobuilder in MongoDB Atlas
+const COLL_NAME = EnvironmentClass.getCollection(); // Collection name in MongoDB Atlas
 const META_NAME = 'meta';
 const MONITOR_NAME = 'monitor';
 const ENTITLEMENTS_NAME = 'entitlements';
@@ -33,7 +33,7 @@ module.exports = {
     return null;
   },
   // Gets the Queue Collection
-  getQueueCollection() {
+  getCollection() {
     if (client) {
       return client.db(DB_NAME).collection(COLL_NAME);
     }
@@ -91,9 +91,14 @@ module.exports = {
     };
 
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
-    const options = { sort: { priority: -1, createdTime: 1 } };
-    await queueCollection.findOne({ status: 'inQueue' });
-    return queueCollection.findOneAndUpdate(query, update, options);
+    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
+
+    try {
+      return queueCollection.findOneAndUpdate(query, update, options);
+    } catch (error) {
+      console.trace(error)
+      throw error
+    }
   },
 
   // Sends Job To completed Status and Sets End Time
@@ -133,7 +138,7 @@ module.exports = {
 
   // Adds Log Message To Job In The Queue
   async logMessageInMongo(currentJob, message) {
-    const queueCollection = module.exports.getQueueCollection();
+    const queueCollection = module.exports.getCollection();
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
@@ -151,7 +156,7 @@ module.exports = {
   },
   // Adds Log Message To Job In The Queue
   async populateCommunicationMessageInMongo(currentJob, message) {
-    const queueCollection = module.exports.getQueueCollection();
+    const queueCollection = module.exports.getCollection();
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
