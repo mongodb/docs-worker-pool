@@ -96,7 +96,7 @@ module.exports = {
     try {
       return queueCollection.findOneAndUpdate(query, update, options);
     } catch (error) {
-      console.log(error)
+      console.trace(error)
       throw error
     }
   },
