@@ -116,7 +116,7 @@ module.exports = {
     // This is the collection that houses the work tickets
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
-      queueCollection = mongo.getQueueCollection();
+      queueCollection = mongo.getCollection();
     }
     monitorInstance.reportStatus('start server');
 
