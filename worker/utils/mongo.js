@@ -126,7 +126,7 @@ module.exports = {
       $inc: { numFailures: 1 },
     };
 
-    if (job.numFailures >= 2) {
+    if (job.numFailures >= 1) {
       update.$set.status = 'failed';
     }
 
