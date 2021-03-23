@@ -109,10 +109,6 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(asy
             tdElement.appendChild(document.createTextNode(formatDate(job.endTime)));
             rowElement.appendChild(tdElement);
 
-            tdElement = document.createElement("td");
-            tdElement.appendChild(document.createTextNode(job.numFailures));
-            rowElement.appendChild(tdElement);
-
             document.getElementById("jobsTable").appendChild(rowElement);
         }
         

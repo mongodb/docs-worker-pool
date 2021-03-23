@@ -19,7 +19,6 @@
   "createdTime": { "$date": { "$numberLong": "1546285378951" } },
   "endTime": { "$date": { "$numberLong": "1548372926643" } },
   "priority": { "$numberLong": "1" },
-  "numFailures": { "$numberLong": "0" },
   "failures": [],
   "result": [
     "public/5-26328b3c7a0749a7047f.js",
