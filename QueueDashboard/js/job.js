@@ -24,16 +24,11 @@ stitchClient.auth.loginWithCredential(new stitch.AnonymousCredential()).then(use
             startTime: formatDate(result.startTime), 
             endTime: formatDate(result.endTime), 
             numFailures: result.numFailures, 
-            failures: result.failures, 
+            error: result.error, 
             result: result.result,
             payload: result.payload,
             logs: result.logs,
         }
-
-        for (const failure of job.failures) {
-            failure.time = formatDate(failure.time);
-        }
-
         $('#json-renderer').jsonViewer(job);
     }).catch(err => {
         console.log(err)

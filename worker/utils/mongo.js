@@ -121,11 +121,10 @@ module.exports = {
   async finishJobWithFailure(queueCollection, job, reason) {
     const query = { _id: job._id };
     const update = {
-      $set: { startTime: null, status: 'failed' },
-      $push: { failures: { time: new Date(), reason } },
+      $set: { startTime: null, status: 'failed',error:  { time: new Date().toString(), reason }},
       $inc: { numFailures: 1 },
     };
-    
+
     const updateResult = await queueCollection.updateOne(query, update);
     if (updateResult.result.n < 1) {
       throw new Error(`Failed to update job (${job._id}) in queue on failure`);
@@ -138,7 +137,7 @@ module.exports = {
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
-        $push: { [`logs.try${currentJob.numFailures}`]: message },
+        $push: { ['logs']: message },
       };
 
       try {
