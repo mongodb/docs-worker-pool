@@ -8,8 +8,7 @@
   "createdTime": "2/8/2019 - 12:52 PM",
   "startTime": "2/9/2019 - 12:32 PM",
   "endTime": "2/9/2019 - 12:32 PM",
-  "numFailures": 0,
-  "failures": [],
+  "error": "",
   "result": [
     "public/app-f60730fd5aade27a12ea.js",
     "public/app-f60730fd5aade27a12ea.js.map",
@@ -31,8 +30,7 @@
     "url": "https://github.com/skerschb/testauth.git",
     "newHead": "38b805e9c7c4f1c364476682e93f9d24a87f470a"
   },
-  "logs": {
-    "try0": [
+  "logs": [
       "* Starting Job with ID: 5c5e0817ce099eaf874a9801 and type: githubPush",
       " ** Running github push function",
       "    (GATSBY)   Running Gatsby Build",
@@ -41,5 +39,4 @@
       "    (AWS)      Uploaded Files: ",
       "    (DONE)     Finished Job with ID: 5c5e0817ce099eaf874a9801"
     ]
-  }
 }

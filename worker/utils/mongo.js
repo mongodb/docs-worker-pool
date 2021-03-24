@@ -117,18 +117,12 @@ module.exports = {
     }
   },
 
-  // Sends Job To inQueue Status or Failed Status Depending on job.numFailures
+  // Updates the status to be failed and the reason with failed time
   async finishJobWithFailure(queueCollection, job, reason) {
     const query = { _id: job._id };
     const update = {
-      $set: { startTime: null, status: 'inQueue' },
-      $push: { failures: { time: new Date(), reason } },
-      $inc: { numFailures: 1 },
+      $set: { startTime: null, status: 'failed',error: { time: new Date().toString(), reason: reason }}
     };
-
-    if (job.numFailures >= 2) {
-      update.$set.status = 'failed';
-    }
 
     const updateResult = await queueCollection.updateOne(query, update);
     if (updateResult.result.n < 1) {
@@ -142,7 +136,7 @@ module.exports = {
     if (queueCollection) {
       const query = { _id: currentJob._id };
       const update = {
-        $push: { [`logs.try${currentJob.numFailures}`]: message },
+        $push: { ['logs']: message },
       };
 
       try {
