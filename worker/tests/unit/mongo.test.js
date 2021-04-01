@@ -1,10 +1,8 @@
 const { MongoClient } = require('mongodb');
 const mongo = require('../../utils/mongo');
 const env = require('../../utils/environment');
-
 const runXlarge = env.EnvironmentClass.getXlarge();
 const Monitor = require('../../utils/monitor').Monitor;
-
 // Helper function to add n days to the current date
 function newDateInNDays(n) {
   const date = new Date();
@@ -20,10 +18,9 @@ const job1 = {
   endTime: null,
   priority: 2,
   status: 'inQueue',
-  numFailures: 0,
-  failures: [],
+  error: {},
   result: null,
-  logs: {}
+  logs: []
 };
 
 // Job2 should be the second job taken off the queue because it has the earliest createdTime
@@ -93,8 +90,7 @@ describe('Mongo Tests', () => {
     expect(currJob).toHaveProperty('startTime', null);
     expect(currJob).toHaveProperty('endTime', null);
     expect(currJob).toHaveProperty('priority');
-    expect(currJob).toHaveProperty('numFailures', 0);
-    expect(currJob).toHaveProperty('failures', []);
+    expect(currJob).toHaveProperty('error', {});
     expect(currJob).toHaveProperty('result', null);
   });
 
@@ -216,40 +212,15 @@ describe('Mongo Tests', () => {
   /** ******************************************************************
    *                       finishJobWithFailure()                     *
    ******************************************************************* */
-  it('finishJobWithFailure(queueCollection, job, reason) works properly with numFailure < 2', async () => {
+  it('finishJobWithFailure(queueCollection, job, reason) works properly', async () => {
     const jobsColl = db.collection('jobs');
 
     await mongo.finishJobWithFailure(jobsColl, job2, 'failed job 2');
     let currJob = await jobsColl.findOne({ _id: job2._id });
     expect(currJob).toBeTruthy();
-    expect(currJob.status).toEqual('inQueue');
-    expect(currJob.startTime).toBeNull();
-    expect(currJob.numFailures).toEqual(1);
-    expect(currJob.failures).toHaveLength(1);
-    expect(currJob.failures[0].reason).toEqual('failed job 2');
-
-    await mongo.finishJobWithFailure(jobsColl, job2, 'failed job 2');
-    currJob = await jobsColl.findOne({ _id: job2._id });
-    expect(currJob).toBeTruthy();
-    expect(currJob.status).toEqual('inQueue');
-    expect(currJob.startTime).toBeNull();
-    expect(currJob.numFailures).toEqual(2);
-    expect(currJob.failures).toHaveLength(2);
-    expect(currJob.failures[1].reason).toEqual('failed job 2');
-  }, 5000);
-
-  it('finishJobWithFailure(queueCollection, job, reason) works properly with numFailure >= 2', async () => {
-    const jobsColl = db.collection('jobs');
-    job2.numFailures = 2;
-
-    await mongo.finishJobWithFailure(jobsColl, job2, 'failed job 2 (real)');
-    const currJob = await jobsColl.findOne({ _id: job2._id });
-    expect(currJob).toBeTruthy();
     expect(currJob.status).toEqual('failed');
     expect(currJob.startTime).toBeNull();
-    expect(currJob.numFailures).toEqual(3);
-    expect(currJob.failures).toHaveLength(3);
-    expect(currJob.failures[2].reason).toEqual('failed job 2 (real)');
+    expect(currJob.error.reason).toEqual('failed job 2');
   }, 5000);
 
   it('finishJobWithFailure() fails on incorrect jobId', async () => {
@@ -274,22 +245,19 @@ describe('Mongo Tests', () => {
 
     await mongo.logMessageInMongo(job2, 'message 1');
     let currJob = await jobsColl.findOne({ _id: job2._id });
-    expect(currJob.logs).toHaveProperty('try0');
-    expect(currJob.logs.try0).toHaveLength(1);
-    expect(currJob.logs.try0[0]).toEqual('message 1');
+    expect(currJob.logs).toHaveLength(1);
+    expect(currJob.logs[0]).toEqual('message 1');
 
     await mongo.logMessageInMongo(job2, 'message 2');
     currJob = await jobsColl.findOne({ _id: job2._id });
-    expect(currJob.logs).toHaveProperty('try0');
-    expect(currJob.logs.try0).toHaveLength(2);
-    expect(currJob.logs.try0[1]).toEqual('message 2');
+    expect(currJob.logs).toHaveLength(2);
+    expect(currJob.logs[1]).toEqual('message 2');
 
     job2.numFailures = 1;
     await mongo.logMessageInMongo(job2, 'message 3');
     currJob = await jobsColl.findOne({ _id: job2._id });
-    expect(currJob.logs).toHaveProperty('try0');
-    expect(currJob.logs.try1).toHaveLength(1);
-    expect(currJob.logs.try1[0]).toEqual('message 3');
+    expect(currJob.logs).toHaveLength(3);
+    expect(currJob.logs[2]).toEqual('message 3');
 
     mongo.getCollection = jest.fn().mockReturnValue();
     await mongo.logMessageInMongo(job2, 'message 1');
@@ -306,7 +274,9 @@ describe('Mongo Tests', () => {
     mongo.getMonitorCollection = jest.fn().mockReturnValue(monitorColl);
     await monitor.reportStatus('job failed');
     let message = await monitorColl.findOne({});
+    if (message) {
     expect(message.monitor).toHaveProperty('ip');
     expect(message.monitor.ip).toEqual(monitor.ip);
+    }
   }, 5000);
 });
