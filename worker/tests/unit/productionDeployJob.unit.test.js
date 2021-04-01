@@ -16,7 +16,6 @@ const testPayloadWithRepo = {
 describe('Test Class', () => {
   // Dont actually reset the directory and dont care about the logging
   beforeAll(() => {
-    try {
     workerUtils.resetDirectory = jest.fn().mockResolvedValue();
     workerUtils.logInMongo = jest.fn().mockResolvedValue();
     this.githubJob = new GitHubJob(testPayloadWithRepo);
@@ -33,9 +32,6 @@ describe('Test Class', () => {
     });
     this.logger.save = jest.fn().mockReturnValueOnce({});
     jest.useFakeTimers();
-  } catch(ex) {
-    console.log(ex)
-  }
   });
 
   it('startGithubBuild(: If build is successful --> return true', async () => {

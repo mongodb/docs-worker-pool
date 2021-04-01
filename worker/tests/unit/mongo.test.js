@@ -52,7 +52,7 @@ describe('Mongo Tests', () => {
       useNewUrlParser: true
     });
     db = await connection.db(global.__MONGO_DB_NAME__);
-    
+
     // Remove the jobs collection (should be empty anyways)
     db.dropCollection('jobs').catch(err => {
       console.log(err);
@@ -245,7 +245,6 @@ describe('Mongo Tests', () => {
 
     await mongo.logMessageInMongo(job2, 'message 1');
     let currJob = await jobsColl.findOne({ _id: job2._id });
-    console.log(currJob)
     expect(currJob.logs).toHaveLength(1);
     expect(currJob.logs[0]).toEqual('message 1');
 
