@@ -1,19 +1,16 @@
-prefix: 'drivers/node'
+prefix: '/drivers/go'
 version:
   published:
-    - '4.0 (upcoming)'
-    - '3.6 (current)'
+    - 'master'
   active:
-    - '4.0 (upcoming)'
-    - '3.6 (current)'
-  stable: 'v3.6'
-  upcoming: 'v4.0'
+    - 'master'
+  stable: 'master'
+  upcoming: master
 git:
   branches:
     manual: 'master'
     published:
       - 'master'
-      - 'v3.6'
       # the branches/published list **must** be ordered from most to
       # least recent release.
 ...

@@ -5,9 +5,16 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
-PRODUCTION_BUCKET=docs-mongodb-org-prod
+
+ifeq ($(SNOOTY_INTEGRATION),false)
+  PRODUCTION_URL="https://docs.mongodb.com"
+  PRODUCTION_BUCKET=docs-mongodb-org-prod
+else
+  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
+  PRODUCTION_BUCKET=docs-datalake-integration
+endif
+
 PROJECT=datalake
 MUT_PREFIX ?= $(PROJECT)
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
@@ -15,6 +22,8 @@ REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+include ~/shared.mk
 
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
@@ -24,6 +33,8 @@ PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
 URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
+
+
 
 next-gen-html:
 	# snooty parse and then build-front-end
@@ -43,8 +54,8 @@ next-gen-html:
 			exit 0; \
 		fi \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR}; 
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty; 
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	if [ -n "${PATCH_ID}" ]; then \
@@ -75,10 +86,5 @@ get-build-dependencies:
 next-gen-deploy:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}/index.html";
-	$(MAKE) next-gen-deploy-search-index
-
-## Update the search index for this branch
-next-gen-deploy-search-index:
-	@echo "Building search index"
-	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
+	if [ ${MANIFEST_PREFIX} ]; then $(MAKE) next-gen-deploy-search-index; fi
