@@ -51,4 +51,5 @@ next-gen-stage: ## Host online for review
 
 next-gen-deploy:	
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://developer.mongodb.com --json --all-subdirectories ${ARGS};
+	yes | mut-publish public developer-hub-prod --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
