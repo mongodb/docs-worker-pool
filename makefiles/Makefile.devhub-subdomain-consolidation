@@ -6,8 +6,8 @@ STAGING_BUCKET=docs-devhub-staging
 
 STRAPI_URL=http://54.219.137.111:1337
 
-PRODUCTION_BUCKET=docs-devhub-prod
-PRODUCTION_URL=https://developer.mongodb.com
+PRODUCTION_BUCKET=developer-hub-prod
+PRODUCTION_URL=https://mongodb.com/developer
 
 PATH_PREFIX=developer
 
@@ -57,5 +57,5 @@ next-gen-stage: ## Host online for review
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 next-gen-deploy:	
-	yes | mut-publish public developer-hub-prod --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
