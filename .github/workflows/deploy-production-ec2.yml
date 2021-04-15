@@ -1,0 +1,40 @@
+on:
+  push:
+    tags:
+      - 'v*'
+name: Deploy Production
+jobs:
+  deploy-production:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.3.0
+        with:
+          key: ${{ secrets.EC2_RSA_KEY }}
+          known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
+          name: id_rsa
+      - name: SSH to Production 1
+        run: |
+          ssh ${{ secrets.PRODUCTION_HOST_1}} -T '
+          cd docker/cs-test-docs-worker-pool
+          git pull origin
+          git checkout $(git describe --tags)
+          sudo docker system prune
+          sudo docker build --no-cache --tag production
+          sudo ./rundocker.sh
+          '
+
+      - name: SSH to Production 2
+        run: |
+          ssh ${{ secrets.PRODUCTION_HOST_2}} -T '
+          cd docker/cs-test-docs-worker-pool
+          git pull origin
+          git checkout $(git describe --tags)
+          sudo docker system prune
+          sudo docker build --no-cache --tag production .
+          sudo sh rundocker.sh
+          '
+          

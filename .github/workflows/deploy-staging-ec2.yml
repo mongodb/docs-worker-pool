@@ -1,0 +1,33 @@
+on:
+  push:
+    branches:
+      - development
+name: Deploy Staging
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.3.0
+        with:
+          key: ${{ secrets.EC2_RSA_KEY }}
+          known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
+          name: id_rsa
+      - name: Deploy Development to Staging
+        run: |
+          ssh -vvv -l ubuntu ${{ secrets.STAGING_HOST}} -T '
+          cd docker/cs-stage-docs-worker-pool
+          git pull origin
+          git checkout origin/development
+          sudo docker system prune -f
+          sudo docker build --no-cache --tag stage .
+          sudo sh rundocker.sh
+          '
+          
+        
+
+
+        
+        
