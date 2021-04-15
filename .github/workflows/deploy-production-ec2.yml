@@ -23,7 +23,7 @@ jobs:
           git pull origin
           git checkout $(git describe --tags)
           sudo docker system prune
-          sudo docker build --no-cache --tag production
+          sudo docker build --no-cache --tag production .
           sudo ./rundocker.sh
           '
 
