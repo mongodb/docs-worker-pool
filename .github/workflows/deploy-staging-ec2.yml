@@ -17,7 +17,7 @@ jobs:
           name: id_rsa
       - name: Deploy Development to Staging
         run: |
-          ssh -vvv -l ubuntu ${{ secrets.STAGING_HOST}} -T '
+          ssh -l ubuntu ${{ secrets.STAGING_HOST}} -T '
           cd docker/cs-stage-docs-worker-pool
           git pull origin
           git checkout origin/development

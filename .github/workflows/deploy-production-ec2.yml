@@ -24,7 +24,7 @@ jobs:
           git checkout $(git describe --tags)
           sudo docker system prune
           sudo docker build --no-cache --tag production .
-          sudo ./rundocker.sh
+          sudo sh rundocker.sh
           '
 
       - name: SSH to Production 2
