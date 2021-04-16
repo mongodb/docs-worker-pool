@@ -4,7 +4,7 @@ on:
       - 'v*'
 name: Deploy Production
 jobs:
-  deploy-production:
+  deploy-production-1:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +27,18 @@ jobs:
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           '
-
+  deploy-production-2:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.3.0
+        with:
+          key: ${{ secrets.EC2_RSA_KEY }}
+          known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
+          name: id_rsa
       - name: SSH to Production 2
         run: |
           ssh ${{ secrets.PRODUCTION_HOST_2}} -T '
