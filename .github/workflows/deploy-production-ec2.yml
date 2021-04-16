@@ -24,6 +24,7 @@ jobs:
           git checkout $(git describe --tags)
           sudo docker system prune
           sudo docker build --no-cache --tag production .
+          sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           '
 
@@ -35,6 +36,7 @@ jobs:
           git checkout $(git describe --tags)
           sudo docker system prune
           sudo docker build --no-cache --tag production .
+          sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           '
           

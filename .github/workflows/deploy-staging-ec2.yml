@@ -22,6 +22,7 @@ jobs:
           git pull origin
           git checkout origin/development
           sudo docker system prune -f
+          sudo docker stop $(sudo docker ps -a -q)
           sudo docker build --no-cache --tag stage .
           sudo sh rundocker.sh
           '

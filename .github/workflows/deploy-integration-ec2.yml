@@ -19,11 +19,13 @@ jobs:
       - name: Deploy Master to Integration
         run: |
           ssh ${{ secrets.INTEGRATION_HOST}} -T '
-          cd docker/cs-integration-docs-worker-pool
+          cd docs-worker-pool
           git pull origin
           git checkout origin/master
           sudo docker system prune
           sudo docker build --no-cache --tag integration .
+          sudo docker stop $(sudo docker ps -a -q)
+          sudo docker build --no-cache --tag stage .
           sudo sh rundocker.sh
           '
           
