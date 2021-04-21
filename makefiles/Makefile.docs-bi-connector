@@ -6,9 +6,13 @@ STAGING_BUCKET=docs-mongodb-org-staging
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
   PRODUCTION_BUCKET=docs-bi-connector-prod
+  STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+  STAGING_BUCKET=docs-mongodb-org-staging
 else
   PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
   PRODUCTION_BUCKET=docs-bi-connector-integration
+  STAGING_URL="https://docs-mongodborg-integration.corp.mongodb.com/staging"
+  STAGING_BUCKET=docs-mongodb-org-staging-dp
 endif
 
 PROJECT=bi-connector
