@@ -1,8 +1,6 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
-STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-staging
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"

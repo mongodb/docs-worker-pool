@@ -4,8 +4,6 @@ ifeq ($(STAGING_USERNAME),)
 else
 	USER=$(STAGING_USERNAME)
 endif
-STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-staging
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
