@@ -10,7 +10,7 @@ else
   PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
   PRODUCTION_BUCKET=docs-node-integration
   STAGING_URL="https://docs-mongodbcom-integration.corp.mongodb.com/regressiontests"
-  STAGING_BUCKET=docs-mongodborg-integration
+  STAGING_BUCKET=docs-mongodborg-integration/regressiontests
 endif
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
