@@ -119,7 +119,6 @@ next-gen-deploy:
 
 next-gen-html: examples
 	# snooty parse and then build-front-end
-	echo 'snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}';
 	@if [ ! -z "${PATCH_ID}" ]; then \
 		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
 		if [ $$? -eq 1 ]; then \
@@ -128,7 +127,7 @@ next-gen-html: examples
 			exit 0; \
 		fi \
 	else \
-		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
@@ -139,9 +138,9 @@ next-gen-html: examples
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty && \
 	cd snooty && \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production && \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 	if [ ! -z "${PATCH_ID}" ]; then \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 	fi && \
 	npm run build && \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
