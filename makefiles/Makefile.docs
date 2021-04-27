@@ -24,7 +24,6 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 REGRESSION_TESTS = $(shell printenv REGRESSION_TESTS)
-echo "GURU ${REGRESSION_TESTS}"
 
 include ~/shared.mk
 
@@ -55,6 +54,10 @@ get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-stage: ## Host online for review
+	ifeq ($(REGRESSION_TESTS),true)
+			$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"
+			echo "GURU ${MUT_PREFIX}"
+	endif
 	# stagel local jobs \
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
 		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
