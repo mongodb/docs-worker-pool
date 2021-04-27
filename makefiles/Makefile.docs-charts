@@ -11,8 +11,6 @@ else
   PRODUCTION_BUCKET=docs-compass-integration 
   STAGING_URL="https://docs-mongodbcom-integration.corp.mongodb.com/regressiontests"
   STAGING_BUCKET=docs-mongodborg-integration
-  ifeq($(REGRESSION_TESTS), true)
-    MUT_PREFIX = "regressiontests/${MUT_PREFIX}"
 endif
 
 PREFIX=charts
