@@ -1,11 +1,11 @@
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
+STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+STAGING_BUCKET=docs-mongodb-org-staging
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
   PRODUCTION_BUCKET=docs-mongodb-org-prod
-  STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-  STAGING_BUCKET=docs-mongodb-org-staging
 else
   PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
   PRODUCTION_BUCKET=docs-manual-integration
@@ -47,6 +47,7 @@ URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
 .PHONY: help lint html markdown stage deploy deploy-search-index examples redirects
+
 
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
