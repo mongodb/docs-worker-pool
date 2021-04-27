@@ -25,10 +25,6 @@ SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 REGRESSION_TESTS = $(shell printenv REGRESSION_TESTS)
 echo "GURU ${REGRESSION_TESTS}"
-ifeq ($(REGRESSION_TESTS),true)
-		$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"
-		echo "GURU ${MUT_PREFIX}"
-endif
 
 include ~/shared.mk
 
