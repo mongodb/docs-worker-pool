@@ -42,8 +42,6 @@ PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}";
 
 URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 
-REGRESSION_TESTS = $(shell printenv REGRESSION_TESTS)
-
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
@@ -56,7 +54,7 @@ get-build-dependencies:
 
 next-gen-stage: ## Host online for review
 	echo "next-gen-stage"
-	ifeq($REGRESSION_TESTS,true)
+	ifeq($(REGRESSION_TESTS),true)
 		$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"
 		echo "GURU ${MUT_PREFIX}"
 	endif
