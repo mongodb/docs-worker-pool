@@ -50,6 +50,9 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yam
 .PHONY: help lint html markdown stage deploy deploy-search-index examples redirects
 
 
+ifeq($(REGRESSION_TESTS), true)
+    MUT_PREFIX = "regressiontests/${MUT_PREFIX}"
+
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
 
@@ -60,8 +63,6 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	# stagel commit jobs and regular git push jobs\
 	else \
-		ifeq($(REGRESSION_TESTS), true)
-        	MUT_PREFIX = "regressiontests/${MUT_PREFIX}"
 		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
