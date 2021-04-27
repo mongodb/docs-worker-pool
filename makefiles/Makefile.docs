@@ -55,6 +55,7 @@ get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-stage: ## Host online for review
+	echo "next-gen-stage"
 	ifeq($REGRESSION_TESTS,true)
 		$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"
 		echo "GURU ${MUT_PREFIX}"
