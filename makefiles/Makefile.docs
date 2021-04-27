@@ -67,7 +67,7 @@ next-gen-stage: ## Host online for review
 		else \
 			mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 			echo "Hosted at ${STAGING_BUCKET}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
-		fi
+		fi \
 		echo "regression test ${REGRESSION_TESTS}"; \
 	fi
 
