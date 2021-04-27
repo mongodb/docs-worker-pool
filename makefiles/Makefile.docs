@@ -55,7 +55,7 @@ get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-stage: ## Host online for review
-	if ["${REGRESSION_TESTS}" = "true" ]; then \
+	if ["${REGRESSION_TESTS}" = true ]; then \
 		$MUT_PREFIX  = "regressiontests\${MUT_PREFIX}"; \
 	fi
 	# stagel local jobs \
