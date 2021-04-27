@@ -56,7 +56,8 @@ get-build-dependencies:
 
 next-gen-stage: ## Host online for review
 	if ["${REGRESSION_TESTS}" = true ]; then \
-		$MUT_PREFIX  = "regressiontests\${MUT_PREFIX}"; \
+		$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"; \
+		echo "GURU ${MUT_PREFIX}"; \
 	fi
 	# stagel local jobs \
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
