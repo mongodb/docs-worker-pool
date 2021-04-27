@@ -1,8 +1,6 @@
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
-MUT_PREFIX ?= $(PROJECT)
-
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
   PRODUCTION_BUCKET=docs-mongodb-org-prod
@@ -17,6 +15,7 @@ endif
 
 PREFIX=manual
 PROJECT=docs
+MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
 PATCH_FILE="myPatch.patch"
