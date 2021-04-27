@@ -42,6 +42,8 @@ PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}";
 
 URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 
+REGRESSION_TESTS = $(shell printenv REGRESSION_TESTS)
+
 # Parse our published-branches configuration file to get the name of
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
@@ -59,6 +61,8 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	# stagel commit jobs and regular git push jobs\
 	else \
+		if ["${REGRESSION_TESTS}" = true ]; then \
+			MUT_PREFIX  = "regressiontests\${MUT_PREFIX}"; \
 		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
