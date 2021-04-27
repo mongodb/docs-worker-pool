@@ -23,6 +23,12 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+REGRESSION_TESTS = $(shell printenv REGRESSION_TESTS)
+echo "GURU ${REGRESSION_TESTS}"
+ifeq ($(REGRESSION_TESTS),true)
+		$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"
+		echo "GURU ${MUT_PREFIX}"
+endif
 
 include ~/shared.mk
 
@@ -51,12 +57,6 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yam
 
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
-
-echo "GURU ${REGRESSION_TESTS}"
-ifeq ($(REGRESSION_TESTS),true)
-		$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"
-		echo "GURU ${MUT_PREFIX}"
-endif
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
