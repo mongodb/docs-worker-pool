@@ -62,7 +62,9 @@ next-gen-stage: ## Host online for review
 	else \
 		ifeq($(REGRESSION_TESTS), true)
         	MUT_PREFIX = "regressiontests/${MUT_PREFIX}"
-  		endif
+		else
+			MUT_PREFIX = ${MUT_PREFIX}
+		endif
 		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
