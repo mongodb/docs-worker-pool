@@ -65,7 +65,7 @@ next-gen-stage: ## Host online for review
 	# stagel commit jobs and regular git push jobs\
 	else \
 		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+		echo "Hosted at ${STAGING_BUCKET}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
 
 lint: ## Checks URLs in the built corpus underneath build/<branch>/html
