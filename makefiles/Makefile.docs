@@ -52,6 +52,7 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yam
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
 
+echo "GURU ${REGRESSION_TESTS}"
 ifeq ($(REGRESSION_TESTS),true)
 		$MUT_PREFIX  = "regressiontests/${MUT_PREFIX}"
 		echo "GURU ${MUT_PREFIX}"
