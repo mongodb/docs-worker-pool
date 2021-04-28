@@ -5,7 +5,6 @@ STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
 STAGING_BUCKET=docs-devhub-staging
 
 STRAPI_URL=http://54.219.137.111:1337
-STRAPI_PUBLICATION_STATE = $(shell printenv STRAPI_PUBLICATION_STATE)
 
 PRODUCTION_BUCKET=docs-devhub-prod
 PRODUCTION_URL=https://developer.mongodb.com
