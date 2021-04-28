@@ -5,6 +5,7 @@ STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
 STAGING_BUCKET=docs-devhub-staging
 
 STRAPI_URL=http://54.219.137.111:1337
+STRAPI_PUBLICATION_STATE = $(shell printenv STRAPI_PUBLICATION_STATE)
 
 PRODUCTION_BUCKET=docs-devhub-prod
 PRODUCTION_URL=https://developer.mongodb.com
@@ -45,6 +46,7 @@ next-gen-html: update-snooty
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
+	echo "STRAPI_PUBLICATION_STATE=${STRAPI_PUBLICATION_STATE}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
   
