@@ -95,7 +95,6 @@ class S3PublishClass {
       }
       // check for json string output from mut
       // check if json was returned from mut
-      try {
 
         const makefileOutput = stdout.replace(/\r/g, "").split(/\n/);
         // the URLS are always third line returned bc of the makefile target
@@ -121,14 +120,25 @@ class S3PublishClass {
               batchedUrls = [];
             }
           }
-        });
-      } catch (error) {
-        console.trace(error)
-        throw(error)
-      }
+          // if over certain length, send as a single slack message and reset the array
+          if (batchedUrls.length > 20 || i >= (surrogateKeyArray.length - 1)) {
+            logger.sendSlackMsg(`${batchedUrls.join('\n')}`);
+            batchedUrls = [];
+          }
+        }
+      });
+    } catch (error) {
+      console.trace(error)
+      throw(error)
+    }
+
+        try {
+          this.fastly.warmCache(st)
+        } catch (error) {
+          
+        }
             
       return new Promise((resolve) => {
-        console.log("we are going to return!!!")
         logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
         logger.save(
           `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`

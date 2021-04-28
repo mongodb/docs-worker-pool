@@ -13,11 +13,26 @@ class FastlyJobClass {
     }
   }
 
-  // takes in an array of urls and purges cache for each
-  async purgeCache(urlArray) {
-    console.log("purge cache is called!!!!")
-    if (!Array.isArray(urlArray)) {
-      throw new Error('Parameter `urlArray` needs to be an array of urls');
+  // request urls of updated content to "warm" the cache for our customers
+  async warmCache(updatedContentURLS) {
+    if (!Array.isArray(updatedContentURLS)) {
+      throw new Error('Parameter `updatedContentURLS` needs to be an array of urls');
+    }
+
+    
+    for (let i = 0; i < updatedContentURLS.length; i++) {
+      request(updatedContentURLS[i], function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          console.log(body);
+        }
+      })
+    }
+  }
+  // takes in an array of surrogate keys and purges cache for each
+  async purgeCache(surrogateKeyArray) {
+
+    if (!Array.isArray(surrogateKeyArray)) {
+      throw new Error('Parameter `surrogateKeyArray` needs to be an array of urls');
     }
 
     let that = this;
