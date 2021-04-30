@@ -18,7 +18,7 @@ jobs:
       - name: Deploy Development to Staging
         run: |
           ssh -l ubuntu ${{ secrets.STAGING_HOST}} -T '
-          cd docker/cs-stage-docs-worker-pool
+          cd docker/docs-worker-pool
           git pull origin
           git checkout origin/development
           sudo docker system prune -f
