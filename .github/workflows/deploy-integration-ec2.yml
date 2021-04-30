@@ -1,11 +1,11 @@
 on:
   push:
     branches:
-      - master
+      - integration
 name: Deploy Integration
 jobs:
   deploy-integration:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/integration'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,12 +16,12 @@ jobs:
           key: ${{ secrets.EC2_RSA_KEY }}
           known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
           name: id_rsa
-      - name: Deploy Master to Integration
+      - name: Deploy Integration to Integration
         run: |
           ssh ${{ secrets.INTEGRATION_HOST}} -T '
           cd docs-worker-pool/docs-worker-pool
           git pull origin
-          git checkout origin/master
+          git checkout origin/integration
           sudo docker system prune
           sudo docker build --no-cache --tag integration .
           sudo docker stop $(sudo docker ps -a -q)
