@@ -121,39 +121,42 @@ class S3PublishClass {
             }
           }
           // if over certain length, send as a single slack message and reset the array
-          if (batchedUrls.length > 20 || i >= (surrogateKeyArray.length - 1)) {
+          if (batchedUrls.length > 20 || i >= (urlArray.length - 1)) {
             logger.sendSlackMsg(`${batchedUrls.join('\n')}`);
             batchedUrls = [];
           }
         }
-      });
+      );
     } catch (error) {
       console.trace(error)
       throw(error)
     }
 
         try {
-          this.fastly.warmCache(st)
+          this.fastly.warmCache(urlArray)
         } catch (error) {
-          
+          //do something with error
         }
-            
-      return new Promise((resolve) => {
-        logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-        logger.save(
-          `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
-        );
-        resolve({
-          status: 'success',
-          stdout: stdoutMod
+       try{
+
+        return new Promise((resolve) => {
+          logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
+          logger.save(
+            `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
+          );
+          resolve({
+            status: 'success',
+            stdout: stdoutMod
+          });
         });
-      });
-    } catch (errResult) {
+      }     
+      catch (errResult) {
       logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
     }
   }
 }
+
 
 module.exports = {
   S3PublishClass
