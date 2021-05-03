@@ -67,22 +67,24 @@ async retrieveSurrogateKey(url) {
   try {
     request({
       method: `HEAD`,
-      url: url,
+      url: 'https://' + url,
       headers: headers,
    }, function(err, response, body) {
      // surrogate key was not valid to purge
      if (err){
        console.trace(err)
+       throw err
      }
      console.log("this is the url: ", url)
-     console.log("these are the response headers: ", response.headers)
-     console.log("this is the surrogate key, ", response.headers['surrogate-key'])
+     console.log("these are the response ", response)
+    //  console.log("this is the surrogate key, ", response.headers['surrogate-key'])
  /*  capture the purge request id in case we still see stale content on site, 
      contact Fastly for further assistance with purge id and resource 
      see https://docs.fastly.com/en/guides/single-purges */
  })
   } catch (error) {
-    console.log("error in retrieval: ", error)
+    console.trace("error in retrieval: ", error)
+    throw error
   }
 }
 
