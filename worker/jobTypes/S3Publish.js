@@ -80,6 +80,7 @@ class S3PublishClass {
       //as defined in githubJob.js
       if (manifestPrefix) deployCommands[deployCommands.length - 1] +=  ` MANIFEST_PREFIX=${manifestPrefix} GLOBAL_SEARCH_FLAG=${this.GitHubJob.currentJob.payload.stableBranch}`;
     }
+
     // deploy site
     try {
       const exec = workerUtils.getExecPromise();
@@ -95,7 +96,7 @@ class S3PublishClass {
       }
       // check for json string output from mut
       // check if json was returned from mut
-
+      try{
         const makefileOutput = stdout.replace(/\r/g, "").split(/\n/);
         // the URLS are always third line returned bc of the makefile target
         const stdoutJSON = JSON.parse(makefileOutput[2]);
@@ -131,24 +132,16 @@ class S3PublishClass {
       console.trace(error)
       throw(error)
     }
-
-        try {
-          this.fastly.warmCache(urlArray)
-        } catch (error) {
-          //do something with error
-        }
-       try{
-
-        return new Promise((resolve) => {
-          logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-          logger.save(
-            `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
-          );
-          resolve({
-            status: 'success',
-            stdout: stdoutMod
-          });
-        });
+    return new Promise((resolve) => {
+      logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
+      logger.save(
+        `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
+      );
+      resolve({
+        status: 'success',
+        stdout: stdoutMod
+      });
+    });
       }     
       catch (errResult) {
       logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
@@ -156,6 +149,8 @@ class S3PublishClass {
     }
   }
 }
+
+
 
 
 module.exports = {

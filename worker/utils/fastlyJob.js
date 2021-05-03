@@ -41,12 +41,12 @@ class FastlyJobClass {
   async purgeCache(urlArray) {
 
 
-    if (!Array.isArray(surrogateKeyArray)) {
-      throw new Error('Parameter `surrogateKeyArray` needs to be an array of urls');
+    if (!Array.isArray(urlArray)) {
+      throw new Error('Parameter `url array` needs to be an array of urls');
     }
 
     let that = this;
-    let urlCounter = surrogateKeyArray.length;
+    let urlCounter = urlArray.length;
     let purgeMessages = [];
 
     return new Promise((resolve, reject) => {
@@ -57,7 +57,7 @@ class FastlyJobClass {
         const surrogateKey = this.retrieveSurrogateKey(urlArray[i])
         
         // perform request to purge
-        this.requestPurgeOfSurrogateKey(surrogateKey)
+        // this.requestPurgeOfSurrogateKey(surrogateKey)
 
     }
   })
@@ -66,7 +66,7 @@ class FastlyJobClass {
 async retrieveSurrogateKey(url) {
   try {
     request({
-      method: `GET`,
+      method: `HEAD`,
       url: url,
       headers: headers,
    }, function(err, response, body) {
@@ -74,26 +74,25 @@ async retrieveSurrogateKey(url) {
      if (err){
        console.trace(err)
      }
-     console.log(request.headers)
+     console.log("this is the url: ", url)
+     console.log("these are the response headers: ", response.headers)
+     console.log("this is the surrogate key, ", response.headers['surrogate-key'])
  /*  capture the purge request id in case we still see stale content on site, 
      contact Fastly for further assistance with purge id and resource 
      see https://docs.fastly.com/en/guides/single-purges */
-     console.log(body)
-
  })
   } catch (error) {
-    
+    console.log("error in retrieval: ", error)
   }
 }
 
   async requestPurgeOfSurrogateKey(surrogateKey){
-    console.log("this is the surrogate key")
     try {
       headers['Surrogate-Key'] = surrogateKey
       request({
         method: `POST`,
-        url: `https://api.fastly.com/service/${fastly_service_id}/purge${surrogateKeyArray}`,
-        path: `/service/${fastly_service_id}/purge${surrogateKeyArray}`,
+        url: `https://api.fastly.com/service/${fastly_service_id}/purge${surrogateKey}`,
+        path: `/service/${fastly_service_id}/purge${surrogateKey}`,
         headers: headers,
     }, function(err, response, body) {
       // surrogate key was not valid to purge
@@ -104,7 +103,7 @@ async retrieveSurrogateKey(url) {
   /*  capture the purge request id in case we still see stale content on site, 
       contact Fastly for further assistance with purge id and resource 
       see https://docs.fastly.com/en/guides/single-purges */
-      console.log(body)
+      // console.log(body)
           }
       )
     } catch (error) {
