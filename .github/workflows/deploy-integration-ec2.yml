@@ -19,7 +19,7 @@ jobs:
       - name: Deploy Integration to Integration
         run: |
           ssh -l ubuntu ${{ secrets.INTEGRATION_HOST}} -T '
-          cd docs-worker-pool/docs-worker-pool
+          cd docs-worker-pool
           git pull origin
           git checkout origin/integration
           sudo docker system prune
