@@ -18,7 +18,7 @@ jobs:
           name: id_rsa
       - name: SSH to Production 1
         run: |
-          ssh ${{ secrets.PRODUCTION_HOST_1}} -T '
+          ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_1}} -T '
           cd docker/docs-worker-pool
           git pull origin
           git checkout $(git describe --tags)
@@ -41,7 +41,7 @@ jobs:
           name: id_rsa
       - name: SSH to Production 2
         run: |
-          ssh ${{ secrets.PRODUCTION_HOST_2}} -T '
+          ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_2}} -T '
           cd docker/docs-worker-pool
           git pull origin
           git checkout $(git describe --tags)
