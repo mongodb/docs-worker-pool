@@ -50,3 +50,32 @@ npm install --dev
 ```
 
 See the [spec doc](https://docs.google.com/document/d/1XZOuuGmozcLQRSDitx0UWhZzJaS4opR1JVwZqDp-N4g/edit?usp=sharing) for more details.
+
+## Branches
+Development in this repository can be done via forks or branches. Currently, we support an `integration` and `master` branch, in addition to a `meta` branch. In general, the development workflow is to open pull requests against `integration`, and to promote `integration` to `master` after testing prior to a release.
+
+In general, the git workflow within this repository loosely follows https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow .
+
+### Meta
+`Meta` contains various makefiles and .yaml files used for configuration.
+Changes or additions to/of makefiles and .yaml for publishing purposes should be performed against this branch.
+There is no general requirement to keep `Meta` up to date with `Master` or `Integration`.
+
+### Integration
+`Integration` is treated as a running feature branch that should **always** remain up to date with `master`
+
+### Master
+`Master` is treated as our production state branch. In general, pull requests to master should be opened only from integration or a hot-fix feature branch.
+If a change is merged into `Master` that is not present in `Integration`, in general, that change should be merged as well from said branch or fork into integration. 
+
+## Releasing
+docs-worker-pool contains various triggers for release to higher environments. Currently, the repository supports an integration environment (reflecting the state of the integration branch) and a production environment (reflecting the state of the most recent release tag). 
+
+### Integration
+ - Merge a pull request or otherwise push a commit to the integration branch. 
+ - Verify that the deploy-integration-ec2 workflow has executed successfully.
+
+### Production
+ - Merge outstanding changes within `integration` to `master`.
+ - Create release tags.
+ - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
