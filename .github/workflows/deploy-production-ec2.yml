@@ -20,7 +20,7 @@ jobs:
         run: |
           ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_1}} -T '
           cd docker/docs-worker-pool
-          git pull origin
+          git fetch origin
           git checkout $(git describe --tags)
           sudo docker system prune
           sudo docker build --no-cache --tag production .
@@ -43,7 +43,7 @@ jobs:
         run: |
           ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_2}} -T '
           cd docker/docs-worker-pool
-          git pull origin
+          git fetch origin
           git checkout $(git describe --tags)
           sudo docker system prune
           sudo docker build --no-cache --tag production .

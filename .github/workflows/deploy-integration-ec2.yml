@@ -20,7 +20,7 @@ jobs:
         run: |
           ssh -l ubuntu ${{ secrets.INTEGRATION_HOST}} -T '
           cd docs-worker-pool
-          git pull origin
+          git fetch origin
           git checkout origin/integration
           sudo docker system prune
           sudo docker build --no-cache --tag integration .
