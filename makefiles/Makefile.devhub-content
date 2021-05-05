@@ -45,9 +45,6 @@ next-gen-html: update-snooty
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
-	if [ -n ${STRAPI_PUBLICATION_STATE} ]; then \
-		echo "STRAPI_PUBLICATION_STATE=${STRAPI_PUBLICATION_STATE}" >> .env.production; \
-	fi
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
   
