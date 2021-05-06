@@ -22,7 +22,7 @@ jobs:
           cd docker/docs-worker-pool
           git fetch origin
           git checkout $(git describe --tags)
-          sudo docker system prune
+          sudo docker system prune -f
           sudo docker build --no-cache --tag production .
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
@@ -45,7 +45,7 @@ jobs:
           cd docker/docs-worker-pool
           git fetch origin
           git checkout $(git describe --tags)
-          sudo docker system prune
+          sudo docker system prune -f
           sudo docker build --no-cache --tag production .
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
