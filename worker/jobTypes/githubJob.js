@@ -327,7 +327,7 @@ class GitHubJobClass {
       if (this.buildNextGen() && !isProdDeployJob) {
         commandsToBuild[commandsToBuild.length - 1] = 'make next-gen-html';
         //tell Gatsby to pull in draft data from CMS
-        //this stanza can be removed when devhub is entirely off autobuilder
+        //TODO: this stanza can be removed when devhub is entirely off autobuilder
         if (this.currentJob.payload.repoName === 'devhub-content-integration') {
             commandsToBuild[commandsToBuild.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
           }
