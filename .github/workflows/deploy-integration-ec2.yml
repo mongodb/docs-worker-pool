@@ -22,10 +22,10 @@ jobs:
           cd docs-worker-pool
           git fetch origin
           git checkout origin/integration
-          sudo docker system prune
+          sudo docker system prune -af
           sudo docker build --no-cache --tag integration .
           sudo docker stop $(sudo docker ps -a -q)
-          sudo docker build --no-cache --tag stage .
+          sudo sh rundocker.sh
           sudo sh rundocker.sh
           '
           
