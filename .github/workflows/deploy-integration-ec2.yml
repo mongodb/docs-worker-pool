@@ -27,5 +27,6 @@ jobs:
           sudo docker stop $(sudo docker ps -a -q)
           sudo docker build --no-cache --tag stage .
           sudo sh rundocker.sh
+          sudo sh rundocker.sh
           '
           
