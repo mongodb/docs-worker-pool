@@ -117,7 +117,7 @@ next-gen-deploy:
 	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
 	if [ ${MANIFEST_PREFIX} ]; then $(MAKE) next-gen-deploy-search-index; fi
 
-next-gen-html: examples
+next-gen-html: examples get-build-dependencies
 	# snooty parse and then build-front-end
 	@if [ -n "${PATCH_ID}" ]; then \
 		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
