@@ -76,7 +76,8 @@ warmCache(updatedUrl) {
         url: url,
         headers: headers,
      }, function(err, response, body) {
-          if (!error && response.statusCode == 200) {
+          if (!err && response.statusCode == 200) {
+            console.log("this is the url ", url)
             console.log("these are the surrogate: ", response.headers['surrogate-key'])
             resolve(response.headers['surrogate-key']); 
           }
@@ -101,12 +102,11 @@ warmCache(updatedUrl) {
           path: `/service/${fastly_service_id}/purge${surrogateKey}`,
           headers: headers,
       }, function(err, response, body) {
-          if (!error && response.statusCode == 200){
+          if (!err && response.statusCode == 200){
             console.log("this is the response from purging!!! ", response.statusCode)
             resolve(response.statusCode)
           }
-          
-          }
+        }
         )
       })    
     } catch (error) {
