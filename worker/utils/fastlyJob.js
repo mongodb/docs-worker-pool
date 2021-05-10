@@ -46,8 +46,9 @@ class FastlyJobClass {
     }
 
     let that = this;
-    let urlCounter = urlArray.length;
+    let urlCounter = surrogateKeyArray.length;
     let purgeMessages = [];
+    const fastly_service_id = environment.getFastlyServiceId();
 
     return new Promise((resolve, reject) => {
       
