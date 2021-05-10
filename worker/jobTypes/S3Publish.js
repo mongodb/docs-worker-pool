@@ -98,6 +98,7 @@ class S3PublishClass {
       // check if json was returned from mut
       try{
         const makefileOutput = stdout.replace(/\r/g, "").split(/\n/);
+        console.log("this is the makefile output: \n", makefileOutput)
         // the URLS are always third line returned bc of the makefile target
         const stdoutJSON = JSON.parse(makefileOutput[2]);
         const urls = stdoutJSON.urls;

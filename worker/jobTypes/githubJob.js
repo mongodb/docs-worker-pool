@@ -130,11 +130,7 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-<<<<<<< HEAD
-        const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
-=======
         const makefileLocation = `https://raw.githubusercontent.com/madelinezec/docs-worker-pool/DOP-2000-Makefiles/makefiles/Makefile.${this.currentJob.payload.repoName}`;
->>>>>>> 000bb42a43b40d3f7bd77f2d84073769facab2d7
         const returnObject = {};
         return new Promise(function(resolve, reject) {
             request(makefileLocation, function(error, response, body) {
