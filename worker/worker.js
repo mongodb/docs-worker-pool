@@ -185,7 +185,7 @@ module.exports = {
           jobTypeToFunc[currentJob.payload.jobType].function(currentJob),
           `Worker Timeout Error: Timed out performing ${currentJob.payload.jobType} for jobId: ${currentJob._id}`
         );
-
+          console.trace('job has finished we are in worker.js')
         // Update the job to be successful
         await workerUtils
           .promiseTimeoutS(

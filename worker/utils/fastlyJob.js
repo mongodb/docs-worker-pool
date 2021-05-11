@@ -23,12 +23,10 @@ class FastlyJobClass {
 
   // request urls of updated content to "warm" the cache for our customers
 warmCache(updatedUrl) {
-    console.log("warm cache called")
     try {
       return new Promise(function (resolve) {
         request.get(updatedUrl, function (err, response) {
           if (!err && response.statusCode === 200) {
-            console.log("status code of warming the cache: ", response.statusCode)
             resolve(response.statusCode)
           }
       })
@@ -48,8 +46,6 @@ warmCache(updatedUrl) {
     let urlCounter = urlArray.length;
     let purgeMessages = [];
     const fastly_service_id = environment.getFastlyServiceId();
-
-    // return new Promise((resolve, reject) => {
   
       for (let i = 0; i < urlArray.length; i++) {
         //retrieve surrogate key
@@ -65,6 +61,11 @@ warmCache(updatedUrl) {
           throw error
         }
     }
+    console.trace("we finished purging the array of urls")
+    return new Promise((resolve) => {
+      resolve(true);
+    });
+    //what should be condition for rejecting?? 
   // })
 }
 
@@ -77,8 +78,6 @@ warmCache(updatedUrl) {
         headers: headers,
      }, function(err, response, body) {
           if (!err && response.statusCode == 200) {
-            console.log("this is the url ", url)
-            console.log("these are the surrogate: ", response.headers['surrogate-key'])
             resolve(response.headers['surrogate-key']); 
           }
         })
@@ -92,7 +91,6 @@ warmCache(updatedUrl) {
 }
 
   requestPurgeOfSurrogateKey(surrogateKey){
-    
     try {
       return new Promise(function (resolve) {
         headers['Surrogate-Key'] = surrogateKey
@@ -103,9 +101,9 @@ warmCache(updatedUrl) {
           headers: headers,
       }, function(err, response, body) {
           if (!err && response.statusCode == 200){
-            console.log("this is the response from purging!!! ", response.statusCode)
             resolve(response.statusCode)
           }
+          //else what to do if there is err?
         }
         )
       })    

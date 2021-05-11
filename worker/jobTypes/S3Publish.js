@@ -102,46 +102,27 @@ class S3PublishClass {
         const stdoutJSON = JSON.parse(makefileOutput[2]);
         const urls = stdoutJSON.urls;
         
-        this.fastly.purgeCache(urls).then(function (data) {
-          logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
-          logger.sendSlackMsg('Fastly Summary: The following pages were purged from cache for your deploy');
-          // when finished purging
-          // batch surrogate keys to send as single slack message
-          let batchedUrls = [];
-          for (let i = 0; i < urls.length; i++) {
-            console.log(urls[i])
-            console.log(urls[i].split('.')[0])
-            const purgedUrl = urls[i];
-            if (purgedUrl && purgedUrl.indexOf('.html') !== -1) {
-              batchedUrls.push(purgedUrl);
-            }
-            // if over certain length, send as a single slack message and reset the array
-            if (batchedUrls.length > 20 || i >= (urls.length - 1)) {
-              logger.sendSlackMsg(`${batchedUrls.join('\n')}`);
-              batchedUrls = [];
-            }
-          }
-          // if over certain length, send as a single slack message and reset the array
-          if (batchedUrls.length > 20 || i >= (urlArray.length - 1)) {
-            logger.sendSlackMsg(`${batchedUrls.join('\n')}`);
-            batchedUrls = [];
-          }
+        await this.fastly.purgeCache(urls);
+        logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
+        logger.save('Fastly Summary: The following pages were purged from cache for your deploy: \n',urls);
+        // when finished purging
+        // batch surrogate keys to send as single slack message
+        return new Promise((resolve) => {
+          logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
+          logger.save(
+            `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
+          );
+          resolve({
+            status: 'success',
+            stdout: stdoutMod
+          });
         }
       );
     } catch (error) {
       console.trace(error)
       throw(error)
     }
-    return new Promise((resolve) => {
-      logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-      logger.save(
-        `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
-      );
-      resolve({
-        status: 'success',
-        stdout: stdoutMod
-      });
-    });
+
       }     
       catch (errResult) {
       logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
