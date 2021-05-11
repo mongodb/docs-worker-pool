@@ -1,7 +1,8 @@
-const request = require('request');
+const axios = require('axios').default;
 const environment = require('../utils/environment').EnvironmentClass;
 const fastly = require('fastly')(environment.getFastlyToken());
 const utils = require('../utils/utils');
+const Logger = require('../utils/logger').LoggerClass;
 
 const fastlyServiceId = environment.getFastlyServiceId();
 const headers = {
@@ -16,8 +17,9 @@ class FastlyJobClass {
     // pass in a job payload to setup class
     constructor(currentJob) {
         this.currentJob = currentJob;
+        this.logger = new Logger(currentJob);
         if (fastly === undefined) {
-          utils.logInMongo(currentJob, 'fastly connectivity not found');
+            utils.logInMongo(currentJob, 'fastly connectivity not found');
         }
     }
 
@@ -27,101 +29,103 @@ class FastlyJobClass {
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
 
-        for (let i = 0; i < urlArray.length; i++) {
-              // retrieve surrogate key
-              try {
-                  const surrogateKey = await this.retrieveSurrogateKey(urlArray[i]);
-                  // perform request to purge
-                  await this.requestPurgeOfSurrogateKey(surrogateKey);
+        try {
+            //retrieve surrogate key associated with each URL/file updated in push to S3
+            const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url));
+            const surrogateKeyArray = await Promise.all(surrogateKeyPromises).catch(console.log); ;
+            console.log(surrogateKeyArray)
+            //purge each surrogate key
+            // const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
+            // await Promise.all(purgeRequestPromises);
 
-                  // warm cache
-                  await this.warmCache(urlArray[i]);
-              } catch (error) {
-                  console.trace(error);
-                  // should return reject here?
-                  throw error;
-              }
-          }
-        return new Promise((resolve) => {
-          resolve(true);
-        });
-        // what should be condition for rejecting??
+            // // GET request the URLs to warm cache for our users
+            // const warmCachePromises = urlArray.map(url => this.warmCache(url));
+            // await Promise.all(warmCachePromises)
+        } catch (error) {
+            logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
+            throw error
+        }
+
     }
 
-    retrieveSurrogateKey(url) {
+    async retrieveSurrogateKey(url) {
+
         try {
-            return new Promise((resolve) => {
-              request({
+            axios({
                 method: 'HEAD',
                 url: url,
                 headers: headers,
-            }, (err, response) => {
-                  if (!err && response.statusCode === 200) {
-                    resolve(response.headers['surrogate-key']); 
-                  }
-                });
+            }).then(response => {
+                console.log("this is the response status: ", response.status)
+                if (response.status === 200) {
+                    console.log("this is the surrogate key!! ", response.headers['surrogate-key'])
+                    return response.headers['surrogate-key'];
+                }
+                // console.log("this is the response inside retrieveSurrogateKey: ", response)
             });
         } catch (error) {
-            console.trace(error);
+            logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
+            throw error
+        }
+
+    }
+
+    async requestPurgeOfSurrogateKey(surrogateKey) {
+        headers['Surrogate-Key'] = surrogateKey
+
+        try {
+            axios({
+                    method: `POST`,
+                    url: `https://api.fastly.com/service/${fastlyServiceId}/purge/${surrogateKey}`,
+                    path: `/service/${fastlyServiceId}/purge${surrogateKey}`,
+                    headers: headers,
+                })
+                .then(response => {
+                    console.log("the status code for purging!! ", response.status)
+                    if (response.status === 200) {
+                        return true
+                    }
+                });
+        } catch (error) {
+            logger.save(`${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey: ${error}`);
             throw error;
         }
     }
 
-    requestPurgeOfSurrogateKey(surrogateKey){
-        try {
-          return new Promise((resolve) => {
-            headers['Surrogate-Key'] = surrogateKey
-            request({
-              method: `POST`,
-              url: `https://api.fastly.com/service/${fastlyServiceId}/purge/${surrogateKey}`,
-              path: `/service/${fastlyServiceId}/purge${surrogateKey}`,
-              headers: headers,
-          }, (err, response) => {
-              if (!err && response.statusCode === 200){
-                resolve(response.statusCode);
-              }
-            });
-          });
-        } catch (error) {
-          console.trace(error);
-          throw error;
-        }
-      }
-
     // request urls of updated content to "warm" the cache for our customers
-    warmCache(updatedUrl) {
-        try {
-          return new Promise((resolve) => {
-            request.get(updatedUrl, (err, response) => {
-              if (!err && response.statusCode === 200) {
-                resolve(response.statusCode);
-              }
-          });
-        });
-        } catch (error) {
-          console.trace(error);
-          throw error;
-        }
-      }
+    async warmCache(updatedUrl) {
 
-      // upserts {source: target} mappings
-      // to the fastly edge dictionary
-      async connectAndUpsert(map) {
+        try {
+            axios.get(updatedUrl)
+                .then(response => {
+                    if (response.status === 200) {
+                        return true;
+                    }
+                })
+        } catch (error) {
+            logger.save(`${'(prod)'.padEnd(15)}stdErr: ${error}`);
+            throw error;
+        }
+    }
+
+    // upserts {source: target} mappings
+    // to the fastly edge dictionary
+    async connectAndUpsert(map) {
         const options = {
-          item_value: map.target,
+            item_value: map.target,
         };
         const connectString = `/service/${fastlyServiceId}/dictionary/${environment.getDochubMap()}/item/${
           map.source
           }`;
 
         return new Promise((resolve, reject) => {
-          fastly.request('PUT', connectString, options, (err, obj) => {
-            if (err) reject(err);
-            resolve(obj);
-          });
+            fastly.request('PUT', connectString, options, (err, obj) => {
+                if (err) reject(err);
+                resolve(obj);
+            });
         })
-      }
-  }
+    }
+}
 
 module.exports = {
     FastlyJobClass,

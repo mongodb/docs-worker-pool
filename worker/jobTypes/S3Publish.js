@@ -99,11 +99,12 @@ class S3PublishClass {
         const makefileOutput = stdout.replace(/\r/g, '').split(/\n/);
         // the URLS are always third line returned bc of the makefile target
         const stdoutJSON = JSON.parse(makefileOutput[2]);
-        const urls = stdoutJSON.urls;
-
-        await this.fastly.purgeCache(urls);
-        logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
-        logger.save('Fastly Summary: The following pages were purged from cache for your deploy: \n', urls);
+        //contains URLs corresponding to files updated via our push to S3
+        const updatedURLsArray = stdoutJSON.urls;
+        // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
+        await this.fastly.purgeCache(updatedURLsArray);
+        //save purged URLs to job object
+        workerUtils.updateJobWithPurgedURLs(this.GitHubJob.currentJob, updatedURLsArray);
 
         return new Promise((resolve) => {
           logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
