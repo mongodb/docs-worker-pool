@@ -95,40 +95,36 @@ class S3PublishClass {
         throw new Error(`Failed pushing to prod: ${stderr}`)
       }
 
-      try{
-        const makefileOutput = stdout.replace(/\r/g, "").split(/\n/);
+      try {
+        const makefileOutput = stdout.replace(/\r/g, '').split(/\n/);
         // the URLS are always third line returned bc of the makefile target
         const stdoutJSON = JSON.parse(makefileOutput[2]);
         const urls = stdoutJSON.urls;
-        
+
         await this.fastly.purgeCache(urls);
         logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
-        logger.save('Fastly Summary: The following pages were purged from cache for your deploy: \n',urls);
+        logger.save('Fastly Summary: The following pages were purged from cache for your deploy: \n', urls);
 
         return new Promise((resolve) => {
           logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-          logger.save(
-            `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
-          );
+          logger.save(`${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`);
           resolve({
             status: 'success',
-            stdout: stdoutMod
-          });
-        }
-      );
-    } catch (error) {
+            stdout: stdoutMod,
+            });
+          },);
+      } catch (error) {
       console.trace(error)
       throw(error)
     }
-
-      }     
-      catch (errResult) {
-      logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-      throw errResult;
-    }
+  }     
+  catch (errResult) {
+  logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+  throw errResult;
+}
   }
 }
 
 module.exports = {
-  S3PublishClass
+  S3PublishClass,
 };
