@@ -131,9 +131,6 @@ class S3PublishClass {
   }
 }
 
-
-
-
 module.exports = {
   S3PublishClass
 };
