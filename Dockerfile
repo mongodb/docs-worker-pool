@@ -34,7 +34,7 @@ USER docsworker-xlarge
 WORKDIR /home/docsworker-xlarge
 
 # get shared.mk
-RUN curl https://raw.githubusercontent.com/madelinezec/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
@@ -42,14 +42,14 @@ RUN python3 -m pip install pip==20.2 flit==3.0.0
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	git checkout v0.9.6 && \
+	git checkout v0.9.7 && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	git checkout v0.9.8 && \	
+	git checkout v0.9.9 && \	
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
