@@ -103,8 +103,6 @@ module.exports = {
 
   // Sends Job To completed Status and Sets End Time
   async finishJobWithResult(queueCollection, job, result) {
-    console.log("finishJobWithResult called!!!")
-
     const query = { _id: job._id };
     const update = {
       $set: {

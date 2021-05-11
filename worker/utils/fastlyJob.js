@@ -58,15 +58,14 @@ warmCache(updatedUrl) {
           await this.warmCache(urlArray[i])
         } catch (error) {
           console.trace(error)
+          //should return reject here?
           throw error
         }
     }
-    console.trace("we finished purging the array of urls")
     return new Promise((resolve) => {
       resolve(true);
     });
     //what should be condition for rejecting?? 
-  // })
 }
 
   retrieveSurrogateKey(url) {
