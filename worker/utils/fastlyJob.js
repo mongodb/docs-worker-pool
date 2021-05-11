@@ -32,15 +32,15 @@ class FastlyJobClass {
         try {
             //retrieve surrogate key associated with each URL/file updated in push to S3
             const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url));
-            const surrogateKeyArray = await Promise.all(surrogateKeyPromises).catch(console.log); ;
-            console.log(surrogateKeyArray)
-            //purge each surrogate key
-            // const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
-            // await Promise.all(purgeRequestPromises);
+            const surrogateKeyArray = await Promise.all(surrogateKeyPromises).catch(console.log);
 
-            // // GET request the URLs to warm cache for our users
-            // const warmCachePromises = urlArray.map(url => this.warmCache(url));
-            // await Promise.all(warmCachePromises)
+            //purge each surrogate key
+            const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
+            await Promise.all(purgeRequestPromises);
+
+            // GET request the URLs to warm cache for our users
+            const warmCachePromises = urlArray.map(url => this.warmCache(url));
+            await Promise.all(warmCachePromises)
         } catch (error) {
             logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
             throw error
@@ -51,7 +51,7 @@ class FastlyJobClass {
     async retrieveSurrogateKey(url) {
 
         try {
-            axios({
+            return axios({
                 method: 'HEAD',
                 url: url,
                 headers: headers,
@@ -74,7 +74,7 @@ class FastlyJobClass {
         headers['Surrogate-Key'] = surrogateKey
 
         try {
-            axios({
+            return axios({
                     method: `POST`,
                     url: `https://api.fastly.com/service/${fastlyServiceId}/purge/${surrogateKey}`,
                     path: `/service/${fastlyServiceId}/purge${surrogateKey}`,
@@ -96,7 +96,7 @@ class FastlyJobClass {
     async warmCache(updatedUrl) {
 
         try {
-            axios.get(updatedUrl)
+            return axios.get(updatedUrl)
                 .then(response => {
                     if (response.status === 200) {
                         return true;
