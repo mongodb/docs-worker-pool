@@ -94,8 +94,7 @@ class S3PublishClass {
         );
         throw new Error(`Failed pushing to prod: ${stderr}`)
       }
-      // check for json string output from mut
-      // check if json was returned from mut
+
       try{
         const makefileOutput = stdout.replace(/\r/g, "").split(/\n/);
         // the URLS are always third line returned bc of the makefile target
@@ -105,8 +104,7 @@ class S3PublishClass {
         await this.fastly.purgeCache(urls);
         logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
         logger.save('Fastly Summary: The following pages were purged from cache for your deploy: \n',urls);
-        // when finished purging
-        // batch surrogate keys to send as single slack message
+
         return new Promise((resolve) => {
           logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
           logger.save(
@@ -130,9 +128,6 @@ class S3PublishClass {
     }
   }
 }
-
-
-
 
 module.exports = {
   S3PublishClass

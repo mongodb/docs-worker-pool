@@ -39,7 +39,7 @@ warmCache(updatedUrl) {
   // takes in an array of surrogate keys and purges cache for each
   async purgeCache(urlArray) {
     if (!Array.isArray(urlArray)) {
-      throw new Error('Parameter `url array` needs to be an array of urls');
+      throw new Error('Parameter `urlArray` needs to be an array of urls');
     }
 
     let that = this;
