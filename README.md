@@ -57,16 +57,16 @@ Development in this repository can be done via forks or branches. Currently, we 
 In general, the git workflow within this repository loosely follows https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow .
 
 ### Meta
-`Meta` contains various makefiles and .yaml files used for configuration.
+`meta` contains various makefiles and .yaml files used for configuration.
 Changes or additions to/of makefiles and .yaml for publishing purposes should be performed against this branch.
-There is no general requirement to keep `Meta` up to date with `Master` or `Integration`.
+There is no general requirement to keep `meta` up to date with `master` or `integration`.
 
 ### Integration
-`Integration` is treated as a running feature branch that should **always** remain up to date with `master`
+`integration` is treated as a running feature branch that should **always** remain up to date with `master`.
 
 ### Master
-`Master` is treated as our production state branch. In general, pull requests to master should be opened only from integration or a hot-fix feature branch.
-If a change is merged into `Master` that is not present in `Integration`, in general, that change should be merged as well from said branch or fork into integration. 
+`master` is treated as our production state branch. In general, pull requests to master should be opened only from integration or a hot-fix feature branch.
+If a change is merged into `master` that is not present in `integration`, then a contributor with push-access to `integration` should rebase `integration` with master to ensure the branches remain in sync and conflict free. 
 
 ## Releasing
 docs-worker-pool contains various triggers for release to higher environments. Currently, the repository supports an integration environment (reflecting the state of the integration branch) and a production environment (reflecting the state of the most recent release tag). 
@@ -76,6 +76,7 @@ docs-worker-pool contains various triggers for release to higher environments. C
  - Verify that the deploy-integration-ec2 workflow has executed successfully.
 
 ### Production
- - Merge outstanding changes within `integration` to `master`.
- - Create release tags.
+ - Rebase `master` with `integration` and push the latest changes, or merge a pull request to `master` if performing a hotfix.
+ - If you don't have push access, open an issue or otherwise contact a contributor with administrator priveliges. 
+ - Create release tags. We currently follow [semver](https://semver.org/) standards.
  - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
