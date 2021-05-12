@@ -32,7 +32,7 @@ class FastlyJobClass {
         try {
             //retrieve surrogate key associated with each URL/file updated in push to S3
             const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url));
-            const surrogateKeyArray = await Promise.all(surrogateKeyPromises).catch(console.log);
+            const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
 
             //purge each surrogate key
             const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
@@ -56,12 +56,9 @@ class FastlyJobClass {
                 url: url,
                 headers: headers,
             }).then(response => {
-                console.log("this is the response status: ", response.status)
                 if (response.status === 200) {
-                    console.log("this is the surrogate key!! ", response.headers['surrogate-key'])
                     return response.headers['surrogate-key'];
                 }
-                // console.log("this is the response inside retrieveSurrogateKey: ", response)
             });
         } catch (error) {
             logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
@@ -81,7 +78,6 @@ class FastlyJobClass {
                     headers: headers,
                 })
                 .then(response => {
-                    console.log("the status code for purging!! ", response.status)
                     if (response.status === 200) {
                         return true
                     }
