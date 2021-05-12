@@ -42,7 +42,7 @@ class FastlyJobClass {
             const warmCachePromises = urlArray.map(url => this.warmCache(url));
             await Promise.all(warmCachePromises)
         } catch (error) {
-            logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
+            this.logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
             throw error
         }
 
