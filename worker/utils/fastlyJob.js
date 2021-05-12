@@ -61,7 +61,7 @@ class FastlyJobClass {
                 }
             });
         } catch (error) {
-            logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
+            this.logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
             throw error
         }
 
@@ -83,7 +83,7 @@ class FastlyJobClass {
                     }
                 });
         } catch (error) {
-            logger.save(`${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey: ${error}`);
+            this.logger.save(`${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey: ${error}`);
             throw error;
         }
     }
@@ -99,7 +99,7 @@ class FastlyJobClass {
                     }
                 })
         } catch (error) {
-            logger.save(`${'(prod)'.padEnd(15)}stdErr: ${error}`);
+            this.logger.save(`${'(prod)'.padEnd(15)}stdErr: ${error}`);
             throw error;
         }
     }
