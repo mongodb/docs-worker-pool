@@ -1,5 +1,5 @@
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-USER=$(shell whoami)
+
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
 
@@ -15,8 +15,7 @@ PREFIX=manual
 PROJECT=docs
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
-
-PATCH_FILE="myPatch.patch"
+CUSTOM_NEXT_GEN_HTML=true
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
@@ -32,12 +31,6 @@ DRIVERS_PATH=source/driver-examples
 BLOCKS_FILE=./build/${GIT_BRANCH}/tests.blocks
 TEST_FILE=./build/${GIT_BRANCH}/tests.js
 
-# "PATCH_ID" related shell commands to manage commitless builds
-
-PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
-
-PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
-
 URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 
 # Parse our published-branches configuration file to get the name of
@@ -49,17 +42,6 @@ STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yam
 
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
-
-next-gen-stage: ## Host online for review
-	# stagel local jobs \
-	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
-	# stagel commit jobs and regular git push jobs\
-	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
-	fi
 
 lint: ## Checks URLs in the built corpus underneath build/<branch>/html
 	mut-lint --linters=links ./build/master/source/ ${ARGS}
@@ -119,27 +101,13 @@ next-gen-deploy:
 
 next-gen-html: examples get-build-dependencies
 	# snooty parse and then build-front-end
-	@if [ -n "${PATCH_ID}" ]; then \
-		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
-		if [ $$? -eq 1 ]; then \
-			exit 1; \
-		else \
-			exit 0; \
-		fi \
-	else \
-		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
-		if [ $$? -eq 1 ]; then \
-			exit 1; \
-		else \
-			exit 0; \
-		fi \
-	fi
+	echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 	if [ -n "${PATCH_ID}" ]; then \
-		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
 	npm run build; \

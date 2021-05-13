@@ -1,5 +1,5 @@
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-USER=$(shell whoami)
+
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 PRODUCTION_URL="https://docs.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-staging
@@ -8,7 +8,6 @@ PREFIX=manual
 PROJECT=docs-stage
 REPO_DIR=$(shell pwd)
 
-PATCH_FILE="myPatch.patch"
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)

@@ -1,5 +1,5 @@
-GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
-USER=$(shell whoami)
+
+
 STAGING_URL=https://docs-mongodborg-staging.corp.mongodb.com
 STAGING_BUCKET=docs-mongodb-org-staging
 
@@ -23,7 +23,7 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 include ~/shared.mk
 
 DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
-
+CUSTOM_NEXT_GEN_HTML=true
 
 
 get-build-dependencies: 
@@ -42,6 +42,10 @@ next-gen-html: build-legacy-pages
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
+	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
+	if [ -n "${PATCH_ID}" ]; then \
+		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+	fi && \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 	mv build-legacy-pages/sitemap-index.xml public/
