@@ -9,6 +9,9 @@ STRAPI_URL=http://54.219.137.111:1337
 PRODUCTION_BUCKET=docs-devhub-prod
 PRODUCTION_URL=https://developer.mongodb.com
 
+UPCOMING_PRODUCTION_BUCKET=developer-hub-prod
+UPCOMING_PRODUCTION_URL=https://mongodb.com/developer
+
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
@@ -55,4 +58,6 @@ next-gen-stage: ## Host online for review
 
 next-gen-deploy:	
 	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://developer.mongodb.com --json --all-subdirectories ${ARGS};
+	yes | mut-publish public ${UPCOMING_PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
+	@echo "Hosted at ${UPCOMING_PRODUCTION_URL}/index.html";
