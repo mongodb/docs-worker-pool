@@ -21,10 +21,13 @@ jobs:
           ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_1}} -T '
           cd docker/docs-worker-pool
           git fetch origin
+          git checkout master
+          git pull
           git checkout $(git describe --tags)
           sudo docker system prune -af
           sudo docker build --no-cache --tag production .
           sudo docker stop $(sudo docker ps -a -q)
+          sudo sh rundocker.sh
           sudo sh rundocker.sh
           '
   deploy-production-2:
@@ -44,10 +47,13 @@ jobs:
           ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_2}} -T '
           cd docker/docs-worker-pool
           git fetch origin
+          git checkout master
+          git pull
           git checkout $(git describe --tags)
           sudo docker system prune -af
           sudo docker build --no-cache --tag production .
           sudo docker stop $(sudo docker ps -a -q)
+          sudo sh rundocker.sh
           sudo sh rundocker.sh
           '
           
