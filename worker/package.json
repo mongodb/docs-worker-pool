@@ -19,6 +19,7 @@
     "@babel/polyfill": "^7.4.4",
     "async-retry": "^1.2.3",
     "aws-sdk": "^2.383.0",
+    "axios": "^0.21.1",
     "core-js": "^3.1.4",
     "express": "^4.16.4",
     "fastly": "^2.2.1",
@@ -34,10 +35,10 @@
     "remote-file-size": "^3.0.5",
     "simple-git": "^1.107.0",
     "supertest": "^4.0.2",
+    "toml": "^3.0.0",
     "typescript": "^4.0.2",
     "validator": "^10.11.0",
-    "xmlhttprequest": "^1.8.0", 
-    "toml": "^3.0.0"
+    "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
     "aws-sdk-mock": "^4.3.0",

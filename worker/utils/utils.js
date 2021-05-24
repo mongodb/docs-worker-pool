@@ -134,6 +134,11 @@ module.exports = {
   getExecPromise() {
     return exec;
   },
+  
+  // save array of purged URLs to job object
+  async updateJobWithPurgedURLs(currentJob, urlArray) {
+    await mongo.updateJobWithPurgedURLs(currentJob, urlArray);
+  },
 
   // Adds log message (message) to current job in queue at spot (currentJob.numFailures)
   async logInMongo(currentJob, message) {
