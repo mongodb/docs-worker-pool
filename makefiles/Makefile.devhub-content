@@ -53,6 +53,3 @@ next-gen-stage: ## Host online for review
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
-next-gen-deploy:	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://developer.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/index.html";
