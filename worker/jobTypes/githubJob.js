@@ -130,7 +130,6 @@ class GitHubJobClass {
 
     // our maintained directory of makefiles
     async downloadMakefile() {
-        // TODO: remove call to my fork and branch
         const makefileLocation = `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currentJob.payload.repoName}`;
         const returnObject = {};
         return new Promise(function(resolve, reject) {
