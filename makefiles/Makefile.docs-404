@@ -11,6 +11,7 @@ SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 PROJECT=docs-404
 MUT_PREFIX=404
+CUSTOM_NEXT_GEN_DEPLOY=true
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   DEPLOY_JOBS=job-docs-mongodb-org-prod job-docs-atlas-prod job-docs-opsmanager-prod job-docs-cloudmanager-prod

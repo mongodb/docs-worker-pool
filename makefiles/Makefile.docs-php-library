@@ -7,7 +7,7 @@ ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
   PRODUCTION_BUCKET=docs-mongodb-org-prod
 else
-  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
+  PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
   PRODUCTION_BUCKET=docs-manual-integration
 endif
 
