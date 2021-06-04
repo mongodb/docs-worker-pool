@@ -41,6 +41,7 @@ next-gen-html: update-snooty
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub; 
+	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod-new.js > ${REPO_DIR}/snooty/gatsby-config.js
 	cd snooty-devhub; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
