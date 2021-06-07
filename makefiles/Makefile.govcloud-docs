@@ -21,8 +21,6 @@ REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-CUSTOM_NEXT_GEN_DEPLOY=true
-
 include ~/shared.mk
 
 .PHONY: help stage fake-deploy deploy deploy-search-index publish remote-includes api-docs

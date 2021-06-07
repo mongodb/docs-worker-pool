@@ -20,7 +20,6 @@ GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
 GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
-CUSTOM_NEXT_GEN_DEPLOY=true
 
 include ~/shared.mk
 
