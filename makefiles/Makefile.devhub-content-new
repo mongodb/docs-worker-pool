@@ -40,14 +40,14 @@ next-gen-html: update-snooty
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub/ ${REPO_DIR}/snooty-devhub-tmp;
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub; 
-	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod-new.js > ${REPO_DIR}/snooty/gatsby-config.js
-	cd snooty-devhub; \
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub-tmp; 
+	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod-new.js > ${REPO_DIR}/snooty-devhub-tmp/gatsby-config.js
+	cd snooty-devhub-tmp; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
+	cp -r "${REPO_DIR}/snooty-devhub-tmp/public" ${REPO_DIR};
   
 next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
