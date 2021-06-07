@@ -17,7 +17,6 @@ version:
     - '4.4'
     - '4.2'
     - '4.0'
-    - '3.6'
   stable: '4.4'
   upcoming: '5.0'
 git:
