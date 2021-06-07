@@ -8,7 +8,7 @@ endif
 STAGING_URL="https://docs-atlas-staging.mongodb.com"
 STAGING_BUCKET=docs-atlas-staging
 
-PRODUCTION_URL="docs.atlas.mongodb.com"
+PRODUCTION_URL="https://docs.atlas.mongodb.com"
 PRODUCTION_BUCKET=docs-atlas-prod
 PREFIX=cloud-docs
 PROJECT=cloud-docs
