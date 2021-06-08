@@ -105,10 +105,9 @@ class S3PublishClass {
         logger.save(`${JSON.stringify(updatedURLsArray)}`);
         await this.fastly.purgeCache(updatedURLsArray);
         //save purged URLs to job object
-        workerUtils.updateJobWithPurgedURLs(this.GitHubJob.currentJob, updatedURLsArray);
+        await workerUtils.updateJobWithPurgedURLs(this.GitHubJob.currentJob, updatedURLsArray);
 
         return new Promise((resolve) => {
-          logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
           logger.save(`${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`);
           resolve({
             status: 'success',
