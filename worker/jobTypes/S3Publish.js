@@ -108,6 +108,7 @@ class S3PublishClass {
         await workerUtils.updateJobWithPurgedURLs(this.GitHubJob.currentJob, updatedURLsArray);
 
         return new Promise((resolve) => {
+          logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
           logger.save(`${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`);
           resolve({
             status: 'success',
