@@ -130,6 +130,25 @@ module.exports = {
     }
   },
 
+  async updateJobWithPurgedURLs(currentJob, urlArray) {
+    const queueCollection = module.exports.getCollection();
+    if (queueCollection) {
+      const query = { _id: currentJob._id };
+      const update = {
+        $push: { ['purgedURLs']: urlArray },
+      };
+
+      try {
+        await queueCollection.updateOne(query, update);
+      } catch (err) {
+        console.log(`Error in updateJobWithPurgedURLs(): ${err}`);
+        throw err
+      }
+    } else {
+      console.log('Error in logInMongo(): queueCollection does not exist');
+    }
+  },
+  
   // Adds Log Message To Job In The Queue
   async logMessageInMongo(currentJob, message) {
     const queueCollection = module.exports.getCollection();
