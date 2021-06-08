@@ -80,6 +80,7 @@ class S3PublishClass {
       //as defined in githubJob.js
       if (manifestPrefix) deployCommands[deployCommands.length - 1] +=  ` MANIFEST_PREFIX=${manifestPrefix} GLOBAL_SEARCH_FLAG=${this.GitHubJob.currentJob.payload.stableBranch}`;
     }
+
     // deploy site
     try {
       const exec = workerUtils.getExecPromise();
@@ -93,57 +94,39 @@ class S3PublishClass {
         );
         throw new Error(`Failed pushing to prod: ${stderr}`)
       }
-      // check for json string output from mut
-      const validateJsonOutput = stdout ? stdout.substr(0, stdout.lastIndexOf(']}') + 2) : '';
 
-      // check if json was returned from mut
       try {
-        const stdoutJSON = JSON.parse(validateJsonOutput);
-        const urls = stdoutJSON.urls;
-        // pass in urls to fastly function to purge cache
-        this.fastly.purgeCache(urls).then(function (data) {
-          logger.save(`${'(prod)'.padEnd(15)}Fastly finished purging URL's`);
-          logger.sendSlackMsg('Fastly Summary: The following pages were purged from cache for your deploy');
-          // when finished purging
-          // batch urls to send as single slack message
-          let batchedUrls = [];
-          for (let i = 0; i < urls.length; i++) {
-            const purgedUrl = urls[i];
-            if (purgedUrl && purgedUrl.indexOf('.html') !== -1) {
-              batchedUrls.push(purgedUrl);
-            }
-            // if over certain length, send as a single slack message and reset the array
-            if (batchedUrls.length > 20 || i >= (urls.length - 1)) {
-              logger.sendSlackMsg(`${batchedUrls.join('\n')}`);
-              batchedUrls = [];
-            }
-          }
-        });
-      } catch (e) {
-        // if not JSON, then it's a normal string output from mut
-        // get only last part of message which includes # of files changes + s3 link
-        if (stdout.indexOf('Summary') !== -1) {
-          stdoutMod = stdout.substr(stdout.indexOf('Summary'));
-        }
-      }
+        const makefileOutput = stdout.replace(/\r/g, '').split(/\n/);
+        // the URLS are always third line returned bc of the makefile target
+        const stdoutJSON = JSON.parse(makefileOutput[2]);
+        //contains URLs corresponding to files updated via our push to S3
+        const updatedURLsArray = stdoutJSON.urls;
+        // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
+        logger.save(`${JSON.stringify(updatedURLsArray)}`);
+        await this.fastly.purgeCache(updatedURLsArray);
+        //save purged URLs to job object
+        await workerUtils.updateJobWithPurgedURLs(this.GitHubJob.currentJob, updatedURLsArray);
 
-      return new Promise((resolve) => {
-        logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
-        logger.save(
-          `${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`
-        );
-        resolve({
-          status: 'success',
-          stdout: stdoutMod
-        });
-      });
-    } catch (errResult) {
-      logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
-      throw errResult;
+        return new Promise((resolve) => {
+          logger.save(`${'(prod)'.padEnd(15)}Finished pushing to production`);
+          logger.save(`${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`);
+          resolve({
+            status: 'success',
+            stdout: stdoutMod,
+            });
+          },);
+      } catch (error) {
+      console.trace(error)
+      throw(error)
     }
+  }     
+  catch (errResult) {
+  logger.save(`${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+  throw errResult;
+}
   }
 }
 
 module.exports = {
-  S3PublishClass
+  S3PublishClass,
 };

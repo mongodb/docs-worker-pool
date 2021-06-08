@@ -1,92 +1,128 @@
-const request = require('request');
-const utils = require('../utils/utils');
+const axios = require('axios').default;
 const environment = require('../utils/environment').EnvironmentClass;
 const fastly = require('fastly')(environment.getFastlyToken());
+const utils = require('../utils/utils');
+const Logger = require('../utils/logger').LoggerClass;
+
+const fastlyServiceId = environment.getFastlyServiceId();
+const headers = {
+    'Fastly-Key': environment.getFastlyToken(),
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'Fastly-Debug': 1,
+};
+
 
 class FastlyJobClass {
-  // pass in a job payload to setup class
-  constructor(currentJob) {
-    this.currentJob = currentJob;
-    if (fastly === undefined) {
-      utils.logInMongo(currentJob, 'fastly connectivity not found');
-    }
-  }
-
-  // takes in an array of urls and purges cache for each
-  async purgeCache(urlArray) {
-    if (!Array.isArray(urlArray)) {
-      throw new Error('Parameter `urlArray` needs to be an array of urls');
+    // pass in a job payload to setup class
+    constructor(currentJob) {
+        this.currentJob = currentJob;
+        this.logger = new Logger(currentJob);
+        if (fastly === undefined) {
+            utils.logInMongo(currentJob, 'fastly connectivity not found');
+        }
     }
 
-    let that = this;
-    let urlCounter = urlArray.length;
-    let purgeMessages = [];
+    // takes in an array of surrogate keys and purges cache for each
+    async purgeCache(urlArray) {
+        if (!Array.isArray(urlArray)) {
+            throw new Error('Parameter `urlArray` needs to be an array of urls');
+        }
 
-    // the 1 is just "some" value needed for this header: https://docs.fastly.com/en/guides/soft-purges
-    const headers = {
-      'fastly-key': environment.getFastlyToken(),
-      'accept': 'application/json',
-      'Fastly-Soft-Purge': '1',
-    };
+        try {
+            //retrieve surrogate key associated with each URL/file updated in push to S3
+            const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url));
+            const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
 
-    return new Promise((resolve, reject) => {
-      for (let i = 0; i < urlArray.length; i++) {
-        // perform request to purge
-        request({
-          method: 'PURGE',
-          url: urlArray[i],
-          headers: headers,
-        }, function(err, response, body) {
-          // url was not valid to purge
-          if (!response) {
-            utils.logInMongo(that.currentJob, `Error: service for this url does not exist in fastly for purging ${urlArray[i]}`);
-            purgeMessages.push({
-              'status': 'failure',
-              'message': `service with url ${urlArray[i]} does not exist in fastly`
+            //purge each surrogate key
+            const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
+            await Promise.all(purgeRequestPromises);
+
+            // GET request the URLs to warm cache for our users
+            const warmCachePromises = urlArray.map(url => this.warmCache(url));
+            await Promise.all(warmCachePromises)
+        } catch (error) {
+            this.logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
+            // throw error
+        }
+
+    }
+
+    async retrieveSurrogateKey(url) {
+
+        try {
+            return axios({
+                method: 'HEAD',
+                url: url,
+                headers: headers,
+            }).then(response => {
+                if (response.status === 200) {
+                    return response.headers['surrogate-key'];
+                }
             });
-          } else if (response.headers['content-type'].indexOf('application/json') === 0) {
-            try {
-              body = JSON.parse(body);
-              purgeMessages.push(body);
-            } catch(er) {
-              utils.logInMongo(that.currentJob, `Error: failed parsing output from fastly for url ${urlArray[i]}`);
-              console.log(`Error: failed parsing output from fastly for url ${urlArray[i]}`);
-            }
-          }
-          // when we are done purging all urls
-          // this is outside of the conditional above because if some url fails to purge
-          // we do not want to actually have this entire build fail, just show warning
-          urlCounter--;
-          if (urlCounter <= 0) {
-            resolve({
-              'status': 'success',
-              'fastlyMessages': purgeMessages,
+        } catch (error) {
+            this.logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
+            throw error
+        }
+
+    }
+
+    async requestPurgeOfSurrogateKey(surrogateKey) {
+        headers['Surrogate-Key'] = surrogateKey
+
+        try {
+            return axios({
+                    method: `POST`,
+                    url: `https://api.fastly.com/service/${fastlyServiceId}/purge/${surrogateKey}`,
+                    path: `/service/${fastlyServiceId}/purge${surrogateKey}`,
+                    headers: headers,
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return true
+                    }
+                });
+        } catch (error) {
+            this.logger.save(`${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey: ${error}`);
+            throw error;
+        }
+    }
+
+    // request urls of updated content to "warm" the cache for our customers
+    async warmCache(updatedUrl) {
+
+        try {
+            return axios.get(updatedUrl)
+                .then(response => {
+                    if (response.status === 200) {
+                        return true;
+                    }
+                })
+        } catch (error) {
+            this.logger.save(`${'(prod)'.padEnd(15)}stdErr: ${error}`);
+            throw error;
+        }
+    }
+
+    // upserts {source: target} mappings
+    // to the fastly edge dictionary
+    async connectAndUpsert(map) {
+        const options = {
+            item_value: map.target,
+        };
+        const connectString = `/service/${fastlyServiceId}/dictionary/${environment.getDochubMap()}/item/${
+          map.source
+          }`;
+
+        return new Promise((resolve, reject) => {
+            fastly.request('PUT', connectString, options, (err, obj) => {
+                if (err) reject(err);
+                resolve(obj);
             });
-          }
-        });
-      }
-    })
-  }
-
-  // upserts {source: target} mappings
-  // to the fastly edge dictionary
-  async connectAndUpsert(map) {
-    const options = {
-      item_value: map.target
-    };
-    const connectString = `/service/${environment.getFastlyServiceId()}/dictionary/${environment.getDochubMap()}/item/${
-      map.source
-      }`;
-
-    return new Promise((resolve, reject) => {
-      fastly.request('PUT', connectString, options, function(err, obj) {
-        if (err) reject(err);
-        resolve(obj);
-      });
-    })
-  }
+        })
+    }
 }
 
 module.exports = {
-  FastlyJobClass: FastlyJobClass
+    FastlyJobClass,
 };
