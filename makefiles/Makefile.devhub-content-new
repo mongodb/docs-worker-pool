@@ -55,5 +55,5 @@ next-gen-stage: ## Host online for review
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 next-gen-deploy:	
-	yes | AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} mut-publish public ${PRODUCTION_BUCKET} --prefix="developer" --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
+	yes | AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} mut-publish public ${PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
