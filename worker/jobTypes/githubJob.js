@@ -72,10 +72,6 @@ class GitHubJobClass {
           }
 
         }
-        // server staging commit jobs
-        else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 
-          pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/${this.currentJob.payload.branchName}`; 
-        }
         //mut only expects prefix or prefix/version for versioned repos, have to remove server user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           this.currentJob.payload.pathPrefix = pathPrefix;
