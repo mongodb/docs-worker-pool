@@ -72,10 +72,7 @@ class GitHubJobClass {
           }
 
         }
-        // server staging commit jobs
-        else if(this.currentJob.payload.patch && this.currentJob.payload.patchType === 'commit'){ 
-          pathPrefix = `${repoContent.content.prefix}/${this.currentJob.user}/${this.currentJob.payload.localBranchName}/${server_user}/${this.currentJob.payload.branchName}`; 
-        }
+
         //mut only expects prefix or prefix/version for versioned repos, have to remove server user from staging prefix
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           this.currentJob.payload.pathPrefix = pathPrefix;
@@ -311,16 +308,6 @@ class GitHubJobClass {
           `make html`
       ];
       
-      // server specifies path prefix for stagel commit jobs and prod deploy jobs only, which we
-      // save to job object to pass to mut in S3Publish.js. 
-        
-      // Front end constructs path for regular staging jobs 
-      // via the env vars defined/written in GatsbyAdapter.initEnv(), so the server doesn't have to create one here
-      // check if need to build next-gen
-      if(this.buildNextGen()){
-        await this.constructPrefix(isProdDeployJob);
-        await gatsbyAdapter.initEnv();
-      }
 
       // staging jobs do not need to retrieve the published branches yaml file for front-end
       // thus why the series of makefile targets are slightly different btwn prod and staging jobs
@@ -335,6 +322,12 @@ class GitHubJobClass {
 
       //check if prod deploy job
       if (this.buildNextGen() && isProdDeployJob) {
+      // Front end constructs path for regular staging jobs 
+      // via the env vars defined/written in GatsbyAdapter.initEnv(), so the server doesn't have to create one here
+      // check if need to build next-gen
+        await this.constructPrefix(isProdDeployJob);
+        await gatsbyAdapter.initEnv();
+        
         // we only generate a single search index per branch to ensure we do not have duplicate search indexes
         // duplicate indexes === only differ by the suffix of the url, /atlas vs /saas vs /master
         // if a branch is not aliased (and therefore not duplicated) or if this is the primary alias of a branch, construct a path for search index
