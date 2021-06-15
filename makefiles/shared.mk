@@ -17,7 +17,7 @@ next-gen-deploy:
 endif
 
 ifndef PUSHLESS_DEPLOY_DISABLED
-next-gen-html
+next-gen-html:
 	# snooty parse and then build-front-end
 	@if [ -n "${PATCH_ID}" ]; then \
 		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
