@@ -19,8 +19,8 @@ GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
 GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
-PUSHLESS_DEPLOY_SHARED_DISABLED=true
 CUSTOM_NEXT_GEN_DEPLOY=true
+PUSHLESS_DEPLOY_SHARED_DISABLED=true
 
 include ~/shared.mk
 
@@ -55,7 +55,7 @@ next-gen-stage: ## Host online for review
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
-next-gen-deploy:	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://developer.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/index.html";
-
+next-gen-deploy:
+	if [ -f config/redirects -a "${GIT_BRANCH}" = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
+	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${PRODUCTION_URL} --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
