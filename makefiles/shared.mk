@@ -16,7 +16,7 @@ next-gen-deploy:
 	if [ ${MANIFEST_PREFIX} ]; then $(MAKE) next-gen-deploy-search-index; fi
 endif
 
-ifndef PUSHLESS_DEPLOY_DISABLED
+ifndef PUSHLESS_DEPLOY_SHARED_DISABLED
 next-gen-html:
 	# snooty parse and then build-front-end
 	@if [ -n "${PATCH_ID}" ]; then \
@@ -44,7 +44,6 @@ next-gen-html:
 	fi && \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
