@@ -16,6 +16,48 @@ next-gen-deploy:
 	if [ ${MANIFEST_PREFIX} ]; then $(MAKE) next-gen-deploy-search-index; fi
 endif
 
+ifndef PUSHLESS_DEPLOY_DISABLED
+next-gen-html: examples get-build-dependencies
+	# snooty parse and then build-front-end
+	@if [ -n "${PATCH_ID}" ]; then \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	else \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	fi
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	if [ -n "${PATCH_ID}" ]; then \
+		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
+		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+	fi && \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
+
+next-gen-stage: ## Host online for review
+	# stagel local jobs \
+	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
+		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	# stagel commit jobs and regular git push jobs\
+	else \
+		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	fi
+endif
+
 ## Update the search index for this branch
 next-gen-deploy-search-index:
 	@echo "Building search index"
