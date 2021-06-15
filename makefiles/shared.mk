@@ -44,8 +44,9 @@ next-gen-html:
 	fi && \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+endif
 
-
+ifndef PUSHLESS_DEPLOY_DISABLED
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
