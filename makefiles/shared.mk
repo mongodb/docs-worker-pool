@@ -49,6 +49,7 @@ next-gen-html:
 	fi && \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
