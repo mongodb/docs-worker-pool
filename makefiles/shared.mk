@@ -1,5 +1,10 @@
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 INTEGRATION_SEARCH_BUCKET=docs-search-indexes-integration
+# "PATCH_ID" related shell commands to manage commitless builds
+PATCH_FILE="myPatch.patch"
+PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
+
+PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
 ifeq ($(SNOOTY_INTEGRATION),true)
 	BUCKET_FLAG=-b ${INTEGRATION_SEARCH_BUCKET}

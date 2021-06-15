@@ -14,7 +14,7 @@ endif
 PROJECT=bi-connector
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
-
+PATCH_FILE="myPatch.patch"
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 export DIAGNOSTICS_FORMAT=JSON
 
