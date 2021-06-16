@@ -11,6 +11,7 @@ SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 PROJECT=docs-404
 MUT_PREFIX=404
+CUSTOM_NEXT_GEN_DEPLOY=true
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   DEPLOY_JOBS=job-docs-mongodb-org-prod job-docs-atlas-prod job-docs-opsmanager-prod job-docs-cloudmanager-prod
@@ -25,23 +26,6 @@ include ~/shared.mk
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-404.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-html: ## snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
-	if [ $$? -eq 1 ]; then \
-		exit 1; \
-	else \
-		exit 0; \
-	fi
-	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-
-next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS};
-	@echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"
 
 next-gen-deploy: $(DEPLOY_JOBS)
 

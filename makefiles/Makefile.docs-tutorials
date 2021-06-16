@@ -33,34 +33,10 @@ publish: examples install-resources ## Builds this branch's publishable HTML and
 	giza make publish
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
 
-next-gen-html:
-	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true"; \
-	if [ $$? -eq 1 ]; then \
-		exit 1; \
-	else \
-		exit 0; \
-	fi
-	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
-	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-  
-next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; 
-	echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
-
-
 get-build-dependencies: 
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-tutorials.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-deploy:
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=https://docs.mongodb.com --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
-	$(MAKE) next-gen-deploy-search-index
+
 
 
 stage: ## Host online for review
