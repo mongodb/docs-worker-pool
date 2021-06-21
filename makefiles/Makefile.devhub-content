@@ -90,6 +90,6 @@ next-gen-stage-new: ## Host online for review
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
-next-gen-deploy-new: next-gen-html-new
+next-gen-deploy-new:
 	yes | AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEVHUB} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEVHUB} mut-publish public ${PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
