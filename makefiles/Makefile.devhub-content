@@ -83,13 +83,13 @@ next-gen-html-new: update-snooty
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub-tmp/public" ${REPO_DIR};
+	cp -r "${REPO_DIR}/snooty-devhub-tmp/public/" ${REPO_DIR}/public-new;
 
-next-gen-stage-new: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
+next-gen-stage-new: next-gen-html-new ## Host online for review
+	mut-publish ./public-new ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
-next-gen-deploy-new:
-	yes | AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEVHUB} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEVHUB} mut-publish public ${PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
+next-gen-deploy-new: next-gen-html-new
+	yes | AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEVHUB} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEVHUB} mut-publish ./public-new ${NEW_PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
