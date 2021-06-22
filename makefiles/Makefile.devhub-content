@@ -83,7 +83,7 @@ next-gen-html-new: update-snooty
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
 	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub-tmp/public" ${REPO_DIR}/public-new/;
+	cp -r "${REPO_DIR}/snooty-devhub-tmp/public/" ${REPO_DIR}/public-new;
 
 next-gen-stage-new: next-gen-html-new ## Host online for review
 	mut-publish ./public-new ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
