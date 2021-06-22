@@ -99,7 +99,7 @@ class S3PublishClass {
         const makefileOutput = stdout.replace(/\r/g, '').split(/\n/);
         // the URLS are always third line returned bc of the makefile target
         try {
-          logger.save(`${'(prod)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`);
+          logger.save(`${'(prod GURU)'.padEnd(15)}Deploy details:\n\n${stdoutMod}`);
           const stdoutJSON = JSON.parse(makefileOutput[2]);
           //contains URLs corresponding to files updated via our push to S3
           const updatedURLsArray = stdoutJSON.urls;
