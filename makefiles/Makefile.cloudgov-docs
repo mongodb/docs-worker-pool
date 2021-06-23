@@ -15,7 +15,7 @@ endif
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 PREFIX=government
 PROJECT=cloudgov
-MUT_PREFIX ?= $(PREFIX)
+MUT_PREFIX=government
 REPO_DIR=$(shell pwd)
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
