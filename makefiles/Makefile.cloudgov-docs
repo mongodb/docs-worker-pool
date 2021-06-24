@@ -13,7 +13,7 @@ else
 endif
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
-PREFIX=government
+
 PROJECT=government
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
@@ -35,10 +35,6 @@ html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html
 
 
-
-
-
 next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
-	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PREFIX} -g -s --exclude build/public/sdk/iOS
-
+	mut-index upload build/public -o ${PROJECT}-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -g -s --exclude build/public/sdk/iOS
