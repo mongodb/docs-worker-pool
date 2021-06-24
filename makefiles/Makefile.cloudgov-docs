@@ -14,7 +14,7 @@ endif
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
-PROJECT=government
+PROJECT=cloudgov
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
