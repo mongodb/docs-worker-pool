@@ -14,7 +14,7 @@ endif
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
-PREFIX=drivers/java
+PREFIX=drivers/java/sync
 PROJECT=java
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
