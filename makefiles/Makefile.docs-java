@@ -6,7 +6,7 @@ STAGING_BUCKET=docs-mongodb-org-staging
 
 ifeq ($(SNOOTY_INTEGRATION),false)
   PRODUCTION_URL="https://docs.mongodb.com"
-  PRODUCTION_BUCKET=docs-java-prod
+  PRODUCTION_BUCKET=docs-java-driver
 else
   PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
   PRODUCTION_BUCKET=docs-java-integration
