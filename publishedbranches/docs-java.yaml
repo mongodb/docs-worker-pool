@@ -1,4 +1,4 @@
-prefix: 'drivers/java'
+prefix: 'drivers/java/sync'
 version:
   published:
     - 'master (upcoming)'
