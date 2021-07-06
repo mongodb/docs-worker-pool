@@ -107,6 +107,7 @@ module.exports = {
     if (mongoClient) {
       monitorInstance.reportStatus('closed connection');
       mongoClient.close();
+      console.log('\nServer has closed mongo client connection');
     }
   },
 
