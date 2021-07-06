@@ -281,7 +281,7 @@ describe('Mongo Tests', () => {
       const jobsColl = db.collection('jobs');
       expect.assertions(1);
       await expect(
-        mongo.finishJobWithFailure(
+        mongo.resetJobForReenqueue(
           jobsColl,
           { _id: 'notRealId', numFailures: 0 },
           'a'
