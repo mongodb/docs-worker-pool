@@ -72,4 +72,4 @@ RUN mkdir repos && chmod 755 repos
 
 # entry to kick-off the worker
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "index.js"]
