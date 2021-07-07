@@ -1,0 +1,76 @@
+service: docs-worker-pool
+
+plugins:
+  - serverless-pseudo-parameters
+provider:
+  name: aws
+  stage: ${opt:stage, 'stg'}
+  deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
+  deploymentPrefix: serverless
+  region: us-east-2
+  vpc:
+    securityGroupIds:
+      - 'Fn::GetAtt':
+          - GroupId
+    subnetIds:
+      - subnet-8c3623f6
+      - subnet-a4ac73cf
+      - subnet-9e83fed2
+custom:
+  deploymentBucket:
+    intgr: docs-workerpool-deployment
+    stg: docs-workerpool-deployment
+    prd: docs-workerpool-deployment
+  ecs:
+    port: '80'
+    imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-1.amazonaws.com/${self:service}-${self:provider.stage}:latest
+    containerCpu:
+      intgr: '512'
+      stg: '2048'
+      prd: '2048'
+    containerMemory:
+      intgr: '1024'
+      stg: '4096'
+      prd: '4096'
+    desiredCount:
+      intgr: '1'
+      stg: '1'
+      prd: '2' 
+    minimumHealthyPercent:
+      intgr: 100
+      stg: 100
+      prd: 100
+    maximumPercent:
+      intgr: 200
+      stg: 200
+      prd: 200
+    deregistrationDelaySecs: '10'
+    healthCheckIntervalSecs: '10'
+    healthyThreshold:
+      intgr: '3'
+      stg: '3'
+      prd: '3'
+    unhealthyThreshold:
+      stg: '3'
+      intgr: '3'
+      prd: '3'
+  targetGroupName: docs-worker-pool
+  accountId:
+    stg: 216656347858
+    intgr: 216656347858
+    prd: 216656347858
+  dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
+  dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
+  xLarge: ${ssm:/env/${self:provider.stage}/docs/worker_pool/xlarge}
+  dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collection}
+  awsKey: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/key}
+  awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret}
+  githubBotUserName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/username}
+  githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
+  fastlyToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/token}
+  fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
+  fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
+
+resources:
+  - ${file(./ecs_service.yml)}
+

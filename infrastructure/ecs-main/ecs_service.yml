@@ -1,0 +1,114 @@
+Resources:
+  SecurityGroupVPC:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: vpc-781fab13
+      GroupDescription: 'Security group to VPC'
+
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: ${self:service}-${self:provider.stage}
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  TaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: ${self:service}-${self:provider.stage}
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: ${self:custom.ecs.containerCpu.${self:provider.stage}}
+      Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
+      ExecutionRoleArn: !Ref ExecutionRole
+      TaskRoleArn: !Ref TaskRole
+      ContainerDefinitions:
+        - Name: ${self:service}-${self:provider.stage}
+          Image: ${self:custom.ecs.imageUrl}
+          Cpu: ${self:custom.ecs.containerCpu.${self:provider.stage}}
+          Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
+          PortMappings:
+            - ContainerPort: ${self:custom.ecs.port}
+              Protocol: tcp
+          Environment:
+            - Name: SNOOTY_ENV
+              Value: ${self:provider.stage}
+            - Name: MONGO_ATLAS_USERNAME
+              value: ${self:custom.dbUsername.${self:provider.stage}}
+            - Name: MONGO_ATLAS_PASSWORD
+              value: ${self:custom.dbPassword.${self:provider.stage}}
+            - Name: XLARGE
+              value: ${self:custom.xLarge.${self:provider.stage}}
+            - Name: DB_NAME
+              value: ${self:custom.dbName.${self:provider.stage}}
+            - Name: AWS_ACCESS_KEY_ID
+              value: ${self:custom.awsKey.${self:provider.stage}}
+            - Name: AWS_SECRET_ACCESS_KEY
+              value: ${self:custom.awsSecret.${self:provider.stage}}
+            - Name: GITHUB_BOT_USERNAME
+              value: ${self:custom.githubBotUserName.${self:provider.stage}}
+            - Name: GITHUB_BOT_PASSWORD
+              value: ${self:custom.githubBotPW.${self:provider.stage}}
+            - Name: FASTLY_TOKEN
+              value: ${self:custom.fastlyToken.${self:provider.stage}}
+            - Name: FASTLY_DOCHUB_MAP
+              value: ${self:custom.fastlyDochubMap.${self:provider.stage}}
+            - Name: FASTLY_SERVICE_ID
+              value: ${self:custom.fastlyServiceId.${self:provider.stage}}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref 'LogGroup'
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ${self:provider.stage}
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: ${self:service}-${self:provider.stage}
+
+  ExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+
+  TaskRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+
+  ECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      LaunchType: FARGATE
+      ServiceName: ${self:service}-${self:provider.stage}
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref TaskDefinition
+      DeploymentConfiguration:
+        MinimumHealthyPercent: ${self:custom.ecs.minimumHealthyPercent.${self:provider.stage}}
+        MaximumPercent: ${self:custom.ecs.maximumPercent.${self:provider.stage}}
+      DesiredCount: ${self:custom.ecs.desiredCount.${self:provider.stage}}
+      HealthCheckGracePeriodSeconds: ${self:custom.ecs.healthCheckIntervalSecs}
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets:
+            - subnet-8c3623f6
+            - subnet-a4ac73cf
+            - subnet-9e83fed2
+          SecurityGroups:
+            - !Ref SecurityGroupVPC
