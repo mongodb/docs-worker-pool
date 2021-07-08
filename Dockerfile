@@ -43,7 +43,7 @@ RUN python3 -m pip install pip==20.2 flit==3.0.0
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	git checkout v0.10.3 && \
+	git checkout v0.10.4 && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
 # install snooty front-end
