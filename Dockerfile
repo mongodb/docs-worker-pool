@@ -50,7 +50,7 @@ RUN git clone https://github.com/mongodb/snooty-parser.git && \
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	git checkout v0.10.1 && \	
+	git checkout v0.11.0 && \	
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
