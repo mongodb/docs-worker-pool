@@ -7,7 +7,7 @@ version:
   active:
     - '4.x (upcoming)'
     - '4.0 (current)'
-    - '3.6 (current)'
+    - '3.6'
   stable: 'v4.0'
   upcoming: 'master'
 git:
