@@ -1,12 +1,12 @@
 prefix: 'drivers/node'
 version:
   published:
-    - '4.x (upcoming)'
-    - '4.0 (current)'
+    - 'Version 4.x (upcoming)'
+    - 'Version 4.0 (current)'
     - '3.6'
   active:
-    - '4.x (upcoming)'
-    - '4.0 (current)'
+    - 'Version 4.x (upcoming)'
+    - 'Version 4.0 (current)'
     - '3.6'
   stable: 'v4.0'
   upcoming: 'master'
