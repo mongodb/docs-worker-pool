@@ -23,10 +23,9 @@ SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 PUSHLESS_DEPLOY_SHARED_DISABLED=true
 
-include ~/shared.mk
+CUSTOM_SEARCH_INDEX=true
 
-# "PROJECT" currently exists to support having multiple projects
-# within one bucket. For the manual it is empty.
+include ~/shared.mk
 
 DRIVERS_PATH=source/driver-examples
 
@@ -85,6 +84,15 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
+
+next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
+	@echo "Building search index"
+	MANUAL_INDEX=$(subst docs,manual,${MANIFEST_PREFIX})
+	ifeq ($(MANUAL_INDEX), "manual-manual")
+	MANUAL_INDEX="manual-v5.0"
+	endif
+
+	mut-index upload public -o ${MANUAL_INDEX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml

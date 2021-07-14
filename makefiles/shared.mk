@@ -63,6 +63,8 @@ next-gen-stage: ## Host online for review
 endif
 
 ## Update the search index for this branch
+## Manual has its own custom search index, because it is special.
+ifndef CUSTOM_SEARCH_INDEX
 next-gen-deploy-search-index:
 	@echo "Building search index"
 	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
