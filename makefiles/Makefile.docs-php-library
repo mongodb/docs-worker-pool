@@ -12,14 +12,17 @@ else
 endif
 
 PROJECT=php-library
+PREFIX=php-library
+MUT_PREFIX ?= $(PROJECT)
+REPO_DIR=$(shell pwd)
 
-# Parse our published-branches configuration file to get the name of
-# the current "stable" branch. This is weird and dumb, yes.
-STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-.PHONY: help publish stage deploy deploy-search-index
+include ~/shared.mk
 
-
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-php-library.yaml > ${REPO_DIR}/published-branches.yaml
 
 html:
 	giza make html
