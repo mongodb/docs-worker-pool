@@ -1,0 +1,8 @@
+{
+  "name": "docs-worker-pool",
+  "version": "1.0.0",
+  "description": "package.json for the necessary serverless dependencies",
+  "dependencies": {
+    "serverless-pseudo-parameters": "1.6.0"
+  }
+}
