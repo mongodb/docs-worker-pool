@@ -13,7 +13,7 @@ endif
 
 PREFIX=manual
 PROJECT=docs
-MUT_PREFIX ?= $(PROJECT)
+MUT_PREFIX ?= $(PREFIX)
 REPO_DIR=$(shell pwd)
 
 PATCH_FILE="myPatch.patch"
