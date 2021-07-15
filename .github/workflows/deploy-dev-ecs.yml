@@ -12,19 +12,20 @@ jobs:
         with:
           node-version: '14.x'
       - name: Install Serverless Framework
-        run: npm install -g serverless
+        run: npm ci -g serverless
       - name: Serverless AWS authentication
         run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Create ECS Repo
         run: |
           cd infrastructure/ecs-repo
-          npm install
+          npm ci
           sls deploy --stage dev
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           IMAGE_TAG: ${{ github.sha }}
       - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and push to ECR
         with:
           image: docs-worker-pool-dev
           tags: latest, ${{ github.sha }}
@@ -35,7 +36,7 @@ jobs:
       - name: Deploy ECS
         run: |
           cd infrastructure/ecs-main
-          npm install
+          npm ci
           sls deploy --stage dev
 
 
