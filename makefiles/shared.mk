@@ -63,7 +63,7 @@ next-gen-stage: ## Host online for review
 endif
 
 ## Update the search index for this branch
-## Manual has its own custom search index, because it is special.
+## Manual has its own custom search index, because it is special. Landing doesn't have search at all.
 ifndef CUSTOM_SEARCH_INDEX
 next-gen-deploy-search-index:
 	@echo "Building search index"
