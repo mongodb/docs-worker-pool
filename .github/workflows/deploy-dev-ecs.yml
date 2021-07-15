@@ -13,7 +13,6 @@ jobs:
       - uses: Teakowa/setup-serverless@v2.0.0
         with:
           provider: aws
-        env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           IMAGE_TAG: ${{ github.sha }}
@@ -23,8 +22,6 @@ jobs:
         run: |
           cd infrastructure/ecs-repo
           npm install
-          export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-          export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
           sls deploy --stage dev
 
       - name: Build and publish to ECR
