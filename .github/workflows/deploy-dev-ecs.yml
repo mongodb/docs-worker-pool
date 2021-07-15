@@ -22,9 +22,9 @@ jobs:
       - name: Create ECS Repo
         run: |
           cd infrastructure/ecs-repo
-          $AWS_ACCESS_KEY_ID
-          $AWS_SECRET_ACCESS_KEY
           npm install
+          export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+          export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
           sls deploy --stage dev
 
       - name: Build and publish to ECR
