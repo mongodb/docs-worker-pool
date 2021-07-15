@@ -21,6 +21,7 @@ custom:
     intgr: docs-workerpool-deployment
     stg: docs-workerpool-deployment
     prd: docs-workerpool-deployment
+    dev: worker-pool-deployment
   ecs:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-1.amazonaws.com/${self:service}-${self:provider.stage}:latest

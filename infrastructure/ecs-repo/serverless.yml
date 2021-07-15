@@ -15,6 +15,7 @@ custom:
     intgr: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
+    dev: worker-pool-deployment
 
 resources:
   Resources:
