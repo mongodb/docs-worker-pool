@@ -1,39 +1,37 @@
-name: Deploy dev branch
 on:
   push:
     branches-ignore:
       - "master"
-
+name: Deploy dev branch
 jobs:
-  deploy:
-    name: deploy
+  deploy-dev:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [14.x]
     steps:
-    - uses: Teakowa/setup-serverless@v2.0.0
-      with:
-        provider: aws
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-        IMAGE_TAG: ${{ github.sha }}
-    - name: Create ECS Repo
-    - run: |
-        cd infrastructure/ecs-repo
-        sls deploy --stage dev
-    - name: Build and publish to ECR
-    - run: |
-        $(aws ecr get-login-password --no-include-email --region us-east-2)
-        docker build -f Dockerfile -t integration-data-fetcher-task-dev:$IMAGE_TAG .
-        docker tag docs-worker-pool-task-dev:$IMAGE_TAG 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:$IMAGE_TAG
-        docker tag docs-worker-pool-task-dev:$IMAGE_TAG 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:latest
-        docker push 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:$IMAGE_TAG
-        docker push 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:latest
-    - name: Deploy ECS 
-    - run: | 
-        cd infrastructure/ecs-main
-        sls deploy --stage dev
+      - uses: Teakowa/setup-serverless@v2.0.0
+        with:
+          provider: aws
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          IMAGE_TAG: ${{ github.sha }}
+      - name: Create ECS Repo
+        run: |
+          cd infrastructure/ecs-repo
+          sls deploy --stage dev
+      - name: Build and publish to ECR
+        run: |
+          $(aws ecr get-login-password --no-include-email --region us-east-2)
+          docker build -f Dockerfile -t integration-data-fetcher-task-dev:$IMAGE_TAG .
+          docker tag docs-worker-pool-task-dev:$IMAGE_TAG 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:$IMAGE_TAG
+          docker tag docs-worker-pool-task-dev:$IMAGE_TAG 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:latest
+          docker push 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:$IMAGE_TAG
+          docker push 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:latest
+      - name: Deploy ECS 
+        run: | 
+          cd infrastructure/ecs-main
+          sls deploy --stage dev
 
 
