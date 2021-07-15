@@ -22,7 +22,8 @@ jobs:
       - name: Create ECS Repo
         run: |
           cd infrastructure/ecs-repo
-          aws configure
+          $AWS_ACCESS_KEY_ID
+          $AWS_SECRET_ACCESS_KEY
           npm install
           sls deploy --stage dev
 
