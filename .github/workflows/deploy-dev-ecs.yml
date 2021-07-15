@@ -21,8 +21,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Create ECS Repo
         run: |
-          cd infrastructure/ecs-main
-          ls
+          cd infrastructure/ecs-repo
+          npm install
           sls deploy --stage dev
 
       - name: Build and publish to ECR
@@ -36,6 +36,8 @@ jobs:
       - name: Deploy ECS  
         working-directory: infrastructure/ecs-main
         run: |
+          cd infrastructure/ecs-main
+          npm install
           sls deploy --stage dev
 
 
