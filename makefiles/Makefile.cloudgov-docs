@@ -25,10 +25,10 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 include ~/shared.mk
 
+INDEX_NAME=$(subst cloudgov,AtlasGov,${MANIFEST_PREFIX})
+
 next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
 	@echo "Building search index"
-	INDEX_NAME=$(subst cloudgov,AtlasGov,${MANIFEST_PREFIX})
-
 	mut-index upload public -o ${INDEX_NAME}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 
 
