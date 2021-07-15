@@ -26,7 +26,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
       - uses: mr-smithers-excellent/docker-build-push@v5
         with:
-          image: docs-worker-pool-dev/docs-worker-pool-task
+          image: docs-worker-pool-dev
           tags: latest, ${{ github.sha }}
           registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
         env:
