@@ -19,7 +19,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
       - name: Create ECS Repo
         run: |
-          cd ./infrastructure/ecs-repo
+          cd ../infrastructure/ecs-repo
           ls
           sls deploy --stage dev
       - name: Build and publish to ECR
