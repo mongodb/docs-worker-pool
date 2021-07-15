@@ -22,6 +22,7 @@ jobs:
       - name: Create ECS Repo
         run: |
           cd infrastructure/ecs-repo
+          aws configure
           npm install
           sls deploy --stage dev
 
