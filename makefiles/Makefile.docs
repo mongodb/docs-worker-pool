@@ -88,7 +88,7 @@ next-gen-stage: ## Host online for review
 next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
 	@echo "Building search index"
 	INDEX_NAME=$(subst docs,manual,${MANIFEST_PREFIX})
-	ifeq ($(MANUAL_INDEX), "manual-manual")
+	ifeq ($(INDEX_NAME), "manual-manual")
 	INDEX_NAME="manual-v5.0"
 	endif
 
