@@ -18,10 +18,11 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           IMAGE_TAG: ${{ github.sha }}
       - name: Create ECS Repo
+        working-directory: ./infrastructure/ecs-repo
         run: |
-          cd infrastructure/ecs-repo
           sls deploy --stage dev
       - name: Build and publish to ECR
+        working-directory: ./
         run: |
           $(aws ecr get-login-password --no-include-email --region us-east-2)
           docker build -f Dockerfile -t integration-data-fetcher-task-dev:$IMAGE_TAG .
@@ -30,8 +31,8 @@ jobs:
           docker push 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:$IMAGE_TAG
           docker push 216656347858.dkr.ecr.us-east-2.amazonaws.com/docs-worker-pool-task-intgr-dev:latest
       - name: Deploy ECS 
-        run: | 
-          cd infrastructure/ecs-main
+        working-directory: ./infrastructure/ecs-main
+        run: |
           sls deploy --stage dev
 
 
