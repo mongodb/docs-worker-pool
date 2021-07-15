@@ -1,0 +1,30 @@
+Resources:
+  DocsBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:custom.bucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+  DocsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: DocsBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DocsBucket"
+                    },
+                    "/*"
+                  ]
+              ]

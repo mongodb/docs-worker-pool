@@ -70,6 +70,8 @@ custom:
   fastlyToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/token}
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
+  bucketName: docs-mongodb-org-${self:provider.stage}
+
 
 resources:
   - ${file(./ecs_service.yml)}
