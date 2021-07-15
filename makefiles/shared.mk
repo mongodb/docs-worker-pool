@@ -63,7 +63,9 @@ next-gen-stage: ## Host online for review
 endif
 
 ## Update the search index for this branch
-## Manual has its own custom search index, because it is special.
+## HACK-Y WORKAROUNDS:
+## docs && cloud-docs && cloudgov have own search indexes to rename their manifests because of a bug in the workerpool code
+## Landing doesn't have search at all.
 ifndef CUSTOM_SEARCH_INDEX
 next-gen-deploy-search-index:
 	@echo "Building search index"
