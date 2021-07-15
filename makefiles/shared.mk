@@ -64,7 +64,7 @@ endif
 
 ## Update the search index for this branch
 ## HACK-Y WORKAROUNDS:
-## Manual && Atlas have own search indexes to rename their manifests because of a bug in the workerpool code
+## docs && cloud-docs && cloudgov have own search indexes to rename their manifests because of a bug in the workerpool code
 ## Landing doesn't have search at all.
 ifndef CUSTOM_SEARCH_INDEX
 next-gen-deploy-search-index:
