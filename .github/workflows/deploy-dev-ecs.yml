@@ -18,8 +18,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           IMAGE_TAG: ${{ github.sha }}
       - name: Create ECS Repo
-        working-directory: infrastructure/ecs-repo
         run: |
+          cd ./infrastructure/ecs-repo
           ls
           sls deploy --stage dev
       - name: Build and publish to ECR
