@@ -6,19 +6,15 @@ name: Deploy dev branch
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [14.x]
     steps:
-      - uses: Teakowa/setup-serverless@v2.0.0
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
         with:
-          provider: aws
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-          IMAGE_TAG: ${{ github.sha }}
-      - name: Checkout
-        uses: actions/checkout@v2
+          node-version: '14.x'
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+      - name: Serverless AWS authentication
+        run: sls config credentials --provider aws --key ${{ secrets.AWS_KEY }} --secret ${{ secrets.AWS_SECRET }}
       - name: Create ECS Repo
         run: |
           cd infrastructure/ecs-repo
@@ -31,9 +27,10 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
       - name: Build and publish to ECR
         run: |
           docker build -f Dockerfile -t docs-worker-pool-task-dev:$IMAGE_TAG .
