@@ -114,9 +114,11 @@ module.exports = {
   async startServer() {
     // Initialize MongoDB Collection
     // This is the collection that houses the work tickets
+    console.log("Starting worker pool");
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
       queueCollection = mongo.getCollection();
+      console.log(queueCollection)
     }
     monitorInstance.reportStatus('start server');
 
@@ -135,11 +137,13 @@ module.exports = {
       let logMsg;
 
       if (shouldStop) {
+        console.log('Shutting Down --> Should not get new jobs')
         monitorInstance.reportStatus('shutting down');
         throw new Error('Shutting Down --> Should not get new jobs');
       }
 
       // Get a new job
+      console.log(`retrieving new job from queueCollection`);
       const job = await workerUtils
         .promiseTimeoutS(
           MONGO_TIMEOUT_S,
@@ -148,6 +152,7 @@ module.exports = {
         )
         .catch(error => {
           console.log('connection timeout');
+          console.log(`error getting job ${error}`);
           monitorInstance.reportStatus(`error getting job ${error}`);
         });
 

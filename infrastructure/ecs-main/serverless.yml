@@ -1,4 +1,5 @@
 service: docs-worker-pool
+variablesResolutionMode: 20210326
 
 plugins:
   - serverless-pseudo-parameters
@@ -18,50 +19,47 @@ provider:
       - subnet-9e83fed2
 custom:
   deploymentBucket:
-    intgr: docs-workerpool-deployment
-    stg: docs-workerpool-deployment
-    prd: docs-workerpool-deployment
+    intgr: workerpool-deployment
+    stg: workerpool-deployment
+    prd: workerpool-deployment
+    dev: worker-pool-deployment
   ecs:
     port: '80'
-    imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-1.amazonaws.com/${self:service}-${self:provider.stage}:latest
+    imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
+      dev: '512'
       intgr: '512'
       stg: '2048'
       prd: '2048'
     containerMemory:
+      dev: '1024'
       intgr: '1024'
       stg: '4096'
       prd: '4096'
     desiredCount:
+      dev: 1
       intgr: '1'
       stg: '1'
       prd: '2' 
     minimumHealthyPercent:
+      dev: 100
       intgr: 100
       stg: 100
       prd: 100
     maximumPercent:
+      dev:  200
       intgr: 200
       stg: 200
       prd: 200
     deregistrationDelaySecs: '10'
-    healthCheckIntervalSecs: '10'
-    healthyThreshold:
-      intgr: '3'
-      stg: '3'
-      prd: '3'
-    unhealthyThreshold:
-      stg: '3'
-      intgr: '3'
-      prd: '3'
   targetGroupName: docs-worker-pool
   accountId:
+    dev: 216656347858
     stg: 216656347858
     intgr: 216656347858
     prd: 216656347858
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
-  xLarge: ${ssm:/env/${self:provider.stage}/docs/worker_pool/xlarge}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collection}
   awsKey: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/key}
   awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret}
@@ -70,7 +68,10 @@ custom:
   fastlyToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/token}
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
+  bucketName: docs-mongodb-org-${self:provider.stage}
+
 
 resources:
+  - ${file(./buckets.yml)}
   - ${file(./ecs_service.yml)}
 
