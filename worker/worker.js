@@ -142,7 +142,7 @@ module.exports = {
       }
 
       // Get a new job
-      console.log(`retrieving new job from queueCollection ${JSON.stringify(queueCollection)}`);
+      console.log(`retrieving new job from queueCollection`);
       const job = await workerUtils
         .promiseTimeoutS(
           MONGO_TIMEOUT_S,
