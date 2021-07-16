@@ -18,7 +18,7 @@ jobs:
       - name: Create ECS Repo
         run: |
           cd infrastructure/ecs-repo
-          npm ci
+          npm install
           sls deploy --stage dev
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -36,7 +36,7 @@ jobs:
       - name: Deploy ECS
         run: |
           cd infrastructure/ecs-main
-          npm ci
+          npm install
           sls deploy --stage dev
 
 
