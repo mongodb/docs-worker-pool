@@ -26,18 +26,22 @@ custom:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-1.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
+      dev: '512'
       intgr: '512'
       stg: '2048'
       prd: '2048'
     containerMemory:
+      dev: '1024'
       intgr: '1024'
       stg: '4096'
       prd: '4096'
     desiredCount:
+      dev: 1
       intgr: '1'
       stg: '1'
       prd: '2' 
     minimumHealthyPercent:
+      dev: 100
       intgr: 100
       stg: 100
       prd: 100
@@ -61,16 +65,15 @@ custom:
     intgr: 216656347858
     prd: 216656347858
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
-  dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
-  xLarge: ${ssm:/env/${self:provider.stage}/docs/worker_pool/xlarge}
+  dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password~true}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collection}
   awsKey: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/key}
-  awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret}
+  awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret~true}
   githubBotUserName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/username}
-  githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
-  fastlyToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/token}
-  fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
-  fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
+  githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password~true}
+  fastlyToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/token~true}
+  fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map~true}
+  fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id~true}
   bucketName: docs-mongodb-org-${self:provider.stage}
 
 

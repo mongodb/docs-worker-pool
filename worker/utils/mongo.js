@@ -4,7 +4,6 @@ const EnvironmentClass = require('../utils/environment').EnvironmentClass;
 // Get username password credentials
 const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
 const password = encodeURIComponent(EnvironmentClass.getAtlasPassword());
-const runXlarge = EnvironmentClass.getXlarge();
 
 const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
 
@@ -55,7 +54,6 @@ module.exports = {
   },
 
   async reportStatus(monitor) {
-    monitor.setXlarge(runXlarge);
     monitor.setEnvType(DB_NAME);
     const monitorCollection = module.exports.getMonitorCollection();
     if (monitorCollection) {

@@ -36,27 +36,25 @@ Resources:
             - Name: SNOOTY_ENV
               Value: ${self:provider.stage}
             - Name: MONGO_ATLAS_USERNAME
-              value: ${self:custom.dbUsername.${self:provider.stage}}
+              value: ${self:custom.dbUsername}
             - Name: MONGO_ATLAS_PASSWORD
-              value: ${self:custom.dbPassword.${self:provider.stage}}
-            - Name: XLARGE
-              value: ${self:custom.xLarge.${self:provider.stage}}
+              value: ${self:custom.dbPassword}
             - Name: DB_NAME
-              value: ${self:custom.dbName.${self:provider.stage}}
+              value: ${self:custom.dbName}
             - Name: AWS_ACCESS_KEY_ID
-              value: ${self:custom.awsKey.${self:provider.stage}}
+              value: ${self:custom.awsKey}
             - Name: AWS_SECRET_ACCESS_KEY
-              value: ${self:custom.awsSecret.${self:provider.stage}}
+              value: ${self:custom.awsSecret}
             - Name: GITHUB_BOT_USERNAME
-              value: ${self:custom.githubBotUserName.${self:provider.stage}}
+              value: ${self:custom.githubBotUserName}
             - Name: GITHUB_BOT_PASSWORD
-              value: ${self:custom.githubBotPW.${self:provider.stage}}
+              value: ${self:custom.githubBotPW}
             - Name: FASTLY_TOKEN
-              value: ${self:custom.fastlyToken.${self:provider.stage}}
+              value: ${self:custom.fastlyToken}
             - Name: FASTLY_DOCHUB_MAP
-              value: ${self:custom.fastlyDochubMap.${self:provider.stage}}
+              value: ${self:custom.fastlyDochubMap}
             - Name: FASTLY_SERVICE_ID
-              value: ${self:custom.fastlyServiceId.${self:provider.stage}}
+              value: ${self:custom.fastlyServiceId}
           LogConfiguration:
             LogDriver: awslogs
             Options:
