@@ -46,6 +46,7 @@ custom:
       stg: 100
       prd: 100
     maximumPercent:
+      dev: 200
       intgr: 200
       stg: 200
       prd: 200
@@ -61,6 +62,7 @@ custom:
       prd: '3'
   targetGroupName: docs-worker-pool
   accountId:
+    dev: 216656347858
     stg: 216656347858
     intgr: 216656347858
     prd: 216656347858
