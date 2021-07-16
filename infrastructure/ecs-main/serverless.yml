@@ -1,5 +1,6 @@
 service: docs-worker-pool
 variablesResolutionMode: 20210326
+
 plugins:
   - serverless-pseudo-parameters
 provider:
@@ -41,15 +42,15 @@ custom:
       stg: '1'
       prd: '2' 
     minimumHealthyPercent:
-      dev: 0
-      intgr: 0
-      stg: 0
-      prd: 0
-    maximumPercent:
       dev: 100
       intgr: 100
       stg: 100
       prd: 100
+    maximumPercent:
+      dev:  200
+      intgr: 200
+      stg: 200
+      prd: 200
     deregistrationDelaySecs: '10'
   targetGroupName: docs-worker-pool
   accountId:
