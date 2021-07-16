@@ -18,9 +18,10 @@ const ENTITLEMENTS_NAME = 'entitlements';
 let client;
 
 module.exports = {
-  url,
   // Initializes the Mongo Client
   async initMongoClient() {
+    console.log(url);
+    console.log(DB_NAME);
     client = new MongoClient(url, { useNewUrlParser: true });
     return client.connect();
   },

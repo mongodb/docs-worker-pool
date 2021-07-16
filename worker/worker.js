@@ -148,6 +148,7 @@ module.exports = {
         )
         .catch(error => {
           console.log('connection timeout');
+          console.log(`error getting job ${error}`);
           monitorInstance.reportStatus(`error getting job ${error}`);
         });
 
