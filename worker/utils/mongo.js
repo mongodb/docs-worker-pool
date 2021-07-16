@@ -38,6 +38,7 @@ module.exports = {
       console.log(`DB_NAME: ${DB_NAME} COLL_NAME: ${COLL_NAME}`)
       return client.db(DB_NAME).collection(COLL_NAME);
     }
+    console.log('client null')
     return null;
   },
 
