@@ -118,6 +118,7 @@ module.exports = {
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
       queueCollection = mongo.getCollection();
+      console.log(queueCollection)
     }
     monitorInstance.reportStatus('start server');
 

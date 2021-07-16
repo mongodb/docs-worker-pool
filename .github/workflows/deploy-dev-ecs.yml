@@ -41,11 +41,4 @@ jobs:
           npm install
           sls deploy --stage dev
           aws ecs update-service --force-new-deployment --service docs-worker-pool-dev --cluster docs-worker-pool-dev
-      - name: Wait for ECS task to stabilize
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          service: docs-worker-pool-dev
-          cluster: docs-worker-pool-dev
-          wait-for-service-stability: true
-
 
