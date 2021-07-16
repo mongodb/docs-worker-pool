@@ -85,7 +85,6 @@ module.exports = {
   async getNextJob(queueCollection) {
     const query = {
       status: 'inQueue',
-      'payload.isXlarge': runXlarge,
       createdTime: { $lte: new Date() },
       // We may eventually want to add in the following logic
       // payLoad.jobName: {$in: [jobs]}
