@@ -100,10 +100,9 @@ Resources:
         MinimumHealthyPercent: ${self:custom.ecs.minimumHealthyPercent.${self:provider.stage}}
         MaximumPercent: ${self:custom.ecs.maximumPercent.${self:provider.stage}}
       DesiredCount: ${self:custom.ecs.desiredCount.${self:provider.stage}}
-      HealthCheckGracePeriodSeconds: ${self:custom.ecs.healthCheckIntervalSecs}
       NetworkConfiguration:
         AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
+          AssignPublicIp: ENABLED
           Subnets:
             - subnet-8c3623f6
             - subnet-a4ac73cf

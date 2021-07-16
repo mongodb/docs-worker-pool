@@ -24,7 +24,7 @@ custom:
     dev: worker-pool-deployment
   ecs:
     port: '80'
-    imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-1.amazonaws.com/${self:service}-${self:provider.stage}:latest
+    imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
       dev: '512'
       intgr: '512'
@@ -51,15 +51,6 @@ custom:
       stg: 200
       prd: 200
     deregistrationDelaySecs: '10'
-    healthCheckIntervalSecs: '10'
-    healthyThreshold:
-      intgr: '3'
-      stg: '3'
-      prd: '3'
-    unhealthyThreshold:
-      stg: '3'
-      intgr: '3'
-      prd: '3'
   targetGroupName: docs-worker-pool
   accountId:
     dev: 216656347858
