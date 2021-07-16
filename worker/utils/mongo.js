@@ -35,6 +35,7 @@ module.exports = {
   // Gets the Queue Collection
   getCollection() {
     if (client) {
+      console.log(`DB_NAME: ${DB_NAME} COLL_NAME: ${COLL_NAME}`)
       return client.db(DB_NAME).collection(COLL_NAME);
     }
     return null;

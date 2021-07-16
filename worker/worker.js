@@ -135,6 +135,7 @@ module.exports = {
       let logMsg;
 
       if (shouldStop) {
+        console.log('Shutting Down --> Should not get new jobs')
         monitorInstance.reportStatus('shutting down');
         throw new Error('Shutting Down --> Should not get new jobs');
       }
