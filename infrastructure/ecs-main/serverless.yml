@@ -69,6 +69,10 @@ custom:
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
   bucketName: docs-mongodb-org-${self:provider.stage}
+  env:
+    dev: "dev"
+    stg: "staging"
+    prd: "production"
 
 
 resources:
