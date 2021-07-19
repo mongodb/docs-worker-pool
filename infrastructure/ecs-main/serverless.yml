@@ -19,9 +19,9 @@ provider:
       - subnet-9e83fed2
 custom:
   deploymentBucket:
-    intgr: workerpool-deployment
-    stg: workerpool-deployment
-    prd: workerpool-deployment
+    intgr: worker-pool-deployment
+    stg: worker-pool-deployment
+    prd: worker-pool-deployment
     dev: worker-pool-deployment
   ecs:
     port: '80'
