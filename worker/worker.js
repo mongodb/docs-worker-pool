@@ -162,7 +162,7 @@ module.exports = {
 
         monitorInstance.reportStatus('running job');
 
-        logMsg = `* Starting Job with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
+        logMsg = `* Starting Job in ECS with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
         workerUtils.logInMongo(currentJob, logMsg);
 
         // Throw error if we cannot perform this job / it is not a valid job

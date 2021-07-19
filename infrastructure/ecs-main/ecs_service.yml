@@ -34,7 +34,7 @@ Resources:
               Protocol: tcp
           Environment:
             - Name: SNOOTY_ENV
-              Value: ${self:provider.stage}
+              Value: ${self:custom.${self:provider.stage}.env}
             - Name: MONGO_ATLAS_USERNAME
               value: ${self:custom.dbUsername}
             - Name: MONGO_ATLAS_PASSWORD
