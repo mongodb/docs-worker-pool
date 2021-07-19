@@ -55,6 +55,8 @@ Resources:
               value: ${self:custom.fastlyDochubMap}
             - Name: FASTLY_SERVICE_ID
               value: ${self:custom.fastlyServiceId}
+            - Name: COL_NAME
+              value: ${self:custom.collection}
           LogConfiguration:
             LogDriver: awslogs
             Options:

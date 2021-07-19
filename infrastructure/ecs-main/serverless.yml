@@ -60,7 +60,8 @@ custom:
     prd: 216656347858
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
-  dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collection}
+  dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
+  collection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collection}
   awsKey: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/key}
   awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret}
   githubBotUserName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/username}
