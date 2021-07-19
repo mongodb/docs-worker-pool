@@ -1,7 +1,7 @@
 on:
   push:
-    tags:
-      - 'v*'
+    branches-ignore:
+      - "master"
 name: Deploy prd branch
 jobs:
   deploy-prd:
