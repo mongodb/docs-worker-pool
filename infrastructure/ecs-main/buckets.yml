@@ -38,7 +38,7 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: PublicRead
-      BucketName: developer-hub-prod
+      BucketName: developer-hub-prd
       WebsiteConfiguration:
           IndexDocument: index.html
 
