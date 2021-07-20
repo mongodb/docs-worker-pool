@@ -30,7 +30,7 @@ jobs:
         name: build and push to ECR
         with:
           image: docs-worker-pool-stg
-          tags: latest, ${{ github.sha }}
+          tags: latest
           registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
