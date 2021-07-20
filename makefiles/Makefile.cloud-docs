@@ -1,4 +1,6 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
+
 ifeq ($(STAGING_USERNAME),)
 	USER=$(shell whoami)
 else
@@ -8,8 +10,17 @@ endif
 STAGING_URL="https://docs-atlas-staging.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-stg
 
-PRODUCTION_URL="https://docs.atlas.mongodb.com"
-PRODUCTION_BUCKET=docs-mongodb-org-prd
+ifeq ($(SNOOTY_ENV), production) 
+	PRODUCTION_URL="https://docs.atlas.mongodb.com"
+	PRODUCTION_BUCKET=docs-mongodb-org-prd
+else ifeq ($(SNOOTY_ENV), staging)
+	PRODUCTION_URL="https://docs-atlas-staging.mongodb.com"
+	PRODUCTION_BUCKET=docs-mongodb-org-stg
+else ifeq ($(SNOOTY_ENV), regression)
+	PRODUCTION_URL="https://docs-atlas-integration.mongodb.com"
+	PRODUCTION_BUCKET=docs-mongodb-org-integration
+endif
+
 PREFIX=cloud-docs
 PROJECT=cloud-docs
 MUT_PREFIX ?= $(PROJECT)
