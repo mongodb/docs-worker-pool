@@ -1,4 +1,7 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
+SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
+
 ifeq ($(STAGING_USERNAME),)
 	USER=$(shell whoami)
 else
@@ -13,8 +16,14 @@ PROJECT=docs-404
 MUT_PREFIX=404
 CUSTOM_NEXT_GEN_DEPLOY=true
 
-DEPLOY_JOBS=docs-mongodb-org-prd
 
+ifeq ($(SNOOTY_ENV), production) 
+	DEPLOY_JOBS=docs-mongodb-org-prd
+else ifeq ($(SNOOTY_ENV), staging)
+	DEPLOY_JOBS=docs-mongodb-org-stg
+else ifeq ($(SNOOTY_ENV), regression)
+	DEPLOY_JOBS=docs-mongodb-org-integration
+endif
 
 .PHONY: next-gen-html next-gen-stage next-gen-deploy $(DEPLOY_JOBS)
 

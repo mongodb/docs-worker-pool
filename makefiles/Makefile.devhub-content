@@ -1,16 +1,27 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
-STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
-STAGING_BUCKET=docs-mongodb-org-stg
+STAGING_URL="http://docs-devhub-stg.s3-website-us-east-1.amazonaws.com"
+STAGING_BUCKET=docs-devhub-stg
 
 STRAPI_URL=http://54.219.137.111:1337
 
-PRODUCTION_BUCKET=docs-mongodb-org-prd
-PRODUCTION_URL=https://developer.mongodb.com
-
-NEW_PRODUCTION_BUCKET=developer-hub-prod
-NEW_PRODUCTION_URL=https://mongodb.com/developer
+ifeq ($(SNOOTY_ENV), production) 
+	PRODUCTION_URL="https://developer.mongodb.com"
+	PRODUCTION_BUCKET=docs-devhub-prd
+	NEW_PRODUCTION_BUCKET=developer-hub-prd
+	NEW_PRODUCTION_URL=https://mongodb.com/developer
+else ifeq ($(SNOOTY_ENV), staging)
+	PRODUCTION_URL="http://docs-devhub-stg.s3-website-us-east-1.amazonaws.com"
+	PRODUCTION_BUCKET=docs-devhub-stg
+	NEW_PRODUCTION_BUCKET=developer-hub-stg
+	NEW_PRODUCTION_URL="http://developer-hub-stg.s3-website-us-east-1.amazonaws.com"
+else ifeq ($(SNOOTY_ENV), regression)
+	PRODUCTION_URL="http://docs-devhub-integration.s3-website-us-east-1.amazonaws.com"
+	PRODUCTION_BUCKET=docs-devhub-integration
+	NEW_PRODUCTION_BUCKET=developer-hub-integration
+	NEW_PRODUCTION_URL="http://developer-hub-integration.s3-website-us-east-1.amazonaws.com"
+endif
 
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
