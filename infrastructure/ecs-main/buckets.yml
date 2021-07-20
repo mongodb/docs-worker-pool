@@ -2,42 +2,36 @@ Resources:
   DocsBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: ${self:custom.bucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: ${self:custom.atlastBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
   DocAtlasOsbBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: ${self:custom.atlasOsbBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
   DocAtlasGovBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: ${self:custom.atlasGovBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
   DevhubBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: ${self:custom.devhubBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
   NewDevhubBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: developer-hub-prd
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -45,7 +39,6 @@ Resources:
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: ${self:custom.cloudManagerBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -53,7 +46,6 @@ Resources:
   OpsManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicRead
       BucketName: ${self:custom.opsManagerBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
