@@ -6,6 +6,58 @@ Resources:
       BucketName: ${self:custom.bucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+  DocAtlasBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:custom.atlastBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+  DocAtlasOsbBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:custom.atlasOsbBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+  DocAtlasGovBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:custom.atlasGovBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+  DevhubBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:custom.devhubBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+  NewDevhubBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: developer-hub-prod
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
+  CloudManagerBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:custom.cloudManagerBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
+  opsManagerBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:custom.opsManagerBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
   DocsBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -18,7 +70,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
-            Resource:
+            Resources: [
               Fn::Join: [
                 "", [
                     "arn:aws:s3:::",
@@ -27,4 +79,67 @@ Resources:
                     },
                     "/*"
                   ]
-              ]
+              ],
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DocAtlasBucket"
+                    },
+                    "/*"
+                  ]
+              ], 
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DocAtlasOsbBucket"
+                    },
+                    "/*"
+                  ]
+              ], 
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DocAtlasGovBucket"
+                    },
+                    "/*"
+                  ]
+              ], 
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DevhubBucket"
+                    },
+                    "/*"
+                  ]
+              ], 
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "NewDevhubBucket"
+                    },
+                    "/*"
+                  ]
+              ], 
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "CloudManagerBucket"
+                    },
+                    "/*"
+                  ]
+              ], 
+              Fn::Join: [
+                "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "opsManagerBucket"
+                    },
+                    "/*"
+                  ]
+              ]]

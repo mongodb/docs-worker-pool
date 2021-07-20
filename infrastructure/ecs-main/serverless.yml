@@ -70,6 +70,12 @@ custom:
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
   bucketName: docs-mongodb-org-${self:provider.stage}
+  atlastBucketName: docs-atlas-${self:provider.stage}
+  atlasOsbBucketName: docs-atlas-osb-${self:provider.stage}
+  atlasGovBucketName: docs-govcloud-${self:provider.stage}
+  devhubBucketName: docs-devhub-${self:provider.stage}
+  cloudManagerBucketName: docs-cloudmanager-${self:provider.stage}
+  opsManagerBucketName: docs-opsmanager-${self:provider.stage}
   env:
     dev: "dev"
     stg: "staging"
