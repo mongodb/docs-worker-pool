@@ -5,15 +5,10 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-staging
+STAGING_BUCKET=docs-mongodb-org-stg
 
-ifeq ($(SNOOTY_INTEGRATION),false)
-  PRODUCTION_URL="https://docs.mongodb.com"
-  PRODUCTION_BUCKET=docs-mongodb-org-prod
-else
-  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
-  PRODUCTION_BUCKET=docs-datalake-integration
-endif
+PRODUCTION_URL="https://docs.mongodb.com"
+PRODUCTION_BUCKET=docs-mongodb-org-prd
 
 PROJECT=datalake
 MUT_PREFIX ?= $(PROJECT)
