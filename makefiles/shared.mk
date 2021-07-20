@@ -69,5 +69,5 @@ endif
 ifndef CUSTOM_SEARCH_INDEX
 next-gen-deploy-search-index:
 	@echo "Building search index"
-	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
+	mut-index upload public -b ${PRODUCTION_BUCKET} -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 endif
