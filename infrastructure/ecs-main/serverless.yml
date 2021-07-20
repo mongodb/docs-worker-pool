@@ -6,6 +6,13 @@ plugins:
 provider:
   name: aws
   stage: ${opt:stage, 'stg'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "s3:DeleteObject"
+        - "s3:PutObject"
+      Resource:
+        - "*"
   deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
   deploymentPrefix: serverless
   region: us-east-2
