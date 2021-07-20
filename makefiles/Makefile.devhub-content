@@ -18,8 +18,8 @@ else ifeq ($(SNOOTY_ENV), staging)
 	NEW_PRODUCTION_URL="http://developer-hub-stg.s3-website-us-east-1.amazonaws.com"
 else ifeq ($(SNOOTY_ENV), regression)
 	PRODUCTION_URL="http://docs-devhub-integration.s3-website-us-east-1.amazonaws.com"
-	PRODUCTION_BUCKET=docs-devhub-integration
-	NEW_PRODUCTION_BUCKET=developer-hub-integration
+	PRODUCTION_BUCKET=docs-devhub-intgr
+	NEW_PRODUCTION_BUCKET=developer-hub-intgr
 	NEW_PRODUCTION_URL="http://developer-hub-integration.s3-website-us-east-1.amazonaws.com"
 endif
 

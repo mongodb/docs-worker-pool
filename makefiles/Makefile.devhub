@@ -2,7 +2,7 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
 STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
-STAGING_BUCKET=docs-devhub--stg
+STAGING_BUCKET=docs-devhub-stg
 
 STRAPI_URL=http://54.219.137.111:1337
 
@@ -11,10 +11,10 @@ ifeq ($(SNOOTY_ENV), production)
 	PRODUCTION_BUCKET=docs-devhub-prd
 else ifeq ($(SNOOTY_ENV), staging)
 	PRODUCTION_URL="http://docs-devhub-stg.s3-website-us-east-1.amazonaws.com"
-	PRODUCTION_BUCKET=docs-devhub--stg
+	PRODUCTION_BUCKET=docs-devhub-stg
 else ifeq ($(SNOOTY_ENV), regression)
 	PRODUCTION_URL="http://docs-devhub-integration.s3-website-us-east-1.amazonaws.com"
-	PRODUCTION_BUCKET=docs-devhub-integration
+	PRODUCTION_BUCKET=docs-devhub-intgr
 endif
 
 PROJECT=devhub

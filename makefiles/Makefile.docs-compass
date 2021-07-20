@@ -15,7 +15,7 @@ else ifeq ($(SNOOTY_ENV), staging)
 	PRODUCTION_BUCKET=docs-mongodb-org-stg
 else ifeq ($(SNOOTY_ENV), regression)
 	PRODUCTION_URL="https://docs-mongodborg-integration.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-integration
+	PRODUCTION_BUCKET=docs-mongodb-org-intgr
 endif
 
 PREFIX=compass

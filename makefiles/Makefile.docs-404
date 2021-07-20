@@ -22,7 +22,7 @@ ifeq ($(SNOOTY_ENV), production)
 else ifeq ($(SNOOTY_ENV), staging)
 	DEPLOY_JOBS=docs-mongodb-org-stg
 else ifeq ($(SNOOTY_ENV), regression)
-	DEPLOY_JOBS=docs-mongodb-org-integration
+	DEPLOY_JOBS=docs-mongodb-org-intgr
 endif
 
 .PHONY: next-gen-html next-gen-stage next-gen-deploy $(DEPLOY_JOBS)

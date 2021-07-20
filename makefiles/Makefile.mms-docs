@@ -26,9 +26,9 @@ else ifeq ($(SNOOTY_ENV), staging)
 	PRODUCTION_BUCKET_CLOUDMGR=docs-mongodb-org-stg		
 else ifeq ($(SNOOTY_ENV), regression)
 	PRODUCTION_URL_CLOUDMGR="https://docs-cloudmanager-integration.mongodb.com"
-	PRODUCTION_BUCKET_CLOUDMGR=docs-mongodb-org-integration
+	PRODUCTION_BUCKET_CLOUDMGR=docs-mongodb-org-intgr
 	PRODUCTION_URL_OPSMGR="https://docs-opsmanager-integration.mongodb.com"
-	PRODUCTION_BUCKET_CLOUDMGR=docs-mongodb-org-integration		
+	PRODUCTION_BUCKET_CLOUDMGR=docs-mongodb-org-intgr		
 endif
 
 

@@ -14,7 +14,7 @@ else ifeq ($(SNOOTY_ENV), staging)
 	PRODUCTION_BUCKET=docs-devhub-stg
 else ifeq ($(SNOOTY_ENV), regression)
 	PRODUCTION_URL="http://docs-devhub-integration.s3-website-us-east-1.amazonaws.com"
-	PRODUCTION_BUCKET=docs-devhub-integration
+	PRODUCTION_BUCKET=docs-devhub-intgr
 endif
 
 PROJECT=devhub
