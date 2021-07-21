@@ -17,7 +17,7 @@ Resources:
       BucketName: ${self:custom.atlasOsbBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
-          
+
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -91,36 +91,6 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasGovBucket", "Arn" ] }, '/*']]
-
-  DevhubBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: DevhubBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource: 
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["DevhubBucket", "Arn" ] }, '/*']]
-
-  NewDevhubBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: NewDevhubBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["NewDevhubBucket", "Arn" ] }, '/*']]
 
   CloudManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
