@@ -41,9 +41,9 @@ custom:
       stg: '4096'
       prd: '4096'
     desiredCount:
-      intgr: '1'
-      stg: '1'
-      prd: '2' 
+      intgr: '10'
+      stg: '3'
+      prd: '5' 
     minimumHealthyPercent:
       intgr: 100
       stg: 100
