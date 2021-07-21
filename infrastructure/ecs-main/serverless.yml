@@ -79,7 +79,7 @@ custom:
   env:
     stg: "staging"
     prd: "production"
-    intgr: "integration"
+    intgr: "staging"
 
 
 resources:
