@@ -24,7 +24,7 @@ ifeq ($(SNOOTY_ENV), production)
 else ifeq ($(SNOOTY_ENV), staging)
 	PRODUCTION_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 	PRODUCTION_BUCKET=docs-mongodb-org-stg
-else ifeq ($(SNOOTY_ENV), regression)
+else ifeq ($(SNOOTY_ENV), integration)
 	PRODUCTION_URL="https://docs-mongodborg-integration.corp.mongodb.com"
 	PRODUCTION_BUCKET=docs-mongodb-org-intgr
 endif
