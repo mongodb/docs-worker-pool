@@ -29,6 +29,7 @@ else ifeq ($(SNOOTY_ENV), integration)
 	PRODUCTION_BUCKET=docs-mongodb-org-intgr
 endif
 
+endif
 @echo "Hosted at ${PRODUCTION_URL}";
 
 ifndef CUSTOM_NEXT_GEN_DEPLOY
