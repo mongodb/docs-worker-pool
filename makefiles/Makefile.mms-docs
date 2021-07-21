@@ -1,5 +1,7 @@
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
+DEDICATED_BUCKET=true
+
 SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 
 ifeq ($(STAGING_USERNAME),)

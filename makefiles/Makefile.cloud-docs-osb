@@ -1,5 +1,8 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
+
+DEDICATED_BUCKET=true
+
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 STAGING_BUCKET=docs-atlas-osb-stg
 

@@ -1,21 +1,15 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
+DEDICATED_BUCKET=true
+
 STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
-STAGING_BUCKET=docs-devhub-stg
+STAGING_BUCKET=docs-devhub-staging
 
 STRAPI_URL=http://54.219.137.111:1337
 
-ifeq ($(SNOOTY_ENV), production) 
-	PRODUCTION_URL="https://developer.mongodb.com"
-	PRODUCTION_BUCKET=docs-devhub-prd
-else ifeq ($(SNOOTY_ENV), staging)
-	PRODUCTION_URL="http://docs-devhub-stg.s3-website-us-east-1.amazonaws.com"
-	PRODUCTION_BUCKET=docs-devhub-stg
-else ifeq ($(SNOOTY_ENV), regression)
-	PRODUCTION_URL="http://docs-devhub-integration.s3-website-us-east-1.amazonaws.com"
-	PRODUCTION_BUCKET=docs-devhub-intgr
-endif
+PRODUCTION_BUCKET=docs-devhub-prod
+PRODUCTION_URL=https://developer.mongodb.com
 
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
