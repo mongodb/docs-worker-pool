@@ -1,6 +1,6 @@
 on:
   push:
-    branches:
+    branches-ignore:
       - "master"
 name: Deploy integration branch
 jobs:
