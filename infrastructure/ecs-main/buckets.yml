@@ -17,25 +17,7 @@ Resources:
       BucketName: ${self:custom.atlasOsbBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
-  DocAtlasGovBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: ${self:custom.atlasGovBucketName}
-      WebsiteConfiguration:
-          IndexDocument: index.html
-  DevhubBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: ${self:custom.devhubBucketName}
-      WebsiteConfiguration:
-          IndexDocument: index.html
-  NewDevhubBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: developer-hub-prd
-      WebsiteConfiguration:
-          IndexDocument: index.html
-
+          
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:

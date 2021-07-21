@@ -29,39 +29,32 @@ custom:
     intgr: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
-    dev: worker-pool-deployment
   ecs:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
-      dev: '512'
       intgr: '512'
       stg: '2048'
       prd: '2048'
     containerMemory:
-      dev: '1024'
       intgr: '1024'
       stg: '4096'
       prd: '4096'
     desiredCount:
-      dev: 1
       intgr: '1'
       stg: '1'
       prd: '2' 
     minimumHealthyPercent:
-      dev: 100
       intgr: 100
       stg: 100
       prd: 100
     maximumPercent:
-      dev:  200
       intgr: 200
       stg: 200
       prd: 200
     deregistrationDelaySecs: '10'
   targetGroupName: docs-worker-pool
   accountId:
-    dev: 216656347858
     stg: 216656347858
     intgr: 216656347858
     prd: 216656347858
@@ -84,9 +77,9 @@ custom:
   cloudManagerBucketName: docs-cloudmanager-${self:provider.stage}
   opsManagerBucketName: docs-opsmanager-${self:provider.stage}
   env:
-    dev: "dev"
     stg: "staging"
     prd: "production"
+    intgr: "integration"
 
 
 resources:

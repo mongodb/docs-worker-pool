@@ -2,9 +2,9 @@ on:
   push:
     branches:
       - "master"
-name: Deploy dev branch
+name: Deploy integration branch
 jobs:
-  deploy-dev:
+  deploy-intgr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,11 +25,11 @@ jobs:
         run: |
           cd infrastructure/ecs-repo
           npm install
-          sls deploy --stage dev
+          sls deploy --stage intgr
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR
         with:
-          image: docs-worker-pool-dev
+          image: docs-worker-pool-intgr
           tags: latest
           registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
         env:
@@ -39,6 +39,6 @@ jobs:
         run: |
           cd infrastructure/ecs-main
           npm install
-          sls deploy --stage dev
-          aws ecs update-service --force-new-deployment --service docs-worker-pool-dev --cluster docs-worker-pool-dev
+          sls deploy --stage intgr
+          aws ecs update-service --force-new-deployment --service docs-worker-pool-intgr --cluster docs-worker-pool-intgr
 
