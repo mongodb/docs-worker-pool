@@ -11,13 +11,6 @@ Resources:
       BucketName: ${self:custom.atlastBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
-  DocAtlasOsbBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: ${self:custom.atlasOsbBucketName}
-      WebsiteConfiguration:
-          IndexDocument: index.html
-
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -61,21 +54,6 @@ Resources:
               - s3:GetObject
             Resource: 
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
-
-  DocAtlasOsbBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: DocAtlasOsbBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource: 
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasOsbBucket", "Arn" ] }, '/*']]
 
   CloudManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
