@@ -77,21 +77,6 @@ Resources:
             Resource: 
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasOsbBucket", "Arn" ] }, '/*']]
 
-  DocAtlasGovBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: DocAtlasGovBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasGovBucket", "Arn" ] }, '/*']]
-
   CloudManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
