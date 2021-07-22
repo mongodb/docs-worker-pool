@@ -179,6 +179,10 @@ module.exports = {
         // Sanitize the job (note that jobs that do not implement the sanitize function
         // will not proceed
 
+        if (currentJob.payload.regression) {
+          process.env.REGRESSION = true;
+        }
+
         await workerUtils.promiseTimeoutS(
           JOB_TIMEOUT_S,
           jobTypeToFunc[currentJob.payload.jobType].safe(currentJob),
@@ -204,6 +208,7 @@ module.exports = {
           });
 
         // Log that we are done with this job
+        process.env.REGRESSION = false;
         logMsg = `${'    (DONE)'.padEnd(LOG_PADDING)}Finished Job with ID: ${
           currentJob._id
         }`;
