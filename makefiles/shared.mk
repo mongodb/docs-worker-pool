@@ -21,7 +21,7 @@ STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-stg
 
 ifeq ($(REGRESSION), true)
-	PRODUCTION_URL="https://docs-mongodborg-integration.corp.mongodb.com"
+	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
 	PRODUCTION_BUCKET=docs-mongodb-org-intgr
 else ifeq ($(SNOOTY_ENV), production) 
 	PRODUCTION_URL="https://docs.mongodb.com"
@@ -30,7 +30,7 @@ else ifeq ($(SNOOTY_ENV), staging)
 	PRODUCTION_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 	PRODUCTION_BUCKET=docs-mongodb-org-stg
 else ifeq ($(SNOOTY_ENV), integration)
-	PRODUCTION_URL="https://docs-mongodborg-integration.corp.mongodb.com"
+	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
 	PRODUCTION_BUCKET=docs-mongodb-org-intgr
 endif
 
