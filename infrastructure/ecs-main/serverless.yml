@@ -33,16 +33,16 @@ custom:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
-      intgr: '512'
+      intgr: '4096'
       stg: '2048'
-      prd: '2048'
-    containerMemory:
-      intgr: '1024'
-      stg: '4096'
       prd: '4096'
+    containerMemory:
+      intgr: '8192'
+      stg: '4096'
+      prd: '8192'
     desiredCount:
       intgr: '4'
-      stg: '3'
+      stg: '2'
       prd: '4' 
     minimumHealthyPercent:
       intgr: 100
