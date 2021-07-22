@@ -37,9 +37,9 @@ custom:
       stg: '2048'
       prd: '4096'
     containerMemory:
-      intgr: '8192'
+      intgr: '24576'
       stg: '4096'
-      prd: '8192'
+      prd: '24576'
     desiredCount:
       intgr: '4'
       stg: '2'
