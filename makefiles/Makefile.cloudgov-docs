@@ -36,7 +36,7 @@ INDEX_NAME=$(subst cloudgov,AtlasGov,${MANIFEST_PREFIX})
 
 next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
 	@echo "Building search index"
-	mut-index upload public -o ${INDEX_NAME}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
+	mut-index upload public -b ${PRODUCTION_BUCKET} -o ${INDEX_NAME}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 
 
 .PHONY: help stage fake-deploy deploy deploy-search-index publish remote-includes api-docs

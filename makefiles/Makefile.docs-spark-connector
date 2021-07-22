@@ -17,7 +17,7 @@ get-build-dependencies:
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-spark-connector.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-deploy-search-index: ## Update the search index for this branch
-	mut-index upload public -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+	mut-index upload public -b ${PRODUCTION_BUCKET} -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
 
 #This workaround is because the redirects for symlink version does not prefix with ruby-driver.
 check-redirects:
