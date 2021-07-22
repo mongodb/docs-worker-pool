@@ -1,5 +1,6 @@
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
+REGRESSION = $(shell printenv REGRESSION)
 INTEGRATION_SEARCH_BUCKET=docs-search-indexes-integration
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
@@ -18,7 +19,11 @@ get-project-name:
 ifndef DEDICATED_BUCKET
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
 STAGING_BUCKET=docs-mongodb-org-stg
-ifeq ($(SNOOTY_ENV), production) 
+
+ifeq ($(REGRESSION), true)
+	PRODUCTION_URL="https://docs-mongodborg-integration.corp.mongodb.com"
+	PRODUCTION_BUCKET=docs-mongodb-org-intgr
+else ifeq ($(SNOOTY_ENV), production) 
 	PRODUCTION_URL="https://docs.mongodb.com"
 	PRODUCTION_BUCKET=docs-mongodb-org-prd
 else ifeq ($(SNOOTY_ENV), staging)

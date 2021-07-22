@@ -15,8 +15,12 @@ STAGING_BUCKET_CLOUDMGR=docs-cloudmanager-stg
 STAGING_URL_OPSMGR="https://docs-opsmanager-staging.mongodb.com"
 STAGING_BUCKET_OPSMGR=docs-opsmanager-stg
 
-
-ifeq ($(SNOOTY_ENV), production) 
+ifeq ($(REGRESSION), true)
+	PRODUCTION_URL_CLOUDMGR="https://docs-cloudmanager-integration.mongodb.com"
+	PRODUCTION_BUCKET_CLOUDMGR=docs-cloudmanager-intgr
+	PRODUCTION_URL_OPSMGR="https://docs-opsmanager-integration.mongodb.com"
+	PRODUCTION_BUCKET_OPSMGR=docs-opsmanager-intgr	
+else ifeq ($(SNOOTY_ENV), production) 
 	PRODUCTION_URL_OPSMGR="https://docs.opsmanager.mongodb.com"
 	PRODUCTION_BUCKET_OPSMGR=docs-opsmanager-prd
 	PRODUCTION_URL_CLOUDMGR="https://docs.cloudmanager.mongodb.com"
