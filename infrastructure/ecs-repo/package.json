@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "package.json for the necessary serverless dependencies",
   "dependencies": {
-    "serverless-pseudo-parameters": "1.6.0",
-    "serverless-deployment-bucket": "^1.1.2"
+    "serverless-deployment-bucket": "^1.1.2",
+    "serverless-pseudo-parameters": "1.6.0"
   }
 }

@@ -24,7 +24,7 @@ jobs:
       - name: Create ECS Repo
         run: |
           cd infrastructure/ecs-repo
-          npm install
+          npm ci
           sls deploy --stage prd
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR
@@ -38,7 +38,7 @@ jobs:
       - name: Deploy ECS
         run: |
           cd infrastructure/ecs-main
-          npm install
+          npm ci
           sls deploy --stage prd
           aws ecs update-service --force-new-deployment --service docs-worker-pool-prd --cluster docs-worker-pool-prd
 
