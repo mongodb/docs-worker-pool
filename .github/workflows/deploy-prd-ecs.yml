@@ -1,8 +1,8 @@
 on:
   push:
-    branches-ignore:
-      - "master"
-name: Deploy prd branch
+    tags:
+      - 'v*'
+name: Deploy Production ECS
 jobs:
   deploy-prd:
     runs-on: ubuntu-latest

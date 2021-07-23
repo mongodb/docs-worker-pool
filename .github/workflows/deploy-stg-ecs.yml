@@ -1,8 +1,9 @@
 on:
-  push:
+  pull_request:
     branches:
-      - "master"
-name: Deploy stg branch
+      - master
+      - integration
+name: Deploy Staging(Dev) ECS
 jobs:
   deploy-stg:
     runs-on: ubuntu-latest

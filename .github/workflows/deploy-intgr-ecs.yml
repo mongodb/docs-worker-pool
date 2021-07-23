@@ -1,8 +1,9 @@
 on:
   push:
     branches:
+      - "integration"
       - "master"
-name: Deploy integration branch
+name: Deploy Integration ECS
 jobs:
   deploy-intgr:
     runs-on: ubuntu-latest
