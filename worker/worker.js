@@ -213,6 +213,7 @@ module.exports = {
           currentJob._id
         }`;
         workerUtils.logInMongo(currentJob, logMsg);
+        workerUtils.removeDirectory(`repos/${currentJob.payload.repoName}`);
 
         // Must use timeout for testing purposes (essentially just re-calling work())
         setTimeout(module.exports.work, MIN_TIMEOUT_MS);
