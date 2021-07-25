@@ -114,9 +114,11 @@ module.exports = {
   async startServer() {
     // Initialize MongoDB Collection
     // This is the collection that houses the work tickets
+    console.log("Starting worker pool");
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
       queueCollection = mongo.getCollection();
+      console.log(queueCollection)
     }
     monitorInstance.reportStatus('start server');
 
@@ -135,11 +137,13 @@ module.exports = {
       let logMsg;
 
       if (shouldStop) {
+        console.log('Shutting Down --> Should not get new jobs')
         monitorInstance.reportStatus('shutting down');
         throw new Error('Shutting Down --> Should not get new jobs');
       }
 
       // Get a new job
+      console.log(`retrieving new job from queueCollection`);
       const job = await workerUtils
         .promiseTimeoutS(
           MONGO_TIMEOUT_S,
@@ -148,6 +152,7 @@ module.exports = {
         )
         .catch(error => {
           console.log('connection timeout');
+          console.log(`error getting job ${error}`);
           monitorInstance.reportStatus(`error getting job ${error}`);
         });
 
@@ -157,7 +162,8 @@ module.exports = {
 
         monitorInstance.reportStatus('running job');
 
-        logMsg = `* Starting Job with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
+        logMsg = `* Starting Job in ECS with ID: ${currentJob._id} and type: ${currentJob.payload.jobType}`;
+        console.log(logMsg);
         workerUtils.logInMongo(currentJob, logMsg);
 
         // Throw error if we cannot perform this job / it is not a valid job
@@ -172,6 +178,10 @@ module.exports = {
 
         // Sanitize the job (note that jobs that do not implement the sanitize function
         // will not proceed
+
+        if (currentJob.payload.regression) {
+          process.env.REGRESSION = true;
+        }
 
         await workerUtils.promiseTimeoutS(
           JOB_TIMEOUT_S,
@@ -198,10 +208,12 @@ module.exports = {
           });
 
         // Log that we are done with this job
+        process.env.REGRESSION = false;
         logMsg = `${'    (DONE)'.padEnd(LOG_PADDING)}Finished Job with ID: ${
           currentJob._id
         }`;
         workerUtils.logInMongo(currentJob, logMsg);
+        workerUtils.removeDirectory(`repos/${currentJob.payload.repoName}`);
 
         // Must use timeout for testing purposes (essentially just re-calling work())
         setTimeout(module.exports.work, MIN_TIMEOUT_MS);
