@@ -4,7 +4,6 @@ const EnvironmentClass = require('../utils/environment').EnvironmentClass;
 // Get username password credentials
 const username = encodeURIComponent(EnvironmentClass.getAtlasUsername());
 const password = encodeURIComponent(EnvironmentClass.getAtlasPassword());
-const runXlarge = EnvironmentClass.getXlarge();
 
 const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
 
@@ -19,9 +18,10 @@ const ENTITLEMENTS_NAME = 'entitlements';
 let client;
 
 module.exports = {
-  url,
   // Initializes the Mongo Client
   async initMongoClient() {
+    console.log(url);
+    console.log(DB_NAME);
     client = new MongoClient(url, { useNewUrlParser: true });
     return client.connect();
   },
@@ -35,8 +35,10 @@ module.exports = {
   // Gets the Queue Collection
   getCollection() {
     if (client) {
+      console.log(`DB_NAME: ${DB_NAME} COLL_NAME: ${COLL_NAME}`)
       return client.db(DB_NAME).collection(COLL_NAME);
     }
+    console.log('client null')
     return null;
   },
 
@@ -55,7 +57,6 @@ module.exports = {
   },
 
   async reportStatus(monitor) {
-    monitor.setXlarge(runXlarge);
     monitor.setEnvType(DB_NAME);
     const monitorCollection = module.exports.getMonitorCollection();
     if (monitorCollection) {
@@ -84,7 +85,6 @@ module.exports = {
   async getNextJob(queueCollection) {
     const query = {
       status: 'inQueue',
-      'payload.isXlarge': runXlarge,
       createdTime: { $lte: new Date() },
       // We may eventually want to add in the following logic
       // payLoad.jobName: {$in: [jobs]}

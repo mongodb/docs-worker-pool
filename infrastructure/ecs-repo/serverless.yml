@@ -15,6 +15,7 @@ custom:
     intgr: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
+    dev: worker-pool-deployment
 
 resources:
   Resources:
@@ -22,4 +23,4 @@ resources:
     ECRRepository:
       Type: 'AWS::ECR::Repository'
       Properties:
-        RepositoryName: docs-worker-pool-service-${self:provider.stage}
+        RepositoryName: docs-worker-pool-${self:provider.stage}
