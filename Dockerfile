@@ -43,14 +43,14 @@ RUN python3 -m pip install pip==20.2 flit==3.0.0
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	git checkout v0.9.9 && \
+	git checkout v0.11.0 && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	git checkout v0.9.13 && \	
+	git checkout v0.11.4 && \	
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
@@ -72,4 +72,4 @@ RUN mkdir repos && chmod 755 repos
 
 # entry to kick-off the worker
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "index.js"]

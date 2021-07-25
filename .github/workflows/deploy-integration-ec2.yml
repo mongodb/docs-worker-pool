@@ -27,5 +27,6 @@ jobs:
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           sudo sh rundocker.sh
+          sudo docker container prune -f
           '
           

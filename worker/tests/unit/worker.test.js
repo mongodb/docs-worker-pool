@@ -36,10 +36,10 @@ describe('Test Class', () => {
   it('onSignal()', async () => {
     worker.setCurrentJob({ job: 'doesnt matter' });
     workerUtils.promiseTimeoutS = jest.fn().mockResolvedValue();
-    mongo.finishJobWithFailure = jest.fn().mockResolvedValue();
+    mongo.resetJobForReenqueue = jest.fn().mockResolvedValue();
 
     await expect(worker.gracefulShutdown()).resolves.toBeUndefined();
-    expect(mongo.finishJobWithFailure).toHaveBeenCalledTimes(1);
+    expect(mongo.resetJobForReenqueue).toHaveBeenCalledTimes(1);
 
     worker.setCurrentJob(null);
   });

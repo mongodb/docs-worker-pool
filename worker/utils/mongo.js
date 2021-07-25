@@ -130,6 +130,26 @@ module.exports = {
     }
   },
 
+  // Updates the status to be inQueue
+  async resetJobForReenqueue(queueCollection, job) {
+    const query = { _id: job._id };
+    const reenqueueMessage = 'Job restarted due to server shutdown.';
+
+    const update = {
+      $set: {
+        startTime: null,
+        status: 'inQueue',
+        error: {},
+        logs: [reenqueueMessage],
+      }
+    };
+
+    const updateResult = await queueCollection.updateOne(query, update);
+    if (updateResult.result.n < 1) {
+      throw new Error(`Failed to update job (${job._id}) in queue during re-enqueue operation`);
+    }
+  },
+
   async updateJobWithPurgedURLs(currentJob, urlArray) {
     const queueCollection = module.exports.getCollection();
     if (queueCollection) {

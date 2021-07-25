@@ -263,6 +263,32 @@ describe('Mongo Tests', () => {
     await mongo.logMessageInMongo(job2, 'message 1');
   }, 5000);
 
+    /** ******************************************************************
+   *                       resetJobForReenqueue()                     *
+   ******************************************************************* */
+     it('resetJobForReenqueue(queueCollection, job) works properly', async () => {
+      const jobsColl = db.collection('jobs');
+  
+      await mongo.resetJobForReenqueue(jobsColl, job2);
+      const currJob = await jobsColl.findOne({ _id: job2._id });
+      expect(currJob).toBeTruthy();
+      expect(currJob.status).toEqual('inQueue');
+      expect(currJob.startTime).toBeNull();
+      expect(currJob.logs[0]).toEqual('Job restarted due to server shutdown.');
+    }, 5000);
+  
+    it('resetJobForReenqueue() fails on incorrect jobId', async () => {
+      const jobsColl = db.collection('jobs');
+      expect.assertions(1);
+      await expect(
+        mongo.resetJobForReenqueue(
+          jobsColl,
+          { _id: 'notRealId', numFailures: 0 },
+          'a'
+        )
+      ).rejects.toBeTruthy();
+    }, 5000);
+
   /** ******************************************************************
    *                       reportStatus()                               *
    ******************************************************************* */

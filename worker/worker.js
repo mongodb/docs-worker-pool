@@ -96,17 +96,17 @@ module.exports = {
       workerUtils.resetDirectory('work/');
       await workerUtils.promiseTimeoutS(
         MONGO_TIMEOUT_S,
-        await mongo.finishJobWithFailure(
+        await mongo.resetJobForReenqueue(
           queueCollection,
           currentJob,
-          'Server is being shutdown'
         ),
-        `Mongo Timeout Error: Timed out finishing failed job with jobId: ${currentJob._id}`
+        `Mongo Timeout Error: Timed out finishing re-enqueueing job with jobId: ${currentJob._id}`
       );
     }
     if (mongoClient) {
       monitorInstance.reportStatus('closed connection');
       mongoClient.close();
+      console.log('\nServer has closed mongo client connection');
     }
   },
 
