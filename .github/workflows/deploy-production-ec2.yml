@@ -17,7 +17,7 @@ jobs:
           known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
           name: id_rsa
       - name: SSH to Production 1
-        with:
+        env:
           NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
         run: |
@@ -47,7 +47,7 @@ jobs:
           known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
           name: id_rsa
       - name: SSH to Production 2
-        with:
+        env:
           NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
         run: |
