@@ -28,7 +28,7 @@ jobs:
           git pull
           git checkout $(git describe --tags)
           sudo docker system prune -af
-          sudo docker build --build-arg NPM_EMAIL=$NPM_EMAIL --build-arg NPM_BASE_64_AUTH=$NPM_BASE_64_AUTH --no-cache --tag production . 
+          sudo docker build --build-arg NPM_EMAIL=${{ secrets.NPM_EMAIL }} --build-arg NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }} --no-cache --tag production . 
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           sudo sh rundocker.sh
@@ -58,7 +58,7 @@ jobs:
           git pull
           git checkout $(git describe --tags)
           sudo docker system prune -af
-          sudo docker build --build-arg NPM_EMAIL=$NPM_EMAIL --build-arg NPM_BASE_64_AUTH=$NPM_BASE_64_AUTH --no-cache --tag production . 
+          sudo docker build --build-arg NPM_EMAIL=${{ secrets.NPM_EMAIL }} --build-arg NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }} --no-cache --tag production . 
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           sudo sh rundocker.sh
