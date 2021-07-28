@@ -17,13 +17,16 @@ jobs:
           known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
           name: id_rsa
       - name: Deploy Master to Integration
+        with:
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
         run: |
           ssh -l ubuntu ${{ secrets.INTEGRATION_HOST}} -T '
           cd docs-worker-pool
           git fetch origin
           git checkout origin/master
           sudo docker system prune -af
-          sudo docker build --no-cache --tag integration .
+          sudo docker build --build-arg NPM_EMAIL=$NPM_EMAIL --build-arg NPM_BASE_64_AUTH=$NPM_BASE_64_AUTH --no-cache --tag integration .
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           sudo sh rundocker.sh

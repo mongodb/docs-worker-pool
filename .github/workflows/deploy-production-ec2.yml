@@ -17,6 +17,9 @@ jobs:
           known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
           name: id_rsa
       - name: SSH to Production 1
+        with:
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
         run: |
           ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_1}} -T '
           cd docker/docs-worker-pool
@@ -25,7 +28,7 @@ jobs:
           git pull
           git checkout $(git describe --tags)
           sudo docker system prune -af
-          sudo docker build --no-cache --tag production .
+          sudo docker build --build-arg NPM_EMAIL=$NPM_EMAIL --build-arg NPM_BASE_64_AUTH=$NPM_BASE_64_AUTH --no-cache --tag production . 
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           sudo sh rundocker.sh
@@ -44,6 +47,9 @@ jobs:
           known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
           name: id_rsa
       - name: SSH to Production 2
+        with:
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
         run: |
           ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_2}} -T '
           cd docker/docs-worker-pool
@@ -52,7 +58,7 @@ jobs:
           git pull
           git checkout $(git describe --tags)
           sudo docker system prune -af
-          sudo docker build --no-cache --tag production .
+          sudo docker build --build-arg NPM_EMAIL=$NPM_EMAIL --build-arg NPM_BASE_64_AUTH=$NPM_BASE_64_AUTH --no-cache --tag production . 
           sudo docker stop $(sudo docker ps -a -q)
           sudo sh rundocker.sh
           sudo sh rundocker.sh
