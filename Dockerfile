@@ -1,5 +1,7 @@
 FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
+ARG NPM_BASE_64_AUTH
+ARG NPM_EMAIL
 
 # install legacy build environment for docs
 RUN apt-get -o Acquire::Check-Valid-Until=false update
