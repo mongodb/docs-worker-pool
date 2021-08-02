@@ -10,8 +10,7 @@ STAGING_BUCKET=docs-mongodb-org-staging
 
 PRODUCTION_URL="https://docs.atlas.mongodb.com"
 PRODUCTION_BUCKET=realm-docs-sdk-java-prod
-PREFIX=realm-docs-sdk-java
-PROJECT=realm-docs-sdk-java
+PROJECT=realm-java-sdk
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
