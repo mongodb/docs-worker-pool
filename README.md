@@ -75,7 +75,6 @@ docs-worker-pool contains various triggers for release to higher environments. C
  - Verify that the deploy-integration-ec2 workflow has executed successfully.
 
 ### Production Environment
- - Rebase `master` with `integration` and push the latest changes, or merge a pull request to `master` if performing a hotfix.
- - If you don't have push access, open an issue or otherwise contact a contributor with administrator priveliges. 
  - Create release tags. We currently follow [semver](https://semver.org/) standards.
+ - If you don't have push access, open an issue or otherwise contact a contributor with administrator privileges. 
  - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
