@@ -15,6 +15,11 @@ class GatsbyAdapterClass {
       envVars += `PATH_PREFIX=${pathPrefix}\n`
 		}
 
+    // PUT ENVIRONMENT VARIABLES FOR SNOOTY FRONTEND HERE
+    // TODO: Make this into an actual abstraction somewhere if we keep this structure for writing env.production
+    // should be its own service, and much more accessible than this
+    envVars += `GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION=${process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION}\n`;
+
     return envVars
   }
 
