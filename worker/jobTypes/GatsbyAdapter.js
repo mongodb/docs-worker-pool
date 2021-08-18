@@ -19,6 +19,7 @@ class GatsbyAdapterClass {
     // TODO: Make this into an actual abstraction somewhere if we keep this structure for writing env.production
     // should be its own service, and much more accessible than this
     envVars += `GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION=${process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION}\n`;
+    envVars += `GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN=${process.env.GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN}\n`;
 
     return envVars
   }
