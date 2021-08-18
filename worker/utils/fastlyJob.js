@@ -40,10 +40,13 @@ class FastlyJobClass {
             const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
             await Promise.all(purgeRequestPromises);
             } else {
+                try {
                 logger.save(`Purging all`);
                 await this.requestPurgeAll()
+                } catch(error) {
+                    logger.save(`${'(prod)'.padEnd(15)}error in purge all: ${error}`);
+                }
             }
-
             // GET request the URLs to warm cache for our users
             const warmCachePromises = urlArray.map(url => this.warmCache(url));
             await Promise.all(warmCachePromises)
