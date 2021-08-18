@@ -28,33 +28,31 @@ class FastlyJobClass {
         if (!Array.isArray(urlArray)) {
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
+        if (!purgeAll) {
+            try {
+                logger.save(`Purging URL's`);
+                //retrieve surrogate key associated with each URL/file updated in push to S3
+                const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url));
+                const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
 
-        try {
-            if (!purgeAll) {
-            logger.save(`Purging URL's`);
-            //retrieve surrogate key associated with each URL/file updated in push to S3
-            const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url));
-            const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
+                //purge each surrogate key
+                const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
+                await Promise.all(purgeRequestPromises);
+                // GET request the URLs to warm cache for our users
+                const warmCachePromises = urlArray.map(url => this.warmCache(url));
+                await Promise.all(warmCachePromises)
+            } catch (error) {
+                logger.save(`${'(prod)'.padEnd(15)}error in purge urls: ${error}`);
+            }
 
-            //purge each surrogate key
-            const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
-            await Promise.all(purgeRequestPromises);
-            } else {
-                try {
+        } else {
+            try {
                 logger.save(`Purging all`);
                 await this.requestPurgeAll()
-                } catch(error) {
-                    logger.save(`${'(prod)'.padEnd(15)}error in purge all: ${error}`);
-                }
+            } catch (error) {
+                logger.save(`${'(prod)'.padEnd(15)}error in purge all: ${error}`);
             }
-            // GET request the URLs to warm cache for our users
-            const warmCachePromises = urlArray.map(url => this.warmCache(url));
-            await Promise.all(warmCachePromises)
-        } catch (error) {
-            logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
-            // throw error
         }
-
     }
 
 
@@ -82,11 +80,11 @@ class FastlyJobClass {
 
         try {
             return axios({
-                    method: `POST`,
-                    url: `https://api.fastly.com/service/${fastlyServiceId}/purge/${surrogateKey}`,
-                    path: `/service/${fastlyServiceId}/purge${surrogateKey}`,
-                    headers: headers,
-                })
+                method: `POST`,
+                url: `https://api.fastly.com/service/${fastlyServiceId}/purge/${surrogateKey}`,
+                path: `/service/${fastlyServiceId}/purge${surrogateKey}`,
+                headers: headers,
+            })
                 .then(response => {
                     if (response.status === 200) {
                         return true
@@ -99,7 +97,22 @@ class FastlyJobClass {
     }
 
     async requestPurgeAll() {
-        await axios.post(`https://api.fastly.com/service/${fastlyServiceId}/purge_all`, {},{ headers });
+        try {
+            return axios({
+                method: `POST`,
+                url: `https://api.fastly.com/service/${fastlyServiceId}/purge_all`,
+                path: `/service/${fastlyServiceId}/purge_all`,
+                headers: headers,
+            })
+                .then(response => {
+                    if (response.status === 200) {
+                        return true
+                    }
+                });
+        } catch (error) {
+            this.logger.save(`${'(prod)'.padEnd(15)}error in requestPurgeAll: ${error}`);
+            throw error;
+        }
     }
 
     // request urls of updated content to "warm" the cache for our customers
@@ -124,9 +137,8 @@ class FastlyJobClass {
         const options = {
             item_value: map.target,
         };
-        const connectString = `/service/${fastlyServiceId}/dictionary/${environment.getDochubMap()}/item/${
-          map.source
-          }`;
+        const connectString = `/service/${fastlyServiceId}/dictionary/${environment.getDochubMap()}/item/${map.source
+            }`;
 
         return new Promise((resolve, reject) => {
             fastly.request('PUT', connectString, options, (err, obj) => {
