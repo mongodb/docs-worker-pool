@@ -24,14 +24,14 @@ class FastlyJobClass {
     }
 
     // takes in an array of surrogate keys and purges cache for each
-    async purgeCache(urlArray, purgeAll = false) {
+    async purgeCache(urlArray, logger, purgeAll = false) {
         if (!Array.isArray(urlArray)) {
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
 
         try {
             if (!purgeAll) {
-            this.logger.save(`Purging URL's`);
+            logger.save(`Purging URL's`);
             //retrieve surrogate key associated with each URL/file updated in push to S3
             const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url));
             const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
@@ -40,7 +40,7 @@ class FastlyJobClass {
             const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
             await Promise.all(purgeRequestPromises);
             } else {
-                this.logger.save(`Purging all`);
+                logger.save(`Purging all`);
                 await this.requestPurgeAll()
             }
 
@@ -48,7 +48,7 @@ class FastlyJobClass {
             const warmCachePromises = urlArray.map(url => this.warmCache(url));
             await Promise.all(warmCachePromises)
         } catch (error) {
-            this.logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
+            logger.save(`${'(prod)'.padEnd(15)}error in purge cache: ${error}`);
             // throw error
         }
 

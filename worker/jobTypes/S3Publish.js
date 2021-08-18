@@ -105,7 +105,8 @@ class S3PublishClass {
           const updatedURLsArray = stdoutJSON.urls;
           // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
           logger.save(`${JSON.stringify(updatedURLsArray)}`);
-          await this.fastly.purgeCache(updatedURLsArray, environment.shouldPurgeAll());
+          logger.save(`Purge All ${environment.shouldPurgeAll()}`);
+          await this.fastly.purgeCache(updatedURLsArray, logger, environment.shouldPurgeAll());
           //save purged URLs to job object
           await workerUtils.updateJobWithPurgedURLs(this.GitHubJob.currentJob, updatedURLsArray);
         } catch (error) {
