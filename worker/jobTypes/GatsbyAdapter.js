@@ -33,14 +33,14 @@ class GatsbyAdapterClass {
               console.log(`error writing .env.production file: ${err.stderr}`);
               throw err;
             }
-        }); 
+        });
       } catch (error) {
-       console.log(error)
-       throw error 
+       console.log(error);
+       throw error;
       }
   }
 }
-  module.exports = {
-    GatsbyAdapterClass,
-  };
-  
+
+module.exports = {
+  GatsbyAdapterClass,
+};
