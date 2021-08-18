@@ -27,9 +27,12 @@ class EnvironmentClass {
 
   static shouldPurgeAll() {
     if (purgeAll === undefined) {
-      purgeAll = true;
+      return true
     }
-    return purgeAll;
+    if (purgeAll === 'true') {
+      return true;
+    }
+    return false;
   }
 
   static getXlarge() {
