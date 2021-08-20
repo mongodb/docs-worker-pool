@@ -15,6 +15,8 @@ REPO_DIR=$(shell pwd)
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
+AWS_ACCESS_KEY_ID=$(shell printenv AWS_ACCESS_KEY_ID_DEVHUB)
+AWS_SECRET_ACCESS_KEY=$(shell printenv AWS_SECRET_ACCESS_KEY_DEVHUB)
 GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
 GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
@@ -57,5 +59,5 @@ next-gen-stage: ## Host online for review
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 next-gen-deploy:
-	yes | AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEVHUB} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEVHUB} mut-publish ./public ${PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
+	yes | mut-publish ./public ${PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
