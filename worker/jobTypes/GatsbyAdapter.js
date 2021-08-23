@@ -25,7 +25,7 @@ class GatsbyAdapterClass {
     };
 
     for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
-      const isTruthyEnv = (envValue && String(envValue).toUpper() !== 'FALSE')
+      const isTruthyEnv = (envValue && String(envValue).toUpperCase() !== 'FALSE');
       if (isTruthyEnv) envVars += `${envName}=${envValue}\n`;
     }
 
