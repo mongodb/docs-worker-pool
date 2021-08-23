@@ -16,15 +16,19 @@ class GatsbyAdapterClass {
 		}
 
     // PUT ENVIRONMENT VARIABLES FOR SNOOTY FRONTEND HERE
-    // TODO: Make this into an actual abstraction somewhere if we keep this structure for writing env.production
-    // should be its own service, and much more accessible than this
-    if (process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION) {
-      envVars += `GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION=${process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION}\n`;
+    // in a key value format e.g.
+    // 'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
+    // If no environment variables are needed, please leave this as an empty object
+    const snootyFrontEndVars = {
+      'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION,
+      'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': process.env.GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN,
+    };
+
+    for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
+      const isTruthyEnv = (envValue && String(envValue).toUpper() !== 'FALSE')
+      if (isTruthyEnv) envVars += `${envName}=${envValue}\n`;
     }
 
-    if (process.env.GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN) {
-      envVars += `GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN=${process.env.GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN}\n`;
-    }
     return envVars
   }
 
