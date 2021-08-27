@@ -1,0 +1,14 @@
+{
+    "stage": "dev",
+    "dbUsername":"devuser",
+    "dbPassword": "devpw",
+    "dbName" : "devdb",
+    "collection":"devcoll",
+    "awsKey": "devkey", 
+    "awsSecret": "devsecret",
+    "githubBotUserName": "devghun",
+    "githubBotPW": "devghpw",
+    "fastlyToken" : "devfslytoken",
+    "fastlyDochubMap":"devfslydochubmap",
+    "fastlyServiceId": "devfslysid"
+}
