@@ -1,4 +1,4 @@
-import { JobHandler } from "./job";
+import { JobHandler } from "./jobHandler";
 
 export class ProductionJobHandler extends JobHandler {
     throwIfJobInvalid(): void {

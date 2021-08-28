@@ -1,5 +1,5 @@
-import { IJob } from "../job/job";
 import {config} from "config";
+import { IJob } from "../entities/job";
 
 export interface ICDNConnector {
     purge(job:IJob): Promise<any>

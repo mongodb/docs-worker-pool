@@ -30,6 +30,7 @@
     "mongodb": "^3.3.4",
     "mongodb-stitch-browser-sdk": "^4.2.0",
     "mongodb-stitch-server-sdk": "^4.2.0",
+    "mongoose": "^6.0.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "remote-file-size": "^3.0.5",

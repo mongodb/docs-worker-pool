@@ -1,12 +1,12 @@
 import { InvalidJobError } from "../errors/errors";
-import { IJob } from "./job";
 import {validator} from "validator";
 import { IDBConnector } from "../services/db";
+import { IJob } from "../entities/job";
 
 export interface IJobValidator {
-    throwIfJobInvalid(job: IJob, user: string): void;
+    throwIfJobInvalid(job: IJob): void;
     verifyBranchConfiguredForPublish(job: IJob): Promise<void>;
-    verifyUserIsEntitled(user: string): Promise<void>;
+    verifyUserIsEntitled(job: IJob): Promise<void>;
 }
 
 export class JobValidator implements IJobValidator{
@@ -15,8 +15,8 @@ export class JobValidator implements IJobValidator{
         this._dbConnector = dbConnector;
     }
 
-    verifyUserIsEntitled(user: string): Promise<void> {
-        throw new InvalidJobError(`${user} is not authorized.`);
+    verifyUserIsEntitled(job: IJob): Promise<void> {
+        throw new InvalidJobError(`${job.user} is not authorized.`);
     }
 
 
@@ -24,20 +24,20 @@ export class JobValidator implements IJobValidator{
         throw new Error("Method not implemented.");
     }
 
-    public throwIfJobInvalid(job: IJob, user: string): void {
+    public throwIfJobInvalid(job: IJob): void {
         this._validateInput(job);
-        this.verifyUserIsEntitled(user);
+        this.verifyUserIsEntitled(job);
         this.verifyBranchConfiguredForPublish(job);
     }
 
     private _validateInput(job: IJob): void {
-        if ( !job.repoName || !this.safeString(job.repoName)) {
+        if ( !job.payload.repoName || !this.safeString(job.payload.repoName)) {
             throw new InvalidJobError("Invalid Reponame");
         }
-        if ( !job.branchName || !this.safeString(job.branchName)) {
+        if ( !job.payload.branchName || !this.safeString(job.payload.branchName)) {
             throw new InvalidJobError("Invalid Branchname");
         }
-        if ( !job.repoOwner || !this.safeString(job.repoOwner)) {
+        if ( !job.payload.repoOwner || !this.safeString(job.payload.repoOwner)) {
             throw new InvalidJobError("Invalid RepoOwner");
         }
     }

@@ -1,4 +1,4 @@
-import {IJob} from '../job/job'
+import { IJob } from '../entities/job';
 import { ICommandExecutor } from './commandExecutor';
 export interface IRepoConnector {
     applyPatch(job: IJob): Promise<any>

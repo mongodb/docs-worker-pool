@@ -41,3 +41,9 @@ export class NetworkError extends  AutoBuilderError{
         super(message, "CDNError", errorCode, stack);
       }
   }
+
+  export class DBError extends AutoBuilderError {
+    constructor(message:string, errorCode?:Number, stack?: string) {
+        super(message, "DBError", errorCode, stack);
+      }
+  }

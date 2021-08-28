@@ -5,18 +5,19 @@ import { RegressionJobHandler } from "./regressionJobHandler";
 import { StagingJobHandler } from "./stagingJobHandler";
 import { IRepoConnector } from "../services/repo";
 import { ILogger } from "../services/logger";
-import { IJob, JobHandler } from "./job";
+import { JobHandler } from "./jobHandler";
 import { ICommandExecutor } from "../services/commandExecutor";
 import { InvalidJobError } from "../errors/errors";
+import { IJob } from "../entities/job";
 
 export class JobFactory {
     public createJobHandler(job: IJob, commandExecutor: ICommandExecutor, dbConnector: IDBConnector, 
         cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: ILogger) : JobHandler {
-        if (job.jobType === "regression") {
+        if (job.payload.jobType === "regression") {
             return new RegressionJobHandler(job, commandExecutor, dbConnector, cdnConnector, repoConnector, logger);
-        } else if (job.jobType === "githubPush") {
+        } else if (job.payload.jobType === "githubPush") {
             return new StagingJobHandler(job, commandExecutor, dbConnector, cdnConnector, repoConnector, logger);
-        } else if (job.jobType === "productionDeploy") {
+        } else if (job.payload.jobType === "productionDeploy") {
             return new ProductionJobHandler(job, commandExecutor, dbConnector, cdnConnector, repoConnector, logger);
         }
         throw new InvalidJobError("Job type not supported");
