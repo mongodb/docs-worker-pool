@@ -27,6 +27,7 @@ PUSHLESS_DEPLOY_SHARED_DISABLED=true
 include ~/shared.mk
 
 update-snooty:
+	echo $(shell pwd)
 	cd ../../snooty-devhub; \
 	git fetch --all; \
 	git reset --hard origin/master; \
@@ -37,6 +38,7 @@ get-build-dependencies:
 
 next-gen-html: update-snooty
 	# snooty parse and then build-front-end
+	echo $(shell pwd)
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
@@ -45,7 +47,7 @@ next-gen-html: update-snooty
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
-	cd snooty-devhub; \
+	cd ${REPO_DIR}/snooty-devhub; \
 	echo $(shell pwd)
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
