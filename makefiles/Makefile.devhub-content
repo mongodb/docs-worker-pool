@@ -43,7 +43,7 @@ next-gen-html: update-snooty
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub/ ${REPO_DIR}; 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
 	cd snooty-devhub; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
