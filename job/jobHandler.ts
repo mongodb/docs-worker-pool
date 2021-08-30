@@ -1,17 +1,18 @@
 import { IJob } from "../entities/job";
+import { JobRepository } from "../repositories/jobRepository";
+import { RepoEntitlementsRepository } from "../repositories/repoEntitlementsRepository";
 import { ICDNConnector } from "../services/cdn";
 import { ICommandExecutor } from "../services/commandExecutor";
-import { IDBConnector } from "../services/db";
 import { ILogger } from "../services/logger";
 import { IRepoConnector } from "../services/repo";
 
 export abstract class JobHandler {
     protected _currJob: IJob;
     protected _commandExecutor: ICommandExecutor;
-    protected _dbConnector: IDBConnector;
     protected _cdnConnector: ICDNConnector;
     protected _repoConnector: IRepoConnector;
     protected _logger: ILogger;
+    protected _jobRepository: JobRepository;
     
     /**
      * ICommandExecutor
@@ -21,13 +22,14 @@ export abstract class JobHandler {
      * ILogger
      * 
      */
-    constructor (job: IJob, commandExecutor: ICommandExecutor, dbConnector: IDBConnector, cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: ILogger) {
+    constructor (job: IJob, jobRepository:JobRepository, commandExecutor: ICommandExecutor, 
+        cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: ILogger) {
         this._commandExecutor = commandExecutor;
-        this._dbConnector = dbConnector;
         this._cdnConnector = cdnConnector;
         this._repoConnector = repoConnector;
         this._logger = logger;
-        this._currJob = job
+        this._currJob = job;
+        this._jobRepository = jobRepository;
     }
 
     abstract prepCommands():  Promise<string[]>;

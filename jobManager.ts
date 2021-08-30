@@ -1,20 +1,20 @@
 import { ICDNConnector } from "./services/cdn";
-import { ICommandExecutor } from "./services/commandExecutor";
-import { IDBConnector } from "./services/db";
-import { ILogger } from "./services/logger";
+import { IJobRepoLogger, ILogger } from "./services/logger";
 import { IRepoConnector } from "./services/repo";
-
+import { JobRepository } from "./repositories/jobRepository";
+import { RepoEntitlementsRepository } from "./repositories/repoEntitlementsRepository";
 export class JobManager {
-    _commandExecutor: ICommandExecutor;
-    _dbConnector: IDBConnector;
+    _jobRepository: JobRepository;
+    _repoEntitlementRepository; RepoEntitlementsRepository;
     _cdnConnector: ICDNConnector;
     _repoConnector: IRepoConnector;
-    _logger: ILogger;
+    _logger: IJobRepoLogger;
 
-    constructor(commandExecutor: ICommandExecutor, dbConnector: IDBConnector, 
-        cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: ILogger) {
-            this._commandExecutor = commandExecutor;
-            this._dbConnector = dbConnector;
+    constructor(jobRepository: JobRepository, 
+        repoEntitlementRepository: RepoEntitlementsRepository,
+        cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: IJobRepoLogger) {
+            this._jobRepository = jobRepository;
+            this._repoEntitlementRepository = repoEntitlementRepository;
             this._cdnConnector = cdnConnector;
             this._repoConnector = repoConnector;
             this._logger = logger;

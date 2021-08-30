@@ -1,6 +1,5 @@
 import { InvalidJobError } from "../errors/errors";
 import {validator} from "validator";
-import { IDBConnector } from "../services/db";
 import { IJob } from "../entities/job";
 
 export interface IJobValidator {
@@ -10,9 +9,7 @@ export interface IJobValidator {
 }
 
 export class JobValidator implements IJobValidator{
-    _dbConnector: IDBConnector;
-    constructor(dbConnector: IDBConnector) {
-        this._dbConnector = dbConnector;
+    constructor() {
     }
 
     verifyUserIsEntitled(job: IJob): Promise<void> {

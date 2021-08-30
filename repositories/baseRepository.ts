@@ -4,12 +4,12 @@ import { DBError } from '../errors/errors';
 import { ILogger } from '../services/logger';
 
 export abstract class BaseRepository<T> {
-    private readonly _collection: Collection;
+    protected   _collectionName: string;
     protected _logger: ILogger;
     protected _repoName: string;
 
     constructor(db: Db, collectionName: string, logger: ILogger) {
-        this._collection = db.collection(collectionName);
+        this._collectionName = db.collection(collectionName);
         this._logger = logger;
     }
 

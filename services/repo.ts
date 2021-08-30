@@ -1,5 +1,6 @@
 import { IJob } from '../entities/job';
 import { ICommandExecutor } from './commandExecutor';
+import { IJobRepoLogger } from './logger';
 export interface IRepoConnector {
     applyPatch(job: IJob): Promise<any>
     cloneRepo(job: IJob): Promise<any>
@@ -9,9 +10,12 @@ export interface IRepoConnector {
 
 export class GitHubConnector implements IRepoConnector {
     _commandExectuor: ICommandExecutor;
+    _jobRepoLogger: IJobRepoLogger; 
 
-    constructor (commandExecutor: ICommandExecutor) {
+
+    constructor (commandExecutor: ICommandExecutor, logger: IJobRepoLogger) {
         this._commandExectuor = commandExecutor;
+        this._jobRepoLogger = logger;
     }
     applyPatch(job: IJob): Promise<any> {
         throw new Error('Method not implemented.');

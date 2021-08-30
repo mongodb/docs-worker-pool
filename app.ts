@@ -1,12 +1,25 @@
-import { JobManager } from "./src/jobManager";
-import {IDBConnector} from "./src/services/db";
-import {ICDNConnector} from "./src/services/cdn";
-import {IRepoConnector} from "./src/services/repo";
-import {ILogger} from './src/services/logger';
-import {ICommandExecutor} from './src/services/commandExecutor';
+import { JobManager } from "./jobManager";
+import {FastlyConnector} from "./services/cdn";
+import {GitHubConnector} from "./services/repo";
+import {HybridJobLogger, ConsoleLogger} from './services/logger';
+import {ShellCommandExecutor} from './services/commandExecutor';
+import { JobRepository } from "./repositories/jobRepository";
+const config = require('config');
+import { RepoEntitlementsRepository } from "./repositories/repoEntitlementsRepository";
+
+import {MongoClient} from "mongodb"
 
 // Setup the server with startServer()
-let jobManager = new JobManager();
+let client = MongoClient()
+let consoleLogger = new ConsoleLogger()
+let commandExecutor = new ShellCommandExecutor(); 
+let jobRepository = new JobRepository(null, config.collection, consoleLogger);
+let hybridJobLogger = new HybridJobLogger(jobRepository);
+let repoEntitlementRepository = new RepoEntitlementsRepository(null, config, consoleLogger);
+let cdnConnector = new FastlyConnector(config, hybridJobLogger);
+let repoConnector = new GitHubConnector(commandExecutor, hybridJobLogger);
+let jobManager = new JobManager(jobRepository, repoEntitlementRepository, cdnConnector, repoConnector, hybridJobLogger);
+
 jobManager
   .start()
   .then(() => {

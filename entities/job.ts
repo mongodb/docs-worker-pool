@@ -1,4 +1,5 @@
 export interface IJob {
+    _id: string;
     payload: IPayload;
     createdTime: Date;
     email: string;
@@ -12,6 +13,7 @@ export interface IJob {
     title: string;
     user: string;
     comMessage: string[]| null | undefined;
+    purgedUrls:  string[]| null | undefined;
     manifestPrefix: string | undefined;
     pathPrefix: string | null | undefined;
     mutPrefix: string | null | undefined;
@@ -34,6 +36,7 @@ export interface IJob {
   }
 
 export class Job implements IJob {
+  _id: string;
   payload: IPayload;
   createdTime: Date;
   email: string;
@@ -47,6 +50,7 @@ export class Job implements IJob {
   title: string;
   user: string;
   comMessage: string[] | null | undefined;
+  purgedUrls:  string[]| null | undefined;
   manifestPrefix: string | undefined;
   pathPrefix: string | null |undefined;
   mutPrefix: string | null | undefined;
