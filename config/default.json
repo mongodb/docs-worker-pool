@@ -3,12 +3,21 @@
     "dbUsername":"devuser",
     "dbPassword": "devpw",
     "dbName" : "devdb",
-    "collection":"devcoll",
+    "jobQueueCollection":"devcoll",
     "awsKey": "devkey", 
     "awsSecret": "devsecret",
     "githubBotUserName": "devghun",
     "githubBotPW": "devghpw",
     "fastlyToken" : "devfslytoken",
     "fastlyDochubMap":"devfslydochubmap",
-    "fastlyServiceId": "devfslysid"
+    "fastlyServiceId": "devfslysid",
+    "entitlementCollection": "entitlement",
+    "MONGO_TIMEOUT_S": 15,
+    "JOB_TIMEOUT_S": 900,
+    "RETRY_TIMEOUT_MS": 5000,
+    "MIN_TIMEOUT_MS": 1,
+    "LOG_PADDING": 15,
+    "PORT": 3000,
+    "GATSBY_PARSER_USER": "user",
+    "shouldPurgeAll": true
 }

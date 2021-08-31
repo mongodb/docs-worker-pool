@@ -12,6 +12,12 @@ export class AutoBuilderError extends Error implements IAutoBuilderError {
     errorCode: Number | undefined;
 }
 
+export class JobStoppedError extends  AutoBuilderError{
+  constructor(message:string, errorCode?:Number, stack?: string) {
+      super(message, "JobStoppedError", errorCode, stack);
+    }
+}
+
 export class InvalidJobError extends  AutoBuilderError{
     constructor(message:string, errorCode?:Number, stack?: string) {
         super(message, "InvalidJobError", errorCode, stack);
@@ -45,5 +51,11 @@ export class NetworkError extends  AutoBuilderError{
   export class DBError extends AutoBuilderError {
     constructor(message:string, errorCode?:Number, stack?: string) {
         super(message, "DBError", errorCode, stack);
+      }
+  }
+
+  export class AuthorizationError extends AutoBuilderError {
+    constructor(message:string, errorCode?:Number, stack?: string) {
+        super(message, "AuthorizationError", errorCode, stack);
       }
   }

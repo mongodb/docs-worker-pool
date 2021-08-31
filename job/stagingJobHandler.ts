@@ -1,23 +1,63 @@
-import { InvalidJobError } from "../errors/errors";
 import { JobHandler } from "./jobHandler";
-import {validator} from "validator";
+import { IConfig } from "config";
+import { IJob } from "../entities/job";
+import { JobRepository } from "../repositories/jobRepository";
+import { ICDNConnector } from "../services/cdn";
+import { CommandExecutorResponse, IJobCommandExecutor } from "../services/commandExecutor";
+import { IFileSystemServices } from "../services/fileServices";
+import { IJobRepoLogger } from "../services/logger";
+import { IRepoConnector } from "../services/repo";
 
 export class StagingJobHandler extends JobHandler {
-    throwIfJobInvalid(): void {
-        if ( !this._currJob.payload.repoName ) {
-            throw new InvalidJobError("Reponame is null or empty");
+    constructor(job: IJob, config: IConfig, jobRepository: JobRepository, fileSystemServices: IFileSystemServices, commandExecutor: IJobCommandExecutor,
+        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger) {
+            super(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
+            this.name = "Staging";
         }
-        if ( !this._currJob.payload.branchName ) {
-            throw new InvalidJobError("Branchname is null or empty");
+
+    prepDeployCommands(): void {
+        this.currJob.deployCommands = [
+            '. /venv/bin/activate',
+            `cd repos/${this.currJob.payload.repoName}`,
+            'make stage'
+          ];
+
+        if (this.currJob.payload.isNextGen) {
+            if (this.currJob.payload.pathPrefix) {
+                this.currJob.deployCommands[ this.currJob.deployCommands.length - 1] = `make next-gen-stage MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+              } else {
+                this.currJob.deployCommands[this.currJob.deployCommands.length - 1] = 'make next-gen-stage'
+              }
         }
     }
-    prepCommands(): Promise<string[]> {
-        throw new Error("Method not implemented.");
+
+    async constructManifestIndexPath(): Promise<void> {
+
     }
-    build():  Promise<void> {
-        throw new Error("Method not implemented.");
+    async getPathPrefix(): Promise<string> {
+        return ""
     }
-    publish():  Promise<void> {
-        throw new Error("Method not implemented.");
+    prepStageSpecificNextGenCommands(): void {
+        if (this.currJob.buildCommands) {
+            this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-html';
+            if (this.currJob.payload.repoName === 'devhub-content-integration') {
+                this.currJob.buildCommands[this.currJob.buildCommands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
+            }
+        }
+    }
+    async deploy(): Promise<CommandExecutorResponse> { 
+        try {
+            let resp = await this.deployGeneric();
+            let summary = ""
+            if (resp.output.indexOf('Summary') !== -1) {
+                resp.output = resp.output.substr(resp.output.indexOf('Summary'));
+            }
+            this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
+            this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
+            return resp;
+        } catch (errResult) {
+            this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+            throw errResult;
+        }
     }
 }

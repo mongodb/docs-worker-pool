@@ -3,12 +3,15 @@
     "dbUsername":"MONGO_ATLAS_USERNAME",
     "dbPassword": "MONGO_ATLAS_PASSWORD",
     "dbName" : "DB_NAME",
-    "collection":"COL_NAME",
+    "jobQueueCollection":"JOB_QUEUE_COL_NAME",
     "awsKey": "AWS_ACCESS_KEY_ID", 
     "awsSecret": "AWS_SECRET_ACCESS_KEY",
     "githubBotUserName": "GITHUB_BOT_USERNAME",
     "githubBotPW": "GITHUB_BOT_PASSWORD",
     "fastlyToken" : "FASTLY_TOKEN",
     "fastlyDochubMap":"FASTLY_DOCHUB_MAP",
-    "fastlyServiceId": "FASTLY_SERVICE_ID"
+    "fastlyServiceId": "FASTLY_SERVICE_ID",
+    "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
+    "GATSBY_PARSER_USER": "GATSBY_PARSER_USER",
+    "shouldPurgeAll": "true"
 }

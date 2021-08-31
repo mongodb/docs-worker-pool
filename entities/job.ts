@@ -14,11 +14,8 @@ export interface IJob {
     user: string;
     comMessage: string[]| null | undefined;
     purgedUrls:  string[]| null | undefined;
-    manifestPrefix: string | undefined;
-    pathPrefix: string | null | undefined;
-    mutPrefix: string | null | undefined;
     buildCommands: Array<string> | null | undefined;
-    publishCommands: Array<string> | null | undefined;
+    deployCommands: Array<string> | null | undefined;
   }
   
   export interface IPayload {
@@ -33,6 +30,16 @@ export interface IJob {
     repoOwner: string;
     url: string;
     newHead: string| null | undefined;
+    patch: string | null | undefined;
+    alias: string | null | undefined;
+    manifestPrefix: string | undefined;
+    pathPrefix: string | null | undefined;
+    mutPrefix: string | null | undefined;
+    aliased: string | null | undefined;
+    primaryAlias:  string | null | undefined;
+    publishedBranches: any;
+    stableBranch:  string | null | undefined;
+    isNextGen: boolean| null | undefined;
   }
 
 export class Job implements IJob {
@@ -55,5 +62,5 @@ export class Job implements IJob {
   pathPrefix: string | null |undefined;
   mutPrefix: string | null | undefined;
   buildCommands: string[] |null | undefined;
-  publishCommands: string[] |null | undefined;
+  deployCommands: string[] |null | undefined;
 }

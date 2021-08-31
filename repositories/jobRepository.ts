@@ -2,11 +2,12 @@ import { Db } from 'mongodb';
 import { BaseRepository } from "./BaseRepository";
 import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
+import { IConfig } from 'config';
 
 export class JobRepository extends BaseRepository<Job> {
 
-    constructor(db: Db, collectionName: string, logger: ILogger) {
-        super(db, collectionName, logger);
+    constructor(db: Db, config: IConfig, logger: ILogger) {
+        super(db, config, logger);
         this._repoName = "JobRepository";
     }
 
@@ -19,7 +20,7 @@ export class JobRepository extends BaseRepository<Job> {
                 endTime: new Date(),
             },
         };
-        return await this.updateOne(query, update);
+        return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`);
     }
 
     async getOneQueuedJobAndUpdate(): Promise<Job> {
@@ -27,10 +28,9 @@ export class JobRepository extends BaseRepository<Job> {
             status: 'inQueue',
             createdTime: { $lte: new Date() },
         };
-
         const update = { $set: { startTime: new Date(), status: 'inProgress' } };
         const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
-        let response = await this.findOneAndUpdate(query, update, options);
+        let response = await this.findOneAndUpdate(query, update, options, `Mongo Timeout Error: Timed out while retrieving job}`);
         return Object.assign(new Job(), response)
 
     }
@@ -39,7 +39,7 @@ export class JobRepository extends BaseRepository<Job> {
         const update = {
             $set: { startTime: null, status: 'failed', error: { time: new Date().toString(), reason: reason } }
         };
-        return await this.updateOne(query, update);
+        return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while updating failure status for jobId: ${id}`);
     }
 
     async insertLogStatement(id: string, messages: Array<string>): Promise<boolean> {
@@ -47,7 +47,7 @@ export class JobRepository extends BaseRepository<Job> {
         const update = {
             $push: { ['logs']: { $each: messages } }
         };
-        return await this.updateOne(query, update);
+        return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting log statements for jobId: ${id}`);
     }
 
     async insertNotificationMessages(id:string, message: string): Promise<boolean> {
@@ -55,7 +55,7 @@ export class JobRepository extends BaseRepository<Job> {
         const update = {
             $push: { comMessage: message }
         };
-        return await this.updateOne(query, update);
+        return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting notification messages for jobId: ${id}`);
     }
 
     async insertPurgedUrls(id:string, urlArray: Array<string>): Promise<boolean> {
@@ -63,7 +63,7 @@ export class JobRepository extends BaseRepository<Job> {
         const update = {
             $push: { ['purgedURLs']: urlArray }
         };
-        return await this.updateOne(query, update);
+        return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting purged urls for jobId: ${id}`);
     }
 
     async resetJobStatus(id:string, reenqueueMessage: string) {
@@ -76,7 +76,7 @@ export class JobRepository extends BaseRepository<Job> {
                 logs: [reenqueueMessage],
             },
         };
-        return await this.updateOne(query, update);
+        return await this.updateOne(query, update, `Mongo Timeout Error: Timed out finishing re-enqueueing job for jobId: ${id}`);
     }
 
 }
