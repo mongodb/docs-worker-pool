@@ -46,9 +46,9 @@ next-gen-html: update-snooty
 	# If prod --> set PATH_PREFIX build arg to /developer
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
-	cd /home/docsworker-xlarge/repos/devhub-content/snooty-devhub;
-	ls
-	echo $(shell pwd)
+	cd snooty-devhub; \
+	ls; \
+	echo $(shell pwd); \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
