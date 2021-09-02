@@ -48,6 +48,7 @@ next-gen-html: update-snooty
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
 	cd /home/docsworker-xlarge/repos/devhub-content/snooty-devhub;
 	ls
+	echo $(shell pwd)
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
