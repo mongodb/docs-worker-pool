@@ -6,11 +6,8 @@ STAGING_BUCKET=docs-devhub-staging
 
 STRAPI_URL=http://54.219.137.111:1337
 
-PRODUCTION_BUCKET=docs-devhub-prod
-PRODUCTION_URL=https://developer.mongodb.com
-
-NEW_PRODUCTION_BUCKET=developer-hub-prod
-NEW_PRODUCTION_URL=https://mongodb.com/developer
+PRODUCTION_BUCKET=developer-hub-prod
+PRODUCTION_URL=https://mongodb.com/developer
 
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
@@ -18,6 +15,8 @@ REPO_DIR=$(shell pwd)
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
+AWS_ACCESS_KEY_ID=$(shell printenv AWS_ACCESS_KEY_ID_DEVHUB)
+AWS_SECRET_ACCESS_KEY=$(shell printenv AWS_SECRET_ACCESS_KEY_DEVHUB)
 GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
 GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
@@ -36,7 +35,7 @@ update-snooty:
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/devhub-content.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-html: next-gen-html-new
+next-gen-html: update-snooty
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
 	if [ $$? -eq 1 ]; then \
@@ -45,51 +44,20 @@ next-gen-html: next-gen-html-new
 		exit 0; \
 	fi
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub; 
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
 	cd snooty-devhub; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
+	# If prod --> set PATH_PREFIX build arg to /developer
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
-  
-next-gen-stage: next-gen-stage-new ## Host online for review
+
+next-gen-stage: ## Host online for review
 	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
 	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
-  
-next-gen-deploy: next-gen-deploy-new
-	if [ -f config/redirects -a "${GIT_BRANCH}" = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${PRODUCTION_URL} --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
 
-
-## Add new commands for DevHub subdomain consolidation
-## These can replace the above after the migration is done
-
-next-gen-html-new: update-snooty
-	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
-	if [ $$? -eq 1 ]; then \
-		exit 1; \
-	else \
-		exit 0; \
-	fi
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub/ ${REPO_DIR}/snooty-devhub-tmp;
-	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub-tmp;
-	curl https://raw.githubusercontent.com/mongodb/devhub/master/gatsby-config.prod-new.js > ${REPO_DIR}/snooty-devhub-tmp/gatsby-config.js
-	cd snooty-devhub-tmp; \
-	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
-	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
-	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
-	npm run build; \
-	cp -r "${REPO_DIR}/snooty-devhub-tmp/public/" ${REPO_DIR}/public-new;
-
-next-gen-stage-new: next-gen-html-new ## Host online for review
-	mut-publish ./public-new ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${MUT_PREFIX}" --stage ${ARGS};
-	echo "${COMMIT_HASH}/${MUT_PREFIX}"
-	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
-
-next-gen-deploy-new: next-gen-html-new
-	yes | AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEVHUB} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEVHUB} mut-publish ./public-new ${NEW_PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
+next-gen-deploy:
+	yes | mut-publish ./public ${PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${PRODUCTION_URL}/index.html";
