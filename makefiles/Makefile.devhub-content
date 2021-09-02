@@ -1,8 +1,8 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
-STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
-STAGING_BUCKET=docs-devhub-staging
+STAGING_URL="http://developer-hub-staging.s3-website-us-east-1.amazonaws.com"
+STAGING_BUCKET=developer-hub-staging
 
 STRAPI_URL=http://54.219.137.111:1337
 
@@ -47,6 +47,7 @@ next-gen-html: update-snooty
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
 	cd /home/docsworker-xlarge/repos/devhub-content/snooty-devhub;
+	$(shell ls)
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
