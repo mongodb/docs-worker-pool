@@ -4,11 +4,13 @@ version:
     - 'Version 4.x (upcoming)'
     - 'Version 4.1 (current)'
     - 'Version 4.0'
+    - '3.7'
     - '3.6'
   active:
     - 'Version 4.x (upcoming)'
     - 'Version 4.1 (current)'
     - 'Version 4.0'
+    - '3.7'
     - '3.6'
   stable: 'v4.1'
   upcoming: 'master'
@@ -19,6 +21,7 @@ git:
       - 'master'
       - 'v4.1'
       - 'v4.0'
+      - 'v3.7'
       - 'v3.6'
       # the branches/published list **must** be ordered from most to
       # least recent release.
