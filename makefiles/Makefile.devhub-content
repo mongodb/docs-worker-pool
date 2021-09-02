@@ -49,7 +49,7 @@ next-gen-html: update-snooty
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
-	# If prod --> set PATH_PREFIX build arg
+	# If prod --> set PATH_PREFIX build arg to /developer
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
 
