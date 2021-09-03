@@ -7,6 +7,7 @@ import { IRepoConnector } from "../services/repo";
 import { IFileSystemServices } from "../services/fileServices";
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from "../errors/errors";
 import { IConfig } from "config";
+import TestableArrayWrapper  from "./ITestableTypeWrapper";
 
 export abstract class JobHandler {
     private _currJob: IJob;
@@ -19,15 +20,10 @@ export abstract class JobHandler {
         return this._commandExecutor;
     }
    
-    private _cdnConnector: ICDNConnector;
-    protected get cdnConnector(): ICDNConnector {
-        return this._cdnConnector;
-    }
+    protected _cdnConnector: ICDNConnector;
 
     private _repoConnector: IRepoConnector;
-    protected get repoConnector(): IRepoConnector {
-        return this._repoConnector;
-    }
+
     private _logger: IJobRepoLogger;
     protected get logger(): IJobRepoLogger {
         return this._logger;
@@ -38,14 +34,9 @@ export abstract class JobHandler {
         return this._jobRepository;
     }
     private _fileSystemServices: IFileSystemServices;
-    protected get fileSystemServices(): IFileSystemServices {
-        return this._fileSystemServices;
-    }
+  
     private _shouldStop: boolean;
-    protected get shouldStop(): boolean {
-        return this._shouldStop;
-    }
-
+  
     private _stopped: boolean;
     public get stopped(): boolean {
         return this._stopped;
@@ -54,10 +45,8 @@ export abstract class JobHandler {
         this._stopped = value;
     }
 
-    private _config: IConfig;
-    protected get config(): IConfig {
-        return this._config;
-    }
+    protected _config: IConfig;
+
     protected name:string;
 
     constructor(job: IJob, config: IConfig, jobRepository: JobRepository, fileSystemServices: IFileSystemServices, commandExecutor: IJobCommandExecutor,
@@ -77,12 +66,12 @@ export abstract class JobHandler {
 
     private async update(publishResult:CommandExecutorResponse): Promise<void> {
         if (publishResult && publishResult.status === 'success') {
-            await this.jobRepository.insertNotificationMessages(this.currJob._id, publishResult.output);
             let files = this._fileSystemServices.getFilesInDirectory(`./${this.currJob.payload.repoName}/build/public`, '');
             await this.jobRepository.updateWithCompletionStatus(this.currJob._id, files);
         } else {
             await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);
         }
+        await this.jobRepository.insertNotificationMessages(this.currJob._id, publishResult.output);
     }
 
     private cleanup(): void {
@@ -91,7 +80,7 @@ export abstract class JobHandler {
 
     @throwIfJobInterupted()
     private async constructPrefix(): Promise<void> {
-        const server_user = await this._config.get("GATSBY_PARSER_USER");
+        const server_user = this._config.get<string>("GATSBY_PARSER_USER");
         let pathPrefix = await this.getPathPrefix();
         if (typeof pathPrefix !== 'undefined' && pathPrefix !== null) {
             this.currJob.payload.pathPrefix = pathPrefix;
@@ -125,7 +114,7 @@ export abstract class JobHandler {
                     throw err;
                 }
             } catch (error) {
-                if (!(error as InvalidJobError)) {
+                if (!(error instanceof AutoBuilderError)) {
                     this.logError(error);
                 }
                 throw error;
@@ -163,7 +152,6 @@ export abstract class JobHandler {
         if (this._fileSystemServices.rootFileExists(workerPath)) {
             const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
             const workerLines = workerContents.split(/\r?\n/);
-    
             for (let i = 0; i < workerLines.length; i++) {
                 if (workerLines[i] === '"build-and-stage-next-gen"') {
                     return true;
@@ -177,19 +165,22 @@ export abstract class JobHandler {
     private async prepNextGenBuild(): Promise<void> {
         if (this.isbuildNextGen()) {
             await this.constructPrefix();
-            await this.constructManifestIndexPath();
             if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
                 await this.constructManifestIndexPath();
             }
             this.prepStageSpecificNextGenCommands();
             this.constructEnvVars();
             this.currJob.payload.isNextGen = true;
+        } else {
+            this.currJob.payload.isNextGen = false;
         }
     }
 
     @throwIfJobInterupted()
     private async executeBuild(): Promise<boolean> {
-        if (this.currJob.buildCommands) {
+        const testableArrayWrapper = new TestableArrayWrapper();
+        if (this.currJob.buildCommands && new TestableArrayWrapper().length(this.currJob.buildCommands) > 0) {
+            
             this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
             this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
             let resp = await this._commandExecutor.execute(this.currJob.buildCommands);
@@ -200,27 +191,28 @@ export abstract class JobHandler {
                 this.logError(error);
                 throw error 
             }
+        } else {
+            const error = new AutoBuilderError("No commands to execute", "BuildError")
+            this.logError(error);
+            throw error 
         }
         return true;
     }
 
     private constructEnvVars(): void {
-        let envVars = `GATSBY_PARSER_USER=${this._config.get("EATURE_FLAG_SDK_VERSION_DROPDOWN")}\nGATSBY_PARSER_BRANCH=${this.currJob.payload.branchName}\n`;
+        let envVars = `GATSBY_PARSER_USER=${ this._config.get<string>("GATSBY_PARSER_USER")}\nGATSBY_PARSER_BRANCH=${this.currJob.payload.branchName}\n`;
         const pathPrefix = this.currJob.payload.pathPrefix;
-    
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           envVars += `PATH_PREFIX=${pathPrefix}\n`
         }
         const snootyFrontEndVars = {
-          'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get("EATURE_FLAG_SDK_VERSION_DROPDOWN"),
-          'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get("GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN"),
+          'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION"),
+          'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN"),
         };
     
         for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
-          const isTruthyEnv = (envValue && String(envValue).toUpperCase() !== 'FALSE');
-          if (isTruthyEnv) envVars += `${envName}=${envValue}\n`;
+          if (envValue) envVars += `${envName}=TRUE\n`;
         }
-
         this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' });
     }
 
@@ -246,9 +238,10 @@ export abstract class JobHandler {
             this.cleanup();
             await this.cloneRepo();
             await this.commitCheck();
-            await this.pullRepo()
+            await this.pullRepo();
             await this._repoConnector.applyPatch(this.currJob);
             await this.downloadMakeFile();
+            this.prepBuildCommands();
             await this.prepNextGenBuild();
             return await this.executeBuild();
     }
@@ -257,12 +250,12 @@ export abstract class JobHandler {
     protected async deployGeneric(): Promise<CommandExecutorResponse> {
         this.prepDeployCommands();
         this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Pushing to ${this.name}`);
-        if (this.currJob.deployCommands) {
-            let ret = ""
+        
+        if (this.currJob.deployCommands && new TestableArrayWrapper().length(this.currJob.deployCommands) > 0 ) {
             const resp = await this._commandExecutor.execute(this.currJob.deployCommands)
             if (resp && resp.error && resp.error.indexOf('ERROR') !== -1) {
                 this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Failed to push to ${this.name}`);
-                throw new PublishError(`Failed pushing to staging: ${resp.error}`)
+                throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`)
               }
             this._logger.save(this.currJob._id,`${'(stage)'.padEnd(15)}Finished pushing to ${this.name}`);
             this._logger.save(this.currJob._id,`${'(stage)'.padEnd(15)}Staging push details:\n\n${resp.output}`);
@@ -270,7 +263,7 @@ export abstract class JobHandler {
 
         } else {
             this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Pushing to ${this.name} failed as there is no commands to execute`);
-            throw new PublishError("Failed pushing to staging, No commands to execute");
+            throw new PublishError(`Failed pushing to ${this.name}, No commands to execute`);
         }
     }
 
@@ -287,7 +280,6 @@ export abstract class JobHandler {
                 await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
                 this.cleanup();
             } catch (error) {
-                console.log("another exception");
                 this._logger.error(this._currJob._id, error.message);
             }
         }

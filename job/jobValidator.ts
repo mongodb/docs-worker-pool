@@ -37,10 +37,9 @@ export class JobValidator implements IJobValidator {
 
     throwIfItIsNotPublishable(job: IJob): void {
         let publishedBranches = [''];
-        console.log(job.payload);
         if (job.payload.publishedBranches) {
             publishedBranches = job.payload.publishedBranches.git.branches.published;
-            job.payload["stableBranch"] = (job.payload.publishedBranches.content.version.stable === job.payload.branchName && (job.payload.primaryAlias || !job.payload.aliased)) ? '-g' : "";
+            job.payload["stableBranch"] = (job.payload.publishedBranches.version.stable === job.payload.branchName && (job.payload.primaryAlias || !job.payload.aliased)) ? '-g' : "";
         }
         if (!publishedBranches.includes(job.payload.branchName)) {
             throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
