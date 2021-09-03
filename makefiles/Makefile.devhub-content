@@ -12,6 +12,7 @@ PRODUCTION_URL=https://mongodb.com/developer
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
+SPL_PREFIX=/developer
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
@@ -50,6 +51,7 @@ next-gen-html: update-snooty
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
+	echo "PATH_PREFIX=${SPL_PREFIX}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
 
