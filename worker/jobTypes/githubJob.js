@@ -326,6 +326,7 @@ class GitHubJobClass {
         //TODO: this stanza can be removed when devhub is entirely off autobuilder
         if (this.currentJob.payload.repoName === 'devhub-content-integration') {
             commandsToBuild[commandsToBuild.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
+            commandsToBuild[commandsToBuild.length - 1] += ` PATH_PREFIX=/developer`;
           }
       }
 
