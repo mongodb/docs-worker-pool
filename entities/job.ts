@@ -35,7 +35,7 @@ export interface IJob {
     manifestPrefix: string | undefined;
     pathPrefix: string | null | undefined;
     mutPrefix: string | null | undefined;
-    aliased: string | null | undefined;
+    aliased: boolean | null | undefined;
     primaryAlias:  string | null | undefined;
     publishedBranches: any;
     stableBranch:  string | null | undefined;

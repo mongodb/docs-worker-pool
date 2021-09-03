@@ -1,4 +1,4 @@
-{
+export default {
     "_id": "5c5e0817ce099eaf874a9801",
     "title": "Github Push: skerschb/testauth",
     "user": "skerschb",
@@ -14,7 +14,7 @@
       "jobType": "githubPush",
       "source": "github",
       "action": "push",
-      "repoName": "skerschb/testauth",
+      "repoName": "testauth",
       "branchName": "DOCSP-666",
       "isFork": false,
       "repoOwner": "skerschb",

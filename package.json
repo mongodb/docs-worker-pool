@@ -28,6 +28,7 @@
     "fs-extra": "^7.0.1",
     "gatsby": "^1.9.279",
     "ip": "^1.1.5",
+    "jest-mock-extended": "^2.0.2-beta2",
     "js-yaml": "^3.13.1",
     "mongodb": "^3.6.12",
     "mongodb-stitch-browser-sdk": "^4.2.0",

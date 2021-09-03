@@ -119,7 +119,7 @@ export abstract class JobHandler {
         if (this.currJob.payload.newHead && this.currJob.title !== 'Regression Test Child Process') {
             try {
                 const resp = await this._repoConnector.checkCommits(this._currJob);
-                if (resp.output && !resp.output.includes(`* ${this.currJob.payload.branchName}`)) {
+                if (!resp || !resp.output || (resp.output && !resp.output.includes(`* ${this.currJob.payload.branchName}`))) {
                     const err = new InvalidJobError(`Specified commit does not exist on ${this.currJob.payload.branchName} branch`);
                     this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)} failed. The specified commit does not exist on ${this.currJob.payload.branchName} branch.`);
                     throw err;
@@ -243,14 +243,14 @@ export abstract class JobHandler {
 
     @throwIfJobInterupted()
     protected async build(): Promise<boolean> {
-        await this.cleanup();
-        await this.cloneRepo();
-        await this.commitCheck();
-        await this.pullRepo()
-        await this._repoConnector.applyPatch(this.currJob);
-        await this.downloadMakeFile();
-        await this.prepNextGenBuild();
-        return await this.executeBuild();
+            this.cleanup();
+            await this.cloneRepo();
+            await this.commitCheck();
+            await this.pullRepo()
+            await this._repoConnector.applyPatch(this.currJob);
+            await this.downloadMakeFile();
+            await this.prepNextGenBuild();
+            return await this.executeBuild();
     }
 
     @throwIfJobInterupted()
@@ -284,9 +284,10 @@ export abstract class JobHandler {
             this.cleanup();
         } catch (error) {
             try {
-                this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
+                await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
                 this.cleanup();
             } catch (error) {
+                console.log("another exception");
                 this._logger.error(this._currJob._id, error.message);
             }
         }
@@ -318,7 +319,7 @@ function throwIfJobInterupted() {
                     jobHandler.stopped = true;
                     throw new JobStoppedError(`${jobHandler.currJob._id} is stopped`);
                 }
-                return original.apply(this, args)()
+                return original.apply(this, args);
             }
         }
         return descriptor;
