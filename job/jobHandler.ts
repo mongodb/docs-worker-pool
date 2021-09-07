@@ -205,7 +205,7 @@ export abstract class JobHandler {
     }
 
     private constructEnvVars(): void {
-        let envVars = `GATSBY_PARSER_USER=${this._config.get("EATURE_FLAG_SDK_VERSION_DROPDOWN")}\nGATSBY_PARSER_BRANCH=${this.currJob.payload.branchName}\n`;
+        let envVars = `GATSBY_PARSER_USER=${this._config.get("GATSBY_PARSER_USER")}\nGATSBY_PARSER_BRANCH=${this.currJob.payload.branchName}\n`;
         const pathPrefix = this.currJob.payload.pathPrefix;
     
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
