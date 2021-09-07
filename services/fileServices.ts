@@ -23,10 +23,14 @@ export class FileSystemServices implements IFileSystemServices {
         return await axios.get(url);
     }
 
+    private isDownloadSuccess(resp): boolean {
+        return (resp?.status == 200 && resp?.data);
+    }
+
     async downloadYaml(url: any): Promise<any> {
         let resp = await this.download(url);
         const returnObject = {};
-        if (resp && resp.status == 200 && resp.data) {
+        if (this.isDownloadSuccess(resp)) {
             const yamlParsed = yaml.safeLoad(resp.data);
             returnObject['status'] = 'success';
             returnObject['content'] = yamlParsed;
@@ -34,6 +38,7 @@ export class FileSystemServices implements IFileSystemServices {
             returnObject['status'] = 'failure';
             returnObject['content'] = resp;
         }
+        return returnObject;
     }
 
     async saveUrlAsFile(url: string, path: string, options: any): Promise<any> {
