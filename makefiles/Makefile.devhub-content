@@ -12,6 +12,7 @@ PRODUCTION_URL=https://mongodb.com/developer
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
+SPL_PREFIX=/developer
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
@@ -46,11 +47,11 @@ next-gen-html: update-snooty
 	# If prod --> set PATH_PREFIX build arg to /developer
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
-	cd /home/docsworker-xlarge/repos/devhub-content/snooty-devhub;
-	$(shell ls)
+	cd snooty-devhub; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production; \
 	echo "STRAPI_URL=${STRAPI_URL}" >> .env.production; \
+	echo "PATH_PREFIX=${SPL_PREFIX}" >> .env.production; \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
 
