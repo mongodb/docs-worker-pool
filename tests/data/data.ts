@@ -103,6 +103,11 @@ export class TestDataProvider {
         return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), ['make get-build-dependencies', 'make next-gen-html']);
     }
 
+    static getExpectedStagingBuildNextGenCommands(job: IJob): Array<string> {
+        let genericCommands = TestDataProvider.getCommonBuildCommands(job);
+        return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), ['make next-gen-html']);
+    }
+
     static getEnvVarsWithPathPrefixWithFlags(job: IJob, nav: string | null, dropdown: string | null): string {
         let retStr = `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\n`;
         if (nav) {
@@ -202,6 +207,19 @@ export class TestDataProvider {
         'make publish && make deploy'];
     }
 
+
+    static getCommonDeployCommandsForStaging(job: IJob): Array<string> {
+        return [
+        '. /venv/bin/activate',
+        `cd repos/${job.payload.repoName}`,
+        'make stage'];
+    }
+
+    static getExpectedStageDeployNextGenCommands(job: IJob): Array<string> {
+        let genericCommands = TestDataProvider.getCommonDeployCommands(job);
+        return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [`make next-gen-stage`]);
+    }
+
     static getExpectedProdDeployNextGenCommands(job: IJob): Array<string> {
         let genericCommands = TestDataProvider.getCommonDeployCommands(job);
         let ret = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [`make next-gen-deploy MUT_PREFIX=${job.payload.mutPrefix}`]);
@@ -211,10 +229,9 @@ export class TestDataProvider {
         return ret;
     }
 
-    static getPublishOutput(job:IJob) : string {
-        
+    static getPublishOutputWithPurgedUrls() : any {
+        return ["Line1 \r\n Line2 \r\n {\t\"urls\": [\"url1\", \"url2\", \"url3\", \"url4\", \"url5\"]}", ["url1", "url2", "url3", "url4", "url5"]];        
     }
-
     static nextGenEntryInWorkerFile() {
         return ['"build-and-stage-next-gen"'].join("/r/n");
     }

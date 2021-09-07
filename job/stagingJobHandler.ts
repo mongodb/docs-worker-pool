@@ -21,7 +21,6 @@ export class StagingJobHandler extends JobHandler {
             `cd repos/${this.currJob.payload.repoName}`,
             'make stage'
           ];
-
         if (this.currJob.payload.isNextGen) {
             if (this.currJob.payload.pathPrefix) {
                 this.currJob.deployCommands[ this.currJob.deployCommands.length - 1] = `make next-gen-stage MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
@@ -31,12 +30,6 @@ export class StagingJobHandler extends JobHandler {
         }
     }
 
-    async constructManifestIndexPath(): Promise<void> {
-
-    }
-    async getPathPrefix(): Promise<string> {
-        return ""
-    }
     prepStageSpecificNextGenCommands(): void {
         if (this.currJob.buildCommands) {
             this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-html';

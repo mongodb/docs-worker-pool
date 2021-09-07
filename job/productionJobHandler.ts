@@ -1,6 +1,6 @@
 import { IConfig } from "config";
 import { IJob } from "../entities/job";
-import { AuthorizationError, InvalidJobError } from "../errors/errors";
+import { InvalidJobError } from "../errors/errors";
 import { JobRepository } from "../repositories/jobRepository";
 import { ICDNConnector } from "../services/cdn";
 import { CommandExecutorResponse, IJobCommandExecutor } from "../services/commandExecutor";
@@ -33,10 +33,8 @@ export class ProductionJobHandler extends JobHandler {
     }
 
     prepStageSpecificNextGenCommands(): void {
-        if (this.currJob.buildCommands) {
             this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
             this.currJob.buildCommands.push('make next-gen-html');
-        }
     }
 
     async constructManifestIndexPath(): Promise<void> {

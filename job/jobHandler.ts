@@ -216,9 +216,13 @@ export abstract class JobHandler {
         this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' });
     }
 
-    protected abstract getPathPrefix(): Promise<string>;
+    protected getPathPrefix(): Promise<string> {
+        return Promise.resolve("");
+    }
 
-    protected abstract constructManifestIndexPath(): Promise<void>;
+    protected constructManifestIndexPath(): Promise<void> {
+        return Promise.resolve();
+    }
 
     protected abstract deploy(): Promise<CommandExecutorResponse>;
 
