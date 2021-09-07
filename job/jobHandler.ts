@@ -212,7 +212,7 @@ export abstract class JobHandler {
           envVars += `PATH_PREFIX=${pathPrefix}\n`
         }
         const snootyFrontEndVars = {
-          'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get("EATURE_FLAG_SDK_VERSION_DROPDOWN"),
+          'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get("GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION"),
           'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get("GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN"),
         };
     
