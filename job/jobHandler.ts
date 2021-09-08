@@ -208,6 +208,7 @@ export abstract class JobHandler {
         const snootyFrontEndVars = {
           'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION"),
           'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN"),
+
         };
     
         for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
