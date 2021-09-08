@@ -1,6 +1,6 @@
 import { IConfig } from "config";
 import { IJob } from "../entities/job";
-import { AuthorizationError, InvalidJobError } from "../errors/errors";
+import { InvalidJobError } from "../errors/errors";
 import { JobRepository } from "../repositories/jobRepository";
 import { ICDNConnector } from "../services/cdn";
 import { CommandExecutorResponse, IJobCommandExecutor } from "../services/commandExecutor";
@@ -33,17 +33,14 @@ export class ProductionJobHandler extends JobHandler {
     }
 
     prepStageSpecificNextGenCommands(): void {
-        this.prepBuildCommands();
-        if (this.currJob.buildCommands) {
             this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
             this.currJob.buildCommands.push('make next-gen-html');
-        }
     }
 
     async constructManifestIndexPath(): Promise<void> {
         try {
             const snootyName = await this.commandExecutor.getSnootyProjectName(this.currJob.payload.repoName);
-            this.currJob.payload.manifestPrefix = snootyName + '-' + (this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName)
+            this.currJob.payload.manifestPrefix = snootyName + '-' + (this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName);
         } catch (error) {
             this.logger.save(this.currJob._id, error)
             throw error
@@ -66,15 +63,6 @@ export class ProductionJobHandler extends JobHandler {
         }
     }
 
-    private throwIfItIsNotPublishable(): void {
-        const publishedBranches = this.currJob.payload.publishedBranches.git.branches.published;
-        this.currJob.payload["stableBranch"] = (this.currJob.payload.publishedBranches.content.version.stable === this.currJob.payload.branchName && (this.currJob.payload.primaryAlias || !this.currJob.payload.aliased)) ? '-g' : "";
-        if (!publishedBranches.includes(this.currJob.payload.branchName)) {
-            this.logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)} You are trying to run in production a branch that is not configured for publishing`);
-            throw new AuthorizationError(`${this.currJob.payload.branchName} is not configured for publish`);
-        }
-    }
-
     private async purgePublishedContent(makefileOutput: Array<string>): Promise<void> {
         try {
             const stdoutJSON = JSON.parse(makefileOutput[2]);
@@ -82,10 +70,10 @@ export class ProductionJobHandler extends JobHandler {
             const updatedURLsArray = stdoutJSON.urls;
             // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
             this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
-            if (this.config.get("shouldPurgeAll")) {
-                await this.cdnConnector.purgeAll(this.currJob._id);
+            if (this._config.get("shouldPurgeAll")) {
+                await this._cdnConnector.purgeAll(this.currJob._id);
             } else {
-                await this.cdnConnector.purge(this.currJob._id, updatedURLsArray);
+                await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
                 await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
             }
 
@@ -95,7 +83,6 @@ export class ProductionJobHandler extends JobHandler {
     }
 
     async deploy(): Promise<CommandExecutorResponse> {
-        this.throwIfItIsNotPublishable();
         let resp = await this.deployGeneric();
         try {
             const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);

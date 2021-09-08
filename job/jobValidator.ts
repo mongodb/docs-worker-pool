@@ -1,29 +1,29 @@
 import { AuthorizationError, InvalidJobError } from "../errors/errors";
-import {validator} from "validator";
+import validator from "validator";
 import { IJob } from "../entities/job";
 import { IFileSystemServices } from "../services/fileServices";
 import { RepoEntitlementsRepository } from "../repositories/repoEntitlementsRepository";
 
 export interface IJobValidator {
-    throwIfJobInvalid(job: IJob): void;
+    throwIfJobInvalid(job: IJob): Promise<void>;
     throwIfBranchNotConfigured(job: IJob): Promise<void>;
     throwIfUserNotEntitled(job: IJob): Promise<void>;
-    throwIfItIsNotPublishable(job:IJob): void;
+    throwIfItIsNotPublishable(job: IJob): void;
 }
 
-export class JobValidator implements IJobValidator{
+export class JobValidator implements IJobValidator {
     _fileSystemService: IFileSystemServices;
     _repoEntitlementRepository: RepoEntitlementsRepository;
-    constructor(fileSystemService:IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository) {
+    constructor(fileSystemService: IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository) {
         this._fileSystemService = fileSystemService;
         this._repoEntitlementRepository = repoEntitlementRepository;
     }
 
     async throwIfUserNotEntitled(job: IJob): Promise<void> {
-          const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
-          if (!entitlementsObject || !entitlementsObject.repos || entitlementsObject.repos.indexOf(`${job.payload.repoOwner}/${job.payload.repoName}`) === -1) {
+        const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
+        if (!entitlementsObject || !entitlementsObject.repos || entitlementsObject.repos.indexOf(`${job.payload.repoOwner}/${job.payload.repoName}`) === -1) {
             throw new AuthorizationError(`${job.user} is not entitled for repo ${job.payload.repoName}`);
-          }
+        }
     }
 
     async throwIfBranchNotConfigured(job: IJob): Promise<void> {
@@ -35,40 +35,43 @@ export class JobValidator implements IJobValidator{
         }
     }
 
-    throwIfItIsNotPublishable(job:IJob): void {
-        const publishedBranches = job.payload.publishedBranches.git.branches.published;
-        job.payload["stableBranch"] = ( job.payload.publishedBranches.content.version.stable === job.payload.branchName && (job.payload.primaryAlias || ! job.payload.aliased) )   ? '-g' : "";
-        if ( !publishedBranches.includes(job.payload.branchName)) {
+    throwIfItIsNotPublishable(job: IJob): void {
+        let publishedBranches = [''];
+        if (job.payload.publishedBranches) {
+            publishedBranches = job.payload.publishedBranches.git.branches.published;
+            job.payload["stableBranch"] = (job.payload.publishedBranches.version.stable === job.payload.branchName && (job.payload.primaryAlias || !job.payload.aliased)) ? '-g' : "";
+        }
+        if (!publishedBranches.includes(job.payload.branchName)) {
             throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
         }
     }
 
-    public throwIfJobInvalid(job: IJob): void {
+    public async throwIfJobInvalid(job: IJob): Promise<void> {
         this._validateInput(job);
-        this.throwIfUserNotEntitled(job);
-        this.throwIfBranchNotConfigured(job);
+        await this.throwIfUserNotEntitled(job);
+        await this.throwIfBranchNotConfigured(job);
         this.throwIfItIsNotPublishable(job);
     }
 
     private _validateInput(job: IJob): void {
-        if (!(job.payload.jobType in ["githubPush", "productionDeploy", "publishDochub", "regression"])) {
-            throw new InvalidJobError("Invalid JobType"); 
+        if (!(["githubPush", "productionDeploy", "publishDochub", "regression"].includes(job.payload.jobType))) {
+            throw new InvalidJobError("Invalid JobType");
         }
-        if ( !job.payload.repoName || !this.safeString(job.payload.repoName)) {
+        if (!job.payload.repoName || !this.safeString(job.payload.repoName)) {
             throw new InvalidJobError("Invalid Reponame");
         }
-        if ( !job.payload.branchName || !this.safeString(job.payload.branchName)) {
+        if (!job.payload.branchName || !this.safeString(job.payload.branchName)) {
             throw new InvalidJobError("Invalid Branchname");
         }
-        if ( !job.payload.repoOwner || !this.safeString(job.payload.repoOwner)) {
+        if (!job.payload.repoOwner || !this.safeString(job.payload.repoOwner)) {
             throw new InvalidJobError("Invalid RepoOwner");
         }
     }
 
-    private safeString (stringToCheck) {
+    private safeString(stringToCheck: string) {
         return (
-          validator.isAscii(stringToCheck) &&
-          validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
+            validator.isAscii(stringToCheck) &&
+            validator.matches(stringToCheck, /^((\w)*[-.]?(\w)*)*$/)
         );
     }
 

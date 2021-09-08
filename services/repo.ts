@@ -1,5 +1,5 @@
 import { IJob } from '../entities/job';
-import { CommandExecutorResponse, ICommandExecutor, IGithubCommandExecutor } from './commandExecutor';
+import { CommandExecutorResponse, IGithubCommandExecutor } from './commandExecutor';
 import { IJobRepoLogger } from './logger';
 import { IConfig } from "config";
 import { InvalidJobError } from '../errors/errors';
@@ -13,13 +13,13 @@ export interface IRepoConnector {
 }
 
 export class GitHubConnector implements IRepoConnector {
-    _commandExectuor: IGithubCommandExecutor;
+    _commandExecutor: IGithubCommandExecutor;
     _jobRepoLogger: IJobRepoLogger;
     _config: IConfig
     _fileSystemService: IFileSystemServices;
 
     constructor(commandExecutor: IGithubCommandExecutor, config: IConfig, fileSystemService: IFileSystemServices, logger: IJobRepoLogger) {
-        this._commandExectuor = commandExecutor;
+        this._commandExecutor = commandExecutor;
         this._jobRepoLogger = logger;
         this._config = config;
         this._fileSystemService = fileSystemService;
@@ -36,8 +36,9 @@ export class GitHubConnector implements IRepoConnector {
         if (job.payload.patch) {
             try {
                 this._fileSystemService.writeToFile(`repos/${job.payload.repoName}/myPatch.patch`, job.payload.patch, { encoding: 'utf8', flag: 'w' });
-                return await this._commandExectuor.applyPatch(job.payload.repoName, "myPatch.patch");
+                return await this._commandExecutor.applyPatch(job.payload.repoName, "myPatch.patch");
             } catch (error) {
+                console.log()
                 this._jobRepoLogger.save(job._id, `Error creating patch  ${error}`);
                 throw new InvalidJobError(`Error creating patch  ${error}`);
             }
@@ -48,10 +49,6 @@ export class GitHubConnector implements IRepoConnector {
         this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
         this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}running fetch`);
         try {
-            if (!job.payload.branchName) {
-                this._jobRepoLogger.save(job._id, `${'(CLONE)'.padEnd(15)}failed due to insufficient definition`);
-                throw new InvalidJobError('branch name not indicated');
-            }
             const basePath = this.getBasePath(job);
             const repoPath = basePath + '/' + job.payload.repoOwner + '/' + job.payload.repoName;
             let resp = await simpleGit('repos').clone(repoPath, `${job.payload.repoName}`);
@@ -65,13 +62,13 @@ export class GitHubConnector implements IRepoConnector {
 
     async checkCommits(job: IJob): Promise<any> {
         if ( job.payload.newHead ) {
-            return await this._commandExectuor.checkoutBranchForSpecificHead(job.payload.repoName, job.payload.branchName, job.payload.newHead)
+            return await this._commandExecutor.checkoutBranchForSpecificHead(job.payload.repoName, job.payload.branchName, job.payload.newHead);
         }
     }
 
     async pullRepo(job: IJob): Promise<any> {
         
-        return await this._commandExectuor.pullRepo(job.payload.repoName, job.payload.branchName, job.payload.newHead)
+        return await this._commandExecutor.pullRepo(job.payload.repoName, job.payload.branchName, job.payload.newHead)
     }
 
 }

@@ -1,14 +1,15 @@
-import { Db } from 'mongodb';
+import mongodb from "mongodb";
 import { BaseRepository } from "./BaseRepository";
 import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
+import { InvalidJobError } from "../errors/errors";
 
 export class JobRepository extends BaseRepository<Job> {
-
-    constructor(db: Db, config: IConfig, logger: ILogger) {
+    constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
         super(db, config, logger);
-        this._repoName = "JobRepository";
+        this._repoName = "JobRepository"
+        this._collection = db.collection(config.get("jobQueueCollection"));
     }
 
     async updateWithCompletionStatus(id: string, result: any): Promise<boolean> {
@@ -16,8 +17,8 @@ export class JobRepository extends BaseRepository<Job> {
         const update = {
             $set: {
                 status: "completed",
-                result,
                 endTime: new Date(),
+                result
             },
         };
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`);
@@ -30,14 +31,17 @@ export class JobRepository extends BaseRepository<Job> {
         };
         const update = { $set: { startTime: new Date(), status: 'inProgress' } };
         const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
-        let response = await this.findOneAndUpdate(query, update, options, `Mongo Timeout Error: Timed out while retrieving job}`);
+        let response = await this.findOneAndUpdate(query, update, options, `Mongo Timeout Error: Timed out while retrieving job`);
+        if (!response) {
+            throw new InvalidJobError("JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job");
+        }
         return Object.assign(new Job(), response)
 
     }
     async updateWithErrorStatus(id: string, reason: string): Promise<boolean> {
         const query = { _id: id };
         const update = {
-            $set: { startTime: null, status: 'failed', error: { time: new Date().toString(), reason: reason } }
+            $set: { status: 'failed', endTime: new Date(), error: { time: new Date().toString(), reason: reason } }
         };
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while updating failure status for jobId: ${id}`);
     }
@@ -66,11 +70,11 @@ export class JobRepository extends BaseRepository<Job> {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting purged urls for jobId: ${id}`);
     }
 
-    async resetJobStatus(id:string, reenqueueMessage: string) {
+    async resetJobStatus(id:string, status: string, reenqueueMessage: string) {
         const query = { _id: id };
         const update = {
             $set: {
-                status: "inQueue",
+                status: status,
                 startTime: null,
                 error: {},
                 logs: [reenqueueMessage],

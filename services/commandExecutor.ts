@@ -1,5 +1,6 @@
 
 import { promisify } from "util";
+import cp from 'child_process';
 
 export class CommandExecutorResponse {
     status: string;
@@ -24,7 +25,7 @@ export interface IGithubCommandExecutor {
 
 export class ShellCommandExecutor implements ICommandExecutor {
     async execute(commands: string[]): Promise<CommandExecutorResponse> {
-        let exec = promisify(require('child_process').exec);
+        let exec = promisify(cp.exec);
         let resp = new CommandExecutorResponse();
         try {
             const {
@@ -82,7 +83,7 @@ export class GithubCommandExecutor extends ShellCommandExecutor implements IGith
 
     }
 
-    async pullRepo(repoDirName: string, branchName: string, newHead: string| null | undefined): Promise<CommandExecutorResponse> {
+    async pullRepo(repoDirName: string, branchName: string, newHead: string| null | undefined= null): Promise<CommandExecutorResponse> {
         let pullRepoCommands = [`cd repos/${repoDirName}`, 
         `git checkout ${branchName}`,
         `git pull origin ${branchName}`];
