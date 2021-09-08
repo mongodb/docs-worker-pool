@@ -9,11 +9,12 @@ export class RepoEntitlementsRepository extends BaseRepository<Job> {
     constructor(db: Db, config: IConfig, logger: ILogger) {
         super(db, config, logger);
         this._repoName = "RepoEntitlementsRepository";
+        this._collection = db.collection(config.get("entitlementCollection"));
     }
 
     async getRepoEntitlementsByGithubUsername(githubUsername: string): Promise<any> {
         const query = { 'github_username': githubUsername };
-        const entitlementsObject = await this.findOne(query, `Timedout while retrieving entitlements for ${githubUsername}`);
+        const entitlementsObject = await this.findOne(query, `Mongo Timeout Error: Timedout while retrieving entitlements for ${githubUsername}`);
         // if user has specific entitlements
         if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.length > 0) {
             return {

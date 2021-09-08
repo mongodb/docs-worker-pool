@@ -13,7 +13,7 @@ import { IRepoConnector } from "../../services/repo";
 import { TestDataProvider } from "../data/data";
 import * as data from '../data/jobDef';
 
-export class JobValidatorTestHelper {
+export class JobHandlerTestHelper {
 
     job: IJob;
     config: IConfig;
@@ -43,10 +43,10 @@ export class JobValidatorTestHelper {
         this.jobHandler = new this.handlerMapper[handlerName](this.job, this.config, this.jobRepo, this.fileSystemServices, this.jobCommandExecutor, this.cdnConnector, this.repoConnector, this.logger);
         return this.jobHandler;
     }
-    setStageForDeploySuccess(isNextGen:boolean = true): string[] {
+    setStageForDeploySuccess(isNextGen:boolean = true, prodDeploy:boolean = true): string[] {
         this.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(this.job);
         this.setupForSuccess(isNextGen);
-        const publishOutput = TestDataProvider.getPublishOutputWithPurgedUrls();
+        const publishOutput = TestDataProvider.getPublishOutputWithPurgedUrls(prodDeploy);
         this.jobCommandExecutor.execute.mockReturnValueOnce({ status: "success", output: "Great work", error: null });
         this.jobCommandExecutor.execute.mockReturnValueOnce({ status: "Failed", output: publishOutput[0], error: null })
         return publishOutput[1]; //return urls
@@ -86,7 +86,6 @@ export class JobValidatorTestHelper {
 
     mockArrayLength(returnValue: Number, job: IJob, buildCommand: boolean = false, deployCommand: boolean = false): void {
         TestableArrayWrapper.prototype.length = jest.fn().mockImplementationOnce((args) => {
-            console.log(`${args}, build?: ${buildCommand}, deploy?: ${deployCommand}`);
             if (buildCommand) {
                 if (args[args.length - 1].indexOf("make next-gen-html") >= 0) {
                     return 0;

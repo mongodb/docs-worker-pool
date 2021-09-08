@@ -216,8 +216,8 @@ export abstract class JobHandler {
         this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' });
     }
 
-    protected getPathPrefix(): Promise<string> {
-        return Promise.resolve("");
+    protected getPathPrefix(): Promise<string|undefined> {
+        return Promise.resolve(undefined);
     }
 
     protected constructManifestIndexPath(): Promise<void> {
@@ -281,6 +281,7 @@ export abstract class JobHandler {
             this.cleanup();
         } catch (error) {
             try {
+                console.log(error);
                 await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
                 this.cleanup();
             } catch (error) {

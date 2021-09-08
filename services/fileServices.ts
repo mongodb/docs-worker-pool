@@ -3,6 +3,9 @@ import axios from 'axios';
 import path from 'path';
 import yaml from 'js-yaml';
 import { InvalidJobError } from '../errors/errors';
+
+export const axiosApi = axios.create();
+
 export interface IFileSystemServices {
     resetDirectory(dir: string): void;
     getFilesInDirectory(base: string, ext: string): Array<string>;
@@ -20,33 +23,34 @@ export interface IFileSystemServices {
 export class FileSystemServices implements IFileSystemServices {
 
     private async download(url: string): Promise<any> {
-        return await axios.get(url);
+        return await axiosApi.get(url);
     }
 
     private isDownloadSuccess(resp): boolean {
         return (resp?.status == 200 && resp?.data);
     }
 
-    async downloadYaml(url: any): Promise<any> {
-        let resp = await this.download(url);
-        const returnObject = {};
-        if (this.isDownloadSuccess(resp)) {
-            const yamlParsed = yaml.safeLoad(resp.data);
-            returnObject['status'] = 'success';
-            returnObject['content'] = yamlParsed;
-        } else {
-            returnObject['status'] = 'failure';
-            returnObject['content'] = resp;
-        }
-        return returnObject;
+    async downloadYaml(url: any): Promise<any> { 
+            let resp = await this.download(url);
+            const returnObject = {};
+            if (this.isDownloadSuccess(resp)) {
+                const yamlParsed = yaml.safeLoad(resp.data);
+                returnObject['status'] = 'success';
+                returnObject['content'] = yamlParsed;
+            } else {
+                returnObject['status'] = 'failed';
+                returnObject['content'] = resp;
+            }
+            return returnObject;
     }
 
     async saveUrlAsFile(url: string, path: string, options: any): Promise<any> {
         let resp = await this.download(url);
+        console.log(resp);
         if (resp && resp.status == 200 && resp.data) {
             return this.writeToFile(path, resp.data, options);
         } else {
-            throw new InvalidJobError(`Unable to download file ${url} error: ${resp}`)
+            throw new InvalidJobError(`Unable to download file ${url} error: ${resp?.status}`)
         }
     }
 

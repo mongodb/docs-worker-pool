@@ -1,5 +1,5 @@
 import { mockDeep, mockReset } from 'jest-mock-extended';
-import { IJob, Job } from '../../entities/job';
+import { IJob } from '../../entities/job';
 import { IFileSystemServices } from '../../services/fileServices';
 import * as data from '../data/jobDef'
 import { JobValidator } from '../../job/jobValidator';
