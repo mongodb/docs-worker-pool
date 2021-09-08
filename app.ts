@@ -42,7 +42,7 @@ async function init(): Promise<void> {
   cdnConnector = new FastlyConnector(c, hybridJobLogger);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandletFactory = new JobHandlerFactory();
-  jobManager = new JobManager(c, jobValidator, jobHandletFactory, jobCommandExecutor, jobRepository, repoEntitlementRepository, cdnConnector, repoConnector, fileSystemServices, hybridJobLogger);
+  jobManager = new JobManager(c, jobValidator, jobHandletFactory, jobCommandExecutor, jobRepository, cdnConnector, repoConnector, fileSystemServices, hybridJobLogger);
   jobManager
     .start()
     .catch(err => {

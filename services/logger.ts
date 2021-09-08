@@ -1,9 +1,9 @@
 import {JobRepository} from "../repositories/jobRepository"
 
 export interface ILogger {
-    info(contextId:string, message: string): Promise<void>;
-    warn(contextId:string, message: string): Promise<void>;
-    error(contextId:string, message: string): Promise<void>;
+    info(contextId:string, message: string): void
+    warn(contextId:string, message: string): void;
+    error(contextId:string, message: string): void;
 }
 
 export interface IJobRepoLogger extends ILogger {
@@ -11,14 +11,14 @@ export interface IJobRepoLogger extends ILogger {
 }
 
 export class ConsoleLogger implements ILogger{
-    info(contextId: string, message: string): Promise<void> {
-        throw new Error("Method not implemented.");
+    info(contextId: string, message: string): void {
+       console.info(`Context: ${contextId} message: ${message}`);
     }
-    warn(contextId: string, message: string): Promise<void> {
-        throw new Error("Method not implemented.");
+    warn(contextId: string, message: string): void {
+        console.warn(`Context: ${contextId} message: ${message}`);
     }
-    error(contextId: string, message: string): Promise<void> {
-        throw new Error("Method not implemented.");
+    error(contextId: string, message: string): void {
+        console.error(`Context: ${contextId} message: ${message}`);
     }
 }
 
@@ -28,7 +28,8 @@ export class HybridJobLogger extends ConsoleLogger implements IJobRepoLogger {
         super();
         this._jobRepo = jobRepo;
     }
-    save(contextId: string, message: string): Promise<void> {
-        throw new Error("Method not implemented.");
+    async save(contextId: string, message: string): Promise<void> {
+        this.info(contextId, message);
+        await this._jobRepo.insertLogStatement(contextId, [message]);
     }
 }

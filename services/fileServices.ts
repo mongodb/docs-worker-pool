@@ -38,7 +38,7 @@ export class FileSystemServices implements IFileSystemServices {
             returnObject['status'] = 'success';
             returnObject['content'] = yamlParsed;
         } else {
-            returnObject['status'] = 'failure';
+            returnObject['status'] = 'failed';
             returnObject['content'] = resp;
         }
         return returnObject;

@@ -17,9 +17,6 @@ describe('FileSystemServices Tests', () => {
         fs.removeSync.mockClear();
         fs.writeFileSync.mockClear();
     })
-    afterEach(() => {
-        mock.reset();
-    })
     test('Construct FileSystemServices', () => {
         expect(new FileSystemServices()).toBeDefined();
     })

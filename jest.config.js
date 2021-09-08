@@ -3,16 +3,17 @@ module.exports = {
     "collectCoverageFrom": ["**/*.ts"],
     "coveragePathIgnorePatterns": [
         "node_modules",
-        "tests"
+        "tests",
+        "errors"
     ],
 
     "coverageDirectory": "<rootDir>/coverage/",
     "coverageThreshold": {
         "global": {
-            "branches": 75,
-            "functions": 75,
-            "lines": 75,
-            "statements": 75
+            "branches": 90,
+            "functions": 90,
+            "lines": 90,
+            "statements": 90
         }
     },
     "verbose": false

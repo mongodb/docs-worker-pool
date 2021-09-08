@@ -33,7 +33,6 @@ describe('JobHandlerFactory Tests', () => {
     repoConnector = mockDeep<IRepoConnector>();
     logger = mockDeep<IJobRepoLogger>();
     jobHandlerFactory = new JobHandlerFactory();
-    jobHandlerFactory = new JobHandlerFactory();
   })
 
   test('Construct Job Factory', () => {
