@@ -281,7 +281,6 @@ export abstract class JobHandler {
             this.cleanup();
         } catch (error) {
             try {
-                console.log(error);
                 await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
                 this.cleanup();
             } catch (error) {

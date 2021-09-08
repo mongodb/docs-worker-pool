@@ -391,8 +391,4 @@ export class TestDataProvider {
         }
         return retVal;
     }
-
-    static getSampleYamlFile(fileName:string): string {
-        return fs.readFileSync(path.resolve(__dirname, fileName), 'utf8');
-    }
 }

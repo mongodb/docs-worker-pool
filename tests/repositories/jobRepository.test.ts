@@ -57,11 +57,9 @@ describe('Job Repository Tests', () => {
                 jobRepo.updateWithCompletionStatus("Test_Job", "All good").catch((error) => {
                     expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
                     expect(error.message).toContain(`Mongo Timeout Error: Timed out while updating success status for jobId: Test_Job`)
-                    console.log(error.message);
-                 });
+                });
                 jest.runAllTimers();
             } catch (err) {
-                console.log(err);
             }
         })
     })
@@ -74,7 +72,7 @@ describe('Job Repository Tests', () => {
             dbRepoHelper.config.get.calledWith("MONGO_TIMEOUT_S").mockReturnValueOnce(1);
             await expect(jobRepo.updateWithErrorStatus("Test_Job", "wierd reason")).resolves.toEqual(true);
             expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
-            expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query,  testData.update);
+            expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query, testData.update);
 
             expect(dbRepoHelper.logger.error).toBeCalledTimes(0);
         })
@@ -88,7 +86,7 @@ describe('Job Repository Tests', () => {
 
         test('getOneQueuedJobAndUpdate succeeds', async () => {
             const testData = TestDataProvider.getFindOneAndUpdateCallInfo();
-            dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce( data.default);
+            dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(data.default);
             await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(Object.assign({}, data.default));
             expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
             expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledWith(testData.query, testData.update, testData.options);
@@ -102,16 +100,12 @@ describe('Job Repository Tests', () => {
                     setTimeout(resolve, 5000, 'one');
                 });
             });
-            try {
-                jobRepo.getOneQueuedJobAndUpdate().catch((error) => {
-                    expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
-                    expect(error.message).toContain(`Mongo Timeout Error: Timed out while retrieving job`)
-                    console.log(error.message);
-                 });
-                jest.runAllTimers();
-            } catch (err) {
-                console.log(err);
-            }
+            jobRepo.getOneQueuedJobAndUpdate().catch((error) => {
+                expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
+                expect(error.message).toContain(`Mongo Timeout Error: Timed out while retrieving job`)
+            });
+            jest.runAllTimers();
+
         })
     })
 
@@ -119,14 +113,14 @@ describe('Job Repository Tests', () => {
         test('insertLogStatement succeeds', async () => {
             const testData = TestDataProvider.getInsertLogStatementInfo("Test_Job", ["msg1", "msg2"]);
             setupForUpdateOneSuccess();
-            await expect(jobRepo.insertLogStatement("Test_Job", ["msg1", "msg2"])).resolves.toEqual(true); 
+            await expect(jobRepo.insertLogStatement("Test_Job", ["msg1", "msg2"])).resolves.toEqual(true);
             validateSuccessfullUpdate(testData);
         })
     })
 
     describe('insertNotificationMessages Tests', () => {
         test('insertNotificationMessages succeeds', async () => {
-            const testData = TestDataProvider.getInsertComMessageInfo("Test_Job","Successfully tested");
+            const testData = TestDataProvider.getInsertComMessageInfo("Test_Job", "Successfully tested");
             setupForUpdateOneSuccess();
             await expect(jobRepo.insertNotificationMessages("Test_Job", "Successfully tested")).resolves.toEqual(true);
             validateSuccessfullUpdate(testData);
@@ -135,7 +129,7 @@ describe('Job Repository Tests', () => {
 
     describe('insertPurgedUrls Tests', () => {
         test('insertPurgedUrls succeeds', async () => {
-            const testData = TestDataProvider.getInsertPurgedUrls("Test_Job",['url1', 'url2']);
+            const testData = TestDataProvider.getInsertPurgedUrls("Test_Job", ['url1', 'url2']);
             setupForUpdateOneSuccess();
             await expect(jobRepo.insertPurgedUrls("Test_Job", ['url1', 'url2'])).resolves.toEqual(true);
             validateSuccessfullUpdate(testData);
@@ -144,16 +138,16 @@ describe('Job Repository Tests', () => {
 
     describe('resetJobStatus Tests', () => {
         test('resetJobStatus succeeds', async () => {
-            const testData = TestDataProvider.getJobResetInfo("Test_Job","reset job status for testing reasons ");
+            const testData = TestDataProvider.getJobResetInfo("Test_Job", "reset job status for testing reasons ");
             setupForUpdateOneSuccess();
             await expect(jobRepo.resetJobStatus("Test_Job", "inQueue", "reset job status for testing reasons ")).resolves.toEqual(true);
             validateSuccessfullUpdate(testData);
         })
     })
 
-    function validateSuccessfullUpdate(testData:any) {
+    function validateSuccessfullUpdate(testData: any) {
         expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
-        expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query,  testData.update);
+        expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query, testData.update);
         expect(dbRepoHelper.logger.error).toBeCalledTimes(0);
     }
 

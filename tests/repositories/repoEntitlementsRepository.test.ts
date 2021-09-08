@@ -17,7 +17,7 @@ describe('Job Repository Tests', () => {
     describe('Repo Entitlements Repository getRepoEntitlementsByGithubUsername Tests', () => {
         test('getRepoEntitlementsByGithubUsername returns failure as result is undefined', async () => {
             const testData = TestDataProvider.getRepoEntitlementsByGithubUsernameInfo("test_user");
-            await expect(entitlementRepo.getRepoEntitlementsByGithubUsername("test_user")).resolves.toEqual( { status: 'failure' });
+            await expect(entitlementRepo.getRepoEntitlementsByGithubUsername("test_user")).resolves.toEqual({ status: 'failure' });
             expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
             expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);
         })
@@ -25,7 +25,7 @@ describe('Job Repository Tests', () => {
         test('getRepoEntitlementsByGithubUsername is successfull', async () => {
             const testData = TestDataProvider.getRepoEntitlementsByGithubUsernameInfo("test_user");
             dbRepoHelper.collection.findOne.mockReturnValueOnce({ github_username: "test_user", repos: ["great_repo", "greates_repo"] });
-            await expect(entitlementRepo.getRepoEntitlementsByGithubUsername("test_user")).resolves.toEqual( { repos: ["great_repo", "greates_repo"], github_username: "test_user", status: "success" });
+            await expect(entitlementRepo.getRepoEntitlementsByGithubUsername("test_user")).resolves.toEqual({ repos: ["great_repo", "greates_repo"], github_username: "test_user", status: "success" });
             expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
             expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);
         })
@@ -37,15 +37,12 @@ describe('Job Repository Tests', () => {
                     setTimeout(resolve, 5000, 'one');
                 });
             });
-            try {
-                entitlementRepo.getRepoEntitlementsByGithubUsername("test_user").catch((error) => {
-                    expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
-                    expect(error.message).toContain(`Mongo Timeout Error: Timedout while retrieving entitlements for test_user`)
-                 });
-                jest.runAllTimers();
-            } catch (err) {
-                console.log(err);
-            }
+            entitlementRepo.getRepoEntitlementsByGithubUsername("test_user").catch((error) => {
+                expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
+                expect(error.message).toContain(`Mongo Timeout Error: Timedout while retrieving entitlements for test_user`)
+            });
+            jest.runAllTimers();
+
         })
     })
 })

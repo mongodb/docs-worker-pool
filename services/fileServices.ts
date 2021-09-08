@@ -8,7 +8,7 @@ export const axiosApi = axios.create();
 
 export interface IFileSystemServices {
     resetDirectory(dir: string): void;
-    getFilesInDirectory(base: string, ext: string): Array<string>;
+    getFilesInDirectory(base: string, ext: string, files:string[], result:string[]): Array<string>;
     resetDirectory(dir: string): void;
     fileExists(dir: string): boolean;
     rootFileExists(dir: string): boolean;
@@ -44,24 +44,24 @@ export class FileSystemServices implements IFileSystemServices {
             return returnObject;
     }
 
-    async saveUrlAsFile(url: string, path: string, options: any): Promise<any> {
+    async saveUrlAsFile(url: string, path: string, options: any): Promise<boolean> {
         let resp = await this.download(url);
-        console.log(resp);
         if (resp && resp.status == 200 && resp.data) {
-            return this.writeToFile(path, resp.data, options);
+            this.writeToFile(path, resp.data, options);
         } else {
             throw new InvalidJobError(`Unable to download file ${url} error: ${resp?.status}`)
         }
+        return true;
     }
 
-    getFilesInDirectory(base: string, ext: string): Array<string> {
+    getFilesInDirectory(base: string, ext: string, files:any = null, result:any = null): Array<string> {
         if (fs.existsSync(base)) {
-            const filesInternal = fs.readdirSync(base);
-            let resultInternal = new Array<string>();
+            const filesInternal = files || fs.readdirSync(base);
+            let resultInternal = result || new Array<string>();
             filesInternal.forEach(file => {
                 const newbase = path.join(base, file);
                 if (fs.statSync(newbase).isDirectory()) {
-                    resultInternal = module.exports.getFilesInDir(
+                    resultInternal = this.getFilesInDirectory(
                         newbase,
                         ext,
                         fs.readdirSync(newbase),
@@ -79,7 +79,7 @@ export class FileSystemServices implements IFileSystemServices {
 
     resetDirectory(dir: string): void {
         fs.removeSync(dir);
-        fs.mkdirsSync(dir);
+        fs.mkdirSync(dir);
     }
 
     fileExists(dir: string): boolean {
@@ -91,7 +91,7 @@ export class FileSystemServices implements IFileSystemServices {
     }
 
     writeToFile(fileName: string, text: string, options: any): void {
-        return fs.writeFileSync(fileName, text, options);
+        fs.writeFileSync(fileName, text, options);
     }
 
     removeDirectory(dir): boolean {
