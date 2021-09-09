@@ -114,11 +114,9 @@ module.exports = {
   async startServer() {
     // Initialize MongoDB Collection
     // This is the collection that houses the work tickets
-    console.log("Starting worker pool");
     mongoClient = await mongo.initMongoClient();
     if (mongoClient) {
       queueCollection = mongo.getCollection();
-      console.log(queueCollection)
     }
     monitorInstance.reportStatus('start server');
 
