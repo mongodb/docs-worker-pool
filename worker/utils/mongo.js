@@ -20,8 +20,6 @@ let client;
 module.exports = {
   // Initializes the Mongo Client
   async initMongoClient() {
-    console.log(url);
-    console.log(DB_NAME);
     client = new MongoClient(url, { useNewUrlParser: true });
     return client.connect();
   },
@@ -35,10 +33,8 @@ module.exports = {
   // Gets the Queue Collection
   getCollection() {
     if (client) {
-      console.log(`DB_NAME: ${DB_NAME} COLL_NAME: ${COLL_NAME}`)
       return client.db(DB_NAME).collection(COLL_NAME);
     }
-    console.log('client null')
     return null;
   },
 
