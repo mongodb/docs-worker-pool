@@ -1,5 +1,6 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
+REGRESSION = $(shell printenv REGRESSION)
 DEDICATED_BUCKET=true
 
 ifeq ($(STAGING_USERNAME),)
@@ -20,7 +21,7 @@ else ifeq ($(SNOOTY_ENV), production)
 else ifeq ($(SNOOTY_ENV), staging)
 	PRODUCTION_URL="https://docs-atlas-staging.mongodb.com"
 	PRODUCTION_BUCKET=docs-atlas-stg
-else ifeq ($(SNOOTY_ENV), regression)
+else ifeq ($(SNOOTY_ENV), integration)
 	PRODUCTION_URL="https://docs-atlas-integration.mongodb.com"
 	PRODUCTION_BUCKET=docs-atlas-intgr
 endif
