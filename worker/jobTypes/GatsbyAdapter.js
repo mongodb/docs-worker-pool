@@ -15,6 +15,20 @@ class GatsbyAdapterClass {
       envVars += `PATH_PREFIX=${pathPrefix}\n`
 		}
 
+    // PUT ENVIRONMENT VARIABLES FOR SNOOTY FRONTEND HERE
+    // in a key value format e.g.
+    // 'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
+    // If no environment variables are needed, please leave this as an empty object
+    const snootyFrontEndVars = {
+      'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION,
+      'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': process.env.GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN,
+    };
+
+    for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
+      const isTruthyEnv = (envValue && String(envValue).toUpperCase() !== 'FALSE');
+      if (isTruthyEnv) envVars += `${envName}=${envValue}\n`;
+    }
+
     return envVars
   }
 
@@ -27,14 +41,14 @@ class GatsbyAdapterClass {
               console.log(`error writing .env.production file: ${err.stderr}`);
               throw err;
             }
-        }); 
+        });
       } catch (error) {
-       console.log(error)
-       throw error 
+       console.log(error);
+       throw error;
       }
   }
 }
-  module.exports = {
-    GatsbyAdapterClass,
-  };
-  
+
+module.exports = {
+  GatsbyAdapterClass,
+};

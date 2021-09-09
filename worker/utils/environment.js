@@ -5,6 +5,7 @@ const atlasUsername = process.env.MONGO_ATLAS_USERNAME;
 const atlasPassword = process.env.MONGO_ATLAS_PASSWORD;
 const jobDb = process.env.DB_NAME;
 const jobCol = process.env.COL_NAME;
+const purgeAll = process.env.PURGE_ALL;
 
 class EnvironmentClass {
   static getDB() {
@@ -21,6 +22,16 @@ class EnvironmentClass {
       return 'queue';
     }
     return jobCol;
+  }
+
+  static shouldPurgeAll() {
+    if (purgeAll === undefined) {
+      return true
+    }
+    if (purgeAll === 'true') {
+      return true;
+    }
+    return false;
   }
 
   static getXlarge() {

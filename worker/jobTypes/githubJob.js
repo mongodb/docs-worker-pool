@@ -339,6 +339,9 @@ class GitHubJobClass {
         }
         commandsToBuild[commandsToBuild.length - 1] = 'make get-build-dependencies';
         commandsToBuild.push('make next-gen-html')
+        if (this.currentJob.payload.repoName === 'devhub-content') {
+            commandsToBuild[commandsToBuild.length - 1] += ` PATH_PREFIX=/developer`;
+          }
           
       }
 
