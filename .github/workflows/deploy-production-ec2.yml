@@ -1,0 +1,67 @@
+on:
+  push:
+    tags:
+      - 'v*'
+name: Deploy Production
+jobs:
+  deploy-production-1:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.3.0
+        with:
+          key: ${{ secrets.EC2_RSA_KEY }}
+          known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
+          name: id_rsa
+      - name: SSH to Production 1
+        env:
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+        run: |
+          ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_1}} -T '
+          cd docker/docs-worker-pool
+          git fetch origin
+          git checkout master
+          git pull
+          git checkout $(git describe --tags)
+          sudo docker system prune -af
+          sudo docker build --build-arg NPM_EMAIL=${{ secrets.NPM_EMAIL }} --build-arg NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }} --no-cache --tag production . 
+          sudo docker stop $(sudo docker ps -a -q)
+          sudo sh rundocker.sh
+          sudo sh rundocker.sh
+          sudo docker container prune -f
+          '
+  deploy-production-2:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.3.0
+        with:
+          key: ${{ secrets.EC2_RSA_KEY }}
+          known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
+          name: id_rsa
+      - name: SSH to Production 2
+        env:
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+        run: |
+          ssh -l ubuntu ${{ secrets.PRODUCTION_HOST_2}} -T '
+          cd docker/docs-worker-pool
+          git fetch origin
+          git checkout master
+          git pull
+          git checkout $(git describe --tags)
+          sudo docker system prune -af
+          sudo docker build --build-arg NPM_EMAIL=${{ secrets.NPM_EMAIL }} --build-arg NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }} --no-cache --tag production . 
+          sudo docker stop $(sudo docker ps -a -q)
+          sudo sh rundocker.sh
+          sudo sh rundocker.sh
+          sudo docker container prune -f
+          '
+          
