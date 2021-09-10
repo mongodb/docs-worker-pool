@@ -1,3 +1,4 @@
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 
 DEDICATED_BUCKET=true
