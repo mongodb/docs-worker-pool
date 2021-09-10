@@ -29,6 +29,9 @@ RUN curl --location https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
+# use npm 7.*
+RUN npm install npm@7
+
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
 RUN npm -g config set user root
