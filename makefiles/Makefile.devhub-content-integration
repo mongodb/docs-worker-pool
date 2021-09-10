@@ -2,13 +2,13 @@ USER=$(shell whoami)
 
 DEDICATED_BUCKET=true
 
-STAGING_URL="http://developer-hub-staging.s3-website-us-east-1.amazonaws.com"
-STAGING_BUCKET=developer-hub-staging
+STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
+STAGING_BUCKET=docs-devhub-staging
 
 STRAPI_URL=http://54.219.137.111:1337
 
-PRODUCTION_BUCKET=developer-hub-prod
-PRODUCTION_URL=https://mongodb.com/developer
+PRODUCTION_BUCKET=docs-devhub-prod
+PRODUCTION_URL=https://developer.mongodb.com
 
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
@@ -17,9 +17,6 @@ REPO_DIR=$(shell pwd)
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
-
-AWS_ACCESS_KEY_ID=$(shell printenv AWS_ACCESS_KEY_ID_DEVHUB)
-AWS_SECRET_ACCESS_KEY=$(shell printenv AWS_SECRET_ACCESS_KEY_DEVHUB)
 GITHUB_USER = $(shell printenv GITHUB_BOT_USERNAME)
 GITHUB_PASS = $(shell printenv GITHUB_BOT_PASSWORD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
