@@ -57,6 +57,14 @@ Resources:
               value: ${self:custom.fastlyServiceId}
             - Name: COL_NAME
               value: ${self:custom.collection}
+            - Name: NPM_BASE_64_AUTH
+              value: ${self:custom.npmBase64Auth}
+            - Name: NPM_EMAIL
+              value: ${self:custom.npmEmail}
+            - Name: AWS_ACCESS_KEY_ID_DEVHUB
+              value: ${self:custom.awsKeyDevhub}
+            - Name: AWS_SECRET_ACCESS_KEY_DEVHUB
+              value: ${self:custom.awsSecretDevhub}
           LogConfiguration:
             LogDriver: awslogs
             Options:
