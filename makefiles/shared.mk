@@ -35,7 +35,7 @@ else ifeq ($(SNOOTY_ENV), integration)
 endif
 
 endif
-@echo "Hosted at ${PRODUCTION_URL}";
+	@echo "Hosted at ${PRODUCTION_URL}";
 
 ifndef CUSTOM_NEXT_GEN_DEPLOY
 next-gen-deploy:
