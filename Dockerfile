@@ -29,6 +29,9 @@ RUN curl --location https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
+# use npm 7.*
+RUN npm install npm@7
+
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
 RUN npm -g config set user root
@@ -37,7 +40,7 @@ USER docsworker-xlarge
 WORKDIR /home/docsworker-xlarge
 
 # get shared.mk
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2357/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty

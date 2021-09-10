@@ -15,13 +15,6 @@ class Monitor {
     this.logger = logger;
   }
 
-  // env config
-  setXlarge(style) {
-    if (style !== undefined) {
-      this.config.isXlarge = style;
-    }
-  }
-
   // for now this tells us the db we connect to
   // TODO: abstract DB_NAME to an environment setting
   setEnvType(type) {

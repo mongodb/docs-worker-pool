@@ -1,0 +1,86 @@
+Resources:
+  DocsBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.bucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+  DocAtlasBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.atlastBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+  CloudManagerBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.cloudManagerBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
+  OpsManagerBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.opsManagerBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
+  DocsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: DocsBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource: 
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
+
+  DocAtlasBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: DocAtlasBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource: 
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
+
+  CloudManagerBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: CloudManagerBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
+
+  OpsManagerBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: OpsManagerBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]

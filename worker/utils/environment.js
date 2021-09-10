@@ -3,7 +3,6 @@ const fastlyServiceId = process.env.FASTLY_SERVICE_ID;
 const dochubMap = process.env.FASTLY_DOCHUB_MAP;
 const atlasUsername = process.env.MONGO_ATLAS_USERNAME;
 const atlasPassword = process.env.MONGO_ATLAS_PASSWORD;
-const xlarge = process.env.XLARGE;
 const jobDb = process.env.DB_NAME;
 const jobCol = process.env.COL_NAME;
 const purgeAll = process.env.PURGE_ALL;
