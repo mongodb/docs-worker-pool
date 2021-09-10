@@ -17,25 +17,22 @@ get-project-name:
 
 
 ifndef DEDICATED_BUCKET
-STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-stg
-
-ifeq ($(REGRESSION), true)
-	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-intgr
-else ifeq ($(SNOOTY_ENV), production) 
-	PRODUCTION_URL="https://docs.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-prd
-else ifeq ($(SNOOTY_ENV), staging)
-	PRODUCTION_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-stg
-else ifeq ($(SNOOTY_ENV), integration)
-	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-intgr
+	STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+	STAGING_BUCKET=docs-mongodb-org-stg
+	ifeq ($(REGRESSION), true)
+		PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
+		PRODUCTION_BUCKET=docs-mongodb-org-intgr
+	else ifeq ($(SNOOTY_ENV), production) 
+		PRODUCTION_URL="https://docs.mongodb.com"
+		PRODUCTION_BUCKET=docs-mongodb-org-prd
+	else ifeq ($(SNOOTY_ENV), staging)
+		PRODUCTION_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+		PRODUCTION_BUCKET=docs-mongodb-org-stg
+	else ifeq ($(SNOOTY_ENV), integration)
+		PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
+		PRODUCTION_BUCKET=docs-mongodb-org-intgr
+	endif
 endif
-
-endif
-	@echo "Hosted at ${PRODUCTION_URL}";
 
 ifndef CUSTOM_NEXT_GEN_DEPLOY
 next-gen-deploy:
