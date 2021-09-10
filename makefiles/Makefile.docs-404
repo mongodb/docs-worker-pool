@@ -1,11 +1,15 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
+SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
+
+DEDICATED_BUCKET=true
 ifeq ($(STAGING_USERNAME),)
 	USER=$(shell whoami)
 else
 	USER=$(STAGING_USERNAME)
 endif
 STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-staging
+STAGING_BUCKET=docs-mongodb-org-stg
 REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -13,10 +17,13 @@ PROJECT=docs-404
 MUT_PREFIX=404
 CUSTOM_NEXT_GEN_DEPLOY=true
 
-ifeq ($(SNOOTY_INTEGRATION),false)
-  DEPLOY_JOBS=job-docs-mongodb-org-prod job-docs-atlas-prod job-docs-opsmanager-prod job-docs-cloudmanager-prod
-else
-  DEPLOY_JOBS=job-docs-manual-integration
+
+ifeq ($(SNOOTY_ENV), production) 
+	DEPLOY_JOBS=docs-mongodb-org-prd
+else ifeq ($(SNOOTY_ENV), staging)
+	DEPLOY_JOBS=docs-mongodb-org-stg
+else ifeq ($(SNOOTY_ENV), regression)
+	DEPLOY_JOBS=docs-mongodb-org-intgr
 endif
 
 .PHONY: next-gen-html next-gen-stage next-gen-deploy $(DEPLOY_JOBS)

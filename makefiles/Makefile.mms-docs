@@ -1,4 +1,9 @@
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
+DEDICATED_BUCKET=true
+
+SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
+
 ifeq ($(STAGING_USERNAME),)
 	USER=$(shell whoami)
 else
@@ -6,16 +11,32 @@ else
 endif
 
 STAGING_URL_CLOUDMGR="https://docs-cloudmanager-staging.mongodb.com"
-STAGING_BUCKET_CLOUDMGR=docs-cloudmanager-staging
-
-PRODUCTION_URL_CLOUDMGR="https://docs.cloudmanager.mongodb.com"
-PRODUCTION_BUCKET_CLOUDMGR=docs-cloudmanager-prod
-
+STAGING_BUCKET_CLOUDMGR=docs-cloudmanager-stg
 STAGING_URL_OPSMGR="https://docs-opsmanager-staging.mongodb.com"
-STAGING_BUCKET_OPSMGR=docs-opsmanager-staging
+STAGING_BUCKET_OPSMGR=docs-opsmanager-stg
 
-PRODUCTION_URL_OPSMGR="https://docs.opsmanager.mongodb.com"
-PRODUCTION_BUCKET_OPSMGR=docs-opsmanager-prod
+ifeq ($(REGRESSION), true)
+	PRODUCTION_URL_CLOUDMGR="https://docs-cloudmanager-integration.mongodb.com"
+	PRODUCTION_BUCKET_CLOUDMGR=docs-cloudmanager-intgr
+	PRODUCTION_URL_OPSMGR="https://docs-opsmanager-integration.mongodb.com"
+	PRODUCTION_BUCKET_OPSMGR=docs-opsmanager-intgr	
+else ifeq ($(SNOOTY_ENV), production) 
+	PRODUCTION_URL_OPSMGR="https://docs.opsmanager.mongodb.com"
+	PRODUCTION_BUCKET_OPSMGR=docs-opsmanager-prd
+	PRODUCTION_URL_CLOUDMGR="https://docs.cloudmanager.mongodb.com"
+	PRODUCTION_BUCKET_CLOUDMGR=docs-cloudmanager-prd
+else ifeq ($(SNOOTY_ENV), staging)
+	PRODUCTION_URL_CLOUDMGR="https://docs-cloudmanager-staging.mongodb.com"
+	PRODUCTION_BUCKET_CLOUDMGR=docs-cloudmanager-stg
+	PRODUCTION_URL_OPSMGR="https://docs-opsmanager-staging.mongodb.com"
+	PRODUCTION_BUCKET_OPSMGR=docs-opsmanager-stg		
+else ifeq ($(SNOOTY_ENV), integration)
+	PRODUCTION_URL_CLOUDMGR="https://docs-cloudmanager-integration.mongodb.com"
+	PRODUCTION_BUCKET_CLOUDMGR=docs-cloudmanager-intgr
+	PRODUCTION_URL_OPSMGR="https://docs-opsmanager-integration.mongodb.com"
+	PRODUCTION_BUCKET_OPSMGR=docs-opsmanager-intgr		
+endif
+
 
 PREFIX=
 

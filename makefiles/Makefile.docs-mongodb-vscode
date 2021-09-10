@@ -1,18 +1,9 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
 ifeq ($(STAGING_USERNAME),)
 	USER=$(shell whoami)
 else
 	USER=$(STAGING_USERNAME)
-endif
-STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-staging
-
-ifeq ($(SNOOTY_INTEGRATION),false)
-  PRODUCTION_URL="https://docs.mongodb.com"
-  PRODUCTION_BUCKET=docs-mongodb-vscode-prod
-else
-  PRODUCTION_URL="docs-mongodbcom-integration.corp.mongodb.com"
-  PRODUCTION_BUCKET=docs-mongodb-vscode-integration
 endif
 
 PROJECT=mongodb-vscode
@@ -29,4 +20,4 @@ get-build-dependencies:
 
 next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
-	mut-index upload public -o ${PROJECT}-${GIT_BRANCH}.json -u "${PRODUCTION_URL}/${MUT_PREFIX}" -s
+	mut-index upload public -b ${PRODUCTION_BUCKET} -o ${PROJECT}-${GIT_BRANCH}.json -u "${PRODUCTION_URL}/${MUT_PREFIX}" -s

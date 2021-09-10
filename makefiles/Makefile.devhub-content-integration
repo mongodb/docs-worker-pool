@@ -1,5 +1,6 @@
-GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
+
+DEDICATED_BUCKET=true
 
 STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
 STAGING_BUCKET=docs-devhub-staging
