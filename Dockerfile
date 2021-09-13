@@ -83,8 +83,6 @@ WORKDIR /usr/app
 COPY --from=ts-compiler /usr/app/package*.json ./
 COPY --from=ts-compiler /usr/app/build ./
 RUN npm install --only=production
-
-FROM gcr.io/distroless/nodejs:14
 RUN mkdir repos && chmod 755 repos
 
 # entry to kick-off the worker
