@@ -1,12 +1,13 @@
 {
     "compilerOptions": {
-      "moduleResolution": "node",
       "target": "esnext",
       "module": "commonjs",
       "outDir": "out",
       "strictNullChecks": true,
       "esModuleInterop": true,   
       "baseUrl": "./types",
-      "experimentalDecorators": true
+      "experimentalDecorators": true,
+      "include": ["src/**/*.ts",],
+      "exclude": [ "tests/**/*.ts"]
     }
   }

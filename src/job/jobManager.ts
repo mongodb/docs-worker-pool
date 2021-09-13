@@ -6,7 +6,7 @@ import { IConfig } from "config";
 import { JobHandler } from "../job/jobHandler";
 import { IFileSystemServices } from "../services/fileServices";
 import { IJobValidator } from "./jobValidator";
-import { JobHandlerFactory } from "./jobHandlerFactory";
+import JobHandlerFactory from "./jobHandlerFactory";
 import { IJobCommandExecutor } from "../services/commandExecutor";
 import { IJob } from "../entities/job";
 
