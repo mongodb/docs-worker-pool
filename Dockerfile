@@ -69,6 +69,7 @@ RUN cd snooty-devhub && \
 	npm install --production
 
 # install the node dependencies for worker pool
+RUN tsc
 COPY out/ . 
 COPY package.json .
 COPY package-lock.json .
