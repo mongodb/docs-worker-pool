@@ -6,7 +6,7 @@ module.exports = {
         "tests",
         "errors"
     ],
-
+    "modulePathIgnorePatterns": ["<rootDir>/infrastructure/"],
     "coverageDirectory": "<rootDir>/coverage/",
     "coverageThreshold": {
         "global": {
