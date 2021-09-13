@@ -3,7 +3,7 @@ import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
 
-describe('JobHandlerFactory Tests', () => {
+describe('ProductionJobHandler Tests', () => {
     
     let jobHandlerTestHelper: JobHandlerTestHelper;
 
@@ -185,7 +185,7 @@ describe.each(TestDataProvider.getManifestPrefixCases())('Execute Next Gen Build
         const expectedCommandSet = TestDataProvider.getExpectedProdDeployNextGenCommands(jobHandlerTestHelper.job);
         expect(jobHandlerTestHelper.job.deployCommands).toEqual(expectedCommandSet);
         expect(jobHandlerTestHelper.jobRepo.insertNotificationMessages).toBeCalledWith(jobHandlerTestHelper.job._id,  "Great work");
-        expect(jobHandlerTestHelper.fileSystemServices.getFilesInDirectory).toBeCalledWith(`./${jobHandlerTestHelper.job.payload.repoName}/build/public`, '');
+        expect(jobHandlerTestHelper.fileSystemServices.getFilesInDirectory).toBeCalledWith(`./${jobHandlerTestHelper.job.payload.repoName}/build/public`, '',null, null);
         expect(jobHandlerTestHelper.jobRepo.updateWithCompletionStatus).toBeCalledWith(jobHandlerTestHelper.job._id, ["1.html", "2.html", "3.html"]);
     })
 })
