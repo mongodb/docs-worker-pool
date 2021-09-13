@@ -33,8 +33,10 @@ export class ProductionJobHandler extends JobHandler {
     }
 
     prepStageSpecificNextGenCommands(): void {
+        if (this.currJob && this.currJob.buildCommands) {
             this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
             this.currJob.buildCommands.push('make next-gen-html');
+        }
     }
 
     async constructManifestIndexPath(): Promise<void> {

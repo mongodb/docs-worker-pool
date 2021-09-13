@@ -31,9 +31,11 @@ export class StagingJobHandler extends JobHandler {
     }
 
     prepStageSpecificNextGenCommands(): void {
-        this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-html';
-        if (this.currJob.payload.repoName === 'devhub-content-integration') {
-            this.currJob.buildCommands[this.currJob.buildCommands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
+        if (this.currJob.buildCommands) {
+            this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-html';
+            if (this.currJob.payload.repoName === 'devhub-content-integration') {
+                this.currJob.buildCommands[this.currJob.buildCommands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
+            }
         }
     }
     async deploy(): Promise<CommandExecutorResponse> {

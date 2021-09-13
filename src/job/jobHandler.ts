@@ -312,7 +312,7 @@ function throwIfJobInterupted() {
                 let jobHandler = this as JobHandler;
                 if (jobHandler && jobHandler.isStopped() && !jobHandler.stopped) {
                     jobHandler.getLogger().info(descriptor.value, `Resetting Job with ID: ${jobHandler.currJob._id} because server is being shut down`);
-                    jobHandler.jobRepository.resetJobStatus(jobHandler.currJob._id, `Resetting Job with ID: ${jobHandler.currJob._id} because server is being shut down`);
+                    jobHandler.jobRepository.resetJobStatus(jobHandler.currJob._id, 'inQueue', `Resetting Job with ID: ${jobHandler.currJob._id} because server is being shut down`);
                     jobHandler.stopped = true;
                     throw new JobStoppedError(`${jobHandler.currJob._id} is stopped`);
                 }

@@ -1,5 +1,5 @@
 import { Db } from 'mongodb';
-import { BaseRepository } from "./BaseRepository";
+import { BaseRepository } from "./baseRepository";
 import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
@@ -7,9 +7,7 @@ import { IConfig } from 'config';
 export class RepoEntitlementsRepository extends BaseRepository<Job> {
 
     constructor(db: Db, config: IConfig, logger: ILogger) {
-        super(db, config, logger);
-        this._repoName = "RepoEntitlementsRepository";
-        this._collection = db.collection(config.get("entitlementCollection"));
+        super(config, logger, "RepoEntitlementsRepository", db.collection(config.get("entitlementCollection")));
     }
 
     async getRepoEntitlementsByGithubUsername(githubUsername: string): Promise<any> {

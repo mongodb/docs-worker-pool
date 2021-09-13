@@ -1,5 +1,5 @@
 import mongodb from "mongodb";
-import { BaseRepository } from "./BaseRepository";
+import { BaseRepository } from "./baseRepository";
 import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
@@ -7,9 +7,7 @@ import { InvalidJobError } from "../errors/errors";
 
 export class JobRepository extends BaseRepository<Job> {
     constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
-        super(db, config, logger);
-        this._repoName = "JobRepository"
-        this._collection = db.collection(config.get("jobQueueCollection"));
+        super(config, logger, "JobRepository", db.collection(config.get("jobQueueCollection")));
     }
 
     async updateWithCompletionStatus(id: string, result: any): Promise<boolean> {
