@@ -12,7 +12,7 @@ import { JobRepository } from "../repositories/jobRepository";
 import { IFileSystemServices } from "../services/fileServices";
 import { IConfig } from "config";
 
-export default class JobHandlerFactory {
+export class JobHandlerFactory {
     public createJobHandler(job: IJob,  config: IConfig, jobRepository:JobRepository, fileSystemServices:IFileSystemServices, commandExecutor: IJobCommandExecutor, cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: IJobRepoLogger) : JobHandler {
         if (job.payload.jobType === "regression") {
             return new RegressionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
