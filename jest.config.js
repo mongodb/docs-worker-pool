@@ -1,6 +1,6 @@
 module.exports = {
     "collectCoverage": true,
-    "collectCoverageFrom": ["**/*.ts"],
+    "collectCoverageFrom": ["src/**/*.ts"],
     "coveragePathIgnorePatterns": [
         "node_modules",
         "tests",
