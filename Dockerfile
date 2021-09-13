@@ -69,13 +69,14 @@ RUN cd snooty-devhub && \
 	npm install --production
 
 # install the node dependencies for worker pool
-
-RUN npm install --production
+COPY package.json .
+RUN npm install
+COPY . .
 RUN tsc
-COPY out/ . 
+
 # where repo work will happen
 RUN mkdir repos && chmod 755 repos
 
 # entry to kick-off the worker
 EXPOSE 3000
-CMD ["node", "app.js"]
+CMD ["node", ",/out/app.js"]
