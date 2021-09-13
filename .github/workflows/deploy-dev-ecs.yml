@@ -12,12 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: '16'
-      - name: npm install, build and test
-        run: | 
-         npm install
-         npm build
-         npm test
+          node-version: '14.x'
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication
