@@ -69,13 +69,26 @@ RUN cd snooty-devhub && \
 	npm install --production
 
 # install the node dependencies for worker pool
-COPY package.json .
+WORKDIR /usr/app
+COPY package*.json ./
+COPY tsconfig*.json ./
 RUN npm install
-RUN tsc
-COPY out/ .
+COPY . ./
+RUN npm run build
 # where repo work will happen
+
+WORKDIR /usr/app
+COPY --from=ts-compiler /usr/app/package*.json ./
+COPY --from=ts-compiler /usr/app/build ./
+RUN npm install --only=production
+
+
 RUN mkdir repos && chmod 755 repos
 
 # entry to kick-off the worker
+
+WORKDIR /usr/app
+COPY --from=ts-remover /usr/app ./
 EXPOSE 3000
-CMD ["node", "app.js"]
+CMD ["app.js"]
+

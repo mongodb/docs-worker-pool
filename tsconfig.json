@@ -1,8 +1,9 @@
 {
     "compilerOptions": {
+      "rootDir": "./src",
+      "outDir": "./build",
       "target": "esnext",
       "module": "commonjs",
-      "outDir": "out",
       "strictNullChecks": true,
       "esModuleInterop": true,   
       "baseUrl": "./types",
