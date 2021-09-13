@@ -24,6 +24,7 @@
     "async-retry": "^1.2.3",
     "aws-sdk": "^2.383.0",
     "axios": "^0.21.1",
+    "config": "^3.3.6",
     "core-js": "^3.1.4",
     "express": "^4.16.4",
     "fastly": "^2.2.1",

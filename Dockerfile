@@ -70,7 +70,7 @@ RUN cd snooty-devhub && \
 
 # install the node dependencies for worker pool
 FROM node:14-alpine3.10 as ts-compiler
-WORKDIR /usr/app
+WORKDIR /home/docsworker-xlarge
 COPY package*.json ./
 COPY tsconfig*.json ./
 RUN npm install
@@ -79,10 +79,10 @@ RUN npm run build
 # where repo work will happen
 
 FROM node:14-alpine3.10 as ts-remover
-WORKDIR /usr/app
-COPY --from=ts-compiler /usr/app/package*.json ./
-COPY --from=ts-compiler /usr/app/build ./
-RUN npm install --only=production
+WORKDIR /home/docsworker-xlarge
+COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
+COPY --from=ts-compiler /home/docsworker-xlarge/build ./
+RUN npm install --production
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
 CMD ["app.js"]
