@@ -19,6 +19,7 @@ jobs:
           tsc
       - name: Run tests
         run: |
+          npm ci
           npm test
       - name: Install Serverless Framework
         run: npm install -g serverless
