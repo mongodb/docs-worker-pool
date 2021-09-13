@@ -19,8 +19,7 @@ jobs:
           tsc
       - name: Run tests
         run: |
-          npm ci
-      - uses: icrawl/action-tsc@v1
+          npm test
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication
