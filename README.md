@@ -2,7 +2,21 @@
 
 As part of the Docs Tools Next Generation Project, the Docs Worker Pool seeks to make the build process for developers both easier and more scalable for developers. 
 
-## Build and Run Docker Image
+Docs worker pool will be running as ECS Service. Serverless is used for automating the cloudformation stack creation. 
+going forward any new buckets needs to be added should be specified in infrastructure/ecs-main/buckets.yml
+
+## To Add new properties 
+
+All our properties are managed in parameter store and pulled by serverless framework during deploy time and pushed into the Task environment as part of task definition. 
+
+So to add a new property
+* Add property to parameter store for all environments (stg/prd) by following the convention as other properties
+* Go to infrastructure/ecs-main/serverless.yml custom section
+* define the variable pointing to the right parameter store path 
+* Go to infrastructure/ecs-main/ecs-service.yml TaskDefinition section
+* Add the new property to the ContainerDefinitions/Environment section
+
+## Build and Run Docker Image for local testing
 ```
 docker build --tag=workerpool .
 docker run \
@@ -75,7 +89,6 @@ docs-worker-pool contains various triggers for release to higher environments. C
  - Verify that the deploy-integration-ec2 workflow has executed successfully.
 
 ### Production Environment
- - Rebase `master` with `integration` and push the latest changes, or merge a pull request to `master` if performing a hotfix.
- - If you don't have push access, open an issue or otherwise contact a contributor with administrator priveliges. 
  - Create release tags. We currently follow [semver](https://semver.org/) standards.
+ - If you don't have push access, open an issue or otherwise contact a contributor with administrator privileges. 
  - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.

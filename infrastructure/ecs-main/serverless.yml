@@ -34,15 +34,15 @@ custom:
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
       intgr: '4096'
-      stg: '2048'
+      stg: '4096'
       prd: '4096'
     containerMemory:
       intgr: '24576'
-      stg: '4096'
+      stg: '24576'
       prd: '24576'
     desiredCount:
       intgr: '4'
-      stg: '2'
+      stg: '4'
       prd: '4' 
     minimumHealthyPercent:
       intgr: 100
@@ -76,10 +76,14 @@ custom:
   devhubBucketName: docs-devhub-${self:provider.stage}
   cloudManagerBucketName: docs-cloudmanager-${self:provider.stage}
   opsManagerBucketName: docs-opsmanager-${self:provider.stage}
+  npmBase64Auth: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/auth}
+  npmEmail: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/email}
+  awsKeyDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/key}
+  awsSecretDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/secret}
   env:
     stg: "staging"
     prd: "production"
-    intgr: "staging"
+    intgr: "integration"
 
 
 resources:

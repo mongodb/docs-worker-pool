@@ -29,6 +29,9 @@ RUN curl --location https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
+# use npm 7.*
+RUN npm install npm@7
+
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
 RUN npm -g config set user root
@@ -45,14 +48,14 @@ RUN python3 -m pip install pip==20.2 flit==3.0.0
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	git checkout v0.11.0 && \
+	git checkout v0.11.3 && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	git checkout v0.11.5 && \	
+	git checkout v0.11.9 && \	
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
