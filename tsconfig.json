@@ -6,8 +6,13 @@
       "strictNullChecks": true,
       "esModuleInterop": true,   
       "baseUrl": "./types",
-      "experimentalDecorators": true,
-      "include": ["src/**/*.ts",],
-      "exclude": [ "tests/**/*.ts"]
-    }
+      "experimentalDecorators": true
+    },
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "tests/**/*.ts"
+    ]
   }
