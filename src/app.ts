@@ -2,7 +2,7 @@ import { JobManager } from "./job/jobManager";
 import { FastlyConnector } from "./services/cdn";
 import { GitHubConnector } from "./services/repo";
 import { HybridJobLogger, ConsoleLogger } from './services/logger';
-import { GithubCommandExecutor, JobSpecificCommandExecutor, ShellCommandExecutor } from './services/commandExecutor';
+import { GithubCommandExecutor, JobSpecificCommandExecutor } from './services/commandExecutor';
 import { JobRepository } from "./repositories/jobRepository";
 import { RepoEntitlementsRepository } from "./repositories/repoEntitlementsRepository";
 import c from "config";

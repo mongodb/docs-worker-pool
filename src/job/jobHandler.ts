@@ -66,7 +66,7 @@ export abstract class JobHandler {
 
     private async update(publishResult:CommandExecutorResponse): Promise<void> {
         if (publishResult && publishResult.status === 'success') {
-            let files = this._fileSystemServices.getFilesInDirectory(`./${this.currJob.payload.repoName}/build/public`, '');
+            let files = this._fileSystemServices.getFilesInDirectory(`./${this.currJob.payload.repoName}/build/public`, '', null, null);
             await this.jobRepository.updateWithCompletionStatus(this.currJob._id, files);
         } else {
             await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);

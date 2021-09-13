@@ -8,7 +8,7 @@ export const axiosApi = axios.create();
 
 export interface IFileSystemServices {
     resetDirectory(dir: string): void;
-    getFilesInDirectory(base: string, ext: string, files:string[], result:string[]): Array<string>;
+    getFilesInDirectory(base: string, ext: string, files:string[]|null, result:string[]|null): Array<string>;
     resetDirectory(dir: string): void;
     fileExists(dir: string): boolean;
     rootFileExists(dir: string): boolean;
