@@ -5,7 +5,4 @@ npm-debug.log
 .DS_Store
 work
 coverage
-worker/node_modules
-worker/coverage
-worker/work
-worker/docs-tools
+out

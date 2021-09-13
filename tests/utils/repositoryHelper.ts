@@ -1,9 +1,9 @@
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
 import { Db } from "mongodb";
-import { JobRepository } from "../../repositories/jobRepository";
-import { RepoEntitlementsRepository } from "../../repositories/repoEntitlementsRepository";
-import { ILogger } from "../../services/logger";
+import { JobRepository } from "../../src/repositories/jobRepository";
+import { RepoEntitlementsRepository } from "../../src/repositories/repoEntitlementsRepository";
+import { ILogger } from "../../src/services/logger";
 
 export class DBRepositoryHelper {
     config: IConfig;

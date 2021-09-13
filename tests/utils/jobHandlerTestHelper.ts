@@ -1,15 +1,15 @@
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
-import { IJob } from "../../entities/job";
-import TestableArrayWrapper from "../../job/ITestableTypeWrapper";
-import { ProductionJobHandler } from "../../job/productionJobHandler";
-import { StagingJobHandler } from "../../job/stagingJobHandler";
-import { JobRepository } from "../../repositories/jobRepository";
-import { ICDNConnector } from "../../services/cdn";
-import { IJobCommandExecutor } from "../../services/commandExecutor";
-import { IFileSystemServices } from "../../services/fileServices";
-import { IJobRepoLogger } from "../../services/logger";
-import { IRepoConnector } from "../../services/repo";
+import { IJob } from "../../src/entities/job";
+import TestableArrayWrapper from "../../src/job/ITestableTypeWrapper";
+import { ProductionJobHandler } from "../../src/job/productionJobHandler";
+import { StagingJobHandler } from "../../src/job/stagingJobHandler";
+import { JobRepository } from "../../src/repositories/jobRepository";
+import { ICDNConnector } from "../../src/services/cdn";
+import { IJobCommandExecutor } from "../../src/services/commandExecutor";
+import { IFileSystemServices } from "../../src/services/fileServices";
+import { IJobRepoLogger } from "../../src/services/logger";
+import { IRepoConnector } from "../../src/services/repo";
 import { TestDataProvider } from "../data/data";
 import * as data from '../data/jobDef';
 

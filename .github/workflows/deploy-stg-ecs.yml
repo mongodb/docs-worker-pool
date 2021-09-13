@@ -1,13 +1,13 @@
 on:
   push:
-    branches-ignore:
+    branches:
       - "integration"
       - "master"
   pull_request:
     branches:
       - master
       - integration
-name: Deploy Staging(Dev) ECS
+name: Deploy Staging ECS
 jobs:
   deploy-stg:
     runs-on: ubuntu-latest

@@ -1,17 +1,20 @@
 on:
   push:
-    branches:
+    branches-ignore:
       - "integration"
       - "master"
-name: Deploy Integration ECS
+      - "meta"
+name: Deploy Dev ECS
 jobs:
-  deploy-intgr:
+  deploy-dev:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - name: tsc
+      - uses: icrawl/action-tsc@v1
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication
@@ -26,11 +29,11 @@ jobs:
         run: |
           cd infrastructure/ecs-repo
           npm ci
-          sls deploy --stage intgr
+          sls deploy --stage dev
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR
         with:
-          image: docs-worker-pool-intgr
+          image: docs-worker-pool-dev
           tags: latest
           registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
           buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
@@ -43,6 +46,6 @@ jobs:
         run: |
           cd infrastructure/ecs-main
           npm ci
-          sls deploy --stage intgr
-          aws ecs update-service --force-new-deployment --service docs-worker-pool-intgr --cluster docs-worker-pool-intgr
+          sls deploy --stage dev
+          aws ecs update-service --force-new-deployment --service docs-worker-pool-dev --cluster docs-worker-pool-dev
 

@@ -1,5 +1,5 @@
-import { IJob } from "../../entities/job";
-import { CommandExecutorResponse } from "../../services/commandExecutor";
+import { IJob } from "../../src/entities/job";
+import { CommandExecutorResponse } from "../../src/services/commandExecutor";
 import * as data from '../data/jobDef';
 import fs from 'fs';
 import path from "path";

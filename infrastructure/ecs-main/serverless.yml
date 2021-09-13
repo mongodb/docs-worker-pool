@@ -26,37 +26,37 @@ provider:
       - subnet-9e83fed2
 custom:
   deploymentBucket:
-    intgr: worker-pool-deployment
+    dev: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
   ecs:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
-      intgr: '4096'
+      dev: '4096'
       stg: '4096'
       prd: '4096'
     containerMemory:
-      intgr: '24576'
+      dev: '24576'
       stg: '24576'
       prd: '24576'
     desiredCount:
-      intgr: '4'
+      dev: '4'
       stg: '4'
       prd: '4' 
     minimumHealthyPercent:
-      intgr: 100
+      dev: 100
       stg: 100
       prd: 100
     maximumPercent:
-      intgr: 200
+      dev: 200
       stg: 200
       prd: 200
     deregistrationDelaySecs: '10'
   targetGroupName: docs-worker-pool
   accountId:
     stg: 216656347858
-    intgr: 216656347858
+    dev: 216656347858
     prd: 216656347858
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
@@ -83,7 +83,7 @@ custom:
   env:
     stg: "staging"
     prd: "production"
-    intgr: "integration"
+    dev: "development"
 
 
 resources:

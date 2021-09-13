@@ -1,16 +1,16 @@
-import { JobHandlerFactory } from '../../../job/JobHandlerFactory';
+import { JobHandlerFactory } from '../../../src/job/JobHandlerFactory';
 import { mockDeep } from 'jest-mock-extended';
-import { IJob } from '../../../entities/job';
+import { IJob } from '../../../src/entities/job';
 import { IConfig } from 'config';
-import { JobRepository } from '../../../repositories/jobRepository';
-import { IFileSystemServices } from '../../../services/fileServices';
-import { IJobCommandExecutor } from '../../../services/commandExecutor';
-import { ICDNConnector } from '../../../services/cdn';
-import { IRepoConnector } from '../../../services/repo';
-import { IJobRepoLogger } from '../../../services/logger';
-import { ProductionJobHandler } from '../../../job/productionJobHandler';
-import { RegressionJobHandler } from '../../../job/regressionJobHandler';
-import { StagingJobHandler } from '../../../job/stagingJobHandler';
+import { JobRepository } from '../../../src/repositories/jobRepository';
+import { IFileSystemServices } from '../../../src/services/fileServices';
+import { IJobCommandExecutor } from '../../../src/services/commandExecutor';
+import { ICDNConnector } from '../../../src/services/cdn';
+import { IRepoConnector } from '../../../src/services/repo';
+import { IJobRepoLogger } from '../../../src/services/logger';
+import { ProductionJobHandler } from '../../../src/job/productionJobHandler';
+import { RegressionJobHandler } from '../../../src/job/regressionJobHandler';
+import { StagingJobHandler } from '../../../src/job/stagingJobHandler';
 
 describe('JobHandlerFactory Tests', () => {
   let job: IJob;

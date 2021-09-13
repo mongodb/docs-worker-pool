@@ -1,5 +1,5 @@
 import { TestDataProvider } from '../../data/data';
-import { GithubCommandExecutor } from '../../../services/commandExecutor';
+import { GithubCommandExecutor } from '../../../src/services/commandExecutor';
 import cp from 'child_process';
 jest.mock('child_process');
 

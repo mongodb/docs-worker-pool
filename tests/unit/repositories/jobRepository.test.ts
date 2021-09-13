@@ -1,4 +1,4 @@
-import { JobRepository } from '../../../repositories/jobRepository';
+import { JobRepository } from '../../../src/repositories/jobRepository';
 import * as data from '../../data/jobDef';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';

@@ -1,5 +1,5 @@
 import { TestDataProvider } from '../../data/data';
-import { JobSpecificCommandExecutor } from '../../../services/commandExecutor';
+import { JobSpecificCommandExecutor } from '../../../src/services/commandExecutor';
 import cp from 'child_process';
 jest.mock('child_process');
 

@@ -1,19 +1,17 @@
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
-import { IJob } from "../../entities/job";
-import { JobHandlerFactory } from "../../job/jobHandlerFactory";
-import { JobValidator } from "../../job/jobValidator";
-import { ProductionJobHandler } from "../../job/productionJobHandler";
-import { RegressionJobHandler } from "../../job/regressionJobHandler";
-import { StagingJobHandler } from "../../job/stagingJobHandler";
-import { JobManager } from "../../jobManager";
-import { JobRepository } from "../../repositories/jobRepository";
-import { RepoEntitlementsRepository } from "../../repositories/repoEntitlementsRepository";
-import { ICDNConnector } from "../../services/cdn";
-import { IJobCommandExecutor } from "../../services/commandExecutor";
-import { IFileSystemServices } from "../../services/fileServices";
-import { IJobRepoLogger } from "../../services/logger";
-import { IRepoConnector } from "../../services/repo";
+import { IJob } from "../../src/entities/job";
+import { JobHandlerFactory } from "../../src/job/jobHandlerFactory";
+import { JobValidator } from "../../src/job/jobValidator";
+import { ProductionJobHandler } from "../../src/job/productionJobHandler";
+import { JobManager } from "../../src/job/jobManager";
+import { JobRepository } from "../../src/repositories/jobRepository";
+import { RepoEntitlementsRepository } from "../../src/repositories/repoEntitlementsRepository";
+import { ICDNConnector } from "../../src/services/cdn";
+import { IJobCommandExecutor } from "../../src/services/commandExecutor";
+import { IFileSystemServices } from "../../src/services/fileServices";
+import { IJobRepoLogger } from "../../src/services/logger";
+import { IRepoConnector } from "../../src/services/repo";
 import * as data from '../data/jobDef'
 
 describe('JobManager Tests', () => {
@@ -51,23 +49,23 @@ describe('JobManager Tests', () => {
         expect(jobManager).toBeDefined();
     })
 
-    // describe('JobManager start Tests', () => {
-    //     test('JobManager start stops when it recieves stop signal', async () => {
-    //         jobManager.start();
-    //         jobManager.stop();
-    //         jest.runAllTimers();
-    //         expect(jobManager.isStopped()).toBe(true);
-    //     })
+    describe('JobManager start Tests', () => {
+        test('JobManager start stops when it recieves stop signal', async () => {
+            jobManager.start();
+            jobManager.stop();
+            jest.runAllTimers();
+            expect(jobManager.isStopped()).toBe(true);
+        })
 
-    //     test('JobManager start continues until stop even where there is no valid job signal', async () => {
-    //         jobRepo.getOneQueuedJobAndUpdate.mockReturnValueOnce(null);
-    //         jobManager.start();
-    //         expect(jobRepo.getOneQueuedJobAndUpdate.mock.calls).toHaveLength(1);
-    //         expect(jobHandlerFactory.createJobHandler.mock.calls).toHaveLength(0);
-    //         jobManager.stop();
-    //         jest.runAllTimers();
-    //     })
-    // })
+        test('JobManager start continues until stop even where there is no valid job signal', async () => {
+            jobRepo.getOneQueuedJobAndUpdate.mockReturnValueOnce(null);
+            jobManager.start();
+            expect(jobRepo.getOneQueuedJobAndUpdate.mock.calls).toHaveLength(1);
+            expect(jobHandlerFactory.createJobHandler.mock.calls).toHaveLength(0);
+            jobManager.stop();
+            jest.runAllTimers();
+        })
+    })
 
     describe('JobManager workex Tests', () => {
         test('JobManager workex doesnt throw error when there is no job', async () => {

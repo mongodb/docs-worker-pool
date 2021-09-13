@@ -1,15 +1,14 @@
-import { ICDNConnector } from "./services/cdn";
-import { IJobRepoLogger } from "./services/logger";
-import { IRepoConnector } from "./services/repo";
-import { JobRepository } from "./repositories/jobRepository";
-import { RepoEntitlementsRepository } from "./repositories/repoEntitlementsRepository";
+import { ICDNConnector } from "../services/cdn";
+import { IJobRepoLogger } from "../services/logger";
+import { IRepoConnector } from "../services/repo";
+import { JobRepository } from "../repositories/jobRepository";
 import { IConfig } from "config";
-import { JobHandler } from "./job/jobHandler";
-import { IFileSystemServices } from "./services/fileServices";
-import { IJobValidator } from "./job/jobValidator";
-import { JobHandlerFactory } from "./job/jobHandlerFactory";
-import { IJobCommandExecutor } from "./services/commandExecutor";
-import { IJob } from "./entities/job";
+import { JobHandler } from "../job/jobHandler";
+import { IFileSystemServices } from "../services/fileServices";
+import { IJobValidator } from "../job/jobValidator";
+import { JobHandlerFactory } from "../job/jobHandlerFactory";
+import { IJobCommandExecutor } from "../services/commandExecutor";
+import { IJob } from "../entities/job";
 
 export class JobManager {
    private _jobRepository: JobRepository;

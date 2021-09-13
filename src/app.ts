@@ -1,4 +1,4 @@
-import { JobManager } from "./jobManager";
+import { JobManager } from "./job/jobManager";
 import { FastlyConnector } from "./services/cdn";
 import { GitHubConnector } from "./services/repo";
 import { HybridJobLogger, ConsoleLogger } from './services/logger';

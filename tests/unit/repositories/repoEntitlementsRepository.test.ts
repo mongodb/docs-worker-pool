@@ -1,4 +1,4 @@
-import { RepoEntitlementsRepository } from '../../../repositories/repoEntitlementsRepository';
+import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
 
