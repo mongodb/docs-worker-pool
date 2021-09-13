@@ -13,13 +13,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      - name: Compile Typescript
-        run: |
-          npm ci
-          tsc
-      - uses: mattallty/jest-github-action@v1
-        with:
-          working-directory: "tests"
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm tests
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication

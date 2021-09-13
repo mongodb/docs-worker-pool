@@ -6,7 +6,9 @@
   "scripts": {
     "test": "jest --detectOpenHandles --coverage",
     "start": "node index.js",
-    "clean": "node maintain.js"
+    "clean": "node maintain.js",
+    "build": "tsc"
+
   },
   "repository": {
     "type": "git",
