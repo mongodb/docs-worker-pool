@@ -1,4 +1,2 @@
-queueDashboard/
-work/
-worker/tests/
-worker/node_modules/
+tests/
+node_modules/
