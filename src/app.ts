@@ -6,7 +6,7 @@ import { GithubCommandExecutor, JobSpecificCommandExecutor } from './services/co
 import { JobRepository } from "./repositories/jobRepository";
 import { RepoEntitlementsRepository } from "./repositories/repoEntitlementsRepository";
 import c from "config";
-import mongodb from "mongodb";
+import * as mongodb from "mongodb";
 import { FileSystemServices } from "./services/fileServices";
 import { JobValidator } from "./job/jobValidator";
 
