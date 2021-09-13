@@ -1,7 +1,7 @@
-import { JobRepository } from '../../repositories/jobRepository';
-import * as data from '../data/jobDef';
-import { DBRepositoryHelper } from '../utils/repositoryHelper';
-import { TestDataProvider } from '../data/data';
+import { JobRepository } from '../../../repositories/jobRepository';
+import * as data from '../../data/jobDef';
+import { DBRepositoryHelper } from '../../utils/repositoryHelper';
+import { TestDataProvider } from '../../data/data';
 
 describe('Job Repository Tests', () => {
     let jobRepo: JobRepository;

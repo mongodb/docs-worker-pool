@@ -1,4 +1,4 @@
-import TestableArrayWrapper from '../../job/ITestableTypeWrapper';
+import TestableArrayWrapper from '../../../job/ITestableTypeWrapper';
 
 describe('JobHandlerFactory Tests', () => {
   beforeEach(() => {

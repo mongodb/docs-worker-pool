@@ -1,5 +1,5 @@
-import { HybridJobLogger } from '../../services/logger';
-import { JobRepository } from '../../repositories/jobRepository';
+import { HybridJobLogger } from '../../../services/logger';
+import { JobRepository } from '../../../repositories/jobRepository';
 import { mockDeep } from 'jest-mock-extended';
 
 describe('HybridJobLogger Tests', () => {

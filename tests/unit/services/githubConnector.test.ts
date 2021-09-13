@@ -1,11 +1,11 @@
 import { mockDeep, mockReset } from 'jest-mock-extended';
-import { IFileSystemServices } from '../../services/fileServices';
-import * as data from '../data/jobDef'
+import { IFileSystemServices } from '../../../services/fileServices';
+import * as data from '../../data/jobDef'
 import { IConfig } from 'config';
-import { IGithubCommandExecutor } from '../../services/commandExecutor';
-import { IJobRepoLogger } from '../../services/logger';
-import { GitHubConnector } from '../../services/repo';
-import { IJob } from '../../entities/job';
+import { IGithubCommandExecutor } from '../../../services/commandExecutor';
+import { IJobRepoLogger } from '../../../services/logger';
+import { GitHubConnector } from '../../../services/repo';
+import { IJob } from '../../../entities/job';
 let job: IJob;
 let commandExecutor: IGithubCommandExecutor;
 let jobRepoLogger: IJobRepoLogger;

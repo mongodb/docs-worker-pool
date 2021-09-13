@@ -1,6 +1,6 @@
 import { mockReset } from 'jest-mock-extended';
-import { TestDataProvider } from '../data/data';
-import { JobHandlerTestHelper } from '../utils/jobHandlerTestHelper';
+import { TestDataProvider } from '../../data/data';
+import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
 
 describe('JobHandlerFactory Tests', () => {

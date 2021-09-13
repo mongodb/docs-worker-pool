@@ -1,8 +1,8 @@
-import { FastlyConnector, axiosApi } from '../../services/cdn';
+import { FastlyConnector, axiosApi } from '../../../services/cdn';
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
-import { IJobRepoLogger } from "../../services/logger";
-import { TestDataProvider } from '../data/data';
+import { IJobRepoLogger } from "../../../services/logger";
+import { TestDataProvider } from '../../data/data';
 import MockAdapter from 'axios-mock-adapter';
 
 describe('FastlyConnector Tests', () => {

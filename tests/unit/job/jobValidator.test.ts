@@ -1,10 +1,10 @@
 import { mockDeep, mockReset } from 'jest-mock-extended';
-import { IJob } from '../../entities/job';
-import { IFileSystemServices } from '../../services/fileServices';
-import * as data from '../data/jobDef'
-import { JobValidator } from '../../job/jobValidator';
-import { RepoEntitlementsRepository } from '../../repositories/repoEntitlementsRepository';
-import { TestDataProvider } from '../data/data';
+import { IJob } from '../../../entities/job';
+import { IFileSystemServices } from '../../../services/fileServices';
+import * as data from '../../data/jobDef'
+import { JobValidator } from '../../../job/jobValidator';
+import { RepoEntitlementsRepository } from '../../../repositories/repoEntitlementsRepository';
+import { TestDataProvider } from '../../data/data';
 
 
 let job: IJob;

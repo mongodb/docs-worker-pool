@@ -1,6 +1,6 @@
-import { RepoEntitlementsRepository } from '../../repositories/repoEntitlementsRepository';
-import { DBRepositoryHelper } from '../utils/repositoryHelper';
-import { TestDataProvider } from '../data/data';
+import { RepoEntitlementsRepository } from '../../../repositories/repoEntitlementsRepository';
+import { DBRepositoryHelper } from '../../utils/repositoryHelper';
+import { TestDataProvider } from '../../data/data';
 
 describe('Job Repository Tests', () => {
     let entitlementRepo: RepoEntitlementsRepository;
