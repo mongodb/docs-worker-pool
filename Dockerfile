@@ -69,12 +69,10 @@ RUN cd snooty-devhub && \
 	npm install --production
 
 # install the node dependencies for worker pool
+
+RUN npm install --production
 RUN tsc
 COPY out/ . 
-COPY package.json .
-COPY package-lock.json .
-RUN npm install --production
-
 # where repo work will happen
 RUN mkdir repos && chmod 755 repos
 
