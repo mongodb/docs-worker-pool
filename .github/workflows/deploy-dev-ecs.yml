@@ -13,8 +13,8 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      - name: tsc
-      - uses: icrawl/action-tsc@v1
+      - name: Compile Typescript
+        uses: icrawl/action-tsc@v1
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication
