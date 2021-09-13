@@ -1,4 +1,4 @@
-import { JobManager } from "./job/jobManager";
+import { JobManager, JobHandlerFactory } from "./job/jobManager";
 import { FastlyConnector } from "./services/cdn";
 import { GitHubConnector } from "./services/repo";
 import { HybridJobLogger, ConsoleLogger } from './services/logger';
@@ -9,7 +9,6 @@ import c from "config";
 import mongodb from "mongodb";
 import { FileSystemServices } from "./services/fileServices";
 import { JobValidator } from "./job/jobValidator";
-import { JobHandlerFactory } from "../src/job/jobHandlerFactory";
 
 let db: mongodb.Db;
 let client: mongodb.MongoClient;
