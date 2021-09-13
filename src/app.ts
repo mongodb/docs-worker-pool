@@ -36,7 +36,7 @@ async function init(): Promise<void> {
   githubCommandExecutor = new GithubCommandExecutor();
   jobRepository = new JobRepository(db, c, consoleLogger);
   hybridJobLogger = new HybridJobLogger(jobRepository);
-  repoEntitlementRepository = new RepoEntitlementsRepository(db, c.get("entitlementCollection"), consoleLogger);
+  repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);
   cdnConnector = new FastlyConnector(c, hybridJobLogger);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
