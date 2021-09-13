@@ -84,7 +84,6 @@ COPY --from=ts-compiler /usr/app/package*.json ./
 COPY --from=ts-compiler /usr/app/build ./
 RUN npm install --only=production
 RUN mkdir repos && chmod 755 repos
-COPY /usr/app ./
 EXPOSE 3000
 CMD ["app.js"]
 
