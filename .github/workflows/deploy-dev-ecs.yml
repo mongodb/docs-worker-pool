@@ -13,9 +13,11 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      - run: npm install
-      - run: npm run build
-      - run: npm test
+      - name: npm install, build and test
+        run: | 
+         npm install
+         npm build
+         npm test
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication
