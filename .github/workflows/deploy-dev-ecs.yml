@@ -16,6 +16,10 @@ jobs:
       - name: Compile Typescript
         run: |
           npm ci
+          tsc
+      - name: Run tests
+        run: |
+          npm ci
       - uses: icrawl/action-tsc@v1
       - name: Install Serverless Framework
         run: npm install -g serverless
