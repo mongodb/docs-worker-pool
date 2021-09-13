@@ -1,4 +1,4 @@
-import { JobHandlerFactory } from '../../../src/job/JobHandlerFactory';
+import { JobHandlerFactory } from '../../../src/job/jobHandlerFactory';
 import { mockDeep } from 'jest-mock-extended';
 import { IJob } from '../../../src/entities/job';
 import { IConfig } from 'config';

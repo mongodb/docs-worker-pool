@@ -1,7 +1,7 @@
 import { IJob } from "../entities/job";
 import { JobRepository } from "../repositories/jobRepository";
 import { ICDNConnector } from "../services/cdn";
-import { CommandExecutorResponse, ICommandExecutor, IJobCommandExecutor } from "../services/commandExecutor";
+import { CommandExecutorResponse, IJobCommandExecutor } from "../services/commandExecutor";
 import { IJobRepoLogger, ILogger } from "../services/logger";
 import { IRepoConnector } from "../services/repo";
 import { IFileSystemServices } from "../services/fileServices";

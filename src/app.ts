@@ -9,7 +9,7 @@ import c from "config";
 import mongodb from "mongodb";
 import { FileSystemServices } from "./services/fileServices";
 import { JobValidator } from "./job/jobValidator";
-import { JobHandlerFactory } from "./job/JobHandlerFactory";
+import { JobHandlerFactory } from "./job/jobHandlerFactory";
 
 let db: mongodb.Db;
 let client: mongodb.MongoClient;
