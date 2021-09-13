@@ -17,10 +17,9 @@ jobs:
         run: |
           npm ci
           tsc
-      - name: Run tests
-        run: |
-          npm ci
-          npm test
+      - uses: mattallty/jest-github-action@v1
+        with:
+          working-directory: "tests"
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication
