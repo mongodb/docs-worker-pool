@@ -2,7 +2,7 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
 USER=$(shell whoami)
 
-PREFIX=/drivers/go
+PREFIX=drivers/go
 PROJECT=golang
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
