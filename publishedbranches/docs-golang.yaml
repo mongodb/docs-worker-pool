@@ -1,4 +1,4 @@
-prefix: '/drivers/go'
+prefix: 'drivers/go'
 version:
   published:
     - 'master'
