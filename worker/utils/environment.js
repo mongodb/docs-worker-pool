@@ -1,5 +1,6 @@
 const fastlyToken = process.env.FASTLY_TOKEN;
 const fastlyServiceId = process.env.FASTLY_SERVICE_ID;
+const fastlyDochubServiceId = process.env.FASTLY_DOCHUB_SERVICE_ID;
 const dochubMap = process.env.FASTLY_DOCHUB_MAP;
 const atlasUsername = process.env.MONGO_ATLAS_USERNAME;
 const atlasPassword = process.env.MONGO_ATLAS_PASSWORD;
@@ -74,6 +75,13 @@ class EnvironmentClass {
       return 'testId';
     }
     return fastlyServiceId;
+  }
+
+  static getFastlyDochubServiceId() {
+    if (fastlyDochubServiceId === undefined) {
+      return 'testId';
+    }
+    return fastlyDochubServiceId;
   }
 }
 

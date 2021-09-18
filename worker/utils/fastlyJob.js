@@ -133,11 +133,11 @@ class FastlyJobClass {
 
     // upserts {source: target} mappings
     // to the fastly edge dictionary
-    async connectAndUpsert(map) {
+    async connectAndUpsert(map, serviceId) {
         const options = {
             item_value: map.target,
         };
-        const connectString = `/service/${fastlyServiceId}/dictionary/${environment.getDochubMap()}/item/${map.source
+        const connectString = `/service/${serviceId}/dictionary/${environment.getDochubMap()}/item/${map.source
             }`;
 
         return new Promise((resolve, reject) => {

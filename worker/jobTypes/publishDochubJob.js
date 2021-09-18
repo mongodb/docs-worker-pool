@@ -73,7 +73,7 @@ async function runPublishDochub(currentJob) {
   }
   
   const initFastly = new FastlyJob(currentJob);
-  await initFastly.connectAndUpsert(map).then().catch (err => {
+  await initFastly.connectAndUpsert(map, EnvironmentClass.getFastlyDochubServiceId()).then().catch (err => {
     workerUtils.logInMongo(currentJob, `could not complete map ${err}`);
     throw invalidEnvironment;
   });
