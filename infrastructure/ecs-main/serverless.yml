@@ -81,6 +81,8 @@ custom:
   awsKeyDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/key}
   awsSecretDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/secret}
   gatsbyFeatureFlagConsistentNavigation: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/consistent_nav/enabled}
+  javaBucketName: docs-java-${self:provider.stage}
+  goBucketName: docs-go-${self:provider.stage}
   env:
     stg: "staging"
     prd: "production"

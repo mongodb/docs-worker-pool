@@ -18,6 +18,20 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
 
+  JavaBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.javaBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
+  GoBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.goBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
   OpsManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -84,3 +98,33 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
+
+  JavaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: JavaBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
+
+  GoBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: GoBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
