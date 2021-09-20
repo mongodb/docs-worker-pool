@@ -83,6 +83,8 @@ custom:
   gatsbyFeatureFlagConsistentNavigation: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/consistent_nav/enabled}
   javaBucketName: docs-java-${self:provider.stage}
   goBucketName: docs-go-${self:provider.stage}
+  javaIntgrBucketName: docs-java-intgr
+  goIntgrBucketName: docs-go-intgr
   env:
     stg: "staging"
     prd: "production"
