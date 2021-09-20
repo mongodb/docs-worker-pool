@@ -47,27 +47,6 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
 
-  JavaIntgrBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: ${self:custom.javaIntgrBucketName}
-      WebsiteConfiguration:
-          IndexDocument: index.html
-
-  GoIntgrBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: ${self:custom.goIntgrBucketName}
-      WebsiteConfiguration:
-          IndexDocument: index.html
-
-  NodeIntgrBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: ${self:custom.nodeIntgrBucketName}
-      WebsiteConfiguration:
-          IndexDocument: index.html
-
   DocsBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -157,51 +136,6 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
-
-  JavaIntgrBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: JavaIntgrBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaIntgrBucket", "Arn" ] }, '/*']]
-
-  GoIntgrBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: GoIntgrBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["GoIntgrBucket", "Arn" ] }, '/*']]
-
-  NodeIntgrBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: NodeIntgrBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeIntgrBucket", "Arn" ] }, '/*']]
 
   NodeBucketPolicy:
     Type: AWS::S3::BucketPolicy
