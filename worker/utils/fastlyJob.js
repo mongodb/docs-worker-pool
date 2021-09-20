@@ -4,9 +4,7 @@ const fastly = require('fastly')(environment.getFastlyToken());
 const utils = require('../utils/utils');
 const Logger = require('../utils/logger').LoggerClass;
 
-const fastlyServiceId = environment.getFastlyServiceId();
 const headers = {
-    'Fastly-Key': environment.getFastlyToken(),
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'Fastly-Debug': 1,
@@ -25,6 +23,7 @@ class FastlyJobClass {
 
     // takes in an array of surrogate keys and purges cache for each
     async purgeCache(urlArray, logger, purgeAll = false) {
+        headers['Fastly-Key']= environment.getFastlyToken(this.currentJob.payload.repoName);
         if (!Array.isArray(urlArray)) {
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
@@ -36,7 +35,8 @@ class FastlyJobClass {
                 const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
 
                 //purge each surrogate key
-                const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey));
+                const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey, 
+                    environment.getFastlyServiceId(this.currentJob.payload.repoName)));
                 await Promise.all(purgeRequestPromises);
                 // GET request the URLs to warm cache for our users
                 const warmCachePromises = urlArray.map(url => this.warmCache(url));
@@ -48,7 +48,7 @@ class FastlyJobClass {
         } else {
             try {
                 logger.save(`Purging all`);
-                await this.requestPurgeAll()
+                await this.requestPurgeAll(environment.getFastlyServiceId(this.currentJob.payload.repoName))
             } catch (error) {
                 logger.save(`${'(prod)'.padEnd(15)}error in purge all: ${error}`);
             }
@@ -57,7 +57,6 @@ class FastlyJobClass {
 
 
     async retrieveSurrogateKey(url) {
-
         try {
             return axios({
                 method: 'HEAD',
@@ -75,7 +74,7 @@ class FastlyJobClass {
 
     }
 
-    async requestPurgeOfSurrogateKey(surrogateKey) {
+    async requestPurgeOfSurrogateKey(surrogateKey, fastlyServiceId) {
         headers['Surrogate-Key'] = surrogateKey
 
         try {
@@ -96,7 +95,7 @@ class FastlyJobClass {
         }
     }
 
-    async requestPurgeAll() {
+    async requestPurgeAll(fastlyServiceId) {
         try {
             return axios({
                 method: `POST`,
@@ -133,7 +132,9 @@ class FastlyJobClass {
 
     // upserts {source: target} mappings
     // to the fastly edge dictionary
-    async connectAndUpsert(map, serviceId) {
+    async connectAndUpsert(map, serviceId, token) {
+
+        headers['Fastly-Key']= token; 
         const options = {
             item_value: map.target,
         };

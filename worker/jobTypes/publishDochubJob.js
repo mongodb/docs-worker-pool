@@ -54,7 +54,7 @@ async function runPublishDochub(currentJob) {
     throw invalidJobDef;
   }
 
-  if (EnvironmentClass.getFastlyToken() === undefined) {
+  if (EnvironmentClass.getFastlyDochubToken() === undefined) {
     workerUtils.logInMongo(currentJob, 'missing env variable: fastly token');
     throw invalidEnvironment;
   }
@@ -73,7 +73,7 @@ async function runPublishDochub(currentJob) {
   }
   
   const initFastly = new FastlyJob(currentJob);
-  await initFastly.connectAndUpsert(map, EnvironmentClass.getFastlyDochubServiceId()).then().catch (err => {
+  await initFastly.connectAndUpsert(map, EnvironmentClass.getFastlyDochubServiceId(), EnvironmentClass.getFastlyDochubToken()).then().catch (err => {
     workerUtils.logInMongo(currentJob, `could not complete map ${err}`);
     throw invalidEnvironment;
   });
