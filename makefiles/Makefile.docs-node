@@ -12,6 +12,27 @@ REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
+
+DEDICATED_BUCKET=true
+
+STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+STAGING_BUCKET=docs-mongodb-org-stg
+
+ifeq ($(REGRESSION), true)
+	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
+	PRODUCTION_BUCKET=docs-node-intgr
+else ifeq ($(SNOOTY_ENV), production) 
+	PRODUCTION_URL="https://docs.mongodb.com"
+	PRODUCTION_BUCKET=docs-node-prd
+else ifeq ($(SNOOTY_ENV), staging)
+	PRODUCTION_URL="https://docs-mongodborg-staging.corp.mongodb.com"
+	PRODUCTION_BUCKET=docs-node-stg
+else ifeq ($(SNOOTY_ENV), integration)
+	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
+	PRODUCTION_BUCKET=docs-node-intgr
+endif
+
+
 include ~/shared.mk
 
 get-build-dependencies: 
