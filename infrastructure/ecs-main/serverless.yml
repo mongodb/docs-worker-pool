@@ -42,8 +42,8 @@ custom:
       prd: '24576'
     desiredCount:
       intgr: '4'
-      stg: '8'
-      prd: '16' 
+      stg: '4'
+      prd: '4' 
     minimumHealthyPercent:
       intgr: 100
       stg: 100
@@ -91,6 +91,12 @@ custom:
   fastlyDevhubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/service_id}
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
+  javaBucketName: docs-java-${self:provider.stage}
+  goBucketName: docs-go-${self:provider.stage}
+  javaIntgrBucketName: docs-java-intgr
+  goIntgrBucketName: docs-go-intgr
+  nodeBucketName: docs-node-${self:provider.stage}
+  nodeIntgrBucketName: docs-node-intgr
   env:
     stg: "staging"
     prd: "production"
