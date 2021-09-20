@@ -40,6 +40,13 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
 
+  NodeBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.nodeBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+
   JavaIntgrBucket:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -54,6 +61,12 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
 
+  NodeIntgrBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.nodeIntgrBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
 
   DocsBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -174,3 +187,33 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["GoIntgrBucket", "Arn" ] }, '/*']]
+
+  NodeIntgrBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: NodeIntgrBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeIntgrBucket", "Arn" ] }, '/*']]
+
+  NodeBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: NodeBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]

@@ -85,6 +85,8 @@ custom:
   goBucketName: docs-go-${self:provider.stage}
   javaIntgrBucketName: docs-java-intgr
   goIntgrBucketName: docs-go-intgr
+  nodeBucketName: docs-node-${self:provider.stage}
+  nodeIntgrBucketName: docs-node-intgr
   env:
     stg: "staging"
     prd: "production"
