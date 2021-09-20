@@ -65,6 +65,8 @@ Resources:
               value: ${self:custom.awsKeyDevhub}
             - Name: AWS_SECRET_ACCESS_KEY_DEVHUB
               value: ${self:custom.awsSecretDevhub}
+            - Name: GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
+              value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
           LogConfiguration:
             LogDriver: awslogs
             Options:
