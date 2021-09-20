@@ -43,7 +43,7 @@ class EnvironmentClass {
 
   static shouldPurgeAll() {
     if (purgeAll === undefined) {
-      return true
+      return false;
     }
     if (purgeAll === 'true') {
       return true;
