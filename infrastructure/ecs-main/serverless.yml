@@ -42,8 +42,8 @@ custom:
       prd: '24576'
     desiredCount:
       intgr: '4'
-      stg: '8'
-      prd: '16' 
+      stg: '4'
+      prd: '4' 
     minimumHealthyPercent:
       intgr: 100
       stg: 100
