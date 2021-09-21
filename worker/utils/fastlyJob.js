@@ -50,7 +50,7 @@ class FastlyJobClass {
             try {
                 logger.save(`Purging all`);
                 await this.requestPurgeAll(serviceId, token)
-            } catch (error) {
+            } catch (error) {   
                 logger.save(`${'(prod)'.padEnd(15)}error in purge all: ${error}`);
             }
         }
