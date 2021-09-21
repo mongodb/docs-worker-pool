@@ -4,7 +4,7 @@ const fastly = require('fastly')(environment.getFastlyToken());
 const utils = require('../utils/utils');
 const Logger = require('../utils/logger').LoggerClass;
 
-const headers = {
+let headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'Fastly-Debug': 1,

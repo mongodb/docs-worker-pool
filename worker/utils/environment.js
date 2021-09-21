@@ -135,7 +135,7 @@ class EnvironmentClass {
   }
 
   static getFastlyServiceId(repoName) {
-    if (repoName === "cloudgov-docs" || repoName === "cloud-docs") {
+    if (isAtlasRepo(repoName) ) {
       return fastlyAtlasServiceId;
     }
     if (repoName === "devhub-content") {
@@ -144,13 +144,17 @@ class EnvironmentClass {
     return fastlyMainServiceId;
   }
   static getFastlyToken(repoName) {
-    if (repoName === "cloudgov-docs" || repoName === "cloud-docs") {
+    if (isAtlasRepo(repoName)) {
       return fastlyAtlasToken;
     }  
     if (repoName === "devhub-content") {
       return fastlyDevhubToken;
     }
     return fastlyMainToken;
+  }
+
+  static isAtlasRepo(repoName) {
+    return repoName === "cloudgov-docs" || repoName === "cloud-docs" || repoName === "cloud-docs-osb";
   }
 
 }
