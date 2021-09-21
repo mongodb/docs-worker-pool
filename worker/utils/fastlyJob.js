@@ -24,7 +24,9 @@ class FastlyJobClass {
     // takes in an array of surrogate keys and purges cache for each
     async purgeCache(urlArray, logger, purgeAll = false) {
         headers['Fastly-Key']= environment.getFastlyToken(this.currentJob.currentJob.payload.repoName);
+        console.log(`ID: ${this.currentJob.currentJob._id} Environment ${JSON.stringify(environment)} purgeCache Fastly token  ${headers['Fastly-key']} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName)}`);
         if (!Array.isArray(urlArray)) {
+            console.log(`ERROR urlArray ${this.currentJob.currentJob._id}`)
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
         console.log(`Environment ${JSON.stringify(environment)} purgeCache Fastly token  ${headers['Fastly-key']} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName)}`);
