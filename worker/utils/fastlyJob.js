@@ -74,6 +74,7 @@ class FastlyJobClass {
                 headers: this.getHeaders(token),
             }).then(response => {
                 if (response.status === 200) {
+                    console.log(response.headers);
                     console.log(`retrieveSurrogateKey URL: ${url}  success key: ${response.headers['surrogate-key']}`);
                     return response.headers['surrogate-key'];
                 } else {
