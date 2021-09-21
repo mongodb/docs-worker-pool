@@ -1,5 +1,22 @@
-const fastlyToken = process.env.FASTLY_TOKEN;
-const fastlyServiceId = process.env.FASTLY_SERVICE_ID;
+const fastlyMainToken = process.env.FASTLY_MAIN_TOKEN;
+const fastlyMainServiceId = process.env.FASTLY_MAIN_SERVICE_ID;
+
+const fastlyDochubServiceId = process.env.FASTLY_DOCHUB_SERVICE_ID;
+const fastlyDochubToken = process.env.FASTLY_DOCHUB_TOKEN;
+
+const fastlyAtlasToken = process.env.FASTLY_ATLAS_TOKEN;
+const fastlyAtlasServiceId = process.env.FASTLY_ATLAS_SERVICE_ID;
+
+const fastlyDevhubToken = process.env.FASTLY_DEVHUB_TOKEN;
+const fastlyDevhubServiceId = process.env.FASTLY_DEVHUB_SERVICE_ID;
+
+const fastlyOpsManagerToken = process.env.FASTLY_OPS_MANAGER_TOKEN;
+const fastlyOpsManagerServiceId = process.env.FASTLY_OPS_MANAGER_SERVICE_ID;
+
+const fastlyCloudManagerToken = process.env.FASTLY_CLOUD_MANAGER_TOKEN;
+const fastlyCloudManagerServiceId = process.env.FASTLY_CLOUD_MANAGER_SERVICE_ID;
+
+
 const dochubMap = process.env.FASTLY_DOCHUB_MAP;
 const atlasUsername = process.env.MONGO_ATLAS_USERNAME;
 const atlasPassword = process.env.MONGO_ATLAS_PASSWORD;
@@ -26,7 +43,7 @@ class EnvironmentClass {
 
   static shouldPurgeAll() {
     if (purgeAll === undefined) {
-      return true
+      return false;
     }
     if (purgeAll === 'true') {
       return true;
@@ -42,10 +59,6 @@ class EnvironmentClass {
       return true;
     }
     return false;
-  }
-
-  static getFastlyToken() {
-    return fastlyToken;
   }
 
   static getDochubMap() {
@@ -69,12 +82,82 @@ class EnvironmentClass {
     return atlasPassword;
   }
 
-  static getFastlyServiceId() {
-    if (fastlyServiceId === undefined) {
+  static getFastlyMainServiceId() {
+    return fastlyMainServiceId;
+  }
+
+  static getFastlyMainToken() {
+    return fastlyMainToken;
+  }
+
+
+  static getFastlyDochubServiceId() {
+    if (fastlyDochubServiceId === undefined) {
       return 'testId';
     }
-    return fastlyServiceId;
+    return fastlyDochubServiceId;
   }
+
+  static getFastlyDochubToken() {
+    return fastlyDochubToken;
+  }
+
+  static getFastlyAtlasServiceId() {
+    return fastlyAtlasServiceId;
+  }
+
+  static getFastlyAtlasToken() {
+    return fastlyAtlasToken;
+  }
+
+  static getFastlyCloudManagerServiceId() {
+    return fastlyCloudManagerServiceId;
+  }
+
+  static getFastlyCloudManagerToken() {
+    return fastlyCloudManagerToken;
+  }
+
+  static getFastlyOpsManagerServiceId() {
+    return fastlyOpsManagerServiceId;
+  }
+
+  static getFastlyOpsManagerToken() {
+    return fastlyOpsManagerToken;
+  }
+
+  static getFastlyDevhubServiceId() {
+    return fastlyDevhubServiceId;
+  }
+
+  static getFastlyDevhubToken() {
+    return fastlyDevhubToken;
+  }
+
+  static getFastlyServiceId(repoName) {
+    if (this.isAtlasRepo(repoName) ) {
+      return fastlyAtlasServiceId;
+    }
+    if (repoName === "devhub-content") {
+      return fastlyDevhubServiceId;
+    }
+    return fastlyMainServiceId;
+  }
+  static getFastlyToken(repoName) {
+    if (this.isAtlasRepo(repoName)) {
+      console.log(`getFastlyToken ${repoName} ${fastlyAtlasToken}`);
+      return fastlyAtlasToken;
+    }  
+    if (repoName === "devhub-content") {
+      return fastlyDevhubToken;
+    }
+    return fastlyMainToken;
+  }
+
+  static isAtlasRepo(repoName) {
+    return repoName == "cloudgov-docs" || repoName == "cloud-docs" || repoName == "cloud-docs-osb";
+  }
+
 }
 
 module.exports = {
