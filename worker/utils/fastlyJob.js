@@ -74,7 +74,7 @@ class FastlyJobClass {
             });
         } catch (error) {
             this.logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
-            console.log(`retrieveSurrogateKey URL Failed: ${url}`);
+            console.log(`retrieveSurrogateKey URL Failed: ${url} error: ${error}`);
             throw error
         }
 
