@@ -135,7 +135,7 @@ class EnvironmentClass {
   }
 
   static getFastlyServiceId(repoName) {
-    if (isAtlasRepo(repoName) ) {
+    if (this.isAtlasRepo(repoName) ) {
       return fastlyAtlasServiceId;
     }
     if (repoName === "devhub-content") {
@@ -144,7 +144,7 @@ class EnvironmentClass {
     return fastlyMainServiceId;
   }
   static getFastlyToken(repoName) {
-    if (isAtlasRepo(repoName)) {
+    if (this.isAtlasRepo(repoName)) {
       console.log(`getFastlyToken ${repoName} ${fastlyAtlasToken}`);
       return fastlyAtlasToken;
     }  
