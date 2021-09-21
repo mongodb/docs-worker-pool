@@ -43,7 +43,7 @@ class FastlyJobClass {
                 await Promise.all(warmCachePromises)
             } catch (error) {
                 logger.save(`${'(prod)'.padEnd(15)}error in purge urls: ${error}`);
-                console.log('Error purge URLs');
+                console.log(`Error purge URLs ${error}`);
             }
 
         } else {
