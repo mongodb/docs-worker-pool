@@ -35,17 +35,24 @@ class FastlyJobClass {
             try {
                 logger.save(`Purging URL's`);
                 //retrieve surrogate key associated with each URL/file updated in push to S3
+                console.log('Purging URL');
                 const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url, token));
+                console.log('Purging URL mapped URLs');
                 const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
                 console.log(`Surrogate keys: ${JSON.stringify(surrogateKeyArray)} JobID: ${this.currentJob.currentJob._id}`);
                 //purge each surrogate key
                 const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey, serviceId, token));
+                console.log('Purging URL mapped requestPurgeOfSurrogateKey');
                 await Promise.all(purgeRequestPromises);
+                console.log('Purging URL purge keys completed');
                 // GET request the URLs to warm cache for our users
                 const warmCachePromises = urlArray.map(url => this.warmCache(url));
+                console.log('Purging URL mapped warm cache');
                 await Promise.all(warmCachePromises)
+                console.log('Purging URL completed warm cache');
             } catch (error) {
                 logger.save(`${'(prod)'.padEnd(15)}error in purge urls: ${error}`);
+                console.log('Error purge URLs');
             }
 
         } else {
@@ -66,7 +73,6 @@ class FastlyJobClass {
                 url: url,
                 headers: this.getHeaders(token),
             }).then(response => {
-                console.log(JSON.stringify(response));
                 if (response.status === 200) {
                     console.log(`retrieveSurrogateKey URL: ${url}  success key: ${response.headers['surrogate-key']}`);
                     return response.headers['surrogate-key'];
