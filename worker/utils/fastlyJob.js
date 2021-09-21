@@ -36,14 +36,9 @@ class FastlyJobClass {
                 logger.save(`Purging URL's`);
                 //retrieve surrogate key associated with each URL/file updated in push to S3
                 console.log('Purging URL');
-                const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url, token));
+                const purgePromises = urlArray.map(url => this.purgeURL(url));
                 console.log('Purging URL mapped URLs');
-                const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
-                console.log(`Surrogate keys: ${JSON.stringify(surrogateKeyArray)} JobID: ${this.currentJob.currentJob._id}`);
-                //purge each surrogate key
-                const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey, serviceId, token));
-                console.log('Purging URL mapped requestPurgeOfSurrogateKey');
-                await Promise.all(purgeRequestPromises);
+                await Promise.all(purgePromises)
                 console.log('Purging URL purge keys completed');
                 // GET request the URLs to warm cache for our users
                 const warmCachePromises = urlArray.map(url => this.warmCache(url));
@@ -65,52 +60,24 @@ class FastlyJobClass {
         }
     }
 
-
-    async retrieveSurrogateKey(url, token) {
+    async purgeURL(url) {
         try {
             return axios({
-                method: 'HEAD',
-                url: url,
-                headers: this.getHeaders(token),
+                method: 'PURGE',
+                url: url
             }).then(response => {
                 if (response.status === 200) {
-                    console.log(response.headers);
-                    console.log(`retrieveSurrogateKey URL: ${url}  success key: ${response.headers['surrogate-key']}`);
-                    return response.headers['surrogate-key'];
+                    console.log(response);
+                    return;
                 } else {
-                    console.log(`retrieveSurrogateKey URL: ${url} invaid response ${response.status}`);
+                    console.log(`purgeURL URL: ${url} invaid response ${response}`);
                 }
             });
         } catch (error) {
-            console.log(`retrieveSurrogateKey URL Failed: ${url} error: ${error}`);
-            this.logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
-            throw error
+            console.log(`purgeURL Failed: ${url} error: ${error}`);
+            this.logger.save(`${'(prod)'.padEnd(15)}error in purgeURL ${url}: ${error}`);
         }
 
-    }
-
-    async requestPurgeOfSurrogateKey(surrogateKey, fastlyServiceId, token) {
-        let headers = this.getHeaders(token);
-        headers['Surrogate-Key'] = surrogateKey;
-
-        try {
-            return axios({
-                method: `POST`,
-                url: `https://api.fastly.com/service/${fastlyServiceId}/purge/${surrogateKey}`,
-                path: `/service/${fastlyServiceId}/purge${surrogateKey}`,
-                headers: headers,
-            })
-                .then(response => {
-                    if (response.status === 200) {
-                        console.log(`requestPurgeOfSurrogateKey: Purge succeeded for ${surrogateKey}`);
-                        return true
-                    }
-                });
-        } catch (error) {
-            this.logger.save(`${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey: ${error}`);
-            console.log(`requestPurgeOfSurrogateKey: Purge failed for ${surrogateKey}`);
-            throw error;
-        }
     }
 
     async requestPurgeAll(fastlyServiceId, token) {
