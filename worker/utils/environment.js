@@ -92,9 +92,6 @@ class EnvironmentClass {
 
 
   static getFastlyDochubServiceId() {
-    if (fastlyDochubServiceId === undefined) {
-      return 'testId';
-    }
     return fastlyDochubServiceId;
   }
 
