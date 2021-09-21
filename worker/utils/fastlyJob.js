@@ -104,8 +104,8 @@ class FastlyJobClass {
                     }
                 })
         } catch (error) {
+            console.log(`Warmcache failed for ${updatedUrl}`);
             this.logger.save(`${'(prod)'.padEnd(15)}stdErr: ${error}`);
-            throw error;
         }
     }
 
