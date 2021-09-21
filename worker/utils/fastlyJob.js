@@ -67,7 +67,6 @@ class FastlyJobClass {
                 url: url
             }).then(response => {
                 if (response.status === 200) {
-                    console.log(response);
                     return;
                 } else {
                     console.log(`purgeURL URL: ${url} invaid response ${response}`);
