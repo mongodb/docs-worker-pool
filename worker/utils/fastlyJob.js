@@ -23,11 +23,11 @@ class FastlyJobClass {
 
     // takes in an array of surrogate keys and purges cache for each
     async purgeCache(urlArray, logger, purgeAll = false) {
-        headers['Fastly-Key']= environment.getFastlyToken(this.currentJob.payload.repoName);
+        headers['Fastly-Key']= environment.getFastlyToken(this.currentJob.currentJob.payload.repoName);
         if (!Array.isArray(urlArray)) {
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
-        console.log(`purgeCache Fastly token ${headers['Fastly-key']} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.payload.repoName)}`);
+        console.log(`purgeCache Fastly token ${headers['Fastly-key']} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName)}`);
         if (!purgeAll) {
             try {
                 logger.save(`Purging URL's`);
@@ -37,7 +37,7 @@ class FastlyJobClass {
 
                 //purge each surrogate key
                 const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey, 
-                    environment.getFastlyServiceId(this.currentJob.payload.repoName)));
+                    environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName)));
                 await Promise.all(purgeRequestPromises);
                 // GET request the URLs to warm cache for our users
                 const warmCachePromises = urlArray.map(url => this.warmCache(url));
@@ -49,7 +49,7 @@ class FastlyJobClass {
         } else {
             try {
                 logger.save(`Purging all`);
-                await this.requestPurgeAll(environment.getFastlyServiceId(this.currentJob.payload.repoName))
+                await this.requestPurgeAll(environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName))
             } catch (error) {
                 logger.save(`${'(prod)'.padEnd(15)}error in purge all: ${error}`);
             }
