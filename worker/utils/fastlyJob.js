@@ -35,16 +35,12 @@ class FastlyJobClass {
             try {
                 logger.save(`Purging URL's`);
                 //retrieve surrogate key associated with each URL/file updated in push to S3
-                console.log('Purging URL');
                 const purgePromises = urlArray.map(url => this.purgeURL(url));
-                console.log('Purging URL mapped URLs');
                 await Promise.all(purgePromises)
-                console.log('Purging URL purge keys completed');
+                console.log(`Purging URL purge urls completed Total URL's: ${purgePromises.length}`);
                 // GET request the URLs to warm cache for our users
                 const warmCachePromises = urlArray.map(url => this.warmCache(url));
-                console.log('Purging URL mapped warm cache');
                 await Promise.all(warmCachePromises)
-                console.log('Purging URL completed warm cache');
             } catch (error) {
                 logger.save(`${'(prod)'.padEnd(15)}error in purge urls: ${error}`);
                 console.log('Error purge URLs');
