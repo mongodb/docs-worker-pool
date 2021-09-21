@@ -97,12 +97,7 @@ class FastlyJobClass {
     // request urls of updated content to "warm" the cache for our customers
     async warmCache(updatedUrl) {
         try {
-            return axios.get(updatedUrl)
-                .then(response => {
-                    if (response.status === 200) {
-                        return true;
-                    }
-                })
+            await axios.get(updatedUrl);
         } catch (error) {
             console.log(`Warmcache failed for ${updatedUrl}`);
             this.logger.save(`${'(prod)'.padEnd(15)}stdErr: ${error}`);
