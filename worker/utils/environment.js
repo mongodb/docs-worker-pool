@@ -152,7 +152,7 @@ class EnvironmentClass {
   }
 
   static isAtlasRepo(repoName) {
-    return repoName == "cloudgov-docs" || repoName == "cloud-docs" || repoName == "cloud-docs-osb";
+    return ["cloudgov-docs","cloud-docs","cloud-docs-osb"].includes(repoName);
   }
 
 }
