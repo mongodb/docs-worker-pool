@@ -27,7 +27,7 @@ class FastlyJobClass {
         if (!Array.isArray(urlArray)) {
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
-        console.log(`purgeCache Fastly token ${headers['Fastly-key']} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName)}`);
+        console.log(`Environment ${JSON.stringify(environment)} purgeCache Fastly token  ${headers['Fastly-key']} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName)}`);
         if (!purgeAll) {
             try {
                 logger.save(`Purging URL's`);

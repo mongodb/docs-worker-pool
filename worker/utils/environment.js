@@ -145,6 +145,7 @@ class EnvironmentClass {
   }
   static getFastlyToken(repoName) {
     if (isAtlasRepo(repoName)) {
+      console.log(`getFastlyToken ${repoName} ${fastlyAtlasToken}`);
       return fastlyAtlasToken;
     }  
     if (repoName === "devhub-content") {
@@ -154,7 +155,7 @@ class EnvironmentClass {
   }
 
   static isAtlasRepo(repoName) {
-    return repoName === "cloudgov-docs" || repoName === "cloud-docs" || repoName === "cloud-docs-osb";
+    return repoName == "cloudgov-docs" || repoName == "cloud-docs" || repoName == "cloud-docs-osb";
   }
 
 }
