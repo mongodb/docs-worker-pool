@@ -20,7 +20,7 @@ class FastlyJobClass {
             'Fastly-Key': token,
             'Content-Type': 'application/json',
             'Fastly-Debug': 1,
-        }
+        };
     }
 
     // takes in an array of surrogate keys and purges cache for each
@@ -61,12 +61,13 @@ class FastlyJobClass {
 
     async retrieveSurrogateKey(url, token) {
         try {
-            console.log(`retrieveSurrogateKey URL: ${url} headers: ${JSON.parse(this.getHeaders(token))}`);
+            console.log(`retrieveSurrogateKey URL: ${url} headers: ${this.getHeaders(token)}`);
             return axios({
                 method: 'HEAD',
                 url: url,
                 headers: this.getHeaders(token),
             }).then(response => {
+                console.log(JSON.stringify(response));
                 if (response.status === 200) {
                     console.log(`retrieveSurrogateKey URL: ${url}  success key: ${response.headers['surrogate-key']}`);
                     return response.headers['surrogate-key'];
