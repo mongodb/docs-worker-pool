@@ -27,6 +27,7 @@ class FastlyJobClass {
         if (!Array.isArray(urlArray)) {
             throw new Error('Parameter `urlArray` needs to be an array of urls');
         }
+        console.log(`purgeCache Fastly token ${headers['Fastly-key']} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.payload.repoName)}`);
         if (!purgeAll) {
             try {
                 logger.save(`Purging URL's`);
@@ -77,7 +78,6 @@ class FastlyJobClass {
     async requestPurgeOfSurrogateKey(surrogateKey, fastlyServiceId) {
         headers['Surrogate-Key'] = surrogateKey
 
-        logger.save(`requestPurgeOfSurrogateKey Fastly token ${headers['Fastly-key']} Fastly ID: ${fastlyServiceId}`);
         try {
             return axios({
                 method: `POST`,
