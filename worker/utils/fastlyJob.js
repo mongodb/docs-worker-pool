@@ -77,6 +77,7 @@ class FastlyJobClass {
     async requestPurgeOfSurrogateKey(surrogateKey, fastlyServiceId) {
         headers['Surrogate-Key'] = surrogateKey
 
+        logger.save(`requestPurgeOfSurrogateKey Fastly token ${headers['Fastly-key']} Fastly ID: ${fastlyServiceId}`);
         try {
             return axios({
                 method: `POST`,
