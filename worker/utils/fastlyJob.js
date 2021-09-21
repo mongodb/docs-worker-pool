@@ -61,7 +61,6 @@ class FastlyJobClass {
 
     async retrieveSurrogateKey(url, token) {
         try {
-            console.log(`retrieveSurrogateKey URL: ${url} headers: ${this.getHeaders(token)}`);
             return axios({
                 method: 'HEAD',
                 url: url,
@@ -71,11 +70,13 @@ class FastlyJobClass {
                 if (response.status === 200) {
                     console.log(`retrieveSurrogateKey URL: ${url}  success key: ${response.headers['surrogate-key']}`);
                     return response.headers['surrogate-key'];
+                } else {
+                    console.log(`retrieveSurrogateKey URL: ${url} invaid response ${response.status}`);
                 }
             });
         } catch (error) {
-            this.logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
             console.log(`retrieveSurrogateKey URL Failed: ${url} error: ${error}`);
+            this.logger.save(`${'(prod)'.padEnd(15)}error in retrieveSurrogateKey: ${error}`);
             throw error
         }
 
