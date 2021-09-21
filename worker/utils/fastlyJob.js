@@ -27,7 +27,6 @@ class FastlyJobClass {
     async purgeCache(urlArray, logger, purgeAll = false) {
         const token = environment.getFastlyToken(this.currentJob.currentJob.payload.repoName);
         const serviceId = environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName);
-        console.log(`ID: ${this.currentJob.currentJob._id} purgeCache Fastly token  ${token} Fastly ID: ${environment.getFastlyServiceId(this.currentJob.currentJob.payload.repoName)}`);
         if (!Array.isArray(urlArray)) {
             console.log(`ERROR urlArray ${this.currentJob.currentJob._id}`)
             throw new Error('Parameter `urlArray` needs to be an array of urls');
@@ -38,7 +37,7 @@ class FastlyJobClass {
                 //retrieve surrogate key associated with each URL/file updated in push to S3
                 const surrogateKeyPromises = urlArray.map(url => this.retrieveSurrogateKey(url, token));
                 const surrogateKeyArray = await Promise.all(surrogateKeyPromises)
-
+                console.log(`Surrogate keys: ${JSON.stringify(surrogateKeyArray)} JobID: ${this.currentJob.currentJob._id}`);
                 //purge each surrogate key
                 const purgeRequestPromises = surrogateKeyArray.map(surrogateKey => this.requestPurgeOfSurrogateKey(surrogateKey, serviceId, token));
                 await Promise.all(purgeRequestPromises);
@@ -91,11 +90,13 @@ class FastlyJobClass {
             })
                 .then(response => {
                     if (response.status === 200) {
+                        console.log(`requestPurgeOfSurrogateKey: Purge succeeded for ${surrogateKey}`);
                         return true
                     }
                 });
         } catch (error) {
             this.logger.save(`${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey: ${error}`);
+            console.log(`requestPurgeOfSurrogateKey: Purge failed for ${surrogateKey}`);
             throw error;
         }
     }
