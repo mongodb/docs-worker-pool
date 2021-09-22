@@ -11,13 +11,12 @@
     "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
     "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
     "GATSBY_PARSER_USER": "GATSBY_PARSER_USER",
-    "shouldPurgeAll": false,
     "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
     "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
     "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
     "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
     "repo_dir": "repos",
-    "fastly_creds": {
+    "cdn_creds": {
         "cloudgov-docs": {
             "id": "FASTLY_ATLAS_SERVICE_ID",
             "token": "FASTLY_ATLAS_TOKEN"
