@@ -55,7 +55,6 @@ export class FileSystemServices implements IFileSystemServices {
     async saveUrlAsFile(url: string, path: string, options: any): Promise<boolean> {
         let resp = await this.download(url);
         if (resp && resp.status == 200 && resp.data) {
-            console.log(resp.data);
             this.writeToFile(path, resp.data, options);
         } else {
             throw new InvalidJobError(`Unable to download file ${url} error: ${resp?.status}`)

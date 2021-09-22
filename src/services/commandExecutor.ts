@@ -95,7 +95,8 @@ export class GithubCommandExecutor extends ShellCommandExecutor implements IGith
     }
 
     async cloneRepo(srcPath:string, targetPath:string): Promise<CommandExecutorResponse> {
-        let pullRepoCommands = [`cd re${targetPath}`, 
+        let pullRepoCommands = [
+        `cd ${targetPath}`, 
         `git clone ${srcPath}`];
         return await this.execute(pullRepoCommands);
     }
