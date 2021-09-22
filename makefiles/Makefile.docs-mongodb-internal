@@ -17,7 +17,7 @@ CUSTOM_NEXT_GEN_DEPLOY=true
 PUSHLESS_DEPLOY_SHARED_DISABLED=true
 include ~/shared.mk
 
-
+DRIVERS_PATH=source/driver-examples
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongodb-internal.yaml > ${REPO_DIR}/published-branches.yaml
 
