@@ -66,9 +66,7 @@ custom:
   awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret}
   githubBotUserName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/username}
   githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
-  fastlyToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/token}
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
-  fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
   bucketName: docs-mongodb-org-${self:provider.stage}
   atlastBucketName: docs-atlas-${self:provider.stage}
   atlasOsbBucketName: docs-atlas-osb-${self:provider.stage}
@@ -80,6 +78,25 @@ custom:
   npmEmail: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/email}
   awsKeyDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/key}
   awsSecretDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/secret}
+  gatsbyFeatureFlagConsistentNavigation: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/consistent_nav/enabled}
+  fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
+  fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
+  fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}
+  fastlyCloudManagerServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/service_id}
+  fastlyAtlasToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/atlas/token}
+  fastlyAtlasServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/atlas/service_id}
+  fastlyOpsManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/opsmanager/token}
+  fastlyOpsManagerServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/opsmanager/service_id}
+  fastlyDevhubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/token}
+  fastlyDevhubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/service_id}
+  fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
+  fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
+  javaBucketName: docs-java-${self:provider.stage}
+  goBucketName: docs-go-${self:provider.stage}
+  javaIntgrBucketName: docs-java-intgr
+  goIntgrBucketName: docs-go-intgr
+  nodeBucketName: docs-node-${self:provider.stage}
+  nodeIntgrBucketName: docs-node-intgr
   env:
     stg: "staging"
     prd: "production"
