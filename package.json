@@ -39,7 +39,6 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "remote-file-size": "^3.0.5",
-    "simple-git": "^1.107.0",
     "supertest": "^4.0.2",
     "toml": "^3.0.0",
     "validator": "^10.11.0",

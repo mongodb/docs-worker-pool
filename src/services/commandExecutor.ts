@@ -21,6 +21,7 @@ export interface IGithubCommandExecutor {
     checkoutBranchForSpecificHead(repoDirName:string, branchName:string, commitHash:string): Promise<CommandExecutorResponse>;
     pullRepo(repoDirName:string, branchName:string, commitHash:string| null | undefined): Promise<CommandExecutorResponse>;
     applyPatch(repoDirName:string, patchName:string): Promise<CommandExecutorResponse>;
+    cloneRepo(srcPath:string, targetPath:string): Promise<CommandExecutorResponse>;
 }
 
 export class ShellCommandExecutor implements ICommandExecutor {
@@ -90,6 +91,12 @@ export class GithubCommandExecutor extends ShellCommandExecutor implements IGith
         if (newHead) {
             pullRepoCommands.push(`git checkout ${newHead} .`)
         }
+        return await this.execute(pullRepoCommands);
+    }
+
+    async cloneRepo(srcPath:string, targetPath:string): Promise<CommandExecutorResponse> {
+        let pullRepoCommands = [`cd re${targetPath}`, 
+        `git clone ${srcPath}`];
         return await this.execute(pullRepoCommands);
     }
 }

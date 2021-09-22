@@ -3,11 +3,10 @@ import { CommandExecutorResponse, IGithubCommandExecutor } from './commandExecut
 import { IJobRepoLogger } from './logger';
 import { IConfig } from "config";
 import { InvalidJobError } from '../errors/errors';
-import simpleGit, {SimpleGit} from 'simple-git/promise';
 import { IFileSystemServices } from './fileServices';
 export interface IRepoConnector {
     applyPatch(job: IJob): Promise<any>
-    cloneRepo(job: IJob): Promise<any>
+    cloneRepo(job: IJob, targetPath: string): Promise<any>
     checkCommits(job: IJob): Promise<CommandExecutorResponse>
     pullRepo(job: IJob): Promise<CommandExecutorResponse>
 }
@@ -26,8 +25,8 @@ export class GitHubConnector implements IRepoConnector {
     }
 
     private getBasePath(job: IJob): string {
-        let botName = this._config.get("githubBotUserName");
-        let botPw = this._config.get("githubBotPW");
+        let botName = this._config.get<string>("githubBotUserName");
+        let botPw = this._config.get<string>("githubBotPW");
         return (job.payload.private) ? `https://${botName}:${botPw}@github.com` : "https://github.com";
     }
 
@@ -44,18 +43,13 @@ export class GitHubConnector implements IRepoConnector {
         }
     }
 
-    async cloneRepo(job: IJob): Promise<any> {
+    async cloneRepo(job: IJob, targetPath: string): Promise<any> {
         this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
         this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}running fetch`);
         try {
             const basePath = this.getBasePath(job);
             const repoPath = basePath + '/' + job.payload.repoOwner + '/' + job.payload.repoName;
-            console.log("******************GURUURURURU*********************");
-            const git: SimpleGit = simpleGit('repos');
-            console.log(repoPath, );
-            let resp = await git.clone(repoPath, job.payload.repoName);
-            // let resp = await simplegit().clone(repoPath, process.cwd() + `/repos/${job.payload.repoName}`);
-            console.log("******************GURUURURURUEND*********************");
+            await this._commandExecutor.cloneRepo(repoPath, targetPath);
             await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);
         } catch (errResult) {
             console.log(errResult);

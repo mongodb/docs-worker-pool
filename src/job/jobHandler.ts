@@ -96,10 +96,10 @@ export abstract class JobHandler {
     }
 
     @throwIfJobInterupted()
-    private async cloneRepo(): Promise<void> {
+    private async cloneRepo(targetPath: string): Promise<void> {
         await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
         await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}running fetch`);
-        await this._repoConnector.cloneRepo(this.currJob);
+        await this._repoConnector.cloneRepo(this.currJob, targetPath);
     }
 
     @throwIfJobInterupted()
@@ -240,7 +240,7 @@ export abstract class JobHandler {
     @throwIfJobInterupted()
     protected async build(): Promise<boolean> {
             this.cleanup();
-            await this.cloneRepo();
+            await this.cloneRepo(this._config.get<string>("repo_dir"));
             await this.commitCheck();
             await this.pullRepo();
             await this._repoConnector.applyPatch(this.currJob);

@@ -19,5 +19,36 @@
     "LOG_PADDING": 15,
     "PORT": 3000,
     "GATSBY_PARSER_USER": "user",
-    "shouldPurgeAll": true
+    "shouldPurgeAll": false,
+    "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
+    "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
+    "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
+    "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
+    "cdn_creds": {
+        "cloudgov-docs": {
+            "id": "FASTLY_ATLAS_SERVICE_ID",
+            "key": "FASTLY_ATLAS_TOKEN"
+        },
+        "cloud-docs": {
+            "id": "FASTLY_ATLAS_SERVICE_ID",
+            "key": "FASTLY_ATLAS_TOKEN"
+        },
+        "cloud-docs-osb": {
+            "id": "FASTLY_ATLAS_SERVICE_ID",
+            "key": "FASTLY_ATLAS_TOKEN"
+        },
+        "devhub-content": {
+            "id": "FASTLY_DEVHUB_SERVICE_ID",
+            "key": "FASTLY_DEVHUB_TOKEN"
+        },
+        "publishDochub": {
+            "id": "FASTLY_DOCHUB_SERVICE_ID",
+            "key": "FASTLY_DOCHUB_TOKEN"
+        },
+        "main": {
+            "id": "FASTLY_MAIN_SERVICE_ID",
+            "key": "FASTLY_MAIN_TOKEN"
+        }
+    },
+    "repo_dir": "repos"
 }

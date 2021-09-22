@@ -224,16 +224,28 @@ test('Execute legacy build successfully purges only updated urls', async () => {
     expect(jobHandlerTestHelper.cdnConnector.purgeAll).toHaveBeenCalledTimes(0);
 })
 
-test('Execute legacy build runs successfully purges all', async () => {
+test('Execute legacy build runs successfully purges all for main service', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(false);
     jobHandlerTestHelper.config.get.calledWith("shouldPurgeAll").mockReturnValue(true);
+    jobHandlerTestHelper.config.get.calledWith("cdn_creds").mockReturnValue({main:{ "id": "sid",
+    "key": "token"}});
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(false);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(TestDataProvider.getCommonBuildCommands(jobHandlerTestHelper.job));
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(TestDataProvider.getCommonDeployCommands(jobHandlerTestHelper.job));
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledWith(jobHandlerTestHelper.job._id);
+    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledWith(jobHandlerTestHelper.job._id, {id:"sid", key: "token"});
     expect(jobHandlerTestHelper.cdnConnector.purge).toHaveBeenCalledTimes(0);
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
+})
+
+test('Execute build runs successfully purges all for atlas service', async () => {
+    jobHandlerTestHelper.setStageForDeploySuccess(false);
+    jobHandlerTestHelper.config.get.calledWith("shouldPurgeAll").mockReturnValue(true);
+    jobHandlerTestHelper.config.get.calledWith("cdn_creds").mockReturnValue({"cloud-docs-osb":{ "id": "sid",
+    "key": "token"}});
+    jobHandlerTestHelper.job.payload.repoName = "cloud-docs-osb";
+    await jobHandlerTestHelper.jobHandler.execute();
+    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledWith(jobHandlerTestHelper.job._id, {id:"sid", key: "token"});
 })
 
 })

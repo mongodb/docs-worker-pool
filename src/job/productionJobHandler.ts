@@ -73,7 +73,7 @@ export class ProductionJobHandler extends JobHandler {
             // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
             await this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
             if (this._config.get("shouldPurgeAll")) {
-                await this._cdnConnector.purgeAll(this.currJob._id);
+                await this._cdnConnector.purgeAll(this.currJob._id,this.getCdnCreds());
             } else {
                 await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
                 await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
@@ -82,6 +82,13 @@ export class ProductionJobHandler extends JobHandler {
         } catch (error) {
             this.logger.error(this.currJob._id, error);
         }
+    }
+
+    private getCdnCreds(): any {
+        if (this.currJob.payload.repoName && this.currJob.payload.repoName in this._config.get<any>('cdn_creds')) {
+            return this._config.get<any>('cdn_creds')[this.currJob.payload.repoName ];
+        }
+            return this._config.get<any>('cdn_creds')['main'];
     }
 
     async deploy(): Promise<CommandExecutorResponse> {

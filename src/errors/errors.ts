@@ -35,22 +35,7 @@ export class NetworkError extends  AutoBuilderError{
         super(message, "ParserError", errorCode, stack);
       }
   }
-
-  export class SurrogateKeyNotFound extends AutoBuilderError {
-    url: string;
-    constructor(message:string, url:string, errorCode?:Number, stack?: string) {
-        super(message, "SurrogateKeyNotFound", errorCode, stack);
-        this.url = url;
-      }
-  }
-
-  export class PurgeBySurrogateKeyFailed extends SurrogateKeyNotFound {
-    constructor(message:string, url:string, errorCode?:Number, stack?: string) {
-        super(message, url, errorCode, stack);
-        this.name = "PurgeBySurrogateKeyFailed";
-      }
-  }
-
+  
   export class PublishError extends AutoBuilderError {
     constructor(message:string, errorCode?:Number, stack?: string) {
         super(message, "PublishError", errorCode, stack);

@@ -22,6 +22,8 @@ export class JobHandlerFactory {
             return new StagingJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
         } else if (job.payload.jobType === "productionDeploy") {
             return new ProductionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
+        } else if (job.payload.jobType === "publishDochub") {
+            return new ProductionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
         }
         throw new InvalidJobError("Job type not supported");
     }
@@ -88,7 +90,12 @@ export class JobManager {
             });
     }
 
+    
+
     async createHandlerAndExecute(job: IJob): Promise<void> {
+        if (job.payload.jobType == "publishDochub") {
+
+        }
         this._jobValidator.throwIfJobInvalid(job);
         this._jobHandler = this._jobHandlerFactory.createJobHandler(job, this._config, this._jobRepository,
             this._fileSystemServices, this._jobCommandExecutor, this._cdnConnector, this._repoConnector, this._logger);
