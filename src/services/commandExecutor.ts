@@ -98,6 +98,8 @@ export class GithubCommandExecutor extends ShellCommandExecutor implements IGith
         let pullRepoCommands = [
         `cd ${targetPath}`, 
         `git clone ${srcPath}`];
-        return await this.execute(pullRepoCommands);
+        let resp = await this.execute(pullRepoCommands);
+        console.log(resp);
+        return resp;
     }
 }

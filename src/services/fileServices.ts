@@ -99,7 +99,7 @@ export class FileSystemServices implements IFileSystemServices {
     }
 
     writeToFile(fileName: string, text: string, options: any): void {
-        console.log(fileName, text, options);
+        console.log(fileName, options);
         fs.writeFileSync(fileName, text, options);
         console.log(`wrote file ${fileName}`);
     }
