@@ -4,6 +4,9 @@ import { IJobRepoLogger } from "../../../src/services/logger";
 import MockAdapter from 'axios-mock-adapter';
 
 describe('FastlyConnector purge Tests', () => {
+    beforeEach(() => {
+        jest.setTimeout(30000);
+    });
     test('FastlyConnector purge succeeds', async() => {
         let fastlyConnector = new FastlyConnector(mockDeep<IJobRepoLogger>());
         await fastlyConnector.purge("test_job_id", ["https://docs-mongodborg-staging.corp.mongodb.com/compass/master/editions/index.html"]);

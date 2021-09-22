@@ -18,18 +18,18 @@ describe('Job Repository Tests', () => {
     describe('Job Repository updateWithCompletionStatus Tests', () => {
         test('Update with completion status throws DB Error as result is undefined', async () => {
             const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject("Test_Job", "completed", "All good", new Date());
-            await expect(jobRepo.updateWithCompletionStatus("Test_Job", "All good")).rejects.toThrow(`Cannot read property 'result' of undefined`);
-            expect(dbRepoHelper.logger.error).toBeCalledWith("JobRepository:updateOne", `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)} Error: Cannot read property 'result' of undefined`);
+            await expect(jobRepo.updateWithCompletionStatus("Test_Job", "All good")).rejects.toThrow(`Cannot read property 'modifiedCount' of undefined`);
+            expect(dbRepoHelper.logger.error).toBeCalledWith("JobRepository:updateOne", `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)} Error: Cannot read property 'modifiedCount' of undefined`);
         })
 
         test('Update with completion status throws DB Error as result length < 1', async () => {
             const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject("Test_Job", "completed", "All good", new Date());
-            dbRepoHelper.collection.updateOne.mockReturnValue({ result: { n: 0 } });
+            dbRepoHelper.collection.updateOne.mockReturnValue({  modifiedCount: -1  });
             await expect(jobRepo.updateWithCompletionStatus("Test_Job", "All good")).rejects.toThrow(`Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`);
             expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
         })
 
-        test('Update with completion status fails as there is no n in results', async () => {
+        test('Update with completion status fails as there is no modifiedCount in results', async () => {
             const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject("Test_Job", "completed", "All good", new Date());
             dbRepoHelper.collection.updateOne.mockReturnValueOnce({ result: { sn: -1 } });
             await expect(jobRepo.updateWithCompletionStatus("Test_Job", "All good")).rejects.toThrow(`Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`);
@@ -39,7 +39,7 @@ describe('Job Repository Tests', () => {
 
         test('Update with completion status succeeds', async () => {
             const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject("Test_Job", "completed", "All good", new Date());
-            dbRepoHelper.collection.updateOne.mockReturnValueOnce({ result: { n: 1 } });
+            dbRepoHelper.collection.updateOne.mockReturnValueOnce({  modifiedCount: 1  });
             await expect(jobRepo.updateWithCompletionStatus("Test_Job", "All good")).resolves.toEqual(true);
             expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
             expect(dbRepoHelper.logger.error).toBeCalledTimes(0);
@@ -68,7 +68,7 @@ describe('Job Repository Tests', () => {
 
         test('updateWithFailureStatus succeeds', async () => {
             const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject("Test_Job", "failed", "All good", new Date(), true, "wierd reason");
-            dbRepoHelper.collection.updateOne.mockReturnValueOnce({ result: { n: 1 } });
+            dbRepoHelper.collection.updateOne.mockReturnValueOnce({  modifiedCount: 1   });
             dbRepoHelper.config.get.calledWith("MONGO_TIMEOUT_S").mockReturnValueOnce(1);
             await expect(jobRepo.updateWithErrorStatus("Test_Job", "wierd reason")).resolves.toEqual(true);
             expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
@@ -152,7 +152,7 @@ describe('Job Repository Tests', () => {
     }
 
     function setupForUpdateOneSuccess() {
-        dbRepoHelper.collection.updateOne.mockReturnValueOnce({ result: { n: 1 } });
+        dbRepoHelper.collection.updateOne.mockReturnValueOnce({  modifiedCount: 1  });
         dbRepoHelper.config.get.calledWith("MONGO_TIMEOUT_S").mockReturnValueOnce(1);
     }
 

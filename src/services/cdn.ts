@@ -42,7 +42,7 @@ export class FastlyConnector implements ICDNConnector {
 
     async purge(jobId: string, urls: Array<string>): Promise<void> {
         const purgeUrlPromises = urls.map(url => this.purgeURL(jobId, url));
-        await Promise.all(purgeUrlPromises.map(p => p.catch((e) => { console.log(e); urls.splice(urls.indexOf(e.url), 1); return ""; })));
+        await Promise.all(purgeUrlPromises.map(p => p.catch((e) => { urls.splice(urls.indexOf(e.url), 1); return ""; })));
         this._logger.info(jobId, `Total urls purged ${urls.length}`);
         // GET request the URLs to warm cache for our users
         const warmCachePromises = urls.map(url => this.warm(url));

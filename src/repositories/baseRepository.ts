@@ -38,7 +38,6 @@ export abstract class BaseRepository<T> {
     protected async updateOne(query: any, update: any, erroMsg:string): Promise<boolean> {
         try {
             const updateResult = await this.promiseTimeoutS(this._config.get("MONGO_TIMEOUT_S"),this._collection.updateOne(query, update), erroMsg)
-            console.log(updateResult);
             if (!updateResult.modifiedCount || updateResult.modifiedCount < 1) {
                 throw new DBError(`Failed to update job (${JSON.stringify(query)})  for ${JSON.stringify(update)}`);
             }

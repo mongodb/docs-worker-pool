@@ -6,6 +6,7 @@ import { IGithubCommandExecutor } from '../../../src/services/commandExecutor';
 import { IJobRepoLogger } from '../../../src/services/logger';
 import { GitHubConnector } from '../../../src/services/repo';
 import { IJob } from '../../../src/entities/job';
+import fs from 'fs-extra';
 let job: IJob;
 let commandExecutor: IGithubCommandExecutor;
 let jobRepoLogger: IJobRepoLogger;
@@ -79,11 +80,11 @@ describe('GitHubConnector Tests', () => {
 
     describe('GitHubConnector cloneRepo Tests', () => {
         test('GitHubConnector cloneRepo  succeeds', async () => {
-            config.get.calledWith('githubBotUserName').mockReturnValue('uname');
-            config.get.calledWith('githubBotPW').mockReturnValue('pass');
-            commandExecutor.cloneRepo.calledWith(`https://uname:pass@github.com`, "repos").mockReturnValueOnce({ output: "fine", status: "success", error: null });
+            job.payload.repoName = 'docs-java';
+            job.payload.repoOwner= 'mongodb';
             await gitHubConnector.cloneRepo(job, "repos");
-            expect(commandExecutor.cloneRepo.mock.calls).toHaveLength(1);
+            fs.removeSync("repos");
+            
         })
     });
 

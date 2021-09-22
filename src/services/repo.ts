@@ -4,7 +4,8 @@ import { IJobRepoLogger } from './logger';
 import { IConfig } from "config";
 import { InvalidJobError } from '../errors/errors';
 import { IFileSystemServices } from './fileServices';
-const clone = require('git-clone/promise');
+import simpleGit, {SimpleGit} from 'simple-git';
+const git: SimpleGit = simpleGit();
 
 export interface IRepoConnector {
     applyPatch(job: IJob): Promise<any>
@@ -51,12 +52,10 @@ export class GitHubConnector implements IRepoConnector {
         try {
             const basePath = this.getBasePath(job);
             const repoPath = basePath + '/' + job.payload.repoOwner + '/' + job.payload.repoName;
-            let resp = await clone(repoPath, targetPath);
-            console.log(resp);
+            await git.clone(repoPath, `${targetPath}/${job.payload.repoName}`);
             // await this._commandExecutor.cloneRepo(repoPath, targetPath);
             await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);
         } catch (errResult) {
-            console.log(errResult);
             await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
             throw errResult;
         }
