@@ -177,6 +177,7 @@ class GitHubJobClass {
                 currentJob.payload.repoOwner +
                 '/' +
                 currentJob.payload.repoName;
+            console.log(repoPath);
             await simpleGit('repos')
                 .silent(false)
                 .clone(repoPath, `${this.getRepoDirName()}`)
