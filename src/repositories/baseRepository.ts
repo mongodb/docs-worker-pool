@@ -39,7 +39,7 @@ export abstract class BaseRepository<T> {
         try {
             const updateResult = await this.promiseTimeoutS(this._config.get("MONGO_TIMEOUT_S"),this._collection.updateOne(query, update), erroMsg)
             console.log(updateResult);
-            if (!updateResult.result.n || updateResult.result.n < 1) {
+            if (!updateResult.modifiedCount || updateResult.modifiedCount < 1) {
                 throw new DBError(`Failed to update job (${JSON.stringify(query)})  for ${JSON.stringify(update)}`);
             }
         } catch (error) {
