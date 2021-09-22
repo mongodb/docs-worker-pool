@@ -63,7 +63,7 @@ next-gen-stage: ## Host online for review
 
 	
 examples:
-	mkdir -p ${DRIVERS_PATH}
+	mkdir -p source/driver-examples
 # python
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-python-driver/master/test/test_examples.py -o ${DRIVERS_PATH}/test_examples.py
 # motor
