@@ -92,8 +92,8 @@ export class JobManager {
         this._jobValidator.throwIfJobInvalid(job);
         this._jobHandler = this._jobHandlerFactory.createJobHandler(job, this._config, this._jobRepository,
             this._fileSystemServices, this._jobCommandExecutor, this._cdnConnector, this._repoConnector, this._logger);
-        this._jobHandler?.execute();
-        this._logger.save(job._id, `${'    (DONE)'.padEnd(this._config.get("LOG_PADDING"))}Finished Job with ID: ${job._id}`);
+        await this._jobHandler?.execute();
+        await this._logger.save(job._id, `${'    (DONE)'.padEnd(this._config.get("LOG_PADDING"))}Finished Job with ID: ${job._id}`);
     }
 
     async work():Promise<void> {

@@ -44,7 +44,7 @@ export class ProductionJobHandler extends JobHandler {
             const snootyName = await this.commandExecutor.getSnootyProjectName(this.currJob.payload.repoName);
             this.currJob.payload.manifestPrefix = snootyName + '-' + (this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName);
         } catch (error) {
-            this.logger.save(this.currJob._id, error)
+            await this.logger.save(this.currJob._id, error)
             throw error
         }
     }
@@ -60,7 +60,7 @@ export class ProductionJobHandler extends JobHandler {
             }
             return pathPrefix;
         } catch (error) {
-            this.logger.save(this.currJob._id, error)
+            await this.logger.save(this.currJob._id, error)
             throw new InvalidJobError(error.message)
         }
     }
@@ -71,7 +71,7 @@ export class ProductionJobHandler extends JobHandler {
             //contains URLs corresponding to files updated via our push to S3
             const updatedURLsArray = stdoutJSON.urls;
             // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
-            this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
+            await this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
             if (this._config.get("shouldPurgeAll")) {
                 await this._cdnConnector.purgeAll(this.currJob._id);
             } else {
@@ -89,11 +89,11 @@ export class ProductionJobHandler extends JobHandler {
         try {
             const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
             await this.purgePublishedContent(makefileOutput);
-            this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
-            this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
+            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
+            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
             return resp;
         } catch (errResult) {
-            this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
             throw errResult;
         }
     }

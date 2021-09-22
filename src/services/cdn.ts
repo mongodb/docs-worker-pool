@@ -32,7 +32,7 @@ export class FastlyConnector implements ICDNConnector {
         try {
             return await axiosApi.post(`https://api.fastly.com/service/${this._config.get('fastlyServiceId')}/purge_all`, {}, {headers:this._headers});
         } catch (error) {
-            this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in requestPurgeAll: ${error}`);
+            await this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in requestPurgeAll: ${error}`);
             throw error;
         }
     }
@@ -42,7 +42,7 @@ export class FastlyConnector implements ICDNConnector {
             const resp = await axiosApi.get(url);
             return resp && resp.status === 200 ? true: false;
         } catch (error) {
-            this._logger.save(jobId, `${'(prod)'.padEnd(15)}stdErr: ${error}`);
+            await this._logger.save(jobId, `${'(prod)'.padEnd(15)}stdErr: ${error}`);
             throw error;
         }
     }
@@ -50,7 +50,7 @@ export class FastlyConnector implements ICDNConnector {
 
     async purge(jobId:string, urls: Array<string>): Promise<void> {
             try {
-                this._logger.save(jobId, `Purging URL's`);
+                await this._logger.save(jobId, `Purging URL's`);
                 //retrieve surrogate key associated with each URL/file updated in push to S3
                 const surrogateKeyPromises = urls.map(url => this.retrieveSurrogateKey(jobId, url));
                 const results = await Promise.all(surrogateKeyPromises.map(p => p.catch((e) => { urls.splice(urls.indexOf(e.url),1); return ""; })));  
@@ -61,7 +61,7 @@ export class FastlyConnector implements ICDNConnector {
                 const warmCachePromises = urls.map(url => this.warm(jobId, url));
                 await Promise.all(warmCachePromises)
             } catch (error) {
-                this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in purge urls: ${error}`);
+                await this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in purge urls: ${error}`);
             }
 
     }
@@ -72,7 +72,7 @@ export class FastlyConnector implements ICDNConnector {
         try {
             return await axiosApi.post(`https://api.fastly.com/service/${this._config.get('fastlyServiceId')}/purge/${surrogateKey}`, {}, {headers:this._headers});
         } catch (error) {
-            this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey for Key:${surrogateKey} Url:${relevantUrl} Error:${error}`);
+            await this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in requestPurgeOfSurrogateKey for Key:${surrogateKey} Url:${relevantUrl} Error:${error}`);
             throw new PurgeBySurrogateKeyFailed(error, relevantUrl)
         }
     }
@@ -83,7 +83,7 @@ export class FastlyConnector implements ICDNConnector {
             const resp = await axiosApi.head(url, {headers:this._headers});
             return resp.headers['surrogate-key'];
         } catch (error) {
-            this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in retrieveSurrogateKey for url ${url} Error:${error}`);
+            await this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in retrieveSurrogateKey for url ${url} Error:${error}`);
             throw new SurrogateKeyNotFound(error, url)
         }
     }

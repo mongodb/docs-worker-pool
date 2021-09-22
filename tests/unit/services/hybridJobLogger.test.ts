@@ -47,8 +47,8 @@ describe('HybridJobLogger Tests', () => {
     })
 
     describe('HybridJobLogger derived Tests', () => {
-        test('HybridJobLogger save succeeds', () => {
-            hybridJobLogger.save("TestContext", "testMessage");
+        test('HybridJobLogger save succeeds', async() => {
+            await hybridJobLogger.save("TestContext", "testMessage");
             expect(console.info).toBeCalledWith(`Context: TestContext message: testMessage`);
             expect(console.info.mock.calls).toHaveLength(1);
             expect(jobRepo.insertLogStatement.mock.calls).toHaveLength(1);

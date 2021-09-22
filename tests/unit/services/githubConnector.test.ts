@@ -18,7 +18,7 @@ jest.mock("simple-git", () => () => ({ clone: () => "Mocked" }));
 
 beforeEach(() => {
 
-    job = JSON.parse(JSON.stringify(data.default));
+    job = JSON.parse(JSON.stringify(data.default.value));
     fileSystemServices = mockDeep<IFileSystemServices>();
     commandExecutor = mockDeep<IGithubCommandExecutor>();
     jobRepoLogger = mockDeep<IJobRepoLogger>();

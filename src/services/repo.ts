@@ -3,7 +3,7 @@ import { CommandExecutorResponse, IGithubCommandExecutor } from './commandExecut
 import { IJobRepoLogger } from './logger';
 import { IConfig } from "config";
 import { InvalidJobError } from '../errors/errors';
-import simpleGit from 'simple-git';
+import simpleGit, {SimpleGit} from 'simple-git/promise';
 import { IFileSystemServices } from './fileServices';
 export interface IRepoConnector {
     applyPatch(job: IJob): Promise<any>
@@ -26,8 +26,8 @@ export class GitHubConnector implements IRepoConnector {
     }
 
     private getBasePath(job: IJob): string {
-        let botName = this._config.get("GITHUB_BOT_USERNAME");
-        let botPw = this._config.get("GITHUB_BOT_PASSWORD");
+        let botName = this._config.get("githubBotUserName");
+        let botPw = this._config.get("githubBotPW");
         return (job.payload.private) ? `https://${botName}:${botPw}@github.com` : "https://github.com";
     }
 
@@ -38,8 +38,7 @@ export class GitHubConnector implements IRepoConnector {
                 this._fileSystemService.writeToFile(`repos/${job.payload.repoName}/myPatch.patch`, job.payload.patch, { encoding: 'utf8', flag: 'w' });
                 return await this._commandExecutor.applyPatch(job.payload.repoName, "myPatch.patch");
             } catch (error) {
-                console.log()
-                this._jobRepoLogger.save(job._id, `Error creating patch  ${error}`);
+                await this._jobRepoLogger.save(job._id, `Error creating patch  ${error}`);
                 throw new InvalidJobError(`Error creating patch  ${error}`);
             }
         }
@@ -51,11 +50,16 @@ export class GitHubConnector implements IRepoConnector {
         try {
             const basePath = this.getBasePath(job);
             const repoPath = basePath + '/' + job.payload.repoOwner + '/' + job.payload.repoName;
-            let resp = await simpleGit('repos').clone(repoPath, `${job.payload.repoName}`);
-            this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);
-            return resp;
+            console.log("******************GURUURURURU*********************");
+            const git: SimpleGit = simpleGit('repos');
+            console.log(repoPath, );
+            let resp = await git.clone(repoPath, job.payload.repoName);
+            // let resp = await simplegit().clone(repoPath, process.cwd() + `/repos/${job.payload.repoName}`);
+            console.log("******************GURUURURURUEND*********************");
+            await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);
         } catch (errResult) {
-            this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+            console.log(errResult);
+            await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
             throw errResult;
         }
     }

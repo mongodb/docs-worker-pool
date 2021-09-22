@@ -31,7 +31,7 @@ export class JobHandlerTestHelper {
     }
 
     init(handlerName: string): ProductionJobHandler | StagingJobHandler {
-        this.job = JSON.parse(JSON.stringify(data.default));
+        this.job = JSON.parse(JSON.stringify(data.default.value));
         this.config = mockDeep<IConfig>();
         this.jobRepo = mockDeep<JobRepository>();
         this.fileSystemServices = mockDeep<IFileSystemServices>();

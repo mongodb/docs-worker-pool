@@ -90,15 +90,15 @@ export abstract class JobHandler {
     }
 
     @throwIfJobInterupted()
-    private logError(error): void {
-        this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `);
-        this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+    private async logError(error): Promise<void> {
+        await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `);
+        await  this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
     }
 
     @throwIfJobInterupted()
     private async cloneRepo(): Promise<void> {
-        this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
-        this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}running fetch`);
+        await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
+        await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}running fetch`);
         await this._repoConnector.cloneRepo(this.currJob);
     }
 
@@ -110,12 +110,12 @@ export abstract class JobHandler {
                 const resp = await this._repoConnector.checkCommits(this._currJob);
                 if (!resp || !resp.output || (resp.output && !resp.output.includes(`* ${this.currJob.payload.branchName}`))) {
                     const err = new InvalidJobError(`Specified commit does not exist on ${this.currJob.payload.branchName} branch`);
-                    this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)} failed. The specified commit does not exist on ${this.currJob.payload.branchName} branch.`);
+                    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)} failed. The specified commit does not exist on ${this.currJob.payload.branchName} branch.`);
                     throw err;
                 }
             } catch (error) {
                 if (!(error instanceof AutoBuilderError)) {
-                    this.logError(error);
+                    await this.logError(error);
                 }
                 throw error;
             }
@@ -127,7 +127,7 @@ export abstract class JobHandler {
         try {
             await this._repoConnector.pullRepo(this.currJob);
         } catch (error) {
-            this.logError(error);
+            await (error);
             throw error;
         }
     }
@@ -141,7 +141,7 @@ export abstract class JobHandler {
                 flag: 'w'
             });
         } catch (error) {
-            this.logError(error);
+            await this.logError(error);
             throw error;
         }
     }
@@ -180,20 +180,19 @@ export abstract class JobHandler {
     private async executeBuild(): Promise<boolean> {
         const testableArrayWrapper = new TestableArrayWrapper();
         if (this.currJob.buildCommands && new TestableArrayWrapper().length(this.currJob.buildCommands) > 0) {
-            
-            this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
-            this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
+            await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
+            await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
             let resp = await this._commandExecutor.execute(this.currJob.buildCommands);
-            this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
-            this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`);
+            await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
+            await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`);
             if (resp.status != 'success') {
                 const error = new AutoBuilderError(resp.error, "BuildError")
-                this.logError(error);
+                await this.logError(error);
                 throw error 
             }
         } else {
             const error = new AutoBuilderError("No commands to execute", "BuildError")
-            this.logError(error);
+            await this.logError(error);
             throw error 
         }
         return true;
@@ -254,27 +253,27 @@ export abstract class JobHandler {
     @throwIfJobInterupted()
     protected async deployGeneric(): Promise<CommandExecutorResponse> {
         this.prepDeployCommands();
-        this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Pushing to ${this.name}`);
+        await this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Pushing to ${this.name}`);
         
         if (this.currJob.deployCommands && new TestableArrayWrapper().length(this.currJob.deployCommands) > 0 ) {
             const resp = await this._commandExecutor.execute(this.currJob.deployCommands)
             if (resp && resp.error && resp.error.indexOf('ERROR') !== -1) {
-                this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Failed to push to ${this.name}`);
+                await this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Failed to push to ${this.name}`);
                 throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`)
               }
-            this._logger.save(this.currJob._id,`${'(stage)'.padEnd(15)}Finished pushing to ${this.name}`);
-            this._logger.save(this.currJob._id,`${'(stage)'.padEnd(15)}Staging push details:\n\n${resp.output}`);
+            await this._logger.save(this.currJob._id,`${'(stage)'.padEnd(15)}Finished pushing to ${this.name}`);
+            await this._logger.save(this.currJob._id,`${'(stage)'.padEnd(15)}Staging push details:\n\n${resp.output}`);
             return resp;
 
         } else {
-            this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Pushing to ${this.name} failed as there is no commands to execute`);
+            await this._logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Pushing to ${this.name} failed as there is no commands to execute`);
             throw new PublishError(`Failed pushing to ${this.name}, No commands to execute`);
         }
     }
 
     @throwIfJobInterupted()
     public async execute(): Promise<void> {
-        this._logger.save(this._currJob._id, `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`);
+        await this._logger.save(this._currJob._id, `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`);
         try {
             await this.build();
             const resp = await this.deploy();

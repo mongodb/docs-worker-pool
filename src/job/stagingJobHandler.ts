@@ -45,11 +45,11 @@ export class StagingJobHandler extends JobHandler {
             if (resp.output.indexOf('Summary') !== -1) {
                 resp.output = resp.output.substr(resp.output.indexOf('Summary'));
             }
-            this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
-            this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
+            await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
+            await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
             return resp;
         } catch (errResult) {
-            this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+            await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
             throw errResult;
         }
     }

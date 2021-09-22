@@ -17,10 +17,18 @@ export interface IFileSystemServices {
     readFileAsUtf8(filePath: string): string;
     saveUrlAsFile(url: string, path: string, options: any): any;
     downloadYaml(url): Promise<any>;
+    createDirIfNotExists(dir:string):void;
 
 }
 
 export class FileSystemServices implements IFileSystemServices {
+
+    createDirIfNotExists(dir: string): void {
+        if (fs.existsSync(dir)) {
+            return;
+        } 
+        fs.mkdirSync(dir);
+    }
 
     private async download(url: string): Promise<any> {
         return await axiosApi.get(url);

@@ -13,7 +13,7 @@ let repoEntitlementRepository: RepoEntitlementsRepository;
 let jobValidator: JobValidator;
 
 beforeEach(() => {
-    job = JSON.parse(JSON.stringify(data.default));
+    job = JSON.parse(JSON.stringify(data.default.value));
     fileSystemServices = mockDeep<IFileSystemServices>();
     repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
     jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);

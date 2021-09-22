@@ -136,7 +136,7 @@ export class TestDataProvider {
     static getPathPrefixCases(): Array<any> {
         // Null version 
 
-        const job = Object.assign(data.default);
+        const job = Object.assign(data.default.value);
         let itemValid = TestDataProvider.getPublishBranchesContent(job);
 
         // Null version
@@ -178,7 +178,7 @@ export class TestDataProvider {
     }
 
     static getManifestPrefixCases(): Array<any> {
-        const job = Object.assign(data.default);
+        const job = Object.assign(data.default.value);
         let itemValid = TestDataProvider.getPublishBranchesContent(job);
         return [{
             branchInfo: itemValid,

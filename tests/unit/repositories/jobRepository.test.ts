@@ -87,7 +87,7 @@ describe('Job Repository Tests', () => {
         test('getOneQueuedJobAndUpdate succeeds', async () => {
             const testData = TestDataProvider.getFindOneAndUpdateCallInfo();
             dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(data.default);
-            await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(Object.assign({}, data.default));
+            await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(Object.assign({}, data.default.value));
             expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
             expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledWith(testData.query, testData.update, testData.options);
             expect(dbRepoHelper.logger.error).toBeCalledTimes(0);

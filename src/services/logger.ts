@@ -28,8 +28,13 @@ export class HybridJobLogger extends ConsoleLogger implements IJobRepoLogger {
         super();
         this._jobRepo = jobRepo;
     }
-    async save(contextId: string, message: string): Promise<void> {
-        this.info(contextId, message);
-        await this._jobRepo.insertLogStatement(contextId, [message]);
+    async save(contextId: string, message: string): Promise<void> { 
+        try {
+            this.info(contextId, message); 
+            await this._jobRepo.insertLogStatement(contextId, [message]);
+        } catch(err) {
+            this.error(contextId, err);
+        }
+       
     }
 }

@@ -31,7 +31,7 @@ describe('JobManager Tests', () => {
     beforeEach(() => {
         jest.useFakeTimers('modern');
         jest.setSystemTime(new Date(2021, 4, 3));
-        job = JSON.parse(JSON.stringify(data.default));
+        job = JSON.parse(JSON.stringify(data.default.value));
         config = mockDeep<IConfig>();
         jobRepo = mockDeep<JobRepository>();
         fileSystemServices = mockDeep<IFileSystemServices>();

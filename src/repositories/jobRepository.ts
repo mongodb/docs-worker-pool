@@ -4,6 +4,7 @@ import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
 import { InvalidJobError } from "../errors/errors";
+import { isNull } from "node:util";
 
 export class JobRepository extends BaseRepository<Job> {
     constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
@@ -22,7 +23,7 @@ export class JobRepository extends BaseRepository<Job> {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`);
     }
 
-    async getOneQueuedJobAndUpdate(): Promise<Job> {
+    async getOneQueuedJobAndUpdate(): Promise<Job|null> {
         const query = {
             status: 'inQueue',
             createdTime: { $lte: new Date() },
@@ -33,8 +34,10 @@ export class JobRepository extends BaseRepository<Job> {
         if (!response) {
             throw new InvalidJobError("JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job");
         }
-        return Object.assign(new Job(), response)
-
+        if (response.value) {
+            return Object.assign(new Job(), response.value) 
+        }
+        return null;
     }
     async updateWithErrorStatus(id: string, reason: string): Promise<boolean> {
         const query = { _id: id };
