@@ -6,7 +6,7 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 
-PROJECT=mongodb-internal
+PROJECT=docs
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
