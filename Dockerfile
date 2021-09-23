@@ -1,4 +1,3 @@
-
 # Build the Typescript app
 FROM node:14-alpine3.10 as ts-compiler
 WORKDIR /home/docsworker-xlarge
@@ -9,12 +8,11 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
-
 # where repo work will happen
 FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
-ARG NPM_BASE_64_AUTH
-ARG NPM_EMAIL
+ARG NPM_BASE_64_AUTH=ZG9jcy1wbGF0Zm9ybTpBS0NwOGpSYkRUVjRVRktUM0JSTndlckxrckwyVFdjaDZ4U0d0c3JKZUhyRmtFTExGdFZDNDVnZEMxRGF4ZzZ5ckhNeWt2U0Zv
+ARG NPM_EMAIL=docs-platform
 
 # install legacy build environment for docs
 RUN apt-get -o Acquire::Check-Valid-Until=false update
@@ -88,5 +86,5 @@ RUN npm install
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
 RUN ls
-CMD ["app.js"]
+CMD ["node", "app.js"]
 
