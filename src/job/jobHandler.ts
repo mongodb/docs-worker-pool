@@ -196,6 +196,8 @@ export abstract class JobHandler {
             }
         } else {
             const error = new AutoBuilderError("No commands to execute", "BuildError")
+            var files = fs.readdirSync(process.cwd() + `/repos/${this.currJob.payload.repoName}`);
+            console.log(files);
             await this.logError(error);
             throw error 
         }
