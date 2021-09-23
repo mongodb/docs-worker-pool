@@ -1,5 +1,5 @@
 
-# install the node dependencies for worker pool
+# Build the Typescript app
 FROM node:14-alpine3.10 as ts-compiler
 WORKDIR /home/docsworker-xlarge
 COPY  config config/
@@ -9,8 +9,12 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
-# where repo work will happen
 FROM ubuntu:20.04
+WORKDIR /home/docsworker-xlarge
+COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
+COPY --from=ts-compiler /home/docsworker-xlarge/config config/
+COPY --from=ts-compiler /home/docsworker-xlarge/build ./
+
 ARG DEBIAN_FRONTEND=noninteractive
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -79,10 +83,7 @@ RUN cd snooty-devhub && \
 	git fetch --all && \
 	git checkout master && \	
 	npm install --production
-WORKDIR /home/docsworker-xlarge
-COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
-COPY --from=ts-compiler /home/docsworker-xlarge/config config/
-COPY --from=ts-compiler /home/docsworker-xlarge/build ./
+
 RUN npm install
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
