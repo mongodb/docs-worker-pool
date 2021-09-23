@@ -8,6 +8,7 @@ import { IFileSystemServices } from "../services/fileServices";
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from "../errors/errors";
 import { IConfig } from "config";
 import TestableArrayWrapper  from "./ITestableTypeWrapper";
+var fs = require('fs');
 
 export abstract class JobHandler {
     private _currJob: IJob;
@@ -184,6 +185,8 @@ export abstract class JobHandler {
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
             let resp = await this._commandExecutor.execute(this.currJob.buildCommands);
+            var files = fs.readdirSync(process.cwd() + `/repos/${this.currJob.payload.repoName}`);
+            console.log(files);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`);
             if (resp.status != 'success') {
