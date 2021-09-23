@@ -63,6 +63,8 @@ Resources:
               value: ${self:custom.awsSecretDevhub}
             - Name: GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
               value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
+            - Name: GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN
+              value: ${self:custom.gatsbyFeatureFlagVersionDropdown}
             - Name: FASTLY_MAIN_TOKEN
               value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID

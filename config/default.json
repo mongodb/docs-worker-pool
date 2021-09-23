@@ -1,7 +1,7 @@
 {
     "stage": "dev",
-    "dbUsername":"worker",
-    "dbPassword": "worker123",
+    "dbUsername":"un",
+    "dbPassword": "pw",
     "dbName" : "pool_test",
     "jobQueueCollection":"queue",
     "awsKey": "devkey", 
