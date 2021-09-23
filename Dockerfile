@@ -11,8 +11,8 @@ RUN npm run build
 # where repo work will happen
 FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
-ARG NPM_BASE_64_AUTH=ZG9jcy1wbGF0Zm9ybTpBS0NwOGpSYkRUVjRVRktUM0JSTndlckxrckwyVFdjaDZ4U0d0c3JKZUhyRmtFTExGdFZDNDVnZEMxRGF4ZzZ5ckhNeWt2U0Zv
-ARG NPM_EMAIL=docs-platform
+ARG NPM_BASE_64_AUTH
+ARG NPM_EMAIL
 
 # install legacy build environment for docs
 RUN apt-get -o Acquire::Check-Valid-Until=false update
