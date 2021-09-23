@@ -1,4 +1,16 @@
-FROM ubuntu:20.04 as main
+
+# install the node dependencies for worker pool
+FROM node:14-alpine3.10 as ts-compiler
+WORKDIR /home/docsworker-xlarge
+COPY  config config/
+COPY package*.json ./
+COPY tsconfig*.json ./
+RUN npm install
+COPY . ./
+RUN npm run build
+
+# where repo work will happen
+FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -67,19 +79,6 @@ RUN cd snooty-devhub && \
 	git fetch --all && \
 	git checkout master && \	
 	npm install --production
-
-# install the node dependencies for worker pool
-FROM node:14-alpine3.10 as ts-compiler
-WORKDIR /home/docsworker-xlarge
-COPY  config config/
-COPY package*.json ./
-COPY tsconfig*.json ./
-RUN npm install
-COPY . ./
-RUN npm run build
-# where repo work will happen
-
-FROM main
 WORKDIR /home/docsworker-xlarge
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
@@ -87,6 +86,5 @@ COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
-RUN ls
 CMD ["app.js"]
 
