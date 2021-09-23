@@ -52,6 +52,7 @@ export class GitHubConnector implements IRepoConnector {
         try {
             const basePath = this.getBasePath(job);
             const repoPath = basePath + '/' + job.payload.repoOwner + '/' + job.payload.repoName;
+            this._fileSystemService.createDirIfNotExists(targetPath);
             await git.clone(repoPath, `${targetPath}/${job.payload.repoName}`);
             // await this._commandExecutor.cloneRepo(repoPath, targetPath);
             await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);

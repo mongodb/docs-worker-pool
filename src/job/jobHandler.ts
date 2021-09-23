@@ -97,6 +97,7 @@ export abstract class JobHandler {
 
     @throwIfJobInterupted()
     private async cloneRepo(targetPath: string): Promise<void> {
+        console.log(`cloneRepo ${targetPath}`);
         await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
         await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}running fetch`);
         await this._repoConnector.cloneRepo(this.currJob, targetPath);
