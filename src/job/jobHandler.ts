@@ -186,7 +186,6 @@ export abstract class JobHandler {
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
             let resp = await this._commandExecutor.execute(this.currJob.buildCommands);
             var files = fs.readdirSync(process.cwd() + `/repos/${this.currJob.payload.repoName}`);
-            console.log(files);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`);
             if (resp.status != 'success') {
@@ -210,15 +209,15 @@ export abstract class JobHandler {
         if(typeof pathPrefix !== 'undefined' && pathPrefix !== null){
           envVars += `PATH_PREFIX=${pathPrefix}\n`
         }
-        const snootyFrontEndVars = {
-          'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<string>("gatsbyConsitentNavFlag"),
-          'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<string>("gatsbySDKVersionDropdownFlag"),
+        // const snootyFrontEndVars = {
+        //   'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("gatsbyConsitentNavFlag"),
+        //   'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("gatsbySDKVersionDropdownFlag"),
 
-        };
+        // };
     
-        for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
-          if (envValue) envVars += `${envName}=TRUE\n`;
-        }
+        // for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
+        //   if (envValue) envVars += `${envName}=TRUE\n`;
+        // }
         this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars,  { encoding: 'utf8', flag: 'w' });
     }
 
@@ -259,6 +258,7 @@ export abstract class JobHandler {
             this.prepBuildCommands();
             this._logger.info(this._currJob._id,"Prepared Build commands");
             await this.prepNextGenBuild();
+            console.log(this._currJob);
             this._logger.info(this._currJob._id,"Prepared Next Gen build");
             return await this.executeBuild();
     }
@@ -292,11 +292,11 @@ export abstract class JobHandler {
             await this.build();
             const resp = await this.deploy();
             await this.update(resp);
-            this.cleanup();
+            // this.cleanup();
         } catch (error) {
             try {
                 await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
-                this.cleanup();
+                //this.cleanup();
             } catch (error) {
                 this._logger.error(this._currJob._id, error.message);
             }
