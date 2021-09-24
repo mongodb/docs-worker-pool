@@ -61,7 +61,6 @@ custom:
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
-  collection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collection}
   awsKey: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/key}
   awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret}
   githubBotUserName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/username}
@@ -98,6 +97,8 @@ custom:
   goIntgrBucketName: docs-go-intgr
   nodeBucketName: docs-node-${self:provider.stage}
   nodeIntgrBucketName: docs-node-intgr
+  jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
+  entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   env:
     stg: "staging"
     prd: "production"

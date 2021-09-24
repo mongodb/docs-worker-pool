@@ -51,8 +51,8 @@ Resources:
               value: ${self:custom.githubBotPW}
             - Name: FASTLY_DOCHUB_MAP
               value: ${self:custom.fastlyDochubMap}
-            - Name: COL_NAME
-              value: ${self:custom.collection}
+            - Name: JOB_QUEUE_COL_NAME
+              value: ${self:custom.jobCollection}
             - Name: NPM_BASE_64_AUTH
               value: ${self:custom.npmBase64Auth}
             - Name: NPM_EMAIL
@@ -89,6 +89,8 @@ Resources:
               value: ${self:custom.fastlyCloudManagerToken}
             - Name: FASTLY_CLOUD_MANAGER_SERVICE_ID
               value: ${self:custom.fastlyCloudManagerServiceId}
+            - Name: USER_ENTITLEMENT_COL_NAME
+              value: ${self:custom.entitlementCollection}
           LogConfiguration:
             LogDriver: awslogs
             Options:

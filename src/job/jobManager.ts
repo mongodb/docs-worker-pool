@@ -69,9 +69,10 @@ export class JobManager {
     }
 
     async workEx(): Promise<void> {
+
+        const job = await this.getQueuedJob();
         try {
             this._jobHandler = null;
-            const job = await this.getQueuedJob();
             if (job && job.payload) {
                 await this.createHandlerAndExecute(job);
             } else {
@@ -79,6 +80,10 @@ export class JobManager {
             }
         } catch (err) {
             this._logger.error("JobManager", `  Error while polling for jobs: ${err}`);
+            if (job) {
+                this._jobRepository.updateWithErrorStatus(job._id, err);
+            }
+            
         }
     }
 
@@ -93,10 +98,7 @@ export class JobManager {
     
 
     async createHandlerAndExecute(job: IJob): Promise<void> {
-        if (job.payload.jobType == "publishDochub") {
-
-        }
-        this._jobValidator.throwIfJobInvalid(job);
+        await this._jobValidator.throwIfJobInvalid(job);
         this._jobHandler = this._jobHandlerFactory.createJobHandler(job, this._config, this._jobRepository,
             this._fileSystemServices, this._jobCommandExecutor, this._cdnConnector, this._repoConnector, this._logger);
         await this._jobHandler?.execute();
