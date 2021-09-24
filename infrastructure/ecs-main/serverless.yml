@@ -102,7 +102,7 @@ custom:
   env:
     stg: "staging"
     prd: "production"
-    dev: "development"
+    dev: "staging"
 
 
 resources:
