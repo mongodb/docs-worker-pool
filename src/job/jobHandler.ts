@@ -271,7 +271,7 @@ export abstract class JobHandler {
         if (this.currJob.deployCommands && new TestableArrayWrapper().length(this.currJob.deployCommands) > 0 ) {
             const resp = await this._commandExecutor.execute(this.currJob.deployCommands)
             // console.log(resp);
-            if (resp && resp.error && resp.error.indexOf('ERROR') !== -1) {
+            if (resp && resp.error && typeof(resp.error) === 'string' && resp.error.indexOf('ERROR') !== -1) {
                 await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`);
                 throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`)
               }
