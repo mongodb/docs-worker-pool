@@ -37,7 +37,6 @@ export class ShellCommandExecutor implements ICommandExecutor {
             resp.status = 'success';
             return resp;
         } catch (error) {
-            console.log(error);
             resp.output = null;
             resp.error = error;
             resp.status = 'failed';

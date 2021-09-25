@@ -44,10 +44,9 @@ export class TestDBManager {
     let resp = await this.db.collection(collection).insertOne(document);
     return resp.insertedId;
   }
-  
+
   async findJob(id: any): Promise<any> {
     const query = { _id: id };
-    console.log(query);
     return await this.db.collection(process.env.JOB_QUEUE_COL_NAME).findOne(query);
   }
 
