@@ -116,14 +116,7 @@ export class TestDataProvider {
     }
 
     static getEnvVarsWithPathPrefixWithFlags(job: IJob, nav: string | null, dropdown: string | null): string {
-        let retStr = `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\n`;
-        if (nav) {
-            retStr += `GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION=${nav}\n`;
-        }
-        if (dropdown) {
-            retStr += `GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN=${dropdown}\n`;
-        }
-        return retStr;
+       return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\n`;
     }
     static getEnvVarsTestCases(): Array<any> {
         return [
@@ -170,8 +163,8 @@ export class TestDataProvider {
         {
             value: itemVersionActiveEmpty,
             error: null,
-            pathPrefix: undefined,
-            mutPrefix: undefined
+            pathPrefix: itemValid.prefix,
+            mutPrefix: itemValid.prefix
         },
 
         ];

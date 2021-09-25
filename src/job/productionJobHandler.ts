@@ -56,7 +56,7 @@ export class ProductionJobHandler extends JobHandler {
                 pathPrefix = `${this.currJob.payload.publishedBranches.prefix}/${this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName}`;
             }
             else {
-                pathPrefix = `${this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.publishedBranches.content.prefix}`;
+                pathPrefix = `${this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.publishedBranches.prefix}`;
             }
             return pathPrefix;
         } catch (error) {

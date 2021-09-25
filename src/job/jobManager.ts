@@ -44,8 +44,8 @@ export class JobManager {
    private _jobCommandExecutor: IJobCommandExecutor;
 
     constructor(config: IConfig, jobValidator: IJobValidator, jobHandlerFactory: JobHandlerFactory, jobCommandExecutor: IJobCommandExecutor,
-        jobRepository: JobRepository,
-        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, fileSystemServices: IFileSystemServices, logger: IJobRepoLogger) {
+        jobRepository: JobRepository,cdnConnector: ICDNConnector, repoConnector: IRepoConnector, fileSystemServices: IFileSystemServices, 
+        logger: IJobRepoLogger) {
         this._jobRepository = jobRepository;
         this._cdnConnector = cdnConnector;
         this._repoConnector = repoConnector;
@@ -57,6 +57,7 @@ export class JobManager {
         this._jobValidator = jobValidator;
         this._jobHandlerFactory = jobHandlerFactory;
         this._jobCommandExecutor = jobCommandExecutor;
+        console.log(this._jobRepository);
     }
 
     async start(): Promise<void> {
@@ -112,7 +113,7 @@ export class JobManager {
         }
     }
 
-    async stop(): Promise<void> {
+    stop():void {
         this._logger.info("JobManager", '\nServer is starting cleanup');
         this._shouldStop = true;
         this._jobHandler?.stop();

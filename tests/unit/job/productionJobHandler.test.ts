@@ -2,7 +2,6 @@ import { mockReset } from 'jest-mock-extended';
 import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
-
 describe('ProductionJobHandler Tests', () => {
     
     let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -32,7 +31,7 @@ describe('ProductionJobHandler Tests', () => {
 
 
 test('Execute throws error when cloning repo should update status and save the logs', async () => {
-    jobHandlerTestHelper.repoConnector.cloneRepo.mockImplementation(() => { throw new Error("Invalid RepoName");});
+    jobHandlerTestHelper.repoConnector.cloneRepo.mockImplementation((targetPath:string) => { throw new Error("Invalid RepoName");});
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.fileSystemServices.removeDirectory).toBeCalledWith(`repos/${jobHandlerTestHelper.job.payload.repoName}`);
     expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
@@ -144,6 +143,7 @@ test('Execute Next Gen Build throws error while executing commands', async () =>
     jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     mockReset(jobHandlerTestHelper.jobCommandExecutor);
+    jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName.calledWith(jobHandlerTestHelper.job.payload.repoName).mockReturnValue({output:jobHandlerTestHelper.job.payload.repoName})
     jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({status:"failed", error:"Command Execution failed"});
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Command Execution failed");

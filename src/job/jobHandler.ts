@@ -98,7 +98,6 @@ export abstract class JobHandler {
 
     @throwIfJobInterupted()
     private async cloneRepo(targetPath: string): Promise<void> {
-        console.log(`cloneRepo ${targetPath}`);
         await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
         await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}running fetch`);
         await this._repoConnector.cloneRepo(this.currJob, targetPath);
@@ -185,7 +184,6 @@ export abstract class JobHandler {
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
             let resp = await this._commandExecutor.execute(this.currJob.buildCommands);
-            var files = fs.readdirSync(process.cwd() + `/repos/${this.currJob.payload.repoName}`);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`);
             if (resp.status != 'success') {
@@ -195,8 +193,6 @@ export abstract class JobHandler {
             }
         } else {
             const error = new AutoBuilderError("No commands to execute", "BuildError")
-            var files = fs.readdirSync(process.cwd() + `/repos/${this.currJob.payload.repoName}`);
-            console.log(files);
             await this.logError(error);
             throw error 
         }
@@ -258,7 +254,6 @@ export abstract class JobHandler {
             this.prepBuildCommands();
             this._logger.info(this._currJob._id,"Prepared Build commands");
             await this.prepNextGenBuild();
-            console.log(this._currJob);
             this._logger.info(this._currJob._id,"Prepared Next Gen build");
             return await this.executeBuild();
     }
@@ -292,11 +287,11 @@ export abstract class JobHandler {
             await this.build();
             const resp = await this.deploy();
             await this.update(resp);
-            // this.cleanup();
+            this.cleanup();
         } catch (error) {
             try {
                 await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
-                //this.cleanup();
+                this.cleanup();
             } catch (error) {
                 this._logger.error(this._currJob._id, error.message);
             }

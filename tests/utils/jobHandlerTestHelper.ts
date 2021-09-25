@@ -109,11 +109,14 @@ export class JobHandlerTestHelper {
     }
 
     setupForSuccess(rootFileExists: boolean = true, nextGenEntry: string = TestDataProvider.nextGenEntryInWorkerFile()): void {
+        this.config.get.calledWith('repo_dir').mockReturnValue('repos');
+        this.config.get.calledWith('stage').mockReturnValue('test');
         this.repoConnector.checkCommits.calledWith(this.job).mockReturnValue(TestDataProvider.getCommitCheckValidResponse(this.job));
+        this.repoConnector.cloneRepo.calledWith(this.job, 'repos').mockReturnValue({});
         this.fileSystemServices.rootFileExists.calledWith(`repos/${this.job.payload.repoName}/worker.sh`).mockReturnValue(rootFileExists);
         this.fileSystemServices.readFileAsUtf8.calledWith(`repos/${this.job.payload.repoName}/worker.sh`).mockReturnValue(nextGenEntry);
         this.config.get.calledWith('GATSBY_PARSER_USER').mockReturnValue('TestUser');
-        this.jobCommandExecutor.getSnootyProjectName.calledWith(this.job.payload.repoName).mockReturnValue(this.job.payload.repoName)
+        this.jobCommandExecutor.getSnootyProjectName.calledWith(this.job.payload.repoName).mockReturnValue({output:this.job.payload.repoName})
         this.jobCommandExecutor.execute.mockReturnValue({ status: "success", output: "Great work", error: null })
     }
 

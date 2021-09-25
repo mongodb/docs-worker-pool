@@ -42,7 +42,7 @@ describe('JobManager Tests', () => {
         jobHandlerFactory = mockDeep<JobHandlerFactory>();
         jobValidator = mockDeep<JobValidator>();
         repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
-        jobManager = new JobManager(config, jobValidator, jobHandlerFactory, jobCommandExecutor, jobRepo, repoEntitlementRepository, cdnConnector, repoConnector, fileSystemServices, logger);
+        jobManager = new JobManager(config, jobValidator, jobHandlerFactory, jobCommandExecutor, jobRepo, cdnConnector, repoConnector, fileSystemServices, logger);
     })
 
     test('JobManager constructor tests', () => {
@@ -51,6 +51,7 @@ describe('JobManager Tests', () => {
 
     describe('JobManager start Tests', () => {
         test('JobManager start stops when it recieves stop signal', async () => {
+            jobRepo.getOneQueuedJobAndUpdate.mockResolvedValueOnce(null);
             jobManager.start();
             jobManager.stop();
             jest.runAllTimers();
@@ -58,7 +59,7 @@ describe('JobManager Tests', () => {
         })
 
         test('JobManager start continues until stop even where there is no valid job signal', async () => {
-            jobRepo.getOneQueuedJobAndUpdate.mockReturnValueOnce(null);
+            jobRepo.getOneQueuedJobAndUpdate.mockResolvedValueOnce(null);
             jobManager.start();
             expect(jobRepo.getOneQueuedJobAndUpdate.mock.calls).toHaveLength(1);
             expect(jobHandlerFactory.createJobHandler.mock.calls).toHaveLength(0);
