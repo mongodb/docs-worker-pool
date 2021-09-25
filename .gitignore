@@ -7,3 +7,4 @@ work
 coverage
 out
 local.json
+globalConfig.json

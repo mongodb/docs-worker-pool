@@ -57,7 +57,6 @@ export class JobManager {
         this._jobValidator = jobValidator;
         this._jobHandlerFactory = jobHandlerFactory;
         this._jobCommandExecutor = jobCommandExecutor;
-        console.log(this._jobRepository);
     }
 
     async start(): Promise<void> {
@@ -82,7 +81,7 @@ export class JobManager {
         } catch (err) {
             this._logger.error("JobManager", `  Error while polling for jobs: ${err}`);
             if (job) {
-                this._jobRepository.updateWithErrorStatus(job._id, err);
+                await this._jobRepository.updateWithErrorStatus(job._id, err);
             }
             
         }
@@ -118,7 +117,8 @@ export class JobManager {
         this._shouldStop = true;
         this._jobHandler?.stop();
     }
-    async startLocal(): Promise<void> {
 
+    async startSingleJob(): Promise<void> {
+        await this.workEx();
     }
 }

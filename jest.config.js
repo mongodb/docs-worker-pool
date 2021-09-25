@@ -17,7 +17,4 @@ module.exports = {
         }
     },
     "verbose": false,
-    "globalSetup": './tests/mongo/setup.ts',
-    "globalTeardown": './tests/mongo/teardown.ts',
-    "testEnvironment": './tests/mongo/mongo-environment.ts'
 }

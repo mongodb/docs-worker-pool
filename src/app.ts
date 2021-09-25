@@ -1,12 +1,4 @@
 import { JobManager, JobHandlerFactory } from "./job/jobManager";
-
-var fs = require('fs');
-console.log('Current directory: ' + process.cwd());
-var files = fs.readdirSync(process.cwd());
-console.log(files);
-console.log(files.indexOf('config'));
-
-
 import { FastlyConnector } from "./services/cdn";
 import { GitHubConnector } from "./services/repo";
 import { HybridJobLogger, ConsoleLogger } from './services/logger';
