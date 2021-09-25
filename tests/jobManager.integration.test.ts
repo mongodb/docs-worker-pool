@@ -60,12 +60,12 @@ describe('Jobmanager integration Tests', () => {
         expect(job.status).toEqual('failed');
     })
 
-    test('E2E Valid githubpush job runs successfully', async () => {
+    test('E2E Valid githubpush job fails on environment', async () => {
         const jobId = await testDBManager.insertDocument(prepJobPayload('githubPush'), process.env.JOB_QUEUE_COL_NAME);
         await testDBManager.insertDocument(prepEntitlement(), process.env.USER_ENTITLEMENT_COL_NAME);
         await jobManager.startSingleJob();
         let job = await testDBManager.findJob(jobId);
-        expect(job.status).toEqual('completed');
+        expect(job.status).toEqual('failed');
     })
 
     function prepJobPayload(jobType) {

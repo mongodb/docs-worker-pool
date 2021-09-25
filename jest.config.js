@@ -4,7 +4,9 @@ module.exports = {
     "coveragePathIgnorePatterns": [
         "node_modules",
         "tests",
-        "errors"
+        "errors",
+        "app",
+        "app_test"
     ],
     "modulePathIgnorePatterns": ["<rootDir>/infrastructure/"],
     "coverageDirectory": "<rootDir>/coverage/",
