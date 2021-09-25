@@ -18,7 +18,7 @@
     "MIN_TIMEOUT_MS": 1,
     "LOG_PADDING": 15,
     "PORT": 3000,
-    "GATSBY_PARSER_USER": "user",
+    "GATSBY_PARSER_USER": "docsworker-xlarge",
     "shouldPurgeAll": false,
     "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
     "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
