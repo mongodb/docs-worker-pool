@@ -36,8 +36,7 @@ let jobHandletFactory: JobHandlerFactory;
 let jobManager: JobManager;
 
 async function init(): Promise<void> {
-  const url = `mongodb+srv://${c.get("dbUsername")}:${c.get("dbPassword")}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
-  let client = new mongodb.MongoClient(url);
+  let client = new mongodb.MongoClient(c.get("dbUrl"));
   await client.connect();
   db = client.db(c.get("dbName"));
   consoleLogger = new ConsoleLogger();

@@ -39,6 +39,10 @@ Resources:
               value: ${self:custom.dbUsername}
             - Name: MONGO_ATLAS_PASSWORD
               value: ${self:custom.dbPassword}
+            - Name: MONGO_ATLAS_HOST
+              value: ${self:custom.dbhost}
+            - Name: MONGO_ATLAS_URL
+              value: mongodb+srv://${self:custom.dbUsername}:${self:custom.dbPassword}@${self:custom.dbhost}/admin?retryWrites=true
             - Name: DB_NAME
               value: ${self:custom.dbName}
             - Name: AWS_ACCESS_KEY_ID
