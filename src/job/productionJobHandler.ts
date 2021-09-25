@@ -41,8 +41,8 @@ export class ProductionJobHandler extends JobHandler {
 
     async constructManifestIndexPath(): Promise<void> {
         try {
-            const snootyName = await this.commandExecutor.getSnootyProjectName(this.currJob.payload.repoName);
-            this.currJob.payload.manifestPrefix = snootyName + '-' + (this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName);
+            const {output} = await this.commandExecutor.getSnootyProjectName(this.currJob.payload.repoName);
+            this.currJob.payload.manifestPrefix = output + '-' + (this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName);
         } catch (error) {
             await this.logger.save(this.currJob._id, error)
             throw error
