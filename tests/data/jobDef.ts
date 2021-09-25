@@ -1,4 +1,5 @@
 export default {
+  "value": {
     "_id": "5c5e0817ce099eaf874a9801",
     "title": "Github Push: skerschb/testauth",
     "user": "skerschb",
@@ -23,3 +24,4 @@ export default {
     },
     "logs": []
   }
+}

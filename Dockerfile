@@ -1,3 +1,14 @@
+# Build the Typescript app
+FROM node:14-alpine3.10 as ts-compiler
+WORKDIR /home/docsworker-xlarge
+COPY  config config/
+COPY package*.json ./
+COPY tsconfig*.json ./
+RUN npm install
+COPY . ./
+RUN npm run build
+
+# where repo work will happen
 FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
 ARG NPM_BASE_64_AUTH
@@ -40,7 +51,7 @@ USER docsworker-xlarge
 WORKDIR /home/docsworker-xlarge
 
 # get shared.mk
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2357/makefiles/shared.mk -o shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
 RUN python3 -m pip uninstall -y snooty
@@ -48,14 +59,14 @@ RUN python3 -m pip install pip==20.2 flit==3.0.0
 RUN git clone https://github.com/mongodb/snooty-parser.git && \
 	cd snooty-parser && \
 	git fetch --tags && \
-	git checkout v0.11.3 && \
+	git checkout v0.11.4 && \
 	FLIT_ROOT_INSTALL=1 python3 -m flit install
 
 # install snooty front-end
 RUN git clone https://github.com/mongodb/snooty.git snooty
 RUN cd snooty && \
 	git fetch --all && \
-	git checkout v0.11.9 && \	
+	git checkout v0.11.12 && \	
 	npm install && \
 	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
 	mkdir -p ./static/images && \
@@ -68,13 +79,12 @@ RUN cd snooty-devhub && \
 	git checkout master && \	
 	npm install --production
 
-# install the node dependencies for worker pool
-COPY worker/ . 
-RUN npm install --production
-
-# where repo work will happen
+COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
+COPY --from=ts-compiler /home/docsworker-xlarge/config config/
+COPY --from=ts-compiler /home/docsworker-xlarge/build ./
+RUN npm install
 RUN mkdir repos && chmod 755 repos
-
-# entry to kick-off the worker
 EXPOSE 3000
-CMD ["node", "index.js"]
+RUN ls
+CMD ["node", "app.js"]
+

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --detectOpenHandles --coverage",
     "start": "node index.js",
-    "clean": "node maintain.js"
+    "clean": "node maintain.js",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -22,11 +23,13 @@
     "async-retry": "^1.2.3",
     "aws-sdk": "^2.383.0",
     "axios": "^0.21.1",
+    "config": "^3.3.6",
     "core-js": "^3.1.4",
     "express": "^4.16.4",
     "fastly": "^2.2.1",
     "fs-extra": "^7.0.1",
     "gatsby": "^1.9.279",
+    "git-clone": "^0.1.0",
     "ip": "^1.1.5",
     "jest-mock-extended": "^2.0.2-beta2",
     "js-yaml": "^3.13.1",
@@ -36,7 +39,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "remote-file-size": "^3.0.5",
-    "simple-git": "^1.107.0",
+    "simple-git": "^2.45.1",
     "supertest": "^4.0.2",
     "toml": "^3.0.0",
     "validator": "^10.11.0",
@@ -62,7 +65,7 @@
     "jest": "^27.1.0",
     "jest-environment-node": "^27.1.0",
     "jest-mock-axios": "^4.4.0",
-    "mongodb-memory-server": "^2.9.1",
+    "mongodb-memory-server": "^7.4.1",
     "regenerator-runtime": "^0.13.1",
     "ts-jest": "^27.0.5",
     "typescript": "^4.4.2"

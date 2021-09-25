@@ -1,15 +1,15 @@
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
-import { IJob } from "../../entities/job";
-import TestableArrayWrapper from "../../job/ITestableTypeWrapper";
-import { ProductionJobHandler } from "../../job/productionJobHandler";
-import { StagingJobHandler } from "../../job/stagingJobHandler";
-import { JobRepository } from "../../repositories/jobRepository";
-import { ICDNConnector } from "../../services/cdn";
-import { IJobCommandExecutor } from "../../services/commandExecutor";
-import { IFileSystemServices } from "../../services/fileServices";
-import { IJobRepoLogger } from "../../services/logger";
-import { IRepoConnector } from "../../services/repo";
+import { IJob } from "../../src/entities/job";
+import TestableArrayWrapper from "../../src/job/ITestableTypeWrapper";
+import { ProductionJobHandler } from "../../src/job/productionJobHandler";
+import { StagingJobHandler } from "../../src/job/stagingJobHandler";
+import { JobRepository } from "../../src/repositories/jobRepository";
+import { ICDNConnector } from "../../src/services/cdn";
+import { IJobCommandExecutor } from "../../src/services/commandExecutor";
+import { IFileSystemServices } from "../../src/services/fileServices";
+import { IJobRepoLogger } from "../../src/services/logger";
+import { IRepoConnector } from "../../src/services/repo";
 import { TestDataProvider } from "../data/data";
 import * as data from '../data/jobDef';
 
@@ -31,7 +31,7 @@ export class JobHandlerTestHelper {
     }
 
     init(handlerName: string): ProductionJobHandler | StagingJobHandler {
-        this.job = JSON.parse(JSON.stringify(data.default));
+        this.job = JSON.parse(JSON.stringify(data.default.value));
         this.config = mockDeep<IConfig>();
         this.jobRepo = mockDeep<JobRepository>();
         this.fileSystemServices = mockDeep<IFileSystemServices>();
@@ -109,11 +109,14 @@ export class JobHandlerTestHelper {
     }
 
     setupForSuccess(rootFileExists: boolean = true, nextGenEntry: string = TestDataProvider.nextGenEntryInWorkerFile()): void {
+        this.config.get.calledWith('repo_dir').mockReturnValue('repos');
+        this.config.get.calledWith('stage').mockReturnValue('test');
         this.repoConnector.checkCommits.calledWith(this.job).mockReturnValue(TestDataProvider.getCommitCheckValidResponse(this.job));
+        this.repoConnector.cloneRepo.calledWith(this.job, 'repos').mockReturnValue({});
         this.fileSystemServices.rootFileExists.calledWith(`repos/${this.job.payload.repoName}/worker.sh`).mockReturnValue(rootFileExists);
         this.fileSystemServices.readFileAsUtf8.calledWith(`repos/${this.job.payload.repoName}/worker.sh`).mockReturnValue(nextGenEntry);
         this.config.get.calledWith('GATSBY_PARSER_USER').mockReturnValue('TestUser');
-        this.jobCommandExecutor.getSnootyProjectName.calledWith(this.job.payload.repoName).mockReturnValue(this.job.payload.repoName)
+        this.jobCommandExecutor.getSnootyProjectName.calledWith(this.job.payload.repoName).mockReturnValue({output:this.job.payload.repoName})
         this.jobCommandExecutor.execute.mockReturnValue({ status: "success", output: "Great work", error: null })
     }
 

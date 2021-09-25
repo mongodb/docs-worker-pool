@@ -26,49 +26,47 @@ provider:
       - subnet-9e83fed2
 custom:
   deploymentBucket:
-    intgr: worker-pool-deployment
+    dev: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
   ecs:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
-      intgr: '4096'
+      dev: '4096'
       stg: '4096'
       prd: '4096'
     containerMemory:
-      intgr: '24576'
+      dev: '24576'
       stg: '24576'
       prd: '24576'
     desiredCount:
-      intgr: '4'
+      dev: '4'
       stg: '4'
       prd: '4' 
     minimumHealthyPercent:
-      intgr: 100
+      dev: 100
       stg: 100
       prd: 100
     maximumPercent:
-      intgr: 200
+      dev: 200
       stg: 200
       prd: 200
     deregistrationDelaySecs: '10'
   targetGroupName: docs-worker-pool
   accountId:
     stg: 216656347858
-    intgr: 216656347858
+    dev: 216656347858
     prd: 216656347858
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
-  collection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collection}
+  dbhost: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/host}
   awsKey: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/key}
   awsSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/aws/secret}
   githubBotUserName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/username}
   githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
-  fastlyToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/token}
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
-  fastlyServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/service_id}
   bucketName: docs-mongodb-org-${self:provider.stage}
   atlastBucketName: docs-atlas-${self:provider.stage}
   atlasOsbBucketName: docs-atlas-osb-${self:provider.stage}
@@ -80,10 +78,32 @@ custom:
   npmEmail: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/email}
   awsKeyDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/key}
   awsSecretDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/secret}
+  gatsbyFeatureFlagConsistentNavigation: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/consistent_nav/enabled}
+  gatsbyFeatureFlagVersionDropdown:  false
+  fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
+  fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
+  fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}
+  fastlyCloudManagerServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/service_id}
+  fastlyAtlasToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/atlas/token}
+  fastlyAtlasServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/atlas/service_id}
+  fastlyOpsManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/opsmanager/token}
+  fastlyOpsManagerServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/opsmanager/service_id}
+  fastlyDevhubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/token}
+  fastlyDevhubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/service_id}
+  fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
+  fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
+  javaBucketName: docs-java-${self:provider.stage}
+  goBucketName: docs-go-${self:provider.stage}
+  javaIntgrBucketName: docs-java-intgr
+  goIntgrBucketName: docs-go-intgr
+  nodeBucketName: docs-node-${self:provider.stage}
+  nodeIntgrBucketName: docs-node-intgr
+  jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
+  entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   env:
     stg: "staging"
     prd: "production"
-    intgr: "integration"
+    dev: "staging"
 
 
 resources:

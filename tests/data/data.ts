@@ -1,5 +1,5 @@
-import { IJob } from "../../entities/job";
-import { CommandExecutorResponse } from "../../services/commandExecutor";
+import { IJob } from "../../src/entities/job";
+import { CommandExecutorResponse } from "../../src/services/commandExecutor";
 import * as data from '../data/jobDef';
 import fs from 'fs';
 import path from "path";
@@ -116,14 +116,7 @@ export class TestDataProvider {
     }
 
     static getEnvVarsWithPathPrefixWithFlags(job: IJob, nav: string | null, dropdown: string | null): string {
-        let retStr = `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\n`;
-        if (nav) {
-            retStr += `GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION=${nav}\n`;
-        }
-        if (dropdown) {
-            retStr += `GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN=${dropdown}\n`;
-        }
-        return retStr;
+       return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\n`;
     }
     static getEnvVarsTestCases(): Array<any> {
         return [
@@ -136,7 +129,7 @@ export class TestDataProvider {
     static getPathPrefixCases(): Array<any> {
         // Null version 
 
-        const job = Object.assign(data.default);
+        const job = Object.assign(data.default.value);
         let itemValid = TestDataProvider.getPublishBranchesContent(job);
 
         // Null version
@@ -170,15 +163,15 @@ export class TestDataProvider {
         {
             value: itemVersionActiveEmpty,
             error: null,
-            pathPrefix: undefined,
-            mutPrefix: undefined
+            pathPrefix: itemValid.prefix,
+            mutPrefix: itemValid.prefix
         },
 
         ];
     }
 
     static getManifestPrefixCases(): Array<any> {
-        const job = Object.assign(data.default);
+        const job = Object.assign(data.default.value);
         let itemValid = TestDataProvider.getPublishBranchesContent(job);
         return [{
             branchInfo: itemValid,

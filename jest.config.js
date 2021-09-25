@@ -1,12 +1,14 @@
 module.exports = {
     "collectCoverage": true,
-    "collectCoverageFrom": ["**/*.ts"],
+    "collectCoverageFrom": ["src/**/*.ts"],
     "coveragePathIgnorePatterns": [
         "node_modules",
         "tests",
-        "errors"
+        "errors",
+        "app",
+        "app_test"
     ],
-
+    "modulePathIgnorePatterns": ["<rootDir>/infrastructure/"],
     "coverageDirectory": "<rootDir>/coverage/",
     "coverageThreshold": {
         "global": {
@@ -16,5 +18,5 @@ module.exports = {
             "statements": 90
         }
     },
-    "verbose": false
+    "verbose": false,
 }
