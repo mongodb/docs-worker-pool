@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+      "rootDir": "./src",
+      "outDir": "./build",
+      "target": "esnext",
+      "module": "commonjs",
+      "strictNullChecks": true,
+      "esModuleInterop": true,   
+      "baseUrl": "./types",
+      "experimentalDecorators": true
+    },
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "tests/**/*.ts"
+    ]
+  }
