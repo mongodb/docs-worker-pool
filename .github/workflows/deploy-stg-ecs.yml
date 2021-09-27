@@ -28,7 +28,7 @@ jobs:
           aws-region: us-east-2
       - name: Run tests
         run: |
-          npm ci
+          npm install
           npm test
       - name: Create ECS Repo
         run: |
