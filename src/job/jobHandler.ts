@@ -290,10 +290,10 @@ export abstract class JobHandler {
         } catch (error) {
             try {
                 await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
-                this.cleanup();
             } catch (error) {
                 this._logger.error(this._currJob._id, error.message);
             }
+            this.cleanup();
         }
     }
 
