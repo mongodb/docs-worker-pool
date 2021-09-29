@@ -7,7 +7,6 @@ import { IRepoConnector } from "../services/repo";
 import { IFileSystemServices } from "../services/fileServices";
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from "../errors/errors";
 import { IConfig } from "config";
-import TestableArrayWrapper  from "./ITestableTypeWrapper";
 var fs = require('fs');
 
 export abstract class JobHandler {
@@ -179,8 +178,7 @@ export abstract class JobHandler {
 
     @throwIfJobInterupted()
     private async executeBuild(): Promise<boolean> {
-        const testableArrayWrapper = new TestableArrayWrapper();
-        if (this.currJob.buildCommands && new TestableArrayWrapper().length(this.currJob.buildCommands) > 0) {
+        if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
             await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
             let resp = await this._commandExecutor.execute(this.currJob.buildCommands);
@@ -263,7 +261,7 @@ export abstract class JobHandler {
         this.prepDeployCommands();
         await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
         
-        if (this.currJob.deployCommands && new TestableArrayWrapper().length(this.currJob.deployCommands) > 0 ) {
+        if (this.currJob.deployCommands && this.currJob.deployCommands.length > 0 ) {
             const resp = await this._commandExecutor.execute(this.currJob.deployCommands)
             if (resp && resp.error && typeof(resp.error) === 'string' && resp.error.indexOf('ERROR') !== -1) {
                 await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`);
@@ -289,11 +287,11 @@ export abstract class JobHandler {
             this.cleanup();
         } catch (error) {
             try {
-                await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message)
+                await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message);
+                this.cleanup();
             } catch (error) {
                 this._logger.error(this._currJob._id, error.message);
             }
-            this.cleanup();
         }
     }
 
