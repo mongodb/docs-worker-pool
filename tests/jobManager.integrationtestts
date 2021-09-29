@@ -1,5 +1,4 @@
 import c from "config";
-import exp from "constants";
 import { JobHandlerFactory, JobManager } from "../src/job/jobManager";
 import { JobValidator } from "../src/job/jobValidator";
 import { JobRepository } from "../src/repositories/jobRepository";
