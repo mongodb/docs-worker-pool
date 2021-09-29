@@ -11,6 +11,8 @@ import { ConsoleLogger, HybridJobLogger } from "../src/services/logger";
 import { GitHubConnector } from "../src/services/repo";
 import {TestDBManager} from './mongo/testDBManager';
 
+import fs from 'fs-extra';
+
 let testDBManager: TestDBManager;
 
 beforeAll(async () => {
@@ -20,6 +22,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     await testDBManager.stop();
+    fs.removeSync("repos");
 });
 
 describe('Jobmanager integration Tests', () => {
