@@ -16,7 +16,7 @@ let gitHubConnector: GitHubConnector;
 
 
 beforeEach(() => {
-
+    jest.setTimeout(30000)
     job = JSON.parse(JSON.stringify(data.default.value));
     fileSystemServices = mockDeep<IFileSystemServices>();
     commandExecutor = mockDeep<IGithubCommandExecutor>();
@@ -78,15 +78,6 @@ describe('GitHubConnector Tests', () => {
 
     });
 
-    describe('GitHubConnector cloneRepo Tests', () => {
-        test('GitHubConnector cloneRepo  succeeds', async () => {
-            job.payload.repoName = 'docs-java';
-            job.payload.repoOwner= 'mongodb';
-            await gitHubConnector.cloneRepo(job, "repos");
-            fs.removeSync("repos");
-            
-        })
-    });
 
     describe('GitHubConnector checkCommits Tests', () => {
         test('GitHubConnector checkCommits  succeeds', async () => {

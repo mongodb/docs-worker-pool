@@ -157,24 +157,6 @@ test('Execute Next Gen Build throws error when execute throws error', async () =
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Unable to Execute Commands");
 })
 
-test('Execute Next Gen Build throws error when build commands are empty', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
-    jobHandlerTestHelper.setupForSuccess();
-    jobHandlerTestHelper.mockArrayLength(0, jobHandlerTestHelper.job, true, false);
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "No commands to execute");
-    jobHandlerTestHelper.unMockArrayLength();
-})
-
-test('Execute Next Gen Build throws error when deploy commands are empty', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
-    jobHandlerTestHelper.setupForSuccess();
-    jobHandlerTestHelper.mockArrayLength(0, jobHandlerTestHelper.job, false, true);
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Failed pushing to Production, No commands to execute");
-    jobHandlerTestHelper.unMockArrayLength();
-})
-
 describe.each(TestDataProvider.getManifestPrefixCases())('Execute Next Gen Build Validate all deploy commands', (element) => {
     test(`Testing  all deploy command cases with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
         jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
