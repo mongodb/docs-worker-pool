@@ -96,11 +96,11 @@ export class ProductionJobHandler extends JobHandler {
         try {
             const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
             await this.purgePublishedContent(makefileOutput);
-            await this.logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Finished pushing to ${this.name}`);
-            await this.logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Deploy details:\n\n${resp.output}`);
+            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
+            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
             return resp;
         } catch (errResult) {
-            await this.logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}stdErr: ${errResult.stderr}`);
+            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
             throw errResult;
         }
     }

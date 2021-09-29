@@ -1,6 +1,7 @@
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
 import { IJob } from "../../src/entities/job";
+import TestableArrayWrapper from "../../src/job/ITestableTypeWrapper";
 import { ProductionJobHandler } from "../../src/job/productionJobHandler";
 import { StagingJobHandler } from "../../src/job/stagingJobHandler";
 import { JobRepository } from "../../src/repositories/jobRepository";
@@ -38,6 +39,7 @@ export class JobHandlerTestHelper {
         this.cdnConnector = mockDeep<ICDNConnector>();
         this.repoConnector = mockDeep<IRepoConnector>();
         this.logger = mockDeep<IJobRepoLogger>();
+        this.lengthPrototype = TestableArrayWrapper.prototype.length;
         this.jobHandler = new this.handlerMapper[handlerName](this.job, this.config, this.jobRepo, this.fileSystemServices, this.jobCommandExecutor, this.cdnConnector, this.repoConnector, this.logger);
         return this.jobHandler;
     }
@@ -80,8 +82,31 @@ export class JobHandlerTestHelper {
         expect(this.repoConnector.applyPatch).toBeCalledTimes(1);
         expect(this.job.buildCommands).toEqual(expectedCommandSet);
         expect(this.job.payload.isNextGen).toEqual(true);
-    }å
-å
+    }
+
+    mockArrayLength(returnValue: Number, job: IJob, buildCommand: boolean = false, deployCommand: boolean = false): void {
+        TestableArrayWrapper.prototype.length = jest.fn().mockImplementationOnce((args) => {
+            if (buildCommand) {
+                if (args[args.length - 1].indexOf("make next-gen-html") >= 0) {
+                    return 0;
+                } else {
+                    return args.length;
+                }
+            }
+            if (deployCommand) {
+                if (args[args.length - 1].indexOf("make next-gen-deploy") >= 0) {
+                    return 0;
+                } else {
+                    return args.length;
+                }
+            }
+            return returnValue;
+        });
+    }
+
+    unMockArrayLength(): void {
+        TestableArrayWrapper.prototype.length = this.lengthPrototype;
+    }
 
     setupForSuccess(rootFileExists: boolean = true, nextGenEntry: string = TestDataProvider.nextGenEntryInWorkerFile()): void {
         this.config.get.calledWith('repo_dir').mockReturnValue('repos');
