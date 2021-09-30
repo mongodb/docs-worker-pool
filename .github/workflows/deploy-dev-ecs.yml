@@ -49,6 +49,6 @@ jobs:
       - name: Deploy Lambdas
         run: |
           npm ci 
-          tsc
+          npm build
           sls deploy --stage dev
 

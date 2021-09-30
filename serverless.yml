@@ -1,8 +1,6 @@
 service: docs-worker-pool
 variablesResolutionMode: 20210326
 
-plugins:
-  - serverless-pseudo-parameters
 provider:
   name: aws
   stage: ${opt:stage, 'stg'}
