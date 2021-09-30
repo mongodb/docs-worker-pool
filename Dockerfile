@@ -83,6 +83,7 @@ RUN cd snooty-devhub && \
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
+RUN npm install -g serverless
 RUN npm install
 RUN  sls deploy --stage STAGE
 RUN mkdir repos && chmod 755 repos
