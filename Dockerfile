@@ -13,6 +13,7 @@ FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
+ARG STAGE
 
 # install legacy build environment for docs
 RUN apt-get -o Acquire::Check-Valid-Until=false update
@@ -83,8 +84,8 @@ COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
+RUN  sls deploy --stage STAGE
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
-RUN ls
 CMD ["node", "app.js"]
 

@@ -34,7 +34,7 @@ jobs:
           image: docs-worker-pool-dev
           tags: latest
           registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
-          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
+          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }},STAGE=dev
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
