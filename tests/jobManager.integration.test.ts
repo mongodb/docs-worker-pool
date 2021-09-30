@@ -1,5 +1,4 @@
 import c from "config";
-import exp from "constants";
 import { JobHandlerFactory, JobManager } from "../src/job/jobManager";
 import { JobValidator } from "../src/job/jobValidator";
 import { JobRepository } from "../src/repositories/jobRepository";
@@ -11,6 +10,8 @@ import { ConsoleLogger, HybridJobLogger } from "../src/services/logger";
 import { GitHubConnector } from "../src/services/repo";
 import {TestDBManager} from './mongo/testDBManager';
 
+import fs from 'fs-extra';
+
 let testDBManager: TestDBManager;
 
 beforeAll(async () => {
@@ -20,6 +21,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     await testDBManager.stop();
+    fs.removeSync("repos");
 });
 
 describe('Jobmanager integration Tests', () => {
