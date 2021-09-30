@@ -110,3 +110,12 @@ resources:
   - ${file(./buckets.yml)}
   - ${file(./ecs_service.yml)}
 
+functions:
+    v1:
+    handler: controllers/v1/dochub.upsertEdgeDictionaryItem
+    events:
+     - eventBridge:
+        eventBus: arn:aws:events:us-east-2:216656347858:event-bus/aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d 
+        pattern:
+           source:
+             - aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
