@@ -117,13 +117,3 @@ custom:
 resources:
   - ${file(./buckets.yml)}
   - ${file(./ecs_service.yml)}
-
-functions:
-    v1UpsertEdgeDictionaryItem:
-    handler: src/controllers/v1/dochub.UpsertEdgeDictionaryItem
-    events:
-     - eventBridge:
-        eventBus:  ${self:custom.dochubEventBus.${self:provider.stage}}
-        pattern:
-           source:
-             - aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
