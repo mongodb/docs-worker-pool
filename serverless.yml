@@ -34,7 +34,7 @@ custom:
 
 functions:
     v1UpsertEdgeDictionaryItem:
-    handler: build/controllers/v1/dochub.UpsertEdgeDictionaryItem
+    handler: src/controllers/v1/dochub.UpsertEdgeDictionaryItem
     events:
     - eventBridge:
         eventBus:  ${self:custom.dochubEventBus}
