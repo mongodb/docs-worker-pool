@@ -37,7 +37,7 @@
             "id": "FASTLY_DEVHUB_SERVICE_ID",
             "token": "FASTLY_DEVHUB_TOKEN"
         },
-        "publishDochub": {
+        "dochub": {
             "id": "FASTLY_DOCHUB_SERVICE_ID",
             "token": "FASTLY_DOCHUB_TOKEN"
         },

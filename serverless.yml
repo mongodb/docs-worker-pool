@@ -10,6 +10,11 @@ provider:
   deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
   deploymentPrefix: serverless
   region: us-east-2
+  package:
+    excludeDevDependencies: true
+    exclude:
+      - .serverless/**
+      - .vscode/**  
 custom:
   deploymentBucket:
     dev: worker-pool-deployment
@@ -34,10 +39,10 @@ custom:
 
 functions:
     v1UpsertEdgeDictionaryItem:
-    handler: src/controllers/v1/dochub.UpsertEdgeDictionaryItem
-    events:
-    - eventBridge:
-        eventBus:  ${self:custom.dochubEventBus}
-        pattern:
-          source:
-          - ${self:custom.docuhubEventSource.${self:provider.stage}}
+      handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
+      events:
+        - eventBridge:
+            eventBus:  ${self:custom.dochubEventBus}
+            pattern:
+              source:
+                - ${self:custom.docuhubEventSource.${self:provider.stage}}

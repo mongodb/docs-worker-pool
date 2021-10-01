@@ -56,7 +56,12 @@ export class FastlyConnector implements ICDNConnector {
         });
     }
 
-    async upsertEdgeDictionaryItem(keyValue: any, id: string, creds: any): Promise<any> {
+    static async upsertEdgeDictionaryItem(keyValue: any, id: string, creds: any): Promise<any> {
+        console.log(`https://api.fastly.com/service/${creds['service_id']}/dictionary/${id}/item/${keyValue.key}`);
+        console.log({
+            item_value: keyValue.value,
+        });
+        return;
         return await axiosApi.put(`https://api.fastly.com/service/${creds['service_id']}/dictionary/${id}/item/${keyValue.key}`, {
             item_value: keyValue.value,
         });
