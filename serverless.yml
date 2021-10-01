@@ -12,7 +12,7 @@ provider:
   region: us-east-2
 package:
   patterns:
-    config/**
+    api/config/**
 custom:
   deploymentBucket:
     dev: worker-pool-deployment
