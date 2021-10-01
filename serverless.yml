@@ -10,11 +10,9 @@ provider:
   deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
   deploymentPrefix: serverless
   region: us-east-2
-  package:
-    excludeDevDependencies: true
-    exclude:
-      - .serverless/**
-      - .vscode/**  
+package:
+  patterns:
+    config/**
 custom:
   deploymentBucket:
     dev: worker-pool-deployment

@@ -73,7 +73,7 @@ export class ProductionJobHandler extends JobHandler {
             // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
             await this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
             if (this._config.get("shouldPurgeAll")) {
-                await this._cdnConnector.purgeAll(this.currJob._id,this.getCdnCreds());
+                await this._cdnConnector.purgeAll(this.getCdnCreds());
             } else {
                 await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
                 await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);

@@ -6,7 +6,7 @@ export const axiosApi = axios.create();
 
 export interface ICDNConnector {
     purge(jobId: String, urls: Array<string>): Promise<void>;
-    purgeAll(jobId: String, creds: any): Promise<any>;
+    purgeAll(creds: any): Promise<any>;
     warm(jobId: string, url: string): Promise<any>;
     upsertEdgeDictionaryItem(keyValue: any, id: string, creds: any): Promise<void>;
 }
@@ -19,15 +19,15 @@ export class FastlyConnector implements ICDNConnector {
 
     getHeaders(creds: any): any {
         return {
-            'Fastly-Key': creds["service_key"],
+            'Fastly-Key': creds["token"],
             'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Fastly-Debug': 1,
         };
     }
 
-    async purgeAll(jobId: string, creds: any): Promise<any> {
-        return await axiosApi.post(`https://api.fastly.com/service/${creds['service_id']}/purge_all`, {}, { headers: this.getHeaders(creds) });
+    async purgeAll(creds: any): Promise<any> {
+        return await axiosApi.post(`https://api.fastly.com/service/${creds['id']}/purge_all`, {}, { headers: this.getHeaders(creds) });
     }
 
     async warm(url: string): Promise<any> {
@@ -52,13 +52,8 @@ export class FastlyConnector implements ICDNConnector {
     }
 
     async upsertEdgeDictionaryItem(keyValue: any, id: string, creds: any): Promise<any> {
-        console.log(`https://api.fastly.com/service/${creds['service_id']}/dictionary/${id}/item/${keyValue.key}`);
-        console.log({
+        return await axiosApi.put(`https://api.fastly.com/service/${creds['id']}/dictionary/${id}/item/${keyValue.key}`, {
             item_value: keyValue.value,
-        });
-        return;
-        return await axiosApi.put(`https://api.fastly.com/service/${creds['service_id']}/dictionary/${id}/item/${keyValue.key}`, {
-            item_value: keyValue.value,
-        });
+        }, { headers: this.getHeaders(creds) });
     }
 }
