@@ -26,6 +26,7 @@ custom:
     prd: 216656347858
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
+  fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   docuhubEventSource:
     stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
@@ -37,6 +38,13 @@ custom:
     prd: "production"
     dev: "staging"
 
+default-env: &default-env
+  STAGE: ${self:provider.stage}
+  FASTLY_DOCHUB_MAP: ${self:custom.fastlyDochubMap}
+  FASTLY_DOCHUB_SERVICE_ID: ${self:custom.fastlyDochubServiceId}
+  FASTLY_DOCHUB_TOKEN: ${self:custom.fastlyDochubToken}
+
+
 functions:
     v1UpsertEdgeDictionaryItem:
       handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
@@ -46,3 +54,5 @@ functions:
             pattern:
               source:
                 - ${self:custom.docuhubEventSource.${self:provider.stage}}
+      environment:
+        <<: *default-env
