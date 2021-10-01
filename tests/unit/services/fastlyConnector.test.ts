@@ -42,7 +42,7 @@ describe('FastlyConnector Tests', () => {
                 'Content-Type': 'application/json',
                 'Fastly-Debug': 1
             }).reply(200, {});
-            await fastlyConnector.purgeAll("test_job_id", {service_id:"id", service_key: "key"});
+            await fastlyConnector.purgeAll({id:"id", token: "key"});
             expect(mock.history.post.length).toBe(1);
         })
 
@@ -53,7 +53,7 @@ describe('FastlyConnector Tests', () => {
                 'Content-Type': 'application/json',
                 'Fastly-Debug': 1
             }).reply(401, {});
-            await expect(fastlyConnector.purgeAll("test_job_id", {service_id:"id", service_key: "key"})).rejects.toThrow("Request failed with status code 401");
+            await expect(fastlyConnector.purgeAll({id:"id", token: "key"})).rejects.toThrow("Request failed with status code 401");
             expect(mock.history.post.length).toBe(1);
         })
     })
@@ -68,8 +68,13 @@ describe('FastlyConnector Tests', () => {
 
     describe('FastlyConnector upsertEdgeDictionaryItem Tests', () => {
         test('FastlyConnector upsertEdgeDictionaryItem with valid value works fine', async() => {
-            mock.onPut(`https://api.fastly.com/service/sid/dictionary/dictId/item/edgeDictKey`, {item_value: "edgeDictValue"}).reply(200, {});
-            await fastlyConnector.upsertEdgeDictionaryItem({key:"edgeDictKey", value: "edgeDictValue"}, "dictId", {service_id:"sid", service_key: "key"});
+            mock.onPut(`https://api.fastly.com/service/id/dictionary/dictId/item/edgeDictKey`, {item_value: "edgeDictValue"}, {
+                'Fastly-Key': 'key',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Fastly-Debug': 1
+            }).reply(200, {});
+            await fastlyConnector.upsertEdgeDictionaryItem({key:"edgeDictKey", value: "edgeDictValue"}, "dictId", {id:"id", token: "key"});
             expect(mock.history.put.length).toBe(1);
         })
     })
