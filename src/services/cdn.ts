@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { IJobRepoLogger } from "./logger";
+import { ILogger } from "./logger";
 
 export const axiosApi = axios.create();
 
@@ -12,8 +12,8 @@ export interface ICDNConnector {
 }
 
 export class FastlyConnector implements ICDNConnector {
-    private _logger: IJobRepoLogger
-    constructor(logger: IJobRepoLogger) {
+    private _logger: ILogger
+    constructor(logger: ILogger) {
         this._logger = logger;
     }
 
@@ -27,12 +27,7 @@ export class FastlyConnector implements ICDNConnector {
     }
 
     async purgeAll(jobId: string, creds: any): Promise<any> {
-        try {
-            return await axiosApi.post(`https://api.fastly.com/service/${creds['service_id']}/purge_all`, {}, { headers: this.getHeaders(creds) });
-        } catch (error) {
-            await this._logger.save(jobId, `${'(prod)'.padEnd(15)}error in requestPurgeAll: ${error}`);
-            throw error;
-        }
+        return await axiosApi.post(`https://api.fastly.com/service/${creds['service_id']}/purge_all`, {}, { headers: this.getHeaders(creds) });
     }
 
     async warm(url: string): Promise<any> {
@@ -56,7 +51,7 @@ export class FastlyConnector implements ICDNConnector {
         });
     }
 
-    static async upsertEdgeDictionaryItem(keyValue: any, id: string, creds: any): Promise<any> {
+    async upsertEdgeDictionaryItem(keyValue: any, id: string, creds: any): Promise<any> {
         console.log(`https://api.fastly.com/service/${creds['service_id']}/dictionary/${id}/item/${keyValue.key}`);
         console.log({
             item_value: keyValue.value,

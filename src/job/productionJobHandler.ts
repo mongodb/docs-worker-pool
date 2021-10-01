@@ -80,7 +80,7 @@ export class ProductionJobHandler extends JobHandler {
             }
 
         } catch (error) {
-            this.logger.error(this.currJob._id, error);
+            await this.logger.save(this.currJob._id, error);
         }
     }
 
