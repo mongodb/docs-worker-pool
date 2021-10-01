@@ -100,14 +100,6 @@ custom:
   nodeIntgrBucketName: docs-node-intgr
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
-  dochubEventBus:
-    stg: arn:aws:events:us-east-2:216656347858:event-bus/aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d 
-    prd: arn:aws:events:us-east-2:216656347858:event-bus/aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d 
-    dev: arn:aws:events:us-east-2:216656347858:event-bus/aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-  docuhubEventSource:
-    stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-    prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-    dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
   env:
     stg: "staging"
     prd: "production"
