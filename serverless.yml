@@ -1,6 +1,9 @@
 service: docs-worker-pool
 variablesResolutionMode: 20210326
 
+plugins:
+  - serverless-plugin-typescript
+
 provider:
   name: aws
   stage: ${opt:stage, 'stg'}
