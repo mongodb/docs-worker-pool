@@ -112,10 +112,11 @@ export class JobManager {
         }
     }
 
-    stop():void {
+    async stop():Promise<void> {
         this._logger.info("JobManager", '\nServer is starting cleanup');
         this._shouldStop = true;
         this._jobHandler?.stop();
+        await this._jobHandler?.jobRepository.resetJobStatus(this._jobHandler?.currJob._id, 'inQueue', `Resetting Job with ID: ${this._jobHandler?.currJob._id} because server is being shut down`);              
     }
 
     async startSingleJob(): Promise<void> {
