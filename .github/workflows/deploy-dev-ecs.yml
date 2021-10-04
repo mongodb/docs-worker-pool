@@ -4,6 +4,9 @@ on:
       - "integration"
       - "master"
       - "meta"
+concurrency:
+  group: environment-${{ github.ref }}
+  cancel-in-progress: true
 name: Deploy Dev ECS
 jobs:
   deploy-dev:
