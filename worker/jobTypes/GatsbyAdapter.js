@@ -20,7 +20,6 @@ class GatsbyAdapterClass {
     // 'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
     // If no environment variables are needed, please leave this as an empty object
     const snootyFrontEndVars = {
-      'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': process.env.GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION,
       'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': process.env.GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN,
     };
 

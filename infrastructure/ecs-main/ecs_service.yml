@@ -61,8 +61,6 @@ Resources:
               value: ${self:custom.awsKeyDevhub}
             - Name: AWS_SECRET_ACCESS_KEY_DEVHUB
               value: ${self:custom.awsSecretDevhub}
-            - Name: GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
-              value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
             - Name: FASTLY_MAIN_TOKEN
               value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
