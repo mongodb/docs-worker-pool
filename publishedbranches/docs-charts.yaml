@@ -1,9 +1,9 @@
 prefix: 'charts'
 version:
   published:
-    - 'Cloud'
+    - 'master'
   active:
-    - 'Cloud'
+    - 'master'
   stable: 'master'
 git:
   branches:
