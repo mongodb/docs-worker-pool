@@ -41,38 +41,39 @@ export class TestDataProvider {
         return props;
     }
 
-    static getPublishBranchesContent(job: IJob): any {
+    static getBranchSlug(job: IJob): any {
         return {
             prefix: "TestPrefix",
-            version: {
-                published: [1, 2, 3],
-                active: [1, 2, 3],
-                stable: job.payload.branchName
-            },
-            git: {
-                branches: {
-                    manual: 'master',
-                    published: [job.payload.branchName]
-                }
-            }
+            project: "TestProject",
+            repoName: job.payload.repoName,
+            branches: [
+              {
+                "gitBranchName": job.payload.branchName,
+                "urlAliases": [],
+                "urlSlug": "sample_slug",
+                "active": true,
+                "publishOriginalBranchName": true,
+                "isStableBranch": true
+              }
+            ]
         };
     }
 
-    static configurePublishedBranches(job: IJob): IJob {
-        job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(job);
-        return job;
-    }
+    // static configurePublishedBranches(job: IJob): IJob {
+    //     job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(job);
+    //     return job;
+    // }
 
-    static configurePublishedBranchesWithPrimaryAlias(job: IJob): IJob {
-        job.payload.primaryAlias = job.payload.branchName;
-        return TestDataProvider.configurePublishedBranches(job);
-    }
+    // static configurePublishedBranchesWithPrimaryAlias(job: IJob): IJob { //HERE
+    //     job.payload.primaryAlias = job.payload.branchName; //HERE
+    //     return TestDataProvider.configurePublishedBranches(job);
+    // }
 
-    static configurePublishedBranchesWithOutPrimaryAliasAndAliasSet(job: IJob): IJob {
-        job.payload.primaryAlias = null;
-        job.payload.aliased = true;
-        return TestDataProvider.configurePublishedBranches(job);
-    }
+    // static configurePublishedBranchesWithOutPrimaryAliasAndAliasSet(job: IJob): IJob { //HERE
+    //     job.payload.primaryAlias = null; //HERE
+    //     job.payload.aliased = true;
+    //     return TestDataProvider.configurePublishedBranches(job);
+    // }
 
     static getCommitCheckValidResponse(job: IJob): any {
         let resp = new CommandExecutorResponse();
@@ -170,7 +171,7 @@ export class TestDataProvider {
         ];
     }
 
-    static getManifestPrefixCases(): Array<any> {
+    static getManifestPrefixCases(): Array<any> { //HERE
         const job = Object.assign(data.default.value);
         let itemValid = TestDataProvider.getPublishBranchesContent(job);
         return [{
