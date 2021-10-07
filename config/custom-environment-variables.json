@@ -12,6 +12,7 @@
     "githubBotPW": "GITHUB_BOT_PASSWORD",
     "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
     "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
+    "reposBranchesCollection": "REPOS_BRANCHES_COLL_NAME",
     "GATSBY_PARSER_USER": "GATSBY_PARSER_USER",
     "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
     "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",

@@ -70,7 +70,7 @@ describe('Jobmanager integration Tests', () => {
         expect(job.status).toEqual('failed');
     })
 
-    function prepJobPayload(jobType) {
+    function  prepJobPayload(jobType) {
         return {
             "payload": {
                 "jobType": jobType,

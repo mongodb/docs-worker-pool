@@ -165,7 +165,7 @@ export abstract class JobHandler {
     private async prepNextGenBuild(): Promise<void> {
         if (this.isbuildNextGen()) {
             await this.constructPrefix();
-            if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
+            if (!this.currJob.payload.aliased || this.currJob.payload.includeInGlobalSearch) {
                 await this.constructManifestIndexPath();
             }
             this.prepStageSpecificNextGenCommands();

@@ -104,25 +104,6 @@ describe.each(TestDataProvider.getPathPrefixCases())('Validate all Generate path
     })
 })
 
-describe.each(TestDataProvider.getManifestPrefixCases())('Validate all Generate manifest prefix cases', (element) => {
-    test(`Testing manifest prefix with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
-        jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
-        await jobHandlerTestHelper.jobHandler.execute();
-        expect(jobHandlerTestHelper.repoConnector.pullRepo).toBeCalledTimes(1);
-        expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
-        expect(jobHandlerTestHelper.job.payload.manifestPrefix).toEqual(element.manifestPrefix);
-    })
-})
-
-test('Execute Next Gen Manifest prefix generation throws error as get snooty name throws', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
-    jobHandlerTestHelper.setupForSuccess();
-    mockReset(jobHandlerTestHelper.jobCommandExecutor);
-    jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName.calledWith(jobHandlerTestHelper.job.payload.repoName).mockImplementation(() => { throw new Error("Cant get the project name");});
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Cant get the project name");
-})
-
 describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var cases', (element) => {
     test(`Testing commit check returns ${JSON.stringify(element)}`, async () => {
         jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
@@ -140,17 +121,15 @@ describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var 
 })
 
 test('Execute Next Gen Build throws error while executing commands', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     mockReset(jobHandlerTestHelper.jobCommandExecutor);
-    jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName.calledWith(jobHandlerTestHelper.job.payload.repoName).mockReturnValue({output:jobHandlerTestHelper.job.payload.repoName})
     jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({status:"failed", error:"Command Execution failed"});
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Command Execution failed");
 })
 
 test('Execute Next Gen Build throws error when execute throws error', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
+    jobHandlerTestHelper.job.payload.urlSlug = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     jobHandlerTestHelper.jobCommandExecutor.execute.mockImplementation(() => { throw new Error("Unable to Execute Commands");});
     await jobHandlerTestHelper.jobHandler.execute();
@@ -159,7 +138,6 @@ test('Execute Next Gen Build throws error when execute throws error', async () =
 
 describe.each(TestDataProvider.getManifestPrefixCases())('Execute Next Gen Build Validate all deploy commands', (element) => {
     test(`Testing  all deploy command cases with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
-        jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
         jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({status:"success", output: "Great work", error:null})
         jobHandlerTestHelper.fileSystemServices.getFilesInDirectory.calledWith(`./${jobHandlerTestHelper.job.payload.repoName}/build/public`, '').mockReturnValue(["1.html", "2.html", "3.html"]);
         await jobHandlerTestHelper.jobHandler.execute();
