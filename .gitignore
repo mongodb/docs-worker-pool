@@ -8,3 +8,4 @@ coverage
 out
 local.json
 globalConfig.json
+.serverless

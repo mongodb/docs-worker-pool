@@ -1,4 +1,5 @@
 import { IConfig } from "config";
+import { CDNCreds } from "../entities/creds";
 import { IJob } from "../entities/job";
 import { InvalidJobError } from "../errors/errors";
 import { JobRepository } from "../repositories/jobRepository";
@@ -73,22 +74,23 @@ export class ProductionJobHandler extends JobHandler {
             // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
             await this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
             if (this._config.get("shouldPurgeAll")) {
-                await this._cdnConnector.purgeAll(this.currJob._id,this.getCdnCreds());
+                await this._cdnConnector.purgeAll(this.getCdnCreds());
             } else {
                 await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
                 await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
             }
 
         } catch (error) {
-            this.logger.error(this.currJob._id, error);
+            await this.logger.save(this.currJob._id, error);
         }
     }
 
-    private getCdnCreds(): any {
+    private getCdnCreds(): CDNCreds {
+        let creds = this._config.get<any>('cdn_creds')['main'];
         if (this.currJob.payload.repoName && this.currJob.payload.repoName in this._config.get<any>('cdn_creds')) {
-            return this._config.get<any>('cdn_creds')[this.currJob.payload.repoName ];
+            creds = this._config.get<any>('cdn_creds')[this.currJob.payload.repoName];
         }
-            return this._config.get<any>('cdn_creds')['main'];
+        return new CDNCreds(creds['id'], creds['token']);
     }
 
     async deploy(): Promise<CommandExecutorResponse> {

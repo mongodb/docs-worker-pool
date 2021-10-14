@@ -1,0 +1,9 @@
+{
+    "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
+    "cdn_creds": {
+        "dochub": {
+            "id": "FASTLY_DOCHUB_SERVICE_ID",
+            "token": "FASTLY_DOCHUB_TOKEN"
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "fastlyDochubMap":"devfslydochubmap",
+    "cdn_creds": {
+        "dochub": {
+            "id": "FASTLY_DOCHUB_SERVICE_ID",
+            "key": "FASTLY_DOCHUB_TOKEN"
+        }
+    }
+}

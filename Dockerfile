@@ -85,6 +85,5 @@ COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
-RUN ls
 CMD ["node", "app.js"]
 

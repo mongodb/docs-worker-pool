@@ -29,27 +29,27 @@
     "cdn_creds": {
         "cloudgov-docs": {
             "id": "FASTLY_ATLAS_SERVICE_ID",
-            "key": "FASTLY_ATLAS_TOKEN"
+            "token": "FASTLY_ATLAS_TOKEN"
         },
         "cloud-docs": {
             "id": "FASTLY_ATLAS_SERVICE_ID",
-            "key": "FASTLY_ATLAS_TOKEN"
+            "token": "FASTLY_ATLAS_TOKEN"
         },
         "cloud-docs-osb": {
             "id": "FASTLY_ATLAS_SERVICE_ID",
-            "key": "FASTLY_ATLAS_TOKEN"
+            "token": "FASTLY_ATLAS_TOKEN"
         },
         "devhub-content": {
             "id": "FASTLY_DEVHUB_SERVICE_ID",
-            "key": "FASTLY_DEVHUB_TOKEN"
+            "token": "FASTLY_DEVHUB_TOKEN"
         },
         "publishDochub": {
             "id": "FASTLY_DOCHUB_SERVICE_ID",
-            "key": "FASTLY_DOCHUB_TOKEN"
+            "token": "FASTLY_DOCHUB_TOKEN"
         },
         "main": {
             "id": "FASTLY_MAIN_SERVICE_ID",
-            "key": "FASTLY_MAIN_TOKEN"
+            "token": "FASTLY_MAIN_TOKEN"
         }
     },
     "repo_dir": "repos"

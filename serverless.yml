@@ -1,0 +1,56 @@
+service: docs-worker-pool
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-plugin-typescript
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'stg'}
+  deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
+  deploymentPrefix: serverless
+  region: us-east-2
+package:
+  patterns:
+    api/config/**
+custom:
+  deploymentBucket:
+    dev: worker-pool-deployment
+    stg: worker-pool-deployment
+    prd: worker-pool-deployment
+  accountId:
+    stg: 216656347858
+    dev: 216656347858
+    prd: 216656347858
+  fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
+  fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
+  fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
+  docuhubEventSource:
+    stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+  dochubEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.docuhubEventSource.${self:provider.stage}} 
+
+  env:
+    stg: "staging"
+    prd: "production"
+    dev: "staging"
+
+default-env: &default-env
+  STAGE: ${self:provider.stage}
+  FASTLY_DOCHUB_MAP: ${self:custom.fastlyDochubMap}
+  FASTLY_DOCHUB_SERVICE_ID: ${self:custom.fastlyDochubServiceId}
+  FASTLY_DOCHUB_TOKEN: ${self:custom.fastlyDochubToken}
+
+
+functions:
+    v1UpsertEdgeDictionaryItem:
+      handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
+      events:
+        - eventBridge:
+            eventBus:  ${self:custom.dochubEventBus}
+            pattern:
+              source:
+                - ${self:custom.docuhubEventSource.${self:provider.stage}}
+      environment:
+        <<: *default-env

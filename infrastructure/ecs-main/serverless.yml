@@ -109,4 +109,3 @@ custom:
 resources:
   - ${file(./buckets.yml)}
   - ${file(./ecs_service.yml)}
-
