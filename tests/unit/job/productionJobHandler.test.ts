@@ -215,7 +215,7 @@ test('Execute legacy build runs successfully purges all for main service', async
     expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(false);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(TestDataProvider.getCommonBuildCommands(jobHandlerTestHelper.job));
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(TestDataProvider.getCommonDeployCommands(jobHandlerTestHelper.job));
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledWith({id:"sid", key: "token"});
+    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
     expect(jobHandlerTestHelper.cdnConnector.purge).toHaveBeenCalledTimes(0);
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
 })
@@ -227,7 +227,7 @@ test('Execute build runs successfully purges all for atlas service', async () =>
     "key": "token"}});
     jobHandlerTestHelper.job.payload.repoName = "cloud-docs-osb";
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledWith( {id:"sid", key: "token"});
+    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
 })
 
 })

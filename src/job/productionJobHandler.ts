@@ -1,4 +1,5 @@
 import { IConfig } from "config";
+import { CDNCreds } from "../entities/creds";
 import { IJob } from "../entities/job";
 import { InvalidJobError } from "../errors/errors";
 import { JobRepository } from "../repositories/jobRepository";
@@ -84,11 +85,12 @@ export class ProductionJobHandler extends JobHandler {
         }
     }
 
-    private getCdnCreds(): any {
+    private getCdnCreds(): CDNCreds {
+        let creds = this._config.get<any>('cdn_creds')['main'];
         if (this.currJob.payload.repoName && this.currJob.payload.repoName in this._config.get<any>('cdn_creds')) {
-            return this._config.get<any>('cdn_creds')[this.currJob.payload.repoName ];
+            creds = this._config.get<any>('cdn_creds')[this.currJob.payload.repoName];
         }
-            return this._config.get<any>('cdn_creds')['main'];
+        return new CDNCreds(creds['id'], creds['token']);
     }
 
     async deploy(): Promise<CommandExecutorResponse> {
