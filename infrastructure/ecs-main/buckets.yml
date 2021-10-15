@@ -58,17 +58,11 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action:
-              - s3:GetObject
+              - 's3:GetObject'
+              - 's3:ListBucket'
             Resource: 
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
-          - Sid: PublicListObjects
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:ListObjects
-            Resource: 
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
-
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }]]
 
   DocAtlasBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -84,13 +78,6 @@ Resources:
               - s3:GetObject
             Resource: 
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
-          - Sid: PublicListObjects
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:ListObjects
-            Resource: 
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
 
   CloudManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -104,13 +91,6 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
-          - Sid: PublicListObjects
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
 
@@ -129,13 +109,6 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
-          - Sid: PublicListObjects
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:ListObjects
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
 
   JavaBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -149,13 +122,6 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
-          - Sid: PublicListObjects
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
 
@@ -173,13 +139,6 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
-          - Sid: PublicListObjects
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:ListObjects
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
 
   NodeBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -193,12 +152,5 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
-            Resource:
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
-          - Sid: PublicListObjects
-            Effect: Allow
-            Principal: "*"
-            Action:
-              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
