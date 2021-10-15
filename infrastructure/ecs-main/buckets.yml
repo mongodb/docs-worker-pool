@@ -59,6 +59,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
+              - s3:ListObjects
             Resource: 
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
 
@@ -74,6 +75,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
+              - s3:ListObjects
             Resource: 
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
 
@@ -89,6 +91,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
+              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
 
@@ -104,6 +107,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
+              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
 
@@ -119,6 +123,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
+              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
 
@@ -134,6 +139,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
+              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
 
@@ -149,5 +155,6 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
+              - s3:ListObjects
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
