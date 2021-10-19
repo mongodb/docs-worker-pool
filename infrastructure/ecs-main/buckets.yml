@@ -58,9 +58,11 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action:
-              - s3:GetObject
+              - 's3:GetObject'
+              - 's3:ListBucket'
             Resource: 
-            - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }]]
 
   DocAtlasBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -91,6 +93,7 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
+
 
   OpsManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
