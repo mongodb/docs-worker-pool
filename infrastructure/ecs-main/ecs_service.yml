@@ -60,7 +60,7 @@ Resources:
             - Name: AWS_ACCESS_KEY_ID_DEVHUB
               Value: ${self:custom.awsKeyDevhub}
             - Name: AWS_SECRET_ACCESS_KEY_DEVHUB
-              value: ${self:custom.awsSecretDevhub}
+              Value: ${self:custom.awsSecretDevhub}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
