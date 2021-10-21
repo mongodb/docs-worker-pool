@@ -3,7 +3,8 @@ import { BaseRepository } from "./baseRepository";
 import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
-import { InvalidJobError, JobExistsAlreadyError } from "../errors/errors";
+import { InvalidJobError } from "../errors/errors";
+import { isNull } from "node:util";
 
 export class JobRepository extends BaseRepository<Job> {
     constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
@@ -22,17 +23,7 @@ export class JobRepository extends BaseRepository<Job> {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`);
     }
 
-    async insertJob(job: any): Promise<void> {
-        const filterDoc = { payload: job.payload, status: { $in: ["inQueue", "inProgress"] } };
-        const updateDoc = {
-            $setOnInsert: job
-        };
-        if (!await this.upsert(filterDoc, updateDoc, `Mongo Timeout Error: Timed out while inserting Job`)) {
-            throw new JobExistsAlreadyError("InsertJobFailed");
-        }
-    }
-
-    async getOneQueuedJobAndUpdate(): Promise<Job | null> {
+    async getOneQueuedJobAndUpdate(): Promise<Job|null> {
         const query = {
             status: 'inQueue',
             createdTime: { $lte: new Date() },
@@ -44,7 +35,7 @@ export class JobRepository extends BaseRepository<Job> {
             throw new InvalidJobError("JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job");
         }
         if (response.value) {
-            return Object.assign(new Job(), response.value)
+            return Object.assign(new Job(), response.value) 
         }
         return null;
     }
@@ -64,7 +55,7 @@ export class JobRepository extends BaseRepository<Job> {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting log statements for jobId: ${id}`);
     }
 
-    async insertNotificationMessages(id: string, message: string): Promise<boolean> {
+    async insertNotificationMessages(id:string, message: string): Promise<boolean> {
         const query = { _id: id };
         const update = {
             $push: { comMessage: message }
@@ -72,7 +63,7 @@ export class JobRepository extends BaseRepository<Job> {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting notification messages for jobId: ${id}`);
     }
 
-    async insertPurgedUrls(id: string, urlArray: Array<string>): Promise<boolean> {
+    async insertPurgedUrls(id:string, urlArray: Array<string>): Promise<boolean> {
         const query = { _id: id };
         const update = {
             $push: { ['purgedURLs']: urlArray }
@@ -80,7 +71,7 @@ export class JobRepository extends BaseRepository<Job> {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting purged urls for jobId: ${id}`);
     }
 
-    async resetJobStatus(id: string, status: string, reenqueueMessage: string) {
+    async resetJobStatus(id:string, status: string, reenqueueMessage: string) {
         const query = { _id: id };
         const update = {
             $set: {
