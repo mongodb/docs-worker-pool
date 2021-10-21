@@ -2,21 +2,28 @@ import { mockDeep, mockReset } from 'jest-mock-extended';
 import { IJob } from '../../../src/entities/job';
 import { IFileSystemServices } from '../../../src/services/fileServices';
 import * as data from '../../data/jobDef'
+import * as stageData from '../../data/stageJobDef'
 import { JobValidator } from '../../../src/job/jobValidator';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { TestDataProvider } from '../../data/data';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 
 
 let job: IJob;
+let stageJob: IJob;
 let fileSystemServices: IFileSystemServices;
 let repoEntitlementRepository: RepoEntitlementsRepository;
+let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
+
 
 beforeEach(() => {
     job = JSON.parse(JSON.stringify(data.default.value));
+    stageJob = JSON.parse(JSON.stringify(stageData.default.value))
     fileSystemServices = mockDeep<IFileSystemServices>();
     repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
-    jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);
+    repoBranchesRepository = mockDeep<RepoBranchesRepository>();
+    jobValidator = new JobValidator(fileSystemServices, repoBranchesRepository, repoEntitlementRepository);
 })
 
 afterEach(() => {
@@ -28,7 +35,7 @@ afterEach(() => {
 describe('JobValidator Tests', () => {
 
     test('Construct Job Factory', () => {
-        expect(new JobValidator(fileSystemServices, repoEntitlementRepository)).toBeDefined();
+        expect(new JobValidator(fileSystemServices, repoBranchesRepository, repoEntitlementRepository)).toBeDefined();
     })
 
 
@@ -49,56 +56,52 @@ describe('JobValidator Tests', () => {
     test('Throw If User Not Entitled Fails with failure status', async () => {
         repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(job.user).mockReturnValue( { status: 'failure' });
         await expect(jobValidator.throwIfUserNotEntitled(job))
-            .rejects.toThrow(`${job.user} is not entitled for repo ${job.payload.repoName}`);
+            .rejects.toThrow(`${job.user} is not entitled to deploy repo ${job.payload.repoName}`);
         expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
     })
 
     test('Throw If User Not Entitled Fails because undefined return value', async () => {
         repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(job.user).mockReturnValue(undefined);
         await expect(jobValidator.throwIfUserNotEntitled(job))
-            .rejects.toThrow(`${job.user} is not entitled for repo ${job.payload.repoName}`);
+            .rejects.toThrow(`${job.user} is not entitled to deploy repo ${job.payload.repoName}`);
         expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
     })
 
     test('Throw If User Not Entitled Fails because repo not found in return value', async () => {
         repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(job.user).mockReturnValue({ status: 'success', repos:[`someotherepo`], github_username: job.user });
         await expect(jobValidator.throwIfUserNotEntitled(job))
-            .rejects.toThrow(`${job.user} is not entitled for repo ${job.payload.repoName}`);
+            .rejects.toThrow(`${job.user} is not entitled to deploy repo ${job.payload.repoName}`);
         expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
     })
 
+    test('Throw If repo not configured throws as repoName is not configured for deployment', async () => {
+      repoBranchesRepository.getConfiguredBranchesByGithubRepoName.calledWith(job.payload.repoName).mockReturnValue({ status: 'failure' });
+      await expect(jobValidator.throwIfBranchNotConfigured(job))
+        .rejects.toThrow(`${job.payload.repoName} is not configured for deployment`);
+      expect(repoBranchesRepository.getConfiguredBranchesByGithubRepoName).toHaveBeenCalledTimes(1);
+    })
+
     test('Throw If branch not configured throws as branch configuration not found', async () => {
-        fileSystemServices.downloadYaml.calledWith(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`).mockReturnValue( { status: 'failure' });
+        repoBranchesRepository.getConfiguredBranchesByGithubRepoName.calledWith(job.payload.repoName).mockReturnValue({ branches: [{gitBranchName: "nope"}], status: 'success' });
         await expect(jobValidator.throwIfBranchNotConfigured(job))
-            .rejects.toThrow(`Invalid publish branches file for ${job.payload.repoName}`);
-        expect(fileSystemServices.downloadYaml).toHaveBeenCalledTimes(1);
+            .rejects.toThrow(`${job.payload.branchName} in the ${job.payload.repoName} repository is not configured for deployment.`);
+        expect(repoBranchesRepository.getConfiguredBranchesByGithubRepoName).toHaveBeenCalledTimes(1);
     })
 
-    test('throwIfItIsNotPublishable throws as branch not configured for publishing', () => {
-        expect(() => {jobValidator.throwIfItIsNotPublishable(job)}).toThrowError(`${job.payload.branchName} is not configured for publish`);
-  
-    })
-
-    test('throwIfItIsNotPublishable dont throws as branch is configured for publishing and stable branch is set to -g', () => {
-        job = TestDataProvider.configurePublishedBranchesWithPrimaryAlias(job);
-        jobValidator.throwIfItIsNotPublishable(job);
-        expect(job.payload.stableBranch).toEqual('-g');
-    })
-
-    test('throwIfItIsNotPublishable dont throws as branch is configured for publishing and stable branch is not set', () => {
-        job = TestDataProvider.configurePublishedBranchesWithOutPrimaryAliasAndAliasSet(job);
-        jobValidator.throwIfItIsNotPublishable(job);
-        expect(job.payload.stableBranch).toEqual('');
-    })
-
-    test('valid staging job throwIfJobInvalid dont throws as branch is configured for publishing and stable branch is not set', async () => {
+    test('throwIfJobInvalid does not throw when the branch is configured for publishing and user has required permissions', async () => {
         repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(job.user).mockReturnValue( { status: 'success', repos:[`${job.payload.repoOwner}/${job.payload.repoName}`], github_username: job.user });
-        const pubBranchRetVal = TestDataProvider.getPublishBranchesContent(job);
-        fileSystemServices.downloadYaml.calledWith(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`).mockReturnValue( { status: 'success', content:pubBranchRetVal});
+        repoBranchesRepository.getConfiguredBranchesByGithubRepoName.calledWith(job.payload.repoName).mockReturnValue({status: 'success', branches: [{gitBranchName: job.payload.branchName}]})
         await jobValidator.throwIfJobInvalid(job);
-        expect(fileSystemServices.downloadYaml).toHaveBeenCalledTimes(1);
-        expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(0);
+        expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
+        expect(repoBranchesRepository.getConfiguredBranchesByGithubRepoName).toHaveBeenCalledTimes(1);
+    })
 
+    test('throwIfJobInvalid does not check user entitlements for staging builds', async() => {
+        repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(stageJob.user).mockReturnValue( { status: 'success', repos:[`${stageJob.payload.repoOwner}/${stageJob.payload.repoName}`], github_username: stageJob.user });
+        repoBranchesRepository.getConfiguredBranchesByGithubRepoName.calledWith(job.payload.repoName).mockReturnValue({status: 'success', branches: [{gitBranchName: job.payload.branchName}]})
+        await jobValidator.throwIfJobInvalid(stageJob);
+        expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(0);
+        expect(repoBranchesRepository.getConfiguredBranchesByGithubRepoName).toHaveBeenCalledTimes(0);
     })
 
 })
