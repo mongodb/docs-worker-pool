@@ -30,13 +30,6 @@ custom:
     prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
   dochubEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.docuhubEventSource.${self:provider.stage}} 
-  dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
-  dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
-  dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
-  dbhost: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/host}
-  jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
-  entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
-  githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
 
   env:
     stg: "staging"
@@ -48,18 +41,7 @@ default-env: &default-env
   FASTLY_DOCHUB_MAP: ${self:custom.fastlyDochubMap}
   FASTLY_DOCHUB_SERVICE_ID: ${self:custom.fastlyDochubServiceId}
   FASTLY_DOCHUB_TOKEN: ${self:custom.fastlyDochubToken}
-  GITHUB_WEBHOOK_SECRET: REPLACE-WITH-YOUR-SECRET-HERE
 
-webhook-env-core: &webhook-env-core
-  STAGE: ${self:provider.stage}
-  MONGO_ATLAS_USERNAME: ${self:custom.dbUsername}
-  MONGO_ATLAS_PASSWORD: ${self:custom.dbPassword}
-  MONGO_ATLAS_HOST: ${self:custom.dbhost}
-  MONGO_ATLAS_URL: mongodb+srv://${self:custom.dbUsername}:${self:custom.dbPassword}@${self:custom.dbhost}/admin?retryWrites=true
-  DB_NAME: ${self:custom.dbName}
-  USER_ENTITLEMENT_COL_NAME: ${self:custom.entitlementCollection}
-  JOB_QUEUE_COL_NAME: ${self:custom.jobCollection}
-  GITHUB_SECRET: ${self:custom.githubSecret}
 
 functions:
     v1UpsertEdgeDictionaryItem:
@@ -72,14 +54,3 @@ functions:
                 - ${self:custom.docuhubEventSource.${self:provider.stage}}
       environment:
         <<: *default-env
-    
-    v1GithubWebhookListener:
-      handler: api/controllers/v1/github/github.TriggerBuild
-      events:
-        - http:
-            path:  /github/trigger_build
-            method: POST
-            cors: true
-      environment:
-        <<: *webhook-env-core
-
