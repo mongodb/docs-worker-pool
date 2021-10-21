@@ -48,15 +48,18 @@ export class JobValidator implements IJobValidator {
 
     public async throwIfJobInvalid(job: IJob): Promise<void> {
         this._validateInput(job);
-        await this.throwIfUserNotEntitled(job);
+        if (this.isProd(job.payload.jobType)) {
+            await this.throwIfUserNotEntitled(job);
+        }
+        
         await this.throwIfBranchNotConfigured(job);
-        if (this.shouldCheckPublishable(job.payload.jobType)) {
+        if (this.isProd(job.payload.jobType)) {
             this.throwIfItIsNotPublishable(job);
         }
         
     }
 
-    private shouldCheckPublishable(jobType: string): boolean {
+    private isProd(jobType: string): boolean {
         return jobType === 'productionDeploy';
     }
 
