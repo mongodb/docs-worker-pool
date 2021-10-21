@@ -22,7 +22,7 @@ describe('Job Repository Tests', () => {
             expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);
         })
 
-        test('getRepoEntitlementsByGithubUsername is successfull', async () => {
+        test('getRepoEntitlementsByGithubUsername is successful', async () => {
             const testData = TestDataProvider.getRepoEntitlementsByGithubUsernameInfo("test_user");
             dbRepoHelper.collection.findOne.mockReturnValueOnce({ github_username: "test_user", repos: ["great_repo", "greates_repo"] });
             await expect(entitlementRepo.getRepoEntitlementsByGithubUsername("test_user")).resolves.toEqual({ repos: ["great_repo", "greates_repo"], github_username: "test_user", status: "success" });

@@ -3,6 +3,7 @@ import { JobHandlerFactory, JobManager } from "../src/job/jobManager";
 import { JobValidator } from "../src/job/jobValidator";
 import { JobRepository } from "../src/repositories/jobRepository";
 import { RepoEntitlementsRepository } from "../src/repositories/repoEntitlementsRepository";
+import { RepoBranchesRepository } from "../src/repositories/repoBranchesRepository";
 import { FastlyConnector } from "../src/services/cdn";
 import { GithubCommandExecutor, JobSpecificCommandExecutor } from "../src/services/commandExecutor";
 import { FileSystemServices } from "../src/services/fileServices";
@@ -32,6 +33,7 @@ describe('Jobmanager integration Tests', () => {
     let jobRepository: JobRepository;
     let hybridJobLogger: HybridJobLogger;
     let repoEntitlementRepository: RepoEntitlementsRepository;
+    let repoBranchesRepository: RepoBranchesRepository;
     let jobValidator: JobValidator;
     let cdnConnector: FastlyConnector;
     let repoConnector: GitHubConnector;
@@ -45,7 +47,8 @@ describe('Jobmanager integration Tests', () => {
         jobRepository = new JobRepository(testDBManager.db, c, consoleLogger);
         hybridJobLogger = new HybridJobLogger(jobRepository);
         repoEntitlementRepository = new RepoEntitlementsRepository(testDBManager.db, c, consoleLogger);
-        jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);
+        repoBranchesRepository = new RepoBranchesRepository(testDBManager.db, c, consoleLogger);
+        jobValidator = new JobValidator(fileSystemServices, repoBranchesRepository, repoEntitlementRepository);
         cdnConnector = new FastlyConnector(hybridJobLogger);
         repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
         jobHandletFactory = new JobHandlerFactory();
