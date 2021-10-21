@@ -59,3 +59,9 @@ export class NetworkError extends  AutoBuilderError{
         super(message, "AuthorizationError", errorCode, stack);
       }
   }
+
+  export class JobExistsAlreadyError extends AutoBuilderError {
+    constructor(message:string, errorCode?:Number, stack?: string) {
+        super(message, "JobExistsAlready", errorCode, stack);
+      }
+  }
