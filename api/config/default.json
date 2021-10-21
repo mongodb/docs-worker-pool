@@ -1,5 +1,6 @@
 {
     "fastlyDochubMap":"devfslydochubmap",
+    "githubSecret": "sample",
     "cdn_creds": {
         "dochub": {
             "id": "FASTLY_DOCHUB_SERVICE_ID",
