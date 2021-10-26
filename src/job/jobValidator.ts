@@ -7,7 +7,6 @@ import { RepoBranchesRepository } from "../repositories/repoBranchesRepository";
 
 export interface IJobValidator {
     throwIfJobInvalid(job: IJob): Promise<void>;
-    throwIfRepoNotConfigured(job: IJob): Promise<void>;
     throwIfBranchNotConfigured(job: IJob): Promise<void>;
     throwIfUserNotEntitled(job: IJob): Promise<void>;
 }
