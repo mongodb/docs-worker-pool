@@ -5,7 +5,7 @@
     "dbHost": "host",
     "dbName" : "pool_test",
     "dbUrl": "url",
-    "jobQueueCollection":"queue",
+    "jobQueueCollection":"allison_test_queue",
     "awsKey": "devkey", 
     "awsSecret": "devsecret",
     "githubBotUserName": "bot",
