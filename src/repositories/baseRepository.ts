@@ -4,7 +4,7 @@ import mongodb from 'mongodb';
 import { DBError } from '../errors/errors';
 import { ILogger } from '../services/logger';
 
-export abstract class BaseRepository<T> {
+export abstract class BaseRepository {
     protected _collection: mongodb.Collection;
     protected _logger: ILogger;
     protected _repoName: string;
