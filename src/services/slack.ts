@@ -11,6 +11,7 @@ export interface ISlackConnector {
     validateSlackRequest(payload:any):boolean;
     displayRepoOptions(repos:Array<string>,triggerId:string): Promise<string>;
     parseSelection(payload:any):any;
+    sendMessage(message:any, user:string): Promise<string>;
 }
 
 export class SlackConnector implements ISlackConnector {
@@ -20,6 +21,18 @@ export class SlackConnector implements ISlackConnector {
         this._logger = logger;
         this._config = config;
     }
+    async sendMessage(message: any, user: string): Promise<any> {
+        const body = {
+            "channel": user,
+            "text": message
+          }
+        return await axiosApi.post("https://slack.com/api/chat.postMessage", body, { headers: {
+            "Authorization": [
+              `Bearer ${ this._config.get<string>("slackToken")}`
+            ]
+          } });
+    }
+
     parseSelection(stateValues: any): any {
         let values = {};
         let inputMapping = {
