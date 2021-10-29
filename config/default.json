@@ -1,0 +1,56 @@
+{
+    "stage": "dev",
+    "dbUsername":"un",
+    "dbPassword": "pw",
+    "dbHost": "host",
+    "dbName" : "pool_test",
+    "dbUrl": "url",
+    "jobQueueCollection":"queue",
+    "awsKey": "devkey", 
+    "awsSecret": "devsecret",
+    "githubBotUserName": "bot",
+    "githubBotPW": "q1w",
+    "fastlyDochubMap":"devfslydochubmap",
+    "entitlementCollection": "entitlements",
+    "gatsbyConsitentNavFlag": "true",
+    "gatsbySDKVersionDropdownFlag": "true",
+    "MONGO_TIMEOUT_S": 15,
+    "JOB_TIMEOUT_S": 900,
+    "RETRY_TIMEOUT_MS": 5000,
+    "MIN_TIMEOUT_MS": 1,
+    "LOG_PADDING": 15,
+    "PORT": 3000,
+    "GATSBY_PARSER_USER": "docsworker-xlarge",
+    "shouldPurgeAll": false,
+    "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
+    "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
+    "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
+    "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
+    "cdn_creds": {
+        "cloudgov-docs": {
+            "id": "FASTLY_ATLAS_SERVICE_ID",
+            "token": "FASTLY_ATLAS_TOKEN"
+        },
+        "cloud-docs": {
+            "id": "FASTLY_ATLAS_SERVICE_ID",
+            "token": "FASTLY_ATLAS_TOKEN"
+        },
+        "cloud-docs-osb": {
+            "id": "FASTLY_ATLAS_SERVICE_ID",
+            "token": "FASTLY_ATLAS_TOKEN"
+        },
+        "devhub-content": {
+            "id": "FASTLY_DEVHUB_SERVICE_ID",
+            "token": "FASTLY_DEVHUB_TOKEN"
+        },
+        "publishDochub": {
+            "id": "FASTLY_DOCHUB_SERVICE_ID",
+            "token": "FASTLY_DOCHUB_TOKEN"
+        },
+        "main": {
+            "id": "FASTLY_MAIN_SERVICE_ID",
+            "token": "FASTLY_MAIN_TOKEN"
+        }
+    },
+    "repo_dir": "repos"
+}

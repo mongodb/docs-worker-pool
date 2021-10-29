@@ -12,7 +12,6 @@ provider:
 custom:
   ecrName: ${self:service}
   deploymentBucket:
-    intgr: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
     dev: worker-pool-deployment

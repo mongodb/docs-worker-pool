@@ -39,6 +39,10 @@ Resources:
               Value: ${self:custom.dbUsername}
             - Name: MONGO_ATLAS_PASSWORD
               Value: ${self:custom.dbPassword}
+            - Name: MONGO_ATLAS_HOST
+              Value: ${self:custom.dbhost}
+            - Name: MONGO_ATLAS_URL
+              Value: mongodb+srv://${self:custom.dbUsername}:${self:custom.dbPassword}@${self:custom.dbhost}/admin?retryWrites=true
             - Name: DB_NAME
               Value: ${self:custom.dbName}
             - Name: AWS_ACCESS_KEY_ID
@@ -51,8 +55,8 @@ Resources:
               Value: ${self:custom.githubBotPW}
             - Name: FASTLY_DOCHUB_MAP
               Value: ${self:custom.fastlyDochubMap}
-            - Name: COL_NAME
-              Value: ${self:custom.collection}
+            - Name: JOB_QUEUE_COL_NAME
+              Value: ${self:custom.jobCollection}
             - Name: NPM_BASE_64_AUTH
               Value: ${self:custom.npmBase64Auth}
             - Name: NPM_EMAIL
@@ -63,6 +67,8 @@ Resources:
               Value: ${self:custom.awsSecretDevhub}
             - Name: GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
               Value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
+            - Name: GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN
+              Value: ${self:custom.gatsbyFeatureFlagVersionDropdown}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
@@ -87,6 +93,8 @@ Resources:
               Value: ${self:custom.fastlyCloudManagerToken}
             - Name: FASTLY_CLOUD_MANAGER_SERVICE_ID
               Value: ${self:custom.fastlyCloudManagerServiceId}
+            - Name: USER_ENTITLEMENT_COL_NAME
+              Value: ${self:custom.entitlementCollection}
           LogConfiguration:
             LogDriver: awslogs
             Options:

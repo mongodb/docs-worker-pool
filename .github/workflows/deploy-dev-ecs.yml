@@ -1,13 +1,15 @@
 on:
   push:
-    tags:
-      - 'v*'
+    branches-ignore:
+      - "integration"
+      - "master"
+      - "meta"
 concurrency:
   group: environment-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Production ECS
+name: Deploy Dev ECS
 jobs:
-  deploy-prd:
+  deploy-dev:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,12 +30,12 @@ jobs:
         run: |
           cd infrastructure/ecs-repo
           npm ci
-          sls deploy --stage prd
+          sls deploy --stage dev
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR
         with:
-          image: docs-worker-pool-prd
-          tags: latest, ${{ github.sha }}
+          image: docs-worker-pool-dev
+          tags: latest
           registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
           buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
         env:
@@ -45,6 +47,10 @@ jobs:
         run: |
           cd infrastructure/ecs-main
           npm ci
-          sls deploy --stage prd
-          aws ecs update-service --force-new-deployment --service docs-worker-pool-prd --cluster docs-worker-pool-prd
+          sls deploy --stage dev
+          aws ecs update-service --force-new-deployment --service docs-worker-pool-dev --cluster docs-worker-pool-dev
+      - name: Deploy Lambdas
+        run: |
+          npm ci
+          sls deploy --stage dev
 

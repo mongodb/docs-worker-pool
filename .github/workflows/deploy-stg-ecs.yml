@@ -7,7 +7,10 @@ on:
     branches:
       - master
       - integration
-name: Deploy Staging(Dev) ECS
+concurrency:
+  group: environment-${{ github.ref }}
+  cancel-in-progress: true
+name: Deploy Staging ECS
 jobs:
   deploy-stg:
     runs-on: ubuntu-latest
