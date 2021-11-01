@@ -20,7 +20,7 @@ export class JobHandlerFactory {
         if (job.payload.jobType === "regression") {
             return new RegressionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
         } else if (job.payload.jobType === "githubPush") {
-            return new StagingJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
+            return new StagingJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger,validator);
         } else if (job.payload.jobType === "productionDeploy") {
             return new ProductionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger,validator);
         } else if (job.payload.jobType === "publishDochub") {
