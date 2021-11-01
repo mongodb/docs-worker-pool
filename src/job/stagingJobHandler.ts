@@ -7,11 +7,12 @@ import { CommandExecutorResponse, IJobCommandExecutor } from "../services/comman
 import { IFileSystemServices } from "../services/fileServices";
 import { IJobRepoLogger } from "../services/logger";
 import { IRepoConnector } from "../services/repo";
+import { IJobValidator } from "./jobValidator";
 
 export class StagingJobHandler extends JobHandler {
     constructor(job: IJob, config: IConfig, jobRepository: JobRepository, fileSystemServices: IFileSystemServices, commandExecutor: IJobCommandExecutor,
-        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger) {
-        super(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
+        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger, validator:IJobValidator) {
+        super(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger, validator);
         this.name = "Staging";
     }
 

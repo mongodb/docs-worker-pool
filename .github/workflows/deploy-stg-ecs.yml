@@ -53,3 +53,7 @@ jobs:
           sls deploy --stage stg
           aws ecs update-service --force-new-deployment --service docs-worker-pool-stg --cluster docs-worker-pool-stg
 
+      - name: Deploy Lambdas
+        run: |
+          npm ci
+          sls deploy --stage stg

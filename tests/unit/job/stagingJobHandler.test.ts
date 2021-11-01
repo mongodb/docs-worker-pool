@@ -2,7 +2,7 @@ import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
 
-describe('JobHandlerFactory Tests', () => {
+describe('StagingJobHandler Tests', () => {
     
     let jobHandlerTestHelper: JobHandlerTestHelper;
 

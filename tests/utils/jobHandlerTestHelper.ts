@@ -1,6 +1,7 @@
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
 import { IJob } from "../../src/entities/job";
+import { IJobValidator } from "../../src/job/jobValidator";
 import { ProductionJobHandler } from "../../src/job/productionJobHandler";
 import { StagingJobHandler } from "../../src/job/stagingJobHandler";
 import { JobRepository } from "../../src/repositories/jobRepository";
@@ -23,6 +24,7 @@ export class JobHandlerTestHelper {
     repoConnector: IRepoConnector;
     logger: IJobRepoLogger;
     jobHandler: ProductionJobHandler | StagingJobHandler;
+    jobValidator:IJobValidator;
     lengthPrototype;
     handlerMapper = {
         "prod": ProductionJobHandler,
@@ -38,7 +40,8 @@ export class JobHandlerTestHelper {
         this.cdnConnector = mockDeep<ICDNConnector>();
         this.repoConnector = mockDeep<IRepoConnector>();
         this.logger = mockDeep<IJobRepoLogger>();
-        this.jobHandler = new this.handlerMapper[handlerName](this.job, this.config, this.jobRepo, this.fileSystemServices, this.jobCommandExecutor, this.cdnConnector, this.repoConnector, this.logger);
+        this.jobValidator = mockDeep<IJobValidator>();
+        this.jobHandler = new this.handlerMapper[handlerName](this.job, this.config, this.jobRepo, this.fileSystemServices, this.jobCommandExecutor, this.cdnConnector, this.repoConnector, this.logger, this.jobValidator);
         return this.jobHandler;
     }
     setStageForDeploySuccess(isNextGen:boolean = true, prodDeploy:boolean = true): string[] {

@@ -1,4 +1,4 @@
-service: docs-worker-pool
+service: docs-worker-pool-api
 variablesResolutionMode: 20210326
 
 plugins:
