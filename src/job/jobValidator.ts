@@ -51,12 +51,13 @@ export class JobValidator implements IJobValidator {
         if (this.isProd(job.payload.jobType)) {
             await this.throwIfUserNotEntitled(job);
         }
-        
-        await this.throwIfBranchNotConfigured(job);
+        if (job.payload.isNextGen) {
+            await this.throwIfBranchNotConfigured(job);
+        }
         if (this.isProd(job.payload.jobType)) {
             this.throwIfItIsNotPublishable(job);
         }
-        
+
     }
 
     private isProd(jobType: string): boolean {

@@ -98,9 +98,15 @@ export class JobManager {
     
 
     async createHandlerAndExecute(job: IJob): Promise<void> {
-        await this._jobValidator.throwIfJobInvalid(job);
         this._jobHandler = this._jobHandlerFactory.createJobHandler(job, this._config, this._jobRepository,
             this._fileSystemServices, this._jobCommandExecutor, this._cdnConnector, this._repoConnector, this._logger);
+        
+        if ( this._jobHandler.isbuildNextGen()) {
+            job.payload.isNextGen = true
+        } else {
+            job.payload.isNextGen = false
+        }
+        await this._jobValidator.throwIfJobInvalid(job);
         await this._jobHandler?.execute();
         await this._logger.save(job._id, `${'    (DONE)'.padEnd(this._config.get("LOG_PADDING"))}Finished Job with ID: ${job._id}`);
     }

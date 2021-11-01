@@ -147,7 +147,7 @@ export abstract class JobHandler {
     }
 
     @throwIfJobInterupted()
-    private isbuildNextGen(): boolean {
+    public isbuildNextGen(): boolean {
         const workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
         if (this._fileSystemServices.rootFileExists(workerPath)) {
             const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);

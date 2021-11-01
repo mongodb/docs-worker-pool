@@ -27,7 +27,7 @@ custom:
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   docuhubEventSource:
     stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-    prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    prd: aws.partner/mongodb.com/stitch.trigger/5e2b535c2cc8b7e914a5aa4f
     dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
   dochubEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.docuhubEventSource.${self:provider.stage}} 
 

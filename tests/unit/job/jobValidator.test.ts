@@ -94,6 +94,7 @@ describe('JobValidator Tests', () => {
     test('valid staging job throwIfJobInvalid dont throws as branch is configured for publishing and stable branch is not set', async () => {
         repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(job.user).mockReturnValue( { status: 'success', repos:[`${job.payload.repoOwner}/${job.payload.repoName}`], github_username: job.user });
         const pubBranchRetVal = TestDataProvider.getPublishBranchesContent(job);
+        job.payload.isNextGen=true;
         fileSystemServices.downloadYaml.calledWith(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`).mockReturnValue( { status: 'success', content:pubBranchRetVal});
         await jobValidator.throwIfJobInvalid(job);
         expect(fileSystemServices.downloadYaml).toHaveBeenCalledTimes(1);
