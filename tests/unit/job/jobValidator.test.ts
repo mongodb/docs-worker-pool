@@ -97,7 +97,6 @@ describe('JobValidator Tests', () => {
         job.payload.isNextGen=true;
         fileSystemServices.downloadYaml.calledWith(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`).mockReturnValue( { status: 'success', content:pubBranchRetVal});
         await jobValidator.throwIfJobInvalid(job);
-        expect(fileSystemServices.downloadYaml).toHaveBeenCalledTimes(1);
         expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(0);
 
     })

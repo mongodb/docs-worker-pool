@@ -7,6 +7,7 @@ import { IRepoConnector } from "../services/repo";
 import { IFileSystemServices } from "../services/fileServices";
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from "../errors/errors";
 import { IConfig } from "config";
+import { IJobValidator } from "./jobValidator";
 var fs = require('fs');
 
 export abstract class JobHandler {
@@ -45,12 +46,14 @@ export abstract class JobHandler {
         this._stopped = value;
     }
 
+    private _validator: IJobValidator;
+
     protected _config: IConfig;
 
     protected name:string;
 
     constructor(job: IJob, config: IConfig, jobRepository: JobRepository, fileSystemServices: IFileSystemServices, commandExecutor: IJobCommandExecutor,
-        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger) {
+        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger, validator:IJobValidator) {
         this._commandExecutor = commandExecutor;
         this._cdnConnector = cdnConnector;
         this._repoConnector = repoConnector;
@@ -60,6 +63,7 @@ export abstract class JobHandler {
         this._fileSystemServices = fileSystemServices;
         this._shouldStop = false;
         this._config = config;
+        this._validator = validator;
     }
 
     abstract prepStageSpecificNextGenCommands(): void;
@@ -244,14 +248,22 @@ export abstract class JobHandler {
             await this.commitCheck();
             this._logger.info(this._currJob._id,"Checked Commit");
             await this.pullRepo();
+            this.prepBuildCommands();
+            this._logger.info(this._currJob._id,"Prepared Build commands");
+            await this.prepNextGenBuild();
+            if (this.currJob.payload.isNextGen) {
+                await this._validator.throwIfBranchNotConfigured(this._currJob);
+            }
+            if (this._currJob.payload.jobType === 'productionDeploy') {
+                this._validator.throwIfItIsNotPublishable(this._currJob);
+            }
+    
             this._logger.info(this._currJob._id,"Pulled Repo");
             await this._repoConnector.applyPatch(this.currJob);
             this._logger.info(this._currJob._id,"Patch Applied");
             await this.downloadMakeFile();
             this._logger.info(this._currJob._id,"Downloaded Makefile");
-            this.prepBuildCommands();
-            this._logger.info(this._currJob._id,"Prepared Build commands");
-            await this.prepNextGenBuild();
+            
             this._logger.info(this._currJob._id,"Prepared Next Gen build");
             return await this.executeBuild();
     }
