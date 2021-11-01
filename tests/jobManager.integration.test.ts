@@ -58,59 +58,5 @@ describe('Jobmanager integration Tests', () => {
         await jobManager.startSingleJob();
     })
 
-    test('E2E Entitlement error', async () => {
-        const jobId = await testDBManager.insertDocument(prepJobPayload('githubPush'), process.env.JOB_QUEUE_COL_NAME);
-        await jobManager.startSingleJob();
-        let job = await testDBManager.findJob(jobId);
-        expect(job.status).toEqual('failed');
-    })
-
-    test('E2E Valid githubpush job fails on environment', async () => {
-        const jobId = await testDBManager.insertDocument(prepJobPayload('githubPush'), process.env.JOB_QUEUE_COL_NAME);
-        await testDBManager.insertDocument(prepEntitlement(), process.env.USER_ENTITLEMENT_COL_NAME);
-        await jobManager.startSingleJob();
-        let job = await testDBManager.findJob(jobId);
-        expect(job.status).toEqual('failed');
-    })
-
-    function  prepJobPayload(jobType) {
-        return {
-            "payload": {
-                "jobType": jobType,
-                "source": "github",
-                "action": "push",
-                "repoName": "docs-java",
-                "branchName": "master",
-                "aliased": true,
-                "alias": "upcoming",
-                "isFork": true,
-                "private": false,
-                "isXlarge": true,
-                "repoOwner": "mongodb",
-                "url": "https://github.com/mongodb/docs-java",
-                "newHead": null,
-                "primaryAlias": true
-            },
-            "createdTime": new Date(),
-            "email": "split@nothing.com",
-            "endTime": null,
-            "error": {},
-            "logs": [],
-            "priority": 1,
-            "result": null,
-            "startTime": null,
-            "status": "inQueue",
-            "title": "Test deploy: TestUser",
-            "user": "TestUser"
-        }
-    }
-
-    function prepEntitlement() {
-        return {
-            "github_username": "TestUser",
-            "slack_user_id": "TestUserId",
-            "repos": ["mongodb/docs-java"]
-        }
-    }
 
 })
