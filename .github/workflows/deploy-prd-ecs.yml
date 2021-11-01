@@ -50,4 +50,4 @@ jobs:
       - name: Deploy Lambdas	
         run: |
           npm ci
-          sls deploy --stage dev
+          sls deploy --stage prd

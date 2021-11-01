@@ -18,7 +18,7 @@ export class JobHandlerFactory {
     public createJobHandler(job: IJob,  config: IConfig, jobRepository:JobRepository, fileSystemServices:IFileSystemServices, 
         commandExecutor: IJobCommandExecutor, cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: IJobRepoLogger, validator: IJobValidator) : JobHandler {
         if (job.payload.jobType === "regression") {
-            return new RegressionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
+            return new RegressionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger,validator);
         } else if (job.payload.jobType === "githubPush") {
             return new StagingJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger,validator);
         } else if (job.payload.jobType === "productionDeploy") {
