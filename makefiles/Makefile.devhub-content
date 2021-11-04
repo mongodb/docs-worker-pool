@@ -57,7 +57,7 @@ next-gen-html: update-snooty
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix=/developer --stage ${ARGS};
+	mut-publish public ${STAGING_BUCKET} --prefix=/developer --deploy ${ARGS};
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
 	echo "Hosted at ${STAGING_URL}/developer";
 
