@@ -7,6 +7,6 @@ export const UpsertEdgeDictionaryItem = async (event: any = {}): Promise<any> =>
         value: event.detail.fullDocument.url
     }
     const creds = new CDNCreds(process.env.FASTLY_DOCHUB_SERVICE_ID, process.env.FASTLY_DOCHUB_TOKEN)
-    await new FastlyConnector(new ConsoleLogger()).upsertEdgeDictionaryItem(pair,process.env.FASTLY_DOCHUB_MAP, creds);
+    await new FastlyConnector(new ConsoleLogger()).upsertEdgeDictionaryItem(pair, process.env.FASTLY_DOCHUB_MAP, creds);
 }
 
