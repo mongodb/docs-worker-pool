@@ -1,7 +1,7 @@
 prefix: ''
 version:
   published:
-    - 'Version 5.1 (upcoming)'
+    - 'Version 5.1 (Atlas Rapid Release)'
     - '5.0'
     - '4.4'
     - '4.2'
@@ -14,7 +14,7 @@ version:
     - '2.4'
     - '2.2'
   active:
-    - 'Version 5.1 (upcoming)'
+    - 'Version 5.1 (Atlas Rapid Release)'
     - '5.0'
     - '4.4'
     - '4.2'
