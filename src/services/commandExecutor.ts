@@ -27,11 +27,12 @@ export class ShellCommandExecutor implements ICommandExecutor {
     async execute(commands: string[]): Promise<CommandExecutorResponse> {
         let exec = promisify(cp.exec);
         let resp = new CommandExecutorResponse();
+        const MAX_BUFFER_SIZE = 16000000;
         try {
             const {
                 stdout,
                 stderr
-            } = await exec(commands.join(' && '));
+            } = await exec(commands.join(' && '), {maxBuffer : MAX_BUFFER_SIZE});
             resp.output = stdout.trim();
             resp.error = stderr;
             resp.status = 'success';
