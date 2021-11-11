@@ -1,4 +1,5 @@
 import cp from 'child_process';
+import c from 'config';
 
 export class CommandExecutorResponse {
     status: string;
@@ -24,9 +25,9 @@ export interface IGithubCommandExecutor {
 export class ShellCommandExecutor implements ICommandExecutor {
     async execute(commands: string[]): Promise<CommandExecutorResponse> {
         let resp = new CommandExecutorResponse();
-        const MAX_BUFFER_SIZE = 16000000;
+        
         try {
-            const stdout = cp.execSync(commands.join(' && '), {maxBuffer : MAX_BUFFER_SIZE});
+            const stdout = cp.execSync(commands.join(' && '), {maxBuffer : c.get('MAX_STDOUT_BUFFER_SIZE')});
             resp.output = stdout?.toString().trim();
             resp.status = 'success';
             return resp;
