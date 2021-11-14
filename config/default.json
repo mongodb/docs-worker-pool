@@ -26,6 +26,7 @@
     "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
     "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
     "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
+    "repoBranchesCollection": "repo_branches",
     "cdn_creds": {
         "cloudgov-docs": {
             "id": "FASTLY_ATLAS_SERVICE_ID",

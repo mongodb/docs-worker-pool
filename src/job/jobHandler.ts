@@ -1,5 +1,6 @@
 import { IJob } from "../entities/job";
 import { JobRepository } from "../repositories/jobRepository";
+import { RepoBranchesRepository} from "../repositories/repoBranchesRepository";
 import { ICDNConnector } from "../services/cdn";
 import { CommandExecutorResponse, IJobCommandExecutor } from "../services/commandExecutor";
 import { IJobRepoLogger, ILogger } from "../services/logger";
@@ -52,8 +53,10 @@ export abstract class JobHandler {
 
     protected name: string;
 
+    protected _repoBranchesRepo: RepoBranchesRepository
+
     constructor(job: IJob, config: IConfig, jobRepository: JobRepository, fileSystemServices: IFileSystemServices, commandExecutor: IJobCommandExecutor,
-        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger, validator: IJobValidator) {
+        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger, validator: IJobValidator, repoBranchesRepo: RepoBranchesRepository) {
         this._commandExecutor = commandExecutor;
         this._cdnConnector = cdnConnector;
         this._repoConnector = repoConnector;
@@ -64,6 +67,7 @@ export abstract class JobHandler {
         this._shouldStop = false;
         this._config = config;
         this._validator = validator;
+        this._repoBranchesRepo = repoBranchesRepo
     }
 
     abstract prepStageSpecificNextGenCommands(): void;
@@ -243,6 +247,25 @@ export abstract class JobHandler {
             `make html`
         ];
     }
+    
+    protected async setEnvironmentVariables(): Promise<void> {
+        const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName)
+        let env =this._config.get<string>("env");
+        if (repo_info && repo_info['bucket'] && repo_info['url']) {
+            if (this._currJob.payload.regression) {
+                env = 'regression'
+                process.env.REGRESSION = "true";
+              }
+              process.env.BUCKET = repo_info['bucket'][env]
+              process.env.URL = repo_info['url'][env]
+
+            //   Writers are tying to stage it, so lets update the staging bucket. 
+              if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') { 
+                process.env.BUCKET = repo_info['bucket'][env]+'_staging'
+                process.env.URL = repo_info['url']['stg']
+              }
+        }
+    }
 
     @throwIfJobInterupted()
     protected async build(): Promise<boolean> {
@@ -252,16 +275,18 @@ export abstract class JobHandler {
         await this.commitCheck();
         this._logger.info(this._currJob._id, "Checked Commit");
         await this.pullRepo();
+        this._logger.info(this._currJob._id, "Pulled Repo");
         this.prepBuildCommands();
         this._logger.info(this._currJob._id, "Prepared Build commands");
         await this.prepNextGenBuild();
-        this._logger.info(this._currJob._id, "Pulled Repo");
+        this._logger.info(this._currJob._id, "Prepared Next Gen build");
         await this._repoConnector.applyPatch(this.currJob);
         this._logger.info(this._currJob._id, "Patch Applied");
         await this.downloadMakeFile();
         this._logger.info(this._currJob._id, "Downloaded Makefile");
+        await this.setEnvironmentVariables()
+        this._logger.info(this._currJob._id, "prepared Environment variables");
 
-        this._logger.info(this._currJob._id, "Prepared Next Gen build");
         return await this.executeBuild();
     }
 
