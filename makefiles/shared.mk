@@ -1,6 +1,8 @@
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 REGRESSION = $(shell printenv REGRESSION)
+BUCKET = $(shell printenv BUCKET)
+URL = $(shell printenv URL)
 INTEGRATION_SEARCH_BUCKET=docs-search-indexes-integration
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
@@ -16,31 +18,11 @@ get-project-name:
 	@echo ${PROJECT};
 
 
-ifndef DEDICATED_BUCKET
-STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-mongodb-org-stg
-
-ifeq ($(REGRESSION), true)
-	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-intgr
-else ifeq ($(SNOOTY_ENV), production) 
-	PRODUCTION_URL="https://docs.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-prd
-else ifeq ($(SNOOTY_ENV), staging)
-	PRODUCTION_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-stg
-else ifeq ($(SNOOTY_ENV), integration)
-	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-mongodb-org-intgr
-endif
-
-endif
-
 ifndef CUSTOM_NEXT_GEN_DEPLOY
 next-gen-deploy:
 	if [ -f config/redirects -a "${GIT_BRANCH}" = master ]; then mut-redirects config/redirects -o public/.htaccess; fi	
-	yes | mut-publish public ${PRODUCTION_BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${PRODUCTION_URL} --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/${MUT_PREFIX}";
+	yes | mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${URL}/${MUT_PREFIX}";
 	if [ ${MANIFEST_PREFIX} ]; then $(MAKE) next-gen-deploy-search-index; fi
 endif
 
@@ -76,12 +58,12 @@ next-gen-html:
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
-		mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+		mut-publish public ${BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	# stagel commit jobs and regular git push jobs\
 	else \
-		mut-publish public ${STAGING_BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
-		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
 endif
 

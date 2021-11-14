@@ -1,14 +1,10 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
-DEDICATED_BUCKET=true
-
-STAGING_URL="http://developer-hub-staging.s3-website-us-east-1.amazonaws.com"
-STAGING_BUCKET=developer-hub-staging
+BUCKET = $(shell printenv BUCKET)
+URL = $(shell printenv URL)
 
 STRAPI_URL=http://54.219.137.111:1337
 
-PRODUCTION_BUCKET=developer-hub-prod
-PRODUCTION_URL=https://mongodb.com/developer
 
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
@@ -57,10 +53,10 @@ next-gen-html: update-snooty
 	cp -r "${REPO_DIR}/snooty-devhub/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix=/developer --stage ${ARGS};
+	mut-publish public ${BUCKET} --prefix=/developer --stage ${ARGS};
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
-	echo "Hosted at ${STAGING_URL}/developer";
+	echo "Hosted at ${URL}/developer";
 
 next-gen-deploy:
-	yes | mut-publish ./public ${PRODUCTION_BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
-	@echo "Hosted at ${PRODUCTION_URL}/index.html";
+	yes | mut-publish ./public ${BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
+	@echo "Hosted at ${URL}/index.html";

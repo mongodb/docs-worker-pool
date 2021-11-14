@@ -1,15 +1,10 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
-
-DEDICATED_BUCKET=true
-
-STAGING_URL="http://docs-devhub-staging.s3-website-us-east-1.amazonaws.com"
-STAGING_BUCKET=docs-devhub-staging
+BUCKET = $(shell printenv BUCKET)
+URL = $(shell printenv URL)
 
 STRAPI_URL=http://54.219.137.111:1337
 
-PRODUCTION_BUCKET=docs-devhub-prod
-PRODUCTION_URL=https://developer.mongodb.com
 
 PROJECT=devhub
 MUT_PREFIX ?= $(PROJECT)
@@ -49,8 +44,8 @@ next-gen-html: update-snooty
 	npm run build;
 
 next-gen-stage: ## Host online for review
-	mut-publish public ${STAGING_BUCKET} --prefix="${COMMIT_HASH/MUT_PREFIX}" --stage ${ARGS};
-	echo "Hosted at ${STAGING_URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
+	mut-publish public ${BUCKET} --prefix="${COMMIT_HASH/MUT_PREFIX}" --stage ${ARGS};
+	echo "Hosted at ${URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/devhub.yaml > ${REPO_DIR}/published-branches.yaml

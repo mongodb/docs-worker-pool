@@ -2,24 +2,6 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
 SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 REGRESSION = $(shell printenv REGRESSION)
-DEDICATED_BUCKET=true
-
-STAGING_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-STAGING_BUCKET=docs-atlas-stg
-
-ifeq ($(REGRESSION), true)
-	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-atlas-intgr
-else ifeq ($(SNOOTY_ENV), production) 
-	PRODUCTION_URL="https://docs.atlas.mongodb.com"
-	PRODUCTION_BUCKET=docs-atlas-prd
-else ifeq ($(SNOOTY_ENV), staging)
-	PRODUCTION_URL="https://docs-mongodborg-staging.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-atlas-stg
-else ifeq ($(SNOOTY_ENV), integration)
-	PRODUCTION_URL="https://docs-mongodbcom-integration.corp.mongodb.com"
-	PRODUCTION_BUCKET=docs-atlas-intgr
-endif
 
 COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
@@ -38,7 +20,7 @@ INDEX_NAME=$(subst cloudgov,AtlasGov,${MANIFEST_PREFIX})
 
 next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
 	@echo "Building search index"
-	mut-index upload public -b ${PRODUCTION_BUCKET} -o ${INDEX_NAME}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
+	mut-index upload public -b ${BUCKET} -o ${INDEX_NAME}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 
 
 .PHONY: help stage fake-deploy deploy deploy-search-index publish remote-includes api-docs
