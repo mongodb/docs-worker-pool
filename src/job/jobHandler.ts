@@ -265,6 +265,8 @@ export abstract class JobHandler {
                 process.env.URL = repo_info['url']['stg']
               }
         }
+        this._logger.info(this._currJob._id, process.env.BUCKET)
+        this._logger.info(this._currJob._id, process.env.URL)
     }
 
     @throwIfJobInterupted()
