@@ -250,9 +250,10 @@ export abstract class JobHandler {
     }
 
     protected async setEnvironmentVariables(): Promise<void> {
-        this._logger.info(this._currJob._id, 'setEnvironmentVariables');
+        
         const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName)
         let env =this._config.get<string>("env");
+        this._logger.info(this._currJob._id, `setEnvironmentVariables for ${this._currJob.payload.repoName} env ${env} jobType ${this._currJob.payload.jobType}`);
         if (repo_info && repo_info['bucket'] && repo_info['url']) {
             if (this._currJob.payload.regression) {
                 env = 'regression'
