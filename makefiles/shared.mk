@@ -9,9 +9,7 @@ PATCH_FILE="myPatch.patch"
 PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
 
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
-@echo ${BUCKET};
-@echo ${URL};
-@echo ${REGRESSION};
+
 
 ifeq ($(SNOOTY_INTEGRATION),true)
 	BUCKET_FLAG=-b ${INTEGRATION_SEARCH_BUCKET}
@@ -59,6 +57,9 @@ next-gen-html:
 	fi && \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+	echo ${BUCKET}
+	echo ${URL}
+	echo "GURU"
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
