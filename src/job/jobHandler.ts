@@ -143,7 +143,7 @@ export abstract class JobHandler {
     @throwIfJobInterupted()
     private async downloadMakeFile(): Promise<void> {
         try {
-            await this._fileSystemServices.saveUrlAsFile(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
+            await this._fileSystemServices.saveUrlAsFile(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2564/makefiles/Makefile.${this.currJob.payload.repoName}`,
                 `repos/${this.currJob.payload.repoName}/Makefile`, {
                 encoding: 'utf8',
                 flag: 'w'
@@ -247,7 +247,7 @@ export abstract class JobHandler {
             `make html`
         ];
     }
-    
+
     protected async setEnvironmentVariables(): Promise<void> {
         const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName)
         let env =this._config.get<string>("env");
