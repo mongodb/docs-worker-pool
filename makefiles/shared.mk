@@ -50,7 +50,7 @@ next-gen-html:
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
-	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "GATSBY_SITES=${PROJECT}" >> .env.production; \
 	echo "BUCKET=${BUCKET}" >> .env.production; \
 	echo "URL=${URL}" >> .env.production; \
 	if [ -n "${PATCH_ID}" ]; then \
