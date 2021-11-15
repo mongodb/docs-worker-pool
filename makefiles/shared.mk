@@ -14,6 +14,8 @@ ifeq ($(SNOOTY_INTEGRATION),true)
 	BUCKET_FLAG=-b ${INTEGRATION_SEARCH_BUCKET}
 endif
 
+
+
 get-project-name:
 	@echo ${PROJECT};
 
@@ -57,6 +59,8 @@ next-gen-html:
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
+	echo ${BUCKET}
+	echo ${URL}
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
 		mut-publish public ${BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
