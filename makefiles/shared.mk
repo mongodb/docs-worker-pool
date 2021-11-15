@@ -50,9 +50,7 @@ next-gen-html:
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
-	echo "GATSBY_SITES=${PROJECT}" >> .env.production; \
-	echo "BUCKET=${BUCKET}" >> .env.production; \
-	echo "URL=${URL}" >> .env.production; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	if [ -n "${PATCH_ID}" ]; then \
 		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
@@ -62,8 +60,6 @@ next-gen-html:
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
-	echo ${BUCKET}
-	echo ${URL}
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
 		mut-publish public ${BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
@@ -81,5 +77,5 @@ endif
 ifndef CUSTOM_SEARCH_INDEX
 next-gen-deploy-search-index:
 	@echo "Building search index"
-	mut-index upload public -b ${PRODUCTION_BUCKET} -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
+	mut-index upload public -b ${BUCKET} -o ${MANIFEST_PREFIX}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 endif
