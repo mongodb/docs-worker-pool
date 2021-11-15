@@ -95,17 +95,17 @@ deploy: publish ## Deploy to the production bucket
 #      --verbose            prints out a detail of what files are being uploaded/deleted/etc.
 #      --dry-run            instructs mut-publish to do everything *except* actually put stuff on the internet.
 #      if ${ARGS}, then additonal arguments
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy ${ARGS}
+	mut-publish build/public ${BUCKET} --prefix=${PROJECT} --deploy ${ARGS}
 
-	@echo "Hosted at ${PRODUCTION_URL}/${PROJECT}/index.html"
+	@echo "Hosted at ${URL}/${PROJECT}/index.html"
 
 	$(MAKE) next-gen-deploy-search-index
 
 next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o docs-php-library-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -g -s; \
+		mut-index upload build/public/${GIT_BRANCH} -o docs-php-library-${GIT_BRANCH}.json -u ${URL}/${PROJECT}/${GIT_BRANCH} -g -s; \
 	else \
-		mut-index upload build/public/${GIT_BRANCH} -o docs-php-library-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${PROJECT}/${GIT_BRANCH} -s; \
+		mut-index upload build/public/${GIT_BRANCH} -o docs-php-library-${GIT_BRANCH}.json -u ${URL}/${PROJECT}/${GIT_BRANCH} -s; \
 	fi
 

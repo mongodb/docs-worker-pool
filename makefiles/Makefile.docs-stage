@@ -83,18 +83,18 @@ stage: ## Host online for review
 # The recursive behavior would CHANGE if --all-subdirectories were
 # given: ALL contents of build/public/<branch> would be upload
 deploy: build/public ## Deploy to the production bucket
-	mut-publish build/public ${PRODUCTION_BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='v[0-9]\.[0-9]' --redirect-prefix='manual' --redirect-prefix='master' ${ARGS}
+	mut-publish build/public ${BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='v[0-9]\.[0-9]' --redirect-prefix='manual' --redirect-prefix='master' ${ARGS}
 
-	@echo "Hosted at ${PRODUCTION_URL}/index.html"
+	@echo "Hosted at ${URL}/index.html"
 
 	$(MAKE) next-gen-deploy-search-index
 
 next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
 	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o manual-current.json --aliases manual-${GIT_BRANCH} -u ${PRODUCTION_URL}/manual -g -s; \
+		mut-index upload build/public/${GIT_BRANCH} -o manual-current.json --aliases manual-${GIT_BRANCH} -u ${URL}/manual -g -s; \
 	else \
-		mut-index upload build/public/${GIT_BRANCH} -o manual-${GIT_BRANCH}.json -u ${PRODUCTION_URL}/${GIT_BRANCH} -s; \
+		mut-index upload build/public/${GIT_BRANCH} -o manual-${GIT_BRANCH}.json -u ${URL}/${GIT_BRANCH} -s; \
 	fi
 
 next-gen-html: examples

@@ -20,4 +20,4 @@ get-build-dependencies:
 
 next-gen-deploy-search-index: ## Update the search index for this branch
 	@echo "Building search index"
-	mut-index upload public -b ${PRODUCTION_BUCKET} -o ${MANIFEST_PREFIX}.json -u ${PRODUCTION_URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
+	mut-index upload public -b ${BUCKET} -o ${MANIFEST_PREFIX}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG}
