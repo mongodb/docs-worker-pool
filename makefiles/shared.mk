@@ -51,15 +51,14 @@ next-gen-html:
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "BUCKET=${BUCKET}" >> .env.production; \
+	echo "URL=${URL}" >> .env.production; \
 	if [ -n "${PATCH_ID}" ]; then \
 		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-	echo ${BUCKET}
-	echo ${URL}
-	echo "GURU"
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
