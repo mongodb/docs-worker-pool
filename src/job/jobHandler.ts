@@ -143,6 +143,7 @@ export abstract class JobHandler {
     @throwIfJobInterupted()
     private async downloadMakeFile(): Promise<void> {
         try {
+            this._logger.info(this.currJob._id, `https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2564/makefiles/Makefile.${this.currJob.payload.repoName}`);
             await this._fileSystemServices.saveUrlAsFile(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2564/makefiles/Makefile.${this.currJob.payload.repoName}`,
                 `repos/${this.currJob.payload.repoName}/Makefile`, {
                 encoding: 'utf8',
@@ -265,8 +266,13 @@ export abstract class JobHandler {
                 process.env.URL = repo_info['url']['stg']
               }
         }
-        this._logger.info(this._currJob._id, process.env.BUCKET)
-        this._logger.info(this._currJob._id, process.env.URL)
+
+        if (process.env.BUCKET) {
+            this._logger.info(this._currJob._id, process.env.BUCKET)
+        }
+        if (process.env.URL) {
+            this._logger.info(this._currJob._id, process.env.URL)
+        }
     }
 
     @throwIfJobInterupted()
