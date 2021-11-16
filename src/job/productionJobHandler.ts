@@ -97,10 +97,12 @@ export class ProductionJobHandler extends JobHandler {
     async deploy(): Promise<CommandExecutorResponse> {
         let resp = await this.deployGeneric();
         try {
-            const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
-            await this.purgePublishedContent(makefileOutput);
-            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
-            await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
+            if (resp && resp.output) {
+                const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
+                await this.purgePublishedContent(makefileOutput);
+                await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
+                await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
+            }
             return resp;
         } catch (errResult) {
             await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
