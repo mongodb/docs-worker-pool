@@ -80,7 +80,7 @@ export abstract class JobHandler {
                 if (publishResult.error) {
                     await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);
                 } else {
-                    this.logErrorMessage("PublisResult error is undefined")
+                    this.logErrorMessage("PublishResult error is undefined")
                 }
             }
             if (publishResult.output) {
