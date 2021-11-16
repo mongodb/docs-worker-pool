@@ -86,7 +86,7 @@ export abstract class JobHandler {
             if (publishResult.output) {
                 await this.jobRepository.insertNotificationMessages(this.currJob._id, publishResult.output);
             } else {
-                this.logErrorMessage("PublisResult output is undefined")
+                this.logErrorMessage("PublishResult output is undefined")
             }
 
         } else {
