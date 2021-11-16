@@ -90,7 +90,7 @@ export abstract class JobHandler {
             }
 
         } else {
-            this.logErrorMessage("PublisResult is undefined")
+            this.logErrorMessage("PublishResult is undefined")
         }
     }
 
