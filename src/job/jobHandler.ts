@@ -68,15 +68,32 @@ export abstract class JobHandler {
 
     abstract prepStageSpecificNextGenCommands(): void;
 
-    private async update(publishResult: CommandExecutorResponse): Promise<void> {
-        if (publishResult && publishResult.status === 'success') {
-            let files = this._fileSystemServices.getFilesInDirectory(`./${this.currJob.payload.repoName}/build/public`, '', null, null);
-            await this.jobRepository.updateWithCompletionStatus(this.currJob._id, files);
-        } else {
-            await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);
-        }
-        await this.jobRepository.insertNotificationMessages(this.currJob._id, publishResult.output);
+    private logErrorMessage(message: string): void {
+        this.logger.error(this.currJob._id, message)
     }
+    private async update(publishResult: CommandExecutorResponse): Promise<void> {
+        if (publishResult) {
+            if (publishResult && publishResult.status === 'success') {
+                let files = this._fileSystemServices.getFilesInDirectory(`./${this.currJob.payload.repoName}/build/public`, '', null, null);
+                await this.jobRepository.updateWithCompletionStatus(this.currJob._id, files);
+            } else {
+                if (publishResult.error) {
+                    await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);
+                } else {
+                    this.logErrorMessage("PublishResult error is undefined")
+                }
+            }
+            if (publishResult.output) {
+                await this.jobRepository.insertNotificationMessages(this.currJob._id, publishResult.output);
+            } else {
+                this.logErrorMessage("PublishResult output is undefined")
+            }
+
+        } else {
+            this.logErrorMessage("PublishResult is undefined")
+        }
+    }
+
 
     private cleanup(): void {
         this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}`);
@@ -277,7 +294,7 @@ export abstract class JobHandler {
                 throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`)
             }
             await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Finished pushing to ${this.name}`);
-            await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Staging push details:\n\n${resp.output}`);
+            await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}push details:\n\n${resp.output}`);
             return resp;
 
         } else {
