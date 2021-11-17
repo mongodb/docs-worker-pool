@@ -2,23 +2,26 @@ prefix: 'drivers/node'
 version:
   published:
     - 'Version 4.x (upcoming)'
-    - 'Version 4.1 (current)'
+    - 'Version 4.2 (current)'
+    - 'Version 4.1'
     - 'Version 4.0'
     - '3.7'
     - '3.6'
   active:
     - 'Version 4.x (upcoming)'
-    - 'Version 4.1 (current)'
+    - 'Version 4.2 (current)'
+    - 'Version 4.1'
     - 'Version 4.0'
     - '3.7'
     - '3.6'
-  stable: 'v4.1'
+  stable: 'v4.2'
   upcoming: 'master'
 git:
   branches:
     manual: 'master'
     published:
       - 'master'
+      - 'v4.2'
       - 'v4.1'
       - 'v4.0'
       - 'v3.7'
