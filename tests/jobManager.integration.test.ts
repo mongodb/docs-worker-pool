@@ -37,6 +37,7 @@ describe('Jobmanager integration Tests', () => {
     let repoConnector: GitHubConnector;
     let jobHandletFactory: JobHandlerFactory;
     let jobManager: JobManager;
+    jest.setTimeout(18000);
     beforeEach(() => {
         consoleLogger = new ConsoleLogger();
         fileSystemServices = new FileSystemServices();
