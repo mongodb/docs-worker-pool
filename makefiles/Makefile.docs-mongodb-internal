@@ -61,6 +61,19 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${STAGING_URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
 
+html: examples ## Builds this branch's HTML under build/<branch>/html
+	if [ ! -z "${PATCH_ID}" ]; then git checkout -b ${GIT_BRANCH}-${PATCH_ID}; fi;
+	giza make html
+	# TEMP copy of video file. Remove once video infrastructure in place.
+	if [ ! -z "${PATCH_ID}" ]; then mkdir -p build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi;
+	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi
+
+# - Enter build/<branch>/html, and recurse over each regular file
+#   <basename>/<filename>.
+#   * Upload each to the S3 bucket under <project>/<username>/<basename>/<filename>
+stage: ## Host online for review
+	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 	
 examples:
 	mkdir -p source/driver-examples
