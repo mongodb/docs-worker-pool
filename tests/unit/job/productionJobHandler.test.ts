@@ -1,4 +1,5 @@
 import { mockReset } from 'jest-mock-extended';
+import { Buffer } from 'buffer'
 import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
@@ -172,23 +173,23 @@ describe.each(TestDataProvider.getManifestPrefixCases())('Execute Next Gen Build
     })
 })
 
-test('Execute Build succeeded deploy failed updates status properly', async () => {
-    jobHandlerTestHelper.setStageForDeployFailure("Bad work", "Not Good");
+test('Execute Build succeeded deploy failed updates status properly with out and err', async () => {
+    jobHandlerTestHelper.setStageForDeployFailure(Buffer.from("Bad work"), Buffer.from("Not Good"));
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
     expect(jobHandlerTestHelper.jobRepo.insertNotificationMessages).toBeCalledWith(jobHandlerTestHelper.job._id,  "Bad work");
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Not Good");
 })
 
-test('Execute Build succeeded deploy failed updates status properly', async () => {
-    jobHandlerTestHelper.setStageForDeployFailure(null, "Not Good");
+test('Execute Build succeeded deploy failed updates status properly on nullish case', async () => {
+    jobHandlerTestHelper.setStageForDeployFailure(null, Buffer.from("Not Good"));
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id,  "Cannot read property 'replace' of null");
+    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id,  "Not Good");
 })
 
 test('Execute Build succeeded deploy failed with an ERROR updates status properly', async () => {
-    jobHandlerTestHelper.setStageForDeployFailure(null, "ERROR:BAD ONE");
+    jobHandlerTestHelper.setStageForDeployFailure(null, Buffer.from("ERROR:BAD ONE"));
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Failed pushing to Production: ERROR:BAD ONE");
