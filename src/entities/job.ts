@@ -40,6 +40,7 @@ export interface IJob {
     publishedBranches: any;
     stableBranch:  string | null | undefined;
     isNextGen: boolean| null | undefined;
+    regression:boolean| null | undefined;
   }
 
 export class Job implements IJob {

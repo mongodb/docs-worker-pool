@@ -1,5 +1,6 @@
 import { IJob } from "../entities/job";
 import { JobRepository } from "../repositories/jobRepository";
+import { RepoBranchesRepository} from "../repositories/repoBranchesRepository";
 import { ICDNConnector } from "../services/cdn";
 import { CommandExecutorResponse, IJobCommandExecutor } from "../services/commandExecutor";
 import { IJobRepoLogger, ILogger } from "../services/logger";
@@ -52,8 +53,10 @@ export abstract class JobHandler {
 
     protected name: string;
 
+    protected _repoBranchesRepo: RepoBranchesRepository
+
     constructor(job: IJob, config: IConfig, jobRepository: JobRepository, fileSystemServices: IFileSystemServices, commandExecutor: IJobCommandExecutor,
-        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger, validator: IJobValidator) {
+        cdnConnector: ICDNConnector, repoConnector: IRepoConnector, logger: IJobRepoLogger, validator: IJobValidator, repoBranchesRepo: RepoBranchesRepository) {
         this._commandExecutor = commandExecutor;
         this._cdnConnector = cdnConnector;
         this._repoConnector = repoConnector;
@@ -64,6 +67,7 @@ export abstract class JobHandler {
         this._shouldStop = false;
         this._config = config;
         this._validator = validator;
+        this._repoBranchesRepo = repoBranchesRepo
     }
 
     abstract prepStageSpecificNextGenCommands(): void;
@@ -156,7 +160,8 @@ export abstract class JobHandler {
     @throwIfJobInterupted()
     private async downloadMakeFile(): Promise<void> {
         try {
-            await this._fileSystemServices.saveUrlAsFile(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
+            this._logger.info(this.currJob._id, `https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2564/makefiles/Makefile.${this.currJob.payload.repoName}`);
+            await this._fileSystemServices.saveUrlAsFile(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2564/makefiles/Makefile.${this.currJob.payload.repoName}`,
                 `repos/${this.currJob.payload.repoName}/Makefile`, {
                 encoding: 'utf8',
                 flag: 'w'
@@ -261,6 +266,34 @@ export abstract class JobHandler {
         ];
     }
 
+    protected async setEnvironmentVariables(): Promise<void> {
+        
+        const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName)
+        let env =this._config.get<string>("env");
+        this._logger.info(this._currJob._id, `setEnvironmentVariables for ${this._currJob.payload.repoName} env ${env} jobType ${this._currJob.payload.jobType}`);
+        if (repo_info && repo_info['bucket'] && repo_info['url']) {
+            if (this._currJob.payload.regression) {
+                env = 'regression'
+                process.env.REGRESSION = "true";
+              }
+              process.env.BUCKET = repo_info['bucket'][env]
+              process.env.URL = repo_info['url'][env]
+
+            //   Writers are tying to stage it, so lets update the staging bucket. 
+              if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') { 
+                process.env.BUCKET = repo_info['bucket'][env]+'_staging'
+                process.env.URL = repo_info['url']['stg']
+              }
+        }
+
+        if (process.env.BUCKET) {
+            this._logger.info(this._currJob._id, process.env.BUCKET)
+        }
+        if (process.env.URL) {
+            this._logger.info(this._currJob._id, process.env.URL)
+        }
+    }
+
     @throwIfJobInterupted()
     protected async build(): Promise<boolean> {
         this.cleanup();
@@ -269,16 +302,18 @@ export abstract class JobHandler {
         await this.commitCheck();
         this._logger.info(this._currJob._id, "Checked Commit");
         await this.pullRepo();
+        this._logger.info(this._currJob._id, "Pulled Repo");
         this.prepBuildCommands();
         this._logger.info(this._currJob._id, "Prepared Build commands");
         await this.prepNextGenBuild();
-        this._logger.info(this._currJob._id, "Pulled Repo");
+        this._logger.info(this._currJob._id, "Prepared Next Gen build");
         await this._repoConnector.applyPatch(this.currJob);
         this._logger.info(this._currJob._id, "Patch Applied");
         await this.downloadMakeFile();
         this._logger.info(this._currJob._id, "Downloaded Makefile");
+        await this.setEnvironmentVariables()
+        this._logger.info(this._currJob._id, "prepared Environment variables");
 
-        this._logger.info(this._currJob._id, "Prepared Next Gen build");
         return await this.executeBuild();
     }
 

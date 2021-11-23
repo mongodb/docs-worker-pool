@@ -1,5 +1,6 @@
 {
     "stage": "SNOOTY_ENV",
+    "env": "STAGE",
     "dbUsername": "MONGO_ATLAS_USERNAME",
     "dbPassword": "MONGO_ATLAS_PASSWORD",
     "dbHost": "MONGO_ATLAS_HOST",
@@ -19,6 +20,7 @@
     "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
     "gatsbyConsitentNavFlag": "GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION",
     "gatsbySDKVersionDropdownFlag": "GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN",
+    "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
     "repo_dir": "repos",
     "cdn_creds": {
         "cloudgov-docs": {

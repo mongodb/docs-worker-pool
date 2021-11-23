@@ -329,6 +329,18 @@ export class TestDataProvider {
         };
     }
 
+    static getRepoBranchesData(repoName:String):any {
+        return {'repoName':`${repoName}`, 
+         'bucket': {'regression': 'docs-mongodb-org-stg', 'dev': 'docs-mongodb-org-dev', 'stg': 'docs-mongodb-org-stg', 'prd': 'docs-mongodb-org-prd'}, 
+        'url': {'regression': 'https://docs-mongodbcom-integration.corp.mongodb.com', 'dev': 'https://docs-mongodborg-staging.corp.mongodb.com', 'stg': 'https://docs-mongodborg-staging.corp.mongodb.com', 'prd': 'https://docs.mongodb.com'}}
+    }
+
+    static getRepoBranchesByRepoName(repoName: String): any {
+        return {
+            query: { 'repoName': repoName }
+        };
+    }
+
     static getPurgeAllUrlWithSurrogateKeys(): any {
         return {
             urls: ["url1", "url2", "url3", "url4"],

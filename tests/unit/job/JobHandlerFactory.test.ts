@@ -11,6 +11,8 @@ import { IJobRepoLogger } from '../../../src/services/logger';
 import { ProductionJobHandler } from '../../../src/job/productionJobHandler';
 import { RegressionJobHandler } from '../../../src/job/regressionJobHandler';
 import { StagingJobHandler } from '../../../src/job/stagingJobHandler';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
+import { IJobValidator } from '../../../src/job/jobValidator';
 
 describe('JobHandlerFactory Tests', () => {
   let job: IJob;
@@ -22,6 +24,8 @@ describe('JobHandlerFactory Tests', () => {
   let repoConnector: IRepoConnector;
   let logger: IJobRepoLogger;
   let jobHandlerFactory: JobHandlerFactory;
+  let repoBranchesRepo: RepoBranchesRepository
+  let jobValidator: IJobValidator
 
   beforeEach(() => {
     job = mockDeep<IJob>();
@@ -33,6 +37,7 @@ describe('JobHandlerFactory Tests', () => {
     repoConnector = mockDeep<IRepoConnector>();
     logger = mockDeep<IJobRepoLogger>();
     jobHandlerFactory = new JobHandlerFactory();
+    repoBranchesRepo = mockDeep<RepoBranchesRepository>();
   })
 
   test('Construct Job Factory', () => {
@@ -42,25 +47,25 @@ describe('JobHandlerFactory Tests', () => {
   test('Unknown jobtype throws error', () => {
     job.payload.jobType = "Unknown";
     expect(() => { 
-      jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger)
+      jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger, jobValidator, repoBranchesRepo)
     }).toThrowError('Job type not supported');
   })
 
   test('regression jobtype returns regression handler', () => {
     job.payload.jobType = "regression";
-    const handler = jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger);
+    const handler = jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger, jobValidator, repoBranchesRepo);
     expect(handler).toBeInstanceOf(RegressionJobHandler);
   })
 
   test('githubPush jobtype returns Staging handler', () => {
     job.payload.jobType = "githubPush";
-    const handler = jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger);
+    const handler = jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger,jobValidator, repoBranchesRepo);
     expect(handler).toBeInstanceOf(StagingJobHandler);
   })
 
   test('productionDeploy jobtype returns Production handler', () => {
     job.payload.jobType = "productionDeploy";
-    const handler = jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger);
+    const handler = jobHandlerFactory.createJobHandler(job, config, jobRepo, fileSystemServices, jobCommandExecutor, cdnConnector, repoConnector, logger,jobValidator, repoBranchesRepo);
     expect(handler).toBeInstanceOf(ProductionJobHandler);
   })
 })
