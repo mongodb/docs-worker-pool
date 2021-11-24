@@ -7,7 +7,13 @@
     "test": "jest --detectOpenHandles --coverage",
     "start": "node index.js",
     "clean": "node maintain.js",
-    "build": "tsc"
+    "build": "tsc",
+    "format": "npm run prettier -- --check",
+    "format:fix": "npm run prettier -- --write",
+    "lint": "eslint --ext .js,.jsx .",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier '**/*.{js,jsx,json,md}'",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -67,14 +73,9 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx}": [
-      "prettier --write",
-      "eslint --fix",
-      "git add"
-    ],
-    "*.{html,css,less,ejs}": [
-      "prettier --write",
-      "git add"
+    "*.{js,jsx,ts}": [
+      "npm run format:fix",
+      "npm run lint:fix"
     ]
   }
 }
