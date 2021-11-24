@@ -77,7 +77,7 @@ html: examples ## Builds this branch's HTML under build/<branch>/html
 #   <basename>/<filename>.
 #   * Upload each to the S3 bucket under <project>/<username>/<basename>/<filename>
 stage: ## Host online for review
-	@echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+	@echo "Hosted at ${BUCKET} ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 	
 examples:
 	mkdir -p source/driver-examples
