@@ -66,17 +66,17 @@ publish: ## Build docs locally
 
 stage: ## Host online for review
 # !!! DEPLOY HTML TO STAGING WEBSITE !!!
-# Deploys the HTML from the build/<branch> directory to the STAGING_BUCKET.
+# Deploys the HTML from the build/<branch> directory to the BUCKET.
 #
 # mut-publish
-#       build/${GIT_BRANCH}/html  directory from which to grab the HTML to deploy to the STAGING_BUCKET
-#       STAGING_BUCKET            Amazon s3 bucket used for the staging site
+#       build/${GIT_BRANCH}/html  directory from which to grab the HTML to deploy to the BUCKET
+#       	BUCKET            Amazon s3 bucket used for the staging site
 #         --prefix=${PROJECT}      ${PROJECT} is the folder in the staging bucket in which to place the HTML
 #      --stage                    indicates that mut-publish should publish to the staging bucket (not the prod bucket)
 #      if ${ARGS}, then additonal arguments
 
-	mut-publish build/${GIT_BRANCH}/html ${STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
-	@echo "Hosted at ${STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+	mut-publish build/${GIT_BRANCH}/html ${BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 
 
 
@@ -89,7 +89,7 @@ deploy: publish ## Deploy to the production bucket
 # deploy: publish 	the :publish indicates that the publish target must happen before the deploy
 # mut-publish
 #      build/public         directory from which to grab the build artifacts to deploy to the PRODUCTION_BUCKET
-#      PRODUCTION_BUCKET    Amazon s3 bucket that holds the production docs
+#      			BUCKET    Amazon s3 bucket that holds the production docs
 #      --prefix=${PROJECT}   ${PROJECT} is the folder in the prod. bucket in which to place the artifacts
 #      --deploy             indicates that mut-publish should publish to the production bucket (not the staging bucket)
 #      --verbose            prints out a detail of what files are being uploaded/deleted/etc.
