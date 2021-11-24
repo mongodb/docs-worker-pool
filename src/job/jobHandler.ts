@@ -160,8 +160,8 @@ export abstract class JobHandler {
     @throwIfJobInterupted()
     private async downloadMakeFile(): Promise<void> {
         try {
-            this._logger.info(this.currJob._id, `https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2564/makefiles/Makefile.${this.currJob.payload.repoName}`);
-            await this._fileSystemServices.saveUrlAsFile(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2564/makefiles/Makefile.${this.currJob.payload.repoName}`,
+            this._logger.info(this.currJob._id, `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`);
+            await this._fileSystemServices.saveUrlAsFile(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
                 `repos/${this.currJob.payload.repoName}/Makefile`, {
                 encoding: 'utf8',
                 flag: 'w'
