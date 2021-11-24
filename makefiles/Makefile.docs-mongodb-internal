@@ -13,11 +13,6 @@ REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-
-REGRESSION = $(shell printenv REGRESSION)
-BUCKET = $(shell printenv BUCKET)
-URL = $(shell printenv URL)
-
 CUSTOM_NEXT_GEN_DEPLOY=true
 PUSHLESS_DEPLOY_SHARED_DISABLED=true
 include ~/shared.mk
@@ -78,6 +73,8 @@ html: examples ## Builds this branch's HTML under build/<branch>/html
 #   * Upload each to the S3 bucket under <project>/<username>/<basename>/<filename>
 stage: ## Host online for review
 	@echo "Hosted at ${BUCKET} ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+	# mut-publish build/${GIT_BRANCH}/html ${BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	# @echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
 	
 examples:
 	mkdir -p source/driver-examples
