@@ -10,6 +10,9 @@ REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
+# Necessary to add the fetch-submodule dependency
+PUSHLESS_DEPLOY_SHARED_DISABLED=true
+
 include ~/shared.mk
 
 next-gen-html: get-build-dependencies
@@ -40,10 +43,26 @@ next-gen-html: get-build-dependencies
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
-get-build-dependencies: 
+get-build-dependencies: fetch-submodule
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-php-library.yaml > ${REPO_DIR}/published-branches.yaml
+
+fetch-submodule:
 	git submodule update --remote --init
-	rsync -a --delete ${REPO_DIR}/mongo-php-library/docs/ ${REPO_DIR}/source
+
+next-gen-stage: ## Host online for review
+	# stagel local jobs \
+	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
+		mut-publish public ${BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	# stagel commit jobs and regular git push jobs\
+	else \
+		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	fi
+
+########################
+# GIZA MAKEFILE COMMANDS
+########################
 
 html:
 	giza make html
