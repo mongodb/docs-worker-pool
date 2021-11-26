@@ -48,6 +48,7 @@ get-build-dependencies: fetch-submodule
 
 fetch-submodule:
 	git submodule update --remote --init
+	rsync -a --delete ${REPO_DIR}/mongo-php-library/docs/ ${REPO_DIR}/source
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
