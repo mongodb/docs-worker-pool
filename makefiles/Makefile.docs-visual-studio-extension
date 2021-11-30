@@ -1,0 +1,18 @@
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
+USER=$(shell whoami)
+
+PREFIX=mongodb-visual-studio
+PROJECT=visual-studio-extension
+MUT_PREFIX ?= $(PROJECT)
+REPO_DIR=$(shell pwd)
+
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+
+include ~/shared.mk
+
+
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-visual-studio-extension.yaml > ${REPO_DIR}/published-branches.yaml
