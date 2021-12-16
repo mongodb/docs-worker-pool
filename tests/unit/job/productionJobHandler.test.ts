@@ -180,11 +180,11 @@ test('Execute Build succeeded deploy failed updates status properly', async () =
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Not Good");
 })
 
-test('Execute Build succeeded deploy failed updates status properly', async () => {
+test('Execute Build succeeded deploy failed updates status properly on nullish case', async () => {
     jobHandlerTestHelper.setStageForDeployFailure(null, "Not Good");
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id,  "Cannot read property 'replace' of null");
+    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id,  "Not Good");
 })
 
 test('Execute Build succeeded deploy failed with an ERROR updates status properly', async () => {
