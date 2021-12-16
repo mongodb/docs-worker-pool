@@ -9,6 +9,7 @@ import c from "config";
 import * as mongodb from "mongodb";
 import { FileSystemServices } from "./services/fileServices";
 import { JobValidator } from "./job/jobValidator";
+import { RepoBranchesRepository } from "./repositories/repoBranchesRepository";
 
 
 
@@ -21,6 +22,7 @@ let githubCommandExecutor: GithubCommandExecutor;
 let jobRepository: JobRepository;
 let hybridJobLogger: HybridJobLogger;
 let repoEntitlementRepository: RepoEntitlementsRepository;
+let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
 let cdnConnector: FastlyConnector;
 let repoConnector: GitHubConnector;
@@ -38,7 +40,7 @@ async function init(): Promise<void> {
   jobRepository = new JobRepository(db, c, consoleLogger);
   hybridJobLogger = new HybridJobLogger(jobRepository);
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);
+  jobValidator = new JobValidator(fileSystemServices, repoBranchesRepository, repoEntitlementRepository);
   cdnConnector = new FastlyConnector(consoleLogger);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandletFactory = new JobHandlerFactory();
