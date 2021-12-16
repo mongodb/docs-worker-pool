@@ -38,6 +38,15 @@ custom:
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
+  slackNotificationEventSource:
+    stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+  slackNotificationEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.slackNotificationEventSource.${self:provider.stage}} 
+  dashboardUrl:
+    stg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
+    prd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
+    dev: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
 
   env:
     stg: "staging"
@@ -63,6 +72,7 @@ webhook-env-core: &webhook-env-core
   GITHUB_SECRET: ${self:custom.githubSecret}
   REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
   SLACK_SECRET: ${self:custom.slackSecret}
+  DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
 
 functions:
     v1UpsertEdgeDictionaryItem:
@@ -78,6 +88,28 @@ functions:
     
     v1GithubDeployRepo:
       handler: api/controllers/v1/github.TriggerBuild
+      events:
+        - http:
+            path: /webhook/github/trigger/build
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDisplayRepoOptions:
+      handler: api/controllers/v1/slack.DisplayRepoOptions
+      events:
+        - http:
+            path:  /webhook/slack/display/repos
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDeployRepo:
+      handler: api/controllers/v1/slack.DeployRepo
+      events:
+        - http:
       events:
         - http:
             path: /webhook/github/trigger/build
