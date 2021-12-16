@@ -32,7 +32,6 @@ export class SlackConnector implements ISlackConnector {
             ]
           } });
     }
-
     parseSelection(stateValues: any): any {
         let values = {};
         let inputMapping = {

@@ -47,6 +47,7 @@ custom:
     stg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
     prd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
     dev: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
+
   env:
     stg: "staging"
     prd: "production"
@@ -87,6 +88,28 @@ functions:
     
     v1GithubDeployRepo:
       handler: api/controllers/v1/github.TriggerBuild
+      events:
+        - http:
+            path: /webhook/github/trigger/build
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDisplayRepoOptions:
+      handler: api/controllers/v1/slack.DisplayRepoOptions
+      events:
+        - http:
+            path:  /webhook/slack/display/repos
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDeployRepo:
+      handler: api/controllers/v1/slack.DeployRepo
+      events:
+        - http:
       events:
         - http:
             path: /webhook/github/trigger/build
