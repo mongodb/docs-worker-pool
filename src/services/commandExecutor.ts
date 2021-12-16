@@ -13,6 +13,7 @@ export interface ICommandExecutor {
 }
 
 export interface IJobCommandExecutor extends ICommandExecutor {
+    getSnootyProjectName(repoDirName): Promise<CommandExecutorResponse>;
     getServerUser(): Promise<CommandExecutorResponse>;
 }
 
@@ -45,6 +46,15 @@ export class ShellCommandExecutor implements ICommandExecutor {
 }
 
 export class JobSpecificCommandExecutor extends ShellCommandExecutor implements IJobCommandExecutor {
+
+    async getSnootyProjectName(repoDirName: any): Promise<CommandExecutorResponse> {
+        const commands = [
+            `. /venv/bin/activate`,
+            `cd ~/repos/${repoDirName}`,
+            `make get-project-name`
+        ];
+        return await this.execute(commands);
+    }
 
     async getServerUser(): Promise<CommandExecutorResponse> {
         return await this.execute(["whoami"]);
