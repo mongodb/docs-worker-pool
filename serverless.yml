@@ -37,6 +37,7 @@ custom:
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
+  slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
 
   env:
     stg: "staging"
@@ -60,6 +61,8 @@ webhook-env-core: &webhook-env-core
   USER_ENTITLEMENT_COL_NAME: ${self:custom.entitlementCollection}
   JOB_QUEUE_COL_NAME: ${self:custom.jobCollection}
   GITHUB_SECRET: ${self:custom.githubSecret}
+  REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
+  SLACK_SECRET: ${self:custom.slackSecret}
 
 functions:
     v1UpsertEdgeDictionaryItem:
@@ -73,11 +76,31 @@ functions:
       environment:
         <<: *default-env
     
-    v1GithubWebhookListener:
-      handler: api/controllers/v1/github/github.TriggerBuild
+    v1GithubDeployRepo:
+      handler: api/controllers/v1/github.TriggerBuild
       events:
         - http:
-            path:  /github/trigger_build
+            path: /webhook/github/trigger/build
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDisplayRepoOptions:
+      handler: api/controllers/v1/slack.DisplayRepoOptions
+      events:
+        - http:
+            path:  /webhook/slack/display/repos
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDeployRepo:
+      handler: api/controllers/v1/slack.DeployRepo
+      events:
+        - http:
+            path:  /webhook/slack/trigger/build
             method: POST
             cors: true
       environment:
