@@ -1,6 +1,5 @@
 import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
-import { Buffer } from 'buffer';
 import { IJob } from "../../src/entities/job";
 import { IJobValidator } from "../../src/job/jobValidator";
 import { ProductionJobHandler } from "../../src/job/productionJobHandler";
@@ -57,11 +56,11 @@ export class JobHandlerTestHelper {
         return publishOutput[1]; //return urls
     }
 
-    setStageForDeployFailure(deployOutput: Buffer | null, deployError: Buffer) {
+    setStageForDeployFailure(deployOutput: string | null, deployError: string) {
         this.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(this.job);
         this.setupForSuccess();
-        this.jobCommandExecutor.execute.mockReturnValueOnce({ status: "success", output: Buffer.from("Great work"), error: null });
-        this.jobCommandExecutor.execute.mockReturnValueOnce({ status: "Failed", output: deployOutput?.toString(), error: deployError?.toString() })
+        this.jobCommandExecutor.execute.mockReturnValueOnce({ status: "success", output: "Great work", error: null });
+        this.jobCommandExecutor.execute.mockReturnValueOnce({ status: "Failed", output: deployOutput, error: deployError })
         this.fileSystemServices.getFilesInDirectory.calledWith(`./${this.job.payload.repoName}/build/public`, '').mockReturnValue(["1.html", "2.html", "3.html"]);
     }
 
