@@ -1,5 +1,6 @@
+
+import { promisify } from "util";
 import cp from 'child_process';
-import c from 'config';
 
 export class CommandExecutorResponse {
     status: string;
@@ -24,11 +25,15 @@ export interface IGithubCommandExecutor {
 
 export class ShellCommandExecutor implements ICommandExecutor {
     async execute(commands: string[]): Promise<CommandExecutorResponse> {
+        let exec = promisify(cp.exec);
         let resp = new CommandExecutorResponse();
-        
         try {
-            const stdout = cp.execSync(commands.join(' && '), {maxBuffer : c.get('MAX_STDOUT_BUFFER_SIZE')});
-            resp.output = stdout?.toString().trim();
+            const {
+                stdout,
+                stderr
+            } = await exec(commands.join(' && '));
+            resp.output = stdout.trim();
+            resp.error = stderr;
             resp.status = 'success';
             return resp;
         } catch (error) {
