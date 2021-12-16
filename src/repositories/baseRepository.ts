@@ -26,7 +26,7 @@ export abstract class BaseRepository<T> {
     return Promise.race([promise, timeout]);
   }
 
-  protected async findOne(query: any, errorMsg: string): Promise<T> {
+  protected async findOne(query: any, errorMsg: string): Promise<any> {
     try {
       return await this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.findOne(query), errorMsg);
     } catch (error) {
@@ -34,7 +34,7 @@ export abstract class BaseRepository<T> {
       throw error;
     }
   }
-  protected async updateOne(query: any, update: T, errorMsg: string): Promise<boolean> {
+  protected async updateOne(query: any, update: any, errorMsg: string): Promise<boolean> {
     try {
       const updateResult = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
@@ -53,7 +53,7 @@ export abstract class BaseRepository<T> {
     }
     return true;
   }
-  protected async findOneAndUpdate(query: any, update: T, options: any, errorMsg: string): Promise<T> {
+  protected async findOneAndUpdate(query: any, update: any, options: any, errorMsg: string): Promise<any> {
     try {
       return await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
