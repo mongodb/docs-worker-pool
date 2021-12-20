@@ -5,7 +5,7 @@ import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
 import { InvalidJobError, JobExistsAlreadyError } from "../errors/errors";
 
-export class JobRepository extends BaseRepository<Job> {
+export class JobRepository extends BaseRepository {
     constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
         super(config, logger, "JobRepository", db.collection(config.get("jobQueueCollection")));
     }

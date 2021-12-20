@@ -87,47 +87,10 @@ test('Execute throws error when Downloading makefile repo should update status',
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
 })
 
-describe.each(TestDataProvider.getPathPrefixCases())('Validate all Generate path prefix cases', (element) => {
-    test(`Testing Path prefix with input ${JSON.stringify(element)}`, async () => {
-        jobHandlerTestHelper.job.payload.publishedBranches = element.value;
-        jobHandlerTestHelper.setupForSuccess();
-        await jobHandlerTestHelper.jobHandler.execute();
-        expect(jobHandlerTestHelper.repoConnector.pullRepo).toBeCalledTimes(1);
-        expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
-        if (element.error) {
-            expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Cannot read property 'active' of null");
-            expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
-        } else {
-            expect(jobHandlerTestHelper.job.payload.pathPrefix).toEqual(element.pathPrefix);
-            expect(jobHandlerTestHelper.job.payload.mutPrefix).toEqual(element.mutPrefix);
-        } 
-    })
-})
-
-describe.each(TestDataProvider.getManifestPrefixCases())('Validate all Generate manifest prefix cases', (element) => {
-    test(`Testing manifest prefix with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
-        jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
-        await jobHandlerTestHelper.jobHandler.execute();
-        expect(jobHandlerTestHelper.repoConnector.pullRepo).toBeCalledTimes(1);
-        expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
-        expect(jobHandlerTestHelper.job.payload.manifestPrefix).toEqual(element.manifestPrefix);
-    })
-})
-
-test('Execute Next Gen Manifest prefix generation throws error as get snooty name throws', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
-    jobHandlerTestHelper.setupForSuccess();
-    mockReset(jobHandlerTestHelper.jobCommandExecutor);
-    jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName.calledWith(jobHandlerTestHelper.job.payload.repoName).mockImplementation(() => { throw new Error("Cant get the project name");});
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Cant get the project name");
-})
-
 describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var cases', (element) => {
     test(`Testing commit check returns ${JSON.stringify(element)}`, async () => {
-        jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
+        jobHandlerTestHelper.job.payload.urlSlug = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
         jobHandlerTestHelper.job.payload.aliased = true;
-        jobHandlerTestHelper.job.payload.primaryAlias = null;
         jobHandlerTestHelper.setupForSuccess();
         jobHandlerTestHelper.config.get.calledWith('GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION').mockReturnValue(element['GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION']);
         jobHandlerTestHelper.config.get.calledWith('GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN').mockReturnValue(element['GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN']);
@@ -140,37 +103,34 @@ describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var 
 })
 
 test('Execute Next Gen Build throws error while executing commands', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     mockReset(jobHandlerTestHelper.jobCommandExecutor);
-    jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName.calledWith(jobHandlerTestHelper.job.payload.repoName).mockReturnValue({output:jobHandlerTestHelper.job.payload.repoName})
     jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({status:"failed", error:"Command Execution failed"});
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Command Execution failed");
 })
 
 test('Execute Next Gen Build throws error when execute throws error', async () => {
-    jobHandlerTestHelper.job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(jobHandlerTestHelper.job);
+    jobHandlerTestHelper.job.payload.urlSlug = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     jobHandlerTestHelper.jobCommandExecutor.execute.mockImplementation(() => { throw new Error("Unable to Execute Commands");});
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, "Unable to Execute Commands");
 })
 
-describe.each(TestDataProvider.getManifestPrefixCases())('Execute Next Gen Build Validate all deploy commands', (element) => {
-    test(`Testing  all deploy command cases with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
-        jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
-        jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({status:"success", output: "Great work", error:null})
-        jobHandlerTestHelper.fileSystemServices.getFilesInDirectory.calledWith(`./${jobHandlerTestHelper.job.payload.repoName}/build/public`, '').mockReturnValue(["1.html", "2.html", "3.html"]);
-        await jobHandlerTestHelper.jobHandler.execute();
-        jobHandlerTestHelper.verifyNextGenSuccess();
-        const expectedCommandSet = TestDataProvider.getExpectedProdDeployNextGenCommands(jobHandlerTestHelper.job);
-        expect(jobHandlerTestHelper.job.deployCommands).toEqual(expectedCommandSet);
-        expect(jobHandlerTestHelper.jobRepo.insertNotificationMessages).toBeCalledWith(jobHandlerTestHelper.job._id,  "Great work");
-        expect(jobHandlerTestHelper.fileSystemServices.getFilesInDirectory).toBeCalledWith(`./${jobHandlerTestHelper.job.payload.repoName}/build/public`, '',null, null);
-        expect(jobHandlerTestHelper.jobRepo.updateWithCompletionStatus).toBeCalledWith(jobHandlerTestHelper.job._id, ["1.html", "2.html", "3.html"]);
-    })
-})
+// describe.each(TestDataProvider.getManifestPrefixCases())('Execute Next Gen Build Validate all deploy commands', (element) => {
+//     test(`Testing  all deploy command cases with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
+//         jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({status:"success", output: "Great work", error:null})
+//         jobHandlerTestHelper.fileSystemServices.getFilesInDirectory.calledWith(`./${jobHandlerTestHelper.job.payload.repoName}/build/public`, '').mockReturnValue(["1.html", "2.html", "3.html"]);
+//         await jobHandlerTestHelper.jobHandler.execute();
+//         jobHandlerTestHelper.verifyNextGenSuccess();
+//         const expectedCommandSet = TestDataProvider.getExpectedProdDeployNextGenCommands(jobHandlerTestHelper.job);
+//         expect(jobHandlerTestHelper.job.deployCommands).toEqual(expectedCommandSet);
+//         expect(jobHandlerTestHelper.jobRepo.insertNotificationMessages).toBeCalledWith(jobHandlerTestHelper.job._id,  "Great work");
+//         expect(jobHandlerTestHelper.fileSystemServices.getFilesInDirectory).toBeCalledWith(`./${jobHandlerTestHelper.job.payload.repoName}/build/public`, '',null, null);
+//         expect(jobHandlerTestHelper.jobRepo.updateWithCompletionStatus).toBeCalledWith(jobHandlerTestHelper.job._id, ["1.html", "2.html", "3.html"]);
+//     })
+// })
 
 test('Execute Build succeeded deploy failed updates status properly', async () => {
     jobHandlerTestHelper.setStageForDeployFailure("Bad work", "Not Good");

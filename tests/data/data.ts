@@ -329,6 +329,18 @@ export class TestDataProvider {
         };
     }
 
+    static getRepoBranchesData(repoName:String):any {
+        return {'repoName':`${repoName}`, 
+         'bucket': {'regression': 'docs-mongodb-org-stg', 'dev': 'docs-mongodb-org-dev', 'stg': 'docs-mongodb-org-stg', 'prd': 'docs-mongodb-org-prd'}, 
+        'url': {'regression': 'https://docs-mongodbcom-integration.corp.mongodb.com', 'dev': 'https://docs-mongodborg-staging.corp.mongodb.com', 'stg': 'https://docs-mongodborg-staging.corp.mongodb.com', 'prd': 'https://docs.mongodb.com'}}
+    }
+
+    static getRepoBranchesByRepoName(repoName: String): any {
+        return {
+            query: { 'repoName': repoName }
+        };
+    }
+
     static getPurgeAllUrlWithSurrogateKeys(): any {
         return {
             urls: ["url1", "url2", "url3", "url4"],
@@ -383,5 +395,23 @@ export class TestDataProvider {
             retVal.push(`git checkout ${newHead} .`)
         }
         return retVal;
+    }
+
+    static getBranchSlug(job: IJob): any {
+        return {
+            prefix: "TestPrefix",
+            project: "TestProject",
+            repoName: job.payload.repoName,
+            branches: [
+              {
+                "gitBranchName": job.payload.branchName,
+                "urlAliases": [],
+                "urlSlug": "sample_slug",
+                "active": true,
+                "publishOriginalBranchName": true,
+                "isStableBranch": true
+              }
+            ]
+        };
     }
 }

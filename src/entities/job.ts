@@ -41,6 +41,10 @@ export interface IJob {
     stableBranch:  string | null | undefined;
     isNextGen: boolean| null | undefined;
     regression:boolean| null | undefined;
+    urlSlug: string | null | undefined;
+    prefix: string;
+    project: string;
+    includeInGlobalSearch: boolean;
   }
 
 export class Job implements IJob {

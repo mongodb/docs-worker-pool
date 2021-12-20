@@ -4,7 +4,7 @@ import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
 
-export class RepoBranchesRepository extends BaseRepository<Job> {
+export class RepoBranchesRepository extends BaseRepository {
 
     constructor(db: Db, config: IConfig, logger: ILogger) {
         super(config, logger, "RepoEntitlementsRepository", db.collection(config.get("repoBranchesCollection")));
@@ -15,6 +15,21 @@ export class RepoBranchesRepository extends BaseRepository<Job> {
         const repoDetails = await this.findOne(query, `Mongo Timeout Error: Timedout while retrieving Repoinformation for ${repoName}`);
         if (repoDetails && repoDetails.bucket && repoDetails.url) {
             return repoDetails
+    } else {
+        return { status: 'failure' };
+    }
+}
+
+    async getConfiguredBranchesByGithubRepoName(repoName: string): Promise<any> {
+        const query = { 'repoName': repoName };
+        console.log(query)
+        const reposObject = await this.findOne(query, `Mongo Timeout Error: Timedout while retrieving repos entry for ${repoName}`);
+        if (reposObject && reposObject.branches) {
+            return {
+                branches: reposObject.branches,
+                repoName: reposObject.repoName,
+                status: 'success'
+            }
         } else {
             return { status: 'failure' };
         }

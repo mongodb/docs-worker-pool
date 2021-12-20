@@ -3,46 +3,38 @@ import validator from "validator";
 import { IJob } from "../entities/job";
 import { IFileSystemServices } from "../services/fileServices";
 import { RepoEntitlementsRepository } from "../repositories/repoEntitlementsRepository";
+import { RepoBranchesRepository } from "../repositories/repoBranchesRepository";
 
 export interface IJobValidator {
     throwIfJobInvalid(job: IJob): Promise<void>;
     throwIfBranchNotConfigured(job: IJob): Promise<void>;
     throwIfUserNotEntitled(job: IJob): Promise<void>;
-    throwIfItIsNotPublishable(job: IJob): void;
 }
 
 export class JobValidator implements IJobValidator {
     _fileSystemService: IFileSystemServices;
     _repoEntitlementRepository: RepoEntitlementsRepository;
-    constructor(fileSystemService: IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository) {
+    _repoBranchesRepository: RepoBranchesRepository;
+    constructor(fileSystemService: IFileSystemServices, repoBranchesRepository: RepoBranchesRepository, repoEntitlementRepository: RepoEntitlementsRepository) {
         this._fileSystemService = fileSystemService;
         this._repoEntitlementRepository = repoEntitlementRepository;
+        this._repoBranchesRepository = repoBranchesRepository;
     }
 
     async throwIfUserNotEntitled(job: IJob): Promise<void> {
         const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
-        if (!entitlementsObject || !entitlementsObject.repos || entitlementsObject.repos.indexOf(`${job.payload.repoOwner}/${job.payload.repoName}`) === -1) {
-            throw new AuthorizationError(`${job.user} is not entitled for repo ${job.payload.repoName}`);
+        if (!entitlementsObject || !entitlementsObject.repos || entitlementsObject.repos.indexOf(`${job.payload.repoOwner}/${job.payload.repoName}`) === -1 || entitlementsObject.status === 'failure') {
+            throw new AuthorizationError(`${job.user} is not entitled to deploy repo ${job.payload.repoName}`);
         }
     }
 
     async throwIfBranchNotConfigured(job: IJob): Promise<void> {
-        let response = await this._fileSystemService.downloadYaml(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`);
-        if (response['status'] == 'success') {
-            job.payload.publishedBranches = response['content'];
-        } else {
-            throw new AuthorizationError(`Invalid publish branches file for ${job.payload.repoName}`);
-        }
-    }
-
-    throwIfItIsNotPublishable(job: IJob): void {
-        let publishedBranches = [''];
-        if (job.payload.publishedBranches) {
-            publishedBranches = job.payload.publishedBranches.git.branches.published;
-            job.payload["stableBranch"] = (job.payload.publishedBranches.version.stable === job.payload.branchName && (job.payload.primaryAlias || !job.payload.aliased)) ? '-g' : "";
-        }
-        if (!publishedBranches.includes(job.payload.branchName)) {
-            throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
+      const branchesObject = await this._repoBranchesRepository.getConfiguredBranchesByGithubRepoName(job.payload.repoName);
+      if (branchesObject.status != 'success') {
+        throw new AuthorizationError(`${job.payload.repoName} is not configured for deployment`)
+      }
+      if (!branchesObject.branches || branchesObject.branches.findIndex(obj => obj.gitBranchName == job.payload.branchName) === -1) {
+          throw new AuthorizationError(`${job.payload.branchName} in the ${job.payload.repoName} repository is not configured for deployment.`)
         }
     }
 
