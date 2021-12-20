@@ -4,7 +4,7 @@ import { Job } from "../entities/job"
 import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
 
-export class RepoEntitlementsRepository extends BaseRepository {
+export class RepoEntitlementsRepository extends BaseRepository<Job> {
 
     constructor(db: Db, config: IConfig, logger: ILogger) {
         super(config, logger, "RepoEntitlementsRepository", db.collection(config.get("entitlementCollection")));

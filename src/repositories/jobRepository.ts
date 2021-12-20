@@ -5,7 +5,7 @@ import { ILogger } from "../services/logger";
 import { IConfig } from 'config';
 import { InvalidJobError, JobExistsAlreadyError } from "../errors/errors";
 
-export class JobRepository extends BaseRepository {
+export class JobRepository extends BaseRepository<Job> {
     constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
         super(config, logger, "JobRepository", db.collection(config.get("jobQueueCollection")));
     }
@@ -44,7 +44,7 @@ export class JobRepository extends BaseRepository {
             throw new InvalidJobError("JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job");
         }
         if (response.value) {
-            return Object.assign(new Job(), response.value)
+            return Object.assign(new Job(), response.value) 
         }
         return null;
     }
@@ -64,7 +64,7 @@ export class JobRepository extends BaseRepository {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting log statements for jobId: ${id}`);
     }
 
-    async insertNotificationMessages(id: string, message: string): Promise<boolean> {
+    async insertNotificationMessages(id:string, message: string): Promise<boolean> {
         const query = { _id: id };
         const update = {
             $push: { comMessage: message }
@@ -72,7 +72,7 @@ export class JobRepository extends BaseRepository {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting notification messages for jobId: ${id}`);
     }
 
-    async insertPurgedUrls(id: string, urlArray: Array<string>): Promise<boolean> {
+    async insertPurgedUrls(id:string, urlArray: Array<string>): Promise<boolean> {
         const query = { _id: id };
         const update = {
             $push: { ['purgedURLs']: urlArray }
@@ -80,7 +80,7 @@ export class JobRepository extends BaseRepository {
         return await this.updateOne(query, update, `Mongo Timeout Error: Timed out while inserting purged urls for jobId: ${id}`);
     }
 
-    async resetJobStatus(id: string, status: string, reenqueueMessage: string) {
+    async resetJobStatus(id:string, status: string, reenqueueMessage: string) {
         const query = { _id: id };
         const update = {
             $set: {

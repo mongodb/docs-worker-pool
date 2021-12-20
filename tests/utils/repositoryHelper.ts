@@ -2,6 +2,7 @@ import { IConfig } from "config";
 import { mockDeep } from "jest-mock-extended";
 import { Db } from "mongodb";
 import { JobRepository } from "../../src/repositories/jobRepository";
+import { RepoBranchesRepository } from "../../src/repositories/repoBranchesRepository";
 import { RepoEntitlementsRepository } from "../../src/repositories/repoEntitlementsRepository";
 import { ILogger } from "../../src/services/logger";
 
@@ -17,7 +18,8 @@ export class DBRepositoryHelper {
 
     repoMapper = {
         "job": JobRepository,
-        "repo": RepoEntitlementsRepository
+        "repo": RepoEntitlementsRepository,
+        "repoBranches": RepoBranchesRepository
     }
 
     init(repoName, collectionConfigName, collectionName):any {

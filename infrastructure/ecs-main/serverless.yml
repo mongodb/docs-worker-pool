@@ -99,6 +99,7 @@ custom:
   nodeBucketName: docs-node-${self:provider.stage}
   nodeIntgrBucketName: docs-node-intgr
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
+  repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   env:
     stg: "staging"

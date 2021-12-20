@@ -13,18 +13,18 @@ import { IJob } from "../entities/job";
 import { JobRepository } from "../repositories/jobRepository";
 import { IFileSystemServices } from "../services/fileServices";
 import { IConfig } from "config";
+import { RepoBranchesRepository } from "../repositories/repoBranchesRepository";
 
 export class JobHandlerFactory {
-    public createJobHandler(job: IJob,  config: IConfig, jobRepository:JobRepository, fileSystemServices:IFileSystemServices, commandExecutor: IJobCommandExecutor, cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: IJobRepoLogger) : JobHandler {
+    public createJobHandler(job: IJob,  config: IConfig, jobRepository:JobRepository, fileSystemServices:IFileSystemServices, 
+        commandExecutor: IJobCommandExecutor, cdnConnector:ICDNConnector, repoConnector:IRepoConnector, logger: IJobRepoLogger, validator: IJobValidator,  repoBranchesRepo: RepoBranchesRepository) : JobHandler {
         if (job.payload.jobType === "regression") {
-            return new RegressionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
+            return new RegressionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger,validator, repoBranchesRepo);
         } else if (job.payload.jobType === "githubPush") {
-            return new StagingJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
+            return new StagingJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger,validator, repoBranchesRepo);
         } else if (job.payload.jobType === "productionDeploy") {
-            return new ProductionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
-        } else if (job.payload.jobType === "publishDochub") {
-            return new ProductionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger);
-        }
+            return new ProductionJobHandler(job, config, jobRepository, fileSystemServices, commandExecutor, cdnConnector, repoConnector, logger,validator, repoBranchesRepo);
+        } 
         throw new InvalidJobError("Job type not supported");
     }
 }
@@ -42,10 +42,11 @@ export class JobManager {
    private _jobValidator: IJobValidator;
    private  _jobHandlerFactory: JobHandlerFactory;
    private _jobCommandExecutor: IJobCommandExecutor;
+   private _repoBranchesRepo: RepoBranchesRepository
 
     constructor(config: IConfig, jobValidator: IJobValidator, jobHandlerFactory: JobHandlerFactory, jobCommandExecutor: IJobCommandExecutor,
         jobRepository: JobRepository,cdnConnector: ICDNConnector, repoConnector: IRepoConnector, fileSystemServices: IFileSystemServices, 
-        logger: IJobRepoLogger) {
+        logger: IJobRepoLogger,  repoBranchesRepo: RepoBranchesRepository) {
         this._jobRepository = jobRepository;
         this._cdnConnector = cdnConnector;
         this._repoConnector = repoConnector;
@@ -57,6 +58,7 @@ export class JobManager {
         this._jobValidator = jobValidator;
         this._jobHandlerFactory = jobHandlerFactory;
         this._jobCommandExecutor = jobCommandExecutor;
+        this._repoBranchesRepo = repoBranchesRepo
     }
 
     async start(): Promise<void> {
@@ -98,9 +100,10 @@ export class JobManager {
     
 
     async createHandlerAndExecute(job: IJob): Promise<void> {
-        await this._jobValidator.throwIfJobInvalid(job);
         this._jobHandler = this._jobHandlerFactory.createJobHandler(job, this._config, this._jobRepository,
-            this._fileSystemServices, this._jobCommandExecutor, this._cdnConnector, this._repoConnector, this._logger);
+            this._fileSystemServices, this._jobCommandExecutor, this._cdnConnector, this._repoConnector, this._logger, this._jobValidator, this._repoBranchesRepo);
+        
+        await this._jobValidator.throwIfJobInvalid(job);
         await this._jobHandler?.execute();
         await this._logger.save(job._id, `${'    (DONE)'.padEnd(this._config.get("LOG_PADDING"))}Finished Job with ID: ${job._id}`);
     }
