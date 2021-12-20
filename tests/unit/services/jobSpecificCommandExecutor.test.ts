@@ -21,18 +21,20 @@ describe('JobSpecificCommandExecutor Tests', () => {
     describe('JobSpecificCommandExecutor getSnootyProjectName Tests', () => {
         test('JobSpecificCommandExecutor getSnootyProjectName  succeeds', async() => {
             const testData = TestDataProvider.getCommandsForSnootyProjectName("test_repo");
-            cp.execSync.mockImplementation((command, options, callback) => Buffer.from('test_repo_project_snooty_name'));
+            cp.exec.mockImplementation((command, callback) => {
+                callback(null, { stdout: 'test_repo_project_snooty_name' });
+            });
             let resp = await commandExecutor.getSnootyProjectName('test_repo');
             expect(resp.error).toBe(undefined);
             expect(resp.output).toBe('test_repo_project_snooty_name');
             expect(resp.status).toBe('success');
-            expect(cp.execSync.mock.calls[0][0]).toEqual(testData.join(' && '));
-            expect(cp.execSync).toBeCalledTimes(1);
+            expect(cp.exec.mock.calls[0][0]).toEqual(testData.join(' && '));
+            expect(cp.exec).toBeCalledTimes(1);
         })
 
         test('JobSpecificCommandExecutor getSnootyProjectName  fails return proper response', async() => {
             const testData = TestDataProvider.getCommandsForSnootyProjectName("test_repo");
-            cp.execSync.mockImplementation((command, options, callback) => {
+            cp.exec.mockImplementation((command, callback) => {
                 throw Error("Test error");
                 // callback(null, {stdErr: "invalid command", stdout: 'test_repo_project_snooty_name' });
             });
@@ -46,13 +48,15 @@ describe('JobSpecificCommandExecutor Tests', () => {
     describe('JobSpecificCommandExecutor getServerUser Tests', () => {
         test('JobSpecificCommandExecutor getServerUser  succeeds', async() => {
             const testData = TestDataProvider.getCommandsForGetServerUser("test_repo");
-            cp.execSync.mockImplementation((command, options, callback) => Buffer.from('test_user_in_test_machine'));
+            cp.exec.mockImplementation((command, callback) => {
+                callback(null, { stdout: 'test_user_in_test_machine' });
+            });
             let resp = await commandExecutor.getServerUser();
             expect(resp.error).toBe(undefined);
             expect(resp.output).toBe('test_user_in_test_machine');
             expect(resp.status).toBe('success');
-            expect(cp.execSync.mock.calls[0][0]).toEqual(testData.join(' && '));
-            expect(cp.execSync).toBeCalledTimes(1);
+            expect(cp.exec.mock.calls[0][0]).toEqual(testData.join(' && '));
+            expect(cp.exec).toBeCalledTimes(1);
         })
     })
 })
