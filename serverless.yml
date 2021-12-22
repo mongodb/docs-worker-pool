@@ -39,6 +39,7 @@ custom:
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
+  slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
   slackNotificationEventSource:
     stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
