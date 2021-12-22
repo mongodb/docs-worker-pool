@@ -48,7 +48,6 @@ custom:
     stg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
     prd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
     dev: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:provider.jobCollection}&jobId=
-
   env:
     stg: "staging"
     prd: "production"
@@ -73,7 +72,7 @@ webhook-env-core: &webhook-env-core
   GITHUB_SECRET: ${self:custom.githubSecret}
   REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
   SLACK_SECRET: ${self:custom.slackSecret}
-  DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
+  DASHBOARD_URL: ${self:custom.docuhubEventSource.${self:provider.stage}}
 
 functions:
     v1UpsertEdgeDictionaryItem:
