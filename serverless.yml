@@ -36,6 +36,7 @@ custom:
   dbhost: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/host}
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
+  repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
   slackNotificationEventSource:
