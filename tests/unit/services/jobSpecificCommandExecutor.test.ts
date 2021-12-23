@@ -21,7 +21,7 @@ describe('JobSpecificCommandExecutor Tests', () => {
     describe('JobSpecificCommandExecutor getSnootyProjectName Tests', () => {
         test('JobSpecificCommandExecutor getSnootyProjectName  succeeds', async() => {
             const testData = TestDataProvider.getCommandsForSnootyProjectName("test_repo");
-            cp.exec.mockImplementation((command, callback) => {
+            cp.exec.mockImplementation((command, options, callback) => {
                 callback(null, { stdout: 'test_repo_project_snooty_name' });
             });
             let resp = await commandExecutor.getSnootyProjectName('test_repo');
@@ -34,7 +34,7 @@ describe('JobSpecificCommandExecutor Tests', () => {
 
         test('JobSpecificCommandExecutor getSnootyProjectName  fails return proper response', async() => {
             const testData = TestDataProvider.getCommandsForSnootyProjectName("test_repo");
-            cp.exec.mockImplementation((command, callback) => {
+            cp.exec.mockImplementation((command, options, callback) => {
                 throw Error("Test error");
                 // callback(null, {stdErr: "invalid command", stdout: 'test_repo_project_snooty_name' });
             });
@@ -48,7 +48,7 @@ describe('JobSpecificCommandExecutor Tests', () => {
     describe('JobSpecificCommandExecutor getServerUser Tests', () => {
         test('JobSpecificCommandExecutor getServerUser  succeeds', async() => {
             const testData = TestDataProvider.getCommandsForGetServerUser("test_repo");
-            cp.exec.mockImplementation((command, callback) => {
+            cp.exec.mockImplementation((command, options, callback) => {
                 callback(null, { stdout: 'test_user_in_test_machine' });
             });
             let resp = await commandExecutor.getServerUser();

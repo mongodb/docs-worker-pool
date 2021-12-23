@@ -1,6 +1,14 @@
 
 import { promisify } from "util";
-import cp from 'child_process';
+import cp, {ExecOptions, ExecException, ChildProcess} from 'child_process';
+import c from 'config';
+
+const execWithOptions: (
+    command: string,
+    options: ExecOptions,
+    callback?: (error: ExecException | null, stdout: string, stderr: string) => void
+) => ChildProcess = cp.exec
+let exec = promisify(execWithOptions);
 
 export class CommandExecutorResponse {
     status: string;
@@ -25,13 +33,12 @@ export interface IGithubCommandExecutor {
 
 export class ShellCommandExecutor implements ICommandExecutor {
     async execute(commands: string[]): Promise<CommandExecutorResponse> {
-        let exec = promisify(cp.exec);
         let resp = new CommandExecutorResponse();
         try {
             const {
                 stdout,
                 stderr
-            } = await exec(commands.join(' && '));
+            } = await exec(commands.join(' && '), {maxBuffer : c.get('MAX_STDOUT_BUFFER_SIZE')});
             resp.output = stdout.trim();
             resp.error = stderr;
             resp.status = 'success';
