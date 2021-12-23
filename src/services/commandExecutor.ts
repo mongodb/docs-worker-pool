@@ -11,9 +11,9 @@ const execWithOptions: (
     callback?: (error: ExecException | null, stdout: string, stderr: string) => void
 ) => ChildProcess = cp.exec;
 
-// This type inference for the overloaded Promisify signature is throwing a false lint error
-// The expected return signature is a {stdout:string, stderr:string} - don't listen to it!
-let exec = promisify(execWithOptions);
+// This type inference for the overloaded Promisify signature is incorrectly inferring Promise<string>
+// The expected return signature is a Promise<{stdout:string, stderr:string}>
+let exec = promisify(execWithOptions) as any;
 
 export class CommandExecutorResponse {
     status: string;
