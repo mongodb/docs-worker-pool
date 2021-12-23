@@ -13,10 +13,7 @@ const execWithOptions: (
 
 // This type inference for the overloaded Promisify signature is throwing a false lint error
 // The expected return signature is a {stdout:string, stderr:string} - don't listen to it!
-let exec: (arg1: string, arg2: cp.ExecOptions) => PromiseWithChild<{
-    stdout: string;
-    stderr: string;
-}> = promisify(execWithOptions);
+let exec = promisify(execWithOptions);
 
 export class CommandExecutorResponse {
     status: string;
