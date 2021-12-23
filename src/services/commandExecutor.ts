@@ -1,14 +1,22 @@
 
 import { promisify } from "util";
-import cp, {ExecOptions, ExecException, ChildProcess} from 'child_process';
+import cp, {ExecOptions, ExecException, ChildProcess, PromiseWithChild} from 'child_process';
 import c from 'config';
 
+// Hard assign the overloaded function signature to a variable, for promisifying purposes
+// If this isn't done, promisify doesn't know which signature to pick, and throws a type error
 const execWithOptions: (
     command: string,
     options: ExecOptions,
     callback?: (error: ExecException | null, stdout: string, stderr: string) => void
-) => ChildProcess = cp.exec
-let exec = promisify(execWithOptions);
+) => ChildProcess = cp.exec;
+
+// This type inference for the overloaded Promisify signature is throwing a false lint error
+// The expected return signature is a {stdout:string, stderr:string} - don't listen to it!
+let exec: (arg1: string, arg2: cp.ExecOptions) => PromiseWithChild<{
+    stdout: string;
+    stderr: string;
+}> = promisify(execWithOptions);
 
 export class CommandExecutorResponse {
     status: string;
