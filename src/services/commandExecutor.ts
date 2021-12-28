@@ -38,12 +38,14 @@ export interface IGithubCommandExecutor {
 
 export class ShellCommandExecutor implements ICommandExecutor {
     async execute(commands: string[]): Promise<CommandExecutorResponse> {
+        let exec = promisify(cp.exec);
         let resp = new CommandExecutorResponse();
         try {
             const {
                 stdout,
                 stderr
             } = await exec(commands.join(' && '), {maxBuffer : c.get('MAX_STDOUT_BUFFER_SIZE')});
+
             resp.output = stdout.trim();
             resp.error = stderr;
             resp.status = 'success';
