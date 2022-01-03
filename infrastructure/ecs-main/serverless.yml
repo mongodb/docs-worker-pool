@@ -29,6 +29,8 @@ custom:
     dev: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
+    dotcomstg: worker-pool-deployment
+    dotcomprd: worker-pool-deployment
   ecs:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
@@ -36,28 +38,41 @@ custom:
       dev: '4096'
       stg: '4096'
       prd: '4096'
+      dotcomstg: '4096'
+      dotcomprd: '4096'
     containerMemory:
       dev: '24576'
       stg: '24576'
       prd: '24576'
+      dotcomstg: '24576'
+      dotcomprd: '24576'
     desiredCount:
       dev: '4'
       stg: '4'
       prd: '4' 
+      dotcomstg: '4'
+      dotcomprd: '4'
     minimumHealthyPercent:
       dev: 100
       stg: 100
       prd: 100
+      dotcomstg: 100
+      dotcomprd: 100
     maximumPercent:
       dev: 200
       stg: 200
       prd: 200
+      dotcomstg: 200
+      dotcomprd: 200
     deregistrationDelaySecs: '10'
   targetGroupName: docs-worker-pool
   accountId:
     stg: 216656347858
     dev: 216656347858
     prd: 216656347858
+    dotcomstg: 216656347858
+    dotcomprd: 216656347858
+    
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
