@@ -1,4 +1,4 @@
-prefix: '/'
+prefix: '/mongodb-analyzer'
 version:
   published:
     - 'main'
