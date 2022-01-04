@@ -2,7 +2,7 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
 USER=$(shell whoami)
 
-PREFIX=mongodb-visual-studio
+PREFIX=mongodb-analyzer
 PROJECT=visual-studio-extension
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
