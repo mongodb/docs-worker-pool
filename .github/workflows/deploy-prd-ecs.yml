@@ -29,6 +29,7 @@ jobs:
           cd infrastructure/ecs-repo
           npm ci
           sls deploy --stage prd
+          sls deploy --stage dotcomprd
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR
         with:
@@ -46,6 +47,7 @@ jobs:
           cd infrastructure/ecs-main
           npm ci
           sls deploy --stage prd
+          sls deploy --stage dotcomprd
           aws ecs update-service --force-new-deployment --service docs-worker-pool-prd --cluster docs-worker-pool-prd
       - name: Deploy Lambdas	
         run: |
