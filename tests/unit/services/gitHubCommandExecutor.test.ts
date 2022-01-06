@@ -21,7 +21,7 @@ describe('GithubCommandExecutor Tests', () => {
     describe('GithubCommandExecutor applyPatch Tests', () => {
         test('GithubCommandExecutor applyPatch  succeeds', async() => {
             const testData = TestDataProvider.getPatchCommands("test_repo", "test_patch");
-            cp.exec.mockImplementation((command, callback) => {
+            cp.exec.mockImplementation((command, options, callback) => {
                 callback(null, { stdout: 'patch applied properly  ' });
             });
             let resp = await commandExecutor.applyPatch('test_repo', 'test_patch');
@@ -36,7 +36,7 @@ describe('GithubCommandExecutor Tests', () => {
     describe('GithubCommandExecutor checkoutBranchForSpecificHead Tests', () => {
         test('GithubCommandExecutor checkoutBranchForSpecificHead  succeeds', async() => {
             const testData = TestDataProvider.getcheckoutBranchForSpecificHeadCommands("test_repo", "test_patch", "test_head");
-            cp.exec.mockImplementation((command, callback) => {
+            cp.exec.mockImplementation((command, options, callback) => {
                 callback(null, { stdout: 'valid commits' });
             });
             let resp = await commandExecutor.checkoutBranchForSpecificHead("test_repo", "test_patch", "test_head");
@@ -51,7 +51,8 @@ describe('GithubCommandExecutor Tests', () => {
     describe('GithubCommandExecutor pullRepo Tests', () => {
         test('GithubCommandExecutor pullRepo with valid head  succeeds', async() => {
             const testData = TestDataProvider.getPullRepoCommands("test_repo", "test_patch", "test_head");
-            cp.exec.mockImplementation((command, callback) => {
+
+            cp.exec.mockImplementation((command, options, callback) => {
                 callback(null, { stdout: 'Repo pulled properly' });
             });
             let resp = await commandExecutor.pullRepo("test_repo", "test_patch", "test_head");
@@ -64,6 +65,7 @@ describe('GithubCommandExecutor Tests', () => {
 
         test('GithubCommandExecutor pullRepo with no head  succeeds', async() => {
             const testData = TestDataProvider.getPullRepoCommands("test_repo", "test_patch");
+            cp.exec.mockImplementation((command, options, callback) => {
             cp.exec.mockImplementation((command, callback) => {
                 callback(null, { stdout: 'Repo pulled properly' });
             });

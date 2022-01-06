@@ -1,6 +1,19 @@
 
 import { promisify } from "util";
-import cp from 'child_process';
+import cp, {ExecOptions, ExecException, ChildProcess, PromiseWithChild} from 'child_process';
+import c from 'config';
+
+// Hard assign the overloaded function signature to a variable, for promisifying purposes
+// If this isn't done, promisify doesn't know which signature to pick, and throws a type error
+const execWithOptions: (
+    command: string,
+    options: ExecOptions,
+    callback?: (error: ExecException | null, stdout: string, stderr: string) => void
+) => ChildProcess = cp.exec;
+
+// This type inference for the overloaded Promisify signature is incorrectly inferring Promise<string>
+// The expected return signature is a Promise<{stdout:string, stderr:string}>
+let exec = promisify(execWithOptions) as any;
 
 export class CommandExecutorResponse {
     status: string;
@@ -31,7 +44,8 @@ export class ShellCommandExecutor implements ICommandExecutor {
             const {
                 stdout,
                 stderr
-            } = await exec(commands.join(' && '));
+            } = await exec(commands.join(' && '), {maxBuffer : c.get('MAX_STDOUT_BUFFER_SIZE')});
+
             resp.output = stdout.trim();
             resp.error = stderr;
             resp.status = 'success';
