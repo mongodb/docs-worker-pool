@@ -1,15 +1,19 @@
 prefix: '/mongodb-analyzer'
 version:
   published:
-    - 'main'
+    - 'master'
+    - 'v1.0'
   active:
-    - 'main'
-  stable: 'main'
+    - 'master'
+    - 'v1.0'
+  stable: 'v1.0'
+  upcoming: 'master'
 git:
   branches:
-    manual: 'main'
+    manual: 'master'
     published:
-      - 'main'
+      - 'master'
+      - 'v1.0'
       # the branches/published list **must** be ordered from most to
       # least recent release.
 ...
