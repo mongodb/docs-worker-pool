@@ -24,7 +24,7 @@ let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
 let cdnConnector: FastlyConnector;
 let repoConnector: GitHubConnector;
-let jobHandletFactory: JobHandlerFactory;
+let jobHandlerFactory: JobHandlerFactory;
 let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
 
@@ -42,12 +42,12 @@ async function init(): Promise<void> {
   jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);
   cdnConnector = new FastlyConnector(consoleLogger);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
-  jobHandletFactory = new JobHandlerFactory();
+  jobHandlerFactory = new JobHandlerFactory();
   repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
   jobManager = new JobManager(
     c,
     jobValidator,
-    jobHandletFactory,
+    jobHandlerFactory,
     jobCommandExecutor,
     jobRepository,
     cdnConnector,

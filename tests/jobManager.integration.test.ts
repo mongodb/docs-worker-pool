@@ -37,7 +37,7 @@ describe('Jobmanager integration Tests', () => {
   let jobValidator: JobValidator;
   let cdnConnector: FastlyConnector;
   let repoConnector: GitHubConnector;
-  let jobHandletFactory: JobHandlerFactory;
+  let jobHandlerFactory: JobHandlerFactory;
   let jobManager: JobManager;
   beforeEach(() => {
     consoleLogger = new ConsoleLogger();
@@ -51,11 +51,11 @@ describe('Jobmanager integration Tests', () => {
     jobValidator = new JobValidator(fileSystemServices, repoBranchesRepository, repoEntitlementRepository);
     cdnConnector = new FastlyConnector(hybridJobLogger);
     repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
-    jobHandletFactory = new JobHandlerFactory();
+    jobHandlerFactory = new JobHandlerFactory();
     jobManager = new JobManager(
       c,
       jobValidator,
-      jobHandletFactory,
+      jobHandlerFactory,
       jobCommandExecutor,
       jobRepository,
       cdnConnector,

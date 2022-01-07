@@ -50,9 +50,9 @@ export abstract class BaseRepository {
     );
   }
 
-  protected async findOne(query: any, erroMsg: string): Promise<any> {
+  protected async findOne(query: any, errorMsg: string): Promise<any> {
     try {
-      return await this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.findOne(query), erroMsg);
+      return await this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.findOne(query), errorMsg);
     } catch (error) {
       this._logger.error(`${this._repoName}:findOne`, `Failed to find job (${JSON.stringify(query)}) error: ${error}`);
       throw error;

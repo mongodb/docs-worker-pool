@@ -10,9 +10,9 @@ export class DBRepositoryHelper {
   config: IConfig;
   logger: ILogger;
   db: Db;
-  updateOne: Function;
-  findOne: Function;
-  findOneAndUpdate: Function;
+  updateOne: (query: any, update: any, errorMsg: string) => Promise<boolean>;
+  findOne: (query: any, errorMsg: string) => Promise<any>;
+  findOneAndUpdate: (query: any, update: any, options: any, errorMsg: string) => Promise<any>;
   collection: any;
   jobRepo: JobRepository;
 

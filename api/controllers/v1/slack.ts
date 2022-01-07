@@ -43,7 +43,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
   async function buildEntitleBranchList(entitlement: any, branchRepository: BranchRepository) {
     const branchPath = [];
     for (let i = 0; i < entitlement.repos.length; i++) {
-      let pubBranches = [];
+      const pubBranches = [];
       const thisRepo = entitlement.repos[i];
       const [repoOwner, repoName] = thisRepo.split('/');
       const branches = await branchRepository.getRepoBranches(repoName);
@@ -105,7 +105,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
     if (!slackConnector.validateSlackRequest(event)) {
       return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
     }
-    let client = new mongodb.MongoClient(c.get('dbUrl'));
+    const client = new mongodb.MongoClient(c.get('dbUrl'));
     await client.connect();
     const db = client.db(c.get('dbName'));
     const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -133,7 +133,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
     if (!slackConnector.validateSlackRequest(event)) {
       return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
     }
-    let client = new mongodb.MongoClient(c.get('dbUrl'));
+    const client = new mongodb.MongoClient(c.get('dbUrl'));
     await client.connect();
     const db = client.db(c.get('dbName'));
     const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -148,7 +148,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
       return prepReponse(401, 'text/plain', 'User is not entitled!!');
     }
 
-    let values = slackConnector.parseSelection(stateValues);
+    const values = slackConnector.parseSelection(stateValues);
     for (let i = 0; i < values.repo_option.length; i++) {
       // // e.g. mongodb/docs-realm/master => (site/repo/branch)
       const buildDetails = values.repo_option[i].value.split('/');
@@ -251,7 +251,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
       if (!slackConnector.validateSlackRequest(event)) {
         return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
       }
-      let client = new mongodb.MongoClient(c.get('dbUrl'));
+      const client = new mongodb.MongoClient(c.get('dbUrl'));
       await client.connect();
       const db = client.db(c.get('dbName'));
       const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -279,7 +279,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
       if (!slackConnector.validateSlackRequest(event)) {
         return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
       }
-      let client = new mongodb.MongoClient(c.get('dbUrl'));
+      const client = new mongodb.MongoClient(c.get('dbUrl'));
       await client.connect();
       const db = client.db(c.get('dbName'));
       const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -294,7 +294,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
         return prepReponse(401, 'text/plain', 'User is not entitled!!');
       }
 
-      let values = slackConnector.parseSelection(stateValues);
+      const values = slackConnector.parseSelection(stateValues);
       for (let i = 0; i < values.repo_option.length; i++) {
         // // e.g. mongodb/docs-realm/master => (site/repo/branch)
         const buildDetails = values.repo_option[i].value.split('/');

@@ -9,7 +9,7 @@ import { IFileSystemServices } from '../services/fileServices';
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from '../errors/errors';
 import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
-const fs = require('fs');
+require('fs');
 
 export abstract class JobHandler {
   private _currJob: IJob;
