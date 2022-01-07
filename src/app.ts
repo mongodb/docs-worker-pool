@@ -1,17 +1,15 @@
-import { JobManager, JobHandlerFactory } from "./job/jobManager";
-import { FastlyConnector } from "./services/cdn";
-import { GitHubConnector } from "./services/repo";
+import { JobManager, JobHandlerFactory } from './job/jobManager';
+import { FastlyConnector } from './services/cdn';
+import { GitHubConnector } from './services/repo';
 import { HybridJobLogger, ConsoleLogger } from './services/logger';
 import { GithubCommandExecutor, JobSpecificCommandExecutor } from './services/commandExecutor';
-import { JobRepository } from "./repositories/jobRepository";
-import { RepoEntitlementsRepository } from "./repositories/repoEntitlementsRepository";
-import c from "config";
-import * as mongodb from "mongodb";
-import { FileSystemServices } from "./services/fileServices";
-import { JobValidator } from "./job/jobValidator";
-import { RepoBranchesRepository } from "./repositories/repoBranchesRepository";
-
-
+import { JobRepository } from './repositories/jobRepository';
+import { RepoEntitlementsRepository } from './repositories/repoEntitlementsRepository';
+import c from 'config';
+import * as mongodb from 'mongodb';
+import { FileSystemServices } from './services/fileServices';
+import { JobValidator } from './job/jobValidator';
+import { RepoBranchesRepository } from './repositories/repoBranchesRepository';
 
 let db: mongodb.Db;
 let client: mongodb.MongoClient;
@@ -28,12 +26,12 @@ let cdnConnector: FastlyConnector;
 let repoConnector: GitHubConnector;
 let jobHandletFactory: JobHandlerFactory;
 let jobManager: JobManager;
-let repoBranchesRepo: RepoBranchesRepository
+let repoBranchesRepo: RepoBranchesRepository;
 
 async function init(): Promise<void> {
-  let client = new mongodb.MongoClient(c.get("dbUrl"));
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
-  db = client.db(c.get("dbName"));
+  db = client.db(c.get('dbName'));
   consoleLogger = new ConsoleLogger();
   fileSystemServices = new FileSystemServices();
   jobCommandExecutor = new JobSpecificCommandExecutor();
@@ -45,25 +43,33 @@ async function init(): Promise<void> {
   cdnConnector = new FastlyConnector(consoleLogger);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandletFactory = new JobHandlerFactory();
-  repoBranchesRepo = new RepoBranchesRepository(db,c, consoleLogger);
-  jobManager = new JobManager(c, jobValidator, jobHandletFactory, jobCommandExecutor, jobRepository, cdnConnector, repoConnector, fileSystemServices, hybridJobLogger, repoBranchesRepo);
-  jobManager
-    .start()
-    .catch(err => {
-      console.log(`ERROR: ${err}`);
-    });
-
+  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
+  jobManager = new JobManager(
+    c,
+    jobValidator,
+    jobHandletFactory,
+    jobCommandExecutor,
+    jobRepository,
+    cdnConnector,
+    repoConnector,
+    fileSystemServices,
+    hybridJobLogger,
+    repoBranchesRepo
+  );
+  jobManager.start().catch((err) => {
+    console.log(`ERROR: ${err}`);
+  });
 }
 process.on('SIGTERM', async () => {
   console.log('Received SIGTERM');
   await jobManager.stop();
   if (client) {
     client.close();
-    consoleLogger.info("App", '\nServer has closed mongo client connection');
+    consoleLogger.info('App', '\nServer has closed mongo client connection');
   }
   process.exit(0);
 });
 
-(async function() {
+(async function () {
   await init();
 })();

@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.4.5] - 2020-08-13
 
 ### changed
+
 - remove build call (`make next-gen-html`) from S3Publish.js and remove next-gen-publish and next-gen-html-publish targets from all makefiles (DOP-1238)
 - next-gen-deploy is always passed the path prefix from the command line
 
 ### added
-- server writes env.production file for all jobs, but only constructs PATH_PREFIX for production deploy and stagel commit jobs (DOP-1238, DOP-1253) 
 
+- server writes env.production file for all jobs, but only constructs PATH_PREFIX for production deploy and stagel commit jobs (DOP-1238, DOP-1253)
 
 ## [v0.4.4] - 2020-08-13
 
@@ -41,8 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fastly purge cache functionality (DOP-857)
 
-- Parser failures now propagate to build status (DOP-64) 
-
+- Parser failures now propagate to build status (DOP-64)
 
 ## [v0.4.1] - 2020-04-29
 
@@ -51,7 +51,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added Fastly purge cache functionality (DOP-857)
 
 - update Dockerfiles to only download production modules (DOP-999)
-
 
 ## [v0.4.0] - 2020-04-16
 
@@ -68,7 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - production deploy functionality in autobuilder (DOCSPLAT-299)
 
 - cmdline interface for non-git builds (DOCSPLAT-522)
-
 
 ## [v0.2.1] - 2020-01-31
 
@@ -122,7 +120,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Refactor in preparation for productin deploy jobs (DOCSP-7001)
 
-
 ## [v0.0.9] - 2019-11-13
 
 ### Added
@@ -148,7 +145,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for baas-docs slack output (DOCSP-6399)
 
 - Fixed timeout behavior to prevent outages (DOCSP-7729)
-
 
 ## [v0.0.9] - 2019-11-13
 

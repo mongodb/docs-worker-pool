@@ -1,52 +1,52 @@
 {
-    "stage": "SNOOTY_ENV",
-    "env": "STAGE",
-    "dbUsername": "MONGO_ATLAS_USERNAME",
-    "dbPassword": "MONGO_ATLAS_PASSWORD",
-    "dbHost": "MONGO_ATLAS_HOST",
-    "dbName": "DB_NAME",
-    "dbUrl": "MONGO_ATLAS_URL",
-    "jobQueueCollection": "JOB_QUEUE_COL_NAME",
-    "awsKey": "AWS_ACCESS_KEY_ID",
-    "awsSecret": "AWS_SECRET_ACCESS_KEY",
-    "githubBotUserName": "GITHUB_BOT_USERNAME",
-    "githubBotPW": "GITHUB_BOT_PASSWORD",
-    "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
-    "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
-    "reposBranchesCollection": "REPOS_BRANCHES_COL_NAME",
-    "GATSBY_PARSER_USER": "GATSBY_PARSER_USER",
-    "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
-    "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
-    "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
-    "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
-    "gatsbyConsitentNavFlag": "GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION",
-    "gatsbySDKVersionDropdownFlag": "GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN",
-    "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
-    "repo_dir": "repos",
-    "cdn_creds": {
-        "cloudgov-docs": {
-            "id": "FASTLY_ATLAS_SERVICE_ID",
-            "token": "FASTLY_ATLAS_TOKEN"
-        },
-        "cloud-docs": {
-            "id": "FASTLY_ATLAS_SERVICE_ID",
-            "token": "FASTLY_ATLAS_TOKEN"
-        },
-        "cloud-docs-osb": {
-            "id": "FASTLY_ATLAS_SERVICE_ID",
-            "token": "FASTLY_ATLAS_TOKEN"
-        },
-        "devhub-content": {
-            "id": "FASTLY_DEVHUB_SERVICE_ID",
-            "token": "FASTLY_DEVHUB_TOKEN"
-        },
-        "dochub": {
-            "id": "FASTLY_DOCHUB_SERVICE_ID",
-            "token": "FASTLY_DOCHUB_TOKEN"
-        },
-        "main": {
-            "id": "FASTLY_MAIN_SERVICE_ID",
-            "token": "FASTLY_MAIN_TOKEN"
-        }
+  "stage": "SNOOTY_ENV",
+  "env": "STAGE",
+  "dbUsername": "MONGO_ATLAS_USERNAME",
+  "dbPassword": "MONGO_ATLAS_PASSWORD",
+  "dbHost": "MONGO_ATLAS_HOST",
+  "dbName": "DB_NAME",
+  "dbUrl": "MONGO_ATLAS_URL",
+  "jobQueueCollection": "JOB_QUEUE_COL_NAME",
+  "awsKey": "AWS_ACCESS_KEY_ID",
+  "awsSecret": "AWS_SECRET_ACCESS_KEY",
+  "githubBotUserName": "GITHUB_BOT_USERNAME",
+  "githubBotPW": "GITHUB_BOT_PASSWORD",
+  "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
+  "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
+  "reposBranchesCollection": "REPOS_BRANCHES_COL_NAME",
+  "GATSBY_PARSER_USER": "GATSBY_PARSER_USER",
+  "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
+  "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
+  "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
+  "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
+  "gatsbyConsitentNavFlag": "GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION",
+  "gatsbySDKVersionDropdownFlag": "GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN",
+  "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
+  "repo_dir": "repos",
+  "cdn_creds": {
+    "cloudgov-docs": {
+      "id": "FASTLY_ATLAS_SERVICE_ID",
+      "token": "FASTLY_ATLAS_TOKEN"
+    },
+    "cloud-docs": {
+      "id": "FASTLY_ATLAS_SERVICE_ID",
+      "token": "FASTLY_ATLAS_TOKEN"
+    },
+    "cloud-docs-osb": {
+      "id": "FASTLY_ATLAS_SERVICE_ID",
+      "token": "FASTLY_ATLAS_TOKEN"
+    },
+    "devhub-content": {
+      "id": "FASTLY_DEVHUB_SERVICE_ID",
+      "token": "FASTLY_DEVHUB_TOKEN"
+    },
+    "dochub": {
+      "id": "FASTLY_DOCHUB_SERVICE_ID",
+      "token": "FASTLY_DOCHUB_TOKEN"
+    },
+    "main": {
+      "id": "FASTLY_MAIN_SERVICE_ID",
+      "token": "FASTLY_MAIN_TOKEN"
     }
+  }
 }

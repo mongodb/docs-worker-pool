@@ -1,5 +1,5 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import * as mongodb from "mongodb";
+import * as mongodb from 'mongodb';
 import { MongoMemoryServerStates } from 'mongodb-memory-server-core/lib/MongoMemoryServer';
 const COLLECTIONS = ['queue', 'entitlements'];
 export class TestDBManager {
@@ -10,12 +10,12 @@ export class TestDBManager {
     jest.setTimeout(60000);
     this.server = new MongoMemoryServer({
       instance: {
-        dbName: 'jest'
-      }
+        dbName: 'jest',
+      },
     });
     process.env.DB_NAME = 'jest';
-    process.env.JOB_QUEUE_COL_NAME = 'queue'
-    process.env.USER_ENTITLEMENT_COL_NAME = 'entitlements'
+    process.env.JOB_QUEUE_COL_NAME = 'queue';
+    process.env.USER_ENTITLEMENT_COL_NAME = 'entitlements';
   }
 
   async start() {
@@ -40,8 +40,8 @@ export class TestDBManager {
     return await Promise.all(COLLECTIONS.map((c) => this.db.collection(c).deleteMany({})));
   }
 
-  async insertDocument(document: any, collection:string): Promise<any> {
-    let resp = await this.db.collection(collection).insertOne(document);
+  async insertDocument(document: any, collection: string): Promise<any> {
+    const resp = await this.db.collection(collection).insertOne(document);
     return resp.insertedId;
   }
 
@@ -49,5 +49,4 @@ export class TestDBManager {
     const query = { _id: id };
     return await this.db.collection(process.env.JOB_QUEUE_COL_NAME).findOne(query);
   }
-
 }

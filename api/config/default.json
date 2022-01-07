@@ -1,18 +1,18 @@
 {
-    "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
-    "githubSecret":"GITHUB_SECRET",
-    "slackSecret": "SLACK_SECRET",
-    "dbName": "DB_NAME",
-    "dbUrl": "MONGO_ATLAS_URL",
-    "slackViewOpenUrl": "https://slack.com/api/views.open",
-    "jobQueueCollection": "JOB_QUEUE_COL_NAME",
-    "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
-    "repoBranchesCollection":"REPO_BRANCHES_COL_NAME",
-    "dashboardUrl": "DASHBOARD_URL",
-    "cdn_creds": {
-        "dochub": {
-            "id": "FASTLY_DOCHUB_SERVICE_ID",
-            "token": "FASTLY_DOCHUB_TOKEN"
-        }
+  "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
+  "githubSecret": "GITHUB_SECRET",
+  "slackSecret": "SLACK_SECRET",
+  "dbName": "DB_NAME",
+  "dbUrl": "MONGO_ATLAS_URL",
+  "slackViewOpenUrl": "https://slack.com/api/views.open",
+  "jobQueueCollection": "JOB_QUEUE_COL_NAME",
+  "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
+  "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
+  "dashboardUrl": "DASHBOARD_URL",
+  "cdn_creds": {
+    "dochub": {
+      "id": "FASTLY_DOCHUB_SERVICE_ID",
+      "token": "FASTLY_DOCHUB_TOKEN"
     }
+  }
 }

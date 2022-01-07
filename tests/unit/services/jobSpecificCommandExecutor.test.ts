@@ -4,32 +4,32 @@ import cp from 'child_process';
 jest.mock('child_process');
 
 describe('JobSpecificCommandExecutor Tests', () => {
-    let commandExecutor: JobSpecificCommandExecutor;
+  let commandExecutor: JobSpecificCommandExecutor;
 
-    beforeEach(() => {
-        commandExecutor = new JobSpecificCommandExecutor();
-    })
+  beforeEach(() => {
+    commandExecutor = new JobSpecificCommandExecutor();
+  });
 
-    afterEach(() => {
-        jest.resetAllMocks();
-    })
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    test('Construct JobSpecificCommandExecutor', () => {
-        expect(new JobSpecificCommandExecutor()).toBeDefined();
-    })
+  test('Construct JobSpecificCommandExecutor', () => {
+    expect(new JobSpecificCommandExecutor()).toBeDefined();
+  });
 
-    describe('JobSpecificCommandExecutor getServerUser Tests', () => {
-        test('JobSpecificCommandExecutor getServerUser  succeeds', async() => {
-            const testData = TestDataProvider.getCommandsForGetServerUser("test_repo");
-            cp.exec.mockImplementation((command, callback) => {
-                callback(null, { stdout: 'test_user_in_test_machine' });
-            });
-            let resp = await commandExecutor.getServerUser();
-            expect(resp.error).toBe(undefined);
-            expect(resp.output).toBe('test_user_in_test_machine');
-            expect(resp.status).toBe('success');
-            expect(cp.exec.mock.calls[0][0]).toEqual(testData.join(' && '));
-            expect(cp.exec).toBeCalledTimes(1);
-        })
-    })
-})
+  describe('JobSpecificCommandExecutor getServerUser Tests', () => {
+    test('JobSpecificCommandExecutor getServerUser  succeeds', async () => {
+      const testData = TestDataProvider.getCommandsForGetServerUser('test_repo');
+      cp.exec.mockImplementation((command, callback) => {
+        callback(null, { stdout: 'test_user_in_test_machine' });
+      });
+      const resp = await commandExecutor.getServerUser();
+      expect(resp.error).toBe(undefined);
+      expect(resp.output).toBe('test_user_in_test_machine');
+      expect(resp.status).toBe('success');
+      expect(cp.exec.mock.calls[0][0]).toEqual(testData.join(' && '));
+      expect(cp.exec).toBeCalledTimes(1);
+    });
+  });
+});
