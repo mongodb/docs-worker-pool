@@ -1,5 +1,19 @@
-import { promisify } from 'util';
-import cp from 'child_process';
+
+import { promisify } from "util";
+import cp, {ExecOptions, ExecException, ChildProcess, PromiseWithChild} from 'child_process';
+import c from 'config';
+
+// Hard assign the overloaded function signature to a variable, for promisifying purposes
+// If this isn't done, promisify doesn't know which signature to pick, and throws a type error
+const execWithOptions: (
+    command: string,
+    options: ExecOptions,
+    callback?: (error: ExecException | null, stdout: string, stderr: string) => void
+) => ChildProcess = cp.exec;
+
+// This type inference for the overloaded Promisify signature is incorrectly inferring Promise<string>
+// The expected return signature is a Promise<{stdout:string, stderr:string}>
+let exec = promisify(execWithOptions) as any;
 
 export class CommandExecutorResponse {
   status: string;
@@ -30,19 +44,25 @@ export interface IGithubCommandExecutor {
 }
 
 export class ShellCommandExecutor implements ICommandExecutor {
-  async execute(commands: string[]): Promise<CommandExecutorResponse> {
-    const exec = promisify(cp.exec);
-    const resp = new CommandExecutorResponse();
-    try {
-      const { stdout, stderr } = await exec(commands.join(' && '));
-      resp.output = stdout.trim();
-      resp.error = stderr;
-      resp.status = 'success';
-      return resp;
-    } catch (error) {
-      resp.output = null;
-      resp.error = error;
-      resp.status = 'failed';
+    async execute(commands: string[]): Promise<CommandExecutorResponse> {
+        let exec = promisify(cp.exec);
+        let resp = new CommandExecutorResponse();
+        try {
+            const {
+                stdout,
+                stderr
+            } = await exec(commands.join(' && '), {maxBuffer : c.get('MAX_STDOUT_BUFFER_SIZE')});
+
+            resp.output = stdout.trim();
+            resp.error = stderr;
+            resp.status = 'success';
+            return resp;
+        } catch (error) {
+            resp.output = null;
+            resp.error = error;
+            resp.status = 'failed';
+        }
+        return resp;
     }
     return resp;
   }
