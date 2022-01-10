@@ -111,7 +111,7 @@ functions:
       handler: api/controllers/v1/slack.DeployRepo
       events:
         - http:
-            path: /webhook/github/trigger/build
+            path: /webhook/slack/trigger/build
             method: POST
             cors: true
       environment:
