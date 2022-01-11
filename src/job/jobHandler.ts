@@ -215,7 +215,10 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
+
+      console.log("throwIfBranchNotConfigured calling")
       await this._validator.throwIfBranchNotConfigured(this.currJob);
+      console.log(this.currJob)
       await this.constructPrefix();
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         await this.constructManifestIndexPath();

@@ -43,8 +43,8 @@ export class JobValidator implements IJobValidator {
 
   throwIfItIsNotPublishable(job: IJob): void {
     if (job.payload.repoBranches) {
-      job.payload.repoBranches.forEach(repoBranches => {
-        if (repoBranches['gitBranchName'] === 'job.payload.branchName' ) {
+      job.payload.repoBranches['branches'].forEach(branch => {
+        if (branch['gitBranchName'] === 'job.payload.branchName' ) {
           return
         }
       });
