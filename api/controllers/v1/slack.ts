@@ -184,6 +184,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       });
     }
   }
+  return  {
+    'statusCode': 200,
+    'body': "Jobs Enqueued"
+}
+}
   function createPayload(
     jobType: string,
     repoOwner: string,
@@ -230,5 +235,4 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       logs: [],
     };
   }
-};
 

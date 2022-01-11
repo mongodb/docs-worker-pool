@@ -8,7 +8,6 @@
   "slackViewOpenUrl": "https://slack.com/api/views.open",
   "jobQueueCollection": "JOB_QUEUE_COL_NAME",
   "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
-  "MAX_STDOUT_BUFFER_SIZE": 16000000,
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "cdn_creds": {
     "dochub": {
