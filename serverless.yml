@@ -78,6 +78,7 @@ webhook-env-core: &webhook-env-core
   SLACK_SECRET: ${self:custom.slackSecret}
   SLACK_TOKEN: ${self:custom.slackAuthToken}
   DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
+  NODE_CONFIG_DIR: './api/config'
 
 functions:
     v1UpsertEdgeDictionaryItem:
