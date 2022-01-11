@@ -28,7 +28,13 @@ export abstract class BaseRepository {
 
   protected async upsert(filterDoc: any, updateDoc: any, errorMsg: string): Promise<any> {
     try {
-      const updateResult = await this.update(filterDoc, updateDoc, errorMsg);
+      const updateResult = await this.promiseTimeoutS(
+        this._config.get('MONGO_TIMEOUT_S'),
+        this._collection.updateOne(filterDoc, updateDoc,{upsert: true}),
+        errorMsg
+      );
+
+      console.log(updateResult)
       if (updateResult.upsertedId) {
         return updateResult.upsertedId;
       }

@@ -1,16 +1,16 @@
 import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 export const axiosApi = axios.create();
 
-import tsscmp from 'tsscmp';
+import * as tsscmp from 'tsscmp';
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
-  displayRepoOptions(repos: Array<string>, triggerId: string): Promise<string>;
+  displayRepoOptions(repos: Array<string>, triggerId: string): Promise<any>;
   parseSelection(payload: any): any;
-  sendMessage(message: any, user: string): Promise<string>;
+  sendMessage(message: any, user: string): Promise<any>;
 }
 
 export class SlackConnector implements ISlackConnector {
@@ -80,14 +80,17 @@ export class SlackConnector implements ISlackConnector {
   }
 
 
-  async displayRepoOptions(repos: string[], triggerId: string): Promise<string> {
+  async displayRepoOptions(repos: string[], triggerId: string): Promise<any> {
     const repoOptView = this._buildDropdown(repos, triggerId);
+    console.log(repoOptView)
+    console.log(JSON.stringify(repoOptView))
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     console.log(slackUrl)
     return await axiosApi.post(slackUrl, repoOptView, {
       headers: {
         Authorization: [`Bearer ${slackToken}`],
+        'Content-type': 'application/json; charset=utf-8'
       },
     });
   }
@@ -155,7 +158,7 @@ export class SlackConnector implements ISlackConnector {
   }
 
   private _buildDropdown(branches: Array<string>, triggerId: string): any {
-    const reposToShow: Array<any> = [];
+    let reposToShow: Array<any> = [];
     branches.forEach((fullPath) => {
       const fullBranchPath = fullPath;
       const opt = {
@@ -167,6 +170,12 @@ export class SlackConnector implements ISlackConnector {
       };
       reposToShow.push(opt);
     });
+    // THis is the limitation enforced by slack as no more 100 items are allowd in the dropdown
+    //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
+
+    if (reposToShow.length > 100) {
+      reposToShow = reposToShow.splice(0, 100)
+    }
     return this._getDropDownView(triggerId, reposToShow);
   }
 }

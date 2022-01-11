@@ -28,7 +28,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
   }
 
   async getRepoEntitlementsBySlackUserId(slackUserId: string): Promise<any> {
-    const query = { user_id: slackUserId };
+    const query = { slack_user_id: slackUserId };
     const entitlementsObject = await this.findOne(
       query,
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${slackUserId}`

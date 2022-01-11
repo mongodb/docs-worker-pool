@@ -5,6 +5,7 @@ import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
+import { privateEncrypt } from 'crypto';
 
 function isUserEntitled(entitlementsObject: any): boolean {
   if (!entitlementsObject || !entitlementsObject.repos || entitlementsObject.repos.length <= 0) {
@@ -35,6 +36,15 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
   return branchPath;
 }
 
+function getQSString(qs:string) {
+  let key_val = {};
+  qs.split("&").forEach(keyval => {
+    const kvpair = keyval.split("=")
+    key_val[kvpair[0]] = kvpair[1]
+  });
+  return key_val;
+}
+
 export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
@@ -45,22 +55,32 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
     return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
   }
   console.log("validateSlackRequest validated" )
-  console.log(c.get('dbUrl'))
-  const client = new mongodb.MongoClient(process.env.MONGO_ATLAS_URL);
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
-  const parsed = JSON.parse(event.query.payload);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
+  const key_val = getQSString(event.body)
+  console.log(key_val)
+  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val["user_id"]);
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!!');
   }
 
   console.log("user entitlement validated" )
   const entitledBranches = await buildEntitleBranchList(entitlement, branchRepository);
-  console.log(JSON.stringify(entitledBranches))
-  return slackConnector.displayRepoOptions(entitledBranches, event.query.trigger_id);
+  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val["trigger_id"]);
+  if (resp && resp.status == 200 && resp.data) {
+    console.log(resp.data)
+    return  {
+      'statusCode': 200,
+      'body': "Model requested"
+  }
+  }
+  return  {
+    'statusCode': resp?resp.status:500,
+    'body': resp? resp.data : "Unknown error"
+}
 };
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
@@ -76,16 +96,22 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
+    console.log("invalid signature 401");
     return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
   }
-  const client = new mongodb.MongoClient(process.env.MONGO_ATLAS_URL);
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
-  const db = client.db(process.env.DB_NAME);
+  const db = client.db(c.get('dbName'));
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
-  const parsed = JSON.parse(event.query.payload);
+  // This is coming in as urlencoded stirng, need to decode before parsing=
+
+  let decoded = decodeURIComponent(event.body).split("=")[1];
+  console.log(decoded)
+  const parsed = JSON.parse(decoded);
+  console.log(parsed)
   const stateValues = parsed.view.state.values;
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);

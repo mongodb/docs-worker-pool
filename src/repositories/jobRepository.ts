@@ -27,6 +27,7 @@ export class JobRepository extends BaseRepository {
   }
 
   async insertJob(job: any): Promise<void> {
+    console.log(job.payload)
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
