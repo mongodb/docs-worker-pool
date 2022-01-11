@@ -6,6 +6,7 @@ COPY package*.json ./
 COPY tsconfig*.json ./
 RUN npm install
 COPY . ./
+RUN npm install -g typescript@latest
 RUN npm run build
 
 # where repo work will happen
