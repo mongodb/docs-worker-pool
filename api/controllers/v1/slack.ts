@@ -1,5 +1,6 @@
 import c from 'config';
-import mongodb from 'mongodb';
+
+import * as mongodb from 'mongodb';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
@@ -38,12 +39,17 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
 export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
+  console.log("displayrepoptions Guru")
+  console.log(c.get('dbUrl'))
   if (!slackConnector.validateSlackRequest(event)) {
+    console.log("'Signature Mismatch, Authentication Failed!!'")
     return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
   }
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  console.log("validateSlackRequest validated" )
+  console.log(c.get('dbUrl'))
+  const client = new mongodb.MongoClient(process.env.MONGO_ATLAS_URL);
   await client.connect();
-  const db = client.db(c.get('dbName'));
+  const db = client.db(process.env.DB_NAME);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const parsed = JSON.parse(event.query.payload);
@@ -51,12 +57,16 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!!');
   }
+
+  console.log("user entitlement validated" )
   const entitledBranches = await buildEntitleBranchList(entitlement, branchRepository);
+  console.log(JSON.stringify(entitledBranches))
   return slackConnector.displayRepoOptions(entitledBranches, event.query.trigger_id);
 };
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
   try {
+    console.log(JSON.stringify(job))
     await jobRepository.insertJob(job);
   } catch (err) {
     logger.error('SLACK:DEPLOYREPO', err);
@@ -69,9 +79,9 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   if (!slackConnector.validateSlackRequest(event)) {
     return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
   }
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  const client = new mongodb.MongoClient(process.env.MONGO_ATLAS_URL);
   await client.connect();
-  const db = client.db(c.get('dbName'));
+  const db = client.db(process.env.DB_NAME);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);

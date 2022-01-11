@@ -14,6 +14,8 @@ package:
   patterns:
     api/config/**
 custom:
+  serverlessPluginTypescript:
+    tsConfigFileLocation: '.api/tsconfig.build.json'
   deploymentBucket:
     dev: worker-pool-deployment
     stg: worker-pool-deployment
@@ -60,6 +62,7 @@ default-env: &default-env
   FASTLY_DOCHUB_SERVICE_ID: ${self:custom.fastlyDochubServiceId}
   FASTLY_DOCHUB_TOKEN: ${self:custom.fastlyDochubToken}
   GITHUB_WEBHOOK_SECRET: REPLACE-WITH-YOUR-SECRET-HERE
+  NODE_CONFIG_DIR: './api/config'
 
 webhook-env-core: &webhook-env-core
   STAGE: ${self:provider.stage}
@@ -73,6 +76,7 @@ webhook-env-core: &webhook-env-core
   GITHUB_SECRET: ${self:custom.githubSecret}
   REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
   SLACK_SECRET: ${self:custom.slackSecret}
+  SLACK_TOKEN: ${self:custom.slackAuthToken}
   DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
 
 functions:

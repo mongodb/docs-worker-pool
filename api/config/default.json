@@ -2,6 +2,7 @@
   "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
   "githubSecret": "GITHUB_SECRET",
   "slackSecret": "SLACK_SECRET",
+  "slackAuthToken": "SLACK_TOKEN",
   "dbName": "DB_NAME",
   "dbUrl": "MONGO_ATLAS_URL",
   "slackViewOpenUrl": "https://slack.com/api/views.open",

@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
-import * as tsscmp from 'tsscmp';
 import crypto from 'crypto';
-
 export const axiosApi = axios.create();
+
+import tsscmp from 'tsscmp';
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
@@ -63,21 +63,28 @@ export class SlackConnector implements ISlackConnector {
   }
 
   validateSlackRequest(payload: any): boolean {
+      
     // params needed to verify for slack
     const headerSlackSignature = payload.headers['X-Slack-Signature'].toString(); // no idea why `typeof <sig>` = object
     const timestamp = payload.headers['X-Slack-Request-Timestamp'];
-    const signingSecret = this._config.get<string>('slackSecret');
-    const hmac = crypto.createHmac('sha256', signingSecret);
-    const [version, hash] = headerSlackSignature.split('=');
-    const base = `${version}:${timestamp}:${JSON.stringify(payload.body)}`;
-    hmac.update(base);
-    return tsscmp(hash, hmac.digest('hex'));
+    const signingSecret = process.env.SLACK_SECRET;
+    if (signingSecret) {
+      const hmac = crypto.createHmac('sha256', signingSecret);
+      const [version, hash] = headerSlackSignature.split('=');
+      console.log(payload.body)
+      const base = `${version}:${timestamp}:${payload.body}`;
+      hmac.update(base);
+      return tsscmp(hash, hmac.digest('hex'));
+    }
+    return false
   }
+
 
   async displayRepoOptions(repos: string[], triggerId: string): Promise<string> {
     const repoOptView = this._buildDropdown(repos, triggerId);
-    const slackToken = this._config.get<string>('slackToken');
+    const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
+    console.log(slackUrl)
     return await axiosApi.post(slackUrl, repoOptView, {
       headers: {
         Authorization: [`Bearer ${slackToken}`],
