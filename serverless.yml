@@ -42,11 +42,16 @@ custom:
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
   slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
-  slackNotificationEventSource:
-    stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-    prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-    dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-  slackNotificationEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.slackNotificationEventSource.${self:provider.stage}} 
+  slackBuildProgessNotificationEventSource:
+    stg: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
+    prd: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
+    dev: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
+  slackBuildProgessNotificationEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.slackBuildProgessNotificationEventSource.${self:provider.stage}} 
+  slackBuildSummaryNotificationEventSource:
+    stg: aws.partner/mongodb.com/stitch.trigger/5d4328042de84772fcdf9faf
+    prd: aws.partner/mongodb.com/stitch.trigger/5d4328042de84772fcdf9faf
+    dev: aws.partner/mongodb.com/stitch.trigger/5d4328042de84772fcdf9faf
+  slackBuildSummaryNotificationEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.slackBuildSummaryNotificationEventSource.${self:provider.stage}} 
   dashboardUrl:
     stg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
     prd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
@@ -122,3 +127,24 @@ functions:
       environment:
         <<: *webhook-env-core
 
+    v1NotifyBuildSummary:
+      handler: api/controllers/v1/notifications.NotifyBuildSummary
+      events:
+        - eventBridge:
+            eventBus:  ${self:custom.slackBuildSummaryNotificationEventBus}
+            pattern:
+              source:
+                - ${self:custom.slackBuildSummaryNotificationEventSource.${self:provider.stage}}
+      environment:
+        <<: *webhook-env-core
+
+    v1NotifyBuildProgress:
+      handler: api/controllers/v1/notifications.NotifyBuildProgress
+      events:
+        - eventBridge:
+            eventBus:  ${self:custom.slackBuildProgessNotificationEventBus}
+            pattern:
+              source:
+                - ${self:custom.slackBuildProgessNotificationEventSource.${self:provider.stage}}
+      environment:
+        <<: *webhook-env-core

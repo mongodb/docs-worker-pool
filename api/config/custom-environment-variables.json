@@ -8,6 +8,7 @@
   "slackViewOpenUrl": "https://slack.com/api/views.open",
   "jobQueueCollection": "JOB_QUEUE_COL_NAME",
   "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
+  "dashboardUrl": "DASHBOARD_URL", 
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "cdn_creds": {
     "dochub": {

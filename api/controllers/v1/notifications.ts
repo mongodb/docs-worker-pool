@@ -1,25 +1,25 @@
-import c from 'config';
-import mongodb from 'mongodb';
+import * as c from 'config';
+import * as mongodb from 'mongodb';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 
 export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
-  if (JSON.stringify(event.updateDescription.updatedFields).indexOf('comMessage') === -1) {
+  if (JSON.stringify(event.detail.updateDescription.updatedFields).indexOf('comMessage') === -1) {
     return;
   }
-  const slackMsgs = event.fullDocument.comMessage;
+  const slackMsgs = event.detail.fullDocument.comMessage;
   // check if summary exists to send to slack
   if (slackMsgs === undefined || slackMsgs.length === 0) {
     consoleLogger.error(event.fullDocument._id, 'ERROR: Empty slack message array.');
     return;
   }
 
-  const jobTitle = event.fullDocument.title;
-  const jobId = event.fullDocument._id;
-  const repoName = event.fullDocument.payload.repoName;
-  const username = event.fullDocument.user;
+  const jobTitle = event.detail.fullDocument.title;
+  const jobId = event.detail.fullDocument._id;
+  const repoName = event.detail.fullDocument.payload.repoName;
+  const username = event.detail.fullDocument.user;
   const slackConnector = new SlackConnector(consoleLogger, c);
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -86,19 +86,26 @@ function prepProgressMessage(
 export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-  const jobTitle = event.fullDocument.title;
-  const jobId = event.fullDocument._id;
-  const username = event.fullDocument.user;
+  console.log(event)
+  const jobTitle = event.detail.fullDocument.title;
+  const jobId = event.detail.fullDocument._id;
+  const username = event.detail.fullDocument.user;
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
+  console.log(entitlement);
   if (!entitlement || !entitlement['slack_user_id']) {
+    console.log("Entitlement Failed")
     return;
   }
-  return await slackConnector.sendMessage(
-    prepProgressMessage(event.operationType, c.get('dashboardUrl'), jobId, jobTitle, status),
+  console.log(c.get('dashboardUrl'));
+  await slackConnector.sendMessage(
+    prepProgressMessage(event.detail.operationType, c.get('dashboardUrl'), jobId, jobTitle, event.detail.fullDocument.status),
     entitlement['slack_user_id']
   );
+  return {
+    'statusCode': 200,
+  }
 };

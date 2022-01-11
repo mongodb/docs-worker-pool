@@ -16,10 +16,12 @@ export class RepoEntitlementsRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${githubUsername}`
     );
     // if user has specific entitlements
+    console.log(entitlementsObject);
     if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.length > 0) {
       return {
         repos: entitlementsObject.repos,
         github_username: entitlementsObject.github_username,
+        slack_user_id: entitlementsObject.slack_user_id,
         status: 'success',
       };
     } else {
