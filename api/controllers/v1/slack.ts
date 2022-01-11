@@ -5,7 +5,6 @@ import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
-import { privateEncrypt } from 'crypto';
 
 function isUserEntitled(entitlementsObject: any): boolean {
   if (!entitlementsObject || !entitlementsObject.repos || entitlementsObject.repos.length <= 0) {
@@ -109,9 +108,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   // This is coming in as urlencoded stirng, need to decode before parsing=
 
   let decoded = decodeURIComponent(event.body).split("=")[1];
-  console.log(decoded)
   const parsed = JSON.parse(decoded);
-  console.log(parsed)
   const stateValues = parsed.view.state.values;
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
@@ -152,7 +149,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
     else {
-
       let stable = ''
       if (isStableBranch) { stable = '-g' }
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
@@ -184,10 +180,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       });
     }
   }
-  return {
-    'statusCode': 200,
-    'body': "Jobs Enqueued"
-  }
+  return  {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' }
+  };
 }
 function createPayload(
   jobType: string,
