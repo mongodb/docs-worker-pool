@@ -393,6 +393,7 @@ export abstract class JobHandler {
       `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`
     );
     try {
+      console.log(this._currJob)
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);

@@ -24,13 +24,7 @@ describe('Job Repository Tests', () => {
         new Date()
       );
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        `Cannot read property 'modifiedCount' of undefined`
-      );
-      expect(dbRepoHelper.logger.error).toBeCalledWith(
-        'JobRepository:updateOne',
-        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(
-          testData.update
-        )} Error: Cannot read property 'modifiedCount' of undefined`
+        "Failed to update job ({\"_id\":\"Test_Job\"})  for {\"$set\":{\"status\":\"completed\",\"endTime\":\"2021-05-03T07:00:00.000Z\",\"result\":\"All good\"}}"
       );
     });
 

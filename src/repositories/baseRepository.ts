@@ -67,7 +67,7 @@ export abstract class BaseRepository {
   protected async updateOne(query: any, update: any, errorMsg: string): Promise<boolean> {
     try {
       const updateResult = await this.update(query, update, errorMsg);
-      if (!updateResult.modifiedCount || updateResult.modifiedCount < 1) {
+      if (!updateResult || !updateResult.modifiedCount || updateResult.modifiedCount < 1) {
         throw new DBError(`Failed to update job (${JSON.stringify(query)})  for ${JSON.stringify(update)}`);
       }
     } catch (error) {

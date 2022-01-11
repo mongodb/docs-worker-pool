@@ -39,11 +39,11 @@ async function init(): Promise<void> {
   jobRepository = new JobRepository(db, c, consoleLogger);
   hybridJobLogger = new HybridJobLogger(jobRepository);
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);
+  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger,);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository,repoBranchesRepo);
   cdnConnector = new FastlyConnector(consoleLogger);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandlerFactory = new JobHandlerFactory();
-  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
   jobManager = new JobManager(
     c,
     jobValidator,

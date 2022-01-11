@@ -137,7 +137,7 @@ describe('ProductionJobHandler Tests', () => {
 
   describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var cases', (element) => {
     test(`Testing commit check returns ${JSON.stringify(element)}`, async () => {
-      jobHandlerTestHelper.job.payload.urlSlug = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
+      jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
       jobHandlerTestHelper.job.payload.aliased = true;
       jobHandlerTestHelper.setupForSuccess();
       jobHandlerTestHelper.config.get
@@ -175,7 +175,7 @@ describe('ProductionJobHandler Tests', () => {
   });
 
   test('Execute Next Gen Build throws error when execute throws error', async () => {
-    jobHandlerTestHelper.job.payload.urlSlug = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
+    jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     jobHandlerTestHelper.jobCommandExecutor.execute.mockImplementation(() => {
       throw new Error('Unable to Execute Commands');

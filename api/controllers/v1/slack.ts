@@ -192,7 +192,7 @@ function createPayload(
   branchName: string,
   newHead: string,
   aliased = false,
-  alias = null,
+  urlSlug = null,
   primaryAlias = false,
   stable = ''
 ) {
@@ -203,7 +203,7 @@ function createPayload(
     repoName,
     branchName,
     aliased,
-    alias,
+    urlSlug,
     isFork: true,
     private: repoOwner === '10gen' ? true : false,
     isXlarge: true,

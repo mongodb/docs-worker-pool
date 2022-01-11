@@ -3,6 +3,7 @@ import validator from 'validator';
 import { IJob } from '../entities/job';
 import { IFileSystemServices } from '../services/fileServices';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
+import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
 export interface IJobValidator {
   throwIfJobInvalid(job: IJob): Promise<void>;
@@ -14,9 +15,12 @@ export interface IJobValidator {
 export class JobValidator implements IJobValidator {
   _fileSystemService: IFileSystemServices;
   _repoEntitlementRepository: RepoEntitlementsRepository;
-  constructor(fileSystemService: IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository) {
+  _repoBranchesRepository: RepoBranchesRepository;
+  constructor(fileSystemService: IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository, 
+    repoBranchesRepository: RepoBranchesRepository) {
     this._fileSystemService = fileSystemService;
     this._repoEntitlementRepository = repoEntitlementRepository;
+    this._repoBranchesRepository = repoBranchesRepository;
   }
 
   async throwIfUserNotEntitled(job: IJob): Promise<void> {
@@ -30,30 +34,22 @@ export class JobValidator implements IJobValidator {
     }
   }
 
-  async throwIfBranchNotConfigured(job: IJob): Promise<void> {
-    const response = await this._fileSystemService.downloadYaml(
-      `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`
-    );
-    if (response['status'] == 'success') {
-      job.payload.publishedBranches = response['content'];
-    } else {
-      throw new AuthorizationError(`Invalid publish branches file for ${job.payload.repoName}`);
+  async throwIfBranchNotConfigured(job: IJob): Promise<void> { 
+    job.payload.repoBranches = await this._repoBranchesRepository.getRepoBranchesByRepoName(job.payload.repoName);
+    if (!job.payload.repoBranches) {
+      throw new AuthorizationError(`repoBranches not found for ${job.payload.repoName}`);
     }
   }
 
   throwIfItIsNotPublishable(job: IJob): void {
-    let publishedBranches = [''];
-    if (job.payload.publishedBranches) {
-      publishedBranches = job.payload.publishedBranches.git.branches.published;
-      job.payload['stableBranch'] =
-        job.payload.publishedBranches.version.stable === job.payload.branchName &&
-        (job.payload.primaryAlias || !job.payload.aliased)
-          ? '-g'
-          : '';
+    if (job.payload.repoBranches) {
+      job.payload.repoBranches.forEach(repoBranches => {
+        if (repoBranches['gitBranchName'] === 'job.payload.branchName' ) {
+          return
+        }
+      });
     }
-    if (!publishedBranches.includes(job.payload.branchName)) {
-      throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
-    }
+    throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
   }
 
   public async throwIfJobInvalid(job: IJob): Promise<void> {

@@ -5,17 +5,20 @@ import * as data from '../../data/jobDef';
 import { JobValidator } from '../../../src/job/jobValidator';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { TestDataProvider } from '../../data/data';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 
 let job: IJob;
 let fileSystemServices: IFileSystemServices;
 let repoEntitlementRepository: RepoEntitlementsRepository;
 let jobValidator: JobValidator;
+let repoBranchesRepository: RepoBranchesRepository;
 
 beforeEach(() => {
   job = JSON.parse(JSON.stringify(data.default.value));
   fileSystemServices = mockDeep<IFileSystemServices>();
   repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository);
+  repoBranchesRepository = mockDeep<RepoBranchesRepository>();
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository,repoBranchesRepository);
 });
 
 afterEach(() => {
@@ -26,7 +29,7 @@ afterEach(() => {
 
 describe('JobValidator Tests', () => {
   test('Construct Job Factory', () => {
-    expect(new JobValidator(fileSystemServices, repoEntitlementRepository)).toBeDefined();
+    expect(new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepository)).toBeDefined();
   });
 
   test('invalid job type throws', async () => {
@@ -79,27 +82,14 @@ describe('JobValidator Tests', () => {
       )
       .mockReturnValue({ status: 'failure' });
     await expect(jobValidator.throwIfBranchNotConfigured(job)).rejects.toThrow(
-      `Invalid publish branches file for ${job.payload.repoName}`
+      `repoBranches not found for ${job.payload.repoName}`
     );
-    expect(fileSystemServices.downloadYaml).toHaveBeenCalledTimes(1);
   });
 
   test('throwIfItIsNotPublishable throws as branch not configured for publishing', () => {
     expect(() => {
       jobValidator.throwIfItIsNotPublishable(job);
     }).toThrowError(`${job.payload.branchName} is not configured for publish`);
-  });
-
-  test('throwIfItIsNotPublishable dont throws as branch is configured for publishing and stable branch is set to -g', () => {
-    job = TestDataProvider.configurePublishedBranchesWithPrimaryAlias(job);
-    jobValidator.throwIfItIsNotPublishable(job);
-    expect(job.payload.stableBranch).toEqual('-g');
-  });
-
-  test('throwIfItIsNotPublishable dont throws as branch is configured for publishing and stable branch is not set', () => {
-    job = TestDataProvider.configurePublishedBranchesWithOutPrimaryAliasAndAliasSet(job);
-    jobValidator.throwIfItIsNotPublishable(job);
-    expect(job.payload.stableBranch).toEqual('');
   });
 
   test('valid staging job throwIfJobInvalid dont throws as branch is configured for publishing and stable branch is not set', async () => {

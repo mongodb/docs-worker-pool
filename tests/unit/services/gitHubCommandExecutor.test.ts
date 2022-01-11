@@ -65,7 +65,7 @@ describe('GithubCommandExecutor Tests', () => {
 
         test('GithubCommandExecutor pullRepo with no head  succeeds', async() => {
             const testData = TestDataProvider.getPullRepoCommands("test_repo", "test_patch");
-            cp.exec.mockImplementation((command, options, callback) => {
+            cp.exec.mockImplementation(async (command, options, callback) => {
             cp.exec.mockImplementation((command, callback) => {
                 callback(null, { stdout: 'Repo pulled properly' });
             });
@@ -76,5 +76,6 @@ describe('GithubCommandExecutor Tests', () => {
             expect(cp.exec.mock.calls[0][0]).toEqual(testData.join(' && '));
             expect(cp.exec).toBeCalledTimes(1);
         })
+    })
     })
 })

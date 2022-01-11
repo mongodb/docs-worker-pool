@@ -58,7 +58,7 @@ export class JobHandlerTestHelper {
     return this.jobHandler;
   }
   setStageForDeploySuccess(isNextGen = true, prodDeploy = true): string[] {
-    this.job.payload.urlSlug = TestDataProvider.getBranchSlug(this.job);
+    this.job.payload.repoBranches = TestDataProvider.getBranchSlug(this.job);
     this.setupForSuccess(isNextGen);
     const publishOutput = TestDataProvider.getPublishOutputWithPurgedUrls(prodDeploy);
     this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'success', output: 'Great work', error: null });
@@ -67,7 +67,7 @@ export class JobHandlerTestHelper {
   }
 
   setStageForDeployFailure(deployOutput: string | null, deployError: string) {
-    this.job.payload.urlSlug = TestDataProvider.getBranchSlug(this.job);
+    this.job.payload.repoBranches = TestDataProvider.getBranchSlug(this.job);
     this.setupForSuccess();
     this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'success', output: 'Great work', error: null });
     this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'Failed', output: deployOutput, error: deployError });
@@ -87,6 +87,8 @@ export class JobHandlerTestHelper {
   }
 
   setupForSuccess(rootFileExists = true, nextGenEntry: string = TestDataProvider.nextGenEntryInWorkerFile()): void {
+    
+    this.job.payload.repoBranches = TestDataProvider.getBranchSlug(this.job);
     this.config.get.calledWith('repo_dir').mockReturnValue('repos');
     this.config.get.calledWith('stage').mockReturnValue('test');
     this.repoConnector.checkCommits

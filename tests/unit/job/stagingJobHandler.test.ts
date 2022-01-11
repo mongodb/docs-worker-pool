@@ -54,7 +54,7 @@ describe('StagingJobHandler Tests', () => {
   test('Execute nextgen build runs successfully with pathprefix', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(true);
-    jobHandlerTestHelper.job.payload.urlSlug = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
+    jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getBranchSlug(jobHandlerTestHelper.job);
     jobHandlerTestHelper.job.payload.pathPrefix = 'Mutprefix';
     jobHandlerTestHelper.job.payload.mutPrefix = 'Mutprefix';
     await jobHandlerTestHelper.jobHandler.execute();

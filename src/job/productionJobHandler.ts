@@ -69,7 +69,7 @@ export class ProductionJobHandler extends JobHandler {
 
   async constructManifestIndexPath(): Promise<void> {
     try {
-      this.currJob.payload.manifestPrefix = this.currJob.payload.project + '-' + this.currJob.payload.urlSlug;
+      this.currJob.payload.manifestPrefix = this.currJob.payload.repoBranches['project'] + '-' + this.currJob.payload.urlSlug;
     } catch (error) {
       await this.logger.save(this.currJob._id, error);
       throw error;
@@ -79,7 +79,7 @@ export class ProductionJobHandler extends JobHandler {
   async getPathPrefix(): Promise<string> {
     try {
       let pathPrefix = '';
-      pathPrefix = `${this.currJob.payload.prefix}/{$this.currJob.payload.urlSlug}`;
+      pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
       return pathPrefix;
     } catch (error) {
       await this.logger.save(this.currJob._id, error);

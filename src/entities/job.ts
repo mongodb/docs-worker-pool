@@ -37,8 +37,8 @@ export interface IPayload {
   mutPrefix: string | null | undefined;
   aliased: boolean | null | undefined;
   primaryAlias: string | null | undefined;
-  publishedBranches: any;
-  stableBranch: string | null | undefined;
+  repoBranches: any;
+  stable: string | null | undefined;
   isNextGen: boolean | null | undefined;
   regression: boolean | null | undefined;
   urlSlug: string | null | undefined;

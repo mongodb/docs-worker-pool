@@ -1,8 +1,6 @@
 import { IJob } from '../../src/entities/job';
 import { CommandExecutorResponse } from '../../src/services/commandExecutor';
 import * as data from '../data/jobDef';
-import fs from 'fs';
-import path from 'path';
 
 export class TestDataProvider {
   static getJobPropertiesValidateTestCases(): Array<any> {
@@ -45,35 +43,51 @@ export class TestDataProvider {
 
   static getPublishBranchesContent(job: IJob): any {
     return {
-      prefix: 'TestPrefix',
-      version: {
-        published: [1, 2, 3],
-        active: [1, 2, 3],
-        stable: job.payload.branchName,
+      "repoName":job.payload.repoName,
+      "branches": [{
+          "name": "master",
+          "publishOriginalBranchNam": false,
+          "active": true,
+          "aliases": null,
+          "gitBranchName": "master",
+          "urlSlug": null,
+          "versionSelectorLabel": "master",
+          "urlAliases": null,
+          "isStableBranch": true
+      }],
+      "bucket": {
+          "regression": "docs-atlas-stg",
+          "dev": "docs-atlas-dev",
+          "stg": "docs-atlas-stg",
+          "prd": "docs-atlas-prd",
+          "dotcomstg": "docs-atlas-dotcomstg",
+          "dotcomprd": "docs-atlas-dotcomprd"
       },
-      git: {
-        branches: {
-          manual: 'master',
-          published: [job.payload.branchName],
-        },
+      "url": {
+          "regression": "https://docs-atlas-integration.mongodb.com",
+          "dev": "https://docs-atlas-staging.mongodb.com",
+          "stg": "https://docs-atlas-staging.mongodb.com",
+          "prd": "https://docs.atlas.mongodb.com"
       },
-    };
+      "prefix": "/",
+      "project": "cloud-docs"
+  }
   }
 
-  static configurePublishedBranches(job: IJob): IJob {
-    job.payload.publishedBranches = TestDataProvider.getPublishBranchesContent(job);
+  static configureRepoBranches(job: IJob): IJob {
+    job.payload.repoBranches = TestDataProvider.getPublishBranchesContent(job);
     return job;
   }
 
   static configurePublishedBranchesWithPrimaryAlias(job: IJob): IJob {
     job.payload.primaryAlias = job.payload.branchName;
-    return TestDataProvider.configurePublishedBranches(job);
+    return TestDataProvider.configureRepoBranches(job);
   }
 
   static configurePublishedBranchesWithOutPrimaryAliasAndAliasSet(job: IJob): IJob {
     job.payload.primaryAlias = null;
     job.payload.aliased = true;
-    return TestDataProvider.configurePublishedBranches(job);
+    return TestDataProvider.configureRepoBranches(job);
   }
 
   static getCommitCheckValidResponse(job: IJob): any {
