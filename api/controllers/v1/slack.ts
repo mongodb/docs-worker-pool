@@ -1,5 +1,4 @@
-import c from 'config';
-
+import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
