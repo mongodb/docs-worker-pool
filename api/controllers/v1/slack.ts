@@ -36,7 +36,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
   return branchPath;
 }
 
-function getQSString(qs:string) {
+function getQSString(qs: string) {
   let key_val = {};
   qs.split("&").forEach(keyval => {
     const kvpair = keyval.split("=")
@@ -54,7 +54,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
     console.log("'Signature Mismatch, Authentication Failed!!'")
     return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
   }
-  console.log("validateSlackRequest validated" )
+  console.log("validateSlackRequest validated")
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
@@ -67,20 +67,20 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
     return prepReponse(401, 'text/plain', 'User is not entitled!!');
   }
 
-  console.log("user entitlement validated" )
+  console.log("user entitlement validated")
   const entitledBranches = await buildEntitleBranchList(entitlement, branchRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val["trigger_id"]);
   if (resp && resp.status == 200 && resp.data) {
     console.log(resp.data)
-    return  {
+    return {
       'statusCode': 200,
       'body': "Model requested"
+    }
   }
+  return {
+    'statusCode': resp ? resp.status : 500,
+    'body': resp ? resp.data : "Unknown error"
   }
-  return  {
-    'statusCode': resp?resp.status:500,
-    'body': resp? resp.data : "Unknown error"
-}
 };
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
@@ -184,55 +184,55 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       });
     }
   }
-  return  {
+  return {
     'statusCode': 200,
     'body': "Jobs Enqueued"
-}
-}
-  function createPayload(
-    jobType: string,
-    repoOwner: string,
-    repoName: string,
-    branchName: string,
-    newHead: string,
-    aliased = false,
-    alias = null,
-    primaryAlias = false,
-    stable = ''
-  ) {
-    return {
-      jobType,
-      source: 'github',
-      action: 'push',
-      repoName,
-      branchName,
-      aliased,
-      alias,
-      isFork: true,
-      private: repoOwner === '10gen' ? true : false,
-      isXlarge: true,
-      repoOwner,
-      url: 'https://github.com/' + repoOwner + '/' + repoName,
-      newHead,
-      primaryAlias,
-      stable
-    };
   }
+}
+function createPayload(
+  jobType: string,
+  repoOwner: string,
+  repoName: string,
+  branchName: string,
+  newHead: string,
+  aliased = false,
+  alias = null,
+  primaryAlias = false,
+  stable = ''
+) {
+  return {
+    jobType,
+    source: 'github',
+    action: 'push',
+    repoName,
+    branchName,
+    aliased,
+    alias,
+    isFork: true,
+    private: repoOwner === '10gen' ? true : false,
+    isXlarge: true,
+    repoOwner,
+    url: 'https://github.com/' + repoOwner + '/' + repoName,
+    newHead,
+    primaryAlias,
+    stable
+  };
+}
 
-  function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserEmail: string) {
-    return {
-      title: jobTitle,
-      user: jobUserName,
-      email: jobUserEmail,
-      status: 'inQueue',
-      createdTime: new Date(),
-      startTime: null,
-      endTime: null,
-      priority: 1,
-      error: {},
-      result: null,
-      payload: payload,
-      logs: [],
-    };
-  }
+function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserEmail: string) {
+  return {
+    title: jobTitle,
+    user: jobUserName,
+    email: jobUserEmail,
+    status: 'inQueue',
+    createdTime: new Date(),
+    startTime: null,
+    endTime: null,
+    priority: 1,
+    error: {},
+    result: null,
+    payload: payload,
+    logs: [],
+  };
+}
 

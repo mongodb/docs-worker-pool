@@ -4,7 +4,7 @@ import { IConfig } from 'config';
 import * as crypto from 'crypto';
 export const axiosApi = axios.create();
 
-import tsscmp from 'tsscmp';
+import * as tsscmp from 'tsscmp';
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
