@@ -33,8 +33,6 @@ export abstract class BaseRepository {
         this._collection.updateOne(filterDoc, updateDoc,{upsert: true}),
         errorMsg
       );
-
-      console.log(updateResult)
       if (updateResult.upsertedId) {
         return updateResult.upsertedId;
       }

@@ -52,7 +52,7 @@ export class ProductionJobHandler extends JobHandler {
         this.currJob.deployCommands.length - 1
       ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
       if (manifestPrefix) {
-        const searchFlag = this.currJob.payload.includeInGlobalSearch === true ? '-g' : '';
+        const searchFlag = this.currJob.payload.stable;
         this.currJob.deployCommands[
           this.currJob.deployCommands.length - 1
         ] += ` MANIFEST_PREFIX=${manifestPrefix} GLOBAL_SEARCH_FLAG=${searchFlag}`;
@@ -69,21 +69,39 @@ export class ProductionJobHandler extends JobHandler {
 
   async constructManifestIndexPath(): Promise<void> {
     try {
-      this.currJob.payload.manifestPrefix = this.currJob.payload.repoBranches['project'] + '-' + this.currJob.payload.urlSlug;
+      const { output } = await this.commandExecutor.getSnootyProjectName(this.currJob.payload.repoName);
+      this.currJob.payload.manifestPrefix = output + '-' + (this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName);
     } catch (error) {
       await this.logger.save(this.currJob._id, error);
       throw error;
     }
   }
 
+  getActiveBranchLength(): number {
+    let activeCount = 0
+    this.currJob.payload.repoBranches['branches'].forEach(branch => {
+      if (branch['active'] === true) {
+        activeCount += 1
+      }
+    });
+    return activeCount
+  }
   async getPathPrefix(): Promise<string> {
+
     try {
-      let pathPrefix = '';
-      pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
+      let pathPrefix = ""
+      if (this.currJob.payload.repoBranches) {
+        if (this.getActiveBranchLength() > 1) {
+          pathPrefix = `${this.currJob.payload.repoBranches['prefix']}/${this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName}`;
+        }
+        else {
+          pathPrefix = `${this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.repoBranches['prefix']}`;
+        }
+      }
       return pathPrefix;
     } catch (error) {
-      await this.logger.save(this.currJob._id, error);
-      throw new InvalidJobError(error.message);
+      await this.logger.save(this.currJob._id, error)
+      throw new InvalidJobError(error.message)
     }
   }
 

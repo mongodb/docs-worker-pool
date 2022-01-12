@@ -215,14 +215,12 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
-
-      console.log("throwIfBranchNotConfigured calling")
       await this._validator.throwIfBranchNotConfigured(this.currJob);
-      console.log(this.currJob)
       await this.constructPrefix();
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         await this.constructManifestIndexPath();
       }
+
       this.prepStageSpecificNextGenCommands();
       this.constructEnvVars();
       this.currJob.payload.isNextGen = true;
@@ -351,7 +349,6 @@ export abstract class JobHandler {
     this._logger.info(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
     this._logger.info(this._currJob._id, 'prepared Environment variables');
-
     return await this.executeBuild();
   }
 
@@ -396,7 +393,6 @@ export abstract class JobHandler {
       `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`
     );
     try {
-      console.log(this._currJob)
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);

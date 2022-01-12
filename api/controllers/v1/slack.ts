@@ -47,30 +47,22 @@ function getQSString(qs: string) {
 export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-  console.log("displayrepoptions Guru")
-  console.log(c.get('dbUrl'))
   if (!slackConnector.validateSlackRequest(event)) {
-    console.log("'Signature Mismatch, Authentication Failed!!'")
     return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
   }
-  console.log("validateSlackRequest validated")
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body)
-  console.log(key_val)
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val["user_id"]);
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!!');
   }
-
-  console.log("user entitlement validated")
   const entitledBranches = await buildEntitleBranchList(entitlement, branchRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val["trigger_id"]);
   if (resp && resp.status == 200 && resp.data) {
-    console.log(resp.data)
     return {
       'statusCode': 200,
       'body': "Model requested"
@@ -84,7 +76,6 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
   try {
-    console.log(JSON.stringify(job))
     await jobRepository.insertJob(job);
   } catch (err) {
     logger.error('SLACK:DEPLOYREPO', err);
@@ -95,7 +86,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
-    console.log("invalid signature 401");
     return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
   }
   const client = new mongodb.MongoClient(c.get('dbUrl'));

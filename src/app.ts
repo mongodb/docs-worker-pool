@@ -57,7 +57,7 @@ async function init(): Promise<void> {
     repoBranchesRepo
   );
   jobManager.start().catch((err) => {
-    console.log(`ERROR: ${err}`);
+    consoleLogger.error('App',`ERROR: ${err}`);
   });
 }
 process.on('SIGTERM', async () => {

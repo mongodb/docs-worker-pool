@@ -86,7 +86,6 @@ function prepProgressMessage(
 export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-  console.log(event)
   const jobTitle = event.detail.fullDocument.title;
   const jobId = event.detail.fullDocument._id;
   const username = event.detail.fullDocument.user;
@@ -95,12 +94,10 @@ export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
   const db = client.db(c.get('dbName'));
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
-  console.log(entitlement);
   if (!entitlement || !entitlement['slack_user_id']) {
-    console.log("Entitlement Failed")
+    consoleLogger.error(username, "Entitlement Failed")
     return;
   }
-  console.log(c.get('dashboardUrl'));
   await slackConnector.sendMessage(
     prepProgressMessage(event.detail.operationType, c.get('dashboardUrl'), jobId, jobTitle, event.detail.fullDocument.status),
     entitlement['slack_user_id']

@@ -24,7 +24,6 @@ export class RepoBranchesRepository extends BaseRepository {
 
   async getConfiguredBranchesByGithubRepoName(repoName: string): Promise<any> {
     const query = { repoName: repoName };
-    console.log(query);
     const reposObject = await this.findOne(
       query,
       `Mongo Timeout Error: Timedout while retrieving repos entry for ${repoName}`

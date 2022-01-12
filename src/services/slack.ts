@@ -41,14 +41,12 @@ export class SlackConnector implements ISlackConnector {
     };
 
     const slackToken = this._config.get<string>('slackAuthToken');
-    let resp = await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
+    return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
       headers: {
         Authorization: [`Bearer ${slackToken}`],
         'Content-type': 'application/json; charset=utf-8'
       },
     });
-    console.log(resp)
-    return resp
   }
   parseSelection(stateValues: any): any {
     const values = {};
@@ -90,7 +88,6 @@ export class SlackConnector implements ISlackConnector {
     if (signingSecret) {
       const hmac = crypto.createHmac('sha256', signingSecret);
       const [version, hash] = headerSlackSignature.split('=');
-      console.log(payload.body)
       const base = `${version}:${timestamp}:${payload.body}`;
       hmac.update(base);
       return timeSafeCompare(hash, hmac.digest('hex'));
@@ -101,11 +98,8 @@ export class SlackConnector implements ISlackConnector {
 
   async displayRepoOptions(repos: string[], triggerId: string): Promise<any> {
     const repoOptView = this._buildDropdown(repos, triggerId);
-    console.log(repoOptView)
-    console.log(JSON.stringify(repoOptView))
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
-    console.log(slackUrl)
     return await axiosApi.post(slackUrl, repoOptView, {
       headers: {
         Authorization: [`Bearer ${slackToken}`],

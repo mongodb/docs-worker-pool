@@ -43,34 +43,54 @@ export class TestDataProvider {
 
   static getPublishBranchesContent(job: IJob): any {
     return {
-      "repoName":job.payload.repoName,
+      "repoName": job.payload.repoName,
       "branches": [{
-          "name": "master",
-          "publishOriginalBranchNam": false,
+          "name": job.payload.branchName,
+          "publishOriginalBranchName": true,
+          "active": true,
+          "aliases": ["current"],
+          "gitBranchName": job.payload.branchName,
+          "urlSlug": "current",
+          "versionSelectorLabel": "latest stable",
+          "urlAliases": ["current"],
+          "isStableBranch": true
+      }, {
+          "name": "beta",
+          "publishOriginalBranchName": true,
+          "active": true,
+          "aliases": ["upcoming"],
+          "gitBranchName": "beta",
+          "urlAliases": ["upcoming"],
+          "urlSlug": "upcoming",
+          "versionSelectorLabel": "beta",
+          "isStableBranch": false
+      }, {
+          "name": "DOP-1979",
+          "publishOriginalBranchName": true,
           "active": true,
           "aliases": null,
-          "gitBranchName": "master",
-          "urlSlug": null,
-          "versionSelectorLabel": "master",
+          "gitBranchName": "DOP-1979",
           "urlAliases": null,
-          "isStableBranch": true
+          "urlSlug": null,
+          "versionSelectorLabel": "DOP-1979",
+          "isStableBranch": false
       }],
       "bucket": {
-          "regression": "docs-atlas-stg",
-          "dev": "docs-atlas-dev",
-          "stg": "docs-atlas-stg",
-          "prd": "docs-atlas-prd",
-          "dotcomstg": "docs-atlas-dotcomstg",
-          "dotcomprd": "docs-atlas-dotcomprd"
+          "regression": "docs-mongodb-org-stg",
+          "dev": "docs-mongodb-org-dev",
+          "stg": "docs-mongodb-org-stg",
+          "prd": "docs-mongodb-org-prd",
+          "dotcomstg": "docs-mongodb-org-dotcomstg",
+          "dotcomprd": "docs-mongodb-org-dotcomprd"
       },
       "url": {
-          "regression": "https://docs-atlas-integration.mongodb.com",
-          "dev": "https://docs-atlas-staging.mongodb.com",
-          "stg": "https://docs-atlas-staging.mongodb.com",
-          "prd": "https://docs.atlas.mongodb.com"
+          "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+          "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+          "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+          "prd": "https://docs.mongodb.com"
       },
-      "prefix": "/",
-      "project": "cloud-docs"
+      "prefix": "compass",
+      "project": "compass"
   }
   }
 
@@ -173,13 +193,13 @@ export class TestDataProvider {
 
     // Null version
     const itemNullVersion = TestDataProvider.getPublishBranchesContent(job);
-    itemNullVersion.version = null;
+    itemNullVersion['branches'] = null;
 
     const itemPrefixEmpty = TestDataProvider.getPublishBranchesContent(job);
     itemPrefixEmpty.prefix = '';
 
     const itemVersionActiveEmpty = TestDataProvider.getPublishBranchesContent(job);
-    itemVersionActiveEmpty.version.active = [];
+    itemVersionActiveEmpty['branches'][0]['active']= false;
 
     return [
       {
@@ -199,12 +219,6 @@ export class TestDataProvider {
         error: null,
         pathPrefix: `${itemPrefixEmpty.prefix}/${job.payload.branchName}`,
         mutPrefix: `${itemPrefixEmpty.prefix}/${job.payload.branchName}`,
-      },
-      {
-        value: itemVersionActiveEmpty,
-        error: null,
-        pathPrefix: itemValid.prefix,
-        mutPrefix: itemValid.prefix,
       },
     ];
   }
@@ -383,9 +397,6 @@ export class TestDataProvider {
 
   static getRepoBranchesData(job:IJob): any {
     return {
-      "_id": {
-          "$oid": "61de30cb1cd37391889fff77"
-      },
       "repoName": job.payload.repoName,
       "branches": [{
           "name": job.payload.branchName,
@@ -467,23 +478,5 @@ export class TestDataProvider {
       retVal.push(`git checkout ${newHead} .`);
     }
     return retVal;
-  }
-
-  static getBranchSlug(job: IJob): any {
-    return {
-      prefix: 'TestPrefix',
-      project: 'TestProject',
-      repoName: job.payload.repoName,
-      branches: [
-        {
-          gitBranchName: job.payload.branchName,
-          urlAliases: [],
-          urlSlug: 'sample_slug',
-          active: true,
-          publishOriginalBranchName: true,
-          isStableBranch: true,
-        },
-      ],
-    };
   }
 }
