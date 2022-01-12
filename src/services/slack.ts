@@ -4,7 +4,7 @@ import { IConfig } from 'config';
 import * as crypto from 'crypto';
 export const axiosApi = axios.create();
 
-import tsscmp from 'tsscmp';
+import * as tsscmp from 'tsscmp';
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
@@ -25,11 +25,16 @@ export class SlackConnector implements ISlackConnector {
       channel: user,
       text: message,
     };
-    return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
+
+    const slackToken = this._config.get<string>('slackAuthToken');
+    let resp = await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
       headers: {
-        Authorization: [`Bearer ${this._config.get<string>('slackToken')}`],
+        Authorization: [`Bearer ${slackToken}`],
+        'Content-type': 'application/json; charset=utf-8'
       },
     });
+    console.log(resp)
+    return resp
   }
   parseSelection(stateValues: any): any {
     const values = {};
