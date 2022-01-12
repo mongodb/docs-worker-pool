@@ -1,12 +1,11 @@
 # Build the Typescript app
-FROM node:17-alpine3.14 as ts-compiler
+FROM node:14-alpine3.10 as ts-compiler
 WORKDIR /home/docsworker-xlarge
 COPY  config config/
 COPY package*.json ./
 COPY tsconfig*.json ./
 RUN npm install
 COPY . ./
-RUN npm install -g typescript@latest
 RUN npm run build
 
 # where repo work will happen
