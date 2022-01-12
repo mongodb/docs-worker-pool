@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./build",
-    "target": "esnext",
+    "target": "es6",
     "module": "commonjs",
     "strictNullChecks": true,
     "esModuleInterop": true,
