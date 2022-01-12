@@ -4,7 +4,21 @@ import { IConfig } from 'config';
 import * as crypto from 'crypto';
 export const axiosApi = axios.create();
 
-import * as tsscmp from 'tsscmp';
+function bufferEqual(a:Buffer, b:Buffer) {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(a, b);
+}
+
+function timeSafeCompare(a:string, b:string) {
+  let sa = String(a);
+  let sb = String(b);
+  let key = crypto.pseudoRandomBytes(32);
+  let ah = crypto.createHmac('sha256', key).update(sa).digest();
+  let bh = crypto.createHmac('sha256', key).update(sb).digest();
+  return bufferEqual(ah, bh) && a === b;
+}
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
@@ -79,7 +93,7 @@ export class SlackConnector implements ISlackConnector {
       console.log(payload.body)
       const base = `${version}:${timestamp}:${payload.body}`;
       hmac.update(base);
-      return tsscmp(hash, hmac.digest('hex'));
+      return timeSafeCompare(hash, hmac.digest('hex'));
     }
     return false
   }
