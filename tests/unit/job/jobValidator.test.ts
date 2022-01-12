@@ -92,6 +92,13 @@ describe('JobValidator Tests', () => {
     }).toThrowError(`${job.payload.branchName} is not configured for publish`);
   });
 
+  test('throwIfItIsNotPublishable retursn without error', () => {
+    job.payload.repoBranches = TestDataProvider.getRepoBranchesData(job)
+    expect(() => {
+      jobValidator.throwIfItIsNotPublishable(job);
+    }).not.toThrow();
+  });
+
   test('valid staging job throwIfJobInvalid dont throws as branch is configured for publishing and stable branch is not set', async () => {
     repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(job.user).mockReturnValue({
       status: 'success',

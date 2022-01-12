@@ -1,6 +1,7 @@
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
+import * as data from '../../data/jobDef';
 
 describe('Repo Branches Repository Tests', () => {
   let repoBranchesRepo: RepoBranchesRepository;
@@ -23,8 +24,11 @@ describe('Repo Branches Repository Tests', () => {
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {
+
+      let job = JSON.parse(JSON.stringify(data.default.value));
       const testData = TestDataProvider.getRepoBranchesByRepoName('test_repo');
-      dbRepoHelper.collection.findOne.mockReturnValueOnce(TestDataProvider.getRepoBranchesData('test_repo'));
+      job.payload.repoName='test_repo'
+      dbRepoHelper.collection.findOne.mockReturnValueOnce(TestDataProvider.getRepoBranchesData(job));
       await repoBranchesRepo.getRepoBranchesByRepoName('test_repo');
       expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);

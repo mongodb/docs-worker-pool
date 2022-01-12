@@ -381,22 +381,40 @@ export class TestDataProvider {
     };
   }
 
-  static getRepoBranchesData(repoName: string): any {
+  static getRepoBranchesData(job:IJob): any {
     return {
-      repoName: `${repoName}`,
-      bucket: {
-        regression: 'docs-mongodb-org-stg',
-        dev: 'docs-mongodb-org-dev',
-        stg: 'docs-mongodb-org-stg',
-        prd: 'docs-mongodb-org-prd',
+      "_id": {
+          "$oid": "61de30cb1cd37391889fff77"
       },
-      url: {
-        regression: 'https://docs-mongodbcom-integration.corp.mongodb.com',
-        dev: 'https://docs-mongodborg-staging.corp.mongodb.com',
-        stg: 'https://docs-mongodborg-staging.corp.mongodb.com',
-        prd: 'https://docs.mongodb.com',
+      "repoName": job.payload.repoName,
+      "branches": [{
+          "name": job.payload.branchName,
+          "publishOriginalBranchNam": false,
+          "active": true,
+          "aliases": null,
+          "gitBranchName": job.payload.branchName,
+          "urlSlug": null,
+          "versionSelectorLabel": "master",
+          "urlAliases": null,
+          "isStableBranch": true
+      }],
+      "bucket": {
+          "regression": "docs-atlas-stg",
+          "dev": "docs-atlas-dev",
+          "stg": "docs-atlas-stg",
+          "prd": "docs-atlas-prd",
+          "dotcomstg": "docs-atlas-dotcomstg",
+          "dotcomprd": "docs-atlas-dotcomprd"
       },
-    };
+      "url": {
+          "regression": "https://docs-atlas-integration.mongodb.com",
+          "dev": "https://docs-atlas-staging.mongodb.com",
+          "stg": "https://docs-atlas-staging.mongodb.com",
+          "prd": "https://docs.atlas.mongodb.com"
+      },
+      "prefix": "/",
+      "project": "cloud-docs"
+  };
   }
 
   static getRepoBranchesByRepoName(repoName: string): any {

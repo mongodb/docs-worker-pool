@@ -42,16 +42,20 @@ export class JobValidator implements IJobValidator {
   }
 
   throwIfItIsNotPublishable(job: IJob): void {
+    let found = false
     if (job.payload.repoBranches) {
-      console.log(job.payload.repoBranches['branches'], job.payload.branchName)
+      console.log(job.payload.branchName)
       job.payload.repoBranches['branches'].forEach(branch => {
-        console.log(branch)
+        console.log(branch['gitBranchName'])
         if (branch['gitBranchName'] === job.payload.branchName ) {
-          return
+          found = true;
+          return;
         }
       });
     }
-    throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
+    if  (!found) {
+      throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
+    }
   }
 
   public async throwIfJobInvalid(job: IJob): Promise<void> {
