@@ -22,14 +22,21 @@ function prepReponse(statusCode, contentType, body) {
 }
 
 async function buildEntitleBranchList(entitlement: any, branchRepository: BranchRepository) {
-  const branchPath = [];
+  const branchPath:string[] =[];
   for (let i = 0; i < entitlement.repos.length; i++) {
     const pubBranches = [];
     const thisRepo = entitlement.repos[i];
     const [repoOwner, repoName] = thisRepo.split('/');
     const branches = await branchRepository.getRepoBranches(repoName);
     branches.forEach((branch) => {
-      branchPath.push(`${repoOwner}/${repoName}/${branch['name']}`);
+      let buildWithSnooty = true;
+      if ('buildsWithSnooty' in branch ) {
+        buildWithSnooty = branch['buildsWithSnooty']
+      }
+      if (buildWithSnooty ) {
+        branchPath.push(`${repoOwner}/${repoName}/${branch['gitBranchName']}`);
+      }
+      
     });
   }
   return branchPath;
@@ -61,6 +68,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
     return prepReponse(401, 'text/plain', 'User is not entitled!!');
   }
   const entitledBranches = await buildEntitleBranchList(entitlement, branchRepository);
+  console.log(entitledBranches)
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val["trigger_id"]);
   if (resp && resp.status == 200 && resp.data) {
     return {
