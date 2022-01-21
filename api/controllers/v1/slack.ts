@@ -28,6 +28,7 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
     const thisRepo = entitlement.repos[i];
     const [repoOwner, repoName] = thisRepo.split('/');
     const branches = await branchRepository.getRepoBranches(repoName);
+    if (branches) {
     branches.forEach((branch) => {
       let buildWithSnooty = true;
       if ('buildsWithSnooty' in branch ) {
@@ -39,15 +40,19 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
       
     });
   }
+}
   return branchPath;
 }
 
 function getQSString(qs: string) {
   let key_val = {};
-  qs.split("&").forEach(keyval => {
+  const arr = qs.split("&");
+  if (arr) {
+    arr.forEach(keyval => {
     const kvpair = keyval.split("=")
     key_val[kvpair[0]] = kvpair[1]
   });
+}
   return key_val;
 }
 
@@ -150,7 +155,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       let stable = ''
       if (isStableBranch) { stable = '-g' }
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
-      if (urlSlug) {
+      if (urlSlug) { 
         newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, true, urlSlug, true, stable);
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       }
