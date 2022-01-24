@@ -73,7 +73,6 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
     return prepReponse(401, 'text/plain', 'User is not entitled!!');
   }
   const entitledBranches = await buildEntitleBranchList(entitlement, branchRepository);
-  console.log(entitledBranches)
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val["trigger_id"]);
   if (resp && resp.status == 200 && resp.data) {
     return {
