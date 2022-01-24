@@ -3,6 +3,7 @@ on:
     branches:
       - "integration"
       - "master"
+      - "DOP-2508"
   pull_request:
     branches:
       - master
