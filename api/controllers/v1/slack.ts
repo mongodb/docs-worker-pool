@@ -139,8 +139,12 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const active = branchObject.aliasObject.active //bool
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName //bool
     const aliases = branchObject.aliasObject.urlAliases //array or null
-    const urlSlug = branchObject.aliasObject.urlSlug //string or null, string must match value in urlAliases or gitBranchName
+    let urlSlug = branchObject.aliasObject.urlSlug //string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch // bool or Falsey
+    
+    if (!urlSlug) {
+      urlSlug = branchName
+    }
 
     if (!active) {
       continue;
@@ -161,7 +165,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       }
       if (publishOriginalBranchName) {
-        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, null, true, stable);
+        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, branchName, true, stable);
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       } else {
         return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`

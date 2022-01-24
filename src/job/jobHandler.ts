@@ -264,6 +264,7 @@ export abstract class JobHandler {
     if (typeof pathPrefix !== 'undefined' && pathPrefix !== null) {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
+    console.log("constructEnvVars",envVars)
     // const snootyFrontEndVars = {
     //   'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("gatsbyConsitentNavFlag"),
     //   'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("gatsbySDKVersionDropdownFlag"),
