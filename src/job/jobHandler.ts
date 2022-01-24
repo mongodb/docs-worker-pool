@@ -215,6 +215,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
+      console.log("Nextgen Build prepNextGenBuild")
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
@@ -229,6 +230,7 @@ export abstract class JobHandler {
       }
     } else {
       this.currJob.payload.isNextGen = false;
+      console.log("Not a Nextgen Build prepNextGenBuild")
     }
   }
 
