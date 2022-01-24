@@ -67,16 +67,6 @@ export class ProductionJobHandler extends JobHandler {
     }
   }
 
-  async constructManifestIndexPath(): Promise<void> {
-    try {
-      const { output } = await this.commandExecutor.getSnootyProjectName(this.currJob.payload.repoName);
-      this.currJob.payload.manifestPrefix = output + '-' + (this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName);
-    } catch (error) {
-      await this.logger.save(this.currJob._id, error);
-      throw error;
-    }
-  }
-
   getActiveBranchLength(): number {
     let activeCount = 0
     this.currJob.payload.repoBranches['branches'].forEach(branch => {
@@ -86,24 +76,26 @@ export class ProductionJobHandler extends JobHandler {
     });
     return activeCount
   }
-  async getPathPrefix(): Promise<string> {
 
+  async constructManifestIndexPath(): Promise<void> {
+    try {
+        this.currJob.payload.manifestPrefix = this.currJob.payload.project + '-' + this.currJob.payload.urlSlug;
+    } catch (error) {
+        await this.logger.save(this.currJob._id, error)
+        throw error
+    }
+}
+
+async getPathPrefix(): Promise<string> {
     try {
       let pathPrefix = ""
-      if (this.currJob.payload.repoBranches) {
-        if (this.getActiveBranchLength() > 1) {
-          pathPrefix = `${this.currJob.payload.repoBranches['prefix']}/${this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.branchName}`;
-        }
-        else {
-          pathPrefix = `${this.currJob.payload.alias ? this.currJob.payload.alias : this.currJob.payload.repoBranches['prefix']}`;
-        }
-      }
+      pathPrefix = `${this.currJob.payload.prefix}/{$this.currJob.payload.urlSlug}`;
       return pathPrefix;
     } catch (error) {
-      await this.logger.save(this.currJob._id, error)
-      throw new InvalidJobError(error.message)
+        await this.logger.save(this.currJob._id, error)
+        throw new InvalidJobError(error.message)
     }
-  }
+}
 
   private async purgePublishedContent(makefileOutput: Array<string>): Promise<void> {
     try {
