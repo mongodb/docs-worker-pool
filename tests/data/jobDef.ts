@@ -21,6 +21,9 @@ export default {
       repoOwner: 'skerschb',
       url: 'https://github.com/skerschb/testauth.git',
       newHead: '38b805e9c7c4f1c364476682e93f9d24a87f470a',
+      project: 'testauth',
+      urlSlug: 'UsingAlias',
+      prefix: ""
     },
     logs: [],
   },

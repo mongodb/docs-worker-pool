@@ -15,6 +15,13 @@ export class BranchRepository extends BaseRepository {
     return repo ? repo['branches'] : [];
   }
 
+  async getRepo(repoName: string): Promise<any> {
+    const query = { repoName: repoName };
+    const repo = await this.findOne(query, `Mongo Timeout Error: Timedout while retrieving branches for ${repoName}`);
+    // if user has specific entitlements
+    return repo;
+  }
+
   async getRepoBranchAliases(repoName: string, branchName: string): Promise<any> {
     const returnObject = { status: 'failure' };
     const aliasArray = await this._collection

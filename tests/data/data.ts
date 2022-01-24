@@ -205,8 +205,8 @@ export class TestDataProvider {
       {
         value: itemValid,
         error: null,
-        pathPrefix: `${itemValid.prefix}/${job.payload.branchName}`,
-        mutPrefix: `${itemValid.prefix}/${job.payload.branchName}`,
+        pathPrefix: `${itemValid.prefix}/${job.payload.urlSlug}`,
+        mutPrefix: `${itemValid.prefix}/${job.payload.urlSlug}`,
       },
       {
         value: itemNullVersion,
@@ -217,8 +217,8 @@ export class TestDataProvider {
       {
         value: itemPrefixEmpty,
         error: null,
-        pathPrefix: `${itemPrefixEmpty.prefix}/${job.payload.branchName}`,
-        mutPrefix: `${itemPrefixEmpty.prefix}/${job.payload.branchName}`,
+        pathPrefix: `${itemPrefixEmpty.prefix}/${job.payload.urlSlug}`,
+        mutPrefix: `${itemPrefixEmpty.prefix}/${job.payload.urlSlug}`,
       },
     ];
   }
@@ -232,14 +232,14 @@ export class TestDataProvider {
         aliased: false,
         primaryAlias: 'DONTSET',
         alias: 'DONTSET',
-        manifestPrefix: `${job.payload.repoName}-${job.payload.branchName}`,
+        manifestPrefix: `${job.payload.repoName}-${job.payload.urlSlug}`,
       },
       {
         branchInfo: itemValid,
         aliased: true,
         primaryAlias: 'primary',
         alias: 'DONTSET',
-        manifestPrefix: `${job.payload.repoName}-${job.payload.branchName}`,
+        manifestPrefix: `${job.payload.repoName}-${job.payload.urlSlug}`,
       },
       {
         branchInfo: itemValid,

@@ -131,6 +131,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement.email ? entitlement.email : 'split@nothing.com';
 
+    const repoInfo = await branchRepository.getRepo(repoName)
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
 
     if (!branchObject || !branchObject.aliasObject) continue;
@@ -147,7 +148,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     //This is for non aliased branch
     let newPayload = {};
     if (aliases === null) {
-      const newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, false, null, false, '-g');
+      const newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,false, null, false, '-g');
       await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
@@ -156,11 +157,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       if (isStableBranch) { stable = '-g' }
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
       if (urlSlug) { 
-        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, true, urlSlug, true, stable);
+        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, urlSlug, true, stable);
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       }
-      else if (publishOriginalBranchName) {
-        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, true, null, true, stable);
+      if (publishOriginalBranchName) {
+        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, null, true, stable);
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       } else {
         return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`
@@ -174,6 +175,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             repoName,
             branchName,
             hashOption,
+            repoInfo.project, 
+            repoInfo.prefix,
             true,
             alias,
             primaryAlias,
@@ -194,6 +197,8 @@ function createPayload(
   repoName: string,
   branchName: string,
   newHead: string,
+  project: string,
+  prefix: string,
   aliased = false,
   urlSlug = null,
   primaryAlias = false,
@@ -205,6 +210,8 @@ function createPayload(
     action: 'push',
     repoName,
     branchName,
+    project, 
+    prefix,
     aliased,
     urlSlug,
     isFork: true,
