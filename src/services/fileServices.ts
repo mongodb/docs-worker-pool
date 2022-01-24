@@ -51,7 +51,7 @@ export class FileSystemServices implements IFileSystemServices {
 
   async saveUrlAsFile(url: string, path: string, options: any): Promise<boolean> {
     const resp = await this.download(url);
-    if (resp && resp.status == 200 && resp.data) {
+    if (resp?.status == 200 && resp?.data) {
       this.writeToFile(path, resp.data, options);
     } else {
       throw new InvalidJobError(`Unable to download file ${url} error: ${resp?.status}`);
@@ -67,7 +67,7 @@ export class FileSystemServices implements IFileSystemServices {
         const newbase = path.join(base, file);
         if (fs.statSync(newbase).isDirectory()) {
           resultInternal = this.getFilesInDirectory(newbase, ext, fs.readdirSync(newbase), resultInternal);
-        } else if (ext === '' || file.substr(-1 * (ext.length + 1)) === `.${ext}`) {
+        } else if (ext === '' || file.substring(-1 * (ext.length + 1)) === `.${ext}`) {
           resultInternal.push(newbase);
         }
       });

@@ -64,7 +64,7 @@ export class StagingJobHandler extends JobHandler {
       const resp = await this.deployGeneric();
       const summary = '';
       if (resp.output.indexOf('Summary') !== -1) {
-        resp.output = resp.output.substr(resp.output.indexOf('Summary'));
+        resp.output = resp.output.substring(resp.output.indexOf('Summary'));
       }
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);

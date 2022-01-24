@@ -62,15 +62,15 @@ export class SlackConnector implements ISlackConnector {
       const blockInputKey = inputMapping[blockKey];
       const stateValuesObj = stateValues[blockKey][blockInputKey];
       // selected value from dropdown
-      if (stateValuesObj && stateValuesObj.selected_option && stateValuesObj.selected_option.value) {
+      if (stateValuesObj?.selected_option?.value) {
         values[blockInputKey] = stateValuesObj.selected_option.value;
       }
       // multi select is an array
-      else if (stateValuesObj && stateValuesObj.selected_options && stateValuesObj.selected_options.length > 0) {
+      else if (stateValuesObj?.selected_options && stateValuesObj.selected_options.length > 0) {
         values[blockInputKey] = stateValuesObj.selected_options;
       }
       // input value
-      else if (stateValuesObj && stateValuesObj.value) {
+      else if (stateValuesObj?.value) {
         values[blockInputKey] = stateValuesObj.value;
       }
       // no input

@@ -11,17 +11,17 @@ export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
-  if (JSON.stringify(event.detail.updateDescription.updatedFields).indexOf('comMessage') === -1) {
+  if (!JSON.stringify(event?.detail?.updateDescription?.updatedFields).includes('comMessage')) {
     return;
   }
   const jobId = event.detail.documentKey._id;
-  
+
   const jobRepository = new JobRepository(db, c, consoleLogger);
   event.detail.fullDocument = await jobRepository.getJobById(jobId);
 
   const slackMsgs = event.detail.fullDocument.comMessage;
   // check if summary exists to send to slack
-  if (slackMsgs === undefined || slackMsgs.length === 0) {
+  if (!slackMsgs) {
     consoleLogger.error(event.fullDocument._id, 'ERROR: Empty slack message array.');
     return;
   }
@@ -32,7 +32,7 @@ export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
   const slackConnector = new SlackConnector(consoleLogger, c);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
-  if (!entitlement || !entitlement['slack_user_id']) {
+  if (!entitlement?.['slack_user_id']) {
     return;
   }
   const resp = await slackConnector.sendMessage(
@@ -67,9 +67,9 @@ function prepSummaryMessage(
 ): string {
   if (repoName === 'mms-docs') {
     let modMmsOutput: string;
-    modMmsOutput = lastMessage.substr(0, lastMessage.indexOf('mut-publish'));
+    modMmsOutput = lastMessage.substring(lastMessage.indexOf('mut-publish'));
     modMmsOutput = modMmsOutput + '\n\n';
-    modMmsOutput = modMmsOutput + lastMessage.substr(lastMessage.lastIndexOf('Summary'));
+    modMmsOutput = modMmsOutput + lastMessage.substring(lastMessage.lastIndexOf('Summary'));
     lastMessage = modMmsOutput;
   }
   let message = 'Your Job (<' + jobUrl + jobId + '|' + jobTitle + '>) ';
@@ -120,7 +120,7 @@ export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
   const username = event.detail.fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
-  if (!entitlement || !entitlement['slack_user_id']) {
+  if (!entitlement?.['slack_user_id']) {
     consoleLogger.error(username, "Entitlement Failed")
     return;
   }

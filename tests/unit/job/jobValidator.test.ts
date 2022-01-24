@@ -92,7 +92,7 @@ describe('JobValidator Tests', () => {
     }).toThrowError(`${job.payload.branchName} is not configured for publish`);
   });
 
-  test('throwIfItIsNotPublishable retursn without error', () => {
+  test('throwIfItIsNotPublishable returns without error', () => {
     job.payload.repoBranches = TestDataProvider.getRepoBranchesData(job)
     expect(() => {
       jobValidator.throwIfItIsNotPublishable(job);

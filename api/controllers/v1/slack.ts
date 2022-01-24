@@ -7,10 +7,7 @@ import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 
 function isUserEntitled(entitlementsObject: any): boolean {
-  if (!entitlementsObject || !entitlementsObject.repos || entitlementsObject.repos.length <= 0) {
-    return false;
-  }
-  return true;
+  return (entitlementsObject?.repos?.length ?? 0) > 0;
 }
 
 function prepReponse(statusCode, contentType, body) {
@@ -21,8 +18,9 @@ function prepReponse(statusCode, contentType, body) {
   };
 }
 
-async function buildEntitleBranchList(entitlement: any, branchRepository: BranchRepository) {
-  const branchPath:string[] =[];
+// TODO: Condense / simplify function
+async function buildEntitledBranchList(entitlement: any, branchRepository: BranchRepository) {
+  const branchPath:string[] = [];
   for (let i = 0; i < entitlement.repos.length; i++) {
     const pubBranches = [];
     const thisRepo = entitlement.repos[i];
@@ -31,13 +29,13 @@ async function buildEntitleBranchList(entitlement: any, branchRepository: Branch
     if (branches) {
     branches.forEach((branch) => {
       let buildWithSnooty = true;
-      if ('buildsWithSnooty' in branch ) {
-        buildWithSnooty = branch['buildsWithSnooty']
+      if ('buildsWithSnooty' in branch) {
+        buildWithSnooty = branch?.['buildsWithSnooty']
       }
-      if (buildWithSnooty ) {
+      if (buildWithSnooty) {
         branchPath.push(`${repoOwner}/${repoName}/${branch['gitBranchName']}`);
       }
-      
+
     });
   }
 }
@@ -60,7 +58,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
-    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
+    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -70,11 +68,11 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const key_val = getQSString(event.body)
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val["user_id"]);
   if (!isUserEntitled(entitlement)) {
-    return prepReponse(401, 'text/plain', 'User is not entitled!!');
+    return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
-  const entitledBranches = await buildEntitleBranchList(entitlement, branchRepository);
+  const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val["trigger_id"]);
-  if (resp && resp.status == 200 && resp.data) {
+  if (resp?.status == 200 && resp?.data) {
     return {
       'statusCode': 200,
       'body': "Model requested"
@@ -99,7 +97,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
-    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!!');
+    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -117,18 +115,14 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
   console.log(decoded)
   if (!isUserEntitled(entitlement)) {
-    return prepReponse(401, 'text/plain', 'User is not entitled!!');
+    return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
 
   const values = slackConnector.parseSelection(stateValues);
   console.log(JSON.stringify(values))
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
-    const buildDetails = values.repo_option[i].value.split('/');
-    console.log(buildDetails)
-    const repoOwner = buildDetails[0];
-    const repoName = buildDetails[1];
-    const branchName = buildDetails[2];
+    const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
     const hashOption = values.hash_option ? values.hash_option : null;
     const jobTitle = 'Slack deploy: ' + entitlement.github_username;
     const jobUserName = entitlement.github_username;
@@ -137,15 +131,14 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const repoInfo = await branchRepository.getRepo(repoName)
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
 
-    console.log(branchObject)
-    if (!branchObject || !branchObject.aliasObject) continue;
+    if (!branchObject?.aliasObject) continue;
 
     const active = branchObject.aliasObject.active //bool
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName //bool
     const aliases = branchObject.aliasObject.urlAliases //array or null
     let urlSlug = branchObject.aliasObject.urlSlug //string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch // bool or Falsey
-    
+
     if (!urlSlug) {
       urlSlug = branchName
     }
@@ -164,7 +157,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       let stable = ''
       if (isStableBranch) { stable = '-g' }
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
-      if (urlSlug) { 
+      if (urlSlug) {
         newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, urlSlug, true, stable);
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       }
@@ -183,7 +176,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             repoName,
             branchName,
             hashOption,
-            repoInfo.project, 
+            repoInfo.project,
             repoInfo.prefix,
             true,
             alias,

@@ -15,7 +15,7 @@ export class RepoBranchesRepository extends BaseRepository {
       query,
       `Mongo Timeout Error: Timedout while retrieving Repoinformation for ${repoName}`
     );
-    if (repoDetails && repoDetails.bucket && repoDetails.url) {
+    if (repoDetails?.bucket && repoDetails?.url) {
       return repoDetails;
     } else {
       return { status: 'failure' };
@@ -28,7 +28,7 @@ export class RepoBranchesRepository extends BaseRepository {
       query,
       `Mongo Timeout Error: Timedout while retrieving repos entry for ${repoName}`
     );
-    if (reposObject && reposObject.branches) {
+    if (reposObject?.branches) {
       return {
         branches: reposObject.branches,
         repoName: reposObject.repoName,

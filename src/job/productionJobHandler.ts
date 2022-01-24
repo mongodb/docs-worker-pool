@@ -61,7 +61,7 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   prepStageSpecificNextGenCommands(): void {
-    if (this.currJob && this.currJob.buildCommands) {
+    if (this.currJob?.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
       this.currJob.buildCommands.push('make next-gen-html');
     }
@@ -117,7 +117,7 @@ async getPathPrefix(): Promise<string> {
 
   private getCdnCreds(): CDNCreds {
     let creds = this._config.get<any>('cdn_creds')['main'];
-    if (this.currJob.payload.repoName && this.currJob.payload.repoName in this._config.get<any>('cdn_creds')) {
+    if (this.currJob?.payload?.repoName in this._config.get<any>('cdn_creds')) {
       creds = this._config.get<any>('cdn_creds')[this.currJob.payload.repoName];
     }
     return new CDNCreds(creds['id'], creds['token']);
@@ -126,7 +126,7 @@ async getPathPrefix(): Promise<string> {
   async deploy(): Promise<CommandExecutorResponse> {
     const resp = await this.deployGeneric();
     try {
-      if (resp && resp.output) {
+      if (resp?.output) {
         const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
         await this.purgePublishedContent(makefileOutput);
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);

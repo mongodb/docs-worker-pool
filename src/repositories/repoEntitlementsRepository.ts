@@ -16,7 +16,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${githubUsername}`
     );
     // if user has specific entitlements
-    if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.length > 0) {
+    if (entitlementsObject?.repos && entitlementsObject.repos.length > 0) {
       return {
         repos: entitlementsObject.repos,
         github_username: entitlementsObject.github_username,
@@ -35,7 +35,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${slackUserId}`
     );
     // if user has specific entitlements
-    if (entitlementsObject && entitlementsObject.repos && entitlementsObject.repos.length > 0) {
+    if (entitlementsObject?.repos && entitlementsObject.repos.length > 0) {
       return {
         repos: entitlementsObject.repos,
         github_username: entitlementsObject.github_username,
