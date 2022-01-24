@@ -4,6 +4,7 @@ on:
       - "integration"
       - "master"
       - "meta"
+      - "DOP-2508"
 concurrency:
   group: environment-${{ github.ref }}
   cancel-in-progress: true
