@@ -89,7 +89,7 @@ export class ProductionJobHandler extends JobHandler {
 async getPathPrefix(): Promise<string> {
     try {
       let pathPrefix = ""
-      pathPrefix = `${this.currJob.payload.prefix}/{$this.currJob.payload.urlSlug}`;
+      pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
       return pathPrefix;
     } catch (error) {
         await this.logger.save(this.currJob._id, error)
