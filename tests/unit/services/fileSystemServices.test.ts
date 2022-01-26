@@ -102,7 +102,7 @@ describe('FileSystemServices Tests', () => {
       expect(fs.statSync.mock.calls).toHaveLength(3);
     });
 
-    test('FileSystemServices getFilesInDirectory  succeeds non recursive with ext', () => {
+    test('FileSystemServices getFilesInDirectory succeeds non recursive with ext', () => {
       fs.existsSync.mockReturnValueOnce(true);
 
       fs.readdirSync.mockReturnValueOnce(['file1', 'file2.txt', 'file3.txt']);

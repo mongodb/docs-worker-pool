@@ -18,39 +18,29 @@ function prepReponse(statusCode, contentType, body) {
   };
 }
 
-// TODO: Condense / simplify function
 async function buildEntitledBranchList(entitlement: any, branchRepository: BranchRepository) {
-  const branchPath:string[] = [];
-  for (let i = 0; i < entitlement.repos.length; i++) {
-    const pubBranches = [];
-    const thisRepo = entitlement.repos[i];
-    const [repoOwner, repoName] = thisRepo.split('/');
+  const entitledBranches: string[] = [];
+  entitlement.repos?.forEach(async (r) => {
+    const [repoOwner, repoName] = r.split('/');
     const branches = await branchRepository.getRepoBranches(repoName);
-    if (branches) {
-    branches.forEach((branch) => {
-      let buildWithSnooty = true;
-      if ('buildsWithSnooty' in branch) {
-        buildWithSnooty = branch?.['buildsWithSnooty']
+    branches?.forEach((b) => {
+      if (b?.['buildsWithSnooty']) {
+        entitledBranches.push(`${repoOwner}/${repoName}/${b['gitBranchName']}`);
       }
-      if (buildWithSnooty) {
-        branchPath.push(`${repoOwner}/${repoName}/${branch['gitBranchName']}`);
-      }
-
     });
-  }
-}
-  return branchPath;
+  });
+  return entitledBranches;
 }
 
 function getQSString(qs: string) {
-  let key_val = {};
-  const arr = qs.split("&");
+  const key_val = {};
+  const arr = qs.split('&');
   if (arr) {
-    arr.forEach(keyval => {
-    const kvpair = keyval.split("=")
-    key_val[kvpair[0]] = kvpair[1]
-  });
-}
+    arr.forEach((keyval) => {
+      const kvpair = keyval.split('=');
+      key_val[kvpair[0]] = kvpair[1];
+    });
+  }
   return key_val;
 }
 
@@ -65,8 +55,8 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const db = client.db(process.env.DB_NAME);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
-  const key_val = getQSString(event.body)
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val["user_id"]);
+  const key_val = getQSString(event.body);
+  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
@@ -74,14 +64,14 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val["trigger_id"]);
   if (resp?.status == 200 && resp?.data) {
     return {
-      'statusCode': 200,
-      'body': "Model requested"
-    }
+      statusCode: 200,
+      body: 'Model requested',
+    };
   }
   return {
-    'statusCode': resp ? resp.status : 500,
-    'body': resp ? resp.data : "Unknown error"
-  }
+    statusCode: resp ? resp.status : 500,
+    body: resp ? resp.data : 'Unknown error',
+  };
 };
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
@@ -108,7 +98,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   // This is coming in as urlencoded stirng, need to decode before parsing=
 
-  let decoded = decodeURIComponent(event.body).split("=")[1];
+  const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
 
@@ -123,12 +113,12 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
-    const hashOption = values.hash_option ? values.hash_option : null;
+    const hashOption = values?.hash_option ?? null;
     const jobTitle = 'Slack deploy: ' + entitlement.github_username;
     const jobUserName = entitlement.github_username;
-    const jobUserEmail = entitlement.email ? entitlement.email : 'split@nothing.com';
+    const jobUserEmail = entitlement?.email ?? '';
 
-    const repoInfo = await branchRepository.getRepo(repoName)
+    const repoInfo = await branchRepository.getRepo(repoName);
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
 
     if (!branchObject?.aliasObject) continue;
@@ -140,7 +130,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const isStableBranch = branchObject.aliasObject.isStableBranch // bool or Falsey
 
     if (!urlSlug) {
-      urlSlug = branchName
+      urlSlug = branchName;
     }
 
     if (!active) {
@@ -148,26 +138,52 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     }
     //This is for non aliased branch
     let newPayload = {};
-    if (aliases === null) {
-      const newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,false, null, false, '-g');
+    if (!aliases) {
+      const newPayload = createPayload(
+        'productionDeploy',
+        repoOwner,
+        repoName,
+        branchName,
+        hashOption,
+        repoInfo.project,
+        repoInfo.prefix,
+        false,
+        null,
+        false,
+        '-g'
+      );
       await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
     else {
-      let stable = ''
-      if (isStableBranch) { stable = '-g' }
+      let stable = '';
+      if (isStableBranch) {
+        stable = '-g';
+      }
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
       if (urlSlug) {
         newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, urlSlug, true, stable);
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       }
       if (publishOriginalBranchName) {
-        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, branchName, true, stable);
+        newPayload = createPayload(
+          'productionDeploy',
+          repoOwner,
+          repoName,
+          branchName,
+          hashOption,
+          repoInfo.project,
+          repoInfo.prefix,
+          true,
+          branchName,
+          true,
+          stable
+        );
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       } else {
-        return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`
+        return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`;
       }
-      aliases.forEach(async function (alias, index) {
+      aliases.forEach(async (alias) => {
         if (alias != urlSlug) {
           const primaryAlias = urlSlug === alias;
           const newPayload = createPayload(
@@ -180,18 +196,18 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             repoInfo.prefix,
             true,
             alias,
-            primaryAlias,
+            primaryAlias
           );
           await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
         }
       });
     }
   }
-  return  {
+  return {
     statusCode: 200,
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
   };
-}
+};
 function createPayload(
   jobType: string,
   repoOwner: string,
@@ -211,18 +227,18 @@ function createPayload(
     action: 'push',
     repoName,
     branchName,
-    project, 
+    project,
     prefix,
     aliased,
     urlSlug,
     isFork: true,
-    private: repoOwner === '10gen' ? true : false,
+    private: repoOwner === '10gen',
     isXlarge: true,
     repoOwner,
     url: 'https://github.com/' + repoOwner + '/' + repoName,
     newHead,
     primaryAlias,
-    stable
+    stable,
   };
 }
 
@@ -242,4 +258,3 @@ function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserE
     logs: [],
   };
 }
-

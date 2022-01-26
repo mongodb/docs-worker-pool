@@ -24,10 +24,9 @@ describe('Repo Branches Repository Tests', () => {
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {
-
-      let job = JSON.parse(JSON.stringify(data.default.value));
+      const job = JSON.parse(JSON.stringify(data.default.value));
       const testData = TestDataProvider.getRepoBranchesByRepoName('test_repo');
-      job.payload.repoName='test_repo'
+      job.payload.repoName = 'test_repo';
       dbRepoHelper.collection.findOne.mockReturnValueOnce(TestDataProvider.getRepoBranchesData(job));
       await repoBranchesRepo.getRepoBranchesByRepoName('test_repo');
       expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);

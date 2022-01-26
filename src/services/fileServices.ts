@@ -67,7 +67,7 @@ export class FileSystemServices implements IFileSystemServices {
         const newbase = path.join(base, file);
         if (fs.statSync(newbase).isDirectory()) {
           resultInternal = this.getFilesInDirectory(newbase, ext, fs.readdirSync(newbase), resultInternal);
-        } else if (ext === '' || file.substring(-1 * (ext.length + 1)) === `.${ext}`) {
+        } else if (ext === '' || file.slice(-1 * (ext.length + 1)) === `.${ext}`) {
           resultInternal.push(newbase);
         }
       });

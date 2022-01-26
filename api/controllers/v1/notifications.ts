@@ -121,7 +121,7 @@ export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
-    consoleLogger.error(username, "Entitlement Failed")
+    consoleLogger.error(username, 'Entitlement Failed');
     return;
   }
   const resp = await slackConnector.sendMessage(

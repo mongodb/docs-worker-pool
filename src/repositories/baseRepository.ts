@@ -30,7 +30,7 @@ export abstract class BaseRepository {
     try {
       const updateResult = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
-        this._collection.updateOne(filterDoc, updateDoc,{upsert: true}),
+        this._collection.updateOne(filterDoc, updateDoc, { upsert: true }),
         errorMsg
       );
       console.log(updateResult.upsertedId)

@@ -24,7 +24,7 @@ describe('Job Repository Tests', () => {
         new Date()
       );
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        "Failed to update job ({\"_id\":\"Test_Job\"})  for {\"$set\":{\"status\":\"completed\",\"endTime\":\"2021-05-03T07:00:00.000Z\",\"result\":\"All good\"}}"
+        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`
       );
     });
 

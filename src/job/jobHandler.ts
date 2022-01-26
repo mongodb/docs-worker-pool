@@ -205,11 +205,7 @@ export abstract class JobHandler {
     if (this._fileSystemServices.rootFileExists(workerPath)) {
       const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
       const workerLines = workerContents.split(/\r?\n/);
-      for (let i = 0; i < workerLines.length; i++) {
-        if (workerLines[i] === '"build-and-stage-next-gen"') {
-          return true;
-        }
-      }
+      return workerLines.includes('"build-and-stage-next-gen"');
     }
     return false;
   }
@@ -217,7 +213,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
-      console.log("Nextgen Build prepNextGenBuild")
+      console.log('Nextgen Build prepNextGenBuild');
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
@@ -229,11 +225,11 @@ export abstract class JobHandler {
       this.constructEnvVars();
       this.currJob.payload.isNextGen = true;
       if (this._currJob.payload.jobType === 'productionDeploy') {
-        this._validator.throwIfItIsNotPublishable(this._currJob);
+        this._validator.throwIfNotPublishable(this._currJob);
       }
     } else {
       this.currJob.payload.isNextGen = false;
-      console.log("Not a Nextgen Build prepNextGenBuild")
+      console.log('Not a Nextgen Build prepNextGenBuild');
     }
   }
 
@@ -270,7 +266,7 @@ export abstract class JobHandler {
     if (pathPrefix || pathPrefix === '') {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
-    console.log("constructEnvVars",envVars)
+    console.log('constructEnvVars', envVars);
     // const snootyFrontEndVars = {
     //   'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("gatsbyConsitentNavFlag"),
     //   'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("gatsbySDKVersionDropdownFlag"),
@@ -366,7 +362,7 @@ export abstract class JobHandler {
 
     if (this.currJob.deployCommands && this.currJob.deployCommands.length > 0) {
       const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
-      if (resp?.error?.includes("ERROR")) {
+      if (resp?.error?.includes('ERROR')) {
         await this._logger.save(
           this.currJob._id,
           `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`

@@ -39,8 +39,8 @@ async function init(): Promise<void> {
   jobRepository = new JobRepository(db, c, consoleLogger);
   hybridJobLogger = new HybridJobLogger(jobRepository);
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger,);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository,repoBranchesRepo);
+  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
   cdnConnector = new FastlyConnector(consoleLogger);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandlerFactory = new JobHandlerFactory();
@@ -57,7 +57,7 @@ async function init(): Promise<void> {
     repoBranchesRepo
   );
   jobManager.start().catch((err) => {
-    consoleLogger.error('App',`ERROR: ${err}`);
+    consoleLogger.error('App', `ERROR: ${err}`);
   });
 }
 process.on('SIGTERM', async () => {

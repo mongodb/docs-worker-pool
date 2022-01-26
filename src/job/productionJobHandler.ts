@@ -68,34 +68,33 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   getActiveBranchLength(): number {
-    let activeCount = 0
-    this.currJob.payload.repoBranches['branches'].forEach(branch => {
+    let activeCount = 0;
+    this.currJob.payload.repoBranches['branches'].forEach((branch) => {
       if (branch['active'] === true) {
-        activeCount += 1
+        activeCount += 1;
       }
     });
-    return activeCount
+    return activeCount;
   }
 
   async constructManifestIndexPath(): Promise<void> {
     try {
-        this.currJob.payload.manifestPrefix = this.currJob.payload.project + '-' + this.currJob.payload.urlSlug;
+      this.currJob.payload.manifestPrefix = this.currJob.payload.project + '-' + this.currJob.payload.urlSlug;
     } catch (error) {
-        await this.logger.save(this.currJob._id, error)
-        throw error
+      await this.logger.save(this.currJob._id, error);
+      throw error;
     }
-}
+  }
 
-async getPathPrefix(): Promise<string> {
+  async getPathPrefix(): Promise<string> {
     try {
-      let pathPrefix = ""
-      pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
+      const pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
       return pathPrefix;
     } catch (error) {
-        await this.logger.save(this.currJob._id, error)
-        throw new InvalidJobError(error.message)
+      await this.logger.save(this.currJob._id, error);
+      throw new InvalidJobError(error.message);
     }
-}
+  }
 
   private async purgePublishedContent(makefileOutput: Array<string>): Promise<void> {
     try {

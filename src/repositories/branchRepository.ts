@@ -12,7 +12,7 @@ export class BranchRepository extends BaseRepository {
     const query = { repoName: repoName };
     const repo = await this.findOne(query, `Mongo Timeout Error: Timedout while retrieving branches for ${repoName}`);
     // if user has specific entitlements
-    return repo ? repo['branches'] : [];
+    return repo?.['branches'] ?? [];
   }
 
   async getRepo(repoName: string): Promise<any> {

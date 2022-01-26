@@ -18,7 +18,7 @@ beforeEach(() => {
   fileSystemServices = mockDeep<IFileSystemServices>();
   repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
   repoBranchesRepository = mockDeep<RepoBranchesRepository>();
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository,repoBranchesRepository);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepository);
 });
 
 afterEach(() => {
@@ -86,16 +86,16 @@ describe('JobValidator Tests', () => {
     );
   });
 
-  test('throwIfItIsNotPublishable throws as branch not configured for publishing', () => {
+  test('throwIfNotPublishable throws as branch not configured for publishing', () => {
     expect(() => {
-      jobValidator.throwIfItIsNotPublishable(job);
+      jobValidator.throwIfNotPublishable(job);
     }).toThrowError(`${job.payload.branchName} is not configured for publish`);
   });
 
-  test('throwIfItIsNotPublishable returns without error', () => {
-    job.payload.repoBranches = TestDataProvider.getRepoBranchesData(job)
+  test('throwIfNotPublishable returns without error', () => {
+    job.payload.repoBranches = TestDataProvider.getRepoBranchesData(job);
     expect(() => {
-      jobValidator.throwIfItIsNotPublishable(job);
+      jobValidator.throwIfNotPublishable(job);
     }).not.toThrow();
   });
 

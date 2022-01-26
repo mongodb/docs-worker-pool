@@ -9,15 +9,18 @@ export interface IJobValidator {
   throwIfJobInvalid(job: IJob): Promise<void>;
   throwIfBranchNotConfigured(job: IJob): Promise<void>;
   throwIfUserNotEntitled(job: IJob): Promise<void>;
-  throwIfItIsNotPublishable(job: IJob): void;
+  throwIfNotPublishable(job: IJob): void;
 }
 
 export class JobValidator implements IJobValidator {
   _fileSystemService: IFileSystemServices;
   _repoEntitlementRepository: RepoEntitlementsRepository;
   _repoBranchesRepository: RepoBranchesRepository;
-  constructor(fileSystemService: IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository, 
-    repoBranchesRepository: RepoBranchesRepository) {
+  constructor(
+    fileSystemService: IFileSystemServices,
+    repoEntitlementRepository: RepoEntitlementsRepository,
+    repoBranchesRepository: RepoBranchesRepository
+  ) {
     this._fileSystemService = fileSystemService;
     this._repoEntitlementRepository = repoEntitlementRepository;
     this._repoBranchesRepository = repoBranchesRepository;
@@ -30,22 +33,26 @@ export class JobValidator implements IJobValidator {
     }
   }
 
-  async throwIfBranchNotConfigured(job: IJob): Promise<void> { 
+  async throwIfBranchNotConfigured(job: IJob): Promise<void> {
     job.payload.repoBranches = await this._repoBranchesRepository.getRepoBranchesByRepoName(job.payload.repoName);
     if (!job.payload?.repoBranches) {
       throw new AuthorizationError(`repoBranches not found for ${job.payload.repoName}`);
     }
   }
 
-  throwIfItIsNotPublishable(job: IJob): void {
+  throwIfNotPublishable(job: IJob): void {
+    let found = false;
     if (job?.payload?.repoBranches) {
-      job.payload.repoBranches['branches'].forEach(branch => {
-        if (branch['gitBranchName'] === job.payload.branchName ) {
+      job.payload.repoBranches['branches'].forEach((branch) => {
+        if (branch['gitBranchName'] === job.payload.branchName) {
+          found = true;
           return;
         }
       });
     }
-    throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
+    if (!found) {
+      throw new AuthorizationError(`${job.payload.branchName} is not configured for publish`);
+    }
   }
 
   public async throwIfJobInvalid(job: IJob): Promise<void> {
