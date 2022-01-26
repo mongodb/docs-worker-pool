@@ -35,7 +35,7 @@ describe('ShellCommandExecutor Tests', () => {
       });
       const resp = await commandExecutor.execute([]);
       expect(resp.error).not.toBe(undefined);
-      expect(resp.output).toBe(null);
+      expect(resp.output).toBe('');
       expect(resp.status).toBe('failed');
       expect(cp.exec).toBeCalledTimes(1);
     });

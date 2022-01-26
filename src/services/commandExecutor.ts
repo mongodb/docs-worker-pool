@@ -16,8 +16,8 @@ const exec = promisify(execWithOptions) as any;
 
 export class CommandExecutorResponse {
   status: string;
-  output: string | null;
-  error: string | null;
+  output: string;
+  error: string;
 }
 
 export interface ICommandExecutor {
@@ -55,7 +55,7 @@ export class ShellCommandExecutor implements ICommandExecutor {
       resp.status = 'success';
       return resp;
     } catch (error) {
-      resp.output = null;
+      resp.output = '';
       resp.error = error;
       resp.status = 'failed';
     }

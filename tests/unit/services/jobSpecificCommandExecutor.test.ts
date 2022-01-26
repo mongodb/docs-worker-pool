@@ -40,7 +40,7 @@ describe('JobSpecificCommandExecutor Tests', () => {
       });
       const resp = await commandExecutor.getSnootyProjectName('test_repo');
       expect(resp.error).not.toBe(undefined);
-      expect(resp.output).toBe(null);
+      expect(resp.output).toBe('');
       expect(resp.status).toBe('failed');
     });
   });
