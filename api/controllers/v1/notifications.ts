@@ -65,20 +65,15 @@ function prepSummaryMessage(
   jobId: string,
   jobTitle: string
 ): string {
+  // TODO: Determine why mms-docs has a special lastMessage slicing
   if (repoName === 'mms-docs') {
-    let modMmsOutput: string;
-    modMmsOutput = lastMessage.substring(lastMessage.indexOf('mut-publish'));
-    modMmsOutput = modMmsOutput + '\n\n';
-    modMmsOutput = modMmsOutput + lastMessage.substring(lastMessage.lastIndexOf('Summary'));
-    lastMessage = modMmsOutput;
+    lastMessage = `${lastMessage.slice(lastMessage.indexOf('mut-publish'))}\n\n${lastMessage.slice(
+      lastMessage.lastIndexOf('Summary')
+    )}`;
   }
-  let message = 'Your Job (<' + jobUrl + jobId + '|' + jobTitle + '>) ';
-  message += 'finished! Please check the build log for any errors';
-  // only get the summary portion of build output
-  message += '\n' + lastMessage;
-  message += '\n' + 'Enjoy!';
-  message = message.replace(/\.{2,}/g, '');
-  return message;
+  const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) finished! Please check the build log for any errors.\n${lastMessage}\nEnjoy!`;
+  // Removes instances of two or more periods
+  return msg.replace(/\.{2,}/g, '');
 }
 
 function prepProgressMessage(
@@ -87,23 +82,21 @@ function prepProgressMessage(
   jobId: string,
   jobTitle: string,
   status: string
-): any {
-  let message = 'Your Job (<' + jobUrl + jobId + '|' + jobTitle + '>) ';
+): string {
+  const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
   if (operationType === 'insert') {
-    message += 'has successfully been added to the queue.';
-  } else {
-    const newStatus = status;
-    if (newStatus === 'inProgress') {
-      message += 'is now being processed.';
-    } else if (newStatus === 'completed') {
-      message += 'has successfully completed.';
-    } else if (newStatus === 'failed') {
-      message += 'has failed and will not be placed back in the queue.';
-    } else {
-      message += 'has been updated to an unsupported status.';
-    }
+    return msg + 'has successfully been added to the queue.';
   }
-  return message;
+  switch (status) {
+    case 'inProgress':
+      return msg + 'is now being processed.';
+    case 'completed':
+      return msg + 'has successfully completed.';
+    case 'failed':
+      return msg + 'has failed and will not be placed back in the queue.';
+    default:
+      return msg + 'has been updated to an unsupported status.';
+  }
 }
 
 export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {

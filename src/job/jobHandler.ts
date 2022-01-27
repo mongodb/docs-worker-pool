@@ -258,6 +258,7 @@ export abstract class JobHandler {
   }
 
   private constructEnvVars(): void {
+    // TODO: Can we store envVars as an object in the future?
     let envVars = `GATSBY_PARSER_USER=${this._config.get<string>('GATSBY_PARSER_USER')}\nGATSBY_PARSER_BRANCH=${
       this.currJob.payload.branchName
     }\n`;
@@ -299,7 +300,7 @@ export abstract class JobHandler {
       `. /venv/bin/activate`,
       `cd repos/${this.currJob.payload.repoName}`,
       `rm -f makefile`,
-      `make html`,
+      `make html`, // TODO: Can we remove this line, given how many jobHandler functions overwrite it?
     ];
   }
 
@@ -360,7 +361,7 @@ export abstract class JobHandler {
     this.prepDeployCommands();
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
-    if (this.currJob.deployCommands && this.currJob.deployCommands.length > 0) {
+    if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
       const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
       if (resp?.error?.includes('ERROR')) {
         await this._logger.save(

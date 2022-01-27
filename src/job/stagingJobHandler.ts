@@ -39,6 +39,7 @@ export class StagingJobHandler extends JobHandler {
   }
 
   prepDeployCommands(): void {
+    // TODO: Can we simplify the chain of logic here?
     this.currJob.deployCommands = ['. /venv/bin/activate', `cd repos/${this.currJob.payload.repoName}`, 'make stage'];
     if (this.currJob.payload.isNextGen) {
       if (this.currJob.payload.pathPrefix) {

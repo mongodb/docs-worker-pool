@@ -40,6 +40,7 @@ export class ProductionJobHandler extends JobHandler {
     this.name = 'Production';
   }
   prepDeployCommands(): void {
+    // TODO: Can we simplify the chain of logic here?
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
@@ -79,7 +80,7 @@ export class ProductionJobHandler extends JobHandler {
 
   async constructManifestIndexPath(): Promise<void> {
     try {
-      this.currJob.payload.manifestPrefix = this.currJob.payload.project + '-' + this.currJob.payload.urlSlug;
+      this.currJob.payload.manifestPrefix = `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
     } catch (error) {
       await this.logger.save(this.currJob._id, error);
       throw error;

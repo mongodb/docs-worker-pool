@@ -157,7 +157,7 @@ export class TestDataProvider {
     return commands;
   }
 
-  static getEnvVarsWithPathPrefixWithFlags(job: IJob, nav: string | null, dropdown: string | null): string {
+  static getEnvVarsWithPathPrefixWithFlags(job: IJob): string {
     return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\n`;
   }
   static getEnvVarsTestCases(): Array<any> {
@@ -190,8 +190,6 @@ export class TestDataProvider {
   }
 
   static getPathPrefixCases(): Array<any> {
-    // Null version
-
     const job = Object.assign(data.default.value);
     const itemValid = TestDataProvider.getPublishBranchesContent(job);
 
@@ -272,6 +270,7 @@ export class TestDataProvider {
 
   static getExpectedStageDeployNextGenCommands(job: IJob): Array<string> {
     const genericCommands = TestDataProvider.getCommonDeployCommands(job);
+    // TODO: simplify construction of return value
     if (job.payload.mutPrefix) {
       return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
         `make next-gen-stage MUT_PREFIX=${job.payload.mutPrefix}`,
@@ -282,10 +281,12 @@ export class TestDataProvider {
 
   static getExpectedProdDeployNextGenCommands(job: IJob): Array<string> {
     const genericCommands = TestDataProvider.getCommonDeployCommands(job);
+    // TODO: simplify construction of return value
     const ret = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       `make next-gen-deploy MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);
     if (job.payload.manifestPrefix) {
+      // TODO: is job.payload.stableBranch supposed to be isStableBranch?
       ret[
         ret.length - 1
       ] += ` MANIFEST_PREFIX=${job.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${job.payload.stableBranch}`;
