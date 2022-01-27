@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { CDNCreds } from '../entities/creds';
-import { IJob } from '../entities/job';
+import { IJob, IPayload } from '../entities/job';
 import { InvalidJobError } from '../errors/errors';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -48,10 +48,11 @@ export class ProductionJobHandler extends JobHandler {
     ];
 
     if (this.currJob.payload.isNextGen) {
-      const manifestPrefix = this.currJob.payload.manifestPrefix;
       this.currJob.deployCommands[
         this.currJob.deployCommands.length - 1
       ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+      // TODO: Remove functionality of manifestPrefix
+      const manifestPrefix = this.currJob.payload.manifestPrefix;
       if (manifestPrefix) {
         const searchFlag = this.currJob.payload.stable;
         this.currJob.deployCommands[
@@ -120,8 +121,8 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   async deploy(): Promise<CommandExecutorResponse> {
-    const resp = await this.deployGeneric();
     try {
+      const resp = await this.deployGeneric();
       if (resp?.output) {
         const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
         await this.purgePublishedContent(makefileOutput);
