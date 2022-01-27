@@ -1,9 +1,11 @@
+// TODO: Cut down on null and undefined type definition allowances
 export interface IJob {
   _id: string;
   payload: IPayload;
   createdTime: Date;
   email: string;
   endTime: Date | null | undefined;
+  n;
   error: any | null | undefined;
   logs: string[] | null | undefined;
   priority: number | null | undefined;
@@ -14,8 +16,8 @@ export interface IJob {
   user: string;
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;
-  buildCommands: Array<string> | null | undefined;
-  deployCommands: Array<string> | null | undefined;
+  buildCommands: Array<string>;
+  deployCommands: Array<string>;
 }
 
 export interface IPayload {
@@ -66,6 +68,6 @@ export class Job implements IJob {
   manifestPrefix: string | undefined;
   pathPrefix: string | null | undefined;
   mutPrefix: string | null | undefined;
-  buildCommands: string[] | null | undefined;
-  deployCommands: string[] | null | undefined;
+  buildCommands: string[];
+  deployCommands: string[];
 }

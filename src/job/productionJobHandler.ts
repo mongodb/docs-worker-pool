@@ -69,13 +69,7 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   getActiveBranchLength(): number {
-    let activeCount = 0;
-    this.currJob.payload.repoBranches['branches'].forEach((branch) => {
-      if (branch['active'] === true) {
-        activeCount += 1;
-      }
-    });
-    return activeCount;
+    return this.currJob.payload.repoBranches.branches.filter((b) => b['active']).length;
   }
 
   async constructManifestIndexPath(): Promise<void> {
@@ -103,7 +97,7 @@ export class ProductionJobHandler extends JobHandler {
       //contains URLs corresponding to files updated via our push to S3
       const updatedURLsArray = stdoutJSON.urls;
       // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
-      await this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
+      await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
       if (this._config.get('shouldPurgeAll')) {
         await this._cdnConnector.purgeAll(this.getCdnCreds());
       } else {
