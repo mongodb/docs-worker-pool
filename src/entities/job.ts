@@ -5,7 +5,6 @@ export interface IJob {
   createdTime: Date;
   email: string;
   endTime: Date | null | undefined;
-  n;
   error: any | null | undefined;
   logs: string[] | null | undefined;
   priority: number | null | undefined;
