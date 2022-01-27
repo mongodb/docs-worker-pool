@@ -290,8 +290,10 @@ export abstract class JobHandler {
 
   protected abstract deploy(): Promise<CommandExecutorResponse>;
 
+  // TODO: Make this a non-mutating state function, e.g. return the deployCommands
   protected abstract prepDeployCommands(): void;
 
+  // TODO: Make this a non-mutating state function, e.g. return the buildCommands
   protected prepBuildCommands(): void {
     this.currJob.buildCommands = [
       `. /venv/bin/activate`,
@@ -353,6 +355,10 @@ export abstract class JobHandler {
     return await this.executeBuild();
   }
 
+  // TODO: Reduce complexity by not having individual child-class deploy() functions
+  // that just refer back to deployGeneric(), which itself leans is basically just a
+  // a wrapper for the command executor. E.g., the parent could call deployGeneric()
+  // itself, and then call the child's job-specific deploy()
   @throwIfJobInterupted()
   protected async deployGeneric(): Promise<CommandExecutorResponse> {
     this.prepDeployCommands();

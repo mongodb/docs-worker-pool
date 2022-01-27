@@ -59,7 +59,7 @@ describe('JobHandlerFactory Tests', () => {
         jobValidator,
         repoBranchesRepo
       );
-    }).toThrowError('Job type not supported');
+    }).toThrowError(`Job type 'Unknown' not supported`);
   });
 
   test('regression jobtype returns regression handler', () => {
