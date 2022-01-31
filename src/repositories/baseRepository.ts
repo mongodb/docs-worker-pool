@@ -33,11 +33,14 @@ export abstract class BaseRepository {
         this._collection.updateOne(filterDoc, updateDoc,{upsert: true}),
         errorMsg
       );
+      console.log(updateResult.upsertedId)
       if (updateResult.upsertedId) {
         return updateResult.upsertedId;
       }
+      console.log(`Failed to insert job (${JSON.stringify(filterDoc)})`);
       return null;
     } catch (error) {
+      console.log(error)
       this._logger.error(
         `${this._repoName}:upsert`,
         `Failed to insert job (${JSON.stringify(filterDoc)}) error: ${error}`

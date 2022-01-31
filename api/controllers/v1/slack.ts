@@ -88,6 +88,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
   try {
+    console.log(job)
     await jobRepository.insertJob(job);
   } catch (err) {
     logger.error('SLACK:DEPLOYREPO', err);
@@ -114,14 +115,17 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const stateValues = parsed.view.state.values;
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
+  console.log(decoded)
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!!');
   }
 
   const values = slackConnector.parseSelection(stateValues);
+  console.log(JSON.stringify(values))
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     const buildDetails = values.repo_option[i].value.split('/');
+    console.log(buildDetails)
     const repoOwner = buildDetails[0];
     const repoName = buildDetails[1];
     const branchName = buildDetails[2];
@@ -133,6 +137,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const repoInfo = await branchRepository.getRepo(repoName)
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
 
+    console.log(branchObject)
     if (!branchObject || !branchObject.aliasObject) continue;
 
     const active = branchObject.aliasObject.active //bool

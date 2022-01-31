@@ -28,7 +28,7 @@ export class BranchRepository extends BaseRepository {
       .aggregate([
         { $match: { repoName: repoName } },
         { $unwind: '$branches' },
-        { $match: { 'branches.name': branchName } },
+        { $match: { 'branches.gitBranchName': branchName } },
         { $project: { branches: 1 } },
       ])
       .toArray();
