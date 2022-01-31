@@ -5,6 +5,7 @@ import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 
 export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
+  console.log("NotifyBuildSummary",event);
   const consoleLogger = new ConsoleLogger();
   if (JSON.stringify(event.detail.updateDescription.updatedFields).indexOf('comMessage') === -1) {
     return;
@@ -29,11 +30,28 @@ export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
   if (!entitlement || !entitlement['slack_user_id']) {
     return;
   }
-  return await slackConnector.sendMessage(
-    prepSummaryMessage(repoName, slackMsgs[slackMsgs.length - 1], c.get<string>('dashboardUrl'), jobId, jobTitle),
+  const resp = await slackConnector.sendMessage(
+    prepSummaryMessage(repoName,limit_message_size(slackMsgs[slackMsgs.length - 1]), c.get<string>('dashboardUrl'), jobId, jobTitle),
     entitlement['slack_user_id']
   );
+
+  console.log(resp)
+  return {
+    'statusCode': 200,
+  }
 };
+
+function limit_message_size(message) {
+  while (message.length >= 256) {
+    let end = 255
+    while (message[end]!= ' ') {
+        end-=1
+    }
+    message = message.substring(0, end+1)
+    }
+    return message
+
+}
 
 function prepSummaryMessage(
   repoName: string,
@@ -84,6 +102,7 @@ function prepProgressMessage(
 }
 
 export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
+  console.log("NotifyBuildProgress",event);
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   const jobTitle = event.detail.fullDocument.title;
@@ -98,11 +117,13 @@ export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
     consoleLogger.error(username, "Entitlement Failed")
     return;
   }
-  await slackConnector.sendMessage(
+  const resp = await slackConnector.sendMessage(
     prepProgressMessage(event.detail.operationType, c.get('dashboardUrl'), jobId, jobTitle, event.detail.fullDocument.status),
     entitlement['slack_user_id']
   );
+  console.log(resp)
   return {
     'statusCode': 200,
   }
+ 
 };

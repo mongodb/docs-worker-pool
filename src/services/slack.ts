@@ -40,6 +40,8 @@ export class SlackConnector implements ISlackConnector {
       text: message,
     };
 
+    console.log("Slack sendMessage", message)
+
     const slackToken = this._config.get<string>('slackAuthToken');
     return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
       headers: {
