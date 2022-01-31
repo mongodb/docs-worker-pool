@@ -77,6 +77,7 @@ next-gen-stage: ## Host online for review
 	fi
 
 INDEX_NAME=$(subst docs,manual,${MANIFEST_PREFIX})
+INDEX_NAME=$(subst null,manual,${MANIFEST_PREFIX})
 ifeq ($(INDEX_NAME), "manual-manual")
 	INDEX_NAME="manual-v5.0"
 endif
