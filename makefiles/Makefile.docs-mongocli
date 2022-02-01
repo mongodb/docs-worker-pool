@@ -16,6 +16,7 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 # Necessary to add the fetch-submodule dependency
 PUSHLESS_DEPLOY_SHARED_DISABLED=true
+CUSTOM_SEARCH_INDEX=true
 
 include ~/shared.mk
 
@@ -57,6 +58,12 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
+
+INDEX_NAME=$(subst null,${PROJECT},${MANIFEST_PREFIX})
+
+next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
+	@echo "Building search index"
+	mut-index upload public -b ${BUCKET} -o ${INDEX_NAME}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongocli.yaml > ${REPO_DIR}/published-branches.yaml
