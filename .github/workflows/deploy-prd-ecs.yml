@@ -61,6 +61,7 @@ jobs:
           sls deploy --stage prd
           sls deploy --stage dotcomprd
           aws ecs update-service --force-new-deployment --service docs-worker-pool-prd --cluster docs-worker-pool-prd
+          aws ecs update-service --force-new-deployment --service docs-worker-pool-dotcomprd --cluster docs-worker-pool-dotcomprd
       - name: Deploy Lambdas	
         run: |
           npm ci
