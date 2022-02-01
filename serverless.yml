@@ -46,5 +46,11 @@ default-env: &default-env
 functions:
     v1UpsertEdgeDictionaryItem:
       handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
+      events:
+        - eventBridge:
+            eventBus:  ${self:custom.dochubEventBus}
+            pattern:
+              source:
+                - ${self:custom.docuhubEventSource.${self:provider.stage}}
       environment:
         <<: *default-env
