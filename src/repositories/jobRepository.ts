@@ -1,9 +1,11 @@
-  import mongodb from 'mongodb';
+
+import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { Job } from '../entities/job';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
 import { InvalidJobError, JobExistsAlreadyError } from '../errors/errors';
+const objectId = mongodb.ObjectId;
 
 export class JobRepository extends BaseRepository {
   constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
@@ -34,6 +36,17 @@ export class JobRepository extends BaseRepository {
     if (!(await this.upsert(filterDoc, updateDoc, `Mongo Timeout Error: Timed out while inserting Job`))) {
       throw new JobExistsAlreadyError('InsertJobFailed');
     }
+  }
+
+  async getJobById(id: string): Promise<Job | null> {
+    const query = {
+      _id: new objectId(id),
+    };
+    const resp = await this.findOne(query,`Mongo Timeout Error: Timed out while find job by id Job`);
+    if (!resp) {
+      throw new JobExistsAlreadyError('InsertJobFailed');
+    }
+    return Object.assign(new Job(), resp);
   }
 
   async getOneQueuedJobAndUpdate(): Promise<Job | null> {

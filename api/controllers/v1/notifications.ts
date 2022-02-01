@@ -3,13 +3,22 @@ import * as mongodb from 'mongodb';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
+import { JobRepository } from '../../../src/repositories/jobRepository';
 
 export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
   console.log("NotifyBuildSummary",event);
   const consoleLogger = new ConsoleLogger();
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
   if (JSON.stringify(event.detail.updateDescription.updatedFields).indexOf('comMessage') === -1) {
     return;
   }
+  const jobId = event.detail.documentKey._id;
+  
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+  event.detail.fullDocument = await jobRepository.getJobById(jobId);
+
   const slackMsgs = event.detail.fullDocument.comMessage;
   // check if summary exists to send to slack
   if (slackMsgs === undefined || slackMsgs.length === 0) {
@@ -18,13 +27,9 @@ export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
   }
 
   const jobTitle = event.detail.fullDocument.title;
-  const jobId = event.detail.fullDocument._id;
   const repoName = event.detail.fullDocument.payload.repoName;
   const username = event.detail.fullDocument.user;
   const slackConnector = new SlackConnector(consoleLogger, c);
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
-  await client.connect();
-  const db = client.db(c.get('dbName'));
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
   if (!entitlement || !entitlement['slack_user_id']) {
@@ -102,15 +107,17 @@ function prepProgressMessage(
 }
 
 export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
-  console.log("NotifyBuildProgress",event);
   const consoleLogger = new ConsoleLogger();
-  const slackConnector = new SlackConnector(consoleLogger, c);
-  const jobTitle = event.detail.fullDocument.title;
-  const jobId = event.detail.fullDocument._id;
-  const username = event.detail.fullDocument.user;
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
+
+  const slackConnector = new SlackConnector(consoleLogger, c);
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+  const jobId = event.detail.documentKey._id;
+  event.detail.fullDocument = await jobRepository.getJobById(jobId);
+  const jobTitle = event.detail.fullDocument.title;
+  const username = event.detail.fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
   if (!entitlement || !entitlement['slack_user_id']) {
