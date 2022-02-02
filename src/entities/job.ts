@@ -10,7 +10,6 @@ export interface IJob {
   _id: string;
   payload: IPayload;
   createdTime: Date;
-  email: string;
   endTime: Date | null | undefined;
   error: any | null | undefined;
   logs: string[] | null | undefined;
@@ -25,7 +24,6 @@ export interface IJob {
   buildCommands: Array<string>;
   deployCommands: Array<string>;
 }
-
 export interface IPayload {
   jobType: string;
   source: string;
@@ -55,11 +53,10 @@ export interface IPayload {
   includeInGlobalSearch: boolean;
 }
 
-export class Job implements IJob {
+export class BuildJob implements IJob {
   _id: string;
   payload: IPayload;
   createdTime: Date;
-  email: string;
   endTime: Date | null | undefined;
   error: any;
   logs: string[] | null | undefined;
@@ -69,6 +66,8 @@ export class Job implements IJob {
   status: string;
   title: string;
   user: string;
+  // BuildJob specific:
+  email: string; // probably vestigial
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;
   manifestPrefix: string | undefined;
@@ -76,4 +75,21 @@ export class Job implements IJob {
   mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
+}
+
+// ManifestJob represents the creation of the search manifest, which is kicked off
+// in the execute() function of JobHandler.
+export class ManifestJob implements IJob {
+  _id: string;
+  payload: IPayload;
+  createdTime: Date;
+  endTime: Date | null | undefined;
+  error: any | null | undefined;
+  logs: string[] | null | undefined;
+  priority: number | null | undefined;
+  result: any | null | undefined;
+  startTime: Date;
+  status: string;
+  title: string;
+  user: string;
 }
