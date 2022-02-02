@@ -76,7 +76,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
   try {
-    console.log(job)
+    console.log(job);
     await jobRepository.insertJob(job);
   } catch (err) {
     logger.error('SLACK:DEPLOYREPO', err);
@@ -103,13 +103,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const stateValues = parsed.view.state.values;
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
-  console.log(decoded)
+  console.log(decoded);
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
 
   const values = slackConnector.parseSelection(stateValues);
-  console.log(JSON.stringify(values))
+  console.log(JSON.stringify(values));
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
@@ -123,11 +123,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
     if (!branchObject?.aliasObject) continue;
 
-    const active = branchObject.aliasObject.active //bool
-    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName //bool
-    const aliases = branchObject.aliasObject.urlAliases //array or null
-    let urlSlug = branchObject.aliasObject.urlSlug //string or null, string must match value in urlAliases or gitBranchName
-    const isStableBranch = branchObject.aliasObject.isStableBranch // bool or Falsey
+    const active = branchObject.aliasObject.active; //bool
+    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool
+    const aliases = branchObject.aliasObject.urlAliases; //array or null
+    let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
+    const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
 
     if (!urlSlug) {
       urlSlug = branchName;
@@ -162,7 +162,19 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       }
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
       if (urlSlug) {
-        newPayload = createPayload('productionDeploy', repoOwner, repoName, branchName, hashOption, repoInfo.project, repoInfo.prefix,true, urlSlug, true, stable);
+        newPayload = createPayload(
+          'productionDeploy',
+          repoOwner,
+          repoName,
+          branchName,
+          hashOption,
+          repoInfo.project,
+          repoInfo.prefix,
+          true,
+          urlSlug,
+          true,
+          stable
+        );
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
       }
       if (publishOriginalBranchName) {

@@ -6,7 +6,7 @@ import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 
 export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
-  console.log("NotifyBuildSummary",event);
+  console.log('NotifyBuildSummary', event);
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -36,26 +36,31 @@ export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
     return;
   }
   const resp = await slackConnector.sendMessage(
-    prepSummaryMessage(repoName,limit_message_size(slackMsgs[slackMsgs.length - 1]), c.get<string>('dashboardUrl'), jobId, jobTitle),
+    prepSummaryMessage(
+      repoName,
+      limit_message_size(slackMsgs[slackMsgs.length - 1]),
+      c.get<string>('dashboardUrl'),
+      jobId,
+      jobTitle
+    ),
     entitlement['slack_user_id']
   );
 
-  console.log(resp)
+  console.log(resp);
   return {
-    'statusCode': 200,
-  }
+    statusCode: 200,
+  };
 };
 
 function limit_message_size(message) {
   while (message.length >= 256) {
-    let end = 255
-    while (message[end]!= ' ') {
-        end-=1
+    let end = 255;
+    while (message[end] != ' ') {
+      end -= 1;
     }
-    message = message.substring(0, end+1)
-    }
-    return message
-
+    message = message.substring(0, end + 1);
+  }
+  return message;
 }
 
 function prepSummaryMessage(
@@ -118,12 +123,17 @@ export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
     return;
   }
   const resp = await slackConnector.sendMessage(
-    prepProgressMessage(event.detail.operationType, c.get('dashboardUrl'), jobId, jobTitle, event.detail.fullDocument.status),
+    prepProgressMessage(
+      event.detail.operationType,
+      c.get('dashboardUrl'),
+      jobId,
+      jobTitle,
+      event.detail.fullDocument.status
+    ),
     entitlement['slack_user_id']
   );
-  console.log(resp)
+  console.log(resp);
   return {
-    'statusCode': 200,
-  }
- 
+    statusCode: 200,
+  };
 };
