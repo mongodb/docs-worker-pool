@@ -5,6 +5,7 @@ version:
     - '19.12'
   active:
     - 'master'
+    - '19.12'
   stable: 'master'
 git:
   branches:
