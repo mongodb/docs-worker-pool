@@ -1,18 +1,15 @@
 prefix: 'charts'
 version:
   published:
-    - 'Cloud'
-    - '19.12 (On-Prem)'
+    - 'master'
   active:
-    - 'Cloud'
-    - '19.12 (On-Prem)'
+    - 'master'
   stable: 'master'
 git:
   branches:
     manual: 'master'
     published:
       - 'master'
-      - '19.12'
 
       # the branches/published list **must** be ordered from most to
       # least recent release.
