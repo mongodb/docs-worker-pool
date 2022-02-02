@@ -4,19 +4,19 @@ import { IConfig } from 'config';
 import * as crypto from 'crypto';
 export const axiosApi = axios.create();
 
-function bufferEqual(a:Buffer, b:Buffer) {
+function bufferEqual(a: Buffer, b: Buffer) {
   if (a.length !== b.length) {
     return false;
   }
   return crypto.timingSafeEqual(a, b);
 }
 
-function timeSafeCompare(a:string, b:string) {
-  let sa = String(a);
-  let sb = String(b);
-  let key = crypto.pseudoRandomBytes(32);
-  let ah = crypto.createHmac('sha256', key).update(sa).digest();
-  let bh = crypto.createHmac('sha256', key).update(sb).digest();
+function timeSafeCompare(a: string, b: string) {
+  const sa = String(a);
+  const sb = String(b);
+  const key = crypto.pseudoRandomBytes(32);
+  const ah = crypto.createHmac('sha256', key).update(sa).digest();
+  const bh = crypto.createHmac('sha256', key).update(sb).digest();
   return bufferEqual(ah, bh) && a === b;
 }
 
@@ -40,13 +40,13 @@ export class SlackConnector implements ISlackConnector {
       text: message,
     };
 
-    console.log("Slack sendMessage", message)
+    console.log('Slack sendMessage', message);
 
     const slackToken = this._config.get<string>('slackAuthToken');
     return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
       headers: {
         Authorization: [`Bearer ${slackToken}`],
-        'Content-type': 'application/json; charset=utf-8'
+        'Content-type': 'application/json; charset=utf-8',
       },
     });
   }
@@ -62,15 +62,15 @@ export class SlackConnector implements ISlackConnector {
       const blockInputKey = inputMapping[blockKey];
       const stateValuesObj = stateValues[blockKey][blockInputKey];
       // selected value from dropdown
-      if (stateValuesObj && stateValuesObj.selected_option && stateValuesObj.selected_option.value) {
+      if (stateValuesObj?.selected_option?.value) {
         values[blockInputKey] = stateValuesObj.selected_option.value;
       }
       // multi select is an array
-      else if (stateValuesObj && stateValuesObj.selected_options && stateValuesObj.selected_options.length > 0) {
+      else if (stateValuesObj?.selected_options && stateValuesObj.selected_options.length > 0) {
         values[blockInputKey] = stateValuesObj.selected_options;
       }
       // input value
-      else if (stateValuesObj && stateValuesObj.value) {
+      else if (stateValuesObj?.value) {
         values[blockInputKey] = stateValuesObj.value;
       }
       // no input
@@ -82,7 +82,6 @@ export class SlackConnector implements ISlackConnector {
   }
 
   validateSlackRequest(payload: any): boolean {
-      
     // params needed to verify for slack
     const headerSlackSignature = payload.headers['X-Slack-Signature'].toString(); // no idea why `typeof <sig>` = object
     const timestamp = payload.headers['X-Slack-Request-Timestamp'];
@@ -94,9 +93,8 @@ export class SlackConnector implements ISlackConnector {
       hmac.update(base);
       return timeSafeCompare(hash, hmac.digest('hex'));
     }
-    return false
+    return false;
   }
-
 
   async displayRepoOptions(repos: string[], triggerId: string): Promise<any> {
     const repoOptView = this._buildDropdown(repos, triggerId);
@@ -105,7 +103,7 @@ export class SlackConnector implements ISlackConnector {
     return await axiosApi.post(slackUrl, repoOptView, {
       headers: {
         Authorization: [`Bearer ${slackToken}`],
-        'Content-type': 'application/json; charset=utf-8'
+        'Content-type': 'application/json; charset=utf-8',
       },
     });
   }
@@ -189,7 +187,7 @@ export class SlackConnector implements ISlackConnector {
     //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
 
     if (reposToShow.length > 100) {
-      reposToShow = reposToShow.splice(0, 100)
+      reposToShow = reposToShow.splice(0, 100);
     }
     return this._getDropDownView(triggerId, reposToShow);
   }

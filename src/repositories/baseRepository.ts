@@ -30,17 +30,17 @@ export abstract class BaseRepository {
     try {
       const updateResult = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
-        this._collection.updateOne(filterDoc, updateDoc,{upsert: true}),
+        this._collection.updateOne(filterDoc, updateDoc, { upsert: true }),
         errorMsg
       );
-      console.log(updateResult.upsertedId)
+      console.log(updateResult.upsertedId);
       if (updateResult.upsertedId) {
         return updateResult.upsertedId;
       }
       console.log(`Failed to insert job (${JSON.stringify(filterDoc)})`);
       return null;
     } catch (error) {
-      console.log(error)
+      console.log(error);
       this._logger.error(
         `${this._repoName}:upsert`,
         `Failed to insert job (${JSON.stringify(filterDoc)}) error: ${error}`
@@ -68,7 +68,7 @@ export abstract class BaseRepository {
   protected async updateOne(query: any, update: any, errorMsg: string): Promise<boolean> {
     try {
       const updateResult = await this.update(query, update, errorMsg);
-      if (!updateResult || !updateResult.modifiedCount || updateResult.modifiedCount < 1) {
+      if ((updateResult?.modifiedCount ?? 0) < 1) {
         throw new DBError(`Failed to update job (${JSON.stringify(query)})  for ${JSON.stringify(update)}`);
       }
     } catch (error) {

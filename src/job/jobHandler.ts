@@ -86,7 +86,7 @@ export abstract class JobHandler {
   }
   private async update(publishResult: CommandExecutorResponse): Promise<void> {
     if (publishResult) {
-      if (publishResult && publishResult.status === 'success') {
+      if (publishResult?.status === 'success') {
         const files = this._fileSystemServices.getFilesInDirectory(
           `./${this.currJob.payload.repoName}/build/public`,
           '',
@@ -119,7 +119,8 @@ export abstract class JobHandler {
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
     const pathPrefix = await this.getPathPrefix();
-    if (typeof pathPrefix !== 'undefined' && pathPrefix !== null) {
+    // TODO: Can empty string check be removed?
+    if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
       this.currJob.payload.mutPrefix = mutPrefix;
@@ -142,10 +143,11 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async commitCheck(): Promise<void> {
     // if commit hash is provided, use that
-    if (this.currJob.payload.newHead && this.currJob.title !== 'Regression Test Child Process') {
+    if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Regression Test Child Process') {
       try {
         const resp = await this._repoConnector.checkCommits(this._currJob);
-        if (!resp || !resp.output || (resp.output && !resp.output.includes(`* ${this.currJob.payload.branchName}`))) {
+        // The response output MUST contain the branchName, or else we did not find the commit
+        if (!resp?.output?.includes(`* ${this.currJob.payload.branchName}`)) {
           const err = new InvalidJobError(
             `Specified commit does not exist on ${this.currJob.payload.branchName} branch`
           );
@@ -203,11 +205,7 @@ export abstract class JobHandler {
     if (this._fileSystemServices.rootFileExists(workerPath)) {
       const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
       const workerLines = workerContents.split(/\r?\n/);
-      for (let i = 0; i < workerLines.length; i++) {
-        if (workerLines[i] === '"build-and-stage-next-gen"') {
-          return true;
-        }
-      }
+      return workerLines.includes('"build-and-stage-next-gen"');
     }
     return false;
   }
@@ -215,9 +213,10 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
-      console.log("Nextgen Build prepNextGenBuild")
+      console.log('Nextgen Build prepNextGenBuild');
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
+      // if this payload is NOT aliased or if it's the primary alias, we need the index path
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         await this.constructManifestIndexPath();
       }
@@ -226,11 +225,11 @@ export abstract class JobHandler {
       this.constructEnvVars();
       this.currJob.payload.isNextGen = true;
       if (this._currJob.payload.jobType === 'productionDeploy') {
-        this._validator.throwIfItIsNotPublishable(this._currJob);
+        this._validator.throwIfNotPublishable(this._currJob);
       }
     } else {
       this.currJob.payload.isNextGen = false;
-      console.log("Not a Nextgen Build prepNextGenBuild")
+      console.log('Not a Nextgen Build prepNextGenBuild');
     }
   }
 
@@ -259,14 +258,16 @@ export abstract class JobHandler {
   }
 
   private constructEnvVars(): void {
+    // TODO: Can we store envVars as an object in the future?
     let envVars = `GATSBY_PARSER_USER=${this._config.get<string>('GATSBY_PARSER_USER')}\nGATSBY_PARSER_BRANCH=${
       this.currJob.payload.branchName
     }\n`;
     const pathPrefix = this.currJob.payload.pathPrefix;
-    if (typeof pathPrefix !== 'undefined' && pathPrefix !== null) {
+    // TODO: Do we need the empty string check?
+    if (pathPrefix || pathPrefix === '') {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
-    console.log("constructEnvVars",envVars)
+    console.log('constructEnvVars', envVars);
     // const snootyFrontEndVars = {
     //   'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("gatsbyConsitentNavFlag"),
     //   'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("gatsbySDKVersionDropdownFlag"),
@@ -299,7 +300,7 @@ export abstract class JobHandler {
       `. /venv/bin/activate`,
       `cd repos/${this.currJob.payload.repoName}`,
       `rm -f makefile`,
-      `make html`,
+      `make html`, // TODO: Can we remove this line, given how many jobHandler functions overwrite it?
     ];
   }
 
@@ -310,7 +311,7 @@ export abstract class JobHandler {
       this._currJob._id,
       `setEnvironmentVariables for ${this._currJob.payload.repoName} env ${env} jobType ${this._currJob.payload.jobType}`
     );
-    if (repo_info && repo_info['bucket'] && repo_info['url']) {
+    if (repo_info?.['bucket'] && repo_info?.['url']) {
       if (this._currJob.payload.regression) {
         env = 'regression';
         process.env.REGRESSION = 'true';
@@ -318,7 +319,7 @@ export abstract class JobHandler {
       process.env.BUCKET = repo_info['bucket'][env];
       process.env.URL = repo_info['url'][env];
 
-      //   Writers are tying to stage it, so lets update the staging bucket.
+      // Writers are tying to stage it, so lets update the staging bucket.
       if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') {
         process.env.BUCKET = repo_info['bucket'][env] + '-staging';
         process.env.URL = repo_info['url']['stg'];
@@ -360,9 +361,9 @@ export abstract class JobHandler {
     this.prepDeployCommands();
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
-    if (this.currJob.deployCommands && this.currJob.deployCommands.length > 0) {
+    if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
       const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
-      if (resp && resp.error && typeof resp.error === 'string' && resp.error.indexOf('ERROR') !== -1) {
+      if (resp?.error?.includes('ERROR')) {
         await this._logger.save(
           this.currJob._id,
           `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`
@@ -430,7 +431,7 @@ function throwIfJobInterupted() {
     if (typeof original === 'function') {
       descriptor.value = function (...args) {
         const jobHandler = this as JobHandler;
-        if (jobHandler && jobHandler.isStopped() && !jobHandler.stopped) {
+        if (jobHandler?.isStopped() && !jobHandler?.stopped) {
           jobHandler
             .getLogger()
             .info(

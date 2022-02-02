@@ -39,6 +39,7 @@ export class StagingJobHandler extends JobHandler {
   }
 
   prepDeployCommands(): void {
+    // TODO: Can we simplify the chain of logic here?
     this.currJob.deployCommands = ['. /venv/bin/activate', `cd repos/${this.currJob.payload.repoName}`, 'make stage'];
     if (this.currJob.payload.isNextGen) {
       if (this.currJob.payload.pathPrefix) {
@@ -63,8 +64,8 @@ export class StagingJobHandler extends JobHandler {
     try {
       const resp = await this.deployGeneric();
       const summary = '';
-      if (resp.output.indexOf('Summary') !== -1) {
-        resp.output = resp.output.substr(resp.output.indexOf('Summary'));
+      if (resp?.output?.includes('Summary')) {
+        resp.output = resp.output.slice(resp.output.indexOf('Summary'));
       }
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);

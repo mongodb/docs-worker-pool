@@ -40,6 +40,7 @@ export class ProductionJobHandler extends JobHandler {
     this.name = 'Production';
   }
   prepDeployCommands(): void {
+    // TODO: Can we simplify the chain of logic here?
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
@@ -61,41 +62,34 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   prepStageSpecificNextGenCommands(): void {
-    if (this.currJob && this.currJob.buildCommands) {
+    if (this.currJob?.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
       this.currJob.buildCommands.push('make next-gen-html');
     }
   }
 
   getActiveBranchLength(): number {
-    let activeCount = 0
-    this.currJob.payload.repoBranches['branches'].forEach(branch => {
-      if (branch['active'] === true) {
-        activeCount += 1
-      }
-    });
-    return activeCount
+    return this.currJob.payload.repoBranches.branches.filter((b) => b['active']).length;
   }
 
   async constructManifestIndexPath(): Promise<void> {
     try {
-        this.currJob.payload.manifestPrefix = this.currJob.payload.project + '-' + this.currJob.payload.urlSlug;
+      this.currJob.payload.manifestPrefix = `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
     } catch (error) {
-        await this.logger.save(this.currJob._id, error)
-        throw error
+      await this.logger.save(this.currJob._id, error);
+      throw error;
     }
-}
+  }
 
-async getPathPrefix(): Promise<string> {
+  async getPathPrefix(): Promise<string> {
     try {
-      let pathPrefix = ""
-      pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
+      const pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
       return pathPrefix;
     } catch (error) {
-        await this.logger.save(this.currJob._id, error)
-        throw new InvalidJobError(error.message)
+      await this.logger.save(this.currJob._id, error);
+      throw new InvalidJobError(error.message);
     }
-}
+  }
 
   private async purgePublishedContent(makefileOutput: Array<string>): Promise<void> {
     try {
@@ -103,7 +97,7 @@ async getPathPrefix(): Promise<string> {
       //contains URLs corresponding to files updated via our push to S3
       const updatedURLsArray = stdoutJSON.urls;
       // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
-      await this.logger.save(this.currJob._id, `${JSON.stringify(updatedURLsArray)}`);
+      await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
       if (this._config.get('shouldPurgeAll')) {
         await this._cdnConnector.purgeAll(this.getCdnCreds());
       } else {
@@ -117,7 +111,7 @@ async getPathPrefix(): Promise<string> {
 
   private getCdnCreds(): CDNCreds {
     let creds = this._config.get<any>('cdn_creds')['main'];
-    if (this.currJob.payload.repoName && this.currJob.payload.repoName in this._config.get<any>('cdn_creds')) {
+    if (this.currJob?.payload?.repoName in this._config.get<any>('cdn_creds')) {
       creds = this._config.get<any>('cdn_creds')[this.currJob.payload.repoName];
     }
     return new CDNCreds(creds['id'], creds['token']);
@@ -126,7 +120,7 @@ async getPathPrefix(): Promise<string> {
   async deploy(): Promise<CommandExecutorResponse> {
     const resp = await this.deployGeneric();
     try {
-      if (resp && resp.output) {
+      if (resp?.output) {
         const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
         await this.purgePublishedContent(makefileOutput);
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);

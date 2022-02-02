@@ -1,4 +1,3 @@
-
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { Job } from '../entities/job';
@@ -42,7 +41,7 @@ export class JobRepository extends BaseRepository {
     const query = {
       _id: new objectId(id),
     };
-    const resp = await this.findOne(query,`Mongo Timeout Error: Timed out while find job by id Job`);
+    const resp = await this.findOne(query, `Mongo Timeout Error: Timed out while find job by id Job`);
     if (!resp) {
       throw new JobExistsAlreadyError('InsertJobFailed');
     }

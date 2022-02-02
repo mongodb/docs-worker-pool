@@ -124,7 +124,7 @@ export class JobManager {
     const job = await this.getQueuedJob();
     try {
       this._jobHandler = null;
-      if (job && job.payload) {
+      if (job?.payload) {
         await this.createHandlerAndExecute(job);
       } else {
         this._logger.info('JobManager', `No Jobs Found....: ${new Date()}`);
