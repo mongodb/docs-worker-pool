@@ -38,7 +38,7 @@ export class ManifestJobHandler extends JobHandler {
     this.name = 'Manifest';
   }
 
-  // TODO: Make this a non-mutating state function, e.g. return the deployCommands
+  // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
   prepDeployCommands(): void {
     this.currJob.deployCommands = ['. /venv/bin/activate', `cd repos/${this.currJob.payload.repoName}`, 'echo mock generate manifest'];
   }

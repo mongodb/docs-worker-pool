@@ -403,6 +403,7 @@ export abstract class JobHandler {
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);
+      this.queueManifestJob();
       this.cleanup();
     } catch (error) {
       try {
@@ -411,6 +412,18 @@ export abstract class JobHandler {
       } catch (error) {
         this._logger.error(this._currJob._id, error.message);
       }
+    }
+  }
+
+  private async queueManifestJob(): Promise<void> {
+    try {
+      const manifestJob = {
+        // create manifest job here, with payload data
+      }
+      this._jobRepository.insertJob(manifestJob);
+    }
+    catch (error) {
+      this._logger.error(this._currJob._id, `Failed to build search manifest: ${error.message}`);
     }
   }
 
