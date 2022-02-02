@@ -2,7 +2,6 @@ prefix: 'charts'
 version:
   published:
     - 'master'
-    - '19.12'
   active:
     - 'master'
   stable: 'master'
@@ -11,7 +10,6 @@ git:
     manual: 'master'
     published:
       - 'master'
-      - '19.12'
 
       # the branches/published list **must** be ordered from most to
       # least recent release.
