@@ -1,11 +1,11 @@
 prefix: 'charts'
 version:
   published:
-    - 'master'
-    - '19.12'
+    - 'Cloud'
+    - '19.12 (On-Prem)'
   active:
-    - 'master'
-    - '19.12'
+    - 'Cloud'
+    - '19.12 (On-Prem)'
   stable: 'master'
 git:
   branches:
