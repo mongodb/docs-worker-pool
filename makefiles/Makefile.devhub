@@ -27,7 +27,7 @@ include ~/shared.mk
 
 update-snooty:
 	npm install --production > /dev/null 2>&1
-	
+
 next-gen-html: update-snooty
 	# get latest devhub-content to test the front-end
 	rm -rf devhub-content && \
@@ -35,7 +35,7 @@ next-gen-html: update-snooty
 	cp devhub-content/snooty.toml snooty.toml && \
 	cp -r devhub-content/source source; \
 	# snooty parse and then build-front-end
-	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" || exit 0;
+	@-echo ${SNOOTY_DB_PWD} | snooty build ${REPO_DIR} "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" "${RSTSPEC_FLAG}" || exit 0;
 	echo "GATSBY_SITE=devhub" > .env.production; \
 	echo "GATSBY_PARSER_USER=${USER}" >> .env.production; \
 	echo "GATSBY_PARSER_BRANCH=${GIT_BRANCH}" >> .env.production; \
@@ -47,7 +47,5 @@ next-gen-stage: ## Host online for review
 	mut-publish public ${BUCKET} --prefix="${COMMIT_HASH/MUT_PREFIX}" --stage ${ARGS};
 	echo "Hosted at ${URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 
-get-build-dependencies: 
+get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/devhub.yaml > ${REPO_DIR}/published-branches.yaml
-
-
