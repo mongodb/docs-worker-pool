@@ -22,10 +22,6 @@ Resources:
         - FARGATE
       Cpu: ${self:custom.ecs.containerCpu.${self:provider.stage}}
       Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
-      PortMappings:
-        - ContainerPort: ${self:custom.ecs.port}
-          Protocol: tcp
-
       ExecutionRoleArn: !Ref ExecutionRole
       TaskRoleArn: !Ref TaskRole
       ContainerDefinitions:
