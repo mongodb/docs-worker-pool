@@ -42,6 +42,10 @@ custom:
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
   slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
+  JobsQueueName: autobuilder-jobs-queue-${self:provider.stage}
+  JobsDLQueueName: autobuilder-jobs-dlqueue-${self:provider.stage}
+  JobUpdatesQueueName: autobuilder-job-updates-queue-${self:provider.stage}
+  JobUpdatesDLQueueName: autobuilder-job-updates-dlqueue-${self:provider.stage}
   slackBuildProgessNotificationEventSource:
     stg: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
     prd: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
@@ -84,6 +88,10 @@ webhook-env-core: &webhook-env-core
   SLACK_TOKEN: ${self:custom.slackAuthToken}
   DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
   NODE_CONFIG_DIR: './api/config'
+  TASK_DEFINITION_FAMILY: docs-worker-pool-${self:provider.stage}
+
+resources:
+  - ${file(./queues.yml)}
 
 functions:
     v1UpsertEdgeDictionaryItem:
@@ -127,12 +135,49 @@ functions:
       environment:
         <<: *webhook-env-core
 
-    v1NotifyBuildSummary:
-      handler: api/controllers/v1/notifications.NotifyBuildSummary
+    v1HandleJobs:
+      handler: api/controllers/v1/jobs.HandleJobs
+      events:
+        - sqs:
+            arn: !GetAtt AutobuilderJobsQueue.Arn
+            batchSize: 1
+        - sqs:
+            arn: !GetAtt AutobuilderJobUpdatesQueue.Arn
+            batchSize: 1
+      iamRoleStatementsName: 'dwpapi-v1HandleJobs-lr-#{AWS::Region}-${opt:stage, "stg"}'
+      iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "sqs:ReceiveMessage"
+          - "sqs:DeleteMessage"
+          - "sqs:GetQueueAttributes"
+        Resource:
+          - Fn::GetAtt: [AutobuilderJobUpdatesQueue, Arn]
+          - Fn::GetAtt: [JobUpdatesDLQ, Arn]
+          - Fn::GetAtt: [AutobuilderJobsQueue, Arn]
+          - Fn::GetAtt: [JobsDLQ, Arn]
+      - Effect: Allow
+        Action:
+          - "ecs:RunTask"
+        Resource:
+          - arn:aws:ecs:#{AWS::Region}:#{AWS::AccountId}:cluster/docs-worker-pool-${{self:provider.stage}}
+      - Effect: Allow
+        Action:
+          - ecs:DescribeTaskDefinition
+        Resource: "*"
       environment:
         <<: *webhook-env-core
 
-    v1NotifyBuildProgress:
-      handler: api/controllers/v1/notifications.NotifyBuildProgress
-      environment:
-        <<: *webhook-env-core
+Outputs:
+  JobsQueueURL:
+    Description: Jobs Queue Url
+    Value: "https://sqs.#{AWS::Region}.amazonaws.com/#{AWS::AccountId}/${self:custom.JobsQueueName}"
+    Export:
+      Name:  docs-worker-pool-${self:provider.stage}-jobs-queue
+
+  JobsUpdateQueueURL:
+    Description: Job updates Queue URL
+    Value: "https://sqs.#{AWS::Region}.amazonaws.com/#{AWS::AccountId}/${self:custom.JobUpdatesQueueName}"
+    Export:
+      Name: docs-worker-pool-${self:provider.stage}-job-updates-queue
+

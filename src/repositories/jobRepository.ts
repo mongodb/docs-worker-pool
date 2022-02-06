@@ -1,14 +1,19 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import { Job } from '../entities/job';
+import { Job, JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
 import { InvalidJobError, JobExistsAlreadyError } from '../errors/errors';
+import { IQueueConnector, SQSConnector } from '../services/queue';
+import { JobQueueMessage } from '../entities/queueMessage';
+
 const objectId = mongodb.ObjectId;
 
 export class JobRepository extends BaseRepository {
+  private _queueConnector: IQueueConnector;
   constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
     super(config, logger, 'JobRepository', db.collection(config.get('jobQueueCollection')));
+    this._queueConnector = new SQSConnector(logger);
   }
 
   async updateWithCompletionStatus(id: string, result: any): Promise<boolean> {
@@ -20,11 +25,19 @@ export class JobRepository extends BaseRepository {
         result,
       },
     };
-    return await this.updateOne(
+    const bRet = await this.updateOne(
       query,
       update,
       `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`
     );
+    if (bRet) {
+      await this._queueConnector.sendMessage(
+        new JobQueueMessage(id, JobStatus.completed),
+        this._config.get('jobUpdatesQueueUrl'),
+        0
+      );
+    }
+    return bRet;
   }
 
   async insertJob(job: any): Promise<void> {
@@ -32,9 +45,16 @@ export class JobRepository extends BaseRepository {
     const updateDoc = {
       $setOnInsert: job,
     };
-    if (!(await this.upsert(filterDoc, updateDoc, `Mongo Timeout Error: Timed out while inserting Job`))) {
+    const jobId = await this.upsert(filterDoc, updateDoc, `Mongo Timeout Error: Timed out while inserting Job`);
+    if (!jobId) {
       throw new JobExistsAlreadyError('InsertJobFailed');
     }
+    // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
+    await this._queueConnector.sendMessage(
+      new JobQueueMessage(jobId, JobStatus.inQueue),
+      this._config.get('jobsQueueUrl'),
+      0
+    );
   }
 
   async getJobById(id: string): Promise<Job | null> {
@@ -65,7 +85,12 @@ export class JobRepository extends BaseRepository {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
     }
     if (response.value) {
-      return Object.assign(new Job(), response.value);
+      const job = Object.assign(new Job(), response.value);
+      await this._queueConnector.sendMessage(
+        new JobQueueMessage(job._id, JobStatus.inProgress),
+        this._config.get('jobUpdatesQueueUrl'),
+        0
+      );
     }
     return null;
   }
@@ -74,11 +99,19 @@ export class JobRepository extends BaseRepository {
     const update = {
       $set: { status: 'failed', endTime: new Date(), error: { time: new Date().toString(), reason: reason } },
     };
-    return await this.updateOne(
+    const bRet = await this.updateOne(
       query,
       update,
       `Mongo Timeout Error: Timed out while updating failure status for jobId: ${id}`
     );
+    if (bRet) {
+      await this._queueConnector.sendMessage(
+        new JobQueueMessage(id, JobStatus.failed),
+        this._config.get('jobUpdatesQueueUrl'),
+        0
+      );
+    }
+    return bRet;
   }
 
   async insertLogStatement(id: string, messages: Array<string>): Promise<boolean> {
@@ -127,10 +160,20 @@ export class JobRepository extends BaseRepository {
         logs: [reenqueueMessage],
       },
     };
-    return await this.updateOne(
+    const bRet = await this.updateOne(
       query,
       update,
       `Mongo Timeout Error: Timed out finishing re-enqueueing job for jobId: ${id}`
     );
+
+    if (bRet) {
+      // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
+      await this._queueConnector.sendMessage(
+        new JobQueueMessage(id, JobStatus.inQueue),
+        this._config.get('jobsQueueUrl'),
+        0
+      );
+    }
+    return bRet;
   }
 }

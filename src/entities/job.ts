@@ -1,4 +1,11 @@
 // TODO: Cut down on null and undefined type definition allowances
+export enum JobStatus {
+  inQueue = 'inQueue',
+  inProgress = 'inProgress',
+  completed = 'completed',
+  failed = 'failed',
+}
+
 export interface IJob {
   _id: string;
   payload: IPayload;

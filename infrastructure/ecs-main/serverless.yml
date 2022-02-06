@@ -13,6 +13,12 @@ provider:
         - "s3:PutObject"
       Resource:
         - "*"
+
+    - Effect: Allow
+      Action:
+        - "sqs:SendMessage"
+      Resource:
+        - "*"
   deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
   deploymentPrefix: serverless
   region: us-east-2
@@ -116,6 +122,8 @@ custom:
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
+  jobsQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsQueueURL}
+  jobUpdatesQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsUpdateQueueURL}
   env:
     stg: "staging"
     prd: "production"

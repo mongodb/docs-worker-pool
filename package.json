@@ -37,7 +37,8 @@
     "mongodb": "^4.1.1",
     "simple-git": "^2.45.1",
     "tsscmp": "^1.0.6",
-    "validator": "^10.11.0"
+    "validator": "^10.11.0",
+    "@types/aws-lambda": "^8.10.92"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",

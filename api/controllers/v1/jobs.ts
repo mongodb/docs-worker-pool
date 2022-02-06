@@ -4,31 +4,63 @@ import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitl
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
+import { JobQueueMessage } from '../../../src/entities/queueMessage';
+import { JobStatus } from '../../../src/entities/job';
+import { ECSContainer } from '../../../src/services/containerServices';
+export const HandleJobs = async (event: any = {}): Promise<any> => {
+  /**
+   * Check the status of the incoming jobs
+   * if it is inqueue start a task
+   * if it is inprogress call NotifyBuildProgress
+   * if it is completed call NotifyBuildSummary
+   */
 
-export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
-  console.log('NotifyBuildSummary', event);
+  const messages: JobQueueMessage[] = event.Records;
+  await Promise.all(
+    messages.map(async (message: JobQueueMessage) => {
+      const consoleLogger = new ConsoleLogger();
+      switch (message.jobStatus) {
+        case JobStatus.inQueue:
+          NotifyBuildProgress(message.jobId);
+          // start the task , dont start the process before processing the notification
+          const ecsServices = new ECSContainer(consoleLogger);
+          const res = await ecsServices.execute(message.jobId);
+          consoleLogger.info(message.jobId, JSON.stringify(res));
+          break;
+        case JobStatus.inProgress:
+          NotifyBuildProgress(message.jobId);
+          break;
+        case JobStatus.completed:
+        case JobStatus.failed:
+          NotifyBuildSummary(message.jobId);
+          break;
+        default:
+          break;
+      }
+    })
+  );
+};
+
+async function NotifyBuildSummary(jobId: string): Promise<any> {
+  console.log('NotifyBuildSummary', jobId);
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
-  if (!JSON.stringify(event?.detail?.updateDescription?.updatedFields).includes('comMessage')) {
-    return;
-  }
-  const jobId = event.detail.documentKey._id;
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  event.detail.fullDocument = await jobRepository.getJobById(jobId);
+  const fullDocument = await jobRepository.getJobById(jobId);
 
-  const slackMsgs = event.detail.fullDocument.comMessage;
+  const slackMsgs = fullDocument.comMessage;
   // check if summary exists to send to slack
   if (!slackMsgs) {
-    consoleLogger.error(event.fullDocument._id, 'ERROR: Empty slack message array.');
+    consoleLogger.error(jobId, 'ERROR: Empty slack message array.');
     return;
   }
 
-  const jobTitle = event.detail.fullDocument.title;
-  const repoName = event.detail.fullDocument.payload.repoName;
-  const username = event.detail.fullDocument.user;
+  const jobTitle = fullDocument.title;
+  const repoName = fullDocument.payload.repoName;
+  const username = fullDocument.user;
   const slackConnector = new SlackConnector(consoleLogger, c);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
@@ -50,7 +82,7 @@ export const NotifyBuildSummary = async (event: any = {}): Promise<any> => {
   return {
     statusCode: 200,
   };
-};
+}
 
 function limit_message_size(message) {
   while (message.length >= 256) {
@@ -81,18 +113,11 @@ function prepSummaryMessage(
   return msg.replace(/\.{2,}/g, '');
 }
 
-function prepProgressMessage(
-  operationType: string,
-  jobUrl: string,
-  jobId: string,
-  jobTitle: string,
-  status: string
-): string {
+function prepProgressMessage(jobUrl: string, jobId: string, jobTitle: string, status: string): string {
   const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
-  if (operationType === 'insert') {
-    return msg + 'has successfully been added to the queue.';
-  }
   switch (status) {
+    case 'inQueue':
+      return msg + 'has successfully been added to the queue.';
     case 'inProgress':
       return msg + 'is now being processed.';
     case 'completed':
@@ -104,18 +129,16 @@ function prepProgressMessage(
   }
 }
 
-export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
+async function NotifyBuildProgress(jobId: string): Promise<any> {
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
-
   const slackConnector = new SlackConnector(consoleLogger, c);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  const jobId = event.detail.documentKey._id;
-  event.detail.fullDocument = await jobRepository.getJobById(jobId);
-  const jobTitle = event.detail.fullDocument.title;
-  const username = event.detail.fullDocument.user;
+  const fullDocument = await jobRepository.getJobById(jobId);
+  const jobTitle = fullDocument.title;
+  const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
@@ -123,17 +146,11 @@ export const NotifyBuildProgress = async (event: any = {}): Promise<any> => {
     return;
   }
   const resp = await slackConnector.sendMessage(
-    prepProgressMessage(
-      event.detail.operationType,
-      c.get('dashboardUrl'),
-      jobId,
-      jobTitle,
-      event.detail.fullDocument.status
-    ),
+    prepProgressMessage(c.get('dashboardUrl'), jobId, jobTitle, fullDocument.status),
     entitlement['slack_user_id']
   );
   console.log(resp);
   return {
     statusCode: 200,
   };
-};
+}
