@@ -33,9 +33,12 @@ export class ECSContainer implements IContainerServices {
     console.log('td family', name);
     const tdArn = await this.getTaskDefinitionArn(name);
     console.log('Arn', tdArn);
-    const runTaskParams = this.prepareECSRunTaskParams(tdArn, jobId, name, name);
-    console.log('runTask params', JSON.stringify(runTaskParams));
-    return await this._client.runTask(runTaskParams);
+    if (tdArn) {
+      const runTaskParams = this.prepareECSRunTaskParams(tdArn, jobId, name, name);
+      console.log('runTask params', JSON.stringify(runTaskParams));
+      return await this._client.runTask(runTaskParams);
+    }
+    return null;
   }
 
   prepareECSRunTaskParams(arn: string, jobId: string, clusterName: string, containerName: string): RunTaskRequest {
