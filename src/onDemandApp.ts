@@ -56,9 +56,14 @@ async function init(): Promise<void> {
     hybridJobLogger,
     repoBranchesRepo
   );
-  await jobManager.startSpecificJob(c.get('jobId'));
+  try {
+    await jobManager.startSpecificJob(c.get('jobId'));
+  } catch (err) {
+    consoleLogger.info(c.get('jobId'), err);
+  }
 }
 
 (async function () {
   await init();
+  process.exit(0);
 })();
