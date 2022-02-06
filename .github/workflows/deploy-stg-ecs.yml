@@ -67,8 +67,6 @@ jobs:
           npm ci
           sls deploy --stage stg
           sls deploy --stage dotcomstg
-          aws ecs update-service --force-new-deployment --service docs-worker-pool-stg --cluster docs-worker-pool-stg
-          aws ecs update-service --force-new-deployment --service docs-worker-pool-dotcomstg --cluster docs-worker-pool-dotcomstg
 
       - name: Deploy Lambdas
         run: |
