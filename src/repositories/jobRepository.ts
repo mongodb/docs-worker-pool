@@ -2,7 +2,7 @@ import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { Job, JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
-import { IConfig } from 'config';
+import c, { IConfig } from 'config';
 import { InvalidJobError, JobExistsAlreadyError } from '../errors/errors';
 import { IQueueConnector, SQSConnector } from '../services/queue';
 import { JobQueueMessage } from '../entities/queueMessage';
@@ -13,7 +13,7 @@ export class JobRepository extends BaseRepository {
   private _queueConnector: IQueueConnector;
   constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
     super(config, logger, 'JobRepository', db.collection(config.get('jobQueueCollection')));
-    this._queueConnector = new SQSConnector(logger);
+    this._queueConnector = new SQSConnector(logger, config);
   }
 
   async updateWithCompletionStatus(id: string, result: any): Promise<boolean> {

@@ -1,6 +1,7 @@
 import { ILogger } from './logger';
-import SQS, { MessageBodyAttributeMap, SendMessageRequest, SendMessageResult } from 'aws-sdk/clients/sqs';
-import c from 'config';
+import { SQS, SendMessageRequest } from '@aws-sdk/client-sqs';
+
+import { IConfig } from 'config';
 import { JobQueueMessage } from '../entities/queueMessage';
 
 export interface IQueueConnector {
@@ -10,24 +11,21 @@ export interface IQueueConnector {
 export class SQSConnector implements IQueueConnector {
   private _logger: ILogger;
   private _client: SQS;
-  constructor(logger: ILogger) {
+  private _config: IConfig;
+  constructor(logger: ILogger, config: IConfig) {
     this._logger = logger;
-    this._client = new SQS({ region: c.get<string>('aws_region') });
+    this._config = config;
+    this._client = new SQS({ region: config.get<string>('aws_region') });
   }
 
   async sendMessage(payload: JobQueueMessage, url: string, delay: number): Promise<void> {
-    const messageAttributes: MessageBodyAttributeMap = {
-      delay: {
-        DataType: 'Number',
-        StringValue: delay.toString(),
-      },
-    };
     const sendMessageRequest: SendMessageRequest = {
       QueueUrl: url,
       MessageBody: JSON.stringify(payload),
-      MessageAttributes: messageAttributes,
+      DelaySeconds: delay,
     };
-    const result = await this._client.sendMessage(sendMessageRequest).promise();
+    console.log(sendMessageRequest);
+    const result = await this._client.sendMessage(sendMessageRequest);
     console.log(result); // Remove once things are fine
   }
 }

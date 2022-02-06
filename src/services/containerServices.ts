@@ -1,5 +1,6 @@
 import { ILogger } from './logger';
-import ECS, {
+import {
+  ECS,
   RunTaskRequest,
   RunTaskResponse,
   TaskOverride,
@@ -7,10 +8,10 @@ import ECS, {
   ContainerOverride,
   NetworkConfiguration,
   AwsVpcConfiguration,
-} from 'aws-sdk/clients/ecs';
-import c from 'config';
-import { JobQueueMessage } from '../entities/queueMessage';
-import { getDefaultSettings } from 'http2';
+  LaunchType,
+} from '@aws-sdk/client-ecs';
+import c, { IConfig } from 'config';
+import { readSync } from 'fs';
 
 export interface IContainerServices {
   execute(jobId: string): Promise<any>;
@@ -19,15 +20,22 @@ export interface IContainerServices {
 export class ECSContainer implements IContainerServices {
   private _logger: ILogger;
   private _client: ECS;
-  constructor(logger: ILogger) {
+  private _config: IConfig;
+  constructor(config: IConfig, logger: ILogger) {
     this._logger = logger;
-    this._client = new ECS({ region: c.get<string>('aws_region') });
+    this._config = config;
+    this._client = new ECS({ region: config.get<string>('aws_region') });
   }
   async execute(jobId: string): Promise<any> {
-    const tdArn = await this.getTaskDefinitionArn();
-    const name = c.get<string>('taskDefinitionFamily');
+    console.log('Execute');
+    const name = this._config.get<string>('taskDefinitionFamily');
+
+    console.log('td family', name);
+    const tdArn = await this.getTaskDefinitionArn(name);
+    console.log('Arn', tdArn);
     const runTaskParams = this.prepareECSRunTaskParams(tdArn, jobId, name, name);
-    return await this._client.runTask(runTaskParams).promise();
+    console.log('runTask params', JSON.stringify(runTaskParams));
+    return await this._client.runTask(runTaskParams);
   }
 
   prepareECSRunTaskParams(arn: string, jobId: string, clusterName: string, containerName: string): RunTaskRequest {
@@ -36,8 +44,19 @@ export class ECSContainer implements IContainerServices {
       value: jobId,
     };
 
+    const jobsQueueUrl: KeyValuePair = {
+      name: 'JOBS_QUEUE_URL',
+      value: this._config.get('jobsQueueUrl'),
+    };
+
+    const jobUpdateUrl: KeyValuePair = {
+      name: 'JOB_UPDATES_QUEUE_URL',
+      value: this._config.get('jobUpdatesQueueUrl'),
+    };
+
     const awsvpcConfig: AwsVpcConfiguration = {
-      subnets: c.get('subnets'),
+      subnets: this._config.get('subnets'),
+      assignPublicIp: 'ENABLED',
     };
 
     const networkConfig: NetworkConfiguration = {
@@ -46,8 +65,8 @@ export class ECSContainer implements IContainerServices {
 
     const containerOverride: ContainerOverride = {
       name: containerName,
-      environment: [envJobId],
-      command: c.get('commandOverride'),
+      environment: [envJobId, jobsQueueUrl, jobUpdateUrl],
+      command: this._config.get('commandOverride'),
     };
 
     const taskOverride: TaskOverride = {
@@ -58,16 +77,16 @@ export class ECSContainer implements IContainerServices {
       cluster: clusterName,
       taskDefinition: arn,
       overrides: taskOverride,
+      launchType: LaunchType.FARGATE,
       networkConfiguration: networkConfig,
     };
   }
 
-  async getTaskDefinitionArn(): Promise<string> {
-    const result = await this._client
-      .describeTaskDefinition({ taskDefinition: c.get<string>('taskDefinitionFamily') })
-      .promise();
-    if (result && 'taskDefinitionArn' in result) {
-      return result['taskDefinitionArn'];
+  async getTaskDefinitionArn(name: string): Promise<string | undefined> {
+    const result = await this._client.describeTaskDefinition({ taskDefinition: name });
+    console.log(result);
+    if (result) {
+      return result.taskDefinition?.taskDefinitionArn;
     }
     return '';
   }

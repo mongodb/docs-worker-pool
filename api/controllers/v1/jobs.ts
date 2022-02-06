@@ -14,27 +14,33 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
    * if it is inprogress call NotifyBuildProgress
    * if it is completed call NotifyBuildSummary
    */
-
+  console.log(JSON.stringify(event));
   const messages: JobQueueMessage[] = event.Records;
   await Promise.all(
-    messages.map(async (message: JobQueueMessage) => {
+    messages.map(async (message: any) => {
       const consoleLogger = new ConsoleLogger();
-      switch (message.jobStatus) {
-        case JobStatus.inQueue:
-          NotifyBuildProgress(message.jobId);
+      console.log(message);
+      const body = JSON.parse(message.body);
+      const jobId = body['jobId'];
+      const jobStatus = body['jobStatus'];
+      switch (jobStatus) {
+        case JobStatus[JobStatus.inQueue]:
+          await NotifyBuildProgress(jobId);
           // start the task , dont start the process before processing the notification
-          const ecsServices = new ECSContainer(consoleLogger);
-          const res = await ecsServices.execute(message.jobId);
-          consoleLogger.info(message.jobId, JSON.stringify(res));
+          console.log('Starting container');
+          const ecsServices = new ECSContainer(c, consoleLogger);
+          const res = await ecsServices.execute(jobId);
+          consoleLogger.info(jobId, JSON.stringify(res));
           break;
-        case JobStatus.inProgress:
-          NotifyBuildProgress(message.jobId);
+        case JobStatus[JobStatus.inProgress]:
+          await NotifyBuildProgress(jobId);
           break;
-        case JobStatus.completed:
-        case JobStatus.failed:
-          NotifyBuildSummary(message.jobId);
+        case JobStatus[JobStatus.failed]:
+        case JobStatus[JobStatus.completed]:
+          NotifyBuildSummary(jobId);
           break;
         default:
+          console.log('Invalid status');
           break;
       }
     })

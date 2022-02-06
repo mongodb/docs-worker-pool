@@ -20,15 +20,19 @@ function prepReponse(statusCode, contentType, body) {
 
 async function buildEntitledBranchList(entitlement: any, branchRepository: BranchRepository) {
   const entitledBranches: string[] = [];
-  entitlement.repos?.forEach(async (r) => {
-    const [repoOwner, repoName] = r.split('/');
+  for (const repo of entitlement.repos) {
+    const [repoOwner, repoName] = repo.split('/');
     const branches = await branchRepository.getRepoBranches(repoName);
-    branches?.forEach((b) => {
-      if (b?.['buildsWithSnooty']) {
-        entitledBranches.push(`${repoOwner}/${repoName}/${b['gitBranchName']}`);
+    for (const branch of branches) {
+      let buildWithSnooty = true;
+      if ('buildsWithSnooty' in branch) {
+        buildWithSnooty = branch['buildsWithSnooty'];
       }
-    });
-  });
+      if (buildWithSnooty) {
+        entitledBranches.push(`${repoOwner}/${repoName}/${branch['gitBranchName']}`);
+      }
+    }
+  }
   return entitledBranches;
 }
 
@@ -60,8 +64,12 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
+  console.log('Starting buildEntitledBranchList', JSON.stringify(entitlement));
   const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
+  console.log(JSON.stringify(entitledBranches));
+  console.log('Completed buildEntitledBranchList', entitledBranches);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id']);
+  console.log('called displayrepo in slack', resp?.data);
   if (resp?.status == 200 && resp?.data) {
     return {
       statusCode: 200,
@@ -110,6 +118,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   const values = slackConnector.parseSelection(stateValues);
   console.log(JSON.stringify(values));
+  console.log(entitlement);
+  let jobCount = 0;
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
@@ -120,7 +130,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
     const repoInfo = await branchRepository.getRepo(repoName);
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
-
     if (!branchObject?.aliasObject) continue;
 
     const active = branchObject.aliasObject.active; //bool
@@ -153,6 +162,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         '-g'
       );
       await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+      jobCount += 1;
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
     else {
@@ -176,6 +186,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           stable
         );
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+        jobCount += 1;
       }
       if (publishOriginalBranchName) {
         newPayload = createPayload(
@@ -192,6 +203,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           stable
         );
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+        jobCount += 1;
       } else {
         return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`;
       }
@@ -211,6 +223,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             primaryAlias
           );
           await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+          jobCount += 1;
         }
       });
     }

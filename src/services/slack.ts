@@ -98,6 +98,7 @@ export class SlackConnector implements ISlackConnector {
 
   async displayRepoOptions(repos: string[], triggerId: string): Promise<any> {
     const repoOptView = this._buildDropdown(repos, triggerId);
+    console.log('displayRepoOptions', JSON.stringify(repoOptView));
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {

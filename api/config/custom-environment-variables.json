@@ -11,6 +11,8 @@
   "dashboardUrl": "DASHBOARD_URL",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "taskDefinitionFamily": "TASK_DEFINITION_FAMILY",
+  "jobsQueueUrl": "JOBS_QUEUE_URL",
+  "jobUpdatesQueueUrl": "JOB_UPDATES_QUEUE_URL",
   "cdn_creds": {
     "dochub": {
       "id": "FASTLY_DOCHUB_SERVICE_ID",

@@ -21,6 +21,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
         repos: entitlementsObject.repos,
         github_username: entitlementsObject.github_username,
         slack_user_id: entitlementsObject.slack_user_id,
+        email: entitlementsObject.email,
         status: 'success',
       };
     } else {
@@ -39,6 +40,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       return {
         repos: entitlementsObject.repos,
         github_username: entitlementsObject.github_username,
+        email: entitlementsObject.email,
         status: 'success',
       };
     } else {
