@@ -10,7 +10,7 @@
   "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
   "dashboardUrl": "DASHBOARD_URL",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
-  "taskDefinitionFamily":"TASK_DEFINITION_FAMILY",
+  "taskDefinitionFamily": "TASK_DEFINITION_FAMILY",
   "cdn_creds": {
     "dochub": {
       "id": "FASTLY_DOCHUB_SERVICE_ID",
