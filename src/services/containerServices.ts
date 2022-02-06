@@ -5,6 +5,8 @@ import ECS, {
   TaskOverride,
   KeyValuePair,
   ContainerOverride,
+  NetworkConfiguration,
+  AwsVpcConfiguration,
 } from 'aws-sdk/clients/ecs';
 import c from 'config';
 import { JobQueueMessage } from '../entities/queueMessage';
@@ -34,6 +36,14 @@ export class ECSContainer implements IContainerServices {
       value: jobId,
     };
 
+    const awsvpcConfig: AwsVpcConfiguration = {
+      subnets: c.get('subnets'),
+    };
+
+    const networkConfig: NetworkConfiguration = {
+      awsvpcConfiguration: awsvpcConfig,
+    };
+
     const containerOverride: ContainerOverride = {
       name: containerName,
       environment: [envJobId],
@@ -48,6 +58,7 @@ export class ECSContainer implements IContainerServices {
       cluster: clusterName,
       taskDefinition: arn,
       overrides: taskOverride,
+      networkConfiguration: networkConfig,
     };
   }
 
