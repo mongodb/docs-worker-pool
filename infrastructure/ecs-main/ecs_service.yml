@@ -143,4 +143,5 @@ Resources:
                     - 'sqs:SendMessage'
                   Resource: 
                     - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-job-updates-queue-${self:provider.stage}'
+                    - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-jobs-queue-${self:provider.stage}'
 
