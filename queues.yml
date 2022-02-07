@@ -24,3 +24,28 @@ Resources:
       Type: "AWS::SQS::Queue"
       Properties:
         QueueName: ${self:custom.JobUpdatesDLQueueName}
+
+    AllowECS2SQSPolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues: [ !Ref AutobuilderJobUpdatesQueue, !Ref AutobuilderJobsQueue ]
+        PolicyDocument:
+          Version: "2012-10-17"
+          Id: SQSPolicy
+          Statement: 
+          - Sid: Allow-SQS-SendMessage_UpdateQueue    
+            Effect: Allow 
+            Principal:
+              AWS: "*"
+            Action:   
+            - 'sqs:SendMessage'
+            Resource: 
+            - !GetAtt [AutobuilderJobUpdatesQueue, Arn]
+          - Sid: Allow-SQS-SendMessage_JobQueue    
+            Effect: Allow 
+            Principal:
+              AWS: "*"
+            Action:   
+            - 'sqs:SendMessage'
+            Resource: 
+            - !GetAtt [AutobuilderJobsQueue, Arn]
