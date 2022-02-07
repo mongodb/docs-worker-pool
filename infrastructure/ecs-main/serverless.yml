@@ -11,6 +11,7 @@ provider:
       Action:
         - "s3:DeleteObject"
         - "s3:PutObject"
+        - "sqs:SendMessage"
       Resource:
         - "*"
 
