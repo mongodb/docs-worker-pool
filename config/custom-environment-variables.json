@@ -23,6 +23,7 @@
   "gatsbySDKVersionDropdownFlag": "GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "repo_dir": "repos",
+  "jobId": "jobId",
   "jobsQueueUrl": "JOBS_QUEUE_URL",
   "jobUpdatesQueueUrl": "JOB_UPDATES_QUEUE_URL",
   "cdn_creds": {

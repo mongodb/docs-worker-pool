@@ -59,7 +59,7 @@ async function init(): Promise<void> {
   try {
     await jobManager.startSpecificJob(c.get('jobId'));
   } catch (err) {
-    consoleLogger.info(c.get('jobId'), err);
+    consoleLogger.info('onDemandApp', err);
   }
 }
 
