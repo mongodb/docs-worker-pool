@@ -153,7 +153,7 @@ export class JobManager {
   }
 
   async getJob(jobId: string): Promise<IJob | null> {
-    return await this._jobRepository.getJobById(jobId).catch((error) => {
+    return await this._jobRepository.getJobByIdAndUpdate(jobId).catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });

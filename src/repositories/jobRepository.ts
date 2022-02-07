@@ -3,7 +3,7 @@ import { BaseRepository } from './baseRepository';
 import { Job, JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
-import { InvalidJobError, JobExistsAlreadyError } from '../errors/errors';
+import { InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
 import { IQueueConnector, SQSConnector } from '../services/queue';
 import { JobQueueMessage } from '../entities/queueMessage';
 
@@ -63,9 +63,35 @@ export class JobRepository extends BaseRepository {
     };
     const resp = await this.findOne(query, `Mongo Timeout Error: Timed out while find job by id Job`);
     if (!resp) {
-      throw new JobExistsAlreadyError('InsertJobFailed');
+      throw new JobNotFoundError('GetJobByID Failed');
     }
     return Object.assign(new Job(), resp);
+  }
+
+  async getJobByIdAndUpdate(id: string): Promise<Job | null> {
+    const query = {
+      id: new objectId(id),
+    };
+    const update = { $set: { startTime: new Date(), status: 'inProgress' } };
+    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
+    const response = await this.findOneAndUpdate(
+      query,
+      update,
+      options,
+      `Mongo Timeout Error: Timed out while retrieving job`
+    );
+
+    const resp = await this.findOne(query, `Mongo Timeout Error: Timed out while find job by id Job`);
+    if (!resp) {
+      throw new JobNotFoundError('GetJobByID Failed');
+    }
+    const job = Object.assign(new Job(), resp);
+    await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
+    return job;
+  }
+
+  async notify(jobId: string, url: string, status: JobStatus, delay: number) {
+    await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inProgress), url, delay);
   }
 
   async getOneQueuedJobAndUpdate(): Promise<Job | null> {
@@ -85,18 +111,12 @@ export class JobRepository extends BaseRepository {
     if (!response) {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
     }
-    console.log(response);
     if (response.value) {
       console.log(response);
       const job = Object.assign(new Job(), response.value);
-      await this._queueConnector.sendMessage(
-        new JobQueueMessage(job._id, JobStatus.inProgress),
-        this._config.get('jobUpdatesQueueUrl'),
-        0
-      );
+      await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
+      return job;
     }
-
-    console.log('getOneQueuedJobAndUpdate returning null');
     return null;
   }
   async updateWithErrorStatus(id: string, reason: string): Promise<boolean> {
@@ -110,11 +130,7 @@ export class JobRepository extends BaseRepository {
       `Mongo Timeout Error: Timed out while updating failure status for jobId: ${id}`
     );
     if (bRet) {
-      await this._queueConnector.sendMessage(
-        new JobQueueMessage(id, JobStatus.failed),
-        this._config.get('jobUpdatesQueueUrl'),
-        0
-      );
+      await this.notify(id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
     }
     return bRet;
   }
@@ -173,11 +189,7 @@ export class JobRepository extends BaseRepository {
 
     if (bRet) {
       // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
-      await this._queueConnector.sendMessage(
-        new JobQueueMessage(id, JobStatus.inQueue),
-        this._config.get('jobsQueueUrl'),
-        0
-      );
+      await this.notify(id, c.get('jobsQueueUrl'), JobStatus.inProgress, 0);
     }
     return bRet;
   }

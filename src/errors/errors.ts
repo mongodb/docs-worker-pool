@@ -64,3 +64,9 @@ export class JobExistsAlreadyError extends AutoBuilderError {
     super(message, 'JobExistsAlready', errorCode, stack);
   }
 }
+
+export class JobNotFoundError extends AutoBuilderError {
+  constructor(message: string, errorCode?: number, stack?: string) {
+    super(message, 'JobNotFound', errorCode, stack);
+  }
+}
