@@ -72,33 +72,14 @@ export class JobRepository extends BaseRepository {
     const query = {
       _id: new objectId(id),
     };
-    const update = { $set: { startTime: new Date(), status: 'inProgress' } };
-    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
-    const response = await this.findOneAndUpdate(
-      query,
-      update,
-      options,
-      `Mongo Timeout Error: Timed out while retrieving job`
-    );
-
-    if (!response) {
-      throw new JobNotFoundError('GetJobByID Failed');
-    }
-    const job = Object.assign(new Job(), response);
-    await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
-    return job;
+    return await this.findOneAndUpdateJob(query);
   }
 
   async notify(jobId: string, url: string, status: JobStatus, delay: number) {
-    await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inProgress), url, delay);
+    await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status), url, delay);
   }
 
-  async getOneQueuedJobAndUpdate(): Promise<Job | null> {
-    console.log('getOneQueuedJobAndUpdate');
-    const query = {
-      status: 'inQueue',
-      createdTime: { $lte: new Date() },
-    };
+  async findOneAndUpdateJob(query): Promise<Job | null> {
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
     const response = await this.findOneAndUpdate(
@@ -117,6 +98,15 @@ export class JobRepository extends BaseRepository {
       return job;
     }
     return null;
+  }
+
+  async getOneQueuedJobAndUpdate(): Promise<Job | null> {
+    console.log('getOneQueuedJobAndUpdate');
+    const query = {
+      status: 'inQueue',
+      createdTime: { $lte: new Date() },
+    };
+    return await this.findOneAndUpdateJob(query);
   }
   async updateWithErrorStatus(id: string, reason: string): Promise<boolean> {
     const query = { _id: id };
