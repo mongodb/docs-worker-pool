@@ -37,7 +37,8 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           break;
         case JobStatus[JobStatus.failed]:
         case JobStatus[JobStatus.completed]:
-          NotifyBuildSummary(jobId);
+          await NotifyBuildProgress(jobId);
+          await NotifyBuildSummary(jobId);
           break;
         default:
           console.log('Invalid status');
@@ -58,12 +59,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const fullDocument = await jobRepository.getJobById(jobId);
 
   const slackMsgs = fullDocument.comMessage;
-  // check if summary exists to send to slack
-  if (!slackMsgs) {
-    consoleLogger.error(jobId, 'ERROR: Empty slack message array.');
-    return;
-  }
-
+  console.log(fullDocument);
   const jobTitle = fullDocument.title;
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
@@ -71,6 +67,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
+    console.log('Entitlement issue');
     return;
   }
   const resp = await slackConnector.sendMessage(
