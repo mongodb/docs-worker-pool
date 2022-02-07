@@ -133,3 +133,8 @@ Resources:
             Principal:
               Service: ecs-tasks.amazonaws.com
             Action: 'sts:AssumeRole'
+          - Effect: Allow
+            Action: 'sqs:SendMessage'
+            Resource: "arn:aws:sqs:us-east-2:216656347858:autobuilder-job-updates-queue-${self:provider.stage}"
+
+

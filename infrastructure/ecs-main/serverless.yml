@@ -14,10 +14,9 @@ provider:
         - "sqs:SendMessage"
       Resource:
         - "*"
-
     - Effect: Allow
       Action:
-        - "sqs:SendMessage"
+        - “sqs:SendMessage”
       Resource:
         - "*"
   deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
