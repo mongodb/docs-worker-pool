@@ -84,7 +84,7 @@ export class JobRepository extends BaseRepository {
     if (!response) {
       throw new JobNotFoundError('GetJobByID Failed');
     }
-    const job = Object.assign(new Job(), resp);
+    const job = Object.assign(new Job(), response);
     await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
     return job;
   }
