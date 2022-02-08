@@ -80,6 +80,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
   try {
+    console.log(job);
     await jobRepository.insertJob(job);
   } catch (err) {
     logger.error('SLACK:DEPLOYREPO', err);
@@ -148,8 +149,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         hashOption,
         repoInfo.project,
         repoInfo.prefix,
+        branchName,
         false,
-        null,
         false,
         '-g'
       );
@@ -172,8 +173,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           hashOption,
           repoInfo.project,
           repoInfo.prefix,
-          true,
           urlSlug,
+          true,
           true,
           stable
         );
@@ -189,8 +190,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           hashOption,
           repoInfo.project,
           repoInfo.prefix,
-          true,
           branchName,
+          true,
           true,
           stable
         );
@@ -210,8 +211,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             hashOption,
             repoInfo.project,
             repoInfo.prefix,
-            true,
             alias,
+            true,
             primaryAlias
           );
           await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
@@ -233,8 +234,8 @@ function createPayload(
   newHead: string,
   project: string,
   prefix: string,
+  urlSlug,
   aliased = false,
-  urlSlug = null,
   primaryAlias = false,
   stable = ''
 ) {
