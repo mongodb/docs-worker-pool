@@ -2,7 +2,6 @@ import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
 import * as crypto from 'crypto';
-import { Logger } from 'tslog';
 export const axiosApi = axios.create();
 
 function bufferEqual(a: Buffer, b: Buffer) {
