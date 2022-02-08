@@ -49,7 +49,6 @@ jobs:
           cd infrastructure/ecs-main
           npm ci
           sls deploy --stage dev
-          aws ecs update-service --force-new-deployment --service docs-worker-pool-dev --cluster docs-worker-pool-dev
       - name: Deploy Lambdas
         run: |
           npm ci

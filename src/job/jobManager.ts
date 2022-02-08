@@ -116,12 +116,20 @@ export class JobManager {
     await this.work();
   }
 
+  async startSpecificJob(jobId: string): Promise<void> {
+    const job = await this.getJob(jobId);
+    if (job) {
+      await this.workEx(job);
+    } else {
+      this._logger.error(jobId, 'Unable to find the job to execute');
+    }
+  }
+
   isStopped(): boolean {
     return this._shouldStop;
   }
 
-  async workEx(): Promise<void> {
-    const job = await this.getQueuedJob();
+  async workEx(job: IJob): Promise<void> {
     try {
       this._jobHandler = null;
       if (job?.payload) {
@@ -139,6 +147,13 @@ export class JobManager {
 
   async getQueuedJob(): Promise<IJob | null> {
     return await this._jobRepository.getOneQueuedJobAndUpdate().catch((error) => {
+      this._logger.error('JobManager', `Error: ${error}`);
+      return null;
+    });
+  }
+
+  async getJob(jobId: string): Promise<IJob | null> {
+    return await this._jobRepository.getJobByIdAndUpdate(jobId).catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });
@@ -168,7 +183,10 @@ export class JobManager {
 
   async work(): Promise<void> {
     while (!this._shouldStop) {
-      await this.workEx();
+      const job = await this.getQueuedJob();
+      if (job) {
+        await this.workEx(job);
+      }
       await new Promise((resolve) => setTimeout(resolve, this._config.get('RETRY_TIMEOUT_MS')));
     }
   }
@@ -182,9 +200,5 @@ export class JobManager {
       'inQueue',
       `Resetting Job with ID: ${this._jobHandler?.currJob._id} because server is being shut down`
     );
-  }
-
-  async startSingleJob(): Promise<void> {
-    await this.workEx();
   }
 }

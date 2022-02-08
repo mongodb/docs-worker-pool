@@ -20,15 +20,19 @@ function prepReponse(statusCode, contentType, body) {
 
 async function buildEntitledBranchList(entitlement: any, branchRepository: BranchRepository) {
   const entitledBranches: string[] = [];
-  entitlement.repos?.forEach(async (r) => {
-    const [repoOwner, repoName] = r.split('/');
+  for (const repo of entitlement.repos) {
+    const [repoOwner, repoName] = repo.split('/');
     const branches = await branchRepository.getRepoBranches(repoName);
-    branches?.forEach((b) => {
-      if (b?.['buildsWithSnooty']) {
-        entitledBranches.push(`${repoOwner}/${repoName}/${b['gitBranchName']}`);
+    for (const branch of branches) {
+      let buildWithSnooty = true;
+      if ('buildsWithSnooty' in branch) {
+        buildWithSnooty = branch['buildsWithSnooty'];
       }
-    });
-  });
+      if (buildWithSnooty) {
+        entitledBranches.push(`${repoOwner}/${repoName}/${branch['gitBranchName']}`);
+      }
+    }
+  }
   return entitledBranches;
 }
 
@@ -103,13 +107,12 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const stateValues = parsed.view.state.values;
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
-  console.log(decoded);
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
 
   const values = slackConnector.parseSelection(stateValues);
-  console.log(JSON.stringify(values));
+  let jobCount = 0;
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
@@ -120,7 +123,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
     const repoInfo = await branchRepository.getRepo(repoName);
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
-
     if (!branchObject?.aliasObject) continue;
 
     const active = branchObject.aliasObject.active; //bool
@@ -147,12 +149,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         hashOption,
         repoInfo.project,
         repoInfo.prefix,
+        branchName,
         false,
-        null,
         false,
         '-g'
       );
       await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+      jobCount += 1;
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
     else {
@@ -170,12 +173,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           hashOption,
           repoInfo.project,
           repoInfo.prefix,
-          true,
           urlSlug,
+          true,
           true,
           stable
         );
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+        jobCount += 1;
       }
       if (publishOriginalBranchName) {
         newPayload = createPayload(
@@ -186,12 +190,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           hashOption,
           repoInfo.project,
           repoInfo.prefix,
-          true,
           branchName,
+          true,
           true,
           stable
         );
         await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+        jobCount += 1;
       } else {
         return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`;
       }
@@ -206,11 +211,12 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             hashOption,
             repoInfo.project,
             repoInfo.prefix,
-            true,
             alias,
+            true,
             primaryAlias
           );
           await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+          jobCount += 1;
         }
       });
     }
@@ -228,8 +234,8 @@ function createPayload(
   newHead: string,
   project: string,
   prefix: string,
+  urlSlug,
   aliased = false,
-  urlSlug = null,
   primaryAlias = false,
   stable = ''
 ) {

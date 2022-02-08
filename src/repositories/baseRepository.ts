@@ -33,14 +33,11 @@ export abstract class BaseRepository {
         this._collection.updateOne(filterDoc, updateDoc, { upsert: true }),
         errorMsg
       );
-      console.log(updateResult.upsertedId);
       if (updateResult.upsertedId) {
         return updateResult.upsertedId;
       }
-      console.log(`Failed to insert job (${JSON.stringify(filterDoc)})`);
       return null;
     } catch (error) {
-      console.log(error);
       this._logger.error(
         `${this._repoName}:upsert`,
         `Failed to insert job (${JSON.stringify(filterDoc)}) error: ${error}`
@@ -61,7 +58,7 @@ export abstract class BaseRepository {
     try {
       return await this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.findOne(query), errorMsg);
     } catch (error) {
-      this._logger.error(`${this._repoName}:findOne`, `Failed to find job (${JSON.stringify(query)}) error: ${error}`);
+      this._logger.error(`${this._repoName}:findOne`, `Failed to find (${JSON.stringify(query)}) error: ${error}`);
       throw error;
     }
   }
@@ -69,12 +66,12 @@ export abstract class BaseRepository {
     try {
       const updateResult = await this.update(query, update, errorMsg);
       if ((updateResult?.modifiedCount ?? 0) < 1) {
-        throw new DBError(`Failed to update job (${JSON.stringify(query)})  for ${JSON.stringify(update)}`);
+        throw new DBError(`Failed to update (${JSON.stringify(query)})  for ${JSON.stringify(update)}`);
       }
     } catch (error) {
       this._logger.error(
         `${this._repoName}:updateOne`,
-        `Failed to update job (${JSON.stringify(query)})  for ${JSON.stringify(update)} Error: ${error.message}`
+        `Failed to update  (${JSON.stringify(query)})  for ${JSON.stringify(update)} Error: ${error.message}`
       );
       throw error;
     }
@@ -90,7 +87,7 @@ export abstract class BaseRepository {
     } catch (error) {
       this._logger.error(
         `${this._repoName}:findOneAndUpdate`,
-        `Failed to findOneAndUpdate job (${JSON.stringify(query)})  for ${JSON.stringify(
+        `Failed to findOneAndUpdate (${JSON.stringify(query)})  for ${JSON.stringify(
           update
         )} with options ${JSON.stringify(options)} error: ${error}`
       );

@@ -35,20 +35,22 @@ export class SlackConnector implements ISlackConnector {
     this._config = config;
   }
   async sendMessage(message: any, user: string): Promise<any> {
-    const body = {
-      channel: user,
-      text: message,
-    };
-
-    console.log('Slack sendMessage', message);
-
-    const slackToken = this._config.get<string>('slackAuthToken');
-    return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
-      headers: {
-        Authorization: [`Bearer ${slackToken}`],
-        'Content-type': 'application/json; charset=utf-8',
-      },
-    });
+    try {
+      const body = {
+        channel: user,
+        text: message,
+      };
+      const slackToken = this._config.get<string>('slackAuthToken');
+      return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
+        headers: {
+          Authorization: [`Bearer ${slackToken}`],
+          'Content-type': 'application/json; charset=utf-8',
+        },
+      });
+    } catch (error) {
+      this._logger.error('Slack SendMessage', error);
+    }
+    return {};
   }
   parseSelection(stateValues: any): any {
     const values = {};

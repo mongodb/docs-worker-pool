@@ -13,9 +13,14 @@
   "JOB_TIMEOUT_S": 900,
   "RETRY_TIMEOUT_MS": 5000,
   "MAX_STDOUT_BUFFER_SIZE": 16000000,
+  "aws_region": "us-east-2",
   "MIN_TIMEOUT_MS": 1,
   "LOG_PADDING": 15,
   "PORT": 3000,
+  "maxRetries": 3,
+  "retryDelay": 60,
+  "commandOverride": ["node", "onDemandApp.js"],
+  "subnets": ["subnet-8c3623f6", "subnet-a4ac73cf", "subnet-9e83fed2"],
   "cdn_creds": {
     "dochub": {
       "id": "FASTLY_DOCHUB_SERVICE_ID",

@@ -29,9 +29,6 @@ Resources:
           Image: ${self:custom.ecs.imageUrl}
           Cpu: ${self:custom.ecs.containerCpu.${self:provider.stage}}
           Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
-          PortMappings:
-            - ContainerPort: ${self:custom.ecs.port}
-              Protocol: tcp
           Environment:
             - Name: STAGE
               value: ${self:provider.stage}
@@ -99,6 +96,10 @@ Resources:
               Value: ${self:custom.fastlyCloudManagerServiceId}
             - Name: USER_ENTITLEMENT_COL_NAME
               Value: ${self:custom.entitlementCollection}
+            - Name: JOBS_QUEUE_URL
+              Value: ${self:custom.jobsQueueUrl}
+            - Name: JOB_UPDATES_QUEUE_URL
+              Value: ${self:custom.jobUpdatesQueueUrl}
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -132,24 +133,15 @@ Resources:
             Principal:
               Service: ecs-tasks.amazonaws.com
             Action: 'sts:AssumeRole'
+      Policies:
+          - PolicyName: AllowSQSAccess
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'sqs:SendMessage'
+                  Resource: 
+                    - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-job-updates-queue-${self:provider.stage}'
+                    - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-jobs-queue-${self:provider.stage}'
 
-  ECSService:
-    Type: 'AWS::ECS::Service'
-    Properties:
-      LaunchType: FARGATE
-      ServiceName: ${self:service}-${self:provider.stage}
-      Cluster: !Ref ECSCluster
-      TaskDefinition: !Ref TaskDefinition
-      DeploymentConfiguration:
-        MinimumHealthyPercent: ${self:custom.ecs.minimumHealthyPercent.${self:provider.stage}}
-        MaximumPercent: ${self:custom.ecs.maximumPercent.${self:provider.stage}}
-      DesiredCount: ${self:custom.ecs.desiredCount.${self:provider.stage}}
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          AssignPublicIp: ENABLED
-          Subnets:
-            - subnet-8c3623f6
-            - subnet-a4ac73cf
-            - subnet-9e83fed2
-          SecurityGroups:
-            - !Ref SecurityGroupVPC
