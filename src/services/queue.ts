@@ -24,8 +24,6 @@ export class SQSConnector implements IQueueConnector {
       MessageBody: JSON.stringify(payload),
       DelaySeconds: delay,
     };
-    console.log(sendMessageRequest);
     const result = await this._client.sendMessage(sendMessageRequest);
-    console.log(result); // Remove once things are fine
   }
 }

@@ -213,7 +213,6 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
-      console.log('Nextgen Build prepNextGenBuild');
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
@@ -229,7 +228,6 @@ export abstract class JobHandler {
       }
     } else {
       this.currJob.payload.isNextGen = false;
-      console.log('Not a Nextgen Build prepNextGenBuild');
     }
   }
 
@@ -267,7 +265,6 @@ export abstract class JobHandler {
     if (pathPrefix || pathPrefix === '') {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
-    console.log('constructEnvVars', envVars);
     // const snootyFrontEndVars = {
     //   'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("gatsbyConsitentNavFlag"),
     //   'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("gatsbySDKVersionDropdownFlag"),

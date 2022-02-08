@@ -64,12 +64,8 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
-  console.log('Starting buildEntitledBranchList', JSON.stringify(entitlement));
   const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
-  console.log(JSON.stringify(entitledBranches));
-  console.log('Completed buildEntitledBranchList', entitledBranches);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id']);
-  console.log('called displayrepo in slack', resp?.data);
   if (resp?.status == 200 && resp?.data) {
     return {
       statusCode: 200,
@@ -84,7 +80,6 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
 
 async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
   try {
-    console.log(job);
     await jobRepository.insertJob(job);
   } catch (err) {
     logger.error('SLACK:DEPLOYREPO', err);
@@ -111,14 +106,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const stateValues = parsed.view.state.values;
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
-  console.log(decoded);
   if (!isUserEntitled(entitlement)) {
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
 
   const values = slackConnector.parseSelection(stateValues);
-  console.log(JSON.stringify(values));
-  console.log(entitlement);
   let jobCount = 0;
   for (let i = 0; i < values.repo_option.length; i++) {
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
@@ -228,7 +220,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       });
     }
   }
-  console.log('Submitted');
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },

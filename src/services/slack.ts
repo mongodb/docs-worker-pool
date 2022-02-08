@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
 import * as crypto from 'crypto';
+import { Logger } from 'tslog';
 export const axiosApi = axios.create();
 
 function bufferEqual(a: Buffer, b: Buffer) {
@@ -35,20 +36,22 @@ export class SlackConnector implements ISlackConnector {
     this._config = config;
   }
   async sendMessage(message: any, user: string): Promise<any> {
-    const body = {
-      channel: user,
-      text: message,
-    };
-
-    console.log('Slack sendMessage', message);
-
-    const slackToken = this._config.get<string>('slackAuthToken');
-    return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
-      headers: {
-        Authorization: [`Bearer ${slackToken}`],
-        'Content-type': 'application/json; charset=utf-8',
-      },
-    });
+    try {
+      const body = {
+        channel: user,
+        text: message,
+      };
+      const slackToken = this._config.get<string>('slackAuthToken');
+      return await axiosApi.post('https://slack.com/api/chat.postMessage', body, {
+        headers: {
+          Authorization: [`Bearer ${slackToken}`],
+          'Content-type': 'application/json; charset=utf-8',
+        },
+      });
+    } catch (error) {
+      this._logger.error('Slack SendMessage', error);
+    }
+    return {};
   }
   parseSelection(stateValues: any): any {
     const values = {};
@@ -98,7 +101,6 @@ export class SlackConnector implements ISlackConnector {
 
   async displayRepoOptions(repos: string[], triggerId: string): Promise<any> {
     const repoOptView = this._buildDropdown(repos, triggerId);
-    console.log('displayRepoOptions', JSON.stringify(repoOptView));
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {

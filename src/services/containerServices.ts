@@ -27,15 +27,10 @@ export class ECSContainer implements IContainerServices {
     this._client = new ECS({ region: config.get<string>('aws_region') });
   }
   async execute(jobId: string): Promise<any> {
-    console.log('Execute');
     const name = this._config.get<string>('taskDefinitionFamily');
-
-    console.log('td family', name);
     const tdArn = await this.getTaskDefinitionArn(name);
-    console.log('Arn', tdArn);
     if (tdArn) {
       const runTaskParams = this.prepareECSRunTaskParams(tdArn, jobId, name, name);
-      console.log('runTask params', JSON.stringify(runTaskParams));
       return await this._client.runTask(runTaskParams);
     }
     return null;
@@ -87,7 +82,6 @@ export class ECSContainer implements IContainerServices {
 
   async getTaskDefinitionArn(name: string): Promise<string | undefined> {
     const result = await this._client.describeTaskDefinition({ taskDefinition: name });
-    console.log(result);
     if (result) {
       return result.taskDefinition?.taskDefinitionArn;
     }

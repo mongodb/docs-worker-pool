@@ -7,6 +7,8 @@ import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
 import { JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
+import { SQSConnector } from '../../../src/services/queue';
+
 export const HandleJobs = async (event: any = {}): Promise<any> => {
   /**
    * Check the status of the incoming jobs
@@ -14,42 +16,63 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
    * if it is inprogress call NotifyBuildProgress
    * if it is completed call NotifyBuildSummary
    */
-  console.log(JSON.stringify(event));
   const messages: JobQueueMessage[] = event.Records;
   await Promise.all(
     messages.map(async (message: any) => {
       const consoleLogger = new ConsoleLogger();
-      console.log(message);
       const body = JSON.parse(message.body);
+      let queueUrl = '';
       const jobId = body['jobId'];
       const jobStatus = body['jobStatus'];
-      switch (jobStatus) {
-        case JobStatus[JobStatus.inQueue]:
-          await NotifyBuildProgress(jobId);
-          // start the task , dont start the process before processing the notification
-          console.log('Starting container');
-          const ecsServices = new ECSContainer(c, consoleLogger);
-          const res = await ecsServices.execute(jobId);
-          consoleLogger.info(jobId, JSON.stringify(res));
-          break;
-        case JobStatus[JobStatus.inProgress]:
-          await NotifyBuildProgress(jobId);
-          break;
-        case JobStatus[JobStatus.failed]:
-        case JobStatus[JobStatus.completed]:
-          await NotifyBuildProgress(jobId);
-          await NotifyBuildSummary(jobId);
-          break;
-        default:
-          console.log('Invalid status');
-          break;
+      try {
+        switch (jobStatus) {
+          case JobStatus[JobStatus.inQueue]:
+            queueUrl = c.get('jobsQueueUrl');
+            await NotifyBuildProgress(jobId);
+            // start the task , dont start the process before processing the notification
+            const ecsServices = new ECSContainer(c, consoleLogger);
+            const res = await ecsServices.execute(jobId);
+            consoleLogger.info(jobId, JSON.stringify(res));
+            break;
+          case JobStatus[JobStatus.inProgress]:
+            queueUrl = c.get('jobUpdatesQueueUrl');
+            await NotifyBuildProgress(jobId);
+            break;
+          case JobStatus[JobStatus.failed]:
+          case JobStatus[JobStatus.completed]:
+            queueUrl = c.get('jobUpdatesQueueUrl');
+            await NotifyBuildProgress(jobId);
+            await NotifyBuildSummary(jobId);
+            break;
+          default:
+            consoleLogger.error(jobId, 'Invalid status');
+            break;
+        }
+      } catch (err) {
+        consoleLogger.error(jobId, err);
+        await retry(body, consoleLogger, queueUrl);
       }
     })
   );
 };
 
+async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
+  try {
+    const tries = message.tries;
+    if (tries < c.get('maxRetries')) {
+      const sqs = new SQSConnector(consoleLogger, c);
+      message['tries'] += 1;
+      let retryDelay = 10;
+      if (c.get('retryDelay')) {
+        retryDelay = c.get('retryDelay');
+      }
+      await sqs.sendMessage(message, url, retryDelay * tries);
+    }
+  } catch (err) {
+    consoleLogger.error(message['jobId'], err);
+  }
+}
 async function NotifyBuildSummary(jobId: string): Promise<any> {
-  console.log('NotifyBuildSummary', jobId);
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -59,7 +82,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const fullDocument = await jobRepository.getJobById(jobId);
 
   const slackMsgs = fullDocument.comMessage;
-  console.log(fullDocument);
   const jobTitle = fullDocument.title;
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
@@ -67,7 +89,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
-    console.log('Entitlement issue');
     return;
   }
   const resp = await slackConnector.sendMessage(
@@ -80,8 +101,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
-
-  console.log(resp);
   return {
     statusCode: 200,
   };
@@ -152,7 +171,6 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     prepProgressMessage(c.get('dashboardUrl'), jobId, jobTitle, fullDocument.status),
     entitlement['slack_user_id']
   );
-  console.log(resp);
   return {
     statusCode: 200,
   };

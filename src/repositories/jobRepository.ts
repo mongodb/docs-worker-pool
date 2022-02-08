@@ -92,7 +92,6 @@ export class JobRepository extends BaseRepository {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
     }
     if (response.value) {
-      console.log(response);
       const job = Object.assign(new Job(), response.value);
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
@@ -101,7 +100,6 @@ export class JobRepository extends BaseRepository {
   }
 
   async getOneQueuedJobAndUpdate(): Promise<Job | null> {
-    console.log('getOneQueuedJobAndUpdate');
     const query = {
       status: 'inQueue',
       createdTime: { $lte: new Date() },
