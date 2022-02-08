@@ -128,8 +128,8 @@ custom:
     stg: "staging"
     prd: "production"
     dev: "staging"
-    dotcomstg: "staging"
-    dotcomprd: "production"
+    dotcomstg: "dotcomstg"
+    dotcomprd: "dotcomprd"
 
 
 resources:
