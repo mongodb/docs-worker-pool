@@ -30,7 +30,9 @@ export class JobValidator implements IJobValidator {
     }
 
     async throwIfBranchNotConfigured(job: IJob): Promise<void> {
-        let response = await this._fileSystemService.downloadYaml(`${this._config.get<any>('publishBranchesUrl')[this._config.get<string>('env')]}/${job.payload.repoName}.yaml`);
+        const publishBranches = this._config.get<any>('publishBranchesUrl');
+        const env = this._config.get<string>('env');
+        let response = await this._fileSystemService.downloadYaml(`${publishBranches[env]}/${job.payload.repoName}.yaml`);
         if (response['status'] == 'success') {
             job.payload.publishedBranches = response['content'];
         } else {
