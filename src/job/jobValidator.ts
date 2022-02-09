@@ -3,6 +3,7 @@ import validator from "validator";
 import { IJob } from "../entities/job";
 import { IFileSystemServices } from "../services/fileServices";
 import { RepoEntitlementsRepository } from "../repositories/repoEntitlementsRepository";
+import { IConfig } from "config";
 
 export interface IJobValidator {
     throwIfJobInvalid(job: IJob): Promise<void>;
@@ -14,9 +15,11 @@ export interface IJobValidator {
 export class JobValidator implements IJobValidator {
     _fileSystemService: IFileSystemServices;
     _repoEntitlementRepository: RepoEntitlementsRepository;
-    constructor(fileSystemService: IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository) {
+    _config: IConfig;
+    constructor(fileSystemService: IFileSystemServices, repoEntitlementRepository: RepoEntitlementsRepository, config:IConfig) {
         this._fileSystemService = fileSystemService;
         this._repoEntitlementRepository = repoEntitlementRepository;
+        this._config = config
     }
 
     async throwIfUserNotEntitled(job: IJob): Promise<void> {
@@ -27,7 +30,9 @@ export class JobValidator implements IJobValidator {
     }
 
     async throwIfBranchNotConfigured(job: IJob): Promise<void> {
-        let response = await this._fileSystemService.downloadYaml(`https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`);
+        const publishBranches = this._config.get<any>('publishBranchesUrl');
+        const env = this._config.get<string>('env');
+        let response = await this._fileSystemService.downloadYaml(`${publishBranches[env]}/${job.payload.repoName}.yaml`);
         if (response['status'] == 'success') {
             job.payload.publishedBranches = response['content'];
         } else {
