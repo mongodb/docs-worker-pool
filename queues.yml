@@ -3,7 +3,7 @@ Resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: ${self:custom.JobsQueueName}
-        VisibilityTimeout: 600
+        VisibilityTimeout: 180
         RedrivePolicy:
           deadLetterTargetArn:
             Fn::GetAtt: [JobsDLQ, Arn]
@@ -12,6 +12,7 @@ Resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: ${self:custom.JobUpdatesQueueName}
+        VisibilityTimeout: 180
         RedrivePolicy:
           deadLetterTargetArn:
             Fn::GetAtt: [JobUpdatesDLQ, Arn]

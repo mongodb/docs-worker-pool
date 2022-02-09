@@ -150,7 +150,7 @@ functions:
 
     v1HandleJobs:
       handler: api/controllers/v1/jobs.HandleJobs
-      timeout: 300
+      timeout: 180
       events:
         - sqs:
             arn: !GetAtt AutobuilderJobsQueue.Arn
