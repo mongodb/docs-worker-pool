@@ -280,8 +280,8 @@ export abstract class JobHandler {
     });
   }
 
-  protected getPathPrefix(): Promise<string | undefined> {
-    return Promise.resolve(undefined);
+  protected getPathPrefix(): string {
+    return '';
   }
 
   protected constructManifestIndexPath(): Promise<void> {

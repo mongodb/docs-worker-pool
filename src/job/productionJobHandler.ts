@@ -81,12 +81,14 @@ export class ProductionJobHandler extends JobHandler {
     }
   }
 
-  async getPathPrefix(): Promise<string> {
+  getPathPrefix(): string {
     try {
-      const pathPrefix = `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
-      return pathPrefix;
+      if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
+        return this.currJob.payload.urlSlug ?? '';
+      }
+      return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
     } catch (error) {
-      await this.logger.save(this.currJob._id, error);
+      this.logger.save(this.currJob._id, error).then();
       throw new InvalidJobError(error.message);
     }
   }
