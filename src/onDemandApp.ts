@@ -12,7 +12,6 @@ import { JobValidator } from './job/jobValidator';
 import { RepoBranchesRepository } from './repositories/repoBranchesRepository';
 
 let db: mongodb.Db;
-let client: mongodb.MongoClient;
 let consoleLogger: ConsoleLogger;
 let fileSystemServices: FileSystemServices;
 let jobCommandExecutor: JobSpecificCommandExecutor;
@@ -20,7 +19,6 @@ let githubCommandExecutor: GithubCommandExecutor;
 let jobRepository: JobRepository;
 let hybridJobLogger: HybridJobLogger;
 let repoEntitlementRepository: RepoEntitlementsRepository;
-let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
 let cdnConnector: FastlyConnector;
 let repoConnector: GitHubConnector;
@@ -33,28 +31,30 @@ async function init(): Promise<void> {
   await client.connect();
   db = client.db(c.get('dbName'));
   consoleLogger = new ConsoleLogger();
-  fileSystemServices = new FileSystemServices();
-  jobCommandExecutor = new JobSpecificCommandExecutor();
   githubCommandExecutor = new GithubCommandExecutor();
-  jobRepository = new JobRepository(db, c, consoleLogger);
-  hybridJobLogger = new HybridJobLogger(jobRepository);
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
+
+  // for jobManager
   cdnConnector = new FastlyConnector(consoleLogger);
-  repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
+  fileSystemServices = new FileSystemServices();
+  hybridJobLogger = new HybridJobLogger(jobRepository);
+  jobCommandExecutor = new JobSpecificCommandExecutor();
   jobHandlerFactory = new JobHandlerFactory();
+  jobRepository = new JobRepository(db, c, consoleLogger);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
+  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
+  repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobManager = new JobManager(
-    c,
-    jobValidator,
-    jobHandlerFactory,
-    jobCommandExecutor,
-    jobRepository,
     cdnConnector,
-    repoConnector,
+    c, // config
     fileSystemServices,
+    jobCommandExecutor,
+    jobHandlerFactory,
+    jobRepository,
+    jobValidator,
     hybridJobLogger,
-    repoBranchesRepo
+    repoBranchesRepo,
+    repoConnector
   );
   try {
     await jobManager.startSpecificJob(c.get('jobId'));

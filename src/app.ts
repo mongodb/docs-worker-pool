@@ -20,7 +20,6 @@ let githubCommandExecutor: GithubCommandExecutor;
 let jobRepository: JobRepository;
 let hybridJobLogger: HybridJobLogger;
 let repoEntitlementRepository: RepoEntitlementsRepository;
-let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
 let cdnConnector: FastlyConnector;
 let repoConnector: GitHubConnector;
@@ -45,16 +44,16 @@ async function init(): Promise<void> {
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandlerFactory = new JobHandlerFactory();
   jobManager = new JobManager(
-    c,
-    jobValidator,
-    jobHandlerFactory,
-    jobCommandExecutor,
-    jobRepository,
     cdnConnector,
-    repoConnector,
+    c, // config
     fileSystemServices,
+    jobCommandExecutor,
+    jobHandlerFactory,
+    jobRepository,
+    jobValidator,
     hybridJobLogger,
-    repoBranchesRepo
+    repoBranchesRepo,
+    repoConnector
   );
   jobManager.start().catch((err) => {
     consoleLogger.error('App', `ERROR: ${err}`);
