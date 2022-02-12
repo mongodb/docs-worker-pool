@@ -1,6 +1,6 @@
 import { JobHandler } from './jobHandler';
 import { IConfig } from 'config';
-import { IJob } from '../entities/job';
+import { BuildJob } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { ICDNConnector } from '../services/cdn';
 import { CommandExecutorResponse, IJobCommandExecutor } from '../services/commandExecutor';
@@ -12,51 +12,51 @@ import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
-    job: IJob,
-    config: IConfig,
-    jobRepository: JobRepository,
-    fileSystemServices: IFileSystemServices,
-    commandExecutor: IJobCommandExecutor,
+    job: BuildJob,
     cdnConnector: ICDNConnector,
-    repoConnector: IRepoConnector,
+    commandExecutor: IJobCommandExecutor,
+    config: IConfig,
+    fileSystemServices: IFileSystemServices,
+    jobRepository: JobRepository,
     logger: IJobRepoLogger,
-    validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoConnector: IRepoConnector,
+    validator: IJobValidator
   ) {
     super(
       job,
-      config,
-      jobRepository,
-      fileSystemServices,
-      commandExecutor,
       cdnConnector,
-      repoConnector,
+      commandExecutor,
+      config,
+      fileSystemServices,
+      jobRepository,
       logger,
-      validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoConnector,
+      validator
     );
     this.name = 'Staging';
   }
 
   prepDeployCommands(): void {
     // TODO: Can we simplify the chain of logic here?
-    this.currJob.deployCommands = ['. /venv/bin/activate', `cd repos/${this.currJob.payload.repoName}`, 'make stage'];
-    if (this.currJob.payload.isNextGen) {
-      if (this.currJob.payload.pathPrefix) {
-        this.currJob.deployCommands[
-          this.currJob.deployCommands.length - 1
-        ] = `make next-gen-stage MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+    this.job.deployCommands = ['. /venv/bin/activate', `cd repos/${this.job.payload.repoName}`, 'make stage'];
+    if (this.job.payload.isNextGen) {
+      if (this.job.payload.pathPrefix) {
+        this.job.deployCommands[
+          this.job.deployCommands.length - 1
+        ] = `make next-gen-stage MUT_PREFIX=${this.job.payload.mutPrefix}`;
       } else {
-        this.currJob.deployCommands[this.currJob.deployCommands.length - 1] = 'make next-gen-stage';
+        this.job.deployCommands[this.job.deployCommands.length - 1] = 'make next-gen-stage';
       }
     }
   }
 
   prepStageSpecificNextGenCommands(): void {
-    if (this.currJob.buildCommands) {
-      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-html';
-      if (this.currJob.payload.repoName === 'devhub-content-integration') {
-        this.currJob.buildCommands[this.currJob.buildCommands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
+    if (this.job.buildCommands) {
+      this.job.buildCommands[this.job.buildCommands.length - 1] = 'make next-gen-html';
+      if (this.job.payload.repoName === 'devhub-content-integration') {
+        this.job.buildCommands[this.job.buildCommands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
       }
     }
   }
@@ -67,11 +67,11 @@ export class StagingJobHandler extends JobHandler {
       if (resp?.output?.includes('Summary')) {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));
       }
-      await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
-      await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
+      await this.logger.save(this.job._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
+      await this.logger.save(this.job._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
       return resp;
     } catch (errResult) {
-      await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      await this.logger.save(this.job._id, `${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
     }
   }

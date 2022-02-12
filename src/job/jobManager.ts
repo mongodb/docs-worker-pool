@@ -6,7 +6,7 @@ import { StagingJobHandler } from './stagingJobHandler';
 import { ICDNConnector } from '../services/cdn';
 import { IConfig } from 'config';
 import { IFileSystemServices } from '../services/fileServices';
-import { IJob } from '../entities/job';
+import { BuildJob, ManifestJob } from '../entities/job';
 import { IJobCommandExecutor } from '../services/commandExecutor';
 import { IJobRepoLogger } from '../services/logger';
 import { IJobValidator } from './jobValidator';
@@ -15,9 +15,16 @@ import { IRepoConnector } from '../services/repo';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
+export const jobHandlerMap = {
+  githubPush: StagingJobHandler,
+  manifestGeneration: ManifestJobHandler,
+  productionDeploy: ProductionJobHandler,
+  regression: RegressionJobHandler,
+};
+
 export class JobHandlerFactory {
   public createJobHandler(
-    job: IJob,
+    job: BuildJob | ManifestJob,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -28,62 +35,22 @@ export class JobHandlerFactory {
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository
   ): JobHandler {
-    switch (job.payload?.jobType) {
-      case 'regression':
-        return new RegressionJobHandler(
-          job,
-          config,
-          jobRepository,
-          fileSystemServices,
-          commandExecutor,
-          cdnConnector,
-          repoConnector,
-          logger,
-          validator,
-          repoBranchesRepo
-        );
-      case 'githubPush':
-        return new StagingJobHandler(
-          job,
-          config,
-          jobRepository,
-          fileSystemServices,
-          commandExecutor,
-          cdnConnector,
-          repoConnector,
-          logger,
-          validator,
-          repoBranchesRepo
-        );
-      case 'productionDeploy':
-        return new ProductionJobHandler(
-          job,
-          config,
-          jobRepository,
-          fileSystemServices,
-          commandExecutor,
-          cdnConnector,
-          repoConnector,
-          logger,
-          validator,
-          repoBranchesRepo
-        );
-      case 'manifestGeneration':
-        return new ManifestJobHandler(
-          job,
-          config,
-          jobRepository,
-          fileSystemServices,
-          commandExecutor,
-          cdnConnector,
-          repoConnector,
-          logger,
-          validator,
-          repoBranchesRepo
-        );
-      default:
-        throw new InvalidJobError(`Job type '${job.payload?.jobType}' not supported`);
+    const jt = job.payload?.jobType;
+    if (jt in jobHandlerMap) {
+      return jobHandlerMap[jt](
+        job,
+        cdnConnector,
+        commandExecutor,
+        config,
+        fileSystemServices,
+        jobRepository,
+        logger,
+        repoBranchesRepo,
+        repoConnector,
+        validator
+      );
     }
+    throw new InvalidJobError(`Job type '${jt}' not supported`);
   }
 }
 
@@ -102,29 +69,30 @@ export class JobManager {
   private _repoBranchesRepo: RepoBranchesRepository;
 
   constructor(
-    config: IConfig,
-    jobValidator: IJobValidator,
-    jobHandlerFactory: JobHandlerFactory,
-    jobCommandExecutor: IJobCommandExecutor,
-    jobRepository: JobRepository,
     cdnConnector: ICDNConnector,
-    repoConnector: IRepoConnector,
+    config: IConfig,
     fileSystemServices: IFileSystemServices,
+    jobCommandExecutor: IJobCommandExecutor,
+    jobHandlerFactory: JobHandlerFactory,
+    jobRepository: JobRepository,
+    jobValidator: IJobValidator,
     logger: IJobRepoLogger,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoConnector: IRepoConnector
   ) {
-    this._jobRepository = jobRepository;
     this._cdnConnector = cdnConnector;
-    this._repoConnector = repoConnector;
-    this._logger = logger;
-    this._shouldStop = false;
-    this._jobHandler = null;
     this._config = config;
     this._fileSystemServices = fileSystemServices;
-    this._jobValidator = jobValidator;
-    this._jobHandlerFactory = jobHandlerFactory;
     this._jobCommandExecutor = jobCommandExecutor;
+    this._jobHandlerFactory = jobHandlerFactory;
+    this._jobRepository = jobRepository;
+    this._jobValidator = jobValidator;
+    this._logger = logger;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._repoConnector = repoConnector;
+
+    this._shouldStop = false;
+    this._jobHandler = null;
   }
 
   async start(): Promise<void> {
@@ -137,7 +105,7 @@ export class JobManager {
     if (job) {
       await this.workEx(job);
     } else {
-      this._logger.error(jobId, 'Unable to find the job to execute');
+      this._logger.error(jobId, `Unable to find job ID '${jobId}' to execute`);
     }
   }
 
@@ -145,37 +113,37 @@ export class JobManager {
     return this._shouldStop;
   }
 
-  async workEx(job: IJob): Promise<void> {
+  async workEx(job: BuildJob | ManifestJob): Promise<void> {
     try {
       this._jobHandler = null;
       if (job?.payload) {
         await this.createHandlerAndExecute(job);
       } else {
-        this._logger.info('JobManager', `No Jobs Found....: ${new Date()}`);
+        this._logger.info('JobManager', `No jobs found: ${new Date()}`);
       }
     } catch (err) {
-      this._logger.error('JobManager', `  Error while polling for jobs: ${err}`);
+      this._logger.error('JobManager', `Error while polling for jobs: ${err}`);
       if (job) {
         await this._jobRepository.updateWithErrorStatus(job._id, err);
       }
     }
   }
 
-  async getQueuedJob(): Promise<IJob | null> {
+  async getQueuedJob(): Promise<BuildJob | ManifestJob | null> {
     return await this._jobRepository.getOneQueuedJobAndUpdate().catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });
   }
 
-  async getJob(jobId: string): Promise<IJob | null> {
+  async getJob(jobId: string): Promise<BuildJob | ManifestJob | null> {
     return await this._jobRepository.getJobByIdAndUpdate(jobId).catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });
   }
 
-  async createHandlerAndExecute(job: IJob): Promise<void> {
+  async createHandlerAndExecute(job: BuildJob | ManifestJob): Promise<void> {
     this._jobHandler = this._jobHandlerFactory.createJobHandler(
       job,
       this._config,
@@ -193,7 +161,7 @@ export class JobManager {
     await this._jobHandler?.execute();
     await this._logger.save(
       job._id,
-      `${'    (DONE)'.padEnd(this._config.get('LOG_PADDING'))}Finished Job with ID: ${job._id}`
+      `${'    (DONE)'.padEnd(this._config.get('LOG_PADDING'))}Finished job with ID: ${job._id}`
     );
   }
 
@@ -212,9 +180,9 @@ export class JobManager {
     this._shouldStop = true;
     this._jobHandler?.stop();
     await this._jobHandler?.jobRepository.resetJobStatus(
-      this._jobHandler?.currJob._id,
+      this._jobHandler?.job._id,
       'inQueue',
-      `Resetting Job with ID: ${this._jobHandler?.currJob._id} because server is being shut down`
+      `Resetting job with ID: ${this._jobHandler?.job._id} because server is being shut down`
     );
   }
 }

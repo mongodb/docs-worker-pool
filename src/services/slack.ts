@@ -110,6 +110,7 @@ export class SlackConnector implements ISlackConnector {
     });
   }
 
+  // TODO: Give users to generate manifest with deploy?
   private _getDropDownView(triggerId: string, repos: Array<any>) {
     return {
       trigger_id: triggerId,

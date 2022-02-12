@@ -1,4 +1,3 @@
-import { timingSafeEqual } from 'crypto';
 import { JobStatus } from './job';
 
 export class JobQueueMessage {

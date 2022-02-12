@@ -25,6 +25,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
       const jobId = body['jobId'];
       const jobStatus = body['jobStatus'];
       try {
+        // TODO: possible to switch to type map inference?
         switch (jobStatus) {
           case JobStatus[JobStatus.inQueue]:
             queueUrl = c.get('jobsQueueUrl');
@@ -79,25 +80,24 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const db = client.db(c.get('dbName'));
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  const fullDocument = await jobRepository.getJobById(jobId);
+  const job = await jobRepository.getJobById(jobId);
 
-  const slackMsgs = fullDocument.comMessage;
-  const jobTitle = fullDocument.title;
-  const repoName = fullDocument.payload.repoName;
-  const username = fullDocument.user;
+  // TODO: What is this supposed to reference, job.result?
+  const slackMsgs = '';
   const slackConnector = new SlackConnector(consoleLogger, c);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
+  const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job?.user);
   if (!entitlement?.['slack_user_id']) {
     return;
   }
+  // TODO: Where is this supposed to be used?
   const resp = await slackConnector.sendMessage(
     prepSummaryMessage(
-      repoName,
+      job?.payload?.repoName,
       limit_message_size(slackMsgs[slackMsgs.length - 1]),
       c.get<string>('dashboardUrl'),
       jobId,
-      jobTitle
+      job?.title
     ),
     entitlement['slack_user_id']
   );
@@ -130,13 +130,13 @@ function prepSummaryMessage(
       lastMessage.lastIndexOf('Summary')
     )}`;
   }
-  const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) finished! Please check the build log for any errors.\n${lastMessage}\nEnjoy!`;
+  const msg = `Your job (<${jobUrl}${jobId}|${jobTitle}>) finished! Please check the build log for any errors.\n${lastMessage}\nEnjoy!`;
   // Removes instances of two or more periods
   return msg.replace(/\.{2,}/g, '');
 }
 
 function prepProgressMessage(jobUrl: string, jobId: string, jobTitle: string, status: string): string {
-  const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
+  const msg = `Your job (<${jobUrl}${jobId}|${jobTitle}>) `;
   switch (status) {
     case 'inQueue':
       return msg + 'has successfully been added to the queue.';
@@ -147,7 +147,7 @@ function prepProgressMessage(jobUrl: string, jobId: string, jobTitle: string, st
     case 'failed':
       return msg + 'has failed and will not be placed back in the queue.';
     default:
-      return msg + 'has been updated to an unsupported status.';
+      return msg + `has been updated to unsupported status '${status}'.`;
   }
 }
 
@@ -158,17 +158,16 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const db = client.db(c.get('dbName'));
   const slackConnector = new SlackConnector(consoleLogger, c);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  const fullDocument = await jobRepository.getJobById(jobId);
-  const jobTitle = fullDocument.title;
-  const username = fullDocument.user;
+  const job = await jobRepository.getJobById(jobId);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
+  const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job?.user);
   if (!entitlement?.['slack_user_id']) {
-    consoleLogger.error(username, 'Entitlement Failed');
+    consoleLogger.error(job?.user, 'Entitlement Failed');
     return;
   }
+  // TODO: Where is this supposed to be used?
   const resp = await slackConnector.sendMessage(
-    prepProgressMessage(c.get('dashboardUrl'), jobId, jobTitle, fullDocument.status),
+    prepProgressMessage(c.get('dashboardUrl'), jobId, job?.title, job?.status),
     entitlement['slack_user_id']
   );
   return {

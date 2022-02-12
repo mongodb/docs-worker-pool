@@ -1,4 +1,4 @@
-import { IJob } from '../entities/job';
+import { BuildJob, ManifestJob } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -11,10 +11,14 @@ import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
 require('fs');
 
+// TODO: Do we need private variables & public getters? Why not just public vars?
 export abstract class JobHandler {
-  private _currJob: IJob;
-  public get currJob(): IJob {
-    return this._currJob;
+  private _job: BuildJob | ManifestJob;
+  public get job(): BuildJob | ManifestJob {
+    return this._job;
+  }
+  private get jobType(): string {
+    return this._job.payload.jobType;
   }
 
   private _commandExecutor: IJobCommandExecutor;
@@ -55,54 +59,55 @@ export abstract class JobHandler {
   protected _repoBranchesRepo: RepoBranchesRepository;
 
   constructor(
-    job: IJob,
-    config: IConfig,
-    jobRepository: JobRepository,
-    fileSystemServices: IFileSystemServices,
-    commandExecutor: IJobCommandExecutor,
+    job: BuildJob | ManifestJob,
     cdnConnector: ICDNConnector,
-    repoConnector: IRepoConnector,
+    commandExecutor: IJobCommandExecutor,
+    config: IConfig,
+    fileSystemServices: IFileSystemServices,
+    jobRepository: JobRepository,
     logger: IJobRepoLogger,
-    validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoConnector: IRepoConnector,
+    validator: IJobValidator
   ) {
-    this._commandExecutor = commandExecutor;
+    this._job = job;
     this._cdnConnector = cdnConnector;
-    this._repoConnector = repoConnector;
-    this._logger = logger;
-    this._currJob = job;
-    this._jobRepository = jobRepository;
-    this._fileSystemServices = fileSystemServices;
-    this._shouldStop = false;
+    this._commandExecutor = commandExecutor;
     this._config = config;
-    this._validator = validator;
+    this._fileSystemServices = fileSystemServices;
+    this._jobRepository = jobRepository;
+    this._logger = logger;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._repoConnector = repoConnector;
+    this._validator = validator;
+
+    this._shouldStop = false;
   }
 
   abstract prepStageSpecificNextGenCommands(): void;
 
   private logErrorMessage(message: string): void {
-    this.logger.error(this.currJob._id, message);
+    this.logger.error(this.job._id, message);
   }
   private async update(publishResult: CommandExecutorResponse): Promise<void> {
     if (publishResult) {
       if (publishResult?.status === 'success') {
         const files = this._fileSystemServices.getFilesInDirectory(
-          `./${this.currJob.payload.repoName}/build/public`,
+          `./${this.job.payload.repoName}/build/public`,
           '',
           null,
           null
         );
-        await this.jobRepository.updateWithCompletionStatus(this.currJob._id, files);
+        await this.jobRepository.updateWithCompletionStatus(this.job._id, files);
       } else {
         if (publishResult.error) {
-          await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);
+          await this.jobRepository.updateWithErrorStatus(this.job._id, publishResult.error);
         } else {
           this.logErrorMessage('PublishResult error is undefined');
         }
       }
       if (publishResult.output) {
-        await this.jobRepository.insertNotificationMessages(this.currJob._id, publishResult.output);
+        await this.jobRepository.insertNotificationMessages(this.job._id, publishResult.output);
       } else {
         this.logErrorMessage('PublishResult output is undefined');
       }
@@ -112,7 +117,7 @@ export abstract class JobHandler {
   }
 
   private cleanup(): void {
-    this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}`);
+    this._fileSystemServices.removeDirectory(`repos/${this.job.payload.repoName}`);
   }
 
   @throwIfJobInterupted()
@@ -121,40 +126,38 @@ export abstract class JobHandler {
     const pathPrefix = await this.getPathPrefix();
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
-      this.currJob.payload.pathPrefix = pathPrefix;
+      this.job.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this.currJob.payload.mutPrefix = mutPrefix;
+      this.job.payload.mutPrefix = mutPrefix;
     }
   }
 
   @throwIfJobInterupted()
   private async logError(error): Promise<void> {
-    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `);
-    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
+    await this.logger.save(this.job._id, `${'(BUILD)'.padEnd(15)}failed with code: ${error.code}. `);
+    await this.logger.save(this.job._id, `${'(BUILD)'.padEnd(15)}stdErr: ${error.stderr}`);
   }
 
   @throwIfJobInterupted()
   private async cloneRepo(targetPath: string): Promise<void> {
-    await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
-    await this._logger.save(this.currJob._id, `${'(GIT)'.padEnd(15)}running fetch`);
-    await this._repoConnector.cloneRepo(this.currJob, targetPath);
+    await this.logger.save(this.job._id, `${'(GIT)'.padEnd(15)}Cloning repository`);
+    await this.logger.save(this.job._id, `${'(GIT)'.padEnd(15)}running fetch`);
+    await this._repoConnector.cloneRepo(this.job, targetPath);
   }
 
   @throwIfJobInterupted()
   private async commitCheck(): Promise<void> {
     // if commit hash is provided, use that
-    if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Regression Test Child Process') {
+    if (this.job?.payload?.newHead && this.job?.title !== 'Regression Test Child Process') {
       try {
-        const resp = await this._repoConnector.checkCommits(this._currJob);
+        const resp = await this._repoConnector.checkCommits(this.job);
         // The response output MUST contain the branchName, or else we did not find the commit
-        if (!resp?.output?.includes(`* ${this.currJob.payload.branchName}`)) {
-          const err = new InvalidJobError(
-            `Specified commit does not exist on ${this.currJob.payload.branchName} branch`
-          );
-          await this._logger.save(
-            this.currJob._id,
+        if (!resp?.output?.includes(`* ${this.job.payload.branchName}`)) {
+          const err = new InvalidJobError(`Specified commit does not exist on ${this.job.payload.branchName} branch`);
+          await this.logger.save(
+            this.job._id,
             `${'(BUILD)'.padEnd(15)} failed. The specified commit does not exist on ${
-              this.currJob.payload.branchName
+              this.job.payload.branchName
             } branch.`
           );
           throw err;
@@ -171,7 +174,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async pullRepo(): Promise<void> {
     try {
-      await this._repoConnector.pullRepo(this.currJob);
+      await this._repoConnector.pullRepo(this.job);
     } catch (error) {
       await error;
       throw error;
@@ -181,13 +184,13 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async downloadMakeFile(): Promise<void> {
     try {
-      this._logger.info(
-        this.currJob._id,
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`
+      this.logger.info(
+        this.job._id,
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.job.payload.repoName}`
       );
       await this._fileSystemServices.saveUrlAsFile(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
-        `repos/${this.currJob.payload.repoName}/Makefile`,
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.job.payload.repoName}`,
+        `repos/${this.job.payload.repoName}/Makefile`,
         {
           encoding: 'utf8',
           flag: 'w',
@@ -201,7 +204,7 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   public isbuildNextGen(): boolean {
-    const workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
+    const workerPath = `repos/${this.job.payload.repoName}/worker.sh`;
     if (this._fileSystemServices.rootFileExists(workerPath)) {
       const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
       const workerLines = workerContents.split(/\r?\n/);
@@ -213,33 +216,33 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
-      await this._validator.throwIfBranchNotConfigured(this.currJob);
+      await this._validator.throwIfBranchNotConfigured(this.job);
       await this.constructPrefix();
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
-      if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
+      if (!this.job.payload.aliased || (this.job.payload.aliased && this.job.payload.primaryAlias)) {
         await this.constructManifestIndexPath();
       }
 
       this.prepStageSpecificNextGenCommands();
       this.constructEnvVars();
-      this.currJob.payload.isNextGen = true;
-      if (this._currJob.payload.jobType === 'productionDeploy') {
-        this._validator.throwIfNotPublishable(this._currJob);
+      this.job.payload.isNextGen = true;
+      if (this.jobType === 'productionDeploy') {
+        this._validator.throwIfNotPublishable(this.job);
       }
     } else {
-      this.currJob.payload.isNextGen = false;
+      this.job.payload.isNextGen = false;
     }
   }
 
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
-    if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
-      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
-      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
-      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
-      await this._logger.save(
-        this.currJob._id,
+    if (this.job.buildCommands && this.job.buildCommands.length > 0) {
+      await this.logger.save(this.job._id, `${'(BUILD)'.padEnd(15)}Running Build`);
+      await this.logger.save(this.job._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
+      const resp = await this._commandExecutor.execute(this.job.buildCommands);
+      await this.logger.save(this.job._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
+      await this.logger.save(
+        this.job._id,
         `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
       );
       if (resp.status != 'success') {
@@ -256,11 +259,11 @@ export abstract class JobHandler {
   }
 
   private constructEnvVars(): void {
-    // TODO: Can we store envVars as an object in the future?
+    // TODO: Would it make sense store envVars as an object in the future?
     let envVars = `GATSBY_PARSER_USER=${this._config.get<string>('GATSBY_PARSER_USER')}\nGATSBY_PARSER_BRANCH=${
-      this.currJob.payload.branchName
+      this.job.payload.branchName
     }\n`;
-    const pathPrefix = this.currJob.payload.pathPrefix;
+    const pathPrefix = this.job.payload.pathPrefix;
     // TODO: Do we need the empty string check?
     if (pathPrefix || pathPrefix === '') {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
@@ -274,7 +277,7 @@ export abstract class JobHandler {
     // for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
     //   if (envValue) envVars += `${envName}=TRUE\n`;
     // }
-    this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, {
+    this._fileSystemServices.writeToFile(`repos/${this.job.payload.repoName}/.env.production`, envVars, {
       encoding: 'utf8',
       flag: 'w',
     });
@@ -295,23 +298,23 @@ export abstract class JobHandler {
 
   // TODO: Make this a non-mutating state function, e.g. return the buildCommands
   protected prepBuildCommands(): void {
-    this.currJob.buildCommands = [
+    this.job.buildCommands = [
       `. /venv/bin/activate`,
-      `cd repos/${this.currJob.payload.repoName}`,
+      `cd repos/${this.job.payload.repoName}`,
       `rm -f makefile`,
       `make html`, // TODO: Can we remove this line, given how many jobHandler functions overwrite it?
     ];
   }
 
   protected async setEnvironmentVariables(): Promise<void> {
-    const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName);
+    const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this.job.payload.repoName);
     let env = this._config.get<string>('env');
-    this._logger.info(
-      this._currJob._id,
-      `setEnvironmentVariables for ${this._currJob.payload.repoName} env ${env} jobType ${this._currJob.payload.jobType}`
+    this.logger.info(
+      this.job._id,
+      `setEnvironmentVariables for ${this.job.payload.repoName} env ${env} jobType ${this.jobType}`
     );
     if (repo_info?.['bucket'] && repo_info?.['url']) {
-      if (this._currJob.payload.regression) {
+      if (this.job.payload.regression) {
         env = 'regression';
         process.env.REGRESSION = 'true';
       }
@@ -319,17 +322,17 @@ export abstract class JobHandler {
       process.env.URL = repo_info['url'][env];
 
       // Writers are tying to stage it, so lets update the staging bucket.
-      if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') {
+      if (env == 'prd' && this.jobType == 'githubPush') {
         process.env.BUCKET = repo_info['bucket'][env] + '-staging';
         process.env.URL = repo_info['url']['stg'];
       }
     }
 
     if (process.env.BUCKET) {
-      this._logger.info(this._currJob._id, process.env.BUCKET);
+      this.logger.info(this.job._id, process.env.BUCKET);
     }
     if (process.env.URL) {
-      this._logger.info(this._currJob._id, process.env.URL);
+      this.logger.info(this.job._id, process.env.URL);
     }
   }
 
@@ -337,21 +340,21 @@ export abstract class JobHandler {
   protected async build(): Promise<boolean> {
     this.cleanup();
     await this.cloneRepo(this._config.get<string>('repo_dir'));
-    this._logger.info(this._currJob._id, 'Cloned Repo');
+    this.logger.info(this.job._id, 'Cloned Repo');
     await this.commitCheck();
-    this._logger.info(this._currJob._id, 'Checked Commit');
+    this.logger.info(this.job._id, 'Checked Commit');
     await this.pullRepo();
-    this._logger.info(this._currJob._id, 'Pulled Repo');
+    this.logger.info(this.job._id, 'Pulled Repo');
     this.prepBuildCommands();
-    this._logger.info(this._currJob._id, 'Prepared Build commands');
+    this.logger.info(this.job._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
-    this._logger.info(this._currJob._id, 'Prepared Next Gen build');
-    await this._repoConnector.applyPatch(this.currJob);
-    this._logger.info(this._currJob._id, 'Patch Applied');
+    this.logger.info(this.job._id, 'Prepared Next Gen build');
+    await this._repoConnector.applyPatch(this.job);
+    this.logger.info(this.job._id, 'Patch Applied');
     await this.downloadMakeFile();
-    this._logger.info(this._currJob._id, 'Downloaded Makefile');
+    this.logger.info(this.job._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
-    this._logger.info(this._currJob._id, 'prepared Environment variables');
+    this.logger.info(this.job._id, 'prepared Environment variables');
     return await this.executeBuild();
   }
 
@@ -362,29 +365,29 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   protected async deployGeneric(): Promise<CommandExecutorResponse> {
     this.prepDeployCommands();
-    await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
+    await this.logger.save(this.job._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
-    if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
-      const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
+    if ((this.job?.deployCommands?.length ?? 0) > 0) {
+      const resp = await this._commandExecutor.execute(this.job.deployCommands);
       if (resp?.error?.includes('ERROR')) {
-        await this._logger.save(
-          this.currJob._id,
+        await this.logger.save(
+          this.job._id,
           `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`
         );
         throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`);
       }
-      await this._logger.save(
-        this.currJob._id,
+      await this.logger.save(
+        this.job._id,
         `${this._config.get<string>('stage').padEnd(15)}Finished pushing to ${this.name}`
       );
-      await this._logger.save(
-        this.currJob._id,
+      await this.logger.save(
+        this.job._id,
         `${this._config.get<string>('stage').padEnd(15)}push details:\n\n${resp.output}`
       );
       return resp;
     } else {
-      await this._logger.save(
-        this.currJob._id,
+      await this.logger.save(
+        this.job._id,
         `${this._config.get<string>('stage').padEnd(15)}Pushing to ${
           this.name
         } failed as there is no commands to execute`
@@ -395,35 +398,36 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   public async execute(): Promise<void> {
-    await this._logger.save(
-      this._currJob._id,
-      `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`
-    );
+    await this.logger.save(this.job._id, `* Starting Job with ID: ${this.job._id} and type: ${this.jobType}`);
     try {
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);
-      this.queueManifestJob();
+      // TODO: formalize jobTypes
+      if (this.jobType in ['productionDeploy', 'githubPush']) {
+        this.queueManifestJob();
+      }
       this.cleanup();
     } catch (error) {
       try {
-        await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message);
+        await this._jobRepository.updateWithErrorStatus(this.job._id, error.message);
         this.cleanup();
       } catch (error) {
-        this._logger.error(this._currJob._id, error.message);
+        this.logger.error(this.job._id, error.message);
       }
     }
   }
 
   private async queueManifestJob(): Promise<void> {
+    // TODO: create new start time, id, etc.
+    const manifestJob = this.job || {}; // contains payload
+    manifestJob.createdTime = new Date();
+    // normal buildJobs have a priority of 1. Give a "lower" priority to manifest jobs
+    manifestJob.priority = 2;
     try {
-      const manifestJob = {
-        // create manifest job here, with payload data
-      }
       this._jobRepository.insertJob(manifestJob);
-    }
-    catch (error) {
-      this._logger.error(this._currJob._id, `Failed to build search manifest: ${error.message}`);
+    } catch (error) {
+      this.logger.error(manifestJob._id, `Failed to build search manifest: ${error.message}`);
     }
   }
 
@@ -436,7 +440,7 @@ export abstract class JobHandler {
   }
 
   public getLogger(): ILogger {
-    return this._logger;
+    return this.logger;
   }
 }
 
@@ -450,18 +454,15 @@ function throwIfJobInterupted() {
         if (jobHandler?.isStopped() && !jobHandler?.stopped) {
           jobHandler
             .getLogger()
-            .info(
-              descriptor.value,
-              `Resetting Job with ID: ${jobHandler.currJob._id} because server is being shut down`
-            );
+            .info(descriptor.value, `Resetting Job with ID: ${jobHandler.job._id} because server is being shut down`);
           jobHandler.jobRepository.resetJobStatus(
-            jobHandler.currJob._id,
+            jobHandler.job._id,
             'inQueue',
-            `Resetting Job with ID: ${jobHandler.currJob._id} because server is being shut down`
+            `Resetting Job with ID: ${jobHandler.job._id} because server is being shut down`
           );
 
           jobHandler.stopped = true;
-          throw new JobStoppedError(`${jobHandler.currJob._id} is stopped`);
+          throw new JobStoppedError(`${jobHandler.job._id} is stopped`);
         }
         return original.apply(this, args);
       };

@@ -1,5 +1,5 @@
 import { IConfig } from 'config';
-import { IJob } from '../entities/job';
+import { BuildJob } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -12,28 +12,28 @@ import { ProductionJobHandler } from './productionJobHandler';
 
 export class RegressionJobHandler extends ProductionJobHandler {
   constructor(
-    job: IJob,
-    config: IConfig,
-    jobRepository: JobRepository,
-    fileSystemServices: IFileSystemServices,
-    commandExecutor: IJobCommandExecutor,
+    job: BuildJob,
     cdnConnector: ICDNConnector,
-    repoConnector: IRepoConnector,
+    commandExecutor: IJobCommandExecutor,
+    config: IConfig,
+    fileSystemServices: IFileSystemServices,
+    jobRepository: JobRepository,
     logger: IJobRepoLogger,
-    validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoConnector: IRepoConnector,
+    validator: IJobValidator
   ) {
     super(
       job,
-      config,
-      jobRepository,
-      fileSystemServices,
-      commandExecutor,
       cdnConnector,
-      repoConnector,
+      commandExecutor,
+      config,
+      fileSystemServices,
+      jobRepository,
       logger,
-      validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoConnector,
+      validator
     );
     this.name = 'Regression';
   }

@@ -1,6 +1,6 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import { Job, JobStatus } from '../entities/job';
+import { jobMap, BuildJob, ManifestJob, JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
 import { InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
@@ -40,14 +40,14 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: any): Promise<void> {
+  async insertJob(job: BuildJob | ManifestJob): Promise<void> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
     };
     const jobId = await this.upsert(filterDoc, updateDoc, `Mongo Timeout Error: Timed out while inserting Job`);
     if (!jobId) {
-      throw new JobExistsAlreadyError('InsertJobFailed');
+      throw new JobExistsAlreadyError(`InsertJobFailed`);
     }
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
     await this._queueConnector.sendMessage(
@@ -57,18 +57,25 @@ export class JobRepository extends BaseRepository {
     );
   }
 
-  async getJobById(id: string): Promise<Job | null> {
+  // TODO: Rewrite or collapse for Build/Manifest functionality
+  async getJobById(id: string): Promise<BuildJob | ManifestJob | null> {
     const query = {
       _id: new objectId(id),
     };
     const resp = await this.findOne(query, `Mongo Timeout Error: Timed out while find job by id Job`);
     if (!resp) {
       throw new JobNotFoundError('GetJobByID Failed');
+    } else if (resp.value) {
+      const jt = resp?.value?.payload?.jobType;
+      const job = Object.assign(new jobMap[jt](), resp.value);
+      await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
+      return job;
     }
-    return Object.assign(new Job(), resp);
+    return null;
   }
 
-  async getJobByIdAndUpdate(id: string): Promise<Job | null> {
+  // TODO: Rewrite or collapse for Build/Manifest functionality
+  async getJobByIdAndUpdate(id: string): Promise<BuildJob | ManifestJob | null> {
     const query = {
       _id: new objectId(id),
     };
@@ -79,33 +86,36 @@ export class JobRepository extends BaseRepository {
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status), url, delay);
   }
 
-  async findOneAndUpdateJob(query): Promise<Job | null> {
+  // TODO: Cut down on excess functions? (e.g. take _id and build query within)
+  async findOneAndUpdateJob(query): Promise<BuildJob | ManifestJob | null> {
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
-    const response = await this.findOneAndUpdate(
+    const resp = await this.findOneAndUpdate(
       query,
       update,
       options,
       `Mongo Timeout Error: Timed out while retrieving job`
     );
-    if (!response) {
+    if (!resp) {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
-    }
-    if (response.value) {
-      const job = Object.assign(new Job(), response.value);
+    } else if (resp.value) {
+      const jt = resp?.value?.payload?.jobType;
+      const job = Object.assign(new jobMap[jt](), resp.value);
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
     }
     return null;
   }
 
-  async getOneQueuedJobAndUpdate(): Promise<Job | null> {
+  // TODO: Rewrite or collapse for Build/Manifest functionality
+  async getOneQueuedJobAndUpdate(): Promise<BuildJob | ManifestJob | null> {
     const query = {
       status: 'inQueue',
       createdTime: { $lte: new Date() },
     };
     return await this.findOneAndUpdateJob(query);
   }
+
   async updateWithErrorStatus(id: string, reason: string): Promise<boolean> {
     const query = { _id: id };
     const update = {

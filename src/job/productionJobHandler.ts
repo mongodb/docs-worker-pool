@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { CDNCreds } from '../entities/creds';
-import { IJob, IPayload } from '../entities/job';
+import { BuildJob } from '../entities/job';
 import { InvalidJobError } from '../errors/errors';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -14,82 +14,82 @@ import { IJobValidator } from './jobValidator';
 
 export class ProductionJobHandler extends JobHandler {
   constructor(
-    job: IJob,
-    config: IConfig,
-    jobRepository: JobRepository,
-    fileSystemServices: IFileSystemServices,
-    commandExecutor: IJobCommandExecutor,
+    job: BuildJob,
     cdnConnector: ICDNConnector,
-    repoConnector: IRepoConnector,
+    commandExecutor: IJobCommandExecutor,
+    config: IConfig,
+    fileSystemServices: IFileSystemServices,
+    jobRepository: JobRepository,
     logger: IJobRepoLogger,
-    validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoConnector: IRepoConnector,
+    validator: IJobValidator
   ) {
     super(
       job,
-      config,
-      jobRepository,
-      fileSystemServices,
-      commandExecutor,
       cdnConnector,
-      repoConnector,
+      commandExecutor,
+      config,
+      fileSystemServices,
+      jobRepository,
       logger,
-      validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoConnector,
+      validator
     );
     this.name = 'Production';
   }
   prepDeployCommands(): void {
     // TODO: Can we simplify the chain of logic here?
-    this.currJob.deployCommands = [
+    this.job.deployCommands = [
       '. /venv/bin/activate',
-      `cd repos/${this.currJob.payload.repoName}`,
+      `cd repos/${this.job.payload.repoName}`,
       'make publish && make deploy',
     ];
 
-    if (this.currJob.payload.isNextGen) {
-      this.currJob.deployCommands[
-        this.currJob.deployCommands.length - 1
-      ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+    if (this.job.payload.isNextGen) {
+      this.job.deployCommands[
+        this.job.deployCommands.length - 1
+      ] = `make next-gen-deploy MUT_PREFIX=${this.job.payload.mutPrefix}`;
       // TODO: Remove functionality of manifestPrefix
-      const manifestPrefix = this.currJob.payload.manifestPrefix;
+      const manifestPrefix = this.job.payload.manifestPrefix;
       if (manifestPrefix) {
-        const searchFlag = this.currJob.payload.stable;
-        this.currJob.deployCommands[
-          this.currJob.deployCommands.length - 1
+        const searchFlag = this.job.payload.stable;
+        this.job.deployCommands[
+          this.job.deployCommands.length - 1
         ] += ` MANIFEST_PREFIX=${manifestPrefix} GLOBAL_SEARCH_FLAG=${searchFlag}`;
       }
     }
   }
 
   prepStageSpecificNextGenCommands(): void {
-    if (this.currJob?.buildCommands) {
-      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
-      this.currJob.buildCommands.push('make next-gen-html');
+    if (this.job?.buildCommands) {
+      this.job.buildCommands[this.job.buildCommands.length - 1] = 'make get-build-dependencies';
+      this.job.buildCommands.push('make next-gen-html');
     }
   }
 
   getActiveBranchLength(): number {
-    return this.currJob.payload.repoBranches.branches.filter((b) => b['active']).length;
+    return this.job.payload.repoBranches.branches.filter((b) => b['active']).length;
   }
 
   async constructManifestIndexPath(): Promise<void> {
     try {
-      this.currJob.payload.manifestPrefix = `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
+      this.job.payload.manifestPrefix = `${this.job.payload.project}-${this.job.payload.urlSlug}`;
     } catch (error) {
-      await this.logger.save(this.currJob._id, error);
+      await this.logger.save(this.job._id, error);
       throw error;
     }
   }
 
   getPathPrefix(): string {
     try {
-      if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
-        return this.currJob.payload.urlSlug ?? '';
+      if (this.job.payload.prefix && this.job.payload.prefix === '') {
+        return this.job.payload.urlSlug ?? '';
       }
-      return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
+      return `${this.job.payload.prefix}/${this.job.payload.urlSlug}`;
     } catch (error) {
-      this.logger.save(this.currJob._id, error).then();
+      this.logger.save(this.job._id, error).then();
       throw new InvalidJobError(error.message);
     }
   }
@@ -100,22 +100,22 @@ export class ProductionJobHandler extends JobHandler {
       //contains URLs corresponding to files updated via our push to S3
       const updatedURLsArray = stdoutJSON.urls;
       // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
-      await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
+      await this.logger.save(this.job._id, JSON.stringify(updatedURLsArray));
       if (this._config.get('shouldPurgeAll')) {
         await this._cdnConnector.purgeAll(this.getCdnCreds());
       } else {
-        await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
-        await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
+        await this._cdnConnector.purge(this.job._id, updatedURLsArray);
+        await this.jobRepository.insertPurgedUrls(this.job._id, updatedURLsArray);
       }
     } catch (error) {
-      await this.logger.save(this.currJob._id, error);
+      await this.logger.save(this.job._id, error);
     }
   }
 
   private getCdnCreds(): CDNCreds {
     let creds = this._config.get<any>('cdn_creds')['main'];
-    if (this.currJob?.payload?.repoName in this._config.get<any>('cdn_creds')) {
-      creds = this._config.get<any>('cdn_creds')[this.currJob.payload.repoName];
+    if (this.job?.payload?.repoName in this._config.get<any>('cdn_creds')) {
+      creds = this._config.get<any>('cdn_creds')[this.job.payload.repoName];
     }
     return new CDNCreds(creds['id'], creds['token']);
   }
@@ -126,12 +126,12 @@ export class ProductionJobHandler extends JobHandler {
       if (resp?.output) {
         const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);
         await this.purgePublishedContent(makefileOutput);
-        await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
-        await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
+        await this.logger.save(this.job._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
+        await this.logger.save(this.job._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
       }
       return resp;
     } catch (errResult) {
-      await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
+      await this.logger.save(this.job._id, `${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
     }
   }

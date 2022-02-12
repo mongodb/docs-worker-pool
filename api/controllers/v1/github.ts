@@ -1,5 +1,5 @@
 import c from 'config';
-import crypto from 'crypto';
+import crypto, { Utf8AsciiLatin1Encoding } from 'crypto';
 import mongodb from 'mongodb';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
@@ -7,10 +7,11 @@ import { ConsoleLogger } from '../../../src/services/logger';
 // This function will validate your payload from GitHub
 // See docs at https://developer.github.com/webhooks/securing/#validating-payloads-from-github
 function signRequestBody(key: string, body: string) {
-  return `sha1=${crypto.createHmac('sha1', key).update(body, 'utf-8').digest('hex')}`;
+  const enc = 'utf-8' as Utf8AsciiLatin1Encoding;
+  return `sha1=${crypto.createHmac('sha1', key).update(body, enc).digest('hex')}`;
 }
 
-function prepGithubPushPayload(githubEvent: any) {
+function prepGithubPushPayload(githubEvent: any): any {
   return {
     title: githubEvent.repository.full_name,
     user: githubEvent.pusher.name,
@@ -39,7 +40,7 @@ function prepGithubPushPayload(githubEvent: any) {
   };
 }
 
-export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<any> => {
+export const TriggerBuild = async (event: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
