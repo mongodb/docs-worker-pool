@@ -31,36 +31,36 @@
   "repoBranchesCollection": "repo_branches",
   "aws_region": "us-east-2",
   "publishBranchesUrl": {
-      "prd":"https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
-      "stg":"https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
-      "dotcomstg":"https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta-stg/publishedbranches",
-      "dotcomprd":"https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches"
+    "prd": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
+    "stg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
+    "dotcomstg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta-stg/publishedbranches",
+    "dotcomprd": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches"
+  },
+  "cdn_creds": {
+    "cloudgov-docs": {
+      "id": "FASTLY_ATLAS_SERVICE_ID",
+      "token": "FASTLY_ATLAS_TOKEN"
     },
-    "cdn_creds": {
-        "cloudgov-docs": {
-            "id": "FASTLY_ATLAS_SERVICE_ID",
-            "token": "FASTLY_ATLAS_TOKEN"
-        },
-        "cloud-docs": {
-            "id": "FASTLY_ATLAS_SERVICE_ID",
-            "token": "FASTLY_ATLAS_TOKEN"
-        },
-        "cloud-docs-osb": {
-            "id": "FASTLY_ATLAS_SERVICE_ID",
-            "token": "FASTLY_ATLAS_TOKEN"
-        },
-        "devhub-content": {
-            "id": "FASTLY_DEVHUB_SERVICE_ID",
-            "token": "FASTLY_DEVHUB_TOKEN"
-        },
-        "publishDochub": {
-            "id": "FASTLY_DOCHUB_SERVICE_ID",
-            "token": "FASTLY_DOCHUB_TOKEN"
-        },
-        "main": {
-            "id": "FASTLY_MAIN_SERVICE_ID",
-            "token": "FASTLY_MAIN_TOKEN"
-        }
+    "cloud-docs": {
+      "id": "FASTLY_ATLAS_SERVICE_ID",
+      "token": "FASTLY_ATLAS_TOKEN"
     },
+    "cloud-docs-osb": {
+      "id": "FASTLY_ATLAS_SERVICE_ID",
+      "token": "FASTLY_ATLAS_TOKEN"
+    },
+    "devhub-content": {
+      "id": "FASTLY_DEVHUB_SERVICE_ID",
+      "token": "FASTLY_DEVHUB_TOKEN"
+    },
+    "publishDochub": {
+      "id": "FASTLY_DOCHUB_SERVICE_ID",
+      "token": "FASTLY_DOCHUB_TOKEN"
+    },
+    "main": {
+      "id": "FASTLY_MAIN_SERVICE_ID",
+      "token": "FASTLY_MAIN_TOKEN"
+    }
+  },
   "repo_dir": "repos"
 }

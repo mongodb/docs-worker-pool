@@ -1,5 +1,5 @@
 {
-  "env":"STAGE",
+  "env": "STAGE",
   "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
   "githubSecret": "GITHUB_SECRET",
   "slackSecret": "SLACK_SECRET",
