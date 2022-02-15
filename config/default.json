@@ -30,6 +30,21 @@
   "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
   "repoBranchesCollection": "repo_branches",
   "aws_region": "us-east-2",
+  "parallel": {
+    "enabled":true,
+    "stg": {
+      "dbName": "pool_test",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg"
+    },
+    "prd": {
+      "dbName": "pool",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomprd",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd"
+    }
+  },
   "publishBranchesUrl": {
     "prd": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
     "stg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",

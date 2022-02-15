@@ -11,8 +11,12 @@ const objectId = mongodb.ObjectId;
 
 export class JobRepository extends BaseRepository {
   private _queueConnector: IQueueConnector;
-  constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'JobRepository', db.collection(config.get('jobQueueCollection')));
+  constructor(db: mongodb.Db, config: IConfig, logger: ILogger, collectionName: string | null = null) {
+    let collection = db.collection(config.get('jobQueueCollection'));
+    if (collectionName) {
+      collection = db.collection(collectionName);
+    }
+    super(config, logger, 'JobRepository', collection);
     this._queueConnector = new SQSConnector(logger, config);
   }
 
@@ -40,7 +44,7 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: any): Promise<void> {
+  async insertJob(job: any, url: string): Promise<void> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
@@ -50,11 +54,7 @@ export class JobRepository extends BaseRepository {
       throw new JobExistsAlreadyError('InsertJobFailed');
     }
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
-    await this._queueConnector.sendMessage(
-      new JobQueueMessage(jobId, JobStatus.inQueue),
-      this._config.get('jobsQueueUrl'),
-      0
-    );
+    await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inQueue), url, 0);
   }
 
   async getJobById(id: string): Promise<Job | null> {

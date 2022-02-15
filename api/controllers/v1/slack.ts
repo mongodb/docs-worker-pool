@@ -78,10 +78,19 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   };
 };
 
-async function deployRepo(job: any, logger: ILogger, jobRepository: JobRepository) {
+async function deployRepo(
+  job: any,
+  logger: ILogger,
+  jobRepository: JobRepository,
+  parallelJobRepo: JobRepository,
+  parellelUrl: string
+) {
   try {
     console.log(job);
-    await jobRepository.insertJob(job);
+    await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+    if (parallelJobRepo) {
+      await parallelJobRepo.insertJob(job, parellelUrl);
+    }
   } catch (err) {
     logger.error('SLACK:DEPLOYREPO', err);
   }
@@ -99,7 +108,14 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-
+  let parallelJobRepo = null;
+  let parallelUrl = '';
+  const parallel = c.get<any>('parallel');
+  const env = c.get<string>('env');
+  if (parallel && parallel['enabled'] && parallel[env]) {
+    parallelJobRepo = new JobRepository(db, c, consoleLogger, parallel[env]['jobQueueCollection']);
+    parallelUrl = parallel[env]['jobsQueueUrl'];
+  }
   // This is coming in as urlencoded stirng, need to decode before parsing=
 
   const decoded = decodeURIComponent(event.body).split('=')[1];
@@ -154,7 +170,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         false,
         '-g'
       );
-      await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+      await deployRepo(
+        createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
+        consoleLogger,
+        jobRepository,
+        parallelJobRepo,
+        parallelUrl
+      );
       jobCount += 1;
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
@@ -178,7 +200,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           true,
           stable
         );
-        await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+        await deployRepo(
+          createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
+          consoleLogger,
+          jobRepository,
+          parallelJobRepo,
+          parallelUrl
+        );
         jobCount += 1;
       }
       if (publishOriginalBranchName) {
@@ -195,7 +223,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           true,
           stable
         );
-        await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+        await deployRepo(
+          createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
+          consoleLogger,
+          jobRepository,
+          parallelJobRepo,
+          parallelUrl
+        );
         jobCount += 1;
       } else {
         return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`;
@@ -215,7 +249,13 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             true,
             primaryAlias
           );
-          await deployRepo(createJob(newPayload, jobTitle, jobUserName, jobUserEmail), consoleLogger, jobRepository);
+          await deployRepo(
+            createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
+            consoleLogger,
+            jobRepository,
+            parallelJobRepo,
+            parallelUrl
+          );
           jobCount += 1;
         }
       });
