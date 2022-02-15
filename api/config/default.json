@@ -21,6 +21,21 @@
   "retryDelay": 60,
   "commandOverride": ["node", "onDemandApp.js"],
   "subnets": ["subnet-8c3623f6", "subnet-a4ac73cf", "subnet-9e83fed2"],
+  "parallel": {
+    "enabled": true,
+    "stg": {
+      "dbName": "pool_test",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg"
+    },
+    "prd": {
+      "dbName": "pool",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomprd",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd"
+    }
+  },
   "cdn_creds": {
     "dochub": {
       "id": "FASTLY_DOCHUB_SERVICE_ID",
