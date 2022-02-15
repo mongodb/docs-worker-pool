@@ -21,10 +21,14 @@ custom:
     dev: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
+    dotcomstg: worker-pool-deployment
+    dotcomprd: worker-pool-deployment
   accountId:
     stg: 216656347858
     dev: 216656347858
     prd: 216656347858
+    dotcomstg: 216656347858
+    dotcomprd: 216656347858
   region: !Ref "AWS::Region"
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
@@ -33,6 +37,8 @@ custom:
     stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    dotcomstg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    dotcomprd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
   dochubEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.docuhubEventSource.${self:provider.stage}} 
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
@@ -48,19 +54,11 @@ custom:
   JobsDLQueueName: autobuilder-jobs-dlqueue-${self:provider.stage}
   JobUpdatesQueueName: autobuilder-job-updates-queue-${self:provider.stage}
   JobUpdatesDLQueueName: autobuilder-job-updates-dlqueue-${self:provider.stage}
-  slackBuildProgessNotificationEventSource:
-    stg: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
-    prd: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
-    dev: aws.partner/mongodb.com/stitch.trigger/5d4187c6860ce4b18e41510b
-  slackBuildProgessNotificationEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.slackBuildProgessNotificationEventSource.${self:provider.stage}}
-  slackBuildSummaryNotificationEventSource:
-    stg: aws.partner/mongodb.com/stitch.trigger/5d4328042de84772fcdf9faf
-    prd: aws.partner/mongodb.com/stitch.trigger/5d4328042de84772fcdf9faf
-    dev: aws.partner/mongodb.com/stitch.trigger/5d4328042de84772fcdf9faf
-  slackBuildSummaryNotificationEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.slackBuildSummaryNotificationEventSource.${self:provider.stage}} 
   dashboardUrl:
     stg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
     prd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    dotcomstg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    dotcomprd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
     dev: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
   env:
     stg: "staging"
