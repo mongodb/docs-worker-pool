@@ -31,7 +31,7 @@
   "repoBranchesCollection": "repo_branches",
   "aws_region": "us-east-2",
   "parallel": {
-    "enabled":true,
+    "enabled": true,
     "stg": {
       "dbName": "pool_test",
       "jobQueueCollection": "dotcom_queue",
