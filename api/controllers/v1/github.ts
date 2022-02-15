@@ -7,8 +7,13 @@ import { BranchRepository } from '../../../src/repositories/branchRepository';
 
 // This function will validate your payload from GitHub
 // See docs at https://developer.github.com/webhooks/securing/#validating-payloads-from-github
-function signRequestBody(key: string, body: string) {
-  return `sha1=${crypto.createHmac('sha1', key).update(body, 'utf-8').digest('hex')}`;
+function validateJsonWebhook(request: any, secret: string) {
+  const expectedSignature = 'sha256=' + crypto.createHmac('sha256', secret).update(request.body).digest('hex');
+  const signature = request.headers['X-Hub-Signature-256'];
+  if (signature !== expectedSignature) {
+    return false;
+  }
+  return true;
 }
 
 async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchRepository) {
@@ -52,15 +57,15 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
-  // const sig = event.headers['X-Hub-Signature'];
-  // if (sig !== signRequestBody(c.get<string>('githubSecret'), event.body)) {
-  //   const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-  //   return {
-  //     statusCode: 401,
-  //     headers: { 'Content-Type': 'text/plain' },
-  //     body: errMsg,
-  //   };
-  // }
+  const sig = event.headers['X-Hub-Signature-256'];
+  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
   const body = JSON.parse(event.body);
   const job = await prepGithubPushPayload(body, branchRepository);
   try {
