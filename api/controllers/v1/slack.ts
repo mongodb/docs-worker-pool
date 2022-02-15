@@ -127,10 +127,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
     const active = branchObject.aliasObject.active; //bool
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool
-    const aliases = branchObject.aliasObject.urlAliases; //array or null
+    let aliases = branchObject.aliasObject.urlAliases; //array or null
     let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
-
+    aliases = aliases?.filter((a) => a);
     if (!urlSlug) {
       urlSlug = branchName;
     }
