@@ -16,7 +16,7 @@ function validateJsonWebhook(request: any, secret: string) {
   return true;
 }
 
-async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchRepository) {
+async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchRepository, prefix: string) {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await branchRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
@@ -45,6 +45,7 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
       url: githubEvent.repository.clone_url,
       newHead: githubEvent.after,
       urlSlug: urlSlug,
+      prefix: prefix,
     },
     logs: [],
   };
@@ -67,14 +68,16 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
     };
   }
   const body = JSON.parse(event.body);
-  const job = await prepGithubPushPayload(body, branchRepository);
+  const env = c.get<string>('env');
+  const repoInfo = branchRepository.getRepo(body.repository.name);
+  const job = await prepGithubPushPayload(body, branchRepository, repoInfo['prefix'][env]);
   try {
     await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
     const parallel = c.get<any>('parallel');
-    const env = c.get<string>('env');
     if (parallel && parallel['enabled'] && parallel[env]) {
       const parallelJobRepo = new JobRepository(db, c, consoleLogger, parallel[env]['jobQueueCollection']);
       const parallelUrl = parallel[env]['jobsQueueUrl'];
+      job['payload']['prefix'] = repoInfo['prefix'][parallel[env]['parallelStgName']];
       await parallelJobRepo.insertJob(job, parallelUrl);
     }
   } catch (err) {

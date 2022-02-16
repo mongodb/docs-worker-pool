@@ -83,12 +83,13 @@ async function deployRepo(
   logger: ILogger,
   jobRepository: JobRepository,
   parallelJobRepo: JobRepository,
-  parellelUrl: string
+  parellelUrl: string,
+  parallelPrefix: string
 ) {
   try {
-    console.log(job);
     await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
     if (parallelJobRepo) {
+      job.payload.prefix = parallelPrefix;
       await parallelJobRepo.insertJob(job, parellelUrl);
     }
   } catch (err) {
@@ -110,12 +111,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const jobRepository = new JobRepository(db, c, consoleLogger);
   let parallelJobRepo = null;
   let parallelUrl = '';
+  let parallelPrefix = '';
   const parallel = c.get<any>('parallel');
   const env = c.get<string>('env');
-  if (parallel && parallel['enabled'] && parallel[env]) {
-    parallelJobRepo = new JobRepository(db, c, consoleLogger, parallel[env]['jobQueueCollection']);
-    parallelUrl = parallel[env]['jobsQueueUrl'];
-  }
+
   // This is coming in as urlencoded stirng, need to decode before parsing=
 
   const decoded = decodeURIComponent(event.body).split('=')[1];
@@ -127,6 +126,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
 
+  if (parallel && parallel['enabled'] && parallel[env]) {
+    parallelJobRepo = new JobRepository(db, c, consoleLogger, parallel[env]['jobQueueCollection']);
+    parallelUrl = parallel[env]['jobsQueueUrl'];
+  }
   const values = slackConnector.parseSelection(stateValues);
   let jobCount = 0;
   for (let i = 0; i < values.repo_option.length; i++) {
@@ -138,6 +141,9 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const jobUserEmail = entitlement?.email ?? '';
 
     const repoInfo = await branchRepository.getRepo(repoName);
+    if (parallelJobRepo) {
+      parallelPrefix = repoInfo.prefix[parallel[env]['parallelStgName']];
+    }
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
     if (!branchObject?.aliasObject) continue;
 
@@ -175,7 +181,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         consoleLogger,
         jobRepository,
         parallelJobRepo,
-        parallelUrl
+        parallelUrl,
+        parallelPrefix
       );
       jobCount += 1;
     }
@@ -205,7 +212,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           consoleLogger,
           jobRepository,
           parallelJobRepo,
-          parallelUrl
+          parallelUrl,
+          parallelPrefix
         );
         jobCount += 1;
       }
@@ -228,7 +236,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           consoleLogger,
           jobRepository,
           parallelJobRepo,
-          parallelUrl
+          parallelUrl,
+          parallelPrefix
         );
         jobCount += 1;
       } else {
@@ -254,7 +263,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
             consoleLogger,
             jobRepository,
             parallelJobRepo,
-            parallelUrl
+            parallelUrl,
+            parallelPrefix
           );
           jobCount += 1;
         }
