@@ -28,14 +28,14 @@
       "jobQueueCollection": "dotcom_queue",
       "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
       "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg",
-      "parallelStgName":"dotcomstg"
+      "parallelStgName": "dotcomstg"
     },
     "prd": {
       "dbName": "pool",
       "jobQueueCollection": "dotcom_queue",
       "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomprd",
       "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd",
-      "parallelStgName":"dotcomprd"
+      "parallelStgName": "dotcomprd"
     }
   },
   "cdn_creds": {
