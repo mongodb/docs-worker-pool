@@ -93,7 +93,7 @@ async function deployRepo(
       await parallelJobRepo.insertJob(job, parellelUrl);
     }
   } catch (err) {
-    logger.error('SLACK:DEPLOYREPO', err);
+    logger.error(`${job.payload.repoName} ${job.payload.branchName}`, err);
   }
 }
 
@@ -241,7 +241,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         );
         jobCount += 1;
       } else {
-        return `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`;
+        consoleLogger.error(
+          `${branchName} ${repoName}`,
+          `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`
+        );
       }
       aliases.forEach(async (alias) => {
         if (alias != urlSlug) {
