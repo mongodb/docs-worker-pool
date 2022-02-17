@@ -1,6 +1,6 @@
 import { Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
-gimport { ILogger } from '../services/logger';
+import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
 
 export class RepoEntitlementsRepository extends BaseRepository {
