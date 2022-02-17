@@ -2,19 +2,22 @@ prefix: 'drivers/java/sync'
 version:
   published:
     - 'master (upcoming)'
-    - '4.4 (current)'
+    - '4.5 (current)'
+    - '4.4'
     - '4.3'
   active:
     - 'master (upcoming)'
-    - '4.4 (current)'
+    - '4.5 (current)'
+    - '4.4'
     - '4.3'
-  stable: 'v4.4'
+  stable: 'v4.5'
   upcoming: 'master'
 git:
   branches:
     manual: 'master'
     published:
       - 'master'
+      - 'v4.5'
       - 'v4.4'
       - 'v4.3'
       # the branches/published list **must** be ordered from most to
