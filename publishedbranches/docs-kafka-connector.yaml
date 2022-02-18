@@ -2,6 +2,7 @@ prefix: 'kafka-connector'
 version:
   published:
     - 'master'
+    - 'v1.7'
     - 'v1.6'
     - 'v1.5'
     - 'v1.4'
@@ -11,6 +12,7 @@ version:
     - 'v1.0'
   active:
     - 'master'
+    - 'v1.7'
     - 'v1.6'
     - 'v1.5'
     - 'v1.4'
@@ -18,13 +20,14 @@ version:
     - 'v1.2'
     - 'v1.1'
     - 'v1.0'
-  stable: 'v1.6'
+  stable: 'v1.7'
   upcoming: master
 git:
   branches:
     manual: 'master'
     published:
       - 'master'
+      - 'v1.7'
       - 'v1.6'
       - 'v1.5'
       - 'v1.4'
