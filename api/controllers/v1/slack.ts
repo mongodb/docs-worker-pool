@@ -141,6 +141,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const jobUserEmail = entitlement?.email ?? '';
 
     const repoInfo = await branchRepository.getRepo(repoName);
+    const non_versioned = repoInfo.branches.length === 1 ? true : false;
     if (parallelJobRepo) {
       parallelPrefix = repoInfo.prefix[parallel[env]['parallelStgName']];
     }
@@ -153,7 +154,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
     aliases = aliases?.filter((a) => a);
-    if (!urlSlug) {
+    if (!urlSlug && non_versioned == false) {
       urlSlug = branchName;
     }
 
@@ -171,7 +172,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         hashOption,
         repoInfo.project,
         repoInfo.prefix[c.get<string>('env')],
-        branchName,
+        non_versioned ? '' : branchName,
         false,
         false,
         '-g'
@@ -216,8 +217,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           parallelPrefix
         );
         jobCount += 1;
-      }
-      if (publishOriginalBranchName) {
+      } else if (publishOriginalBranchName) {
         newPayload = createPayload(
           'productionDeploy',
           repoOwner,
@@ -240,10 +240,33 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           parallelPrefix
         );
         jobCount += 1;
+      } else if (non_versioned) {
+        newPayload = createPayload(
+          'productionDeploy',
+          repoOwner,
+          repoName,
+          branchName,
+          hashOption,
+          repoInfo.project,
+          repoInfo.prefix[c.get<string>('env')],
+          '',
+          true,
+          true,
+          stable
+        );
+        await deployRepo(
+          createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
+          consoleLogger,
+          jobRepository,
+          parallelJobRepo,
+          parallelUrl,
+          parallelPrefix
+        );
+        jobCount += 1;
       } else {
         consoleLogger.error(
           `${branchName} ${repoName}`,
-          `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug.`
+          `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug or it should be nonversioned.`
         );
       }
       aliases.forEach(async (alias) => {
