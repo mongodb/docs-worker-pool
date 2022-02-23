@@ -4,6 +4,7 @@ USER=$(shell whoami)
 
 PREFIX=manual
 PROJECT=docs
+REPO_NAME=docs
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
@@ -58,6 +59,7 @@ next-gen-html: examples get-build-dependencies
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	echo "REPO_NAME=${REPO_NAME}" >> .env.production; \
 	if [ -n "${PATCH_ID}" ]; then \
 		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
