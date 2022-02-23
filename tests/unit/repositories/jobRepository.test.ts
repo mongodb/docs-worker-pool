@@ -24,7 +24,7 @@ describe('Job Repository Tests', () => {
         new Date()
       );
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`
+        `Failed to update (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
     });
 
@@ -37,7 +37,7 @@ describe('Job Repository Tests', () => {
       );
       dbRepoHelper.collection.updateOne.mockReturnValue({ modifiedCount: -1 });
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`
+        `Failed to update (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
     });
@@ -51,7 +51,7 @@ describe('Job Repository Tests', () => {
       );
       dbRepoHelper.collection.updateOne.mockReturnValueOnce({ result: { sn: -1 } });
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`
+        `Failed to update (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
       expect(dbRepoHelper.logger.error).toBeCalledTimes(1);

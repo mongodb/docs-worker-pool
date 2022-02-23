@@ -420,7 +420,7 @@ export abstract class JobHandler {
 
   private async queueManifestJob(): Promise<void> {
     // TODO: create new start time, id, etc.
-    const manifestJob = this.job || {}; // contains payload
+    const manifestJob = this.job; // contains payload - need to swap to ManifestJob type
     manifestJob.createdTime = new Date();
     // normal buildJobs have a priority of 1. Give a "lower" priority to manifest jobs
     manifestJob.priority = 2;
@@ -446,7 +446,7 @@ export abstract class JobHandler {
 
 // Good to have this as a friend function
 function throwIfJobInterupted() {
-  return function decorator(target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+  return function decorator(descriptor: PropertyDescriptor) {
     const original = descriptor.value;
     if (typeof original === 'function') {
       descriptor.value = function (...args) {

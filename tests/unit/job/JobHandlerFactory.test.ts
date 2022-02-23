@@ -16,28 +16,28 @@ import { IJobValidator } from '../../../src/job/jobValidator';
 
 describe('JobHandlerFactory Tests', () => {
   let job: IJob;
-  let config: IConfig;
-  let jobRepo: JobRepository;
-  let fileSystemServices: IFileSystemServices;
-  let jobCommandExecutor: IJobCommandExecutor;
   let cdnConnector: ICDNConnector;
-  let repoConnector: IRepoConnector;
-  let logger: IJobRepoLogger;
+  let commandExecutor: IJobCommandExecutor;
+  let config: IConfig;
+  let fileSystemServices: IFileSystemServices;
   let jobHandlerFactory: JobHandlerFactory;
+  let jobRepo: JobRepository;
+  let logger: IJobRepoLogger;
   let repoBranchesRepo: RepoBranchesRepository;
-  let jobValidator: IJobValidator;
+  let repoConnector: IRepoConnector;
+  let validator: IJobValidator;
 
   beforeEach(() => {
     job = mockDeep<IJob>();
-    config = mockDeep<IConfig>();
-    jobRepo = mockDeep<JobRepository>();
-    fileSystemServices = mockDeep<IFileSystemServices>();
-    jobCommandExecutor = mockDeep<IJobCommandExecutor>();
     cdnConnector = mockDeep<ICDNConnector>();
-    repoConnector = mockDeep<IRepoConnector>();
-    logger = mockDeep<IJobRepoLogger>();
+    commandExecutor = mockDeep<IJobCommandExecutor>();
+    config = mockDeep<IConfig>();
+    fileSystemServices = mockDeep<IFileSystemServices>();
     jobHandlerFactory = new JobHandlerFactory();
+    jobRepo = mockDeep<JobRepository>();
+    logger = mockDeep<IJobRepoLogger>();
     repoBranchesRepo = mockDeep<RepoBranchesRepository>();
+    repoConnector = mockDeep<IRepoConnector>();
   });
 
   test('Construct Job Factory', () => {
@@ -49,15 +49,15 @@ describe('JobHandlerFactory Tests', () => {
     expect(() => {
       jobHandlerFactory.createJobHandler(
         job,
-        config,
-        jobRepo,
-        fileSystemServices,
-        jobCommandExecutor,
         cdnConnector,
-        repoConnector,
+        commandExecutor,
+        config,
+        fileSystemServices,
+        jobRepo,
         logger,
-        jobValidator,
-        repoBranchesRepo
+        repoBranchesRepo,
+        repoConnector,
+        validator
       );
     }).toThrowError(`Job type 'Unknown' not supported`);
   });
@@ -66,15 +66,15 @@ describe('JobHandlerFactory Tests', () => {
     job.payload.jobType = 'regression';
     const handler = jobHandlerFactory.createJobHandler(
       job,
-      config,
-      jobRepo,
-      fileSystemServices,
-      jobCommandExecutor,
       cdnConnector,
-      repoConnector,
+      commandExecutor,
+      config,
+      fileSystemServices,
+      jobRepo,
       logger,
-      jobValidator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoConnector,
+      validator
     );
     expect(handler).toBeInstanceOf(RegressionJobHandler);
   });
@@ -83,15 +83,15 @@ describe('JobHandlerFactory Tests', () => {
     job.payload.jobType = 'githubPush';
     const handler = jobHandlerFactory.createJobHandler(
       job,
-      config,
-      jobRepo,
-      fileSystemServices,
-      jobCommandExecutor,
       cdnConnector,
-      repoConnector,
+      commandExecutor,
+      config,
+      fileSystemServices,
+      jobRepo,
       logger,
-      jobValidator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoConnector,
+      validator
     );
     expect(handler).toBeInstanceOf(StagingJobHandler);
   });
@@ -100,15 +100,15 @@ describe('JobHandlerFactory Tests', () => {
     job.payload.jobType = 'productionDeploy';
     const handler = jobHandlerFactory.createJobHandler(
       job,
-      config,
-      jobRepo,
-      fileSystemServices,
-      jobCommandExecutor,
       cdnConnector,
-      repoConnector,
+      commandExecutor,
+      config,
+      fileSystemServices,
+      jobRepo,
       logger,
-      jobValidator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoConnector,
+      validator
     );
     expect(handler).toBeInstanceOf(ProductionJobHandler);
   });
