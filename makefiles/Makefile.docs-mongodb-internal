@@ -6,7 +6,7 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 
-PROJECT=docs-internal
+PROJECT=docs
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
