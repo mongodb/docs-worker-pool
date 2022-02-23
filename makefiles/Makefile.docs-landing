@@ -20,18 +20,18 @@ DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
 
 
 
-get-build-dependencies: 
+get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-html: build-legacy-pages
 	# snooty parse and then build-front-end
-	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
+	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${RSTSPEC_FLAG}; \
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
 		exit 0; \
 	fi
-	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}" 
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
@@ -63,7 +63,7 @@ build-legacy-pages:
 	mkdir -p $@
 	mkdir -p $@/cloud
 	mkdir -p $@/tools
-	
+
 	@# Copy CSS and JS files to output directories
 	cp static/sitemap-index.xml $@/sitemap-index.xml
 	cp static/favicon.png $@/favicon.ico
