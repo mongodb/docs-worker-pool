@@ -19,6 +19,7 @@
   "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
   "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
   "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
+  "gatsbyBaseUrl": "GATSBY_BASE_URL",
   "gatsbyConsitentNavFlag": "GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION",
   "gatsbySDKVersionDropdownFlag": "GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
@@ -50,6 +51,7 @@
     "main": {
       "id": "FASTLY_MAIN_SERVICE_ID",
       "token": "FASTLY_MAIN_TOKEN"
+
     }
   }
 }

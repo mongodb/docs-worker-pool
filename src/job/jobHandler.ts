@@ -256,24 +256,22 @@ export abstract class JobHandler {
   }
 
   private constructEnvVars(): void {
-    // TODO: Can we store envVars as an object in the future?
-    let envVars = `GATSBY_PARSER_USER=${this._config.get<string>('GATSBY_PARSER_USER')}\nGATSBY_PARSER_BRANCH=${
-      this.currJob.payload.branchName
-    }\n`;
+    let envVars = `GATSBY_PARSER_USER=${this._config.get<string>("GATSBY_PARSER_USER")}\nGATSBY_PARSER_BRANCH=${
+      this.currJob.payload.branchName}
+    \n`;
     const pathPrefix = this.currJob.payload.pathPrefix;
     // TODO: Do we need the empty string check?
     if (pathPrefix || pathPrefix === '') {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
-    // const snootyFrontEndVars = {
-    //   'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("gatsbyConsitentNavFlag"),
-    //   'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("gatsbySDKVersionDropdownFlag"),
+    const snootyFrontEndVars = {
+      'GATSBY_BASE_URL': this._config.get<String>("gatsbyBaseUrl"),
+    };
 
-    // };
+    for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
+      if (envValue) envVars += `${envName}=${envValue}\n`;
+    }
 
-    // for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
-    //   if (envValue) envVars += `${envName}=TRUE\n`;
-    // }
     this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, {
       encoding: 'utf8',
       flag: 'w',
