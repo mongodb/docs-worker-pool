@@ -1,9 +1,47 @@
 {
-    "fastlyDochubMap":"devfslydochubmap",
-    "cdn_creds": {
-        "dochub": {
-            "id": "FASTLY_DOCHUB_SERVICE_ID",
-            "key": "FASTLY_DOCHUB_TOKEN"
-        }
+  "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
+  "githubSecret": "GITHUB_SECRET",
+  "slackSecret": "SLACK_SECRET",
+  "slackAuthToken": "SLACK_TOKEN",
+  "dbName": "DB_NAME",
+  "dbUrl": "MONGO_ATLAS_URL",
+  "slackViewOpenUrl": "https://slack.com/api/views.open",
+  "jobQueueCollection": "JOB_QUEUE_COL_NAME",
+  "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
+  "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
+  "MONGO_TIMEOUT_S": 15,
+  "JOB_TIMEOUT_S": 900,
+  "RETRY_TIMEOUT_MS": 5000,
+  "MAX_STDOUT_BUFFER_SIZE": 16000000,
+  "aws_region": "us-east-2",
+  "MIN_TIMEOUT_MS": 1,
+  "LOG_PADDING": 15,
+  "PORT": 3000,
+  "maxRetries": 3,
+  "retryDelay": 60,
+  "commandOverride": ["node", "onDemandApp.js"],
+  "subnets": ["subnet-8c3623f6", "subnet-a4ac73cf", "subnet-9e83fed2"],
+  "parallel": {
+    "enabled": true,
+    "stg": {
+      "dbName": "pool_test",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg",
+      "parallelStgName": "dotcomstg"
+    },
+    "prd": {
+      "dbName": "pool",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomprd",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd",
+      "parallelStgName": "dotcomprd"
     }
+  },
+  "cdn_creds": {
+    "dochub": {
+      "id": "FASTLY_DOCHUB_SERVICE_ID",
+      "token": "FASTLY_DOCHUB_TOKEN"
+    }
+  }
 }

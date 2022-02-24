@@ -3,6 +3,7 @@ variablesResolutionMode: 20210326
 
 plugins:
   - serverless-plugin-typescript
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
@@ -14,34 +15,87 @@ package:
   patterns:
     api/config/**
 custom:
+  serverlessPluginTypescript:
+    tsConfigFileLocation: '.api/tsconfig.build.json'
   deploymentBucket:
     dev: worker-pool-deployment
     stg: worker-pool-deployment
     prd: worker-pool-deployment
+    dotcomstg: worker-pool-deployment
+    dotcomprd: worker-pool-deployment
   accountId:
     stg: 216656347858
     dev: 216656347858
     prd: 216656347858
+    dotcomstg: 216656347858
+    dotcomprd: 216656347858
+  region: !Ref "AWS::Region"
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   docuhubEventSource:
     stg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
-    prd: aws.partner/mongodb.com/stitch.trigger/5e2b535c2cc8b7e914a5aa4f
+    prd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    dotcomstg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    dotcomprd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
   dochubEventBus: arn:aws:events:us-east-2:${self:custom.accountId.${self:provider.stage}}:event-bus/${self:custom.docuhubEventSource.${self:provider.stage}} 
-
+  dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
+  dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
+  dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
+  dbhost: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/host}
+  jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
+  entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
+  repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
+  githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
+  slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
+  slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
+  JobsQueueName: autobuilder-jobs-queue-${self:provider.stage}
+  JobsDLQueueName: autobuilder-jobs-dlqueue-${self:provider.stage}
+  JobUpdatesQueueName: autobuilder-job-updates-queue-${self:provider.stage}
+  JobUpdatesDLQueueName: autobuilder-job-updates-dlqueue-${self:provider.stage}
+  dashboardUrl:
+    stg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    prd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    dotcomstg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    dotcomprd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    dev: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
   env:
     stg: "staging"
     prd: "production"
     dev: "staging"
+  jobsQueueUrl: https://sqs.us-east-2.amazonaws.com/216656347858/${self:custom.JobsQueueName}
+  jobUpdatesQueueUrl: https://sqs.us-east-2.amazonaws.com/216656347858/${self:custom.JobUpdatesQueueName}
 
 default-env: &default-env
   STAGE: ${self:provider.stage}
   FASTLY_DOCHUB_MAP: ${self:custom.fastlyDochubMap}
   FASTLY_DOCHUB_SERVICE_ID: ${self:custom.fastlyDochubServiceId}
   FASTLY_DOCHUB_TOKEN: ${self:custom.fastlyDochubToken}
+  GITHUB_WEBHOOK_SECRET: REPLACE-WITH-YOUR-SECRET-HERE
+  NODE_CONFIG_DIR: './api/config'
 
+webhook-env-core: &webhook-env-core
+  STAGE: ${self:provider.stage}
+  MONGO_ATLAS_USERNAME: ${self:custom.dbUsername}
+  MONGO_ATLAS_PASSWORD: ${self:custom.dbPassword}
+  MONGO_ATLAS_HOST: ${self:custom.dbhost}
+  MONGO_ATLAS_URL: mongodb+srv://${self:custom.dbUsername}:${self:custom.dbPassword}@${self:custom.dbhost}/admin?retryWrites=true
+  DB_NAME: ${self:custom.dbName}
+  USER_ENTITLEMENT_COL_NAME: ${self:custom.entitlementCollection}
+  JOB_QUEUE_COL_NAME: ${self:custom.jobCollection}
+  GITHUB_SECRET: ${self:custom.githubSecret}
+  REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
+  SLACK_SECRET: ${self:custom.slackSecret}
+  SLACK_TOKEN: ${self:custom.slackAuthToken}
+  DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
+  NODE_CONFIG_DIR: './api/config'
+  TASK_DEFINITION_FAMILY: docs-worker-pool-${self:provider.stage}
+  JOB_UPDATES_QUEUE_URL: ${self:custom.jobUpdatesQueueUrl}
+  JOBS_QUEUE_URL: ${self:custom.jobsQueueUrl}
+
+resources:
+  - ${file(./queues.yml)}
 
 functions:
     v1UpsertEdgeDictionaryItem:
@@ -54,3 +108,97 @@ functions:
                 - ${self:custom.docuhubEventSource.${self:provider.stage}}
       environment:
         <<: *default-env
+    
+    v1GithubDeployRepo:
+      handler: api/controllers/v1/github.TriggerBuild
+      events:
+        - http:
+            path: /webhook/github/trigger/build
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDisplayRepoOptions:
+      handler: api/controllers/v1/slack.DisplayRepoOptions
+      events:
+        - http:
+            path:  /webhook/slack/display/repos
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+
+    v1SlackDeployRepo:
+      handler: api/controllers/v1/slack.DeployRepo
+      events:
+        - http:
+            path: /webhook/slack/trigger/build
+            method: POST
+            cors: true
+      iamRoleStatementsName: 'dwpapi-v1SlackDeployRepo-lr-${self:provider.region}-${self:provider.stage}'
+      iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "sqs:SendMessage"
+        Resource:
+          - "*"
+      environment:
+        <<: *webhook-env-core
+
+    v1HandleJobs:
+      handler: api/controllers/v1/jobs.HandleJobs
+      timeout: 180
+      events:
+        - sqs:
+            arn: !GetAtt AutobuilderJobsQueue.Arn
+            batchSize: 1
+        - sqs:
+            arn: !GetAtt AutobuilderJobUpdatesQueue.Arn
+            batchSize: 1
+      iamRoleStatementsName: 'dwpapi-v1HandleJobs-ecs-execution-lr-${self:provider.region}-${self:provider.stage}'
+      iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "sqs:ReceiveMessage"
+          - "sqs:DeleteMessage"
+          - "sqs:SendMessage"
+          - "sqs:GetQueueAttributes"
+        Resource:
+          - Fn::GetAtt: [AutobuilderJobUpdatesQueue, Arn]
+          - Fn::GetAtt: [JobUpdatesDLQ, Arn]
+          - Fn::GetAtt: [AutobuilderJobsQueue, Arn]
+          - Fn::GetAtt: [JobsDLQ, Arn]
+      - Effect: Allow
+        Action:
+          - "ecs:RunTask"
+        Resource:
+          - arn:aws:ecs:${self:provider.region}:${self:custom.accountId.${self:provider.stage}}:task-definition/docs-worker-pool-${self:provider.stage}:*
+      - Effect: Allow
+        Action:
+          - ecs:DescribeTaskDefinition
+          - ecr:GetAuthorizationToken
+          - ecr:BatchCheckLayerAvailability
+          - ecr:GetDownloadUrlForLayer
+          - ecr:BatchGetImage
+        Resource: "*"
+      - Effect: Allow
+        Action:
+          - iam:PassRole
+        Resource: "*"
+      environment:
+        <<: *webhook-env-core
+
+Outputs:
+  JobsQueueURL:
+    Description: Jobs Queue Url
+    Value: ${self:custom.jobsQueueUrl}
+    Export:
+      Name:  docs-worker-pool-${self:provider.stage}-jobs-queue
+
+  JobsUpdateQueueURL:
+    Description: Job updates Queue URL
+    Value: ${self:custom.jobUpdatesQueueUrl}
+    Export:
+      Name: docs-worker-pool-${self:provider.stage}-job-updates-queue
+

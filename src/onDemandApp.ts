@@ -56,20 +56,14 @@ async function init(): Promise<void> {
     hybridJobLogger,
     repoBranchesRepo
   );
-  jobManager.start().catch((err) => {
-    consoleLogger.error('App', `ERROR: ${err}`);
-  });
-}
-process.on('SIGTERM', async () => {
-  console.log('Received SIGTERM');
-  await jobManager.stop();
-  if (client) {
-    client.close();
-    consoleLogger.info('App', '\nServer has closed mongo client connection');
+  try {
+    await jobManager.startSpecificJob(c.get('jobId'));
+  } catch (err) {
+    consoleLogger.info('onDemandApp', err);
   }
-  process.exit(0);
-});
+}
 
 (async function () {
   await init();
+  process.exit(0);
 })();

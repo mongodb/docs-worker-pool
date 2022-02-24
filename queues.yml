@@ -1,0 +1,52 @@
+Resources:
+    AutobuilderJobsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.JobsQueueName}
+        VisibilityTimeout: 180
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [JobsDLQ, Arn]
+          maxReceiveCount: 1
+    AutobuilderJobUpdatesQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.JobUpdatesQueueName}
+        VisibilityTimeout: 180
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [JobUpdatesDLQ, Arn]
+          maxReceiveCount: 1
+    JobsDLQ:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${self:custom.JobsDLQueueName}
+    JobUpdatesDLQ:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${self:custom.JobUpdatesDLQueueName}
+
+    AllowECS2SQSPolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues: [ !Ref AutobuilderJobUpdatesQueue, !Ref AutobuilderJobsQueue ]
+        PolicyDocument:
+          Version: "2012-10-17"
+          Id: SQSPolicy
+          Statement: 
+          - Sid: Allow-SQS-SendMessage_UpdateQueue    
+            Effect: Allow 
+            Principal:
+              AWS: "*"
+            Action:   
+            - 'sqs:SendMessage'
+            Resource: 
+            - !GetAtt [AutobuilderJobUpdatesQueue, Arn]
+          - Sid: Allow-SQS-SendMessage_JobQueue    
+            Effect: Allow 
+            Principal:
+              AWS: "*"
+            Action:   
+            - 'sqs:SendMessage'
+            Resource: 
+            - !GetAtt [AutobuilderJobsQueue, Arn]

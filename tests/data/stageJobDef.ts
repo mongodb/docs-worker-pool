@@ -1,7 +1,7 @@
 export default {
   value: {
     _id: '5c5e0817ce099eaf874a9801',
-    title: 'Slack deploy: skerschb',
+    title: 'Github Push: skerschb/testauth',
     user: 'skerschb',
     email: '32710906+skerschb@users.noreply.github.com',
     priority: 1,
@@ -12,7 +12,7 @@ export default {
     error: {},
     result: [],
     payload: {
-      jobType: 'productionDeploy',
+      jobType: 'githubPush',
       source: 'github',
       action: 'push',
       repoName: 'testauth',
@@ -21,9 +21,6 @@ export default {
       repoOwner: 'skerschb',
       url: 'https://github.com/skerschb/testauth.git',
       newHead: '38b805e9c7c4f1c364476682e93f9d24a87f470a',
-      project: 'testauth',
-      urlSlug: 'UsingAlias',
-      prefix: '',
     },
     logs: [],
   },
