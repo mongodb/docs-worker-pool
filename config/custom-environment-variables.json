@@ -51,7 +51,6 @@
     "main": {
       "id": "FASTLY_MAIN_SERVICE_ID",
       "token": "FASTLY_MAIN_TOKEN"
-
     }
   }
 }

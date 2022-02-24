@@ -256,8 +256,9 @@ export abstract class JobHandler {
   }
 
   private constructEnvVars(): void {
-    let envVars = `GATSBY_PARSER_USER=${this._config.get<string>("GATSBY_PARSER_USER")}\nGATSBY_PARSER_BRANCH=${
-      this.currJob.payload.branchName}
+    let envVars = `GATSBY_PARSER_USER=${this._config.get<string>('GATSBY_PARSER_USER')}\nGATSBY_PARSER_BRANCH=${
+      this.currJob.payload.branchName
+    }
     \n`;
     const pathPrefix = this.currJob.payload.pathPrefix;
     // TODO: Do we need the empty string check?
@@ -265,10 +266,10 @@ export abstract class JobHandler {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
     const snootyFrontEndVars = {
-      'GATSBY_BASE_URL': this._config.get<String>("gatsbyBaseUrl"),
+      GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
     };
 
-    for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
+    for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
       if (envValue) envVars += `${envName}=${envValue}\n`;
     }
 
