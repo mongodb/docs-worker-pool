@@ -233,15 +233,13 @@ export abstract class JobHandler {
         if (typeof pathPrefix !== 'undefined' && pathPrefix !== null) {
             envVars += `PATH_PREFIX=${pathPrefix}\n`
         }
-        // const snootyFrontEndVars = {
-        //   'GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION': this._config.get<boolean>("gatsbyConsitentNavFlag"),
-        //   'GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN': this._config.get<boolean>("gatsbySDKVersionDropdownFlag"),
+        const snootyFrontEndVars = {
+          'GATSBY_BASE_URL': this._config.get<String>("gatsbyBaseUrl"),
+        };
 
-        // };
-
-        // for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
-        //   if (envValue) envVars += `${envName}=TRUE\n`;
-        // }
+        for (const[envName, envValue] of Object.entries(snootyFrontEndVars)) {
+            if (envValue) envVars += `${envName}=${envValue}\n`;
+        }
         this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, { encoding: 'utf8', flag: 'w' });
     }
 
