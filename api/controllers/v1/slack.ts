@@ -217,7 +217,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           parallelPrefix
         );
         jobCount += 1;
-      } else if (publishOriginalBranchName) {
+      }
+      if (non_versioned) {
         newPayload = createPayload(
           'productionDeploy',
           repoOwner,
@@ -226,7 +227,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           hashOption,
           repoInfo.project,
           repoInfo.prefix[c.get<string>('env')],
-          branchName,
+          '',
           true,
           true,
           stable
@@ -240,7 +241,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           parallelPrefix
         );
         jobCount += 1;
-      } else if (non_versioned) {
+      } else if (publishOriginalBranchName) {
         newPayload = createPayload(
           'productionDeploy',
           repoOwner,
@@ -249,7 +250,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           hashOption,
           repoInfo.project,
           repoInfo.prefix[c.get<string>('env')],
-          '',
+          branchName,
           true,
           true,
           stable
