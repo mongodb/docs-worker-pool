@@ -32,17 +32,19 @@ async function init(): Promise<void> {
   await client.connect();
   db = client.db(c.get('dbName'));
   consoleLogger = new ConsoleLogger();
+  githubCommandExecutor = new GithubCommandExecutor();
+  repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
+
+  // Initialize for new JobManager
+  cdnConnector = new FastlyConnector(consoleLogger);
   fileSystemServices = new FileSystemServices();
   jobCommandExecutor = new JobSpecificCommandExecutor();
-  githubCommandExecutor = new GithubCommandExecutor();
-  jobRepository = new JobRepository(db, c, consoleLogger);
-  hybridJobLogger = new HybridJobLogger(jobRepository);
-  repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
-  cdnConnector = new FastlyConnector(consoleLogger);
-  repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandlerFactory = new JobHandlerFactory();
+  jobRepository = new JobRepository(db, c, consoleLogger);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
+  hybridJobLogger = new HybridJobLogger(jobRepository);
+  repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
+  repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobManager = new JobManager(
     cdnConnector,
     c, // config

@@ -27,43 +27,48 @@ afterAll(async () => {
 
 describe('Jobmanager integration Tests', () => {
   let consoleLogger: ConsoleLogger;
+  let githubCommandExecutor: GithubCommandExecutor;
+  let repoEntitlementRepository: RepoEntitlementsRepository;
+
+  // Init for JobManager
+  let cdnConnector: FastlyConnector;
   let fileSystemServices: FileSystemServices;
   let jobCommandExecutor: JobSpecificCommandExecutor;
-  let githubCommandExecutor: GithubCommandExecutor;
-  let jobRepository: JobRepository;
-  let hybridJobLogger: HybridJobLogger;
-  let repoEntitlementRepository: RepoEntitlementsRepository;
-  let repoBranchesRepository: RepoBranchesRepository;
-  let jobValidator: JobValidator;
-  let cdnConnector: FastlyConnector;
-  let repoConnector: GitHubConnector;
   let jobHandlerFactory: JobHandlerFactory;
+  let jobRepository: JobRepository;
+  let jobValidator: JobValidator;
+  let hybridJobLogger: HybridJobLogger;
+  let repoBranchesRepo: RepoBranchesRepository;
+  let repoConnector: GitHubConnector;
   let jobManager: JobManager;
   beforeEach(() => {
     consoleLogger = new ConsoleLogger();
+    githubCommandExecutor = new GithubCommandExecutor();
+    repoEntitlementRepository = new RepoEntitlementsRepository(testDBManager.db, c, consoleLogger);
+
+    cdnConnector = new FastlyConnector(hybridJobLogger);
     fileSystemServices = new FileSystemServices();
     jobCommandExecutor = new JobSpecificCommandExecutor();
-    githubCommandExecutor = new GithubCommandExecutor();
-    jobRepository = new JobRepository(testDBManager.db, c, consoleLogger);
-    hybridJobLogger = new HybridJobLogger(jobRepository);
-    repoEntitlementRepository = new RepoEntitlementsRepository(testDBManager.db, c, consoleLogger);
-    repoBranchesRepository = new RepoBranchesRepository(testDBManager.db, c, consoleLogger);
-    jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepository);
-    cdnConnector = new FastlyConnector(hybridJobLogger);
-    repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
     jobHandlerFactory = new JobHandlerFactory();
+    jobRepository = new JobRepository(testDBManager.db, c, consoleLogger);
+    jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
+    hybridJobLogger = new HybridJobLogger(jobRepository);
+    repoBranchesRepo = new RepoBranchesRepository(testDBManager.db, c, consoleLogger);
+    repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
     jobManager = new JobManager(
-      c,
-      jobValidator,
-      jobHandlerFactory,
-      jobCommandExecutor,
-      jobRepository,
       cdnConnector,
-      repoConnector,
+      c, // config
       fileSystemServices,
-      hybridJobLogger
+      jobCommandExecutor,
+      jobHandlerFactory,
+      jobRepository,
+      jobValidator,
+      hybridJobLogger,
+      repoBranchesRepo,
+      repoConnector
     );
   });
+  // TODO: Do we need to implement startSingleJob?
   test('E2E runs without any error if no job is present', async () => {
     await jobManager.startSingleJob();
   });

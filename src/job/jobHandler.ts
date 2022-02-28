@@ -50,7 +50,7 @@ export abstract class JobHandler {
     this._stopped = value;
   }
 
-  private _validator: IJobValidator;
+  private _jobValidator: IJobValidator;
 
   protected _config: IConfig;
 
@@ -65,10 +65,10 @@ export abstract class JobHandler {
     config: IConfig,
     fileSystemServices: IFileSystemServices,
     jobRepository: JobRepository,
+    jobValidator: IJobValidator,
     logger: IJobRepoLogger,
     repoBranchesRepo: RepoBranchesRepository,
-    repoConnector: IRepoConnector,
-    validator: IJobValidator
+    repoConnector: IRepoConnector
   ) {
     this._job = job;
     this._cdnConnector = cdnConnector;
@@ -76,10 +76,10 @@ export abstract class JobHandler {
     this._config = config;
     this._fileSystemServices = fileSystemServices;
     this._jobRepository = jobRepository;
+    this._jobValidator = jobValidator;
     this._logger = logger;
     this._repoBranchesRepo = repoBranchesRepo;
     this._repoConnector = repoConnector;
-    this._validator = validator;
 
     this._shouldStop = false;
   }
@@ -216,7 +216,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
-      await this._validator.throwIfBranchNotConfigured(this.job);
+      await this._jobValidator.throwIfBranchNotConfigured(this.job);
       await this.constructPrefix();
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
       if (!this.job.payload.aliased || (this.job.payload.aliased && this.job.payload.primaryAlias)) {
@@ -227,7 +227,7 @@ export abstract class JobHandler {
       this.constructEnvVars();
       this.job.payload.isNextGen = true;
       if (this.jobType === 'productionDeploy') {
-        this._validator.throwIfNotPublishable(this.job);
+        this._jobValidator.throwIfNotPublishable(this.job);
       }
     } else {
       this.job.payload.isNextGen = false;
@@ -445,7 +445,7 @@ export abstract class JobHandler {
 }
 
 // Good to have this as a friend function
-function throwIfJobInterupted() {
+function throwIfJobInterupted(): any {
   return function decorator(descriptor: PropertyDescriptor) {
     const original = descriptor.value;
     if (typeof original === 'function') {

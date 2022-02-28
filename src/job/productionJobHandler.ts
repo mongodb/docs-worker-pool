@@ -16,26 +16,26 @@ export class ProductionJobHandler extends JobHandler {
   constructor(
     job: BuildJob,
     cdnConnector: ICDNConnector,
-    commandExecutor: IJobCommandExecutor,
     config: IConfig,
     fileSystemServices: IFileSystemServices,
+    jobCommandExecutor: IJobCommandExecutor,
     jobRepository: JobRepository,
+    jobValidator: IJobValidator,
     logger: IJobRepoLogger,
     repoBranchesRepo: RepoBranchesRepository,
-    repoConnector: IRepoConnector,
-    validator: IJobValidator
+    repoConnector: IRepoConnector
   ) {
     super(
       job,
       cdnConnector,
-      commandExecutor,
       config,
       fileSystemServices,
+      jobCommandExecutor,
       jobRepository,
+      jobValidator,
       logger,
       repoBranchesRepo,
-      repoConnector,
-      validator
+      repoConnector
     );
     this.name = 'Production';
   }

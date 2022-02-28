@@ -26,28 +26,28 @@ export class JobHandlerFactory {
   public createJobHandler(
     job: BuildJob | ManifestJob,
     cdnConnector: ICDNConnector,
-    commandExecutor: IJobCommandExecutor,
     config: IConfig,
     fileSystemServices: IFileSystemServices,
+    jobCommandExecutor: IJobCommandExecutor,
     jobRepository: JobRepository,
+    jobValidator: IJobValidator,
     logger: IJobRepoLogger,
     repoBranchesRepo: RepoBranchesRepository,
-    repoConnector: IRepoConnector,
-    validator: IJobValidator
+    repoConnector: IRepoConnector
   ): JobHandler {
     const jt = job.payload?.jobType;
     if (jt in jobHandlerMap) {
       return new jobHandlerMap[jt](
         job,
         cdnConnector,
-        commandExecutor,
         config,
         fileSystemServices,
+        jobCommandExecutor,
         jobRepository,
+        jobValidator,
         logger,
         repoBranchesRepo,
-        repoConnector,
-        validator
+        repoConnector
       );
     }
     throw new InvalidJobError(`Job type '${jt}' not supported`);
@@ -56,41 +56,41 @@ export class JobHandlerFactory {
 
 export class JobManager {
   private _cdnConnector: ICDNConnector;
-  private _commandExecutor: IJobCommandExecutor;
   private _config: IConfig;
   private _fileSystemServices: IFileSystemServices;
+  private _jobCommandExecutor: IJobCommandExecutor;
   private _jobHandlerFactory: JobHandlerFactory;
   private _jobRepository: JobRepository;
+  private _jobValidator: IJobValidator;
   private _logger: IJobRepoLogger;
   private _repoBranchesRepo: RepoBranchesRepository;
   private _repoConnector: IRepoConnector;
-  private _validator: IJobValidator;
 
   private _shouldStop: boolean;
   private _jobHandler: JobHandler | null | undefined;
 
   constructor(
     cdnConnector: ICDNConnector,
-    commandExecutor: IJobCommandExecutor,
     config: IConfig,
     fileSystemServices: IFileSystemServices,
+    jobCommandExecutor: IJobCommandExecutor,
     jobHandlerFactory: JobHandlerFactory,
     jobRepository: JobRepository,
+    jobValidator: IJobValidator,
     logger: IJobRepoLogger,
     repoBranchesRepo: RepoBranchesRepository,
-    repoConnector: IRepoConnector,
-    validator: IJobValidator
+    repoConnector: IRepoConnector
   ) {
     this._cdnConnector = cdnConnector;
-    this._commandExecutor = commandExecutor;
     this._config = config;
     this._fileSystemServices = fileSystemServices;
+    this._jobCommandExecutor = jobCommandExecutor;
     this._jobHandlerFactory = jobHandlerFactory;
     this._jobRepository = jobRepository;
+    this._jobValidator = jobValidator;
     this._logger = logger;
     this._repoBranchesRepo = repoBranchesRepo;
     this._repoConnector = repoConnector;
-    this._validator = validator;
 
     this._shouldStop = false;
     this._jobHandler = null;
@@ -148,17 +148,17 @@ export class JobManager {
     this._jobHandler = this._jobHandlerFactory.createJobHandler(
       job,
       this._cdnConnector,
-      this._commandExecutor,
       this._config,
       this._fileSystemServices,
+      this._jobCommandExecutor,
       this._jobRepository,
+      this._jobValidator,
       this._logger,
       this._repoBranchesRepo,
-      this._repoConnector,
-      this._validator
+      this._repoConnector
     );
 
-    await this._validator.throwIfJobInvalid(job);
+    await this._jobValidator.throwIfJobInvalid(job);
     await this._jobHandler?.execute();
     await this._logger.save(
       job._id,
