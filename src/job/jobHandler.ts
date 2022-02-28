@@ -271,7 +271,6 @@ export abstract class JobHandler {
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
       if (envValue) envVars += `${envName}=${envValue}\n`;
     }
-    envVars = envVars.trim();
     this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, {
       encoding: 'utf8',
       flag: 'w',
