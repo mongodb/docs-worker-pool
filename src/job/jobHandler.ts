@@ -119,6 +119,8 @@ export abstract class JobHandler {
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
     const pathPrefix = await this.getPathPrefix();
+    console.log('jobHandler hello world');
+    console.log(pathPrefix);
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
@@ -261,8 +263,13 @@ export abstract class JobHandler {
     }
     \n`;
     const pathPrefix = this.currJob.payload.pathPrefix;
+
+    // Frontend expects docs properties deployed to the root of their bucket to have '/' as their prefix.
+    if (this._currJob.payload.jobType === 'productionDeploy' && pathPrefix === '') {
+      envVars += 'PATH_PREFIX=/\n';
+    }
     // TODO: Do we need the empty string check?
-    if (pathPrefix || pathPrefix === '') {
+    else if (pathPrefix || pathPrefix === '') {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
     const snootyFrontEndVars = {
