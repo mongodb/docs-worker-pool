@@ -158,7 +158,7 @@ export class TestDataProvider {
   }
 
   static getEnvVarsWithPathPrefixWithFlags(job: IJob): string {
-    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test`;
+    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\n`;
   }
   static getEnvVarsTestCases(): Array<any> {
     return [
