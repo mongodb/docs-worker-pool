@@ -103,6 +103,7 @@ export class JobHandlerTestHelper {
   setupForSuccess(rootFileExists = true, nextGenEntry: string = TestDataProvider.nextGenEntryInWorkerFile()): void {
     this.config.get.calledWith('repo_dir').mockReturnValue('repos');
     this.config.get.calledWith('stage').mockReturnValue('test');
+    this.config.get.calledWith('gatsbyBaseUrl').mockReturnValue('test');
     this.repoConnector.checkCommits
       .calledWith(this.job)
       .mockReturnValue(TestDataProvider.getCommitCheckValidResponse(this.job));

@@ -260,8 +260,7 @@ export abstract class JobHandler {
   private constructEnvVars(): void {
     let envVars = `GATSBY_PARSER_USER=${this._config.get<string>('GATSBY_PARSER_USER')}\nGATSBY_PARSER_BRANCH=${
       this.currJob.payload.branchName
-    }
-    \n`;
+    }\n`;
     const pathPrefix = this.currJob.payload.pathPrefix;
 
     // Frontend expects docs properties deployed to the root of their bucket to have '/' as their prefix.
@@ -279,7 +278,7 @@ export abstract class JobHandler {
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
       if (envValue) envVars += `${envName}=${envValue}\n`;
     }
-
+    envVars = envVars.trim();
     this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, {
       encoding: 'utf8',
       flag: 'w',
