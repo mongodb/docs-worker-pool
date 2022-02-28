@@ -207,6 +207,23 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
+  test("Production deploy of a job with empty string pathPrefix sets PATH_PREFIX env to '/'", async () => {
+    jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
+    jobHandlerTestHelper.job.payload.repoBranches.prefix = '';
+    jobHandlerTestHelper.job.payload.prefix = '';
+    jobHandlerTestHelper.job.payload.urlSlug = null;
+
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+
+    expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
+      `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
+      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\n`,
+      { encoding: 'utf8', flag: 'w' }
+    );
+  });
+
   test('Execute Next Gen Build throws error while executing commands', async () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();

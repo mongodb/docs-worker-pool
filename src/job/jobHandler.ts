@@ -260,8 +260,13 @@ export abstract class JobHandler {
       this.currJob.payload.branchName
     }\n`;
     const pathPrefix = this.currJob.payload.pathPrefix;
+
+    // Frontend expects docs properties deployed to the root of their bucket to have '/' as their prefix.
+    if (this._currJob.payload.jobType === 'productionDeploy' && pathPrefix === '') {
+      envVars += 'PATH_PREFIX=/\n';
+    }
     // TODO: Do we need the empty string check?
-    if (pathPrefix || pathPrefix === '') {
+    else if (pathPrefix || pathPrefix === '') {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
     const snootyFrontEndVars = {
