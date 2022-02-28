@@ -6,26 +6,23 @@ export enum JobStatus {
   failed = 'failed',
 }
 
+// TODO: Restrict jobTypes, a la JobStatus
 export interface IJob {
   _id: string;
   payload: IPayload;
   createdTime: Date;
-  email: string;
   endTime: Date | null | undefined;
   error: any | null | undefined;
   logs: string[] | null | undefined;
   priority: number | null | undefined;
   result: any | null | undefined;
   startTime: Date;
-  status: string;
+  status: JobStatus | null;
   title: string;
   user: string;
-  comMessage: string[] | null | undefined;
-  purgedUrls: string[] | null | undefined;
-  buildCommands: Array<string>;
-  deployCommands: Array<string>;
+  buildCommands: string[];
+  deployCommands: string[];
 }
-
 export interface IPayload {
   jobType: string;
   source: string;
@@ -55,26 +52,53 @@ export interface IPayload {
   includeInGlobalSearch: boolean;
 }
 
-export class Job implements IJob {
+export class BuildJob implements IJob {
   _id: string;
   payload: IPayload;
   createdTime: Date;
-  email: string;
   endTime: Date | null | undefined;
   error: any;
   logs: string[] | null | undefined;
   priority: number | null | undefined;
   result: any;
   startTime: Date;
-  status: string;
+  status: JobStatus | null;
   title: string;
   user: string;
+  buildCommands: string[];
+  deployCommands: string[];
+  // BuildJob specific:
+  email: string; // probably can be removed
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;
   manifestPrefix: string | undefined;
   pathPrefix: string | null | undefined;
   mutPrefix: string | null | undefined;
+}
+
+// ManifestJob represents the creation of the search manifest, which is kicked off
+// in the execute() function of JobHandler.
+export class ManifestJob implements IJob {
+  _id: string;
+  payload: IPayload;
+  createdTime: Date;
+  endTime: Date | null | undefined;
+  error: any | null | undefined;
+  logs: string[] | null | undefined;
+  priority: number | null | undefined;
+  result: any | null | undefined;
+  startTime: Date;
+  status: JobStatus | null;
+  title: string;
+  user: string;
   buildCommands: string[];
   deployCommands: string[];
   invalidationStatusURL: string | null | undefined;
 }
+
+export const jobMap = {
+  githubPush: BuildJob,
+  manifestGeneration: ManifestJob,
+  productionDeploy: BuildJob,
+  regression: BuildJob,
+};

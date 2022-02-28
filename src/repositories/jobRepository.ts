@@ -1,6 +1,6 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import { Job, JobStatus } from '../entities/job';
+import { jobMap, BuildJob, ManifestJob, JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
 import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
@@ -44,7 +44,7 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: any, url: string): Promise<string> {
+  async insertJob(job: BuildJob | ManifestJob, url: string): Promise<string> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
@@ -75,18 +75,23 @@ export class JobRepository extends BaseRepository {
     return jobIds;
   }
 
-  async getJobById(id: string): Promise<Job | null> {
+  async getJobById(id: string): Promise<BuildJob | ManifestJob | null> {
     const query = {
       _id: new objectId(id),
     };
     const resp = await this.findOne(query, `Mongo Timeout Error: Timed out while find job by id Job`);
     if (!resp) {
       throw new JobNotFoundError('GetJobByID Failed');
+    } else if (resp.value) {
+      const jt = resp?.value?.payload?.jobType;
+      const job = Object.assign(new jobMap[jt](), resp.value);
+      await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
+      return job;
     }
-    return Object.assign(new Job(), resp);
+    return null;
   }
 
-  async getJobByIdAndUpdate(id: string): Promise<Job | null> {
+  async getJobByIdAndUpdate(id: string): Promise<BuildJob | ManifestJob | null> {
     const query = {
       _id: new objectId(id),
     };
@@ -97,7 +102,7 @@ export class JobRepository extends BaseRepository {
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status), url, delay);
   }
 
-  async findOneAndUpdateJob(query): Promise<Job | null> {
+  async findOneAndUpdateJob(query): Promise<BuildJob | ManifestJob | null> {
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
     const response = await this.findOneAndUpdate(
@@ -108,16 +113,16 @@ export class JobRepository extends BaseRepository {
     );
     if (!response) {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
-    }
-    if (response.value) {
-      const job = Object.assign(new Job(), response.value);
+    } else if (response.value) {
+      const jt = response?.value?.payload?.jobType;
+      const job = Object.assign(new jobMap[jt](), response.value);
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
     }
     return null;
   }
 
-  async getOneQueuedJobAndUpdate(): Promise<Job | null> {
+  async getOneQueuedJobAndUpdate(): Promise<BuildJob | ManifestJob | null> {
     const query = {
       status: 'inQueue',
       createdTime: { $lte: new Date() },

@@ -1,6 +1,6 @@
 import { JobHandler } from './jobHandler';
 import { IConfig } from 'config';
-import { IJob } from '../entities/job';
+import { BuildJob } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { ICDNConnector } from '../services/cdn';
 import { CommandExecutorResponse, IJobCommandExecutor } from '../services/commandExecutor';
@@ -12,7 +12,7 @@ import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
-    job: IJob,
+    job: BuildJob,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,

@@ -1,4 +1,4 @@
-import { IJob } from '../entities/job';
+import { BuildJob, ManifestJob } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -12,8 +12,8 @@ import { IJobValidator } from './jobValidator';
 require('fs');
 
 export abstract class JobHandler {
-  private _currJob: IJob;
-  public get currJob(): IJob {
+  private _currJob: BuildJob | ManifestJob;
+  public get currJob(): BuildJob | ManifestJob {
     return this._currJob;
   }
 
@@ -55,7 +55,7 @@ export abstract class JobHandler {
   protected _repoBranchesRepo: RepoBranchesRepository;
 
   constructor(
-    job: IJob,
+    job: BuildJob | ManifestJob,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -403,6 +403,9 @@ export abstract class JobHandler {
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);
+      if (this._currJob.payload.jobType in ['productionDeploy', 'githubPush']) {
+        this.queueManifestJob();
+      }
       this.cleanup();
     } catch (error) {
       try {
@@ -411,6 +414,19 @@ export abstract class JobHandler {
       } catch (error) {
         this._logger.error(this._currJob._id, error.message);
       }
+    }
+  }
+
+  private async queueManifestJob(): Promise<void> {
+    // TODO: create new start time, id, etc.
+    const manifestJob = this.currJob; // contains payload - need to swap to ManifestJob type
+    manifestJob.createdTime = new Date();
+    // normal buildJobs have a priority of 1. Give a "lower" priority to manifest jobs
+    manifestJob.priority = 2;
+    try {
+      // this._jobRepository.insertJob(manifestJob, config.get('jobsQueueUrl'));
+    } catch (error) {
+      this.logger.error(manifestJob._id, `Failed to build search manifest: ${error.message}`);
     }
   }
 
