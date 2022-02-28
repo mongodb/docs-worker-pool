@@ -158,7 +158,7 @@ export class TestDataProvider {
   }
 
   static getEnvVarsWithPathPrefixWithFlags(job: IJob): string {
-    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\n`;
+    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test`;
   }
   static getEnvVarsTestCases(): Array<any> {
     return [
@@ -198,7 +198,7 @@ export class TestDataProvider {
     itemNullVersion['branches'] = null;
 
     const itemPrefixEmpty = TestDataProvider.getPublishBranchesContent(job);
-    itemPrefixEmpty.prefix = '';
+    itemPrefixEmpty.prefix = 'compass';
 
     const itemVersionActiveEmpty = TestDataProvider.getPublishBranchesContent(job);
     itemVersionActiveEmpty['branches'][0]['active'] = false;

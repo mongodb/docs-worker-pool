@@ -30,6 +30,7 @@
   "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
   "repoBranchesCollection": "repo_branches",
   "aws_region": "us-east-2",
+  "gatsbyBaseUrl":"GATSBY_BASE_URL",
   "parallel": {
     "enabled": true,
     "stg": {
