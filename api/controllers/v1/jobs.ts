@@ -124,9 +124,15 @@ async function extract_url_info(
     prefix = `/${fullDocument.payload.prefix}`;
   }
   if (fullDocument.payload.jobType == 'githubPush') {
-    return repo?.url['stg'] + prefix + '/docsworker-xlarge' + `/${fullDocument.payload.urlSlug}`;
+    if (repoName == 'docs-mongodb-internal') {
+      repoName = 'docs';
+    }
+    return repo?.url['stg'] + prefix ?? repoName + '/docsworker-xlarge' + `/${fullDocument.payload.urlSlug}`;
   }
-  return base_url + prefix + `/${fullDocument.payload.urlSlug}`;
+  if (prefix !== '') {
+    return base_url + prefix + `/${fullDocument.payload.urlSlug}`;
+  }
+  return base_url + `${fullDocument.payload.urlSlug}`;
 }
 
 function limit_message_size(message) {
@@ -157,12 +163,18 @@ async function prepSummaryMessage(
       lastMessage.lastIndexOf('Summary')
     )}`;
   }
+
   const url = await extract_url_info(env, repoName, fullDocument, branchesRepo);
+
   let msg = '';
   if (failed) {
     msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
   } else {
-    msg = `Your Job <${jobUrl}${jobId}|Completed|>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
+    if (repoName == 'mms-docs') {
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:${lastMessage} \nEnjoy  :smile:!`;
+    } else {
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
+    }
   }
   // Removes instances of two or more periods
   return msg.replace(/\.{2,}/g, '');

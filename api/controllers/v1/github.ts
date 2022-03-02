@@ -67,6 +67,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
       body: errMsg,
     };
   }
+  console.log(event.body);
   const body = JSON.parse(event.body);
   const env = c.get<string>('env');
   const repoInfo = await branchRepository.getRepo(body.repository.name);
