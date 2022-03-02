@@ -57,6 +57,9 @@ export interface IJob {
   status: JobStatus | null;
   title: string;
   user: string;
+  manifestPrefix: string | undefined;
+  pathPrefix: string | null | undefined;
+  mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
 }
@@ -65,9 +68,6 @@ export type BuildJob = IJob & {
   email: string; // probably can be removed
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;
-  manifestPrefix: string | undefined;
-  pathPrefix: string | null | undefined;
-  mutPrefix: string | null | undefined;
 };
 
 // ManifestJob represents the creation of the search manifest, which is kicked off
