@@ -4,6 +4,7 @@ import { IJob } from '../../src/entities/job';
 import { IJobValidator } from '../../src/job/jobValidator';
 import { ProductionJobHandler } from '../../src/job/productionJobHandler';
 import { StagingJobHandler } from '../../src/job/stagingJobHandler';
+import { ManifestJobHandler } from '../../src/job/manifestJobHandler';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
 import { ICDNConnector } from '../../src/services/cdn';
@@ -23,13 +24,14 @@ export class JobHandlerTestHelper {
   cdnConnector: ICDNConnector;
   repoConnector: IRepoConnector;
   logger: IJobRepoLogger;
-  jobHandler: ProductionJobHandler | StagingJobHandler;
+  jobHandler: ProductionJobHandler | StagingJobHandler | ManifestJobHandler;
   jobValidator: IJobValidator;
   repoBranchesRepo: RepoBranchesRepository;
   lengthPrototype;
   handlerMapper = {
     prod: ProductionJobHandler,
     staging: StagingJobHandler,
+    manifest: ManifestJobHandler,
   };
 
   init(handlerName: string): ProductionJobHandler | StagingJobHandler {

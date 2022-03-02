@@ -422,7 +422,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async queueManifestJob(): Promise<void> {
     // Rudimentary error prevention
-    if (this._currJob._id.includes('-search')) {
+    if (this._currJob.payload.jobType.includes('manifestGeneration')) {
       this._logger.error(
         this._currJob._id,
         `Incorrectly attempted to queue another search manifest job 
@@ -433,7 +433,7 @@ export abstract class JobHandler {
     const manifestPayload: IPayload = this._currJob.payload;
     manifestPayload.jobType = 'manifestGeneration';
     const manifestJob: ManifestJob = {
-      _id: this._currJob._id + '-search',
+      _id: '',
       payload: manifestPayload,
       createdTime: new Date(),
       endTime: undefined,
@@ -445,6 +445,9 @@ export abstract class JobHandler {
       status: null,
       title: this._currJob.title + ' - search manifest generation',
       user: this._currJob.user,
+      manifestPrefix: this._currJob.manifestPrefix,
+      pathPrefix: this._currJob.pathPrefix,
+      mutPrefix: this._currJob.mutPrefix,
       buildCommands: [],
       deployCommands: [],
     };
