@@ -6,23 +6,14 @@ export enum JobStatus {
   failed = 'failed',
 }
 
-// TODO: Restrict jobTypes, a la JobStatus
-export interface IJob {
-  _id: string;
-  payload: IPayload;
-  createdTime: Date;
-  endTime: Date | null | undefined;
-  error: any | null | undefined;
-  logs: string[] | null | undefined;
-  priority: number | null | undefined;
-  result: any | null | undefined;
-  startTime: Date;
-  status: JobStatus | null;
-  title: string;
-  user: string;
-  buildCommands: string[];
-  deployCommands: string[];
-}
+// TODO: Formalize JobTypes
+// export enum JobType {
+//   githubPush = 'githubPush',
+//   manifestGeneration = 'manifestGeneration',
+//   productionDeploy = 'productionDeploy',
+//   regression = 'regression',
+// }
+
 export interface IPayload {
   jobType: string;
   source: string;
@@ -52,33 +43,8 @@ export interface IPayload {
   includeInGlobalSearch: boolean;
 }
 
-export class BuildJob implements IJob {
-  _id: string;
-  payload: IPayload;
-  createdTime: Date;
-  endTime: Date | null | undefined;
-  error: any;
-  logs: string[] | null | undefined;
-  priority: number | null | undefined;
-  result: any;
-  startTime: Date;
-  status: JobStatus | null;
-  title: string;
-  user: string;
-  buildCommands: string[];
-  deployCommands: string[];
-  // BuildJob specific:
-  email: string; // probably can be removed
-  comMessage: string[] | null | undefined;
-  purgedUrls: string[] | null | undefined;
-  manifestPrefix: string | undefined;
-  pathPrefix: string | null | undefined;
-  mutPrefix: string | null | undefined;
-}
-
-// ManifestJob represents the creation of the search manifest, which is kicked off
-// in the execute() function of JobHandler.
-export class ManifestJob implements IJob {
+// TODO: Restrict jobTypes, a la JobStatus
+export interface IJob {
   _id: string;
   payload: IPayload;
   createdTime: Date;
@@ -95,9 +61,15 @@ export class ManifestJob implements IJob {
   deployCommands: string[];
 }
 
-export const jobMap = {
-  githubPush: BuildJob,
-  manifestGeneration: ManifestJob,
-  productionDeploy: BuildJob,
-  regression: BuildJob,
+export type BuildJob = IJob & {
+  email: string; // probably can be removed
+  comMessage: string[] | null | undefined;
+  purgedUrls: string[] | null | undefined;
+  manifestPrefix: string | undefined;
+  pathPrefix: string | null | undefined;
+  mutPrefix: string | null | undefined;
 };
+
+// ManifestJob represents the creation of the search manifest, which is kicked off
+// in the execute() function of JobHandler.
+export type ManifestJob = IJob;
