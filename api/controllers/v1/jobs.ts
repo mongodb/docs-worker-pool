@@ -1,11 +1,12 @@
 import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
+import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
-import { JobStatus } from '../../../src/entities/job';
+import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 
@@ -41,7 +42,6 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
-            await NotifyBuildProgress(jobId);
             await NotifyBuildSummary(jobId);
             break;
           default:
@@ -77,10 +77,11 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
+  const env = c.get<string>('env');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const fullDocument = await jobRepository.getJobById(jobId);
-
+  const branchesRepo = new BranchRepository(db, c, consoleLogger);
   const slackMsgs = fullDocument.comMessage;
   const jobTitle = fullDocument.title;
   const repoName = fullDocument.payload.repoName;
@@ -92,18 +93,40 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     return;
   }
   const resp = await slackConnector.sendMessage(
-    prepSummaryMessage(
+    await prepSummaryMessage(
+      env,
+      fullDocument,
+      branchesRepo,
       repoName,
       limit_message_size(slackMsgs[slackMsgs.length - 1]),
       c.get<string>('dashboardUrl'),
       jobId,
-      jobTitle
+      jobTitle,
+      fullDocument.status == 'failed'
     ),
     entitlement['slack_user_id']
   );
   return {
     statusCode: 200,
   };
+}
+
+async function extract_url_info(
+  env: string,
+  repoName: string,
+  fullDocument: Job,
+  branchesRepo: BranchRepository
+): Promise<string> {
+  const repo = await branchesRepo.getRepo(repoName);
+  const base_url = repo?.url[env];
+  let prefix = '';
+  if (fullDocument.payload.prefix && fullDocument.payload.prefix !== '') {
+    prefix = `/${fullDocument.payload.prefix}`;
+  }
+  if (fullDocument.payload.jobType == 'githubPush') {
+    return repo?.url['stg'] + prefix + '/docsworker-xlarge' + `/${fullDocument.payload.urlSlug}`;
+  }
+  return base_url + prefix + `/${fullDocument.payload.urlSlug}`;
 }
 
 function limit_message_size(message) {
@@ -117,20 +140,30 @@ function limit_message_size(message) {
   return message;
 }
 
-function prepSummaryMessage(
+async function prepSummaryMessage(
+  env: string,
+  fullDocument: Job,
+  branchesRepo: BranchRepository,
   repoName: string,
   lastMessage: string,
   jobUrl: string,
   jobId: string,
-  jobTitle: string
-): string {
+  jobTitle: string,
+  failed = false
+): Promise<string> {
   // TODO: Determine why mms-docs has a special lastMessage slicing
   if (repoName === 'mms-docs') {
     lastMessage = `${lastMessage.slice(lastMessage.indexOf('mut-publish'))}\n\n${lastMessage.slice(
       lastMessage.lastIndexOf('Summary')
     )}`;
   }
-  const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) finished! Please check the build log for any errors.\n${lastMessage}\nEnjoy!`;
+  const url = await extract_url_info(env, repoName, fullDocument, branchesRepo);
+  let msg = '';
+  if (failed) {
+    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
+  } else {
+    msg = `Your Job <${jobUrl}${jobId}|Completed|>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
+  }
   // Removes instances of two or more periods
   return msg.replace(/\.{2,}/g, '');
 }

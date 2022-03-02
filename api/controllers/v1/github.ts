@@ -69,17 +69,11 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   }
   const body = JSON.parse(event.body);
   const env = c.get<string>('env');
-  const repoInfo = branchRepository.getRepo(body.repository.name);
-  const job = await prepGithubPushPayload(body, branchRepository, repoInfo['prefix'][env]);
+  const repoInfo = await branchRepository.getRepo(body.repository.name);
+  const jobPrefix = repoinfo?.prefix ? repoinfo['prefix'][env] : '';
+  const job = await prepGithubPushPayload(body, branchRepository, jobPrefix);
   try {
     await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
-    const parallel = c.get<any>('parallel');
-    if (parallel && parallel['enabled'] && parallel[env]) {
-      const parallelJobRepo = new JobRepository(db, c, consoleLogger, parallel[env]['jobQueueCollection']);
-      const parallelUrl = parallel[env]['jobsQueueUrl'];
-      job['payload']['prefix'] = repoInfo['prefix'][parallel[env]['parallelStgName']];
-      await parallelJobRepo.insertJob(job, parallelUrl);
-    }
   } catch (err) {
     return {
       statusCode: 500,
