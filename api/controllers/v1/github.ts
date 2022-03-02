@@ -70,12 +70,8 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const body = JSON.parse(event.body);
   const env = c.get<string>('env');
   const repoInfo = await branchRepository.getRepo(body.repository.name);
-  let job = null;
-  if (repoInfo) {
-    job = await prepGithubPushPayload(body, branchRepository, repoInfo['prefix'][env]);
-  } else {
-    job = await prepGithubPushPayload(body, branchRepository, '');
-  }
+  const jobPrefix = repoinfo?.prefix ? repoinfo['prefix'][env] : '';
+  const job = await prepGithubPushPayload(body, branchRepository, jobPrefix);
   try {
     await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
   } catch (err) {
