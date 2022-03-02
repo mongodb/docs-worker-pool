@@ -162,7 +162,7 @@ async function prepSummaryMessage(
   if (failed) {
     msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
   } else {
-    msg = `Your Job <${jobUrl}${jobId}|Completed|>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n Hosted at ${url} \nEnjoy  :smile:!`;
+    msg = `Your Job <${jobUrl}${jobId}|Completed|>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
   }
   // Removes instances of two or more periods
   return msg.replace(/\.{2,}/g, '');
