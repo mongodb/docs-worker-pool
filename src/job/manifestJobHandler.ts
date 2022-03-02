@@ -43,7 +43,8 @@ export class ManifestJobHandler extends JobHandler {
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
-      'echo test-manifest-generation-deploy-commands',
+      'echo IGNORE: testing manifest generation deploy commands',
+      'python3 test-mut-script.py',
     ];
   }
 
@@ -53,7 +54,7 @@ export class ManifestJobHandler extends JobHandler {
 
   async deploy(): Promise<CommandExecutorResponse> {
     try {
-      const resp = await this.deployGeneric();
+      const resp = await this.deployGeneric(); // runs prepDeployCommands
       await this.logger.save(this.currJob._id, `(generate manifest) Manifest generation details:\n\n${resp?.output}`);
       return resp;
     } catch (errResult) {

@@ -1,6 +1,6 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import { jobMap, BuildJob, ManifestJob, JobStatus } from '../entities/job';
+import { BuildJob, ManifestJob, JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
 import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
@@ -83,8 +83,7 @@ export class JobRepository extends BaseRepository {
     if (!resp) {
       throw new JobNotFoundError('GetJobByID Failed');
     } else if (resp.value) {
-      const jt = resp?.value?.payload?.jobType;
-      const job = Object.assign(new jobMap[jt](), resp.value);
+      const job: BuildJob | ManifestJob = resp.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
     }
@@ -114,8 +113,7 @@ export class JobRepository extends BaseRepository {
     if (!response) {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
     } else if (response.value) {
-      const jt = response?.value?.payload?.jobType;
-      const job = Object.assign(new jobMap[jt](), response.value);
+      const job: BuildJob | ManifestJob = response.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
     }
