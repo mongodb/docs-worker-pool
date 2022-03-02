@@ -42,7 +42,6 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
-            await NotifyBuildProgress(jobId);
             await NotifyBuildSummary(jobId);
             break;
           default:
@@ -161,9 +160,9 @@ async function prepSummaryMessage(
   const url = await extract_url_info(env, repoName, fullDocument, branchesRepo);
   let msg = '';
   if (failed) {
-    msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) finished! Please check the build log for any errors.\n${lastMessage}\nEnjoy!`;
+    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n-Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
   } else {
-    msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) finished! \nHosted at ${url} \nEnjoy!`;
+    msg = `Your Job <${jobUrl}${jobId}|Completed|>! \n-Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n Hosted at ${url} \nEnjoy  :smile:!`;
   }
   // Removes instances of two or more periods
   return msg.replace(/\.{2,}/g, '');
