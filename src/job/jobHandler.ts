@@ -452,7 +452,7 @@ export abstract class JobHandler {
       deployCommands: [],
     };
     try {
-      this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
+      await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
     } catch (error) {
       this._logger.error(
         manifestJob._id,
