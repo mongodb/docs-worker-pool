@@ -69,4 +69,4 @@ get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongocli.yaml > ${REPO_DIR}/published-branches.yaml
 
 fetch-submodule:
-	git submodule update --remote --init
+	git submodule update --init
