@@ -217,7 +217,7 @@ export abstract class JobHandler {
       await this.constructPrefix();
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
-        await this.constructManifestIndexPath();
+        this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
       }
 
       this.prepStageSpecificNextGenCommands();
@@ -286,8 +286,12 @@ export abstract class JobHandler {
     return '';
   }
 
-  protected constructManifestIndexPath(): Promise<void> {
-    return Promise.resolve();
+  // For certain unversioned properties, urlSlug is null; use branchName instead
+  protected constructManifestPrefix(): string {
+    if (this.currJob.payload.urlSlug) {
+      return `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
+    }
+    return `${this.currJob.payload.project}-${this.currJob.payload.branchName}`;
   }
 
   protected abstract deploy(): Promise<CommandExecutorResponse>;

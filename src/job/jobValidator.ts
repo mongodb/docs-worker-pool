@@ -67,6 +67,9 @@ export class JobValidator implements IJobValidator {
   }
 
   private _validateInput(job: IJob): void {
+    if (!job.payload.project) {
+      throw new InvalidJobError('Invalid project');
+    }
     if (!['githubPush', 'productionDeploy', 'publishDochub', 'regression'].includes(job.payload.jobType)) {
       throw new InvalidJobError('Invalid JobType');
     }
