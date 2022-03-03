@@ -10,6 +10,31 @@ import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 
+export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const consoleLogger = new ConsoleLogger();
+  const sqs = new SQSConnector(consoleLogger, c);
+  const body = JSON.parse(event.body);
+  try {
+    consoleLogger.info(body.jobId, 'enqueuing Job');
+    await sqs.sendMessage(new JobQueueMessage(body.jobId, JobStatus.inQueue), c.get('jobUpdatesQueueUrl'), 0);
+    consoleLogger.info(body.jobId, 'Job Queued Job');
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body: { jobId: body.jobId },
+    };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+};
+
 export const HandleJobs = async (event: any = {}): Promise<any> => {
   /**
    * Check the status of the incoming jobs

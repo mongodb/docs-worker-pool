@@ -67,14 +67,15 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
       body: errMsg,
     };
   }
-  console.log(event.body);
   const body = JSON.parse(event.body);
   const env = c.get<string>('env');
   const repoInfo = await branchRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
   const job = await prepGithubPushPayload(body, branchRepository, jobPrefix);
   try {
-    await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+    consoleLogger.info(job.title, 'Creating Job');
+    const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+    consoleLogger.info(job.title, `Created Job ${jobId}`);
   } catch (err) {
     return {
       statusCode: 500,
