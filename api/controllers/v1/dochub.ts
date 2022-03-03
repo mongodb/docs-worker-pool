@@ -62,13 +62,14 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: { jobId: jobId, status: 'Job Queued' },
+      body: jobId,
     };
   } catch (err) {
+    console.log(err);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
-      body: err,
+      body: err.message,
     };
   }
 };

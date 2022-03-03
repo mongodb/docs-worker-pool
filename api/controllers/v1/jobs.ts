@@ -24,9 +24,10 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: { jobId: body.jobId },
+      body: body.jobId,
     };
   } catch (err) {
+    console.log(err);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
