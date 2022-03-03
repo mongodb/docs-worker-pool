@@ -111,30 +111,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   };
 }
 
-async function extract_url_info(
-  env: string,
-  repoName: string,
-  fullDocument: Job,
-  branchesRepo: BranchRepository
-): Promise<string> {
-  const repo = await branchesRepo.getRepo(repoName);
-  const base_url = repo?.url[env];
-  let prefix = '';
-  if (fullDocument.payload.prefix && fullDocument.payload.prefix !== '') {
-    prefix = `/${fullDocument.payload.prefix}`;
-  }
-  if (fullDocument.payload.jobType == 'githubPush') {
-    if (repoName == 'docs-mongodb-internal') {
-      repoName = 'docs';
-    }
-    return repo?.url['stg'] + prefix ?? repoName + '/docsworker-xlarge' + `/${fullDocument.payload.urlSlug}`;
-  }
-  if (prefix !== '') {
-    return base_url + prefix + `/${fullDocument.payload.urlSlug}`;
-  }
-  return base_url + `${fullDocument.payload.urlSlug}`;
-}
-
 function limit_message_size(message) {
   while (message.length >= 256) {
     let end = 255;
@@ -144,6 +120,22 @@ function limit_message_size(message) {
     message = message.substring(0, end + 1);
   }
   return message;
+}
+
+function extractUrlFromMessage(fullDocument) {
+  if (fullDocument.logs.length > 0) {
+    const urls = [];
+    for (let i = 0; i < fullDocument.logs.length; i++) {
+      const element = fullDocument.logs[i];
+      const ret = element.match(/\bhttps?:\/\/\S+/gi);
+      console.log(ret);
+      if (ret) {
+        urls.push(...ret);
+      }
+    }
+    return urls;
+  }
+  return [];
 }
 
 async function prepSummaryMessage(
@@ -157,21 +149,23 @@ async function prepSummaryMessage(
   jobTitle: string,
   failed = false
 ): Promise<string> {
-  // TODO: Determine why mms-docs has a special lastMessage slicing
+  const urls = extractUrlFromMessage(fullDocument);
+  let mms_urls = [null, null];
   if (repoName === 'mms-docs') {
-    lastMessage = `${lastMessage.slice(lastMessage.indexOf('mut-publish'))}\n\n${lastMessage.slice(
-      lastMessage.lastIndexOf('Summary')
-    )}`;
+    if (urls.length >= 2) {
+      mms_urls = urls.slice(-2);
+    }
   }
-
-  const url = await extract_url_info(env, repoName, fullDocument, branchesRepo);
-
+  let url = '';
+  if (urls.length > 0) {
+    url = urls[urls.length - 1];
+  }
   let msg = '';
   if (failed) {
     msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
   } else {
     if (repoName == 'mms-docs') {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:${lastMessage} \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager> \nEnjoy  :smile:!`;
     } else {
       msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
     }
