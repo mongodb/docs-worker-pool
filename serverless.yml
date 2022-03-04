@@ -119,6 +119,17 @@ functions:
       environment:
         <<: *webhook-env-core
 
+    v1DochubDeployRepo:
+      handler: api/controllers/v1/dochub.TriggerBuild
+      events:
+        - http:
+            path: /webhook/dochub/trigger/build
+            method: POST
+            cors: true
+            public: true
+      environment:
+        <<: *webhook-env-core
+
     v1SlackDisplayRepoOptions:
       handler: api/controllers/v1/slack.DisplayRepoOptions
       events:
@@ -146,6 +157,26 @@ functions:
       environment:
         <<: *webhook-env-core
 
+    v1TriggerLocalBuild:
+      handler: api/controllers/v1/jobs.TriggerLocalBuild
+      events:
+        - http:
+            path: /webhook/local/trigger/build
+            method: POST
+            cors: true
+            batchSize: 1
+      iamRoleStatementsName: 'dwpapi-v1TriggerLocalBuild-lr-${self:provider.region}-${self:provider.stage}'
+      iamRoleStatements:
+        - Effect: Allow
+          Action:
+            - "sqs:SendMessage"
+            - "sqs:GetQueueAttributes"
+          Resource:
+            - Fn::GetAtt: [AutobuilderJobUpdatesQueue, Arn]
+            - Fn::GetAtt: [AutobuilderJobsQueue, Arn]
+      environment:
+        <<: *webhook-env-core
+    
     v1HandleJobs:
       handler: api/controllers/v1/jobs.HandleJobs
       timeout: 180

@@ -44,17 +44,18 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: any, url: string): Promise<void> {
+  async insertJob(job: any, url: string): Promise<string> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
     };
     const jobId = await this.upsert(filterDoc, updateDoc, `Mongo Timeout Error: Timed out while inserting Job`);
     if (!jobId) {
-      throw new JobExistsAlreadyError('InsertJobFailed');
+      throw new JobExistsAlreadyError('InsertJobFailed: Job exists Already');
     }
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inQueue), url, 0);
+    return jobId;
   }
 
   async getJobById(id: string): Promise<Job | null> {

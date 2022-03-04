@@ -10,6 +10,32 @@ import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 
+export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const consoleLogger = new ConsoleLogger();
+  const sqs = new SQSConnector(consoleLogger, c);
+  const body = JSON.parse(event.body);
+  try {
+    consoleLogger.info(body.jobId, 'enqueuing Job');
+    await sqs.sendMessage(new JobQueueMessage(body.jobId, JobStatus.inQueue), c.get('jobUpdatesQueueUrl'), 0);
+    consoleLogger.info(body.jobId, 'Job Queued Job');
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body: body.jobId,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+};
+
 export const HandleJobs = async (event: any = {}): Promise<any> => {
   /**
    * Check the status of the incoming jobs
@@ -111,30 +137,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   };
 }
 
-async function extract_url_info(
-  env: string,
-  repoName: string,
-  fullDocument: Job,
-  branchesRepo: BranchRepository
-): Promise<string> {
-  const repo = await branchesRepo.getRepo(repoName);
-  const base_url = repo?.url[env];
-  let prefix = '';
-  if (fullDocument.payload.prefix && fullDocument.payload.prefix !== '') {
-    prefix = `/${fullDocument.payload.prefix}`;
-  }
-  if (fullDocument.payload.jobType == 'githubPush') {
-    if (repoName == 'docs-mongodb-internal') {
-      repoName = 'docs';
-    }
-    return repo?.url['stg'] + prefix ?? repoName + '/docsworker-xlarge' + `/${fullDocument.payload.urlSlug}`;
-  }
-  if (prefix !== '') {
-    return base_url + prefix + `/${fullDocument.payload.urlSlug}`;
-  }
-  return base_url + `${fullDocument.payload.urlSlug}`;
-}
-
 function limit_message_size(message) {
   while (message.length >= 256) {
     let end = 255;
@@ -144,6 +146,12 @@ function limit_message_size(message) {
     message = message.substring(0, end + 1);
   }
   return message;
+}
+
+function extractUrlFromMessage(fullDocument) {
+  const { logs } = fullDocument;
+  const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
+  return urls;
 }
 
 async function prepSummaryMessage(
@@ -157,21 +165,24 @@ async function prepSummaryMessage(
   jobTitle: string,
   failed = false
 ): Promise<string> {
-  // TODO: Determine why mms-docs has a special lastMessage slicing
+  const urls = extractUrlFromMessage(fullDocument);
+  let mms_urls = [null, null];
+  // mms-docs needs special handling as it builds two sites cloudmanager and ops manager so we need to extract both the URL's
   if (repoName === 'mms-docs') {
-    lastMessage = `${lastMessage.slice(lastMessage.indexOf('mut-publish'))}\n\n${lastMessage.slice(
-      lastMessage.lastIndexOf('Summary')
-    )}`;
+    if (urls.length >= 2) {
+      mms_urls = urls.slice(-2);
+    }
   }
-
-  const url = await extract_url_info(env, repoName, fullDocument, branchesRepo);
-
+  let url = '';
+  if (urls.length > 0) {
+    url = urls[urls.length - 1];
+  }
   let msg = '';
   if (failed) {
     msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
   } else {
     if (repoName == 'mms-docs') {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:${lastMessage} \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager> \nEnjoy  :smile:!`;
     } else {
       msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
     }
@@ -207,7 +218,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
+  const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
     consoleLogger.error(username, 'Entitlement Failed');
     return;
