@@ -67,7 +67,7 @@ Resources:
             - Name: AWS_SECRET_ACCESS_KEY_DEVHUB
               Value: ${self:custom.awsSecretDevhub}
             - Name: GATSBY_BASE_URL
-              Value: ${self.custom.gatsbyBaseUrl}
+              Value: ${self:custom.gatsbyBaseUrl}
             - Name: GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
               Value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
             - Name: GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN
