@@ -150,9 +150,7 @@ function limit_message_size(message) {
 
 function extractUrlFromMessage(fullDocument) {
   const { logs } = fullDocument;
-  let urls = (logs?.length > 0 )
-    ? logs.flatMap(log => log.match(/\bhttps?:\/\/\S+/gi) || []);
-    : [];
+  const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
   return urls;
 }
 
@@ -169,6 +167,7 @@ async function prepSummaryMessage(
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
   let mms_urls = [null, null];
+  // mms-docs needs special handling as it builds two sites cloudmanager and ops manager so we need to extract both the URL's
   if (repoName === 'mms-docs') {
     if (urls.length >= 2) {
       mms_urls = urls.slice(-2);
