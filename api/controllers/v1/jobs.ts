@@ -149,19 +149,11 @@ function limit_message_size(message) {
 }
 
 function extractUrlFromMessage(fullDocument) {
-  if (fullDocument.logs.length > 0) {
-    const urls = [];
-    for (let i = 0; i < fullDocument.logs.length; i++) {
-      const element = fullDocument.logs[i];
-      const ret = element.match(/\bhttps?:\/\/\S+/gi);
-      console.log(ret);
-      if (ret) {
-        urls.push(...ret);
-      }
-    }
-    return urls;
-  }
-  return [];
+  const { logs } = fullDocument;
+  let urls = (logs?.length > 0 )
+    ? logs.flatMap(log => log.match(/\bhttps?:\/\/\S+/gi) || []);
+    : [];
+  return urls;
 }
 
 async function prepSummaryMessage(
