@@ -218,7 +218,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
+  const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
     consoleLogger.error(username, 'Entitlement Failed');
     return;

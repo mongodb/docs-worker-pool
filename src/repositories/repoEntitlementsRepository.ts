@@ -29,6 +29,25 @@ export class RepoEntitlementsRepository extends BaseRepository {
     }
   }
 
+  async getSlackUserIdByGithubUsername(githubUsername: string): Promise<any> {
+    const query = { github_username: githubUsername };
+    const entitlementsObject = await this.findOne(
+      query,
+      `Mongo Timeout Error: Timedout while retrieving entitlements for ${githubUsername}`
+    );
+    // if user has specific entitlements
+    if (entitlementsObject?.repos) {
+      return {
+        github_username: entitlementsObject.github_username,
+        slack_user_id: entitlementsObject.slack_user_id,
+        email: entitlementsObject.email,
+        status: 'success',
+      };
+    } else {
+      return { status: 'failure' };
+    }
+  }
+
   async getRepoEntitlementsBySlackUserId(slackUserId: string): Promise<any> {
     const query = { slack_user_id: slackUserId };
     const entitlementsObject = await this.findOne(
