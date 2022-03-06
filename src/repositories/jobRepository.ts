@@ -3,7 +3,7 @@ import { BaseRepository } from './baseRepository';
 import { Job, JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
-import { InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
+import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
 import { IQueueConnector, SQSConnector } from '../services/queue';
 import { JobQueueMessage } from '../entities/queueMessage';
 
@@ -54,8 +54,24 @@ export class JobRepository extends BaseRepository {
       throw new JobExistsAlreadyError('InsertJobFailed: Job exists Already');
     }
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
+
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inQueue), url, 0);
     return jobId;
+  }
+
+  async insertJBulkJobs(jobs: Array<any>, url: string): Promise<Array<any>> {
+    const jobIds = await this.insertMany(jobs, `Mongo Timeout Error: Timed out while inserting bulk Jobs`);
+    if (!jobIds || jobIds.length != jobs.length) {
+      throw new DBError('insertJBulkJobs:Unable to insert multiple jobs');
+    }
+    // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
+    await Promise.all(
+      Object.values(jobIds).map(async (jobId: string) => {
+        await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inQueue), url, 0);
+        console.log(jobId);
+      })
+    );
+    return jobIds;
   }
 
   async getJobById(id: string): Promise<Job | null> {

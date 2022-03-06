@@ -26,6 +26,23 @@ export abstract class BaseRepository {
     return Promise.race([promise, timeout]);
   }
 
+  protected async insertMany(docs: Array<any>, errorMsg: string): Promise<any> {
+    try {
+      const insertManyResult = await this.promiseTimeoutS(
+        this._config.get('MONGO_TIMEOUT_S'),
+        this._collection.insertMany(docs),
+        errorMsg
+      );
+      if (insertManyResult?.insertedIds) {
+        return insertManyResult.insertedIds;
+      }
+      return null;
+    } catch (error) {
+      this._logger.error(`${this._repoName}:upsert`, `Failed to insert job (${JSON.stringify(docs)}) error: ${error}`);
+      throw error;
+    }
+  }
+
   protected async upsert(filterDoc: any, updateDoc: any, errorMsg: string): Promise<any> {
     try {
       const updateResult = await this.promiseTimeoutS(

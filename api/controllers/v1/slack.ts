@@ -79,7 +79,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
 };
 
 async function deployRepo(
-  job: any,
+  deployable: Array<any>,
   logger: ILogger,
   jobRepository: JobRepository,
   parallelJobRepo: JobRepository,
@@ -87,13 +87,15 @@ async function deployRepo(
   parallelPrefix: string
 ) {
   try {
-    await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+    await jobRepository.insertJBulkJobs(deployable, c.get('jobsQueueUrl'));
     if (parallelJobRepo) {
-      job.payload.prefix = parallelPrefix;
-      await parallelJobRepo.insertJob(job, parellelUrl);
+      deployable.map((job) => {
+        job.payload.prefix = parallelPrefix;
+      });
+      await parallelJobRepo.insertJBulkJobs(deployable, parellelUrl);
     }
   } catch (err) {
-    logger.error(`${job.payload.repoName} ${job.payload.branchName}`, err);
+    logger.error('deployRepo', err);
   }
 }
 
@@ -114,7 +116,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   let parallelPrefix = '';
   const parallel = c.get<any>('parallel');
   const env = c.get<string>('env');
-
+  const depolayable = [];
   // This is coming in as urlencoded stirng, need to decode before parsing=
 
   const decoded = decodeURIComponent(event.body).split('=')[1];
@@ -153,6 +155,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     let aliases = branchObject.aliasObject.urlAliases; //array or null
     let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
+    console.log(repoName, branchName, branchObject.aliasObject);
     aliases = aliases?.filter((a) => a);
     if (!urlSlug && non_versioned == false) {
       urlSlug = branchName;
@@ -161,30 +164,22 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     if (!active) {
       continue;
     }
-    //This is for non aliased branch
-    let newPayload = {};
+    //Generic payload, will be conditionaly modified appropriately
+    const newPayload = createPayload(
+      'productionDeploy',
+      repoOwner,
+      repoName,
+      branchName,
+      hashOption,
+      repoInfo.project,
+      repoInfo.prefix[c.get<string>('env')],
+      non_versioned ? '' : branchName,
+      false,
+      false,
+      '-g'
+    );
     if (!aliases) {
-      const newPayload = createPayload(
-        'productionDeploy',
-        repoOwner,
-        repoName,
-        branchName,
-        hashOption,
-        repoInfo.project,
-        repoInfo.prefix[c.get<string>('env')],
-        non_versioned ? '' : branchName,
-        false,
-        false,
-        '-g'
-      );
-      await deployRepo(
-        createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
-        consoleLogger,
-        jobRepository,
-        parallelJobRepo,
-        parallelUrl,
-        parallelPrefix
-      );
+      depolayable.push(createJob(Object.assign({}, newPayload), jobTitle, jobUserName, jobUserEmail));
       jobCount += 1;
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
@@ -193,109 +188,41 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       if (isStableBranch) {
         stable = '-g';
       }
+
+      newPayload.stable = stable;
+      newPayload.aliased = true;
+      newPayload.primaryAlias = true;
+
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
       if (urlSlug) {
-        newPayload = createPayload(
-          'productionDeploy',
-          repoOwner,
-          repoName,
-          branchName,
-          hashOption,
-          repoInfo.project,
-          repoInfo.prefix[c.get<string>('env')],
-          urlSlug,
-          true,
-          true,
-          stable
-        );
-        await deployRepo(
-          createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
-          consoleLogger,
-          jobRepository,
-          parallelJobRepo,
-          parallelUrl,
-          parallelPrefix
-        );
+        newPayload.urlSlug = urlSlug;
+        console.log('Present URLSLUG', urlSlug, newPayload);
+        depolayable.push(createJob(Object.assign({}, newPayload), jobTitle, jobUserName, jobUserEmail));
         jobCount += 1;
       }
       if (non_versioned) {
-        newPayload = createPayload(
-          'productionDeploy',
-          repoOwner,
-          repoName,
-          branchName,
-          hashOption,
-          repoInfo.project,
-          repoInfo.prefix[c.get<string>('env')],
-          '',
-          true,
-          true,
-          stable
-        );
-        await deployRepo(
-          createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
-          consoleLogger,
-          jobRepository,
-          parallelJobRepo,
-          parallelUrl,
-          parallelPrefix
-        );
+        newPayload.urlSlug = '';
+        depolayable.push(createJob(Object.assign({}, newPayload), jobTitle, jobUserName, jobUserEmail));
         jobCount += 1;
       } else if (publishOriginalBranchName) {
-        newPayload = createPayload(
-          'productionDeploy',
-          repoOwner,
-          repoName,
-          branchName,
-          hashOption,
-          repoInfo.project,
-          repoInfo.prefix[c.get<string>('env')],
-          branchName,
-          true,
-          true,
-          stable
-        );
-        await deployRepo(
-          createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
-          consoleLogger,
-          jobRepository,
-          parallelJobRepo,
-          parallelUrl,
-          parallelPrefix
-        );
+        newPayload.urlSlug = branchName;
+        depolayable.push(createJob(Object.assign({}, newPayload), jobTitle, jobUserName, jobUserEmail));
         jobCount += 1;
-      } else {
-        consoleLogger.error(
-          `${branchName} ${repoName}`,
-          `ERROR: ${branchName} is misconfigured and cannot be deployed. Ensure that publishOriginalBranchName is set to true and/or specify a default urlSlug or it should be nonversioned.`
-        );
       }
       aliases.forEach(async (alias) => {
         if (alias != urlSlug) {
           const primaryAlias = urlSlug === alias;
-          const newPayload = createPayload(
-            'productionDeploy',
-            repoOwner,
-            repoName,
-            branchName,
-            hashOption,
-            repoInfo.project,
-            repoInfo.prefix[c.get<string>('env')],
-            alias,
-            true,
-            primaryAlias
-          );
-          await deployRepo(
-            createJob(newPayload, jobTitle, jobUserName, jobUserEmail),
-            consoleLogger,
-            jobRepository,
-            parallelJobRepo,
-            parallelUrl,
-            parallelPrefix
-          );
+          newPayload.stable = '';
+          newPayload.urlSlug = alias;
+          newPayload.primaryAlias = primaryAlias;
+          depolayable.push(createJob(Object.assign({}, newPayload), jobTitle, jobUserName, jobUserEmail));
           jobCount += 1;
         }
       });
+    }
+
+    if (depolayable.length > 0) {
+      await deployRepo(depolayable, consoleLogger, jobRepository, parallelJobRepo, parallelUrl, parallelPrefix);
     }
   }
   return {

@@ -76,7 +76,8 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
         }
       } catch (err) {
         consoleLogger.error(jobId, err);
-        await retry(body, consoleLogger, queueUrl);
+        throw err;
+        // await retry(body, consoleLogger, queueUrl);
       }
     })
   );
@@ -122,12 +123,9 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     await prepSummaryMessage(
       env,
       fullDocument,
-      branchesRepo,
       repoName,
-      limit_message_size(slackMsgs[slackMsgs.length - 1]),
       c.get<string>('dashboardUrl'),
       jobId,
-      jobTitle,
       fullDocument.status == 'failed'
     ),
     entitlement['slack_user_id']
@@ -137,32 +135,18 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   };
 }
 
-function limit_message_size(message) {
-  while (message.length >= 256) {
-    let end = 255;
-    while (message[end] != ' ') {
-      end -= 1;
-    }
-    message = message.substring(0, end + 1);
-  }
-  return message;
-}
-
 function extractUrlFromMessage(fullDocument) {
   const { logs } = fullDocument;
   const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
-  return urls;
+  return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
 }
 
 async function prepSummaryMessage(
   env: string,
   fullDocument: Job,
-  branchesRepo: BranchRepository,
   repoName: string,
-  lastMessage: string,
   jobUrl: string,
   jobId: string,
-  jobTitle: string,
   failed = false
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
@@ -179,12 +163,12 @@ async function prepSummaryMessage(
   }
   let msg = '';
   if (failed) {
-    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
+    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
   } else {
     if (repoName == 'mms-docs') {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager> \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager> \nEnjoy  :smile:!`;
     } else {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
     }
   }
   // Removes instances of two or more periods
