@@ -115,8 +115,10 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const username = fullDocument.user;
   const slackConnector = new SlackConnector(consoleLogger, c);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsByGithubUsername(username);
+  const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
+  console.log(entitlement, username, jobId);
   if (!entitlement?.['slack_user_id']) {
+    console.log('Entitlement failed');
     return;
   }
   const resp = await slackConnector.sendMessage(
@@ -163,7 +165,7 @@ async function prepSummaryMessage(
   }
   let msg = '';
   if (failed) {
-    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n ${lastMessage}\nSorry  :disappointed:! `;
+    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n Check logs for more errors!!\nSorry  :disappointed:! `;
   } else {
     if (repoName == 'mms-docs') {
       msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager> \nEnjoy  :smile:!`;
