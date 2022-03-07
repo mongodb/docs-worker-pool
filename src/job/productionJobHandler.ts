@@ -72,15 +72,6 @@ export class ProductionJobHandler extends JobHandler {
     return this.currJob.payload.repoBranches.branches.filter((b) => b['active']).length;
   }
 
-  async constructManifestIndexPath(): Promise<void> {
-    try {
-      this.currJob.payload.manifestPrefix = `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
-    } catch (error) {
-      await this.logger.save(this.currJob._id, error);
-      throw error;
-    }
-  }
-
   getPathPrefix(): string {
     try {
       if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
