@@ -404,7 +404,7 @@ export abstract class JobHandler {
       const resp = await this.deploy();
       await this.update(resp);
       // For most buildJobs, we create off a manifestJob
-      if (this._currJob.payload.jobType in ['productionDeploy', 'githubPush']) {
+      if (['productionDeploy', 'githubPush'].includes(this._currJob.payload.jobType)) {
         this.queueManifestJob();
       }
       this.cleanup();
@@ -420,7 +420,7 @@ export abstract class JobHandler {
 
   // Creates and pushes the related manifestJob
   @throwIfJobInterupted()
-  private async queueManifestJob(): Promise<void> {
+  public async queueManifestJob(): Promise<void> {
     // Rudimentary error prevention
     if (this._currJob.payload.jobType.includes('manifestGeneration')) {
       this._logger.error(
