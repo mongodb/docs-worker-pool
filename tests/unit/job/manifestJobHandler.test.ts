@@ -12,16 +12,18 @@ describe('ManifestJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobHandler).toBeDefined();
   });
 
-  test('Execute called after a stop signal throws error Production Handler at decorator', () => {
+  test('Execute called after a stop signal throws error ManifestHandler at decorator', () => {
     jobHandlerTestHelper.jobHandler.stop();
     expect(() => {
       jobHandlerTestHelper.jobHandler.execute();
     }).toThrow(`${jobHandlerTestHelper.job._id} is stopped`);
   });
 
-  test('Execute nextgen build runs successfully and results in summary message', async () => {
+  test('Execute manifestJob runs successfully and does not queue another manifest job', async () => {
+    const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+    jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(true);
+    expect(queueManifestJobSpy).toBeCalledTimes(0);
   });
 });
