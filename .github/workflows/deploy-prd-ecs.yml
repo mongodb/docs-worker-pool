@@ -64,4 +64,3 @@ jobs:
         run: |
           npm ci
           sls deploy --stage prd
-          sls deploy --stage dotcomprd
