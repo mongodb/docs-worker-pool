@@ -135,11 +135,11 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   };
 }
 
-function extractUrlFromMessage(fullDocument) {
+export const extractUrlFromMessage = (fullDocument): string[] => {
   const { logs } = fullDocument;
   const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
   return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
-}
+};
 
 async function prepSummaryMessage(
   env: string,
