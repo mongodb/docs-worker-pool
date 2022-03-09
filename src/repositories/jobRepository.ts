@@ -62,7 +62,7 @@ export class JobRepository extends BaseRepository {
   async insertJBulkJobs(jobs: Array<any>, url: string): Promise<Array<any>> {
     const jobIds = await this.insertMany(jobs, `Mongo Timeout Error: Timed out while inserting bulk Jobs`);
     if (!jobIds) {
-      throw new DBError('insertJBulkJobs:Unable to insert multiple jobs');
+      throw new DBError('insertJBulkJobs: Unable to insert multiple jobs');
     }
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
     this._logger.info('insertJBulkJobs', `Total Jobs Expected : ${jobs.length}, Total Jobs Sent: ${jobIds.length}`);
