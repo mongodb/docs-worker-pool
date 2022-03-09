@@ -77,7 +77,6 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
       } catch (err) {
         consoleLogger.error(jobId, err);
         throw err;
-        // await retry(body, consoleLogger, queueUrl);
       }
     })
   );
