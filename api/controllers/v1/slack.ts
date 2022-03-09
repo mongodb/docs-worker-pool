@@ -87,6 +87,7 @@ async function deployRepo(
   parallelPrefix: string
 ) {
   try {
+    console.log(deployable);
     await jobRepository.insertJBulkJobs(deployable, c.get('jobsQueueUrl'));
     if (parallelJobRepo) {
       deployable.map((job) => {
@@ -220,10 +221,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         }
       });
     }
+  }
 
-    if (depolayable.length > 0) {
-      await deployRepo(depolayable, consoleLogger, jobRepository, parallelJobRepo, parallelUrl, parallelPrefix);
-    }
+  if (depolayable.length > 0) {
+    await deployRepo(depolayable, consoleLogger, jobRepository, parallelJobRepo, parallelUrl, parallelPrefix);
   }
   return {
     statusCode: 200,
