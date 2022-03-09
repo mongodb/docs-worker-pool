@@ -20,6 +20,8 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await branchRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
+  const repo_info = await branchRepository.getRepo(githubEvent.repository.name);
+  const project = repo_info.project;
 
   return {
     title: githubEvent.repository.full_name,
@@ -46,6 +48,7 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
       newHead: githubEvent.after,
       urlSlug: urlSlug,
       prefix: prefix,
+      project: project,
     },
     logs: [],
   };
