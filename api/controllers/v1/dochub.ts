@@ -65,7 +65,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
       body: jobId,
     };
   } catch (err) {
-    console.log(err);
+    consoleLogger.error('TriggerBuild', err);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
