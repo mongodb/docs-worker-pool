@@ -87,7 +87,6 @@ async function deployRepo(
   parallelPrefix: string
 ) {
   try {
-    console.log(deployable);
     await jobRepository.insertJBulkJobs(deployable, c.get('jobsQueueUrl'));
     if (parallelJobRepo) {
       deployable.map((job) => {
@@ -156,7 +155,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     let aliases = branchObject.aliasObject.urlAliases; //array or null
     let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
-    console.log(repoName, branchName, branchObject.aliasObject);
     aliases = aliases?.filter((a) => a);
     if (!urlSlug && non_versioned == false) {
       urlSlug = branchName;
@@ -197,7 +195,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
       if (urlSlug) {
         newPayload.urlSlug = urlSlug;
-        console.log('Present URLSLUG', urlSlug, newPayload);
         depolayable.push(createJob(Object.assign({}, newPayload), jobTitle, jobUserName, jobUserEmail));
         jobCount += 1;
       }

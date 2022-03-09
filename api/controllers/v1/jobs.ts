@@ -27,7 +27,7 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
       body: body.jobId,
     };
   } catch (err) {
-    console.log(err);
+    consoleLogger.error('TriggerLocalBuild', err);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
@@ -116,9 +116,8 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const slackConnector = new SlackConnector(consoleLogger, c);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
-  console.log(entitlement, username, jobId);
   if (!entitlement?.['slack_user_id']) {
-    console.log('Entitlement failed');
+    consoleLogger.error(username, 'Entitlement failed');
     return;
   }
   const resp = await slackConnector.sendMessage(

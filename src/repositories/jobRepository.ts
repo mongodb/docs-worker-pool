@@ -65,11 +65,11 @@ export class JobRepository extends BaseRepository {
       throw new DBError('insertJBulkJobs:Unable to insert multiple jobs');
     }
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
-    console.log(`Total Jobs Expected : ${jobs.length}, Total Jobs Sent: ${jobIds.length}`);
+    this._logger.info('insertJBulkJobs', `Total Jobs Expected : ${jobs.length}, Total Jobs Sent: ${jobIds.length}`);
     await Promise.all(
       Object.values(jobIds).map(async (jobId: string) => {
         await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inQueue), url, 0);
-        console.log(jobId);
+        this._logger.info('insertJBulkJobs', `inserted ${jobId}`);
       })
     );
     return jobIds;
