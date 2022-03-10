@@ -215,7 +215,8 @@ export abstract class JobHandler {
     if (this.isbuildNextGen()) {
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
-      // if this payload is NOT aliased or if it's the primary alias, we need the index path
+      // if this payload is NOT aliased or if it's the primary alias, construct
+      // a manifestPrefix for the search manifest
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
       }
@@ -286,12 +287,27 @@ export abstract class JobHandler {
     return '';
   }
 
-  // For certain unversioned properties, urlSlug is null; use branchName instead
   protected constructManifestPrefix(): string {
-    if (this.currJob.payload.urlSlug) {
-      return `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
+    // In the past, we have had issues with generating manifests titled "null-v1.0.json"
+    // This is rudimentary error logging, and should ideally happen elsewhere
+    if (!this.currJob.payload.project) {
+      this._logger.info(this._currJob._id, `Project name not found for ${this.currJob._id}`);
     }
-    return `${this.currJob.payload.project}-${this.currJob.payload.branchName}`;
+    // Due to snooty.toml project naming discrepancies, payload.project may not
+    // match preferred project names. This may be removed pending snooty.toml
+    // name correction
+    const substitute = {
+      cloudgov: 'AtlasGov',
+      cloud: 'atlas',
+      docs: 'manual',
+    };
+    const projectName = substitute[this.currJob.payload.project] ?? this.currJob.payload.project;
+
+    if (this.currJob.payload.urlSlug) {
+      return `${projectName}-${this.currJob.payload.urlSlug}`;
+    }
+    // For certain unversioned properties, urlSlug is null; use branchName instead
+    return `${projectName}-${this.currJob.payload.branchName}`;
   }
 
   protected abstract deploy(): Promise<CommandExecutorResponse>;
@@ -405,7 +421,10 @@ export abstract class JobHandler {
       await this.update(resp);
       // For most buildJobs, we create off a manifestJob
       if (['productionDeploy', 'githubPush'].includes(this._currJob.payload.jobType)) {
-        this.queueManifestJob();
+        // Docs-landing does NOT have an associated search manifest
+        if (this._currJob.payload.project != 'landing') {
+          this.queueManifestJob();
+        }
       }
       this.cleanup();
     } catch (error) {

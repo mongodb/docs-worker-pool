@@ -40,11 +40,26 @@ export class ManifestJobHandler extends JobHandler {
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
   prepDeployCommands(): void {
+    // TODO: bucket and url are environment variables from pool.repo_branches.
+    // When search is correctly configured, reference bucket and url from
+    // https://github.com/mongodb/docs-worker-pool/blob/6516a2643ab586a358223f75d99df967531134fe/src/job/jobHandler.ts#L322
+    const bucket = 'docs-search-indexes-test'; // may need to init bucket first?
+    const url = 'https://docs-mongodborg-staging.corp.mongodb.com'; // dev url
+    const manifestPrefix = this.currJob.payload.manifestPrefix;
+    const mutPrefix = this.currJob.payload.mutPrefix;
+    const globalSearchFlag = this.currJob.payload.stable ?? '';
+
+    // Hacky manifest error catching - should not occur at this level
+    if (!manifestPrefix || manifestPrefix.includes('null')) {
+      this.currJob.deployCommands = [`echo ERROR: malformed manifest prefix ${manifestPrefix}.`];
+      return;
+    }
+
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
-      'echo IGNORE: testing manifest generation deploy commands',
-      'python3 test-mut-script.py',
+      'echo IGNORE: generating test search manifest from new infrastructure',
+      `mut-index upload public -b ${bucket} -o ${manifestPrefix}.json -u ${url}/${mutPrefix} -s ${globalSearchFlag} $(BUCKET_FLAG)`,
     ];
   }
 

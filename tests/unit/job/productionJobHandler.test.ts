@@ -224,9 +224,22 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(data.manifestJobDef.value);
   });
 
-  test('Manifest job does not kick off manifest generation job', async () => {
+  test('Manifest job does not kick off another manifest generation job', async () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
+    const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+
+    expect(queueManifestJobSpy).toBeCalledTimes(0);
+    expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
+  });
+
+  test('Docs-landing deploy does not kick off a manifest generation job', async () => {
+    jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
+    jobHandlerTestHelper.jobHandler.currJob.payload.project = 'landing';
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
     jobHandlerTestHelper.setupForSuccess();

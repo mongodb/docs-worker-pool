@@ -57,6 +57,7 @@ export interface IJob {
   status: JobStatus | null;
   title: string;
   user: string;
+  // TODO: Remove extraneous prefixes (duplicate of payload)
   manifestPrefix: string | undefined;
   pathPrefix: string | null | undefined;
   mutPrefix: string | null | undefined;
