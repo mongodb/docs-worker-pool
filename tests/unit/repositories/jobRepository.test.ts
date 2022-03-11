@@ -1,5 +1,5 @@
 import { JobRepository } from '../../../src/repositories/jobRepository';
-import * as data from '../../data/jobDef';
+import { sampleBuildJob } from '../../data/jobDef';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
 
@@ -130,8 +130,8 @@ describe('Job Repository Tests', () => {
 
     test('getOneQueuedJobAndUpdate succeeds', async () => {
       const testData = TestDataProvider.getFindOneAndUpdateCallInfo();
-      dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(data.default);
-      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(Object.assign({}, data.default.value));
+      dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(sampleBuildJob);
+      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(Object.assign({}, sampleBuildJob));
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledWith(
         testData.query,

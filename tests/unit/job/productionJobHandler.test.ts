@@ -1,6 +1,6 @@
 import { mockReset } from 'jest-mock-extended';
 import { TestDataProvider } from '../../data/data';
-import * as data from '../../data/jobDef';
+import { sampleBuildJob, sampleManifestJob } from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
 describe('ProductionJobHandler Tests', () => {
@@ -212,7 +212,7 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(data.default.value);
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(sampleBuildJob);
 
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();
@@ -221,7 +221,7 @@ describe('ProductionJobHandler Tests', () => {
     expect(queueManifestJobSpy).toBeCalledTimes(1);
     expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(1);
 
-    expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(data.manifestJobDef.value);
+    expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(sampleManifestJob);
   });
 
   test('Manifest job does not kick off another manifest generation job', async () => {
@@ -248,6 +248,38 @@ describe('ProductionJobHandler Tests', () => {
 
     expect(queueManifestJobSpy).toBeCalledTimes(0);
     expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
+  });
+
+  test('Well-formed deploy with urlSlug generates correct manifest prefix', async () => {
+    const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+    const constructManifestPrefixSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'constructManifestPrefix');
+
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+
+    const mp = sampleManifestJob.payload.manifestPrefix;
+    expect(mp).toEqual(`${sampleBuildJob.payload.project}-${sampleBuildJob.payload.urlSlug}`);
+
+    expect(queueManifestJobSpy).toBeCalledTimes(1);
+    expect(constructManifestPrefixSpy).toBeCalledTimes(1);
+    expect(constructManifestPrefixSpy.mock.results[0].value).toEqual(mp);
+  });
+
+  test('Well-formed deploy without urlSlug generates correct manifest prefix', async () => {
+    jobHandlerTestHelper.jobHandler.currJob.payload.urlSlug = '';
+    const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+    const constructManifestPrefixSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'constructManifestPrefix');
+
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+
+    const mp = `${sampleBuildJob.payload.project}-${sampleBuildJob.payload.branchName}`;
+
+    expect(queueManifestJobSpy).toBeCalledTimes(1);
+    expect(constructManifestPrefixSpy).toBeCalledTimes(1);
+    expect(constructManifestPrefixSpy.mock.results[0].value).toEqual(mp);
   });
 
   test("Production deploy of a job with empty string pathPrefix sets PATH_PREFIX env to '/'", async () => {

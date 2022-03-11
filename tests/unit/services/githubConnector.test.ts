@@ -1,12 +1,12 @@
 import { mockDeep, mockReset } from 'jest-mock-extended';
 import { IFileSystemServices } from '../../../src/services/fileServices';
-import * as data from '../../data/jobDef';
+import { sampleBuildJob } from '../../data/jobDef';
 import { IConfig } from 'config';
 import { IGithubCommandExecutor } from '../../../src/services/commandExecutor';
 import { IJobRepoLogger } from '../../../src/services/logger';
 import { GitHubConnector } from '../../../src/services/repo';
 import { IJob } from '../../../src/entities/job';
-import fs from 'fs-extra';
+
 let job: IJob;
 let commandExecutor: IGithubCommandExecutor;
 let jobRepoLogger: IJobRepoLogger;
@@ -16,7 +16,7 @@ let gitHubConnector: GitHubConnector;
 
 beforeEach(() => {
   jest.setTimeout(30000);
-  job = JSON.parse(JSON.stringify(data.default.value));
+  job = JSON.parse(JSON.stringify(sampleBuildJob));
   fileSystemServices = mockDeep<IFileSystemServices>();
   commandExecutor = mockDeep<IGithubCommandExecutor>();
   jobRepoLogger = mockDeep<IJobRepoLogger>();

@@ -12,7 +12,7 @@ import { IJobCommandExecutor } from '../../src/services/commandExecutor';
 import { IFileSystemServices } from '../../src/services/fileServices';
 import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
-import * as data from '../data/jobDef';
+import { sampleBuildJob } from '../data/jobDef';
 
 describe('JobManager Tests', () => {
   let job: IJob;
@@ -31,7 +31,7 @@ describe('JobManager Tests', () => {
   beforeEach(() => {
     jest.useFakeTimers('modern');
     jest.setSystemTime(new Date(2021, 4, 3));
-    job = JSON.parse(JSON.stringify(data.default.value));
+    job = JSON.parse(JSON.stringify(sampleBuildJob));
     config = mockDeep<IConfig>();
     jobRepo = mockDeep<JobRepository>();
     fileSystemServices = mockDeep<IFileSystemServices>();

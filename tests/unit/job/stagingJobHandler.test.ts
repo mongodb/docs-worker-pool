@@ -1,6 +1,6 @@
 import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
-import * as data from '../../data/jobDef';
+import { sampleBuildJob } from '../../data/jobDef';
 
 describe('StagingJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -106,7 +106,7 @@ describe('StagingJobHandler Tests', () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(data.default.value);
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(sampleBuildJob);
 
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();

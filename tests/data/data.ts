@@ -1,6 +1,6 @@
 import { IJob } from '../../src/entities/job';
 import { CommandExecutorResponse } from '../../src/services/commandExecutor';
-import * as data from '../data/jobDef';
+import { sampleBuildJob } from '../data/jobDef';
 
 export class TestDataProvider {
   static getJobPropertiesValidateTestCases(): Array<any> {
@@ -190,7 +190,7 @@ export class TestDataProvider {
   }
 
   static getPathPrefixCases(): Array<any> {
-    const job = Object.assign(data.default.value);
+    const job = Object.assign(sampleBuildJob);
     const itemValid = TestDataProvider.getPublishBranchesContent(job);
 
     // Null version
@@ -226,7 +226,7 @@ export class TestDataProvider {
   }
 
   static getManifestPrefixCases(): Array<any> {
-    const job = Object.assign(data.default.value);
+    const job = Object.assign(sampleBuildJob);
     const itemValid = TestDataProvider.getPublishBranchesContent(job);
     return [
       {

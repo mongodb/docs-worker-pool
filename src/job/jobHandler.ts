@@ -287,7 +287,7 @@ export abstract class JobHandler {
     return '';
   }
 
-  protected constructManifestPrefix(): string {
+  public constructManifestPrefix(): string {
     // In the past, we have had issues with generating manifests titled "null-v1.0.json"
     // This is rudimentary error logging, and should ideally happen elsewhere
     if (!this.currJob.payload.project) {

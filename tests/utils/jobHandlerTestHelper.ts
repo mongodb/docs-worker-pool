@@ -13,7 +13,7 @@ import { IFileSystemServices } from '../../src/services/fileServices';
 import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
 import { TestDataProvider } from '../data/data';
-import * as data from '../data/jobDef';
+import { sampleBuildJob } from '../data/jobDef';
 
 export class JobHandlerTestHelper {
   job: IJob;
@@ -35,7 +35,7 @@ export class JobHandlerTestHelper {
   };
 
   init(handlerName: string): ProductionJobHandler | StagingJobHandler {
-    this.job = JSON.parse(JSON.stringify(data.default.value));
+    this.job = JSON.parse(JSON.stringify(sampleBuildJob));
     this.config = mockDeep<IConfig>();
     this.jobRepo = mockDeep<JobRepository>();
     this.fileSystemServices = mockDeep<IFileSystemServices>();
