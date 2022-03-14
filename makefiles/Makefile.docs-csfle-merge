@@ -11,9 +11,6 @@ PROJECT=csfle-merge
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
-BUCKET = docs-mongodb-org-prd-staging
-URL = "https://docs-mongodborg-staging.corp.mongodb.com"
-
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
