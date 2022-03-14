@@ -42,6 +42,7 @@ async function prepDochubPushPayload() {
       newHead: null,
       urlSlug: null,
       prefix: '',
+      project: 'devhub-content',
     },
     logs: [],
   };
@@ -55,6 +56,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const env = c.get<string>('env');
   const job = await prepDochubPushPayload();
+
   try {
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
