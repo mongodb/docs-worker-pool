@@ -34,7 +34,7 @@ export class JobHandlerTestHelper {
     manifest: ManifestJobHandler,
   };
 
-  init(handlerName: string): ProductionJobHandler | StagingJobHandler {
+  init(handlerName: string): ProductionJobHandler | StagingJobHandler | ManifestJobHandler {
     this.job = JSON.parse(JSON.stringify(data.default.value));
     this.config = mockDeep<IConfig>();
     this.jobRepo = mockDeep<JobRepository>();
