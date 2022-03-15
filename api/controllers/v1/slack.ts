@@ -156,7 +156,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
     aliases = aliases?.filter((a) => a);
-    if (!urlSlug && non_versioned == false) {
+    if (!urlSlug || urlSlug === '') {
       urlSlug = branchName;
     }
 
@@ -172,7 +172,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       hashOption,
       repoInfo.project,
       repoInfo.prefix[c.get<string>('env')],
-      urlSlug ? urlSlug : branchName,
+      urlSlug,
       false,
       false,
       '-g'
