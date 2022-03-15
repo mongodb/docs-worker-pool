@@ -1,6 +1,7 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import type { Job } from '../entities/job';
+import { JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
 import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
