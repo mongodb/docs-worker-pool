@@ -172,7 +172,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       hashOption,
       repoInfo.project,
       repoInfo.prefix[c.get<string>('env')],
-      non_versioned ? '' : branchName,
+      urlSlug ? urlSlug : branchName,
       false,
       false,
       '-g'
