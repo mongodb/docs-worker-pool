@@ -178,6 +178,9 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       '-g'
     );
     if (!aliases) {
+      if (non_versioned) {
+        newPayload.urlSlug = '';
+      }
       depolayable.push(createJob(Object.assign({}, newPayload), jobTitle, jobUserName, jobUserEmail));
       jobCount += 1;
     }
