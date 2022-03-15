@@ -1,6 +1,6 @@
 import { JobHandler } from './jobHandler';
 import { IConfig } from 'config';
-import { ManifestJob } from '../entities/job';
+import type { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { ICDNConnector } from '../services/cdn';
 import { CommandExecutorResponse, IJobCommandExecutor } from '../services/commandExecutor';
@@ -12,7 +12,7 @@ import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
 export class ManifestJobHandler extends JobHandler {
   constructor(
-    job: ManifestJob,
+    job: Job,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,

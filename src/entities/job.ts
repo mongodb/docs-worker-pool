@@ -1,4 +1,5 @@
 // TODO: Cut down on null and undefined type definition allowances
+
 export enum JobStatus {
   inQueue = 'inQueue',
   inProgress = 'inProgress',
@@ -14,7 +15,7 @@ export enum JobStatus {
 //   regression = 'regression',
 // }
 
-export interface IPayload {
+export type Payload = {
   jobType: string;
   source: string;
   action: string;
@@ -41,12 +42,11 @@ export interface IPayload {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
-}
+};
 
-// TODO: Restrict jobTypes, a la JobStatus
-export interface IJob {
+export type Job = {
   _id: string;
-  payload: IPayload;
+  payload: Payload;
   createdTime: Date;
   endTime: Date | null | undefined;
   error: any | null | undefined;
@@ -62,14 +62,8 @@ export interface IJob {
   mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
-}
-
-export type BuildJob = IJob & {
   email: string; // probably can be removed
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;
+  shouldGenerateSearchManifest: boolean;
 };
-
-// ManifestJob represents the creation of the search manifest, which is kicked off
-// in the execute() function of JobHandler.
-export type ManifestJob = IJob;

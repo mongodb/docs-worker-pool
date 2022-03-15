@@ -42,6 +42,10 @@ export const manifestJobDef = {
     pathPrefix: undefined,
     startTime: expect.any(Date),
     createdTime: expect.any(Date),
+    email: '',
+    comMessage: null,
+    purgedUrls: null,
+    shouldGenerateSearchManifest: false,
     payload: {
       action: 'push',
       branchName: 'DOCSP-666',

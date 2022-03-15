@@ -9,7 +9,7 @@ import { IJobRepoLogger } from '../services/logger';
 import { JobHandler } from './jobHandler';
 import { IJobCommandExecutor } from '../services/commandExecutor';
 import { InvalidJobError } from '../errors/errors';
-import { BuildJob, ManifestJob } from '../entities/job';
+import { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
@@ -24,7 +24,7 @@ export const jobHandlerMap = {
 
 export class JobHandlerFactory {
   public createJobHandler(
-    job: BuildJob | ManifestJob,
+    job: Job,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -112,7 +112,7 @@ export class JobManager {
     return this._shouldStop;
   }
 
-  async workEx(job: BuildJob | ManifestJob): Promise<void> {
+  async workEx(job: Job): Promise<void> {
     try {
       this._jobHandler = null;
       if (job?.payload) {
@@ -128,21 +128,21 @@ export class JobManager {
     }
   }
 
-  async getQueuedJob(): Promise<BuildJob | ManifestJob | null> {
+  async getQueuedJob(): Promise<Job | null> {
     return await this._jobRepository.getOneQueuedJobAndUpdate().catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });
   }
 
-  async getJob(jobId: string): Promise<BuildJob | ManifestJob | null> {
+  async getJob(jobId: string): Promise<Job | null> {
     return await this._jobRepository.getJobByIdAndUpdate(jobId).catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });
   }
 
-  async createHandlerAndExecute(job: BuildJob | ManifestJob): Promise<void> {
+  async createHandlerAndExecute(job: Job): Promise<void> {
     this._jobHandler = this._jobHandlerFactory.createJobHandler(
       job,
       this._config,

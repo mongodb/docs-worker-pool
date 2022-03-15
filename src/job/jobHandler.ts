@@ -1,4 +1,4 @@
-import { BuildJob, ManifestJob, IPayload } from '../entities/job';
+import type { Payload, Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -12,8 +12,8 @@ import { IJobValidator } from './jobValidator';
 require('fs');
 
 export abstract class JobHandler {
-  private _currJob: BuildJob | ManifestJob;
-  public get currJob(): BuildJob | ManifestJob {
+  private _currJob: Job;
+  public get currJob(): Job {
     return this._currJob;
   }
 
@@ -55,7 +55,7 @@ export abstract class JobHandler {
   protected _repoBranchesRepo: RepoBranchesRepository;
 
   constructor(
-    job: BuildJob | ManifestJob,
+    job: Job,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -403,10 +403,6 @@ export abstract class JobHandler {
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);
-      // For most buildJobs, we create off a manifestJob
-      if (['productionDeploy', 'githubPush'].includes(this._currJob.payload.jobType)) {
-        this.queueManifestJob();
-      }
       this.cleanup();
     } catch (error) {
       try {
@@ -430,9 +426,9 @@ export abstract class JobHandler {
       );
       return;
     }
-    const manifestPayload: IPayload = this._currJob.payload;
+    const manifestPayload: Payload = this._currJob.payload;
     manifestPayload.jobType = 'manifestGeneration';
-    const manifestJob: ManifestJob = {
+    const manifestJob: Job = {
       _id: '',
       payload: manifestPayload,
       createdTime: new Date(),
@@ -450,6 +446,10 @@ export abstract class JobHandler {
       mutPrefix: this._currJob.mutPrefix,
       buildCommands: [],
       deployCommands: [],
+      email: '',
+      comMessage: null,
+      purgedUrls: null,
+      shouldGenerateSearchManifest: false,
     };
     try {
       await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));

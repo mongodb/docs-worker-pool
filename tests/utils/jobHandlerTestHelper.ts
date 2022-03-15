@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { mockDeep } from 'jest-mock-extended';
-import { IJob } from '../../src/entities/job';
+import type { Job } from '../../src/entities/job';
 import { IJobValidator } from '../../src/job/jobValidator';
 import { ProductionJobHandler } from '../../src/job/productionJobHandler';
 import { StagingJobHandler } from '../../src/job/stagingJobHandler';
@@ -16,7 +16,7 @@ import { TestDataProvider } from '../data/data';
 import * as data from '../data/jobDef';
 
 export class JobHandlerTestHelper {
-  job: IJob;
+  job: Job;
   config: IConfig;
   jobRepo: JobRepository;
   fileSystemServices: IFileSystemServices;

@@ -208,7 +208,7 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
-  test('Production deploy of a job kicks off manifest generation job', async () => {
+  test('Default production deploy kicks off manifest generation', async () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
@@ -224,10 +224,14 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(data.manifestJobDef.value);
   });
 
-  test('Manifest job does not kick off manifest generation job', async () => {
+  test('Production deploy with false shouldGenerateManifest flag does not kick off manifest job', async () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
-    jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
+    jobHandlerTestHelper.job.shouldGenerateSearchManifest = false;
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+
+    const result = data.default.value;
+    result['shouldGenerateSearchManifest'] = false;
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(result);
 
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();

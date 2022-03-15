@@ -82,7 +82,6 @@ RUN cd snooty-devhub && \
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
-COPY src/test-mut-script.py ./
 RUN npm install
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000

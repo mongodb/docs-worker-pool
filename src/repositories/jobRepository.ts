@@ -1,6 +1,6 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import { BuildJob, ManifestJob, JobStatus } from '../entities/job';
+import type { Job } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
 import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
@@ -44,7 +44,7 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: BuildJob | ManifestJob, url: string): Promise<string> {
+  async insertJob(job: Job, url: string): Promise<string> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
@@ -75,7 +75,7 @@ export class JobRepository extends BaseRepository {
     return jobIds;
   }
 
-  async getJobById(id: string): Promise<BuildJob | ManifestJob | null> {
+  async getJobById(id: string): Promise<Job | null> {
     const query = {
       _id: new objectId(id),
     };
@@ -83,14 +83,14 @@ export class JobRepository extends BaseRepository {
     if (!resp) {
       throw new JobNotFoundError('GetJobByID Failed');
     } else if (resp.value) {
-      const job: BuildJob | ManifestJob = resp.value;
+      const job: Job = resp.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
     }
     return null;
   }
 
-  async getJobByIdAndUpdate(id: string): Promise<BuildJob | ManifestJob | null> {
+  async getJobByIdAndUpdate(id: string): Promise<Job | null> {
     const query = {
       _id: new objectId(id),
     };
@@ -101,7 +101,7 @@ export class JobRepository extends BaseRepository {
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status), url, delay);
   }
 
-  async findOneAndUpdateJob(query): Promise<BuildJob | ManifestJob | null> {
+  async findOneAndUpdateJob(query): Promise<Job | null> {
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
     const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
     const response = await this.findOneAndUpdate(
@@ -113,14 +113,14 @@ export class JobRepository extends BaseRepository {
     if (!response) {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
     } else if (response.value) {
-      const job: BuildJob | ManifestJob = response.value;
+      const job: Job = response.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
     }
     return null;
   }
 
-  async getOneQueuedJobAndUpdate(): Promise<BuildJob | ManifestJob | null> {
+  async getOneQueuedJobAndUpdate(): Promise<Job | null> {
     const query = {
       status: 'inQueue',
       createdTime: { $lte: new Date() },
