@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { IConfig } from 'config';
 import { CDNCreds } from '../entities/creds';
 import { ILogger } from './logger';
+import { ISSMConnector } from './ssm';
 
 export const axiosApi = axios.create();
 
@@ -69,5 +71,46 @@ export class FastlyConnector implements ICDNConnector {
       },
       { headers: this.getHeaders(creds) }
     );
+  }
+}
+
+export class K8SCDNConnector implements ICDNConnector {
+  private _logger: ILogger;
+  private _ssmConnector: ISSMConnector;
+  private _config: IConfig;
+  constructor(config: IConfig, logger: ILogger, ssmConnecotr: ISSMConnector) {
+    this._logger = logger;
+    this._ssmConnector = ssmConnecotr;
+    this._config = config;
+  }
+
+  getHeaders(): any {
+    const token = this._ssmConnector.getParameter(
+      `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
+      true
+    );
+    return {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
+  }
+
+  async purge(jobId: string, urls: string[]): Promise<void> {
+    const url = this._config.get<string>('cdnInvalidatorServiceURL');
+    await axios.post(url, { paths: urls }, { headers: this.getHeaders() });
+    this._logger.info(jobId, `Total urls purged ${urls.length}`);
+  }
+
+  purgeAll(creds: CDNCreds): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
+  warm(jobId: string, url: string): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
+  upsertEdgeDictionaryItem(keyValue: any, id: string, creds: CDNCreds): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 }

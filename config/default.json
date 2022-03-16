@@ -78,5 +78,9 @@
       "token": "FASTLY_MAIN_TOKEN"
     }
   },
-  "repo_dir": "repos"
+  "repo_dir": "repos",
+  "cdn_invalidation_oauth_scope":"mongodbcom-docs",
+  "oauthTokenURL": "https://corp.mongodb.com/oauth2/aus4k4jv00hWjNnps297/v1/token",
+  "grantType":"client_credentials",
+  "oauthTokenPath": "docs/worker_pool/cdn/invalidator/token"
 }

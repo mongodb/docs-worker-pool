@@ -66,6 +66,8 @@ custom:
     dev: "staging"
   jobsQueueUrl: https://sqs.us-east-2.amazonaws.com/216656347858/${self:custom.JobsQueueName}
   jobUpdatesQueueUrl: https://sqs.us-east-2.amazonaws.com/216656347858/${self:custom.JobUpdatesQueueName}
+  cdnClientID: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/id}
+  cdnClientSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/secret}
 
 default-env: &default-env
   STAGE: ${self:provider.stage}
@@ -74,6 +76,8 @@ default-env: &default-env
   FASTLY_DOCHUB_TOKEN: ${self:custom.fastlyDochubToken}
   GITHUB_WEBHOOK_SECRET: REPLACE-WITH-YOUR-SECRET-HERE
   NODE_CONFIG_DIR: './api/config'
+  CDN_CLIENT_ID: ${self:custom.cdnClientID}
+  CDN_CLIENT_SECRET: ${self:custom.cdnClientSecret}
 
 webhook-env-core: &webhook-env-core
   STAGE: ${self:provider.stage}
@@ -98,6 +102,13 @@ resources:
   - ${file(./queues.yml)}
 
 functions:
+  v1CDNInvalidatorTokenRefresh:
+    handler: api/controllers/v1/cdn.RefreshToken
+    events:
+      - schedule: rate(20 hours)
+    environment:
+        <<: *default-env
+
     v1UpsertEdgeDictionaryItem:
       handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
       events:

@@ -102,6 +102,15 @@ Resources:
               Value: ${self:custom.jobsQueueUrl}
             - Name: JOB_UPDATES_QUEUE_URL
               Value: ${self:custom.jobUpdatesQueueUrl}
+            - Name: CDN_CLIENT_ID
+              Value: ${self:custom.cdnClientID}
+            - Name: CDN_CLIENT_SECRET
+              Value: ${self:custom.cdnClientSecret}
+            - Name: CDN_INVALIDATOR_SERVICE_ACCESS_TOKEN
+              Value: ${self:custom.cdnInvalidatorAccessToken}
+            - Name: CDN_INVALIDATOR_SERVICE_URL
+              Value: ${self:custom.cdnInvalidatorServiceURL} 
+
           LogConfiguration:
             LogDriver: awslogs
             Options:

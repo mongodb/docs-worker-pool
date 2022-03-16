@@ -125,6 +125,22 @@ custom:
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   jobsQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsQueueURL}
   jobUpdatesQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsUpdateQueueURL}
+  cdnClientID: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/id}
+  cdnClientSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/secret}
+  cdnInvalidatorAccessToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/invalidator/token}
+  distributionName:
+    stg: mongodbcom-staging-docs
+    dotcomstg: mongodbcom-staging-docs-qa
+    dev: mongodbcom-staging-docs
+    dotcomprd: mongodbcom-staging-docs-qa
+    prd: mongodbcom-staging-docs-qa
+  cdnInvalidatorServiceURL:
+    stg: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
+    prd: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
+    dev: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
+    dotcomstg: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
+    dotcomprd: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
+
   env:
     stg: "staging"
     prd: "production"
