@@ -89,7 +89,7 @@ export class K8SCDNConnector implements ICDNConnector {
       `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
       true
     );
-    console.log(data);
+    console.log(data['Parameter']['Value']);
     if ('Parameter' in data && 'Value' in data['Parameter']) {
       return {
         Authorization: `Bearer ${data['Parameter']['Value']}`,
