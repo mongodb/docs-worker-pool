@@ -15,7 +15,7 @@ export interface ISSMConnector {
 export class ParameterStoreConnector implements ISSMConnector {
   private _client: SSM;
   constructor() {
-    this._client = new SSM();
+    this._client = new SSM({ region: 'us-east-2' });
   }
   async getParameter(name: string, with_decrypt: boolean): Promise<any> {
     return await this._client.getParameter({ Name: name, WithDecryption: with_decrypt }).promise();
