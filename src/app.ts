@@ -1,5 +1,5 @@
 import { JobManager, JobHandlerFactory } from './job/jobManager';
-import { FastlyConnector, K8SCDNConnector } from './services/cdn';
+import { K8SCDNConnector } from './services/cdn';
 import { ParameterStoreConnector } from './services/ssm';
 import { GitHubConnector } from './services/repo';
 import { HybridJobLogger, ConsoleLogger } from './services/logger';
