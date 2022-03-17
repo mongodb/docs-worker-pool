@@ -137,11 +137,11 @@ custom:
     dotcomprd: mongodbcom-staging-docs-qa
     prd: mongodbcom-staging-docs-qa
   cdnInvalidatorServiceURL:
-    stg: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
-    prd: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
-    dev: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
-    dotcomstg: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
-    dotcomprd: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.dashboardUrl.${self:provider.stage}}/invalidations"
+    stg: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations"
+    prd: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations"
+    dev: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations"
+    dotcomstg: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations"
+    dotcomprd: "https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations"
 
   env:
     stg: "staging"
