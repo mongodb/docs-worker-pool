@@ -12,6 +12,8 @@ provider:
         - "s3:DeleteObject"
         - "s3:PutObject"
         - "sqs:SendMessage"
+        - "ssm:PutParameter"
+        - "ssm:GetParameter"
       Resource:
         - "*"
     - Effect: Allow

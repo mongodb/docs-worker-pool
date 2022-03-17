@@ -8,6 +8,13 @@ plugins:
 provider:
   name: aws
   stage: ${opt:stage, 'stg'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "ssm:PutParameter"
+        - "ssm:GetParameter"
+      Resource:
+        - "*"
   deploymentBucket: ${self:custom.deploymentBucket.${opt:stage, 'stg'}}
   deploymentPrefix: serverless
   region: us-east-2
@@ -103,9 +110,13 @@ resources:
 
 functions:
   v1CDNInvalidatorTokenRefresh:
-    handler: api/controllers/v1/cdn.RefreshToken
+    handler: api/controllers/v1/cdn.RefreshInvalidatorOAuthToken
     events:
       - schedule: rate(20 hours)
+      - http:
+          path: /cdn/oauth/refresh
+          method: POST
+
     environment:
         <<: *default-env
 
