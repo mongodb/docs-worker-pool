@@ -109,16 +109,16 @@ resources:
   - ${file(./queues.yml)}
 
 functions:
-  v1CDNInvalidatorTokenRefresh:
-    handler: api/controllers/v1/cdn.RefreshInvalidatorOAuthToken
-    events:
-      - schedule: rate(20 hours)
-      - http:
-          path: /cdn/oauth/refresh
-          method: POST
+    v1CDNInvalidatorTokenRefresh:
+      handler: api/controllers/v1/cdn.RefreshInvalidatorOAuthToken
+      events:
+        - schedule: rate(20 hours)
+        - http:
+            path: /cdn/oauth/refresh
+            method: POST
 
-    environment:
-        <<: *default-env
+      environment:
+          <<: *default-env
 
     v1UpsertEdgeDictionaryItem:
       handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
