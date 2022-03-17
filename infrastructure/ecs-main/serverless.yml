@@ -129,7 +129,6 @@ custom:
   jobUpdatesQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsUpdateQueueURL}
   cdnClientID: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/id}
   cdnClientSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/secret}
-  cdnInvalidatorAccessToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/invalidator/token}
   distributionName:
     stg: mongodbcom-staging-docs
     dotcomstg: mongodbcom-staging-docs-qa
