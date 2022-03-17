@@ -90,9 +90,9 @@ export class K8SCDNConnector implements ICDNConnector {
       true
     );
     console.log(data);
-    if ('parameter' in data && 'value' in data['parameter']) {
+    if ('Parameter' in data && 'Value' in data['Parameter']) {
       return {
-        Authorization: `Bearer ${data['parameter']['value']}`,
+        Authorization: `Bearer ${data['Parameter']['Value']}`,
         Accept: 'application/json',
         'Content-Type': 'application/json',
       };
