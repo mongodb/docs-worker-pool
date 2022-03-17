@@ -8,6 +8,7 @@ export const RefreshInvalidatorOAuthToken = async (event: any = {}): Promise<any
   const ssoConnector = new OktaConnector(c, consoleLogger);
   const res = await ssoConnector.retrieveOAuthToken();
   if (res && res.data && 'access_token' in res.data) {
+    consoleLogger.info('RefreshInvalidatorOAuthToken', res.data);
     const ssmConnector = new ParameterStoreConnector();
     await ssmConnector.putParameter(
       `/env/${c.get<string>('env')}/${c.get<string>('oauthTokenPath')}`,
