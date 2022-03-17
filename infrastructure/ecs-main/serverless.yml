@@ -143,9 +143,6 @@ custom:
     dotcomstg: "dotcomstg"
     dotcomprd: "dotcomprd"
 
-
 resources:
   - ${file(./buckets.yml)}
   - ${file(./ecs_service.yml)}
-
-TaskRole
