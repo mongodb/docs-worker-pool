@@ -109,8 +109,8 @@ Resources:
             - Name: CDN_INVALIDATOR_SERVICE_ACCESS_TOKEN
               Value: ${self:custom.cdnInvalidatorAccessToken}
             - Name: CDN_INVALIDATOR_SERVICE_URL
-              Value: ${self:custom.cdnInvalidatorServiceURL} 
-
+              Value: ${self:custom.cdnInvalidatorServiceURL.${self:provider.stage}}
+              
           LogConfiguration:
             LogDriver: awslogs
             Options:
