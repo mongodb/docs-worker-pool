@@ -3,7 +3,7 @@ import { IConfig } from 'config';
 import { CDNCreds } from '../entities/creds';
 import { ILogger } from './logger';
 import { ISSMConnector } from './ssm';
-
+import { ISSOConnector } from './sso';
 export const axiosApi = axios.create();
 
 export interface ICDNConnector {
@@ -78,26 +78,54 @@ export class K8SCDNConnector implements ICDNConnector {
   private _logger: ILogger;
   private _ssmConnector: ISSMConnector;
   private _config: IConfig;
-  constructor(config: IConfig, logger: ILogger, ssmConnecotr: ISSMConnector) {
+  private _ssoConnector: ISSOConnector;
+
+  constructor(config: IConfig, logger: ILogger, ssmConnecotr: ISSMConnector, ssoConnector: ISSOConnector) {
     this._logger = logger;
     this._ssmConnector = ssmConnecotr;
     this._config = config;
+    this._ssoConnector = ssoConnector;
   }
 
-  async getHeaders(): Promise<any> {
-    const data = await this._ssmConnector.getParameter(
+  async generateAndSetToken(): Promise<any> {
+    const res = await this._ssoConnector.retrieveOAuthToken();
+    if (res?.data?.access_token) {
+      await this._ssmConnector.putParameter(
+        `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
+        res.data['access_token'],
+        true,
+        'OAuth Token',
+        'SecureString',
+        true
+      );
+      return res.data['access_token'];
+    }
+    return null;
+  }
+
+  async getToken(): Promise<any> {
+    let token = await this._ssmConnector.getParameter(
       `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
       true
     );
-    console.log(data['Parameter']['Value']);
-    if ('Parameter' in data && 'Value' in data['Parameter']) {
-      return {
-        Authorization: `Bearer ${data['Parameter']['Value']}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      };
+    if (!token) {
+      token = await this.generateAndSetToken();
+    } else {
+      const decodedValue = JSON.parse(Buffer.from(token?.split('.')[1], 'base64').toString('ascii'));
+      if (decodedValue.exp < new Date().getTime() / 1000) {
+        token = await this.generateAndSetToken();
+      }
     }
-    return null;
+    return token;
+  }
+
+  async getHeaders(): Promise<any> {
+    const data = await this.getToken();
+    return {
+      Authorization: `Bearer ${data}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
   }
 
   async purge(jobId: string, urls: string[]): Promise<void> {

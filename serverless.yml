@@ -109,17 +109,6 @@ resources:
   - ${file(./queues.yml)}
 
 functions:
-    v1CDNInvalidatorTokenRefresh:
-      handler: api/controllers/v1/cdn.RefreshInvalidatorOAuthToken
-      events:
-        - schedule: rate(20 hours)
-        - http:
-            path: /cdn/oauth/refresh
-            method: POST
-
-      environment:
-          <<: *default-env
-    
     v1GithubDeployRepo:
       handler: api/controllers/v1/github.TriggerBuild
       events:
