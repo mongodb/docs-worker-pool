@@ -109,7 +109,7 @@ Resources:
             - Name: CDN_INVALIDATOR_SERVICE_ACCESS_TOKEN
               Value: ${self:custom.cdnInvalidatorAccessToken}
             - Name: CDN_INVALIDATOR_SERVICE_URL
-              Value: ${self:custom.cdnInvalidatorServiceURL.${self:provider.stage}}
+              Value: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
               
           LogConfiguration:
             LogDriver: awslogs
