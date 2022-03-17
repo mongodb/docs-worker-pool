@@ -100,7 +100,10 @@ export class K8SCDNConnector implements ICDNConnector {
     console.log(urls);
     console.log('K8SCDNConnector purge');
     const url = this._config.get<string>('cdnInvalidatorServiceURL');
-    const res = await axios.post(url, { paths: urls }, { headers: await this.getHeaders() });
+    console.log(url);
+    const headers = await this.getHeaders();
+    console.log(headers);
+    const res = await axios.post(url, { paths: urls }, { headers: headers });
     console.log(res);
     this._logger.info(jobId, `Total urls purged ${urls.length}`);
   }
