@@ -159,5 +159,5 @@ Resources:
                   Action:
                     - "ssm:GetParameter"
                   Resource:
-                    - "*"
+                    - 'arn:aws:ssm:us-east-2:216656347858:parameter/env/${self:provider.stage}/docs/worker_pool/cdn/invalidator/token'
 
