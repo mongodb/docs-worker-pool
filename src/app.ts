@@ -6,6 +6,7 @@ import { HybridJobLogger, ConsoleLogger } from './services/logger';
 import { GithubCommandExecutor, JobSpecificCommandExecutor } from './services/commandExecutor';
 import { JobRepository } from './repositories/jobRepository';
 import { RepoEntitlementsRepository } from './repositories/repoEntitlementsRepository';
+import { ISSOConnector, OktaConnector } from './services/sso';
 import c from 'config';
 import * as mongodb from 'mongodb';
 import { FileSystemServices } from './services/fileServices';
@@ -30,6 +31,7 @@ let repoConnector: GitHubConnector;
 let jobHandlerFactory: JobHandlerFactory;
 let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
+let ssoConnector: ISSOConnector;
 
 async function init(): Promise<void> {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -45,7 +47,8 @@ async function init(): Promise<void> {
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
   jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
-  cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector);
+  ssoConnector = new OktaConnector(c, consoleLogger);
+  cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector, ssoConnector);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandlerFactory = new JobHandlerFactory();
   jobManager = new JobManager(

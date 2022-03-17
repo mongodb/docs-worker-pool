@@ -11,6 +11,7 @@ import * as mongodb from 'mongodb';
 import { FileSystemServices } from './services/fileServices';
 import { JobValidator } from './job/jobValidator';
 import { RepoBranchesRepository } from './repositories/repoBranchesRepository';
+import { ISSOConnector, OktaConnector } from './services/sso';
 
 let db: mongodb.Db;
 let client: mongodb.MongoClient;
@@ -30,6 +31,7 @@ let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
 
 let ssmConnector: ParameterStoreConnector;
+let ssoConnector: ISSOConnector;
 
 async function init(): Promise<void> {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -45,7 +47,8 @@ async function init(): Promise<void> {
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
   jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
-  cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector);
+  ssoConnector = new OktaConnector(c, consoleLogger);
+  cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector, ssoConnector);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandlerFactory = new JobHandlerFactory();
   jobManager = new JobManager(
