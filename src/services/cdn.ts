@@ -85,15 +85,18 @@ export class K8SCDNConnector implements ICDNConnector {
   }
 
   async getHeaders(): Promise<any> {
-    const token = await this._ssmConnector.getParameter(
+    const data = await this._ssmConnector.getParameter(
       `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
       true
     );
-    return {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    };
+    if ('parameter' in data && 'value' in data['parameter']) {
+      return {
+        Authorization: `Bearer ${data['parameter']['value']}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      };
+    }
+    return null;
   }
 
   async purge(jobId: string, urls: string[]): Promise<void> {
