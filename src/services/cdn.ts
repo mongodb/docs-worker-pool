@@ -84,8 +84,8 @@ export class K8SCDNConnector implements ICDNConnector {
     this._config = config;
   }
 
-  getHeaders(): any {
-    const token = this._ssmConnector.getParameter(
+  async getHeaders(): Promise<any> {
+    const token = await this._ssmConnector.getParameter(
       `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
       true
     );
@@ -100,7 +100,7 @@ export class K8SCDNConnector implements ICDNConnector {
     console.log(urls);
     console.log('K8SCDNConnector purge');
     const url = this._config.get<string>('cdnInvalidatorServiceURL');
-    const res = await axios.post(url, { paths: urls }, { headers: this.getHeaders() });
+    const res = await axios.post(url, { paths: urls }, { headers: await this.getHeaders() });
     console.log(res);
     this._logger.info(jobId, `Total urls purged ${urls.length}`);
   }
