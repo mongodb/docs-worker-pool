@@ -155,9 +155,13 @@ Resources:
                   Resource: 
                     - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-job-updates-queue-${self:provider.stage}'
                     - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-jobs-queue-${self:provider.stage}'
+          - PolicyName: AllowSSMAccess
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
                 - Effect: Allow
                   Action:
-                    - "ssm:GetParameter"
+                    - 'ssm:GetParameter'
                   Resource:
                     - 'arn:aws:ssm:us-east-2:216656347858:parameter/env/${self:provider.stage}/docs/worker_pool/cdn/invalidator/token'
 
