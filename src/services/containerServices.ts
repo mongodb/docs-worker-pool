@@ -54,7 +54,7 @@ export class ECSContainer implements IContainerServices {
 
     const awsvpcConfig: AwsVpcConfiguration = {
       subnets: this._config.get('subnets'),
-      assignPublicIp: 'ENABLED',
+      assignPublicIp: 'DISABLED',
     };
 
     const networkConfig: NetworkConfiguration = {

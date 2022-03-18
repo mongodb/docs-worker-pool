@@ -1,7 +1,9 @@
 import axios from 'axios';
+import { IConfig } from 'config';
 import { CDNCreds } from '../entities/creds';
 import { ILogger } from './logger';
-
+import { ISSMConnector } from './ssm';
+import { ISSOConnector } from './sso';
 export const axiosApi = axios.create();
 
 export interface ICDNConnector {
@@ -69,5 +71,85 @@ export class FastlyConnector implements ICDNConnector {
       },
       { headers: this.getHeaders(creds) }
     );
+  }
+}
+
+export class K8SCDNConnector implements ICDNConnector {
+  private _logger: ILogger;
+  private _ssmConnector: ISSMConnector;
+  private _config: IConfig;
+  private _ssoConnector: ISSOConnector;
+
+  constructor(config: IConfig, logger: ILogger, ssmConnecotr: ISSMConnector, ssoConnector: ISSOConnector) {
+    this._logger = logger;
+    this._ssmConnector = ssmConnecotr;
+    this._config = config;
+    this._ssoConnector = ssoConnector;
+  }
+
+  async generateAndSetToken(): Promise<any> {
+    const res = await this._ssoConnector.retrieveOAuthToken();
+    if (res?.data?.access_token) {
+      await this._ssmConnector.putParameter(
+        `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
+        res.data['access_token'],
+        true,
+        'OAuth Token',
+        'SecureString',
+        true
+      );
+      return res.data['access_token'];
+    }
+    return null;
+  }
+
+  async getToken(): Promise<any> {
+    let token = await this._ssmConnector.getParameter(
+      `/env/${this._config.get<string>('env')}/${this._config.get<string>('oauthTokenPath')}`,
+      true
+    );
+    if (!token) {
+      token = await this.generateAndSetToken();
+    } else {
+      token = token['Parameter']['Value'];
+      const decodedValue = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('ascii'));
+      if (decodedValue.exp < new Date().getTime() / 1000) {
+        token = await this.generateAndSetToken();
+      }
+    }
+    return token;
+  }
+
+  async getHeaders(): Promise<any> {
+    const data = await this.getToken();
+    return {
+      Authorization: `Bearer ${data}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
+  }
+
+  async purge(jobId: string, urls: string[]): Promise<void> {
+    console.log(urls);
+    console.log('K8SCDNConnector purge');
+    const url = this._config.get<string>('cdnInvalidatorServiceURL');
+    console.log(url);
+    const headers = await this.getHeaders();
+    console.log(headers);
+    const res = await axios.post(url, { paths: urls }, { headers: headers });
+    console.log(res?.data);
+    this._logger.info(jobId, `Total urls purged ${urls.length}`);
+  }
+
+  purgeAll(creds: CDNCreds): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
+  warm(jobId: string, url: string): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
+  upsertEdgeDictionaryItem(keyValue: any, id: string, creds: CDNCreds): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 }

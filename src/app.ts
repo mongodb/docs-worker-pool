@@ -1,10 +1,12 @@
 import { JobManager, JobHandlerFactory } from './job/jobManager';
-import { FastlyConnector } from './services/cdn';
+import { K8SCDNConnector } from './services/cdn';
+import { ParameterStoreConnector } from './services/ssm';
 import { GitHubConnector } from './services/repo';
 import { HybridJobLogger, ConsoleLogger } from './services/logger';
 import { GithubCommandExecutor, JobSpecificCommandExecutor } from './services/commandExecutor';
 import { JobRepository } from './repositories/jobRepository';
 import { RepoEntitlementsRepository } from './repositories/repoEntitlementsRepository';
+import { ISSOConnector, OktaConnector } from './services/sso';
 import c from 'config';
 import * as mongodb from 'mongodb';
 import { FileSystemServices } from './services/fileServices';
@@ -22,11 +24,14 @@ let hybridJobLogger: HybridJobLogger;
 let repoEntitlementRepository: RepoEntitlementsRepository;
 let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
-let cdnConnector: FastlyConnector;
+let cdnConnector: K8SCDNConnector;
+let ssmConnector: ParameterStoreConnector;
+
 let repoConnector: GitHubConnector;
 let jobHandlerFactory: JobHandlerFactory;
 let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
+let ssoConnector: ISSOConnector;
 
 async function init(): Promise<void> {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -38,10 +43,12 @@ async function init(): Promise<void> {
   githubCommandExecutor = new GithubCommandExecutor();
   jobRepository = new JobRepository(db, c, consoleLogger);
   hybridJobLogger = new HybridJobLogger(jobRepository);
+  ssmConnector = new ParameterStoreConnector();
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
   jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
-  cdnConnector = new FastlyConnector(consoleLogger);
+  ssoConnector = new OktaConnector(c, consoleLogger);
+  cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector, ssoConnector);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
   jobHandlerFactory = new JobHandlerFactory();
   jobManager = new JobManager(

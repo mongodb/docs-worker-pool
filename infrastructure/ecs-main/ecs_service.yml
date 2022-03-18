@@ -2,7 +2,7 @@ Resources:
   SecurityGroupVPC:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      VpcId: vpc-781fab13
+      VpcId: vpc-03701c29a3408c714
       GroupDescription: 'Security group to VPC'
 
   ECSCluster:
@@ -102,6 +102,13 @@ Resources:
               Value: ${self:custom.jobsQueueUrl}
             - Name: JOB_UPDATES_QUEUE_URL
               Value: ${self:custom.jobUpdatesQueueUrl}
+            - Name: CDN_CLIENT_ID
+              Value: ${self:custom.cdnClientID}
+            - Name: CDN_CLIENT_SECRET
+              Value: ${self:custom.cdnClientSecret}
+            - Name: CDN_INVALIDATOR_SERVICE_URL
+              Value: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+              
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -146,4 +153,12 @@ Resources:
                   Resource: 
                     - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-job-updates-queue-${self:provider.stage}'
                     - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-jobs-queue-${self:provider.stage}'
+          - PolicyName: AllowSSMAccess
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'ssm:GetParameter'
+                  Resource: "*"
 
