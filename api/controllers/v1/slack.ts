@@ -11,8 +11,8 @@ function isUserEntitled(entitlementsObject: any): boolean {
 }
 
 function isRestrictedToDeploy(userId: string): boolean {
-  const prodDeploy = c.get<any>('prodDeploy');
-  return (prodDeploy.restrictedProdDeploy && !prodDeploy.entitledSlackUser.includes(userId));
+  const { restrictedProdDeploy, entitledSlackUsers } = c.get<any>('prodDeploy');
+  return (restrictedProdDeploy && !entitledSlackUsers.includes(userId));
 }
 
 function prepReponse(statusCode, contentType, body) {
