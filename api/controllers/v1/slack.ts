@@ -91,6 +91,16 @@ async function deployRepo(
   }
 }
 
+// Used solely for adding parallel deploy jobs to another array
+const parallelPrefixDeployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail, parallelPrefix = undefined, parallelDeployable) => {
+  deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail))
+  if (parallelPrefix) {
+    const parallelPayload = { ...payload };
+    parallelPayload.prefix = parallelPrefix;
+    parallelDeployable.push(createJob(parallelPayload, jobTitle, jobUserName, jobUserEmail));
+  } 
+}
+
 export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
@@ -155,15 +165,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
     if (!active) {
       continue;
-    }
-
-    const parallelPrefixDeployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail, parallelPrefix = undefined, parallelDeployable) => {
-      deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail))
-      if (parallelPrefix) {
-        const parallelPayload = { ...payload };
-        parallelPayload.prefix = parallelPrefix;
-        parallelDeployable.push(createJob(parallelPayload, jobTitle, jobUserName, jobUserEmail));
-      } 
     }
 
     //Generic payload, will be conditionaly modified appropriately
