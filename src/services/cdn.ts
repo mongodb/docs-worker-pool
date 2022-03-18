@@ -137,7 +137,7 @@ export class K8SCDNConnector implements ICDNConnector {
     const headers = await this.getHeaders();
     console.log(headers);
     const res = await axios.post(url, { paths: urls }, { headers: headers });
-    console.log(res);
+    console.log(res?.data);
     this._logger.info(jobId, `Total urls purged ${urls.length}`);
   }
 
