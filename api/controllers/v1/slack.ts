@@ -92,7 +92,7 @@ async function deployRepo(
 }
 
 // Used solely for adding parallel deploy jobs to another array
-const parallelPrefixDeployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail, parallelPrefix = undefined, parallelDeployable) => {
+const parallelPrefixDeployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail, parallelPrefix = undefined, parallelDeployable = []) => {
   deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail))
   if (parallelPrefix) {
     const parallelPayload = { ...payload };
