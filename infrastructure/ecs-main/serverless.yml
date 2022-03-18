@@ -128,6 +128,12 @@ custom:
   jobUpdatesQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsUpdateQueueURL}
   cdnClientID: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/id}
   cdnClientSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/secret}
+  cdnInvalidatorServiceURL: 
+    stg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    prd: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    dotcomstg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    dotcomprd: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    dev: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
   distributionName:
     stg: mongodbcom-staging-docs
     dotcomstg: mongodbcom-staging-docs-qa

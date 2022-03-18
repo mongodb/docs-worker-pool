@@ -166,9 +166,9 @@ async function prepSummaryMessage(
     msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n Check logs for more errors!!\nSorry  :disappointed:! `;
   } else {
     if (repoName == 'mms-docs') {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager> \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager>*\n- InvalidationStatus:<${fullDocument.invalidationStatusURL}>s \nEnjoy  :smile:!`;
     } else {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n- Url:<${url}|${repoName}> \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n- Url:<${url}|${repoName}>*\n- InvalidationStatus:<${fullDocument.invalidationStatusURL}> \nEnjoy  :smile:!`;
     }
   }
   // Removes instances of two or more periods

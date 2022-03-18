@@ -7,7 +7,7 @@ import { ISSOConnector } from './sso';
 export const axiosApi = axios.create();
 
 export interface ICDNConnector {
-  purge(jobId: string, urls: Array<string>): Promise<void>;
+  purge(jobId: string, urls: Array<string>): Promise<string>;
   purgeAll(creds: CDNCreds): Promise<any>;
   warm(jobId: string, url: string): Promise<any>;
   upsertEdgeDictionaryItem(keyValue: any, id: string, creds: CDNCreds): Promise<void>;
@@ -40,7 +40,7 @@ export class FastlyConnector implements ICDNConnector {
     return await axiosApi.get(url);
   }
 
-  async purge(jobId: string, urls: Array<string>): Promise<void> {
+  async purge(jobId: string, urls: Array<string>): Promise<string> {
     const purgeUrlPromises = urls.map((url) => this.purgeURL(url));
     await Promise.all(
       purgeUrlPromises.map((p) =>
@@ -54,6 +54,7 @@ export class FastlyConnector implements ICDNConnector {
     // GET request the URLs to warm cache for our users
     const warmCachePromises = urls.map((url) => this.warm(url));
     await Promise.all(warmCachePromises);
+    return '';
   }
 
   private async purgeURL(url: string): Promise<any> {
@@ -129,7 +130,7 @@ export class K8SCDNConnector implements ICDNConnector {
     };
   }
 
-  async purge(jobId: string, urls: string[]): Promise<void> {
+  async purge(jobId: string, urls: string[]): Promise<string> {
     console.log(urls);
     console.log('K8SCDNConnector purge');
     const url = this._config.get<string>('cdnInvalidatorServiceURL');
@@ -142,6 +143,7 @@ export class K8SCDNConnector implements ICDNConnector {
     const res = await axios.post(url, { paths: urls }, { headers: headers });
     console.log(res?.data);
     this._logger.info(jobId, `Total urls purged ${urls.length}`);
+    return res?.data?.id;
   }
 
   purgeAll(creds: CDNCreds): Promise<any> {
