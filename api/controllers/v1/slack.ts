@@ -70,7 +70,9 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const key_val = getQSString(event.body);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
   if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
-    return prepReponse(401, 'text/plain', 'User is not entitled!');
+    const { restrictedProdDeploy } = c.get<any>('prodDeploy');
+    const response = restrictedProdDeploy ? 'Production freeze in place - please notify DOP if seeing this past 3/26' : 'User is not entitled!';
+    return prepReponse(401, 'text/plain', response);
   }
   const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id']);
