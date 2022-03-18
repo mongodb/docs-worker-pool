@@ -56,7 +56,7 @@
       "U01QVEWPL5B",
       "UKF72EJRF"
     ]
-  }
+  },
   "cdnInvalidationOauthScope": "mongodbcom-docs",
   "oauthTokenURL": "https://corp.mongodb.com/oauth2/aus4k4jv00hWjNnps297/v1/token",
   "grantType": "client_credentials",
