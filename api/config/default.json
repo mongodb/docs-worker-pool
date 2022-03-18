@@ -20,7 +20,7 @@
   "maxRetries": 3,
   "retryDelay": 60,
   "commandOverride": ["node", "onDemandApp.js"],
-  "subnets": ["subnet-8c3623f6", "subnet-a4ac73cf", "subnet-9e83fed2"],
+  "subnets": ["subnet-0a142842e8f13a042", "subnet-0fba568cfd3839eee"],
   "parallel": {
     "enabled": true,
     "stg": {
