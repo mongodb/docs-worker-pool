@@ -43,5 +43,10 @@
       "id": "FASTLY_DOCHUB_SERVICE_ID",
       "token": "FASTLY_DOCHUB_TOKEN"
     }
+  },
+  "prodDeploy": {
+    "restrictedProdDeploy": true,
+    "entitledSlackUsers": ["U0V6H55D2", "U0V2WGRFC", "U01S32X6GJV", "URF5PJS6Q", "U02HJ4P5MJS", "U015S53G8TT", "U01QVEWPL5B", "UKF72EJRF"]
   }
+  
 }

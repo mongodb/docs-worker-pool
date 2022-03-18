@@ -10,6 +10,14 @@ function isUserEntitled(entitlementsObject: any): boolean {
   return (entitlementsObject?.repos?.length ?? 0) > 0;
 }
 
+function isRestrictedToDeploy(userId: string): boolean {
+  const prodDeploy = c.get<any>('prodDeploy');
+  if (prodDeploy.restrictedProdDeploy && prodDeploy.entitledSlackUser.includes(userId) == false) {
+    return true;
+  }
+  return false;
+}
+
 function prepReponse(statusCode, contentType, body) {
   return {
     statusCode: statusCode,
@@ -61,7 +69,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
-  if (!isUserEntitled(entitlement)) {
+  if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
   const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
