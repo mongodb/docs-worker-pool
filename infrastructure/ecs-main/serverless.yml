@@ -29,7 +29,8 @@ provider:
       - 'Fn::GetAtt':
           - GroupId
     subnetIds:
-      - subnet-005fb70a6c17142c1
+      - subnet-0a142842e8f13a042
+      - subnet-0fba568cfd3839eee
 custom:
   deploymentBucket:
     dev: worker-pool-deployment

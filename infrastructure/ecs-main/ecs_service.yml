@@ -2,7 +2,7 @@ Resources:
   SecurityGroupVPC:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      VpcId: vpc-0fc209d2b715b6dca
+      VpcId: vpc-03701c29a3408c714
       GroupDescription: 'Security group to VPC'
 
   ECSCluster:
