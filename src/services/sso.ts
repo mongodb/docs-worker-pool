@@ -36,7 +36,7 @@ export class OktaConnector implements ISSOConnector {
     return await axiosApi.post(
       `${this._config.get<string>('oauthTokenURL')}?grant_type=${this._config.get<string>(
         'grantType'
-      )}&scope=${this._config.get<string>('cdn_invalidation_oauth_scope')}`,
+      )}&scope=${this._config.get<string>('cdnInvalidationOauthScope')}`,
       {},
       { headers: this.getHeaders() }
     );
