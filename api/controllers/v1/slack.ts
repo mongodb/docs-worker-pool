@@ -93,7 +93,7 @@ async function deployRepo(
 
 // Used solely for adding parallel deploy jobs to another array
 const parallelPrefixDeployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail, parallelPrefix = undefined, parallelDeployable = []) => {
-  deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail))
+  deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail));
   if (parallelPrefix) {
     const parallelPayload = { ...payload };
     parallelPayload.prefix = parallelPrefix;
@@ -231,7 +231,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
   if (parallelDeployable.length > 0) {
-    await deployRepo(deployable, consoleLogger, parallelJobRepo, parallelUrl)
+    await deployRepo(parallelDeployable, consoleLogger, parallelJobRepo, parallelUrl);
   }
   return {
     statusCode: 200,
