@@ -111,9 +111,8 @@ export class K8SCDNConnector implements ICDNConnector {
     if (!token) {
       token = await this.generateAndSetToken();
     } else {
-      const decodedValue = JSON.parse(
-        Buffer.from(token['Parameter']['Value']?.split('.')[1], 'base64').toString('ascii')
-      );
+      token = token['Parameter']['Value'];
+      const decodedValue = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('ascii'));
       if (decodedValue.exp < new Date().getTime() / 1000) {
         token = await this.generateAndSetToken();
       }
