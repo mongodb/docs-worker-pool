@@ -176,6 +176,18 @@ export class JobRepository extends BaseRepository {
     );
   }
 
+  async insertInvalidationRequestStatusUrl(id: string, url: string): Promise<boolean> {
+    const query = { _id: id };
+    const update = {
+      $set: { invalidationStatusURL: url },
+    };
+    return await this.updateOne(
+      query,
+      update,
+      `Mongo Timeout Error: Timed out while inserting purged urls for jobId: ${id}`
+    );
+  }
+
   async resetJobStatus(id: string, status: string, reenqueueMessage: string) {
     const query = { _id: id };
     const update = {

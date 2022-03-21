@@ -12,6 +12,8 @@ provider:
         - "s3:DeleteObject"
         - "s3:PutObject"
         - "sqs:SendMessage"
+        - "ssm:PutParameter"
+        - "ssm:GetParameter"
       Resource:
         - "*"
     - Effect: Allow
@@ -27,9 +29,8 @@ provider:
       - 'Fn::GetAtt':
           - GroupId
     subnetIds:
-      - subnet-8c3623f6
-      - subnet-a4ac73cf
-      - subnet-9e83fed2
+      - subnet-0a142842e8f13a042
+      - subnet-0fba568cfd3839eee
 custom:
   deploymentBucket:
     dev: worker-pool-deployment
@@ -41,17 +42,17 @@ custom:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
     containerCpu:
-      dev: '4096'
-      stg: '4096'
-      prd: '4096'
-      dotcomstg: '4096'
-      dotcomprd: '4096'
+      dev: '2048'
+      stg: '2048'
+      prd: '2048'
+      dotcomstg: '2048'
+      dotcomprd: '2048'
     containerMemory:
-      dev: '24576'
-      stg: '24576'
-      prd: '24576'
-      dotcomstg: '24576'
-      dotcomprd: '24576'
+      dev: '8192'
+      stg: '8192'
+      prd: '8192'
+      dotcomstg: '8192'
+      dotcomprd: '8192'
     desiredCount:
       dev: '4'
       stg: '4'
@@ -125,13 +126,26 @@ custom:
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   jobsQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsQueueURL}
   jobUpdatesQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsUpdateQueueURL}
+  cdnClientID: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/id}
+  cdnClientSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/secret}
+  cdnInvalidatorServiceURL: 
+    stg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    prd: https://cdnvalidator.devops.prod.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    dotcomstg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    dotcomprd: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    dev: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+  distributionName:
+    stg: mongodbcom-staging-docs
+    dotcomstg: mongodbcom-staging-docs
+    dev: mongodbcom-staging-docs
+    dotcomprd: mongodbcom-prod-docs
+    prd: mongodbcom-prod-docs
   env:
     stg: "staging"
     prd: "production"
     dev: "staging"
     dotcomstg: "dotcomstg"
     dotcomprd: "dotcomprd"
-
 
 resources:
   - ${file(./buckets.yml)}

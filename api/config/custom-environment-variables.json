@@ -19,5 +19,7 @@
       "id": "FASTLY_DOCHUB_SERVICE_ID",
       "token": "FASTLY_DOCHUB_TOKEN"
     }
-  }
+  },
+  "cdnClientID": "CDN_CLIENT_ID",
+  "cdnClientSecret": "CDN_CLIENT_SECRET"
 }

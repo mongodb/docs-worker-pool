@@ -76,4 +76,5 @@ export class Job implements IJob {
   mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
+  invalidationStatusURL: string | null | undefined;
 }

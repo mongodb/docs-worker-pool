@@ -98,12 +98,12 @@ export class ProductionJobHandler extends JobHandler {
       const updatedURLsArray = stdoutJSON.urls;
       // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
       await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
-      if (this._config.get('shouldPurgeAll')) {
-        await this._cdnConnector.purgeAll(this.getCdnCreds());
-      } else {
-        await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
-        await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
-      }
+      const id = await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
+      await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
+      await this.jobRepository.insertInvalidationRequestStatusUrl(
+        this.currJob._id,
+        `${this._config.get<string>('cdnInvalidatorServiceURL')}/${id}`
+      );
     } catch (error) {
       await this.logger.save(this.currJob._id, error);
     }
