@@ -136,9 +136,9 @@ custom:
     dev: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
   distributionName:
     stg: mongodbcom-staging-docs
-    dotcomstg: mongodbcom-staging-docs-qa
+    dotcomstg: mongodbcom-staging-docs
     dev: mongodbcom-staging-docs
-    dotcomprd: mongodbcom-prod-docs-qa
+    dotcomprd: mongodbcom-prod-docs
     prd: mongodbcom-prod-docs
   env:
     stg: "staging"
