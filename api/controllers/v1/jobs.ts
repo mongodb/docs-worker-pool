@@ -177,15 +177,16 @@ async function prepSummaryMessage(
 
 function prepProgressMessage(jobUrl: string, jobId: string, jobTitle: string, status: string): string {
   const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
+  const env = c.get<string>('env');
   switch (status) {
     case 'inQueue':
-      return msg + 'has successfully been added to the queue.';
+      return msg + 'has successfully been added to the ' + env + ' queue.';
     case 'inProgress':
       return msg + 'is now being processed.';
     case 'completed':
       return msg + 'has successfully completed.';
     case 'failed':
-      return msg + 'has failed and will not be placed back in the queue.';
+      return msg + 'has failed and will not be placed back in the ' + env + ' queue.';
     default:
       return msg + 'has been updated to an unsupported status.';
   }
