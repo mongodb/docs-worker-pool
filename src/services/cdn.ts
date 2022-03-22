@@ -139,11 +139,14 @@ export class K8SCDNConnector implements ICDNConnector {
     urls = urls.map((item) => {
       return `/${item}`;
     });
-    const res = await axios.post(url, { paths: urls }, { headers: headers });
-    console.log(urls);
-    console.log(res);
-    this._logger.info(jobId, `Total urls purged ${urls.length}`);
-    return res?.data?.id;
+    try {
+      const res = await axios.post(url, { paths: urls }, { headers: headers });
+      this._logger.info(jobId, `Total urls purged ${urls.length}`);
+      return res?.data?.id;
+    } catch (err) {
+      this._logger.error(jobId, err.response.data);
+    }
+    return '';
   }
 
   purgeAll(creds: CDNCreds): Promise<any> {
