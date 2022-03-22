@@ -7,7 +7,7 @@ import { ISSOConnector } from './sso';
 export const axiosApi = axios.create();
 
 export interface ICDNConnector {
-  purge(jobId: string, urls: Array<string>): Promise<string>;
+  purge(jobId: string, urls: Array<string>): Promise<string | null>;
   purgeAll(creds: CDNCreds): Promise<any>;
   warm(jobId: string, url: string): Promise<any>;
   upsertEdgeDictionaryItem(keyValue: any, id: string, creds: CDNCreds): Promise<void>;
@@ -130,7 +130,7 @@ export class K8SCDNConnector implements ICDNConnector {
     };
   }
 
-  async purge(jobId: string, urls: string[]): Promise<string> {
+  async purge(jobId: string, urls: string[]): Promise<string | null> {
     console.log('K8SCDNConnector purge');
     const url = this._config.get<string>('cdnInvalidatorServiceURL');
     console.log(url);
@@ -146,7 +146,7 @@ export class K8SCDNConnector implements ICDNConnector {
     } catch (err) {
       this._logger.error(jobId, JSON.stringify(err.response));
     }
-    return '';
+    return null;
   }
 
   purgeAll(creds: CDNCreds): Promise<any> {

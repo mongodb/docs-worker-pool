@@ -100,7 +100,7 @@ export class ProductionJobHandler extends JobHandler {
       await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
       const id = await this._cdnConnector.purge(this.currJob._id, updatedURLsArray);
       await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
-      if (id && id !== '') {
+      if (id) {
         await this.jobRepository.insertInvalidationRequestStatusUrl(
           this.currJob._id,
           `${this._config.get<string>('cdnInvalidatorServiceURL')}/${id}`
