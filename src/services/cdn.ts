@@ -144,7 +144,7 @@ export class K8SCDNConnector implements ICDNConnector {
       this._logger.info(jobId, `Total urls purged ${urls.length}`);
       return res?.data?.id;
     } catch (err) {
-      this._logger.error(jobId, JSON.stringify(err.response));
+      this._logger.error(jobId, JSON.stringify(err?.response?.data));
     }
     return null;
   }
