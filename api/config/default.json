@@ -45,7 +45,7 @@
     }
   },
   "prodDeploy": {
-    "restrictedProdDeploy": true,
+    "restrictedProdDeploy": false,
     "entitledSlackUsers": [
       "U0V6H55D2",
       "U0V2WGRFC",
