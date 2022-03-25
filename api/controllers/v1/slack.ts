@@ -10,11 +10,6 @@ function isUserEntitled(entitlementsObject: any): boolean {
   return (entitlementsObject?.repos?.length ?? 0) > 0;
 }
 
-function isRestrictedToDeploy(userId: string): boolean {
-  const { restrictedProdDeploy, entitledSlackUsers } = c.get<any>('prodDeploy');
-  return restrictedProdDeploy && !entitledSlackUsers.includes(userId);
-}
-
 function prepReponse(statusCode, contentType, body) {
   return {
     statusCode: statusCode,
@@ -66,11 +61,8 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
-  if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
-    const { restrictedProdDeploy } = c.get<any>('prodDeploy');
-    const response = restrictedProdDeploy
-      ? 'Production freeze in place - please notify DOP if seeing this past 3/26'
-      : 'User is not entitled!';
+  if (!isUserEntitled(entitlement)) {
+    const response = 'User is not entitled!';
     return prepReponse(401, 'text/plain', response);
   }
   const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
