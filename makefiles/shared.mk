@@ -10,13 +10,7 @@ PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |
 
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
-# DOP-2649: If we're building in a dotcom environment, then we should use a different rstspec file
-ifneq (,$(findstring dotcom,$(SNOOTY_ENV)))
-	RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec-consolidated.toml
-else
-	RSTSPEC_FLAG=
-endif
-
+RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec-consolidated.toml
 
 ifeq ($(SNOOTY_INTEGRATION),true)
 	BUCKET_FLAG=-b ${INTEGRATION_SEARCH_BUCKET}
