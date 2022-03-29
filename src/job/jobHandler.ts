@@ -282,10 +282,24 @@ export abstract class JobHandler {
     });
   }
 
-  protected getPathPrefix(): string {
-    return '';
+  getPathPrefix(): string {
+    try {
+      if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
+        return this.currJob.payload.urlSlug ?? '';
+      }
+      if (this.currJob.payload.urlSlug) {
+        if (this.currJob.payload.urlSlug === '') {
+          return this.currJob.payload.prefix;
+        } else {
+          return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
+        }
+      }
+      return this.currJob.payload.prefix;
+    } catch (error) {
+      this.logger.save(this.currJob._id, error).then();
+      throw new InvalidJobError(error.message);
+    }
   }
-
   // For certain unversioned properties, urlSlug is null; use branchName instead
   protected constructManifestPrefix(): string {
     if (this.currJob.payload.urlSlug) {
