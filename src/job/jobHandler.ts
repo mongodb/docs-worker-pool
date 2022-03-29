@@ -282,24 +282,10 @@ export abstract class JobHandler {
     });
   }
 
-  getPathPrefix(): string {
-    try {
-      if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
-        return this.currJob.payload.urlSlug ?? '';
-      }
-      if (this.currJob.payload.urlSlug) {
-        if (this.currJob.payload.urlSlug === '') {
-          return this.currJob.payload.prefix;
-        } else {
-          return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
-        }
-      }
-      return this.currJob.payload.prefix;
-    } catch (error) {
-      this.logger.save(this.currJob._id, error).then();
-      throw new InvalidJobError(error.message);
-    }
+  protected getPathPrefix(): string {
+    return '';
   }
+
   // For certain unversioned properties, urlSlug is null; use branchName instead
   protected constructManifestPrefix(): string {
     if (this.currJob.payload.urlSlug) {
@@ -338,7 +324,7 @@ export abstract class JobHandler {
 
       // Writers are tying to stage it, so lets update the staging bucket.
       if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') {
-        process.env.BUCKET = repo_info['bucket']['stg'];
+        process.env.BUCKET = repo_info['bucket'][env] + '-staging';
         process.env.URL = repo_info['url']['stg'];
       }
     }

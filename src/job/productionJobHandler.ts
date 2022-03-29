@@ -72,6 +72,25 @@ export class ProductionJobHandler extends JobHandler {
     return this.currJob.payload.repoBranches.branches.filter((b) => b['active']).length;
   }
 
+  getPathPrefix(): string {
+    try {
+      if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
+        return this.currJob.payload.urlSlug ?? '';
+      }
+      if (this.currJob.payload.urlSlug) {
+        if (this.currJob.payload.urlSlug === '') {
+          return this.currJob.payload.prefix;
+        } else {
+          return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
+        }
+      }
+      return this.currJob.payload.prefix;
+    } catch (error) {
+      this.logger.save(this.currJob._id, error).then();
+      throw new InvalidJobError(error.message);
+    }
+  }
+
   private async purgePublishedContent(makefileOutput: Array<string>): Promise<void> {
     try {
       const stdoutJSON = JSON.parse(makefileOutput[2]);
