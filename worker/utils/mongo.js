@@ -5,7 +5,7 @@ const username = encodeURIComponent(process.env.MONGO_ATLAS_USERNAME);
 const password = encodeURIComponent(process.env.MONGO_ATLAS_PASSWORD);
 const runXlarge = process.env.XLARGE === undefined ? false : Boolean(process.env.XLARGE);
 
-const url = `mongodb+srv://${username}:${password}@cluster0-ylwlz.mongodb.net/admin?retryWrites=true`;
+const url = `mongodb+srv://${username}:${password}@emergencyrestore-ylwlz.mongodb.net/admin?retryWrites=true`;
 
 // Collection information
 const DB_NAME = process.env.DB_NAME ? process.env.DB_NAME : 'pool'; // Database name of the queue in MongoDB Atlas
