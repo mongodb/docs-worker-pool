@@ -1,0 +1,69 @@
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
+ifeq ($(STAGING_USERNAME),)
+	USER=$(shell whoami)
+else
+	USER=$(STAGING_USERNAME)
+endif
+
+REPO_DIR=$(shell pwd)
+
+PROJECT=atlas-cli
+MUT_PREFIX ?= $(PROJECT)
+
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+# Necessary to add the fetch-submodule dependency
+PUSHLESS_DEPLOY_SHARED_DISABLED=true
+CUSTOM_SEARCH_INDEX=true
+
+include ~/shared.mk
+
+next-gen-html: fetch-submodule
+	# snooty parse and then build-front-end
+	@if [ -n "${PATCH_ID}" ]; then \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	else \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" ${RSTSPEC_FLAG}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	fi
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	if [ -n "${PATCH_ID}" ]; then \
+		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
+		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+	fi && \
+	npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
+next-gen-stage: ## Host online for review
+	# stagel local jobs \
+	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
+		mut-publish public ${BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	# stagel commit jobs and regular git push jobs\
+	else \
+		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	fi
+
+INDEX_NAME=$(subst null,${PROJECT},${MANIFEST_PREFIX})
+
+next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
+	@echo "Building search index"
+	mut-index upload public -b ${BUCKET} -o ${INDEX_NAME}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
+
+fetch-submodule:
+	git submodule update --init
