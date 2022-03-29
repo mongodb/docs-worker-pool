@@ -324,7 +324,7 @@ export abstract class JobHandler {
 
       // Writers are tying to stage it, so lets update the staging bucket.
       if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') {
-        process.env.BUCKET = repo_info['bucket']['stg'];
+        process.env.BUCKET = repo_info['bucket'][env] + '-staging';
         process.env.URL = repo_info['url']['stg'];
       }
     }
