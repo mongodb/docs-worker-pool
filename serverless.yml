@@ -130,6 +130,17 @@ functions:
       environment:
         <<: *webhook-env-core
 
+    v1UpsertEdgeDictionaryItem:
+      handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
+      events:
+        - http:
+            path: /webhook/dochub/trigger/upsert
+            method: POST
+            cors: true
+            public: true
+      environment:
+        <<: *default-env
+
     v1SlackDisplayRepoOptions:
       handler: api/controllers/v1/slack.DisplayRepoOptions
       events:
