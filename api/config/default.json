@@ -22,7 +22,7 @@
   "commandOverride": ["node", "onDemandApp.js"],
   "subnets": ["subnet-0a142842e8f13a042", "subnet-0fba568cfd3839eee"],
   "parallel": {
-    "enabled": true,
+    "enabled": false,
     "stg": {
       "dbName": "pool_test",
       "jobQueueCollection": "dotcom_queue",
