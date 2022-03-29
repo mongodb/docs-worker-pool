@@ -8,12 +8,18 @@ import { JobRepository } from '../../../src/repositories/jobRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 
 export const UpsertEdgeDictionaryItem = async (event: any = {}): Promise<any> => {
+  const body = JSON.parse(event.body);
   const pair = {
-    key: event.detail.fullDocument.name,
-    value: event.detail.fullDocument.url,
+    key: body.source,
+    value: body.target,
   };
   const creds = new CDNCreds(process.env.FASTLY_DOCHUB_SERVICE_ID, process.env.FASTLY_DOCHUB_TOKEN);
   await new FastlyConnector(new ConsoleLogger()).upsertEdgeDictionaryItem(pair, process.env.FASTLY_DOCHUB_MAP, creds);
+  return {
+    statusCode: 202,
+    headers: { 'Content-Type': 'text/plain' },
+    body: 'success',
+  };
 };
 
 async function prepDochubPushPayload() {
