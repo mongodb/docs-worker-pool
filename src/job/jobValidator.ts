@@ -1,15 +1,15 @@
 import { AuthorizationError, InvalidJobError } from '../errors/errors';
 import validator from 'validator';
-import { IJob } from '../entities/job';
+import type { Job } from '../entities/job';
 import { IFileSystemServices } from '../services/fileServices';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
 export interface IJobValidator {
-  throwIfJobInvalid(job: IJob): Promise<void>;
-  throwIfBranchNotConfigured(job: IJob): Promise<void>;
-  throwIfUserNotEntitled(job: IJob): Promise<void>;
-  throwIfNotPublishable(job: IJob): void;
+  throwIfJobInvalid(job: Job): Promise<void>;
+  throwIfBranchNotConfigured(job: Job): Promise<void>;
+  throwIfUserNotEntitled(job: Job): Promise<void>;
+  throwIfNotPublishable(job: Job): void;
 }
 
 export class JobValidator implements IJobValidator {
@@ -26,21 +26,21 @@ export class JobValidator implements IJobValidator {
     this._repoBranchesRepository = repoBranchesRepository;
   }
 
-  async throwIfUserNotEntitled(job: IJob): Promise<void> {
+  async throwIfUserNotEntitled(job: Job): Promise<void> {
     const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
     if (!entitlementsObject?.repos?.includes(`${job.payload.repoOwner}/${job.payload.repoName}`)) {
       throw new AuthorizationError(`${job.user} is not entitled for repo ${job.payload.repoName}`);
     }
   }
 
-  async throwIfBranchNotConfigured(job: IJob): Promise<void> {
+  async throwIfBranchNotConfigured(job: Job): Promise<void> {
     job.payload.repoBranches = await this._repoBranchesRepository.getRepoBranchesByRepoName(job.payload.repoName);
     if (!job.payload?.repoBranches) {
       throw new AuthorizationError(`repoBranches not found for ${job.payload.repoName}`);
     }
   }
 
-  throwIfNotPublishable(job: IJob): void {
+  throwIfNotPublishable(job: Job): void {
     let found = false;
     if (job?.payload?.repoBranches) {
       job.payload.repoBranches['branches'].forEach((branch) => {
@@ -55,7 +55,7 @@ export class JobValidator implements IJobValidator {
     }
   }
 
-  public async throwIfJobInvalid(job: IJob): Promise<void> {
+  public async throwIfJobInvalid(job: Job): Promise<void> {
     this._validateInput(job);
     if (this.isProd(job.payload.jobType)) {
       await this.throwIfUserNotEntitled(job);
@@ -66,7 +66,7 @@ export class JobValidator implements IJobValidator {
     return jobType === 'productionDeploy';
   }
 
-  private _validateInput(job: IJob): void {
+  private _validateInput(job: Job): void {
     if (!job.payload.project) {
       throw new InvalidJobError('Invalid project');
     }

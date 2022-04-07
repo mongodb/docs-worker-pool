@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { CDNCreds } from '../entities/creds';
-import { IJob } from '../entities/job';
+import type { Job } from '../entities/job';
 import { InvalidJobError } from '../errors/errors';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -14,7 +14,7 @@ import { IJobValidator } from './jobValidator';
 
 export class ProductionJobHandler extends JobHandler {
   constructor(
-    job: IJob,
+    job: Job,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -129,6 +129,13 @@ export class ProductionJobHandler extends JobHandler {
         await this.purgePublishedContent(makefileOutput);
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
+      }
+      // TODO: Give control to users over this boolean
+      if (this.currJob.shouldGenerateSearchManifest == null) {
+        this.currJob.shouldGenerateSearchManifest = true;
+      }
+      if (this.currJob.shouldGenerateSearchManifest) {
+        this.queueManifestJob();
       }
       return resp;
     } catch (errResult) {
