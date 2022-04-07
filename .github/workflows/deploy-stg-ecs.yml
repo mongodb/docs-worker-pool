@@ -69,3 +69,4 @@ jobs:
         run: |
           npm ci          
           sls deploy --stage stg
+          sls deploy --stage dotcomstg
