@@ -28,7 +28,20 @@ jobs:
         run: |
           cd infrastructure/ecs-repo
           npm ci
+          sls deploy --stage prd
           sls deploy --stage dotcomprd
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and push to ECR
+        with:
+          image: docs-worker-pool-prd
+          tags: latest, ${{ github.sha }}
+          registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
+          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR Dotcom
         with:
@@ -45,8 +58,10 @@ jobs:
         run: |
           cd infrastructure/ecs-main
           npm ci
+          sls deploy --stage prd
           sls deploy --stage dotcomprd
       - name: Deploy Lambdas	
         run: |
           npm ci
+          sls deploy --stage prd
           sls deploy --stage dotcomprd
