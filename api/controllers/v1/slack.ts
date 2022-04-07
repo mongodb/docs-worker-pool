@@ -96,21 +96,8 @@ async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository
 }
 
 // Used solely for adding parallel deploy jobs to another array
-const parallelPrefixDeployHelper = (
-  deployable,
-  payload,
-  jobTitle,
-  jobUserName,
-  jobUserEmail,
-  parallelPrefix = undefined,
-  parallelDeployable = []
-) => {
+const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) => {
   deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail));
-  if (parallelPrefix) {
-    const parallelPayload = { ...payload };
-    parallelPayload.prefix = parallelPrefix;
-    parallelDeployable.push(createJob(parallelPayload, jobTitle, jobUserName, jobUserEmail));
-  }
 };
 
 export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
@@ -125,13 +112,9 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  let parallelJobRepo = null;
-  let parallelUrl = '';
-  let parallelPrefix = '';
   const parallel = c.get<any>('parallel');
   const env = c.get<string>('env');
   const deployable = [];
-  const parallelDeployable = [];
   // This is coming in as urlencoded stirng, need to decode before parsing=
 
   const decoded = decodeURIComponent(event.body).split('=')[1];
@@ -143,10 +126,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     return prepReponse(401, 'text/plain', 'User is not entitled!');
   }
 
-  if (parallel && parallel['enabled'] && parallel[env]) {
-    parallelJobRepo = new JobRepository(db, c, consoleLogger, parallel[env]['jobQueueCollection']);
-    parallelUrl = parallel[env]['jobsQueueUrl'];
-  }
   const values = slackConnector.parseSelection(stateValues);
   let jobCount = 0;
   for (let i = 0; i < values.repo_option.length; i++) {
@@ -159,9 +138,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
     const repoInfo = await branchRepository.getRepo(repoName);
     const non_versioned = repoInfo.branches.length === 1 ? true : false;
-    if (parallelJobRepo) {
-      parallelPrefix = repoInfo.prefix[parallel[env]['parallelStgName']];
-    }
+
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
     if (!branchObject?.aliasObject) continue;
 
@@ -197,15 +174,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       if (non_versioned) {
         newPayload.urlSlug = '';
       }
-      parallelPrefixDeployHelper(
-        deployable,
-        newPayload,
-        jobTitle,
-        jobUserName,
-        jobUserEmail,
-        parallelPrefix,
-        parallelDeployable
-      );
+      deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
       jobCount += 1;
     }
     //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
@@ -222,40 +191,16 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
       if (urlSlug) {
         newPayload.urlSlug = urlSlug;
-        parallelPrefixDeployHelper(
-          deployable,
-          newPayload,
-          jobTitle,
-          jobUserName,
-          jobUserEmail,
-          parallelPrefix,
-          parallelDeployable
-        );
+        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
         jobCount += 1;
       }
       if (non_versioned) {
         newPayload.urlSlug = '';
-        parallelPrefixDeployHelper(
-          deployable,
-          newPayload,
-          jobTitle,
-          jobUserName,
-          jobUserEmail,
-          parallelPrefix,
-          parallelDeployable
-        );
+        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
         jobCount += 1;
       } else if (publishOriginalBranchName) {
         newPayload.urlSlug = branchName;
-        parallelPrefixDeployHelper(
-          deployable,
-          newPayload,
-          jobTitle,
-          jobUserName,
-          jobUserEmail,
-          parallelPrefix,
-          parallelDeployable
-        );
+        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
         jobCount += 1;
       }
       aliases.forEach(async (alias) => {
@@ -264,15 +209,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
           newPayload.stable = '';
           newPayload.urlSlug = alias;
           newPayload.primaryAlias = primaryAlias;
-          parallelPrefixDeployHelper(
-            deployable,
-            newPayload,
-            jobTitle,
-            jobUserName,
-            jobUserEmail,
-            parallelPrefix,
-            parallelDeployable
-          );
+          deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
           jobCount += 1;
         }
       });
@@ -281,9 +218,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
-  }
-  if (parallelDeployable.length > 0) {
-    await deployRepo(parallelDeployable, consoleLogger, parallelJobRepo, parallelUrl);
   }
   return {
     statusCode: 200,
