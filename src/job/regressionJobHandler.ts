@@ -1,5 +1,5 @@
 import { IConfig } from 'config';
-import type { Job } from '../entities/job';
+import { IJob } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -12,7 +12,7 @@ import { ProductionJobHandler } from './productionJobHandler';
 
 export class RegressionJobHandler extends ProductionJobHandler {
   constructor(
-    job: Job,
+    job: IJob,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,

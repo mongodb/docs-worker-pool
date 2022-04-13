@@ -1,5 +1,6 @@
 import { Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
+import { Job } from '../entities/job';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
 

@@ -5,9 +5,9 @@ import { IConfig } from 'config';
 import { IGithubCommandExecutor } from '../../../src/services/commandExecutor';
 import { IJobRepoLogger } from '../../../src/services/logger';
 import { GitHubConnector } from '../../../src/services/repo';
-import type { Job } from '../../../src/entities/job';
-
-let job: Job;
+import { IJob } from '../../../src/entities/job';
+import fs from 'fs-extra';
+let job: IJob;
 let commandExecutor: IGithubCommandExecutor;
 let jobRepoLogger: IJobRepoLogger;
 let config: IConfig;

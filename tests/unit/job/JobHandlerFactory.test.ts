@@ -1,6 +1,6 @@
 import { JobHandlerFactory } from '../../../src/job/jobManager';
 import { mockDeep } from 'jest-mock-extended';
-import { Job } from '../../../src/entities/job';
+import { IJob } from '../../../src/entities/job';
 import { IConfig } from 'config';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { IFileSystemServices } from '../../../src/services/fileServices';
@@ -11,12 +11,11 @@ import { IJobRepoLogger } from '../../../src/services/logger';
 import { ProductionJobHandler } from '../../../src/job/productionJobHandler';
 import { RegressionJobHandler } from '../../../src/job/regressionJobHandler';
 import { StagingJobHandler } from '../../../src/job/stagingJobHandler';
-import { ManifestJobHandler } from '../../../src/job/manifestJobHandler';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { IJobValidator } from '../../../src/job/jobValidator';
 
 describe('JobHandlerFactory Tests', () => {
-  let job: Job;
+  let job: IJob;
   let config: IConfig;
   let jobRepo: JobRepository;
   let fileSystemServices: IFileSystemServices;
@@ -29,7 +28,7 @@ describe('JobHandlerFactory Tests', () => {
   let jobValidator: IJobValidator;
 
   beforeEach(() => {
-    job = mockDeep<Job>();
+    job = mockDeep<IJob>();
     config = mockDeep<IConfig>();
     jobRepo = mockDeep<JobRepository>();
     fileSystemServices = mockDeep<IFileSystemServices>();
@@ -63,28 +62,54 @@ describe('JobHandlerFactory Tests', () => {
     }).toThrowError('Job type not supported');
   });
 
-  test('jobHandlerFactory correctly associates known jobTypes and handlers', () => {
-    const m = {
-      githubPush: StagingJobHandler,
-      manifestGeneration: ManifestJobHandler,
-      productionDeploy: ProductionJobHandler,
-      regression: RegressionJobHandler,
-    };
-    for (const jt in m) {
-      job.payload.jobType = jt;
-      const handler = jobHandlerFactory.createJobHandler(
-        job,
-        config,
-        jobRepo,
-        fileSystemServices,
-        jobCommandExecutor,
-        cdnConnector,
-        repoConnector,
-        logger,
-        jobValidator,
-        repoBranchesRepo
-      );
-      expect(handler).toBeInstanceOf(m[jt]);
-    }
+  test('regression jobtype returns regression handler', () => {
+    job.payload.jobType = 'regression';
+    const handler = jobHandlerFactory.createJobHandler(
+      job,
+      config,
+      jobRepo,
+      fileSystemServices,
+      jobCommandExecutor,
+      cdnConnector,
+      repoConnector,
+      logger,
+      jobValidator,
+      repoBranchesRepo
+    );
+    expect(handler).toBeInstanceOf(RegressionJobHandler);
+  });
+
+  test('githubPush jobtype returns Staging handler', () => {
+    job.payload.jobType = 'githubPush';
+    const handler = jobHandlerFactory.createJobHandler(
+      job,
+      config,
+      jobRepo,
+      fileSystemServices,
+      jobCommandExecutor,
+      cdnConnector,
+      repoConnector,
+      logger,
+      jobValidator,
+      repoBranchesRepo
+    );
+    expect(handler).toBeInstanceOf(StagingJobHandler);
+  });
+
+  test('productionDeploy jobtype returns Production handler', () => {
+    job.payload.jobType = 'productionDeploy';
+    const handler = jobHandlerFactory.createJobHandler(
+      job,
+      config,
+      jobRepo,
+      fileSystemServices,
+      jobCommandExecutor,
+      cdnConnector,
+      repoConnector,
+      logger,
+      jobValidator,
+      repoBranchesRepo
+    );
+    expect(handler).toBeInstanceOf(ProductionJobHandler);
   });
 });

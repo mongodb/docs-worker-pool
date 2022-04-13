@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { mockDeep } from 'jest-mock-extended';
-import type { Job } from '../../src/entities/job';
+import { IJob } from '../../src/entities/job';
 import { JobHandlerFactory } from '../../src/job/jobHandlerFactory';
 import { JobValidator } from '../../src/job/jobValidator';
 import { ProductionJobHandler } from '../../src/job/productionJobHandler';
@@ -15,7 +15,7 @@ import { IRepoConnector } from '../../src/services/repo';
 import * as data from '../data/jobDef';
 
 describe('JobManager Tests', () => {
-  let job: Job;
+  let job: IJob;
   let config: IConfig;
   let jobRepo: JobRepository;
   let fileSystemServices: IFileSystemServices;
