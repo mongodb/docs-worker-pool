@@ -1,4 +1,4 @@
-import type { Job } from '../entities/job';
+import { IJob } from '../entities/job';
 import { CommandExecutorResponse, IGithubCommandExecutor } from './commandExecutor';
 import { IJobRepoLogger } from './logger';
 import { IConfig } from 'config';
@@ -8,10 +8,10 @@ import simpleGit, { SimpleGit } from 'simple-git';
 const git: SimpleGit = simpleGit();
 
 export interface IRepoConnector {
-  applyPatch(job: Job): Promise<any>;
-  cloneRepo(job: Job, targetPath: string): Promise<any>;
-  checkCommits(job: Job): Promise<CommandExecutorResponse>;
-  pullRepo(job: Job): Promise<CommandExecutorResponse>;
+  applyPatch(job: IJob): Promise<any>;
+  cloneRepo(job: IJob, targetPath: string): Promise<any>;
+  checkCommits(job: IJob): Promise<CommandExecutorResponse>;
+  pullRepo(job: IJob): Promise<CommandExecutorResponse>;
 }
 
 export class GitHubConnector implements IRepoConnector {
@@ -32,13 +32,13 @@ export class GitHubConnector implements IRepoConnector {
     this._fileSystemService = fileSystemService;
   }
 
-  private getBasePath(job: Job): string {
+  private getBasePath(job: IJob): string {
     const botName = this._config.get<string>('githubBotUserName');
     const botPw = this._config.get<string>('githubBotPW');
     return job.payload.private ? `https://${botName}:${botPw}@github.com` : 'https://github.com';
   }
 
-  async applyPatch(job: Job): Promise<any> {
+  async applyPatch(job: IJob): Promise<any> {
     if (job.payload.patch) {
       try {
         this._fileSystemService.writeToFile(`repos/${job.payload.repoName}/myPatch.patch`, job.payload.patch, {
@@ -53,7 +53,7 @@ export class GitHubConnector implements IRepoConnector {
     }
   }
 
-  async cloneRepo(job: Job, targetPath: string): Promise<any> {
+  async cloneRepo(job: IJob, targetPath: string): Promise<any> {
     try {
       await git.clone(
         this.getBasePath(job) + '/' + job.payload.repoOwner + '/' + job.payload.repoName,
@@ -66,7 +66,7 @@ export class GitHubConnector implements IRepoConnector {
     }
   }
 
-  async checkCommits(job: Job): Promise<any> {
+  async checkCommits(job: IJob): Promise<any> {
     if (job.payload.newHead) {
       return await this._commandExecutor.checkoutBranchForSpecificHead(
         job.payload.repoName,
@@ -76,7 +76,7 @@ export class GitHubConnector implements IRepoConnector {
     }
   }
 
-  async pullRepo(job: Job): Promise<any> {
+  async pullRepo(job: IJob): Promise<any> {
     return await this._commandExecutor.pullRepo(job.payload.repoName, job.payload.branchName, job.payload.newHead);
   }
 }

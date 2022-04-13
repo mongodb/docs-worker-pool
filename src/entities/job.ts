@@ -1,5 +1,4 @@
 // TODO: Cut down on null and undefined type definition allowances
-
 export enum JobStatus {
   inQueue = 'inQueue',
   inProgress = 'inProgress',
@@ -7,15 +6,27 @@ export enum JobStatus {
   failed = 'failed',
 }
 
-// TODO: Formalize JobTypes
-// export enum JobType {
-//   githubPush = 'githubPush',
-//   manifestGeneration = 'manifestGeneration',
-//   productionDeploy = 'productionDeploy',
-//   regression = 'regression',
-// }
+export interface IJob {
+  _id: string;
+  payload: IPayload;
+  createdTime: Date;
+  email: string;
+  endTime: Date | null | undefined;
+  error: any | null | undefined;
+  logs: string[] | null | undefined;
+  priority: number | null | undefined;
+  result: any | null | undefined;
+  startTime: Date;
+  status: string;
+  title: string;
+  user: string;
+  comMessage: string[] | null | undefined;
+  purgedUrls: string[] | null | undefined;
+  buildCommands: Array<string>;
+  deployCommands: Array<string>;
+}
 
-export type Payload = {
+export interface IPayload {
   jobType: string;
   source: string;
   action: string;
@@ -42,28 +53,28 @@ export type Payload = {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
-};
+}
 
-export type Job = {
+export class Job implements IJob {
   _id: string;
-  payload: Payload;
+  payload: IPayload;
   createdTime: Date;
+  email: string;
   endTime: Date | null | undefined;
-  error: any | null | undefined;
+  error: any;
   logs: string[] | null | undefined;
   priority: number | null | undefined;
-  result: any | null | undefined;
+  result: any;
   startTime: Date;
-  status: JobStatus | null;
+  status: string;
   title: string;
   user: string;
+  comMessage: string[] | null | undefined;
+  purgedUrls: string[] | null | undefined;
   manifestPrefix: string | undefined;
   pathPrefix: string | null | undefined;
   mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
-  email: string; // probably can be removed
-  comMessage: string[] | null | undefined;
-  purgedUrls: string[] | null | undefined;
-  shouldGenerateSearchManifest: boolean;
-};
+  invalidationStatusURL: string | null | undefined;
+}

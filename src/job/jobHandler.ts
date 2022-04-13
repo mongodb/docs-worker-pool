@@ -1,4 +1,4 @@
-import type { Payload, Job } from '../entities/job';
+import { IJob } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -12,8 +12,8 @@ import { IJobValidator } from './jobValidator';
 require('fs');
 
 export abstract class JobHandler {
-  private _currJob: Job;
-  public get currJob(): Job {
+  private _currJob: IJob;
+  public get currJob(): IJob {
     return this._currJob;
   }
 
@@ -55,7 +55,7 @@ export abstract class JobHandler {
   protected _repoBranchesRepo: RepoBranchesRepository;
 
   constructor(
-    job: Job,
+    job: IJob,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -411,54 +411,6 @@ export abstract class JobHandler {
       } catch (error) {
         this._logger.error(this._currJob._id, error.message);
       }
-    }
-  }
-
-  // Creates and pushes the related manifestJob
-  @throwIfJobInterupted()
-  public async queueManifestJob(): Promise<void> {
-    // Rudimentary error prevention
-    if (this._currJob.payload.jobType.includes('manifestGeneration')) {
-      this._logger.error(
-        this._currJob._id,
-        `Incorrectly attempted to queue another search manifest job 
-      based on known ManifestJob '${this._currJob._id}'. Please contact documentation platform team.`
-      );
-      return;
-    }
-    const manifestPayload: Payload = this._currJob.payload;
-    manifestPayload.jobType = 'manifestGeneration';
-    const manifestJob: Job = {
-      _id: '',
-      payload: manifestPayload,
-      createdTime: new Date(),
-      endTime: undefined,
-      error: undefined,
-      logs: undefined,
-      priority: 2,
-      result: undefined,
-      startTime: new Date(),
-      status: null,
-      title: this._currJob.title + ' - search manifest generation',
-      user: this._currJob.user,
-      manifestPrefix: this._currJob.manifestPrefix,
-      pathPrefix: this._currJob.pathPrefix,
-      mutPrefix: this._currJob.mutPrefix,
-      buildCommands: [],
-      deployCommands: [],
-      email: '',
-      comMessage: null,
-      purgedUrls: null,
-      shouldGenerateSearchManifest: false,
-    };
-    try {
-      await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
-    } catch (error) {
-      this._logger.error(
-        manifestJob._id,
-        `Failed to queue search manifest job for build job '${this._currJob._id}'. 
-      Error: ${error.message}. Search results for this property will not be updated.`
-      );
     }
   }
 
