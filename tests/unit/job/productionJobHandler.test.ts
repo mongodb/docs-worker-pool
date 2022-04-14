@@ -396,4 +396,10 @@ describe('ProductionJobHandler Tests', () => {
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
   });
+
+  test('Deploy purge process inserts invalidationStatusUrl', async () => {
+    jobHandlerTestHelper.setStageForDeploySuccess(true);
+    await jobHandlerTestHelper.jobHandler.execute();
+    expect(jobHandlerTestHelper.jobRepo.insertInvalidationRequestStatusUrl).toBeCalledTimes(1);
+  });
 });

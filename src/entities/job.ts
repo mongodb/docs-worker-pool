@@ -62,6 +62,7 @@ export type Job = {
   mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
+  invalidationStatusURL: string | null | undefined;
   email: string; // probably can be removed
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;

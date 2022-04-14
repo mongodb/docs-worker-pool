@@ -11,6 +11,7 @@ export default {
     endTime: '2/9/2019 - 12:32 PM',
     error: {},
     result: [],
+    invalidationStatusURL: '',
     payload: {
       jobType: 'productionDeploy',
       source: 'github',
