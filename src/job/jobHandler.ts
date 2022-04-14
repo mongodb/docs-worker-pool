@@ -418,13 +418,6 @@ export abstract class JobHandler {
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);
-      // For most buildJobs, we create a manifestJob
-      if (['productionDeploy', 'githubPush'].includes(this._currJob.payload.jobType)) {
-        // Docs-landing does NOT have an associated search manifest
-        if (this._currJob.payload.project != 'landing') {
-          this.queueManifestJob();
-        }
-      }
       this.cleanup();
     } catch (error) {
       try {

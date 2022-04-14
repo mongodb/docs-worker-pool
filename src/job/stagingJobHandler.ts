@@ -69,15 +69,6 @@ export class StagingJobHandler extends JobHandler {
       }
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
-      // To test new search infrastructure, we kick off manifest generation jobs during staging
-      // These lines MUST be removed (and corresponding test updated) when infrastructure is
-      // production-ready, to avoid staging jobs causing production search manifests to update
-      if (this.currJob.shouldGenerateSearchManifest == null) {
-        this.currJob.shouldGenerateSearchManifest = true;
-      }
-      if (this.currJob.shouldGenerateSearchManifest) {
-        this.queueManifestJob();
-      }
       return resp;
     } catch (errResult) {
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);
