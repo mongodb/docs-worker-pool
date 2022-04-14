@@ -1,5 +1,5 @@
 import { mockDeep, mockReset } from 'jest-mock-extended';
-import { IJob } from '../../../src/entities/job';
+import { Job } from '../../../src/entities/job';
 import { IFileSystemServices } from '../../../src/services/fileServices';
 import * as data from '../../data/jobDef';
 import { JobValidator } from '../../../src/job/jobValidator';
@@ -7,7 +7,7 @@ import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitl
 import { TestDataProvider } from '../../data/data';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 
-let job: IJob;
+let job: Job;
 let fileSystemServices: IFileSystemServices;
 let repoEntitlementRepository: RepoEntitlementsRepository;
 let jobValidator: JobValidator;

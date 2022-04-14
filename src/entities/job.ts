@@ -1,4 +1,5 @@
 // TODO: Cut down on null and undefined type definition allowances
+
 export enum JobStatus {
   inQueue = 'inQueue',
   inProgress = 'inProgress',
@@ -6,27 +7,15 @@ export enum JobStatus {
   failed = 'failed',
 }
 
-export interface IJob {
-  _id: string;
-  payload: IPayload;
-  createdTime: Date;
-  email: string;
-  endTime: Date | null | undefined;
-  error: any | null | undefined;
-  logs: string[] | null | undefined;
-  priority: number | null | undefined;
-  result: any | null | undefined;
-  startTime: Date;
-  status: string;
-  title: string;
-  user: string;
-  comMessage: string[] | null | undefined;
-  purgedUrls: string[] | null | undefined;
-  buildCommands: Array<string>;
-  deployCommands: Array<string>;
-}
+// TODO: Formalize JobTypes
+// export enum JobType {
+//   githubPush = 'githubPush',
+//   manifestGeneration = 'manifestGeneration',
+//   productionDeploy = 'productionDeploy',
+//   regression = 'regression',
+// }
 
-export interface IPayload {
+export type Payload = {
   jobType: string;
   source: string;
   action: string;
@@ -53,28 +42,28 @@ export interface IPayload {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
-}
+};
 
-export class Job implements IJob {
+export type Job = {
   _id: string;
-  payload: IPayload;
+  payload: Payload;
   createdTime: Date;
-  email: string;
   endTime: Date | null | undefined;
-  error: any;
+  error: any | null | undefined;
   logs: string[] | null | undefined;
   priority: number | null | undefined;
-  result: any;
+  result: any | null | undefined;
   startTime: Date;
-  status: string;
+  status: JobStatus | null;
   title: string;
   user: string;
-  comMessage: string[] | null | undefined;
-  purgedUrls: string[] | null | undefined;
   manifestPrefix: string | undefined;
   pathPrefix: string | null | undefined;
   mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
-  invalidationStatusURL: string | null | undefined;
-}
+  email: string; // probably can be removed
+  comMessage: string[] | null | undefined;
+  purgedUrls: string[] | null | undefined;
+  shouldGenerateSearchManifest: boolean;
+};
