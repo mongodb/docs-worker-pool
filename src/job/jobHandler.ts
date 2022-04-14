@@ -446,6 +446,7 @@ export abstract class JobHandler {
       mutPrefix: this._currJob.mutPrefix,
       buildCommands: [],
       deployCommands: [],
+      invalidationStatusURL: undefined,
       email: '',
       comMessage: null,
       purgedUrls: null,
