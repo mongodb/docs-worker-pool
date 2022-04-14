@@ -32,11 +32,6 @@ describe('JobValidator Tests', () => {
     expect(new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepository)).toBeDefined();
   });
 
-  test('invalid job type throws', async () => {
-    job.payload.jobType = 'Unknown';
-    await expect(jobValidator.throwIfJobInvalid(job)).rejects.toThrow('Invalid JobType');
-  });
-
   describe.each(TestDataProvider.getJobPropertiesValidateTestCases())(
     'Validate invalid repoName/branchName/repoOwner',
     (element) => {

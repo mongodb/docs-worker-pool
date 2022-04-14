@@ -1,6 +1,6 @@
 import { AuthorizationError, InvalidJobError } from '../errors/errors';
 import validator from 'validator';
-import type { Job } from '../entities/job';
+import { Job, JobType } from '../entities/job';
 import { IFileSystemServices } from '../services/fileServices';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -62,16 +62,13 @@ export class JobValidator implements IJobValidator {
     }
   }
 
-  private isProd(jobType: string): boolean {
-    return jobType === 'productionDeploy';
+  private isProd(jobType: JobType): boolean {
+    return jobType === JobType.productionDeploy;
   }
 
   private _validateInput(job: Job): void {
     if (!job.payload.project) {
       throw new InvalidJobError('Invalid project');
-    }
-    if (!['githubPush', 'productionDeploy', 'publishDochub', 'regression'].includes(job.payload.jobType)) {
-      throw new InvalidJobError('Invalid JobType');
     }
     if (!job.payload?.repoName || !this.safeString(job.payload.repoName)) {
       throw new InvalidJobError('Invalid Reponame');

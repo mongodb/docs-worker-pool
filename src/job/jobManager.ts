@@ -35,7 +35,7 @@ export class JobHandlerFactory {
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository
   ): JobHandler {
-    const jt = job.payload?.jobType;
+    const jt = [job.payload?.jobType];
     if (jt in jobHandlerMap) {
       return new jobHandlerMap[jt](
         job,

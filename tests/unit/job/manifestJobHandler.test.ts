@@ -1,4 +1,5 @@
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
+import { JobType } from '../../../src/entities/job';
 
 describe('ManifestJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -21,7 +22,7 @@ describe('ManifestJobHandler Tests', () => {
 
   test('Execute manifestJob runs successfully and does not queue another manifest job', async () => {
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
-    jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
+    jobHandlerTestHelper.jobHandler.currJob.payload.jobType = JobType.manifestGeneration;
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
     expect(queueManifestJobSpy).toBeCalledTimes(0);

@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import * as mongodb from 'mongodb';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { JobType } from '../../../src/entities/job';
 
 export const UpsertEdgeDictionaryItem = async (event: any = {}): Promise<any> => {
   const body = JSON.parse(event.body);
@@ -35,7 +36,7 @@ async function prepDochubPushPayload() {
     error: {},
     result: null,
     payload: {
-      jobType: 'productionDeploy',
+      jobType: JobType.githubPush,
       source: 'strapi',
       action: 'push',
       repoName: 'devhub-content',

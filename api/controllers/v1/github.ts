@@ -4,6 +4,7 @@ import * as mongodb from 'mongodb';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { JobType } from '../../../src/entities/job';
 
 // This function will validate your payload from GitHub
 // See docs at https://developer.github.com/webhooks/securing/#validating-payloads-from-github
@@ -35,7 +36,7 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
     error: {},
     result: null,
     payload: {
-      jobType: 'githubPush',
+      jobType: JobType.githubPush,
       source: 'github',
       action: 'push',
       repoName: githubEvent.repository.name,

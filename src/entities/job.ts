@@ -7,16 +7,15 @@ export enum JobStatus {
   failed = 'failed',
 }
 
-// TODO: Formalize JobTypes
-// export enum JobType {
-//   githubPush = 'githubPush',
-//   manifestGeneration = 'manifestGeneration',
-//   productionDeploy = 'productionDeploy',
-//   regression = 'regression',
-// }
+export enum JobType {
+  githubPush = 'githubPush',
+  manifestGeneration = 'manifestGeneration',
+  productionDeploy = 'productionDeploy',
+  regression = 'regression',
+}
 
 export type Payload = {
-  jobType: string;
+  jobType: JobType;
   source: string;
   action: string;
   repoName: string;

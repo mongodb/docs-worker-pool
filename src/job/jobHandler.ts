@@ -1,4 +1,4 @@
-import type { Payload, Job } from '../entities/job';
+import { Payload, Job, JobType } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -223,7 +223,7 @@ export abstract class JobHandler {
       this.prepStageSpecificNextGenCommands();
       this.constructEnvVars();
       this.currJob.payload.isNextGen = true;
-      if (this._currJob.payload.jobType === 'productionDeploy') {
+      if (this._currJob.payload.jobType === JobType.productionDeploy) {
         this._validator.throwIfNotPublishable(this._currJob);
       }
     } else {
@@ -262,7 +262,7 @@ export abstract class JobHandler {
     const pathPrefix = this.currJob.payload.pathPrefix;
 
     // Frontend expects docs properties deployed to the root of their bucket to have '/' as their prefix.
-    if (this._currJob.payload.jobType === 'productionDeploy' && pathPrefix === '') {
+    if (this._currJob.payload.jobType === JobType.productionDeploy && pathPrefix === '') {
       envVars += 'PATH_PREFIX=/\n';
     }
     // TODO: Do we need the empty string check?
@@ -327,7 +327,7 @@ export abstract class JobHandler {
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,
-      `setEnvironmentVariables for ${this._currJob.payload.repoName} env ${env} jobType ${this._currJob.payload.jobType}`
+      `setEnvironmentVariables for ${this._currJob.payload.repoName}, env: ${env}, jobType: ${this._currJob.payload.jobType}`
     );
     if (repo_info?.['bucket'] && repo_info?.['url']) {
       if (this._currJob.payload.regression) {
@@ -338,7 +338,7 @@ export abstract class JobHandler {
       process.env.URL = repo_info['url'][env];
 
       // Writers are tying to stage it, so lets update the staging bucket.
-      if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') {
+      if (env === 'prd' && this._currJob.payload.jobType === JobType.githubPush) {
         process.env.BUCKET = repo_info['bucket'][env] + '-staging';
         process.env.URL = repo_info['url']['stg'];
       }
@@ -418,8 +418,7 @@ export abstract class JobHandler {
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);
-      // For most buildJobs, we create a manifestJob
-      if (['productionDeploy', 'githubPush'].includes(this._currJob.payload.jobType)) {
+      if (this._currJob.payload.jobType === JobType.productionDeploy) {
         // Docs-landing does NOT have an associated search manifest
         if (this._currJob.payload.project != 'landing') {
           this.queueManifestJob();
@@ -440,7 +439,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   public async queueManifestJob(): Promise<void> {
     // Rudimentary error prevention
-    if (this._currJob.payload.jobType.includes('manifestGeneration')) {
+    if (this._currJob.payload.jobType === JobType.manifestGeneration) {
       this._logger.error(
         this._currJob._id,
         `Incorrectly attempted to queue another search manifest job 
@@ -449,7 +448,7 @@ export abstract class JobHandler {
       return;
     }
     const manifestPayload: Payload = this._currJob.payload;
-    manifestPayload.jobType = 'manifestGeneration';
+    manifestPayload.jobType = JobType.manifestGeneration;
     const manifestJob: Job = {
       _id: '',
       payload: manifestPayload,

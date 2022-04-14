@@ -5,6 +5,7 @@ import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
+import { JobType } from '../../../src/entities/job';
 
 function isUserEntitled(entitlementsObject: any): boolean {
   return (entitlementsObject?.repos?.length ?? 0) > 0;
@@ -181,7 +182,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
     //Generic payload, will be conditionaly modified appropriately
     const newPayload = createPayload(
-      'productionDeploy',
+      JobType.productionDeploy,
       repoOwner,
       repoName,
       branchName,
@@ -291,7 +292,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   };
 };
 function createPayload(
-  jobType: string,
+  jobType: JobType,
   repoOwner: string,
   repoName: string,
   branchName: string,

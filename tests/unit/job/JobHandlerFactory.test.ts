@@ -1,6 +1,6 @@
 import { JobHandlerFactory } from '../../../src/job/jobManager';
 import { mockDeep } from 'jest-mock-extended';
-import { Job } from '../../../src/entities/job';
+import { Job, JobType } from '../../../src/entities/job';
 import { IConfig } from 'config';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { IFileSystemServices } from '../../../src/services/fileServices';
@@ -45,33 +45,15 @@ describe('JobHandlerFactory Tests', () => {
     expect(new JobHandlerFactory()).toBeDefined();
   });
 
-  test('Unknown jobtype throws error', () => {
-    job.payload.jobType = 'Unknown';
-    expect(() => {
-      jobHandlerFactory.createJobHandler(
-        job,
-        config,
-        jobRepo,
-        fileSystemServices,
-        jobCommandExecutor,
-        cdnConnector,
-        repoConnector,
-        logger,
-        jobValidator,
-        repoBranchesRepo
-      );
-    }).toThrowError('Job type not supported');
-  });
-
   test('jobHandlerFactory correctly associates known jobTypes and handlers', () => {
     const m = {
-      githubPush: StagingJobHandler,
-      manifestGeneration: ManifestJobHandler,
-      productionDeploy: ProductionJobHandler,
-      regression: RegressionJobHandler,
+      [JobType.githubPush]: StagingJobHandler,
+      [JobType.manifestGeneration]: ManifestJobHandler,
+      [JobType.productionDeploy]: ProductionJobHandler,
+      [JobType.regression]: RegressionJobHandler,
     };
     for (const jt in m) {
-      job.payload.jobType = jt;
+      job.payload.jobType = JobType[jt];
       const handler = jobHandlerFactory.createJobHandler(
         job,
         config,
