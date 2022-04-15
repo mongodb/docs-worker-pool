@@ -216,6 +216,8 @@ export abstract class JobHandler {
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
+      // TODO: Look into moving the generation of manifestPrefix into the manifestJobHandler,
+      // as well as reducing difficult-to-debug state changes
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
       }
@@ -288,13 +290,15 @@ export abstract class JobHandler {
 
   public constructManifestPrefix(): string {
     // In the past, we have had issues with generating manifests titled "null-v1.0.json"
-    // This is rudimentary error logging, and should ideally happen elsewhere
+    // This is rudimentary error handling, and should ideally happen elsewhere
     if (!this.currJob.payload.project) {
       this._logger.info(this._currJob._id, `Project name not found for ${this.currJob._id}`);
+      throw new InvalidJobError(`Project name not found for ${this.currJob._id}`);
     }
+
     // Due to snooty.toml project naming discrepancies, payload.project may not
     // match preferred project names. This may be removed pending snooty.toml
-    // name correction
+    // name correction AND snooty frontend dropdown de-hardcoding
     const substitute = {
       cloudgov: 'AtlasGov',
       cloud: 'atlas',
