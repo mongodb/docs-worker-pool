@@ -25,7 +25,6 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
 
-
   JavaBucket:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -60,7 +59,7 @@ Resources:
             Action:
               - 's3:GetObject'
               - 's3:ListBucket'
-            Resource: 
+            Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }]]
 
@@ -76,7 +75,7 @@ Resources:
             Principal: "*"
             Action:
               - s3:GetObject
-            Resource: 
+            Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
 
   CloudManagerBucketPolicy:

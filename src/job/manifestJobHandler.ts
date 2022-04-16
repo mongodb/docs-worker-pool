@@ -49,8 +49,8 @@ export class ManifestJobHandler extends JobHandler {
     const globalSearch = this.currJob.payload.stable ? '-g' : '';
 
     if (!this.currJob.manifestPrefix) {
-      this.logger.info(this.currJob.id, `Manifest prefix not found for ${this.currJob.id}`);
-      throw new InvalidJobError(`Manifest prefix not found for ${this.currJob.id}`);
+      this.logger.info(this.currJob._id, `Manifest prefix not found for ${this.currJob._id}`);
+      throw new InvalidJobError(`Manifest prefix not found for ${this.currJob._id}`);
     }
 
     // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2

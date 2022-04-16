@@ -294,7 +294,7 @@ export class TestDataProvider {
     return ret;
   }
 
-  static getPublishOutputWithPurgedUrls(prod: boolean): any {
+  static getPublishOutputWithPurgedUrls(prod: boolean): Array<any> {
     if (prod) {
       return [
         'Line1 \r\n Line2 \r\n {\t"urls": ["url1", "url2", "url3", "url4", "url5"]}',

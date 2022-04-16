@@ -288,12 +288,16 @@ export abstract class JobHandler {
     return '';
   }
 
+  // TODO: Reduce hard-to-follow state mutations
   public constructManifestPrefix(): string {
     // In the past, we have had issues with generating manifests titled "null-v1.0.json"
     // This is rudimentary error handling, and should ideally happen elsewhere
     if (!this.currJob.payload.project) {
-      this._logger.info(this._currJob._id, `Project name not found for ${this.currJob._id}`);
+      this._logger.info(this._currJob._id, `Project name not found for ${this.currJob._id}.`);
       throw new InvalidJobError(`Project name not found for ${this.currJob._id}`);
+    }
+    if (this.currJob.payload.aliased) {
+      this._logger.info(this._currJob._id, `Warning: generating manifest prefix for aliased property.`);
     }
 
     // Due to snooty.toml project naming discrepancies, payload.project may not

@@ -19,6 +19,52 @@ describe('ManifestJobHandler Tests', () => {
     }).toThrow(`${jobHandlerTestHelper.job._id} is stopped`);
   });
 
+  // TODO: Move to TestDataProvider once similar test in productionJobHandler
+  // is merged / removed
+  const manifestCases = [
+    {
+      project: 'testProject',
+      urlSlug: 'testSlug',
+      branchName: 'testBranchName',
+      manifestPrefix: `testProject-testSlug`,
+    },
+    {
+      project: 'testProject',
+      urlSlug: '',
+      branchName: 'testBranchName',
+      manifestPrefix: `testProject-testBranchName`,
+    },
+    // Substitution cases defined in constructManifestPrefix()
+    {
+      project: 'cloudgov',
+      urlSlug: 'testSlug',
+      branchName: '',
+      manifestPrefix: `AtlasGov-testSlug`,
+    },
+    {
+      project: 'cloud',
+      urlSlug: 'testSlug',
+      branchName: '',
+      manifestPrefix: `atlas-testSlug`,
+    },
+    {
+      project: 'docs',
+      urlSlug: 'testSlug',
+      branchName: '',
+      manifestPrefix: `manual-testSlug`,
+    },
+  ];
+  describe.each(manifestCases)('Validate constructManifestPrefix() cases', (element) => {
+    test(`Manifest case: ${element.toString()}`, () => {
+      jobHandlerTestHelper.jobHandler.currJob.payload.project = element.project;
+      jobHandlerTestHelper.jobHandler.currJob.payload.urlSlug = element.urlSlug;
+      jobHandlerTestHelper.jobHandler.currJob.payload.branchName = element.branchName;
+      jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
+      const p = jobHandlerTestHelper.jobHandler.constructManifestPrefix();
+      expect(p).toEqual(element.manifestPrefix);
+    });
+  });
+
   test('Execute manifestJob runs successfully and does not queue another manifest job', async () => {
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
