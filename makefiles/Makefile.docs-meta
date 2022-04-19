@@ -7,12 +7,13 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 
+DOTCOM_STAGING_URL=https://mongodbcom-cdn.website.staging.corp.mongodb.com
+DOTCOM_STAGING_BUCKET=docs-mongodb-org-dotcomstg
 
 PROJECT=docs-meta
 PREFIX=docs-meta
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
-
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -26,5 +27,5 @@ html:
 	giza make html
 
 stage: ## Host online for review
-	mut-publish build/${GIT_BRANCH}/html ${BUCKET} --prefix=${PROJECT} --stage ${ARGS}
-	@echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+	mut-publish build/${GIT_BRANCH}/html ${DOTCOM_STAGING_BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "Hosted at ${DOTCOM_STAGING_URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
