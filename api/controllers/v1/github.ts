@@ -74,6 +74,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const env = c.get<string>('env');
   const repoInfo = await branchRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+  // TODO: Make job be of type Job
   const job = await prepGithubPushPayload(body, branchRepository, jobPrefix);
   try {
     consoleLogger.info(job.title, 'Creating Job');

@@ -1,4 +1,5 @@
 // TODO: Cut down on null and undefined type definition allowances
+// TODO: Remove duplicate defintions from Payload and Job, (e.g. prefixes)
 
 export enum JobStatus {
   inQueue = 'inQueue',

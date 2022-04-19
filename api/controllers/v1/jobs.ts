@@ -85,6 +85,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
 async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
   try {
     const tries = message.tries;
+    // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
     if (tries < c.get('maxRetries')) {
       const sqs = new SQSConnector(consoleLogger, c);
       message['tries'] += 1;
@@ -106,7 +107,9 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const env = c.get<string>('env');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
+  // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
+  // TODO: Remove unused vars, and validate existing vars
   const branchesRepo = new BranchRepository(db, c, consoleLogger);
   const slackMsgs = fullDocument.comMessage;
   const jobTitle = fullDocument.title;
@@ -151,9 +154,11 @@ async function prepSummaryMessage(
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
   let mms_urls = [null, null];
-  // mms-docs needs special handling as it builds two sites cloudmanager and ops manager so we need to extract both the URL's
+  // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
+  // so we need to extract both URLs
   if (repoName === 'mms-docs') {
     if (urls.length >= 2) {
+      // TODO: Type 'string[]' is not assignable to type 'null[]'.
       mms_urls = urls.slice(-2);
     }
   }
@@ -199,6 +204,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const db = client.db(c.get('dbName'));
   const slackConnector = new SlackConnector(consoleLogger, c);
   const jobRepository = new JobRepository(db, c, consoleLogger);
+  // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
@@ -209,7 +215,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     return;
   }
   const resp = await slackConnector.sendMessage(
-    prepProgressMessage(c.get('dashboardUrl'), jobId, jobTitle, fullDocument.status),
+    prepProgressMessage(c.get('dashboardUrl'), jobId, jobTitle, fullDocument.status as string),
     entitlement['slack_user_id']
   );
   return {
