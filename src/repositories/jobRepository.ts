@@ -83,12 +83,8 @@ export class JobRepository extends BaseRepository {
     const resp = await this.findOne(query, `Mongo Timeout Error: Timed out while find job by id Job`);
     if (!resp) {
       throw new JobNotFoundError('GetJobByID Failed');
-    } else if (resp.value) {
-      const job: Job = resp.value;
-      await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
-      return job;
     }
-    return null;
+    return Object.assign({}, resp);
   }
 
   async getJobByIdAndUpdate(id: string): Promise<Job | null> {
