@@ -70,6 +70,14 @@ describe('ManifestJobHandler Tests', () => {
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyManifestSuccess();
     expect(queueManifestJobSpy).toBeCalledTimes(0);
+  });
+
+  test('prepDeployCommands has reasonable output', async () => {
+    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
+    await jobHandlerTestHelper.jobHandler.execute();
+    expect(jobHandlerTestHelper.job.deployCommands).toEqual('');
   });
 });

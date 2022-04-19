@@ -13,7 +13,7 @@ To add a new property:
 
 - Add property to parameter store for all environments (stg/prd) by following the convention as other properties
 - Go to infrastructure/ecs-main/serverless.yml custom section
-- define the variable pointing to the right parameter store path
+- Define the variable pointing to the right parameter store path
 - Go to infrastructure/ecs-main/ecs-service.yml TaskDefinition section
 - Add the new property to the ContainerDefinitions/Environment section
 

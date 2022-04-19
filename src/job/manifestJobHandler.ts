@@ -41,12 +41,21 @@ export class ManifestJobHandler extends JobHandler {
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
   prepDeployCommands(): void {
+    const b = this._config.get<string>('searchIndexBucket');
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
-    const b = 'docs-search-indexes-test/test';
+    const f = this._config.get<string>('searchIndexFolder');
     const maP = this.currJob.manifestPrefix;
     const url = this.currJob.payload.url;
     const muP = this.currJob.mutPrefix;
     const globalSearch = this.currJob.payload.stable ? '-g' : '';
+
+    // Rudimentary error logging
+    if (!b) {
+      this.logger.info(this.currJob._id, `searchIndexBucket not found`);
+    }
+    if (!f) {
+      this.logger.info(this.currJob._id, `searchIndexFolder not found`);
+    }
 
     if (!this.currJob.manifestPrefix) {
       this.logger.info(this.currJob._id, `Manifest prefix not found for ${this.currJob._id}`);
@@ -58,7 +67,7 @@ export class ManifestJobHandler extends JobHandler {
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
-      `mut-index upload public -b ${b} -o ${maP}.json -u ${url}/${muP} ${globalSearch}`,
+      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${url}/${muP} ${globalSearch}`,
     ];
   }
 

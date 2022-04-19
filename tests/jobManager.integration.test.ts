@@ -61,9 +61,11 @@ describe('Jobmanager integration Tests', () => {
       cdnConnector,
       repoConnector,
       fileSystemServices,
-      hybridJobLogger
+      hybridJobLogger,
+      repoBranchesRepository
     );
   });
+  // TODO: Update this failing test
   test('E2E runs without any error if no job is present', async () => {
     await jobManager.startSingleJob();
   });

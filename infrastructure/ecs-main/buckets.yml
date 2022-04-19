@@ -8,7 +8,7 @@ Resources:
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: ${self:custom.atlastBucketName}
+      BucketName: ${self:custom.atlasBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
   CloudManagerBucket:

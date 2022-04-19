@@ -44,6 +44,7 @@ export type Payload = {
   includeInGlobalSearch: boolean;
 };
 
+// TODO: Instead of "or undefined", make fields Optional
 export type Job = {
   _id: string;
   payload: Payload;

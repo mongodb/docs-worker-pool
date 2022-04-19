@@ -1,7 +1,8 @@
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
-import * as data from '../../data/jobDef';
+import { getBuildJobDef } from '../../data/jobDef';
+import { Job } from '../../../src/entities/job';
 
 describe('Repo Branches Repository Tests', () => {
   let repoBranchesRepo: RepoBranchesRepository;
@@ -24,7 +25,7 @@ describe('Repo Branches Repository Tests', () => {
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {
-      const job = JSON.parse(JSON.stringify(data.default.value));
+      const job = getBuildJobDef();
       const testData = TestDataProvider.getRepoBranchesByRepoName('test_repo');
       job.payload.repoName = 'test_repo';
       dbRepoHelper.collection.findOne.mockReturnValueOnce(TestDataProvider.getRepoBranchesData(job));

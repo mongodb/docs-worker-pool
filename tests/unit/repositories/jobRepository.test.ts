@@ -1,5 +1,5 @@
 import { JobRepository } from '../../../src/repositories/jobRepository';
-import * as data from '../../data/jobDef';
+import { getBuildJobDef } from '../../data/jobDef';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
 
@@ -24,7 +24,7 @@ describe('Job Repository Tests', () => {
         new Date()
       );
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`
+        `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
     });
 
@@ -37,7 +37,7 @@ describe('Job Repository Tests', () => {
       );
       dbRepoHelper.collection.updateOne.mockReturnValue({ modifiedCount: -1 });
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`
+        `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
     });
@@ -51,7 +51,7 @@ describe('Job Repository Tests', () => {
       );
       dbRepoHelper.collection.updateOne.mockReturnValueOnce({ result: { sn: -1 } });
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
-        `Failed to update job (${JSON.stringify(testData.query)})  for ${JSON.stringify(testData.update)}`
+        `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
       expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
@@ -130,8 +130,8 @@ describe('Job Repository Tests', () => {
 
     test('getOneQueuedJobAndUpdate succeeds', async () => {
       const testData = TestDataProvider.getFindOneAndUpdateCallInfo();
-      dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(data.default);
-      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(Object.assign({}, data.default.value));
+      dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(getBuildJobDef());
+      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(getBuildJobDef());
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledWith(
         testData.query,

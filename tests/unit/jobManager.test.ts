@@ -6,13 +6,12 @@ import { JobValidator } from '../../src/job/jobValidator';
 import { ProductionJobHandler } from '../../src/job/productionJobHandler';
 import { JobManager } from '../../src/job/jobManager';
 import { JobRepository } from '../../src/repositories/jobRepository';
-import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../../src/services/cdn';
 import { IJobCommandExecutor } from '../../src/services/commandExecutor';
 import { IFileSystemServices } from '../../src/services/fileServices';
 import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
-import * as data from '../data/jobDef';
+import { getBuildJobDef } from '../data/jobDef';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
 
 describe('JobManager Tests', () => {
@@ -27,13 +26,12 @@ describe('JobManager Tests', () => {
   let jobHandlerFactory: JobHandlerFactory;
   let jobManager: JobManager;
   let jobValidator: JobValidator;
-  let repoEntitlementRepository: RepoEntitlementsRepository;
   let repoBranchesRepo: RepoBranchesRepository;
 
   beforeEach(() => {
     jest.useFakeTimers('modern');
     jest.setSystemTime(new Date(2021, 4, 3));
-    job = JSON.parse(JSON.stringify(data.default.value));
+    job = getBuildJobDef();
     config = mockDeep<IConfig>();
     jobRepo = mockDeep<JobRepository>();
     fileSystemServices = mockDeep<IFileSystemServices>();

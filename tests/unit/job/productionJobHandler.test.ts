@@ -1,7 +1,8 @@
 import { mockReset } from 'jest-mock-extended';
 import { TestDataProvider } from '../../data/data';
-import * as data from '../../data/jobDef';
+import { getBuildJobDef, getManifestJobDef } from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
+import { Job } from '../../../src/entities/job';
 
 describe('ProductionJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -215,7 +216,7 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(data.default.value);
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(getBuildJobDef());
 
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();
@@ -224,16 +225,15 @@ describe('ProductionJobHandler Tests', () => {
     expect(queueManifestJobSpy).toBeCalledTimes(1);
     expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(1);
 
-    expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(data.manifestJobDef.value);
+    expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(getManifestJobDef());
   });
 
-  // TODO: Fix failing test
   test('Production deploy with false shouldGenerateManifest flag does not kick off manifest job', async () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     jobHandlerTestHelper.job.shouldGenerateSearchManifest = false;
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    const result = data.default.value;
+    const result = getBuildJobDef();
     result['shouldGenerateSearchManifest'] = false;
     expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(result);
 
