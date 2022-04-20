@@ -1,6 +1,6 @@
 import { JobHandler } from './jobHandler';
 import { IConfig } from 'config';
-import { IJob } from '../entities/job';
+import type { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { ICDNConnector } from '../services/cdn';
 import { CommandExecutorResponse, IJobCommandExecutor } from '../services/commandExecutor';
@@ -12,7 +12,7 @@ import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
-    job: IJob,
+    job: Job,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -69,6 +69,15 @@ export class StagingJobHandler extends JobHandler {
       }
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
+      // To test new search infrastructure, we kick off manifest generation jobs during staging
+      // These lines MUST be removed (and corresponding test updated) when infrastructure is
+      // production-ready, to avoid staging jobs causing production search manifests to update
+      if (this.currJob.shouldGenerateSearchManifest == null) {
+        this.currJob.shouldGenerateSearchManifest = true;
+      }
+      if (this.currJob.shouldGenerateSearchManifest) {
+        this.queueManifestJob();
+      }
       return resp;
     } catch (errResult) {
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}stdErr: ${errResult.stderr}`);

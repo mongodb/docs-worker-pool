@@ -1,6 +1,7 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import { Job, JobStatus } from '../entities/job';
+import type { Job } from '../entities/job';
+import { JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
 import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
@@ -44,7 +45,7 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: any, url: string): Promise<string> {
+  async insertJob(job: Job, url: string): Promise<string> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
@@ -83,7 +84,7 @@ export class JobRepository extends BaseRepository {
     if (!resp) {
       throw new JobNotFoundError('GetJobByID Failed');
     }
-    return Object.assign(new Job(), resp);
+    return Object.assign({}, resp);
   }
 
   async getJobByIdAndUpdate(id: string): Promise<Job | null> {
@@ -108,9 +109,8 @@ export class JobRepository extends BaseRepository {
     );
     if (!response) {
       throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
-    }
-    if (response.value) {
-      const job = Object.assign(new Job(), response.value);
+    } else if (response.value) {
+      const job: Job = response.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
     }

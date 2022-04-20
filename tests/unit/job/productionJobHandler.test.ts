@@ -1,5 +1,6 @@
 import { mockReset } from 'jest-mock-extended';
 import { TestDataProvider } from '../../data/data';
+import * as data from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
 describe('ProductionJobHandler Tests', () => {
@@ -207,6 +208,39 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
+  test('Default production deploy kicks off manifest generation', async () => {
+    jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
+    const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(data.default.value);
+
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+
+    expect(queueManifestJobSpy).toBeCalledTimes(1);
+    expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(1);
+
+    expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(data.manifestJobDef.value);
+  });
+
+  test('Production deploy with false shouldGenerateManifest flag does not kick off manifest job', async () => {
+    jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
+    jobHandlerTestHelper.job.shouldGenerateSearchManifest = false;
+    const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+
+    const result = data.default.value;
+    result['shouldGenerateSearchManifest'] = false;
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(result);
+
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+
+    expect(queueManifestJobSpy).toBeCalledTimes(0);
+    expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
+  });
+
   test("Production deploy of a job with empty string pathPrefix sets PATH_PREFIX env to '/'", async () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.job.payload.repoBranches.prefix = '';
@@ -361,5 +395,11 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.job.payload.repoName = 'cloud-docs-osb';
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
+  });
+
+  test('Deploy purge process inserts invalidationStatusUrl', async () => {
+    jobHandlerTestHelper.setStageForDeploySuccess(true);
+    await jobHandlerTestHelper.jobHandler.execute();
+    expect(jobHandlerTestHelper.jobRepo.insertInvalidationRequestStatusUrl).toBeCalledTimes(1);
   });
 });

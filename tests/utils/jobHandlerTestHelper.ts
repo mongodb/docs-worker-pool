@@ -1,9 +1,10 @@
 import { IConfig } from 'config';
 import { mockDeep } from 'jest-mock-extended';
-import { IJob } from '../../src/entities/job';
+import type { Job } from '../../src/entities/job';
 import { IJobValidator } from '../../src/job/jobValidator';
 import { ProductionJobHandler } from '../../src/job/productionJobHandler';
 import { StagingJobHandler } from '../../src/job/stagingJobHandler';
+import { ManifestJobHandler } from '../../src/job/manifestJobHandler';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
 import { ICDNConnector } from '../../src/services/cdn';
@@ -15,7 +16,7 @@ import { TestDataProvider } from '../data/data';
 import * as data from '../data/jobDef';
 
 export class JobHandlerTestHelper {
-  job: IJob;
+  job: Job;
   config: IConfig;
   jobRepo: JobRepository;
   fileSystemServices: IFileSystemServices;
@@ -23,16 +24,17 @@ export class JobHandlerTestHelper {
   cdnConnector: ICDNConnector;
   repoConnector: IRepoConnector;
   logger: IJobRepoLogger;
-  jobHandler: ProductionJobHandler | StagingJobHandler;
+  jobHandler: ProductionJobHandler | StagingJobHandler | ManifestJobHandler;
   jobValidator: IJobValidator;
   repoBranchesRepo: RepoBranchesRepository;
   lengthPrototype;
   handlerMapper = {
     prod: ProductionJobHandler,
     staging: StagingJobHandler,
+    manifest: ManifestJobHandler,
   };
 
-  init(handlerName: string): ProductionJobHandler | StagingJobHandler {
+  init(handlerName: string): ProductionJobHandler | StagingJobHandler | ManifestJobHandler {
     this.job = JSON.parse(JSON.stringify(data.default.value));
     this.config = mockDeep<IConfig>();
     this.jobRepo = mockDeep<JobRepository>();

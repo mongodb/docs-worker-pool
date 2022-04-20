@@ -2,21 +2,29 @@ import { IJobValidator } from './jobValidator';
 import { ICDNConnector } from '../services/cdn';
 import { ProductionJobHandler } from './productionJobHandler';
 import { RegressionJobHandler } from './regressionJobHandler';
+import { ManifestJobHandler } from './manifestJobHandler';
 import { StagingJobHandler } from './stagingJobHandler';
 import { IRepoConnector } from '../services/repo';
 import { IJobRepoLogger } from '../services/logger';
 import { JobHandler } from './jobHandler';
 import { IJobCommandExecutor } from '../services/commandExecutor';
 import { InvalidJobError } from '../errors/errors';
-import { IJob } from '../entities/job';
+import { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 
+export const jobHandlerMap = {
+  githubPush: StagingJobHandler,
+  manifestGeneration: ManifestJobHandler,
+  productionDeploy: ProductionJobHandler,
+  regression: RegressionJobHandler,
+};
+
 export class JobHandlerFactory {
   public createJobHandler(
-    job: IJob,
+    job: Job,
     config: IConfig,
     jobRepository: JobRepository,
     fileSystemServices: IFileSystemServices,
@@ -27,34 +35,9 @@ export class JobHandlerFactory {
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository
   ): JobHandler {
-    if (job.payload.jobType === 'regression') {
-      return new RegressionJobHandler(
-        job,
-        config,
-        jobRepository,
-        fileSystemServices,
-        commandExecutor,
-        cdnConnector,
-        repoConnector,
-        logger,
-        validator,
-        repoBranchesRepo
-      );
-    } else if (job.payload.jobType === 'githubPush') {
-      return new StagingJobHandler(
-        job,
-        config,
-        jobRepository,
-        fileSystemServices,
-        commandExecutor,
-        cdnConnector,
-        repoConnector,
-        logger,
-        validator,
-        repoBranchesRepo
-      );
-    } else if (job.payload.jobType === 'productionDeploy') {
-      return new ProductionJobHandler(
+    const jt = job.payload?.jobType;
+    if (jt in jobHandlerMap) {
+      return new jobHandlerMap[jt](
         job,
         config,
         jobRepository,
@@ -129,7 +112,7 @@ export class JobManager {
     return this._shouldStop;
   }
 
-  async workEx(job: IJob): Promise<void> {
+  async workEx(job: Job): Promise<void> {
     try {
       this._jobHandler = null;
       if (job?.payload) {
@@ -145,21 +128,21 @@ export class JobManager {
     }
   }
 
-  async getQueuedJob(): Promise<IJob | null> {
+  async getQueuedJob(): Promise<Job | null> {
     return await this._jobRepository.getOneQueuedJobAndUpdate().catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });
   }
 
-  async getJob(jobId: string): Promise<IJob | null> {
+  async getJob(jobId: string): Promise<Job | null> {
     return await this._jobRepository.getJobByIdAndUpdate(jobId).catch((error) => {
       this._logger.error('JobManager', `Error: ${error}`);
       return null;
     });
   }
 
-  async createHandlerAndExecute(job: IJob): Promise<void> {
+  async createHandlerAndExecute(job: Job): Promise<void> {
     this._jobHandler = this._jobHandlerFactory.createJobHandler(
       job,
       this._config,

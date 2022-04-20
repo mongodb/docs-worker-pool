@@ -1,4 +1,4 @@
-import { IJob } from '../../src/entities/job';
+import type { Job } from '../../src/entities/job';
 import { CommandExecutorResponse } from '../../src/services/commandExecutor';
 import * as data from '../data/jobDef';
 
@@ -41,7 +41,7 @@ export class TestDataProvider {
     return props;
   }
 
-  static getPublishBranchesContent(job: IJob): any {
+  static getPublishBranchesContent(job: Job): any {
     return {
       repoName: job.payload.repoName,
       branches: [
@@ -98,23 +98,23 @@ export class TestDataProvider {
     };
   }
 
-  static configureRepoBranches(job: IJob): IJob {
+  static configureRepoBranches(job: Job): Job {
     job.payload.repoBranches = TestDataProvider.getPublishBranchesContent(job);
     return job;
   }
 
-  static configurePublishedBranchesWithPrimaryAlias(job: IJob): IJob {
+  static configurePublishedBranchesWithPrimaryAlias(job: Job): Job {
     job.payload.primaryAlias = job.payload.branchName;
     return TestDataProvider.configureRepoBranches(job);
   }
 
-  static configurePublishedBranchesWithOutPrimaryAliasAndAliasSet(job: IJob): IJob {
+  static configurePublishedBranchesWithOutPrimaryAliasAndAliasSet(job: Job): Job {
     job.payload.primaryAlias = null;
     job.payload.aliased = true;
     return TestDataProvider.configureRepoBranches(job);
   }
 
-  static getCommitCheckValidResponse(job: IJob): any {
+  static getCommitCheckValidResponse(job: Job): any {
     const resp = new CommandExecutorResponse();
     resp.output = `* ${job.payload.branchName}`;
     resp.error = null;
@@ -134,11 +134,11 @@ export class TestDataProvider {
     return [null, {}, TestDataProvider.getCommitCheckInValidResponse(), 'THROW'];
   }
 
-  static getCommonBuildCommands(job: IJob): Array<string> {
+  static getCommonBuildCommands(job: Job): Array<string> {
     return [`. /venv/bin/activate`, `cd repos/${job.payload.repoName}`, `rm -f makefile`, `make html`];
   }
 
-  static getExpectedProdBuildNextGenCommands(job: IJob): Array<string> {
+  static getExpectedProdBuildNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make get-build-dependencies',
@@ -146,7 +146,7 @@ export class TestDataProvider {
     ]);
   }
 
-  static getExpectedStagingBuildNextGenCommands(job: IJob): Array<string> {
+  static getExpectedStagingBuildNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make next-gen-html',
@@ -157,7 +157,7 @@ export class TestDataProvider {
     return commands;
   }
 
-  static getEnvVarsWithPathPrefixWithFlags(job: IJob): string {
+  static getEnvVarsWithPathPrefixWithFlags(job: Job): string {
     return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\n`;
   }
   static getEnvVarsTestCases(): Array<any> {
@@ -260,15 +260,15 @@ export class TestDataProvider {
     ];
   }
 
-  static getCommonDeployCommands(job: IJob): Array<string> {
+  static getCommonDeployCommands(job: Job): Array<string> {
     return ['. /venv/bin/activate', `cd repos/${job.payload.repoName}`, 'make publish && make deploy'];
   }
 
-  static getCommonDeployCommandsForStaging(job: IJob): Array<string> {
+  static getCommonDeployCommandsForStaging(job: Job): Array<string> {
     return ['. /venv/bin/activate', `cd repos/${job.payload.repoName}`, 'make stage'];
   }
 
-  static getExpectedStageDeployNextGenCommands(job: IJob): Array<string> {
+  static getExpectedStageDeployNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonDeployCommands(job);
     // TODO: simplify construction of return value
     if (job.payload.mutPrefix) {
@@ -279,7 +279,7 @@ export class TestDataProvider {
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [`make next-gen-stage`]);
   }
 
-  static getExpectedProdDeployNextGenCommands(job: IJob): Array<string> {
+  static getExpectedProdDeployNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonDeployCommands(job);
     // TODO: simplify construction of return value
     const ret = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
@@ -400,7 +400,7 @@ export class TestDataProvider {
     };
   }
 
-  static getRepoBranchesData(job: IJob): any {
+  static getRepoBranchesData(job: Job): any {
     return {
       repoName: job.payload.repoName,
       branches: [

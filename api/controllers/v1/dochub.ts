@@ -5,7 +5,6 @@ import * as c from 'config';
 import * as crypto from 'crypto';
 import * as mongodb from 'mongodb';
 import { JobRepository } from '../../../src/repositories/jobRepository';
-import { BranchRepository } from '../../../src/repositories/branchRepository';
 
 export const UpsertEdgeDictionaryItem = async (event: any = {}): Promise<any> => {
   const body = JSON.parse(event.body);
@@ -13,6 +12,8 @@ export const UpsertEdgeDictionaryItem = async (event: any = {}): Promise<any> =>
     key: body.source,
     value: body.target,
   };
+  // TODO: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  // Above applies for all 'process.env' variables, they should be validated
   const creds = new CDNCreds(process.env.FASTLY_DOCHUB_SERVICE_ID, process.env.FASTLY_DOCHUB_TOKEN);
   await new FastlyConnector(new ConsoleLogger()).upsertEdgeDictionaryItem(pair, process.env.FASTLY_DOCHUB_MAP, creds);
   return {
@@ -60,7 +61,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const db = client.db(c.get('dbName'));
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  const env = c.get<string>('env');
+  // TODO: Make job be of type Job
   const job = await prepDochubPushPayload();
 
   try {
