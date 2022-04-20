@@ -56,7 +56,7 @@ custom:
     desiredCount:
       dev: '4'
       stg: '4'
-      prd: '4' 
+      prd: '4'
       dotcomstg: '4'
       dotcomprd: '4'
     minimumHealthyPercent:
@@ -79,7 +79,7 @@ custom:
     prd: 216656347858
     dotcomstg: 216656347858
     dotcomprd: 216656347858
-    
+
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
@@ -90,7 +90,7 @@ custom:
   githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
   bucketName: docs-mongodb-org-${self:provider.stage}
-  atlastBucketName: docs-atlas-${self:provider.stage}
+  atlasBucketName: docs-atlas-${self:provider.stage}
   atlasOsbBucketName: docs-atlas-osb-${self:provider.stage}
   atlasGovBucketName: docs-govcloud-${self:provider.stage}
   devhubBucketName: docs-devhub-${self:provider.stage}
@@ -128,7 +128,7 @@ custom:
   jobUpdatesQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsUpdateQueueURL}
   cdnClientID: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/id}
   cdnClientSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/cdn/client/secret}
-  cdnInvalidatorServiceURL: 
+  cdnInvalidatorServiceURL:
     stg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
     prd: https://cdnvalidator.devops.prod.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
     dotcomstg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
@@ -146,6 +146,13 @@ custom:
     dev: "staging"
     dotcomstg: "dotcomstg"
     dotcomprd: "dotcomprd"
+  # TODO: When satisfied with manifest generation, remove '-test'
+  searchIndexBucketName: docs-search-indexes-test
+  # TODO: In future, use duplicate mapping of dotcomstg -> preprd to have
+  # one source-of-truth for new environment-name mapping standard
+  searchIndexFolder:
+    dotcomstg: "preprd"
+    dotcomprd: "prd"
 
 resources:
   - ${file(./buckets.yml)}

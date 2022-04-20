@@ -3,17 +3,17 @@
 As part of the Docs Tools Next Generation Project, the Docs Worker Pool seeks to make the build process for developers both easier and more scalable for developers.
 
 Docs worker pool will be running as ECS Service. Serverless is used for automating the cloudformation stack creation.
-going forward any new buckets needs to be added should be specified in infrastructure/ecs-main/buckets.yml
+Going forward, any new buckets should be specified in infrastructure/ecs-main/buckets.yml
 
 ## To Add new properties
 
 All our properties are managed in parameter store and pulled by serverless framework during deploy time and pushed into the Task environment as part of task definition.
 
-So to add a new property
+To add a new property:
 
 - Add property to parameter store for all environments (stg/prd) by following the convention as other properties
 - Go to infrastructure/ecs-main/serverless.yml custom section
-- define the variable pointing to the right parameter store path
+- Define the variable pointing to the right parameter store path
 - Go to infrastructure/ecs-main/ecs-service.yml TaskDefinition section
 - Add the new property to the ContainerDefinitions/Environment section
 

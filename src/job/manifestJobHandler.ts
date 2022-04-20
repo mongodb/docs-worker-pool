@@ -9,6 +9,7 @@ import { IJobRepoLogger } from '../services/logger';
 import { IRepoConnector } from '../services/repo';
 import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { InvalidJobError } from '../errors/errors';
 
 export class ManifestJobHandler extends JobHandler {
   constructor(
@@ -40,14 +41,37 @@ export class ManifestJobHandler extends JobHandler {
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
   prepDeployCommands(): void {
+    const b = this._config.get<string>('searchIndexBucket');
+    // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
+    const f = this._config.get<string>('searchIndexFolder');
+    const maP = this.currJob.manifestPrefix;
+    const url = this.currJob.payload.url;
+    const muP = this.currJob.mutPrefix;
+    const globalSearch = this.currJob.payload.stable ? '-g' : '';
+
+    // Rudimentary error logging
+    if (!b) {
+      this.logger.info(this.currJob._id, `searchIndexBucket not found`);
+    }
+    if (!f) {
+      this.logger.info(this.currJob._id, `searchIndexFolder not found`);
+    }
+
+    if (!this.currJob.manifestPrefix) {
+      this.logger.info(this.currJob._id, `Manifest prefix not found for ${this.currJob._id}`);
+      throw new InvalidJobError(`Manifest prefix not found for ${this.currJob._id}`);
+    }
+
+    // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
-      'python3 test-mut-script.py',
+      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${url}/${muP} ${globalSearch}`,
     ];
   }
 
+  // TODO: Is this function from jobHandler strictly necessary?
   prepStageSpecificNextGenCommands(): void {
     return;
   }

@@ -107,7 +107,12 @@ Resources:
             - Name: CDN_CLIENT_SECRET
               Value: ${self:custom.cdnClientSecret}
             - Name: CDN_INVALIDATOR_SERVICE_URL
-              Value: ${self:custom.cdnInvalidatorServiceURL.${self:provider.stage}} 
+              Value: ${self:custom.cdnInvalidatorServiceURL.${self:provider.stage}}
+            # TODO: Is this necessary?
+            - Name: SEARCH_INDEX_BUCKET
+              Value: ${self:custom.searchIndexBucket}
+            - Name: SEARCH_INDEX_FOLDER
+              Value: ${self:custon.searchIndexFolder}
 
           LogConfiguration:
             LogDriver: awslogs
@@ -150,7 +155,7 @@ Resources:
                 - Effect: Allow
                   Action:
                     - 'sqs:SendMessage'
-                  Resource: 
+                  Resource:
                     - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-job-updates-queue-${self:provider.stage}'
                     - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-jobs-queue-${self:provider.stage}'
           - PolicyName: AllowSSMAccess

@@ -1,7 +1,7 @@
 import { mockDeep, mockReset } from 'jest-mock-extended';
 import { Job } from '../../../src/entities/job';
 import { IFileSystemServices } from '../../../src/services/fileServices';
-import * as data from '../../data/jobDef';
+import { getBuildJobDef } from '../../data/jobDef';
 import { JobValidator } from '../../../src/job/jobValidator';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { TestDataProvider } from '../../data/data';
@@ -14,7 +14,8 @@ let jobValidator: JobValidator;
 let repoBranchesRepository: RepoBranchesRepository;
 
 beforeEach(() => {
-  job = JSON.parse(JSON.stringify(data.default.value));
+  // Deep copy buildJobDef is necessary because we modify job
+  job = getBuildJobDef();
   fileSystemServices = mockDeep<IFileSystemServices>();
   repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
   repoBranchesRepository = mockDeep<RepoBranchesRepository>();

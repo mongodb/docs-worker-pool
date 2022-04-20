@@ -1,6 +1,6 @@
 import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
-import * as data from '../../data/jobDef';
+import { getBuildJobDef } from '../../data/jobDef';
 
 describe('StagingJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -100,18 +100,16 @@ describe('StagingJobHandler Tests', () => {
     );
   });
 
-  // NOTE: when githubPush is removed from viable job kickoffs, change to
-  // expect(queueManifestJobSpy).toBeCalledTimes(0);
-  test('Staging deploy kicks off manifest generation job', async () => {
+  test('Staging deploy does not kick off manifest generation job', async () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(data.default.value);
+    expect(jobHandlerTestHelper.job).toEqual(getBuildJobDef());
 
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();
 
-    expect(queueManifestJobSpy).toBeCalledTimes(1);
-    expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(1);
+    expect(queueManifestJobSpy).toBeCalledTimes(0);
+    expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
   });
 });

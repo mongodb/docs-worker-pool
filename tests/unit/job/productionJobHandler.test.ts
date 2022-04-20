@@ -1,7 +1,8 @@
 import { mockReset } from 'jest-mock-extended';
 import { TestDataProvider } from '../../data/data';
-import * as data from '../../data/jobDef';
+import { getBuildJobDef, getManifestJobDef } from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
+import { Job } from '../../../src/entities/job';
 
 describe('ProductionJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -156,6 +157,7 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
+  // TODO: Fix failing tests. Can this be removed as dupe of manifestJobHandler test?
   describe.each(TestDataProvider.getManifestPrefixCases())('Validate all Generate manifest prefix cases', (element) => {
     test(`Testing manifest prefix with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
       jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
@@ -166,6 +168,7 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
+  // TODO: Fix failing test
   test('Execute Next Gen Manifest prefix generation throws error as get snooty name throws', async () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
@@ -196,6 +199,7 @@ describe('ProductionJobHandler Tests', () => {
         .mockReturnValue(element['GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN']);
       await jobHandlerTestHelper.jobHandler.execute();
       jobHandlerTestHelper.verifyNextGenSuccess();
+      // TODO: Correct number of arguments
       expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
         `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
         TestDataProvider.getEnvVarsWithPathPrefixWithFlags(
@@ -212,7 +216,7 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(data.default.value);
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(getBuildJobDef());
 
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();
@@ -221,7 +225,7 @@ describe('ProductionJobHandler Tests', () => {
     expect(queueManifestJobSpy).toBeCalledTimes(1);
     expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(1);
 
-    expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(data.manifestJobDef.value);
+    expect(jobHandlerTestHelper.jobRepo.insertJob.mock.calls[0][0]).toEqual(getManifestJobDef());
   });
 
   test('Production deploy with false shouldGenerateManifest flag does not kick off manifest job', async () => {
@@ -229,7 +233,7 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.job.shouldGenerateSearchManifest = false;
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    const result = data.default.value;
+    const result = getBuildJobDef();
     result['shouldGenerateSearchManifest'] = false;
     expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(result);
 
@@ -369,6 +373,7 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.cdnConnector.purgeAll).toHaveBeenCalledTimes(0);
   });
 
+  // TODO: Fix failing test
   test('Execute legacy build runs successfully purges all for main service', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(false);
     jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(true);
@@ -386,6 +391,7 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
   });
 
+  // TODO: Fix failing test
   test('Execute build runs successfully purges all for atlas service', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(false);
     jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(true);

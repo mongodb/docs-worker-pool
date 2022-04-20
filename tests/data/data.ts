@@ -1,6 +1,6 @@
 import type { Job } from '../../src/entities/job';
 import { CommandExecutorResponse } from '../../src/services/commandExecutor';
-import * as data from '../data/jobDef';
+import { getBuildJobDef } from '../data/jobDef';
 
 export class TestDataProvider {
   static getJobPropertiesValidateTestCases(): Array<any> {
@@ -190,7 +190,7 @@ export class TestDataProvider {
   }
 
   static getPathPrefixCases(): Array<any> {
-    const job = Object.assign(data.default.value);
+    const job = getBuildJobDef();
     const itemValid = TestDataProvider.getPublishBranchesContent(job);
 
     // Null version
@@ -226,7 +226,7 @@ export class TestDataProvider {
   }
 
   static getManifestPrefixCases(): Array<any> {
-    const job = Object.assign(data.default.value);
+    const job = getBuildJobDef();
     const itemValid = TestDataProvider.getPublishBranchesContent(job);
     return [
       {
@@ -286,7 +286,7 @@ export class TestDataProvider {
       `make next-gen-deploy MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);
     if (job.payload.manifestPrefix) {
-      // TODO: is job.payload.stableBranch supposed to be isStableBranch?
+      // TODO: is job.payload.stableBranch supposed to be includeInGlobalSearch?
       ret[
         ret.length - 1
       ] += ` MANIFEST_PREFIX=${job.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${job.payload.stableBranch}`;
@@ -294,7 +294,7 @@ export class TestDataProvider {
     return ret;
   }
 
-  static getPublishOutputWithPurgedUrls(prod: boolean): any {
+  static getPublishOutputWithPurgedUrls(prod: boolean): Array<any> {
     if (prod) {
       return [
         'Line1 \r\n Line2 \r\n {\t"urls": ["url1", "url2", "url3", "url4", "url5"]}',

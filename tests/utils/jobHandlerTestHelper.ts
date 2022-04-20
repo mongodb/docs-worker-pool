@@ -13,7 +13,7 @@ import { IFileSystemServices } from '../../src/services/fileServices';
 import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
 import { TestDataProvider } from '../data/data';
-import * as data from '../data/jobDef';
+import { getBuildJobDef, getManifestJobDef } from '../data/jobDef';
 
 export class JobHandlerTestHelper {
   job: Job;
@@ -35,7 +35,7 @@ export class JobHandlerTestHelper {
   };
 
   init(handlerName: string): ProductionJobHandler | StagingJobHandler | ManifestJobHandler {
-    this.job = JSON.parse(JSON.stringify(data.default.value));
+    this.job = handlerName === 'manifest' ? getManifestJobDef() : getBuildJobDef();
     this.config = mockDeep<IConfig>();
     this.jobRepo = mockDeep<JobRepository>();
     this.fileSystemServices = mockDeep<IFileSystemServices>();
@@ -99,6 +99,16 @@ export class JobHandlerTestHelper {
     expect(this.repoConnector.checkCommits).toBeCalledTimes(1);
     expect(this.repoConnector.applyPatch).toBeCalledTimes(1);
     expect(this.job.buildCommands).toEqual(expectedCommandSet);
+    expect(this.job.payload.isNextGen).toEqual(true);
+  }
+
+  // Used for manifestGeneration jobs, per manifestJobHandler & its tests
+  verifyManifestSuccess(): void {
+    expect(this.repoConnector.pullRepo).toBeCalledTimes(1);
+    expect(this.repoConnector.cloneRepo).toBeCalledTimes(1);
+    expect(this.repoConnector.checkCommits).toBeCalledTimes(1);
+    expect(this.repoConnector.applyPatch).toBeCalledTimes(1);
+    expect(this.job.buildCommands).toEqual('');
     expect(this.job.payload.isNextGen).toEqual(true);
   }
 

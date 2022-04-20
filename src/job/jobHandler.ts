@@ -215,6 +215,8 @@ export abstract class JobHandler {
     if (this.isbuildNextGen()) {
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
+      // TODO: Look into moving the generation of manifestPrefix into the manifestJobHandler,
+      // as well as reducing difficult-to-debug state changes
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
@@ -286,12 +288,32 @@ export abstract class JobHandler {
     return '';
   }
 
-  // For certain unversioned properties, urlSlug is null; use branchName instead
-  protected constructManifestPrefix(): string {
-    if (this.currJob.payload.urlSlug) {
-      return `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
+  // TODO: Reduce hard-to-follow state mutations
+  public constructManifestPrefix(): string {
+    // In the past, we have had issues with generating manifests titled "null-v1.0.json"
+    // This is rudimentary error handling, and should ideally happen elsewhere
+    if (!this.currJob.payload.project) {
+      this._logger.info(this._currJob._id, `Project name not found for ${this.currJob._id}.`);
+      throw new InvalidJobError(`Project name not found for ${this.currJob._id}.`);
     }
-    return `${this.currJob.payload.project}-${this.currJob.payload.branchName}`;
+    if (this.currJob.payload.aliased) {
+      this._logger.info(this._currJob._id, `Warning: generating manifest prefix for aliased property.`);
+    }
+    // Due to snooty.toml project naming discrepancies, payload.project may not
+    // match preferred project names. This may be removed pending snooty.toml
+    // name correction AND snooty frontend dropdown de-hardcoding
+    const substitute = {
+      cloudgov: 'AtlasGov',
+      cloud: 'atlas',
+      docs: 'manual',
+    };
+    const projectName = substitute[this.currJob.payload.project] ?? this.currJob.payload.project;
+
+    if (this.currJob.payload.urlSlug) {
+      return `${projectName}-${this.currJob.payload.urlSlug}`;
+    }
+    // For certain unversioned properties, urlSlug is null; use branchName instead
+    return `${projectName}-${this.currJob.payload.branchName}`;
   }
 
   protected abstract deploy(): Promise<CommandExecutorResponse>;
