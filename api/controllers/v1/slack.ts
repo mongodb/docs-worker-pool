@@ -142,7 +142,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
     if (!branchObject?.aliasObject) continue;
 
-    const active = branchObject.aliasObject.active; //bool
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool
     let aliases = branchObject.aliasObject.urlAliases; //array or null
     let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
@@ -150,10 +149,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     aliases = aliases?.filter((a) => a);
     if (!urlSlug || !!urlSlug.trim()) {
       urlSlug = branchName;
-    }
-
-    if (!active) {
-      continue;
     }
 
     //Generic payload, will be conditionaly modified appropriately
