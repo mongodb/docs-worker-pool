@@ -151,6 +151,8 @@ custom:
   # TODO: In future, use duplicate mapping of dotcomstg -> preprd to have
   # one source-of-truth for new environment-name mapping standard
   searchIndexFolder:
+    stg: "preprd"
+    prd: "prd"
     dotcomstg: "preprd"
     dotcomprd: "prd"
 
