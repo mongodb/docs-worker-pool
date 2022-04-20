@@ -320,12 +320,13 @@ export abstract class JobHandler {
 
   protected abstract prepDeployCommands(): void;
 
+  // TODO: Reduce state changes
   protected prepBuildCommands(): void {
     this.currJob.buildCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.currJob.payload.repoName}`,
       `rm -f makefile`,
-      `make html`, // TODO: Can we remove this line, given how many jobHandler functions overwrite it?
+      `make html`,
     ];
   }
 
@@ -457,6 +458,8 @@ export abstract class JobHandler {
       endTime: undefined,
       error: undefined,
       logs: undefined,
+      // NOTE: Priority must be 2 or greater to avoid manifest jobs being
+      // prioritized alongside/above build jobs (which have a priority of 1)
       priority: 2,
       result: undefined,
       startTime: new Date(),

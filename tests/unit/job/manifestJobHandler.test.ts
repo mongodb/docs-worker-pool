@@ -24,15 +24,38 @@ describe('ManifestJobHandler Tests', () => {
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
-    jobHandlerTestHelper.verifyManifestSuccess();
+    jobHandlerTestHelper.verifyNextGenSuccess();
     expect(queueManifestJobSpy).toBeCalledTimes(0);
   });
 
   test('prepDeployCommands has reasonable output', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    const prepSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'prepDeployCommands');
+    jobHandlerTestHelper.job.manifestPrefix = 'test-job-mani-prefix';
+    jobHandlerTestHelper.job.payload.manifestPrefix = 'test-payload-mani-prefix';
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
+    // Set config variables
+    jobHandlerTestHelper.config.get.calledWith('searchIndexBucket').mockReturnValue('sample-bucket');
+    jobHandlerTestHelper.config.get.calledWith('searchIndexFolder').mockReturnValue('sample-folder');
+    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.deployCommands).toEqual('');
+    expect(prepSpy).toBeCalledTimes(1);
+    const o = [
+      '. /venv/bin/activate',
+      'cd repos/testauth',
+      'echo IGNORE: testing manifest generation deploy commands',
+      'mut-index upload public -b sample-bucket -o sample-folder/test-job-mani-prefix.json -u https://github.com/skerschb/testauth.git/ ',
+    ];
+    expect(jobHandlerTestHelper.job.deployCommands).toEqual(o);
+  });
+
+  test('prepDeployCommands throws error without manifestPrefix', async () => {
+    const prepSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'prepDeployCommands');
+    jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
+    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    await jobHandlerTestHelper.jobHandler.execute();
+    expect(prepSpy).toBeCalledTimes(1);
+    expect(prepSpy).toThrowError();
+    expect(jobHandlerTestHelper.job.deployCommands).toEqual([]);
   });
 
   // TODO: Move to TestDataProvider once similar test in productionJobHandler

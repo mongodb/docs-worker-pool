@@ -41,9 +41,9 @@ export class ManifestJobHandler extends JobHandler {
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
   prepDeployCommands(): void {
-    const b = this._config.get<string>('searchIndexBucket');
+    const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
-    const f = this._config.get<string>('searchIndexFolder');
+    const f = this._config.get<string>('searchIndexFolder') ?? 'test-folder';
     const maP = this.currJob.manifestPrefix;
     const url = this.currJob.payload.url;
     const muP = this.currJob.mutPrefix;
@@ -71,9 +71,12 @@ export class ManifestJobHandler extends JobHandler {
     ];
   }
 
-  // TODO: Is this function from jobHandler strictly necessary?
+  // TODO: Can this function be merged with prepBuildCommands?
   prepStageSpecificNextGenCommands(): void {
-    return;
+    if (this.currJob?.buildCommands) {
+      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
+      this.currJob.buildCommands.push('make next-gen-html');
+    }
   }
 
   async deploy(): Promise<CommandExecutorResponse> {

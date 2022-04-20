@@ -42,6 +42,7 @@ export const getBuildJobDef = (): Job => ({
   } as Payload,
 });
 
+// Represents a manifestJob at time of insert to queue
 export const getManifestJobDef = (): Job => ({
   _id: '',
   buildCommands: [],
@@ -49,19 +50,19 @@ export const getManifestJobDef = (): Job => ({
   createdTime: expect.any(Date),
   deployCommands: [],
   email: '',
-  endTime: expect.any(Date),
-  error: {},
-  invalidationStatusURL: 'test-status-url',
-  logs: [],
+  endTime: undefined,
+  error: undefined,
+  invalidationStatusURL: undefined,
+  logs: undefined,
   manifestPrefix: '',
   mutPrefix: '',
   pathPrefix: '',
   priority: 2,
   purgedUrls: null,
-  result: [],
+  result: undefined,
   shouldGenerateSearchManifest: false,
   startTime: expect.any(Date),
-  status: expect.any(JobStatus),
+  status: null,
   title: 'Slack deploy: skerschb - search manifest generation',
   user: 'skerschb',
   payload: {

@@ -47,6 +47,7 @@ export class ProductionJobHandler extends JobHandler {
       'make publish && make deploy',
     ];
 
+    // TODO: Reduce confusion between job.manifestPrefix and job.payload.manifestPrefix
     if (this.currJob.payload.isNextGen) {
       const manifestPrefix = this.currJob.payload.manifestPrefix;
       this.currJob.deployCommands[

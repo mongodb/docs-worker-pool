@@ -102,16 +102,6 @@ export class JobHandlerTestHelper {
     expect(this.job.payload.isNextGen).toEqual(true);
   }
 
-  // Used for manifestGeneration jobs, per manifestJobHandler & its tests
-  verifyManifestSuccess(): void {
-    expect(this.repoConnector.pullRepo).toBeCalledTimes(1);
-    expect(this.repoConnector.cloneRepo).toBeCalledTimes(1);
-    expect(this.repoConnector.checkCommits).toBeCalledTimes(1);
-    expect(this.repoConnector.applyPatch).toBeCalledTimes(1);
-    expect(this.job.buildCommands).toEqual('');
-    expect(this.job.payload.isNextGen).toEqual(true);
-  }
-
   setupForSuccess(rootFileExists = true, nextGenEntry: string = TestDataProvider.nextGenEntryInWorkerFile()): void {
     this.config.get.calledWith('repo_dir').mockReturnValue('repos');
     this.config.get.calledWith('stage').mockReturnValue('test');
