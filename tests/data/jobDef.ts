@@ -1,15 +1,24 @@
 import { Job, Payload, JobStatus } from '../../src/entities/job';
 
+// This wrapper function allows us to use nifty Jest features (which sadly cannot
+// be used as mock function return values, so we have both)
+export const getBuildJobDef = (): Job =>
+  Object.assign(getBuildJobPlain(), {
+    endTime: expect.any(Date),
+    startTime: expect.any(Date),
+    status: expect.any(JobStatus),
+  });
+
 // This is a function to get around object state change errors in tests
-export const getBuildJobDef = (): Job => ({
+export const getBuildJobPlain = (): Job => ({
   _id: '5c5e0817ce099eaf874a9801',
   title: 'Slack deploy: skerschb',
   buildCommands: [],
   comMessage: null,
-  createdTime: expect.any(Date),
+  createdTime: new Date(),
   deployCommands: [],
   email: '32710906+skerschb@users.noreply.github.com',
-  endTime: expect.any(Date),
+  endTime: new Date(),
   error: {},
   invalidationStatusURL: 'test-status-url',
   logs: [],
@@ -20,8 +29,8 @@ export const getBuildJobDef = (): Job => ({
   purgedUrls: null,
   result: [],
   shouldGenerateSearchManifest: true,
-  startTime: expect.any(Date),
-  status: expect.any(JobStatus),
+  startTime: new Date(),
+  status: JobStatus.completed,
   user: 'skerschb',
   payload: {
     jobType: 'productionDeploy',

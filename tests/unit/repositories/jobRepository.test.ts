@@ -1,5 +1,5 @@
 import { JobRepository } from '../../../src/repositories/jobRepository';
-import { getBuildJobDef } from '../../data/jobDef';
+import { getBuildJobDef, getBuildJobPlain } from '../../data/jobDef';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
 
@@ -57,6 +57,8 @@ describe('Job Repository Tests', () => {
       expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
     });
 
+    // TODO: Fix failing test
+    // [Error: Region is missing]
     test('Update with completion status succeeds', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
         'Test_Job',
@@ -95,6 +97,8 @@ describe('Job Repository Tests', () => {
     });
   });
 
+  // TODO: Fix failing test
+  // [Error: Configuration property "jobUpdatesQueueUrl" is not defined]
   describe('Job Repository updateWithFailureStatus Tests', () => {
     test('updateWithFailureStatus succeeds', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
@@ -128,10 +132,14 @@ describe('Job Repository Tests', () => {
       );
     });
 
+    // TODO: Fix failing test
     test('getOneQueuedJobAndUpdate succeeds', async () => {
       const testData = TestDataProvider.getFindOneAndUpdateCallInfo();
-      dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(getBuildJobDef());
-      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(getBuildJobDef());
+      // I wrapped data inside a value key to mimic the original implementation of this test
+      const mockVal = { value: getBuildJobPlain() };
+      dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(mockVal);
+      // getOneQueuedJobAndUpdate() is returning null in this test
+      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(mockVal.value);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledWith(
         testData.query,
@@ -161,7 +169,7 @@ describe('Job Repository Tests', () => {
       const testData = TestDataProvider.getInsertLogStatementInfo('Test_Job', ['msg1', 'msg2']);
       setupForUpdateOneSuccess();
       await expect(jobRepo.insertLogStatement('Test_Job', ['msg1', 'msg2'])).resolves.toEqual(true);
-      validateSuccessfullUpdate(testData);
+      validateSuccessfulUpdate(testData);
     });
   });
 
@@ -170,7 +178,7 @@ describe('Job Repository Tests', () => {
       const testData = TestDataProvider.getInsertComMessageInfo('Test_Job', 'Successfully tested');
       setupForUpdateOneSuccess();
       await expect(jobRepo.insertNotificationMessages('Test_Job', 'Successfully tested')).resolves.toEqual(true);
-      validateSuccessfullUpdate(testData);
+      validateSuccessfulUpdate(testData);
     });
   });
 
@@ -179,10 +187,11 @@ describe('Job Repository Tests', () => {
       const testData = TestDataProvider.getInsertPurgedUrls('Test_Job', ['url1', 'url2']);
       setupForUpdateOneSuccess();
       await expect(jobRepo.insertPurgedUrls('Test_Job', ['url1', 'url2'])).resolves.toEqual(true);
-      validateSuccessfullUpdate(testData);
+      validateSuccessfulUpdate(testData);
     });
   });
 
+  // TODO: Fix failing test
   describe('resetJobStatus Tests', () => {
     test('resetJobStatus succeeds', async () => {
       const testData = TestDataProvider.getJobResetInfo('Test_Job', 'reset job status for testing reasons ');
@@ -190,11 +199,11 @@ describe('Job Repository Tests', () => {
       await expect(
         jobRepo.resetJobStatus('Test_Job', 'inQueue', 'reset job status for testing reasons ')
       ).resolves.toEqual(true);
-      validateSuccessfullUpdate(testData);
+      validateSuccessfulUpdate(testData);
     });
   });
 
-  function validateSuccessfullUpdate(testData: any) {
+  function validateSuccessfulUpdate(testData: any) {
     expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
     expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query, testData.update);
     expect(dbRepoHelper.logger.error).toBeCalledTimes(0);

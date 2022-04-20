@@ -137,6 +137,7 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
   });
 
+  // TODO: Fix failing test
   describe.each(TestDataProvider.getPathPrefixCases())('Validate all Generate path prefix cases', (element) => {
     test(`Testing Path prefix with input ${JSON.stringify(element)}`, async () => {
       jobHandlerTestHelper.job.payload.repoBranches = element.value;
@@ -145,6 +146,7 @@ describe('ProductionJobHandler Tests', () => {
       expect(jobHandlerTestHelper.repoConnector.pullRepo).toBeCalledTimes(1);
       expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
       if (element.error) {
+        // Received number of calls: 0
         expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(
           jobHandlerTestHelper.job._id,
           "Cannot read properties of null (reading 'forEach')"
@@ -157,7 +159,10 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
-  // TODO: Fix failing tests. Can this be removed as dupe of manifestJobHandler test?
+  // TODO CLAIRE: Fix failing tests. Can this be removed as dupe of manifestJobHandler test?
+  // ProductionJobHandler Tests › Validate all Generate manifest prefix cases › Testing manifest prefix with aliased=true primaryAlias=null alias=DONTSET
+  // Expected: undefined
+  // Received: "testauth-UsingAlias"
   describe.each(TestDataProvider.getManifestPrefixCases())('Validate all Generate manifest prefix cases', (element) => {
     test(`Testing manifest prefix with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
       jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
@@ -173,6 +178,7 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     mockReset(jobHandlerTestHelper.jobCommandExecutor);
+    // Received: "Cannot read property 'output' of undefined"
     jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName
       .calledWith(jobHandlerTestHelper.job.payload.repoName)
       .mockImplementation(() => {
@@ -386,6 +392,7 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(
       TestDataProvider.getCommonDeployCommands(jobHandlerTestHelper.job)
     );
+    // Received number of calls: 0
     expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
     expect(jobHandlerTestHelper.cdnConnector.purge).toHaveBeenCalledTimes(0);
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
@@ -400,6 +407,7 @@ describe('ProductionJobHandler Tests', () => {
       .mockReturnValue({ 'cloud-docs-osb': { id: 'sid', key: 'token' } });
     jobHandlerTestHelper.job.payload.repoName = 'cloud-docs-osb';
     await jobHandlerTestHelper.jobHandler.execute();
+    // Received number of calls: 0
     expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
   });
 
