@@ -159,10 +159,7 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
-  // TODO CLAIRE: Fix failing tests. Can this be removed as dupe of manifestJobHandler test?
-  // ProductionJobHandler Tests › Validate all Generate manifest prefix cases › Testing manifest prefix with aliased=true primaryAlias=null alias=DONTSET
-  // Expected: undefined
-  // Received: "testauth-UsingAlias"
+  // TODO: Fix failing tests. Can this be removed as dupe of manifestJobHandler test?
   describe.each(TestDataProvider.getManifestPrefixCases())('Validate all Generate manifest prefix cases', (element) => {
     test(`Testing manifest prefix with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
       jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);

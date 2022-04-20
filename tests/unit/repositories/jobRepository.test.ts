@@ -1,5 +1,5 @@
 import { JobRepository } from '../../../src/repositories/jobRepository';
-import { getBuildJobDef, getBuildJobPlain } from '../../data/jobDef';
+import { getBuildJobPlain } from '../../data/jobDef';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
 
