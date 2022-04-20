@@ -110,9 +110,9 @@ Resources:
               Value: ${self:custom.cdnInvalidatorServiceURL.${self:provider.stage}}
             # TODO: Is this necessary?
             - Name: SEARCH_INDEX_BUCKET
-              Value: ${self:custom.searchIndexBucket}
+              Value: ${self:custom.searchIndexBucketName}
             - Name: SEARCH_INDEX_FOLDER
-              Value: ${self:custon.searchIndexFolder}
+              Value: ${self:custon.searchIndexFolder.${self:provider.stage}}
 
           LogConfiguration:
             LogDriver: awslogs
