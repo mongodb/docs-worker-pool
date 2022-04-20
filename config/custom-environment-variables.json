@@ -55,5 +55,7 @@
   },
   "cdnClientID": "CDN_CLIENT_ID",
   "cdnClientSecret": "CDN_CLIENT_SECRET",
-  "cdnInvalidatorServiceURL": "CDN_INVALIDATOR_SERVICE_URL"
+  "cdnInvalidatorServiceURL": "CDN_INVALIDATOR_SERVICE_URL",
+  "searchIndexBucket": "SEARCH_INDEX_BUCKET",
+  "searchIndexFolder": "SEARCH_INDEX_FOLDER"
 }
