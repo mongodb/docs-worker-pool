@@ -71,7 +71,7 @@ export const getManifestJobDef = (): Job => ({
   result: undefined,
   shouldGenerateSearchManifest: false,
   startTime: expect.any(Date),
-  status: null,
+  status: JobStatus.inQueue,
   title: 'Slack deploy: skerschb - search manifest generation',
   user: 'skerschb',
   payload: {

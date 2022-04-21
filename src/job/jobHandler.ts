@@ -1,4 +1,4 @@
-import type { Payload, Job } from '../entities/job';
+import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -220,6 +220,7 @@ export abstract class JobHandler {
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
+        this._logger.info(this.currJob._id, `Created payload manifestPrefix: ${this.currJob.payload.manifestPrefix}`);
       }
 
       this.prepStageSpecificNextGenCommands();
@@ -440,6 +441,7 @@ export abstract class JobHandler {
   // Creates and pushes the related manifestJob
   @throwIfJobInterupted()
   public async queueManifestJob(): Promise<void> {
+    this._logger.info(this.currJob._id, `Queueing associated search manifest job for job ${this.currJob.title}.`);
     // Rudimentary error prevention
     if (this._currJob.payload.jobType.includes('manifestGeneration')) {
       this._logger.error(
@@ -452,33 +454,36 @@ export abstract class JobHandler {
     const manifestPayload: Payload = this._currJob.payload;
     manifestPayload.jobType = 'manifestGeneration';
     const manifestJob: Job = {
+      // TODO: Wasn't assigned an ID when inserted?
       _id: '',
-      payload: manifestPayload,
+      buildCommands: [],
+      comMessage: null,
       createdTime: new Date(),
+      deployCommands: [],
+      email: '',
       endTime: undefined,
       error: undefined,
+      invalidationStatusURL: undefined,
       logs: undefined,
+      // Note: Be cautious - there are prefixes from both job and payload
+      manifestPrefix: this._currJob.manifestPrefix,
+      mutPrefix: this._currJob.mutPrefix,
+      pathPrefix: this._currJob.pathPrefix,
+      payload: manifestPayload,
       // NOTE: Priority must be 2 or greater to avoid manifest jobs being
       // prioritized alongside/above build jobs (which have a priority of 1)
       priority: 2,
+      purgedUrls: null,
       result: undefined,
+      shouldGenerateSearchManifest: false,
       startTime: new Date(),
-      status: null,
+      status: JobStatus.inQueue,
       title: this._currJob.title + ' - search manifest generation',
       user: this._currJob.user,
-      manifestPrefix: this._currJob.manifestPrefix,
-      pathPrefix: this._currJob.pathPrefix,
-      mutPrefix: this._currJob.mutPrefix,
-      buildCommands: [],
-      deployCommands: [],
-      invalidationStatusURL: undefined,
-      email: '',
-      comMessage: null,
-      purgedUrls: null,
-      shouldGenerateSearchManifest: false,
     };
     try {
-      await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
+      const jobId = await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
+      this._logger.info(manifestJob.title, `Inserted job: ${jobId}.`);
     } catch (error) {
       this._logger.error(
         manifestJob._id,
