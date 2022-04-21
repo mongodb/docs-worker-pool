@@ -472,7 +472,7 @@ export abstract class JobHandler {
       payload: manifestPayload,
       // NOTE: Priority must be 2 or greater to avoid manifest jobs being
       // prioritized alongside/above build jobs (which have a priority of 1)
-      priority: 2,
+      priority: 1, // testing with priority 1
       purgedUrls: null,
       result: undefined,
       shouldGenerateSearchManifest: false,

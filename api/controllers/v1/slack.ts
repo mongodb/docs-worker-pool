@@ -89,7 +89,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
 
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
-    await jobRepository.insertJBulkJobs(deployable, jobQueueUrl);
+    await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
   } catch (err) {
     logger.error('deployRepo', err);
   }

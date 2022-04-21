@@ -66,7 +66,7 @@ export const getManifestJobDef = (): Job => ({
   manifestPrefix: '',
   mutPrefix: '',
   pathPrefix: '',
-  priority: 2,
+  priority: 1,
   purgedUrls: null,
   result: undefined,
   shouldGenerateSearchManifest: false,
