@@ -71,10 +71,8 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
     };
   }
   const body = JSON.parse(event.body);
-  console.log(JSON.stringify(Object.keys(body)));
-  console.log(JSON.stringify(body.action));
 
-  if (body.action === 'deleted') {
+  if (body.deleted) {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/plain' },
