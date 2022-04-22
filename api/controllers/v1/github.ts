@@ -71,6 +71,15 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
     };
   }
   const body = JSON.parse(event.body);
+
+  if (body.deleted) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Job Ignored (Deletion)',
+    };
+  }
+
   const env = c.get<string>('env');
   const repoInfo = await branchRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
