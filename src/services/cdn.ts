@@ -140,12 +140,13 @@ export class K8SCDNConnector implements ICDNConnector {
       return `/${item}`;
     });
 
-    if (urls.length >= 250) {
+    if (urls.length >= 1) {
       const wildcardPatternURL = '/' + pathPrefix + '/*';
+      urls = [wildcardPatternURL];
       try {
-        const res = await axios.post(url, { paths: [wildcardPatternURL] }, { headers: headers });
+        const res = await axios.post(url, { paths: urls }, { headers: headers });
         console.log(res);
-        this._logger.info(jobId, `Total urls purged 1`);
+        this._logger.info(jobId, `Total urls purged ${urls.length}`);
         return res?.data?.id;
       } catch (err) {
         this._logger.error(jobId, JSON.stringify(err?.response?.data));
