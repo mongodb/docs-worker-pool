@@ -135,7 +135,7 @@ export class ProductionJobHandler extends JobHandler {
       if (this.currJob.shouldGenerateSearchManifest == null) {
         this.currJob.shouldGenerateSearchManifest = true;
       }
-      if (this.currJob.shouldGenerateSearchManifest) {
+      if (this.currJob.shouldGenerateSearchManifest && this.currJob.payload.jobType === 'productionDeploy') {
         this.queueManifestJob();
       }
       return resp;

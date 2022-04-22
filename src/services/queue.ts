@@ -25,6 +25,6 @@ export class SQSConnector implements IQueueConnector {
       DelaySeconds: delay,
     };
     const result = await this._client.sendMessage(sendMessageRequest);
-    this._logger.info('QueueConnector.sendMessage', `Result: ${result}`);
+    this._logger.info('QueueConnector.sendMessage', `Result: ${JSON.stringify(result)}`);
   }
 }

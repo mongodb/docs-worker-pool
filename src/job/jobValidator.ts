@@ -70,8 +70,10 @@ export class JobValidator implements IJobValidator {
     if (!job.payload.project) {
       throw new InvalidJobError('Invalid project');
     }
-    if (!['githubPush', 'productionDeploy', 'publishDochub', 'regression'].includes(job.payload.jobType)) {
-      throw new InvalidJobError('Invalid JobType');
+    // TODO: Use formalized JobTypes from job.ts
+    const validJobTypes = ['githubPush', 'productionDeploy', 'publishDochub', 'regression', 'manifestGeneration'];
+    if (!validJobTypes.includes(job.payload.jobType)) {
+      throw new InvalidJobError(`Invalid JobType: ${job.payload.jobType}.`);
     }
     if (!job.payload?.repoName || !this.safeString(job.payload.repoName)) {
       throw new InvalidJobError('Invalid Reponame');

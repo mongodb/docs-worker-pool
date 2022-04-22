@@ -151,6 +151,7 @@ custom:
   # TODO: In future, use duplicate mapping of dotcomstg -> preprd to have
   # one source-of-truth for new environment-name mapping standard
   searchIndexFolder:
+    dev: "" # although we shouldn't generate manifests for 'dev', we include to prevent failing tests
     stg: "preprd"
     prd: "prd"
     dotcomstg: "preprd"
