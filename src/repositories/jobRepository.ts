@@ -45,7 +45,7 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: Job, url: string): Promise<string> {
+  async insertJob(job: Omit<Job, '_id'>, url: string): Promise<string> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,

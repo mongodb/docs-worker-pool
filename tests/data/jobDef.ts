@@ -52,8 +52,7 @@ export const getBuildJobPlain = (): Job => ({
 });
 
 // Represents a manifestJob at time of insert to queue
-export const getManifestJobDef = (): Job => ({
-  _id: '',
+export const getManifestJobDef = (): Omit<Job, '_id'> => ({
   buildCommands: [],
   comMessage: null,
   createdTime: expect.any(Date),

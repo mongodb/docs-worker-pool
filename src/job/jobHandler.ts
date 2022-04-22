@@ -453,9 +453,7 @@ export abstract class JobHandler {
     }
     const manifestPayload: Payload = this._currJob.payload;
     manifestPayload.jobType = 'manifestGeneration';
-    const manifestJob: Job = {
-      // TODO: Wasn't assigned an ID when inserted?
-      _id: '',
+    const manifestJob: Omit<Job, '_id'> = {
       buildCommands: [],
       comMessage: null,
       createdTime: new Date(),
@@ -486,7 +484,7 @@ export abstract class JobHandler {
       this._logger.info(manifestJob.title, `Inserted job: ${jobId}.`);
     } catch (error) {
       this._logger.error(
-        manifestJob._id,
+        manifestJob.title,
         `Failed to queue search manifest job for build job '${this._currJob._id}'. 
       Error: ${error.message}. Search results for this property will not be updated.`
       );
