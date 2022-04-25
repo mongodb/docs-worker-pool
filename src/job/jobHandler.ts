@@ -442,6 +442,12 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   public async queueManifestJob(): Promise<void> {
     this._logger.info(this.currJob._id, `Queueing associated search manifest job for job ${this.currJob.title}.`);
+    // Ensure there is always a manifestPrefix to upload to
+    let backupManifestPrefix = '';
+    if (!this._currJob.manifestPrefix && !this._currJob.payload.manifestPrefix) {
+      backupManifestPrefix = this.constructManifestPrefix();
+      this._logger.info(this.currJob._id, `Using backup manifestPrefix: ${backupManifestPrefix}.`);
+    }
     // Rudimentary error prevention
     if (this._currJob.payload.jobType.includes('manifestGeneration')) {
       this._logger.error(
@@ -464,9 +470,9 @@ export abstract class JobHandler {
       invalidationStatusURL: undefined,
       logs: [],
       // Note: Be cautious - there are prefixes from both job and payload
-      manifestPrefix: this._currJob.manifestPrefix,
-      mutPrefix: this._currJob.mutPrefix,
-      pathPrefix: this._currJob.pathPrefix,
+      manifestPrefix: this._currJob.manifestPrefix ?? this._currJob.payload.manifestPrefix ?? backupManifestPrefix,
+      mutPrefix: this._currJob.mutPrefix ?? this._currJob.payload.mutPrefix,
+      pathPrefix: this._currJob.pathPrefix ?? this._currJob.payload.pathPrefix,
       payload: manifestPayload,
       // NOTE: Priority must be 2 or greater to avoid manifest jobs being
       // prioritized alongside/above build jobs (which have a priority of 1)
@@ -481,7 +487,10 @@ export abstract class JobHandler {
     };
     try {
       const jobId = await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
-      this._logger.info(manifestJob.title, `Inserted job: ${jobId}.`);
+      this._logger.info(
+        manifestJob.title,
+        `Inserted manifestGeneration job: ${jobId} for prefix ${manifestJob.manifestPrefix}.`
+      );
     } catch (error) {
       this._logger.error(
         manifestJob.title,
