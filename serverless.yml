@@ -30,7 +30,8 @@ custom:
     prd: worker-pool-deployment
     dotcomstg: worker-pool-deployment
     dotcomprd: worker-pool-deployment
-  searchBucket:
+  searchIndexBucket:
+    dev: "" # I'm just here so I don't get fined
     # TODO: When satisfied with manifest generation, remove the '-test'
     dotcomstg: docs-search-indexes-test/preprd
     dotcomprd: docs-search-indexes-test/prd
