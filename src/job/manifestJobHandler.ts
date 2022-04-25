@@ -44,9 +44,10 @@ export class ManifestJobHandler extends JobHandler {
     const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
     const f = this._config.get<string>('searchIndexFolder') ?? 'test-folder';
-    const maP = this.currJob.manifestPrefix;
+    // Due to the dual existence of prefixes, check for both for redundancy
+    const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;
+    const muP = this.currJob.mutPrefix ?? this.currJob.payload.mutPrefix;
     const url = this.currJob.payload.url;
-    const muP = this.currJob.mutPrefix;
     const globalSearch = this.currJob.payload.stable ? '-g' : '';
 
     // Rudimentary error logging
