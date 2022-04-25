@@ -147,7 +147,7 @@ custom:
     dotcomstg: "dotcomstg"
     dotcomprd: "dotcomprd"
   # TODO: When satisfied with manifest generation, remove '-test'
-  searchIndexBucketName: docs-search-indexes-test
+  searchIndexBucket: docs-search-indexes-test
   # TODO: In future, use duplicate mapping of dotcomstg -> preprd to have
   # one source-of-truth for new environment-name mapping standard
   searchIndexFolder:

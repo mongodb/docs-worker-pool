@@ -109,7 +109,7 @@ Resources:
             - Name: CDN_INVALIDATOR_SERVICE_URL
               Value: ${self:custom.cdnInvalidatorServiceURL.${self:provider.stage}}
             - Name: SEARCH_INDEX_BUCKET
-              Value: ${self:custom.searchIndexBucketName}
+              Value: ${self:custom.searchIndexBucket}
             - Name: SEARCH_INDEX_FOLDER
               Value: ${self:custom.searchIndexFolder.${self:provider.stage}}
 
