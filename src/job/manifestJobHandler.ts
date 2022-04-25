@@ -11,6 +11,8 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { InvalidJobError } from '../errors/errors';
 
+// Long term goal is to have mut script run off the AST so we can parallelize
+// build&deploy jobs and manifestGeneration jobs
 export class ManifestJobHandler extends JobHandler {
   constructor(
     job: Job,

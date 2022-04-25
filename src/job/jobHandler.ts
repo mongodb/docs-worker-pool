@@ -461,13 +461,13 @@ export abstract class JobHandler {
     manifestPayload.jobType = 'manifestGeneration';
     const manifestJob: Omit<Job, '_id'> = {
       buildCommands: [],
-      comMessage: null,
+      comMessage: [],
       createdTime: new Date(),
       deployCommands: [],
       email: '',
-      endTime: undefined,
-      error: undefined,
-      invalidationStatusURL: undefined,
+      endTime: null,
+      error: null,
+      invalidationStatusURL: '',
       logs: [],
       // Note: Be cautious - there are prefixes from both job and payload
       manifestPrefix: this._currJob.manifestPrefix ?? this._currJob.payload.manifestPrefix ?? backupManifestPrefix,
@@ -477,8 +477,8 @@ export abstract class JobHandler {
       // NOTE: Priority must be 2 or greater to avoid manifest jobs being
       // prioritized alongside/above build jobs (which have a priority of 1)
       priority: 1, // testing with priority 1
-      purgedUrls: null,
-      result: undefined,
+      purgedUrls: [],
+      result: null,
       shouldGenerateSearchManifest: false,
       startTime: new Date(),
       status: JobStatus.inQueue,
