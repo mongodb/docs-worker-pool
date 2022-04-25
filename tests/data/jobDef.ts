@@ -61,7 +61,7 @@ export const getManifestJobDef = (): Omit<Job, '_id'> => ({
   endTime: undefined,
   error: undefined,
   invalidationStatusURL: undefined,
-  logs: undefined,
+  logs: [],
   manifestPrefix: '',
   mutPrefix: '',
   pathPrefix: '',

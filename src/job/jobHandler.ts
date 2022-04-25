@@ -462,7 +462,7 @@ export abstract class JobHandler {
       endTime: undefined,
       error: undefined,
       invalidationStatusURL: undefined,
-      logs: undefined,
+      logs: [],
       // Note: Be cautious - there are prefixes from both job and payload
       manifestPrefix: this._currJob.manifestPrefix,
       mutPrefix: this._currJob.mutPrefix,

@@ -82,5 +82,7 @@
   "cdnInvalidationOauthScope": "mongodbcom-docs",
   "oauthTokenURL": "https://corp.mongodb.com/oauth2/aus4k4jv00hWjNnps297/v1/token",
   "grantType": "client_credentials",
-  "oauthTokenPath": "docs/worker_pool/cdn/invalidator/token"
+  "oauthTokenPath": "docs/worker_pool/cdn/invalidator/token",
+  "searchIndexBucket": "SEARCH_INDEX_BUCKET",
+  "searchIndexFolder": "SEARCH_INDEX_FOLDER"
 }

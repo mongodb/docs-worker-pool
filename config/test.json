@@ -53,5 +53,7 @@
       "key": "FASTLY_MAIN_TOKEN"
     }
   },
-  "repo_dir": "repos"
+  "repo_dir": "repos",
+  "searchIndexBucket": "SEARCH_INDEX_BUCKET",
+  "searchIndexFolder": "SEARCH_INDEX_FOLDER"
 }
