@@ -123,24 +123,6 @@ export class ProductionJobHandler extends JobHandler {
     return new CDNCreds(creds['id'], creds['token']);
   }
 
-  // This function decides whether or not we should queue up a search manifest job
-  // based on information about this build&deploy job
-  // TODO: Give 'shouldGenerateSearchManifest' boolean to users' control
-  shouldGenerateSearchManifest(): boolean {
-    if (!this.currJob.shouldGenerateSearchManifest) {
-      return false;
-    }
-    const doNotSearchProperties = ['docs-landing'];
-    if (doNotSearchProperties.includes(this.currJob.payload.repoName)) {
-      return false;
-    }
-    // Edit this if you want to generate search manifests for dev environments, too
-    if (this.currJob.payload.jobType !== 'productionDeploy') {
-      return false;
-    }
-    return true;
-  }
-
   async deploy(): Promise<CommandExecutorResponse> {
     const resp = await this.deployGeneric();
     try {

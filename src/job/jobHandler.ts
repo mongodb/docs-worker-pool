@@ -438,6 +438,21 @@ export abstract class JobHandler {
     }
   }
 
+  // This function decides whether or not we should queue up a search manifest job
+  // based on information about this build&deploy job
+  // TODO: Give 'shouldGenerateSearchManifest' boolean to users' control
+  shouldGenerateSearchManifest(): boolean {
+    const doNotSearchProperties = ['docs-landing'];
+    if (doNotSearchProperties.includes(this.currJob.payload.repoName)) {
+      return false;
+    }
+    // Edit this if you want to generate search manifests for dev environments, too
+    if (this.currJob.payload.jobType !== 'productionDeploy') {
+      return false;
+    }
+    return true;
+  }
+
   // For most build & deploy jobs, we create and queue an associated job to
   // generate a search manifest (a.k.a. search index), and upload it to the S3
   // bucket via mut (handled in manifestJobHandler.ts)
