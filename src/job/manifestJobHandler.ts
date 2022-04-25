@@ -45,7 +45,8 @@ export class ManifestJobHandler extends JobHandler {
   prepDeployCommands(): void {
     const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
-    const f = this._config.get<string>('searchIndexFolder') ?? 'test-folder';
+    const env = this._config.get<string>('env');
+    const f = this._config.get<string>('searchIndexFolder')[env] ?? 'fallback-folder';
     this.logger.info(this.currJob._id, `Manifest attempt to upload to bucket: ${b}, folder: ${f}`);
     // Due to the dual existence of prefixes, check for both for redundancy
     const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;

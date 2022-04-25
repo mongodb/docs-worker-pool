@@ -53,6 +53,7 @@ export class ProductionJobHandler extends JobHandler {
       this.currJob.deployCommands[
         this.currJob.deployCommands.length - 1
       ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+      // TODO: Remove when satisfied with new manifestJobHandler infrastructure
       if (manifestPrefix) {
         const searchFlag = this.currJob.payload.stable;
         this.currJob.deployCommands[

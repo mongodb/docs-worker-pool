@@ -132,7 +132,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     // // e.g. mongodb/docs-realm/master => (site/repo/branch)
     const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
     const hashOption = values?.hash_option ?? null;
-    const jobTitle = 'Slack deploy: ' + entitlement.github_username;
+    const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement?.email ?? '';
 

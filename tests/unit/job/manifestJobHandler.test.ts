@@ -35,7 +35,13 @@ describe('ManifestJobHandler Tests', () => {
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
     // Set config variables
     jobHandlerTestHelper.config.get.calledWith('searchIndexBucket').mockReturnValue('sample-bucket');
-    jobHandlerTestHelper.config.get.calledWith('searchIndexFolder').mockReturnValue('sample-folder');
+    jobHandlerTestHelper.config.get.calledWith('env').mockReturnValue('dotcomstg');
+    const mockFolderConfig = {
+      dev: '',
+      dotcomstg: 'example-preprd',
+      dotcomprd: 'example-prd',
+    };
+    jobHandlerTestHelper.config.get.calledWith('searchIndexFolder').mockReturnValue(mockFolderConfig);
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
     expect(prepSpy).toBeCalledTimes(1);
@@ -43,7 +49,7 @@ describe('ManifestJobHandler Tests', () => {
       '. /venv/bin/activate',
       'cd repos/testauth',
       'echo IGNORE: testing manifest generation deploy commands',
-      'mut-index upload public -b sample-bucket -o sample-folder/test-job-mani-prefix.json -u https://github.com/skerschb/testauth.git/ ',
+      'mut-index upload public -b sample-bucket -o example-preprd/test-job-mani-prefix.json -u https://github.com/skerschb/testauth.git/ ',
     ];
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(o);
   });
