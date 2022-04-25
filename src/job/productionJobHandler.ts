@@ -133,7 +133,7 @@ export class ProductionJobHandler extends JobHandler {
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
       }
       // TODO: Give control to users over this boolean
-      const doNotSearchProperty = ['landing'].includes(this.currJob.payload.repoName);
+      const doNotSearchProperty = ['docs-landing'].includes(this.currJob.payload.repoName);
       if (this.currJob.shouldGenerateSearchManifest == null && !doNotSearchProperty) {
         // TODO: Add condition for landing
         this.currJob.shouldGenerateSearchManifest = true;
