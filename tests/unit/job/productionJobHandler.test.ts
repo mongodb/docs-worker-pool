@@ -2,7 +2,6 @@ import { mockReset } from 'jest-mock-extended';
 import { TestDataProvider } from '../../data/data';
 import { getBuildJobDef, getManifestJobDef } from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
-import { Job } from '../../../src/entities/job';
 
 describe('ProductionJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -238,6 +237,39 @@ describe('ProductionJobHandler Tests', () => {
 
     const result = getBuildJobDef();
     result['shouldGenerateSearchManifest'] = false;
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(result);
+
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+
+    expect(queueManifestJobSpy).toBeCalledTimes(0);
+    expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
+  });
+
+  test('Calling queueManifestJob() with false shouldGenerateManifest flag does not kick off manifest job', async () => {
+    jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
+    jobHandlerTestHelper.job.shouldGenerateSearchManifest = false;
+
+    const result = getBuildJobDef();
+    result['shouldGenerateSearchManifest'] = false;
+    expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(result);
+
+    jobHandlerTestHelper.setupForSuccess();
+    // In theory, queueManifestJob should not be called by this process, but
+    // for the purpose of testing, we need to know that it exits without
+    // inserting another job.
+    await jobHandlerTestHelper.jobHandler.queueManifestJob();
+    expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
+  });
+
+  test('Docs-landing deploy does not kick off manifest job', async () => {
+    jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
+    jobHandlerTestHelper.job.payload.repoName = 'docs-landing';
+    const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
+
+    const result = getBuildJobDef();
+    result.payload.repoName = 'docs-landing';
     expect(jobHandlerTestHelper.jobHandler.currJob).toEqual(result);
 
     jobHandlerTestHelper.setupForSuccess();

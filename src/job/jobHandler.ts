@@ -379,7 +379,7 @@ export abstract class JobHandler {
     await this.downloadMakeFile();
     this._logger.info(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
-    this._logger.info(this._currJob._id, 'prepared Environment variables');
+    this._logger.info(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
   }
 
@@ -438,17 +438,21 @@ export abstract class JobHandler {
     }
   }
 
-  // Creates and pushes the related manifestJob
+  // For most build & deploy jobs, we create and queue an associated job to
+  // generate a search manifest (a.k.a. search index), and upload it to the S3
+  // bucket via mut (handled in manifestJobHandler.ts)
   @throwIfJobInterupted()
   public async queueManifestJob(): Promise<void> {
     this._logger.info(this.currJob._id, `Queueing associated search manifest job for job ${this.currJob.title}.`);
+
     // Ensure there is always a manifestPrefix to upload to
     let backupManifestPrefix = '';
     if (!this._currJob.manifestPrefix && !this._currJob.payload.manifestPrefix) {
       backupManifestPrefix = this.constructManifestPrefix();
       this._logger.info(this.currJob._id, `Using backup manifestPrefix: ${backupManifestPrefix}.`);
     }
-    // Rudimentary error prevention
+
+    // Rudimentary error prevention (manifest jobs should not queue new manifest jobs - autobuilder will explode)
     if (this._currJob.payload.jobType.includes('manifestGeneration')) {
       this._logger.error(
         this._currJob._id,
@@ -457,6 +461,14 @@ export abstract class JobHandler {
       );
       return;
     }
+    if (!this._currJob.shouldGenerateSearchManifest) {
+      this._logger.error(
+        this._currJob._id,
+        `Incorrectly attempted to queue undesired search manifest job. Stopping queueManifestJob().`
+      );
+      return;
+    }
+
     const manifestPayload: Payload = this._currJob.payload;
     manifestPayload.jobType = 'manifestGeneration';
     const manifestJob: Omit<Job, '_id'> = {
@@ -479,12 +491,14 @@ export abstract class JobHandler {
       priority: 1, // testing with priority 1
       purgedUrls: [],
       result: null,
+      // manifestJobs should never attempt to queue secondary manifestJobs
       shouldGenerateSearchManifest: false,
       startTime: new Date(),
       status: JobStatus.inQueue,
       title: this._currJob.title + ' - search manifest generation',
       user: this._currJob.user,
     };
+
     try {
       const jobId = await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
       this._logger.info(
