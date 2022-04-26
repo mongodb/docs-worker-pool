@@ -46,6 +46,7 @@ export class ManifestJobHandler extends JobHandler {
     const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
     const env = this._config.get<string>('env');
+    // Note: mut-index automatically prepends 'search-indexes/' to the folder.
     const f = this._config.get<string>('searchIndexFolder')[env] ?? 'fallback-folder';
     this.logger.info(this.currJob._id, `Manifest attempt to upload to bucket: ${b}, folder: ${f}`);
     // Due to the dual existence of prefixes, check for both for redundancy
@@ -72,6 +73,7 @@ export class ManifestJobHandler extends JobHandler {
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
+      'ls -al',
       `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${url}/${muP} ${globalSearch}`,
     ];
   }
