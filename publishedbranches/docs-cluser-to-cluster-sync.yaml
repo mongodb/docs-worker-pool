@@ -1,4 +1,4 @@
-prefix: 'cluster-sync'
+prefix: 'cluster-to-cluster'
 version:
   published:
     - 'master'
