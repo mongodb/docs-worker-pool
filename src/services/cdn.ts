@@ -140,7 +140,7 @@ export class K8SCDNConnector implements ICDNConnector {
       return `/${item}`;
     });
 
-    if (urls.length >= 1) {
+    if (urls.length >= 250) {
       const wildcardPatternURL = '/' + pathPrefix + '/*';
       urls = [wildcardPatternURL];
       try {

@@ -1,6 +1,6 @@
-import { K8SCDNConnector, axiosApi } from '../../../src/services/cdn';
+import { K8SCDNConnector } from '../../../src/services/cdn';
+import axios from 'axios';
 import { mockDeep } from 'jest-mock-extended';
-import MockAdapter from 'axios-mock-adapter';
 import { IConfig } from 'config';
 import { ILogger } from './../../../src/services/logger';
 import { ISSMConnector } from './../../../src/services/ssm';
@@ -8,52 +8,67 @@ import { ISSOConnector } from './../../../src/services/sso';
 
 describe('K8SCDNConnector Tests', () => {
   let k8SCDNConnector: K8SCDNConnector;
-  let mock;
   let logger;
-  let ssmConnecotr;
+  let ssmConnector;
   let config;
   let ssoConnector;
+  let spyPost;
 
   beforeEach(() => {
-    mock = new MockAdapter(axiosApi);
     logger = mockDeep<ILogger>();
-    ssmConnecotr = mockDeep<ISSMConnector>();
+    ssmConnector = mockDeep<ISSMConnector>();
     config = mockDeep<IConfig>();
     ssoConnector = mockDeep<ISSOConnector>();
-
-    k8SCDNConnector = new K8SCDNConnector(config, logger, ssmConnecotr, ssoConnector);
+    k8SCDNConnector = new K8SCDNConnector(config, logger, ssmConnector, ssoConnector);
+    spyPost = jest.spyOn(axios, 'post');
   });
+
   afterEach(() => {
-    mock.reset();
+    spyPost.mockClear();
   });
 
   test('Construct K8SCDNConnector', () => {
-    expect(new K8SCDNConnector(config, logger, ssmConnecotr, ssoConnector)).toBeDefined();
+    expect(new K8SCDNConnector(config, logger, ssmConnector, ssoConnector)).toBeDefined();
   });
 
   describe('K8SCDNConnector purge tests', () => {
-    beforeEach(() => {
-      jest.setTimeout(30000);
-    });
-    test('K8SCDNConnector purge succeeds', async () => {
-      const k8SCDNConnector = new K8SCDNConnector(
-        mockDeep<IConfig>(),
-        mockDeep<ILogger>(),
-        mockDeep<ISSMConnector>(),
-        mockDeep<ISSOConnector>()
-      );
-      await k8SCDNConnector.purge(
-        'test_job_id',
-        [
-          '/docs/compass/upcoming/29107295-e47455e7b3c92fba2a11.js.map',
-          '/docs/compass/upcoming/import-pipeline-from-text/index.html',
+    test('K8SCDNConnector invalidates each object when 250 threshold is not met', async () => {
+      const urlsArray = [
+        'docs/realm/functions/js-feature-compatibility/index.html',
+        'docs/realm/page-data/manage-apps/configure/environments/page-data.json',
+        'docs/realm/page-data/values-and-secrets/define-and-manage-secrets/page-data.json',
+      ];
+
+      await k8SCDNConnector.purge('test_job_id_purge_all_urls', urlsArray, 'docs/realm');
+
+      expect(spyPost).toHaveBeenCalled();
+      expect(spyPost.mock.calls[0][1]).toStrictEqual({
+        paths: [
+          '/docs/realm/functions/js-feature-compatibility/index.html',
+          '/docs/realm/page-data/manage-apps/configure/environments/page-data.json',
+          '/docs/realm/page-data/values-and-secrets/define-and-manage-secrets/page-data.json',
         ],
-        'docs/compass'
-      );
+      });
     });
-    // afterAll(async () => {
-    //   await new Promise(resolve => setTimeout(() => resolve(), 5000)); // avoid jest open handle error
-    // });
-    // expect(mock.history.put.length).toBe(1);
+
+    test('K8SCDNConnector performs wildcard invalidations when purging >= 250 objects', async () => {
+      let urlArray = [];
+      const differentUrlArray = [
+        'docs/realm/functions/js-feature-compatibility/index.html',
+        'docs/realm/page-data/manage-apps/configure/environments/page-data.json',
+        'docs/realm/page-data/values-and-secrets/define-and-manage-secrets/page-data.json',
+        'docs/realm/page-data/functions/call-a-function/page-data.json',
+        'docs-qa/realm/users/enable-custom-user-data/index.html',
+      ];
+
+      while (urlArray.length < 250) {
+        urlArray = urlArray.concat(differentUrlArray);
+      }
+
+      await k8SCDNConnector.purge('test_job_id_purge_wildcard_url', urlArray, 'docs/realm');
+
+      expect(spyPost).toHaveBeenCalled();
+      expect(spyPost.mock.calls[0][1]).toStrictEqual({ paths: ['/docs/realm/*'] });
+    });
   });
 });
