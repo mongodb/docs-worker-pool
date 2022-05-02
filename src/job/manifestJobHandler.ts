@@ -42,6 +42,7 @@ export class ManifestJobHandler extends JobHandler {
   }
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
+  // TODO: Separate logic for composing mut-index string into separate helper function? 
   prepDeployCommands(): void {
     const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
