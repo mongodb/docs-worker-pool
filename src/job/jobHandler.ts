@@ -1,4 +1,4 @@
-import type { Payload, Job } from '../entities/job';
+import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
@@ -215,9 +215,12 @@ export abstract class JobHandler {
     if (this.isbuildNextGen()) {
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
+      // TODO: Look into moving the generation of manifestPrefix into the manifestJobHandler,
+      // as well as reducing difficult-to-debug state changes
       // if this payload is NOT aliased or if it's the primary alias, we need the index path
       if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
         this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
+        this._logger.info(this.currJob._id, `Created payload manifestPrefix: ${this.currJob.payload.manifestPrefix}`);
       }
 
       this.prepStageSpecificNextGenCommands();
@@ -286,24 +289,45 @@ export abstract class JobHandler {
     return '';
   }
 
-  // For certain unversioned properties, urlSlug is null; use branchName instead
-  protected constructManifestPrefix(): string {
-    if (this.currJob.payload.urlSlug) {
-      return `${this.currJob.payload.project}-${this.currJob.payload.urlSlug}`;
+  // TODO: Reduce hard-to-follow state mutations
+  public constructManifestPrefix(): string {
+    // In the past, we have had issues with generating manifests titled "null-v1.0.json"
+    // This is rudimentary error handling, and should ideally happen elsewhere
+    if (!this.currJob.payload.project) {
+      this._logger.info(this._currJob._id, `Project name not found for ${this.currJob._id}.`);
+      throw new InvalidJobError(`Project name not found for ${this.currJob._id}.`);
     }
-    return `${this.currJob.payload.project}-${this.currJob.payload.branchName}`;
+    if (this.currJob.payload.aliased) {
+      this._logger.info(this._currJob._id, `Warning: generating manifest prefix for aliased property.`);
+    }
+    // Due to snooty.toml project naming discrepancies, payload.project may not
+    // match preferred project names. This may be removed pending snooty.toml
+    // name correction AND snooty frontend dropdown de-hardcoding
+    const substitute = {
+      cloudgov: 'AtlasGov',
+      cloud: 'atlas',
+      docs: 'manual',
+    };
+    const projectName = substitute[this.currJob.payload.project] ?? this.currJob.payload.project;
+
+    if (this.currJob.payload.urlSlug) {
+      return `${projectName}-${this.currJob.payload.urlSlug}`;
+    }
+    // For certain unversioned properties, urlSlug is null; use branchName instead
+    return `${projectName}-${this.currJob.payload.branchName}`;
   }
 
   protected abstract deploy(): Promise<CommandExecutorResponse>;
 
   protected abstract prepDeployCommands(): void;
 
+  // TODO: Reduce state changes
   protected prepBuildCommands(): void {
     this.currJob.buildCommands = [
       `. /venv/bin/activate`,
       `cd repos/${this.currJob.payload.repoName}`,
       `rm -f makefile`,
-      `make html`, // TODO: Can we remove this line, given how many jobHandler functions overwrite it?
+      `make html`,
     ];
   }
 
@@ -355,7 +379,7 @@ export abstract class JobHandler {
     await this.downloadMakeFile();
     this._logger.info(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
-    this._logger.info(this._currJob._id, 'prepared Environment variables');
+    this._logger.info(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
   }
 
@@ -414,10 +438,36 @@ export abstract class JobHandler {
     }
   }
 
-  // Creates and pushes the related manifestJob
+  // This function decides whether or not we should queue up a search manifest job
+  // based on information about this build&deploy job
+  // TODO: Give 'shouldGenerateSearchManifest' boolean to users' control
+  shouldGenerateSearchManifest(): boolean {
+    const doNotSearchProperties = ['docs-landing'];
+    if (doNotSearchProperties.includes(this.currJob.payload.repoName)) {
+      return false;
+    }
+    // Edit this if you want to generate search manifests for dev environments, too
+    if (this.currJob.payload.jobType !== 'productionDeploy') {
+      return false;
+    }
+    return true;
+  }
+
+  // For most build & deploy jobs, we create and queue an associated job to
+  // generate a search manifest (a.k.a. search index), and upload it to the S3
+  // bucket via mut (handled in manifestJobHandler.ts)
   @throwIfJobInterupted()
   public async queueManifestJob(): Promise<void> {
-    // Rudimentary error prevention
+    this._logger.info(this.currJob._id, `Queueing associated search manifest job for job ${this.currJob.title}.`);
+
+    // Ensure there is always a manifestPrefix to upload to
+    let backupManifestPrefix = '';
+    if (!this._currJob.manifestPrefix && !this._currJob.payload.manifestPrefix) {
+      backupManifestPrefix = this.constructManifestPrefix();
+      this._logger.info(this.currJob._id, `Using backup manifestPrefix: ${backupManifestPrefix}.`);
+    }
+
+    // Rudimentary error prevention (manifest jobs should not queue new manifest jobs - autobuilder will explode)
     if (this._currJob.payload.jobType.includes('manifestGeneration')) {
       this._logger.error(
         this._currJob._id,
@@ -426,37 +476,53 @@ export abstract class JobHandler {
       );
       return;
     }
+    if (!this._currJob.shouldGenerateSearchManifest) {
+      this._logger.error(
+        this._currJob._id,
+        `Incorrectly attempted to queue undesired search manifest job. Stopping queueManifestJob().`
+      );
+      return;
+    }
+
     const manifestPayload: Payload = this._currJob.payload;
     manifestPayload.jobType = 'manifestGeneration';
-    const manifestJob: Job = {
-      _id: '',
-      payload: manifestPayload,
+    const manifestJob: Omit<Job, '_id'> = {
+      buildCommands: [],
+      comMessage: [],
       createdTime: new Date(),
-      endTime: undefined,
-      error: undefined,
-      logs: undefined,
-      priority: 2,
-      result: undefined,
+      deployCommands: [],
+      email: '',
+      endTime: null,
+      error: null,
+      invalidationStatusURL: '',
+      logs: [],
+      // Note: Be cautious - there are prefixes from both job and payload
+      manifestPrefix: this._currJob.manifestPrefix ?? this._currJob.payload.manifestPrefix ?? backupManifestPrefix,
+      mutPrefix: this._currJob.mutPrefix ?? this._currJob.payload.mutPrefix,
+      pathPrefix: this._currJob.pathPrefix ?? this._currJob.payload.pathPrefix,
+      payload: manifestPayload,
+      // NOTE: Priority must be 2 or greater to avoid manifest jobs being
+      // prioritized alongside/above build jobs (which have a priority of 1)
+      priority: 1, // testing with priority 1
+      purgedUrls: [],
+      result: null,
+      // manifestJobs should never attempt to queue secondary manifestJobs
+      shouldGenerateSearchManifest: false,
       startTime: new Date(),
-      status: null,
+      status: JobStatus.inQueue,
       title: this._currJob.title + ' - search manifest generation',
       user: this._currJob.user,
-      manifestPrefix: this._currJob.manifestPrefix,
-      pathPrefix: this._currJob.pathPrefix,
-      mutPrefix: this._currJob.mutPrefix,
-      buildCommands: [],
-      deployCommands: [],
-      invalidationStatusURL: undefined,
-      email: '',
-      comMessage: null,
-      purgedUrls: null,
-      shouldGenerateSearchManifest: false,
     };
+
     try {
-      await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
+      const jobId = await this._jobRepository.insertJob(manifestJob, this._config.get('jobsQueueUrl'));
+      this._logger.info(
+        manifestJob.title,
+        `Inserted manifestGeneration job: ${jobId} for prefix ${manifestJob.manifestPrefix}.`
+      );
     } catch (error) {
       this._logger.error(
-        manifestJob._id,
+        manifestJob.title,
         `Failed to queue search manifest job for build job '${this._currJob._id}'. 
       Error: ${error.message}. Search results for this property will not be updated.`
       );

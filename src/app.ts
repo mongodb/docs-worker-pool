@@ -22,7 +22,6 @@ let githubCommandExecutor: GithubCommandExecutor;
 let jobRepository: JobRepository;
 let hybridJobLogger: HybridJobLogger;
 let repoEntitlementRepository: RepoEntitlementsRepository;
-let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
 let cdnConnector: K8SCDNConnector;
 let ssmConnector: ParameterStoreConnector;

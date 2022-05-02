@@ -47,11 +47,13 @@ export class ProductionJobHandler extends JobHandler {
       'make publish && make deploy',
     ];
 
+    // TODO: Reduce confusion between job.manifestPrefix and job.payload.manifestPrefix
     if (this.currJob.payload.isNextGen) {
       const manifestPrefix = this.currJob.payload.manifestPrefix;
       this.currJob.deployCommands[
         this.currJob.deployCommands.length - 1
       ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+      // TODO: Remove when satisfied with new manifestJobHandler infrastructure
       if (manifestPrefix) {
         const searchFlag = this.currJob.payload.stable;
         this.currJob.deployCommands[
@@ -130,10 +132,8 @@ export class ProductionJobHandler extends JobHandler {
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Finished pushing to production`);
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
       }
-      // TODO: Give control to users over this boolean
-      if (this.currJob.shouldGenerateSearchManifest == null) {
-        this.currJob.shouldGenerateSearchManifest = true;
-      }
+
+      this.currJob.shouldGenerateSearchManifest = this.shouldGenerateSearchManifest();
       if (this.currJob.shouldGenerateSearchManifest) {
         this.queueManifestJob();
       }

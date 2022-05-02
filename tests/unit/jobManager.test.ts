@@ -1,18 +1,18 @@
 import { IConfig } from 'config';
 import { mockDeep } from 'jest-mock-extended';
 import type { Job } from '../../src/entities/job';
-import { JobHandlerFactory } from '../../src/job/jobHandlerFactory';
+import { JobHandlerFactory } from '../../src/job/jobManager';
 import { JobValidator } from '../../src/job/jobValidator';
 import { ProductionJobHandler } from '../../src/job/productionJobHandler';
 import { JobManager } from '../../src/job/jobManager';
 import { JobRepository } from '../../src/repositories/jobRepository';
-import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../../src/services/cdn';
 import { IJobCommandExecutor } from '../../src/services/commandExecutor';
 import { IFileSystemServices } from '../../src/services/fileServices';
 import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
-import * as data from '../data/jobDef';
+import { getBuildJobDef } from '../data/jobDef';
+import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
 
 describe('JobManager Tests', () => {
   let job: Job;
@@ -26,12 +26,12 @@ describe('JobManager Tests', () => {
   let jobHandlerFactory: JobHandlerFactory;
   let jobManager: JobManager;
   let jobValidator: JobValidator;
-  let repoEntitlementRepository: RepoEntitlementsRepository;
+  let repoBranchesRepo: RepoBranchesRepository;
 
   beforeEach(() => {
     jest.useFakeTimers('modern');
     jest.setSystemTime(new Date(2021, 4, 3));
-    job = JSON.parse(JSON.stringify(data.default.value));
+    job = getBuildJobDef();
     config = mockDeep<IConfig>();
     jobRepo = mockDeep<JobRepository>();
     fileSystemServices = mockDeep<IFileSystemServices>();
@@ -41,7 +41,7 @@ describe('JobManager Tests', () => {
     logger = mockDeep<IJobRepoLogger>();
     jobHandlerFactory = mockDeep<JobHandlerFactory>();
     jobValidator = mockDeep<JobValidator>();
-    repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
+    repoBranchesRepo = mockDeep<RepoBranchesRepository>();
     jobManager = new JobManager(
       config,
       jobValidator,
@@ -51,7 +51,8 @@ describe('JobManager Tests', () => {
       cdnConnector,
       repoConnector,
       fileSystemServices,
-      logger
+      logger,
+      repoBranchesRepo
     );
   });
 
@@ -78,6 +79,7 @@ describe('JobManager Tests', () => {
     });
   });
 
+  // TODO: Fix failing test
   describe('JobManager workex Tests', () => {
     test('JobManager workex doesnt throw error when there is no job', async () => {
       const handler = mockDeep<ProductionJobHandler>();

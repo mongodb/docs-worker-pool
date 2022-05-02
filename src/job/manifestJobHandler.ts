@@ -9,7 +9,10 @@ import { IJobRepoLogger } from '../services/logger';
 import { IRepoConnector } from '../services/repo';
 import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { InvalidJobError } from '../errors/errors';
 
+// Long term goal is to have mut script run off the AST so we can parallelize
+// build&deploy jobs and manifestGeneration jobs
 export class ManifestJobHandler extends JobHandler {
   constructor(
     job: Job,
@@ -39,17 +42,49 @@ export class ManifestJobHandler extends JobHandler {
   }
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
+  // TODO: Separate logic for composing mut-index string into separate helper function? 
   prepDeployCommands(): void {
+    const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
+    // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
+    const env = this._config.get<string>('env');
+    // Note: mut-index automatically prepends 'search-indexes/' to the folder.
+    const f = this._config.get<string>('searchIndexFolder')[env] ?? 'fallback-folder';
+    this.logger.info(this.currJob._id, `Manifest attempt to upload to bucket: ${b}, folder: ${f}`);
+    // Due to the dual existence of prefixes, check for both for redundancy
+    const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;
+    const muP = this.currJob.mutPrefix ?? this.currJob.payload.mutPrefix;
+    const url = this.currJob.payload.url;
+    const globalSearch = this.currJob.payload.stable ? '-g' : '';
+
+    // Rudimentary error logging
+    if (!b) {
+      this.logger.info(this.currJob._id, `searchIndexBucket not found`);
+    }
+    if (!f) {
+      this.logger.info(this.currJob._id, `searchIndexFolder not found`);
+    }
+
+    if (!this.currJob.manifestPrefix) {
+      this.logger.info(this.currJob._id, `Manifest prefix not found for ${this.currJob._id}`);
+      throw new InvalidJobError(`Manifest prefix not found for ${this.currJob._id}`);
+    }
+
+    // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
-      'python3 test-mut-script.py',
+      'ls -al',
+      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${url}/${muP} ${globalSearch}`,
     ];
   }
 
+  // TODO: Can this function be merged with prepBuildCommands?
   prepStageSpecificNextGenCommands(): void {
-    return;
+    if (this.currJob?.buildCommands) {
+      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
+      this.currJob.buildCommands.push('make next-gen-html');
+    }
   }
 
   async deploy(): Promise<CommandExecutorResponse> {

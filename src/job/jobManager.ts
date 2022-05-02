@@ -118,10 +118,10 @@ export class JobManager {
       if (job?.payload) {
         await this.createHandlerAndExecute(job);
       } else {
-        this._logger.info('JobManager', `No Jobs Found....: ${new Date()}`);
+        this._logger.info('JobManager', `No Jobs Found: ${new Date()}`);
       }
     } catch (err) {
-      this._logger.error('JobManager', `  Error while polling for jobs: ${err}`);
+      this._logger.error('JobManager', `Error while polling for jobs: ${err}`);
       if (job) {
         await this._jobRepository.updateWithErrorStatus(job._id, err);
       }
