@@ -1,7 +1,7 @@
-import { K8SCDNConnector } from '../../../src/services/cdn';
 import axios from 'axios';
 import { mockDeep } from 'jest-mock-extended';
 import { IConfig } from 'config';
+import { K8SCDNConnector } from '../../../src/services/cdn';
 import { ILogger } from './../../../src/services/logger';
 import { ISSMConnector } from './../../../src/services/ssm';
 import { ISSOConnector } from './../../../src/services/sso';
