@@ -13,8 +13,8 @@ import { InvalidJobError } from '../errors/errors';
 
 // TODO: Move this to a generic util and out of this job file
 const joinUrlAndPrefix = (url, prefix) => {
-  const needsTrim = url.endsWith('/') && prefix.endsWith('/');
-  const needsSlash = !url.endsWith('/') && !prefix.endsWith('/');
+  const needsTrim = url.endsWith('/') && prefix.startsWith('/');
+  const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
   
   return needsTrim ? url.slice(-1) + prefix : needsSlash ? url + '/' + prefix : url + prefix;
 }
