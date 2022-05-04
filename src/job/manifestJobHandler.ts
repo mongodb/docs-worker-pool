@@ -53,7 +53,7 @@ export class ManifestJobHandler extends JobHandler {
     // Due to the dual existence of prefixes, check for both for redundancy
     const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;
     const muP = this.currJob.mutPrefix ?? this.currJob.payload.mutPrefix;
-    const url = this.currJob.payload.url;
+    const url = this.currJob.payload?.repoBranches?.url[env];
     const globalSearch = this.currJob.payload.stable ? '-g' : '';
 
     // Rudimentary error logging
@@ -62,6 +62,11 @@ export class ManifestJobHandler extends JobHandler {
     }
     if (!f) {
       this.logger.info(this.currJob._id, `searchIndexFolder not found`);
+    }
+
+    if (!url) {
+      this.logger.info(this.currJob._id, `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
+      throw new InvalidJobError(`repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
     }
 
     if (!this.currJob.manifestPrefix) {
