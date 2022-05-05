@@ -11,6 +11,14 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { InvalidJobError } from '../errors/errors';
 
+// TODO: Move this to a generic util and out of this job file
+const joinUrlAndPrefix = (url, prefix) => {
+  const needsTrim = url.endsWith('/') && prefix.startsWith('/');
+  const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
+  
+  return needsTrim ? url.slice(-1) + prefix : needsSlash ? url + '/' + prefix : url + prefix;
+}
+
 // Long term goal is to have mut script run off the AST so we can parallelize
 // build&deploy jobs and manifestGeneration jobs
 export class ManifestJobHandler extends JobHandler {
@@ -53,7 +61,8 @@ export class ManifestJobHandler extends JobHandler {
     // Due to the dual existence of prefixes, check for both for redundancy
     const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;
     const muP = this.currJob.mutPrefix ?? this.currJob.payload.mutPrefix;
-    const url = this.currJob.payload.url;
+    const url = this.currJob.payload?.repoBranches?.url[env];
+    const jUaP = joinUrlAndPrefix;
     const globalSearch = this.currJob.payload.stable ? '-g' : '';
 
     // Rudimentary error logging
@@ -62,6 +71,11 @@ export class ManifestJobHandler extends JobHandler {
     }
     if (!f) {
       this.logger.info(this.currJob._id, `searchIndexFolder not found`);
+    }
+
+    if (!url) {
+      this.logger.info(this.currJob._id, `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
+      throw new InvalidJobError(`repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
     }
 
     if (!this.currJob.manifestPrefix) {
@@ -75,7 +89,7 @@ export class ManifestJobHandler extends JobHandler {
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
-      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${url}/${muP} ${globalSearch}`,
+      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${jUaP(url,muP)} ${globalSearch}`,
     ];
   }
 
