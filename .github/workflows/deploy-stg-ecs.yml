@@ -1,13 +1,8 @@
 on:
   push:
     branches:
-      - "integration"
       - "master"
-      - "DOP-2508"
-  pull_request:
-    branches:
-      - master
-      - integration
+      - "integration"
 concurrency:
   group: environment-${{ github.ref }}
   cancel-in-progress: true

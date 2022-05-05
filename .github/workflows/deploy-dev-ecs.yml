@@ -1,9 +1,12 @@
 on:
   push:
-    branches-ignore:
-      - "integration"
+    branches:
       - "master"
-      - "meta"
+      - "integration"
+  pull_request:
+    branches:
+      - master
+      - integration
 concurrency:
   group: environment-${{ github.ref }}
   cancel-in-progress: true
