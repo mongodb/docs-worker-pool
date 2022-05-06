@@ -30,16 +30,14 @@ describe('ManifestJobHandler Tests', () => {
 
   test('prepDeployCommands has reasonable output', async () => {
     const prepSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'prepDeployCommands');
-    jobHandlerTestHelper.job.manifestPrefix = 'test-job-mani-prefix';
-    jobHandlerTestHelper.job.payload.manifestPrefix = 'test-payload-mani-prefix';
+    jobHandlerTestHelper.job.payload.manifestPrefix = 'sample-prefix';
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
-    // Set config variables
     jobHandlerTestHelper.config.get.calledWith('searchIndexBucket').mockReturnValue('sample-bucket');
     jobHandlerTestHelper.config.get.calledWith('env').mockReturnValue('dotcomstg');
     const mockFolderConfig = {
       dev: '',
-      dotcomstg: 'example-preprd',
-      dotcomprd: 'example-prd',
+      dotcomstg: 'sample-preprd',
+      dotcomprd: 'sample-prd',
     };
     jobHandlerTestHelper.config.get.calledWith('searchIndexFolder').mockReturnValue(mockFolderConfig);
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
@@ -48,8 +46,7 @@ describe('ManifestJobHandler Tests', () => {
     const o = [
       '. /venv/bin/activate',
       'cd repos/testauth',
-      'echo IGNORE: testing manifest generation deploy commands',
-      'mut-index upload public -b sample-bucket -o example-preprd/test-job-mani-prefix.json -u https://github.com/skerschb/testauth.git/ ',
+      'mut-index upload public -b sample-bucket -o sample-preprd/testauth-UsingAlias.json -u https://mongodbcom-cdn.website.staging.corp.mongodb.com/ ',
     ];
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(o);
   });

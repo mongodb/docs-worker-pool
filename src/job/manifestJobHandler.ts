@@ -15,9 +15,9 @@ import { InvalidJobError } from '../errors/errors';
 const joinUrlAndPrefix = (url, prefix) => {
   const needsTrim = url.endsWith('/') && prefix.startsWith('/');
   const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
-  
+
   return needsTrim ? url.slice(-1) + prefix : needsSlash ? url + '/' + prefix : url + prefix;
-}
+};
 
 // Long term goal is to have mut script run off the AST so we can parallelize
 // build&deploy jobs and manifestGeneration jobs
@@ -50,7 +50,7 @@ export class ManifestJobHandler extends JobHandler {
   }
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
-  // TODO: Separate logic for composing mut-index string into separate helper function? 
+  // TODO: Separate logic for composing mut-index string into separate helper function?
   prepDeployCommands(): void {
     const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
@@ -59,8 +59,8 @@ export class ManifestJobHandler extends JobHandler {
     const f = this._config.get<string>('searchIndexFolder')[env] ?? 'fallback-folder';
     this.logger.info(this.currJob._id, `Manifest attempt to upload to bucket: ${b}, folder: ${f}`);
     // Due to the dual existence of prefixes, check for both for redundancy
-    const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;
-    const muP = this.currJob.mutPrefix ?? this.currJob.payload.mutPrefix;
+    const maP = this.currJob.payload.manifestPrefix;
+    const muP = this.currJob.payload.mutPrefix;
     const url = this.currJob.payload?.repoBranches?.url[env];
     const jUaP = joinUrlAndPrefix;
     const globalSearch = this.currJob.payload.stable ? '-g' : '';
@@ -72,13 +72,19 @@ export class ManifestJobHandler extends JobHandler {
     if (!f) {
       this.logger.info(this.currJob._id, `searchIndexFolder not found`);
     }
-
     if (!url) {
-      this.logger.info(this.currJob._id, `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
-      throw new InvalidJobError(`repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
+      this.logger.info(
+        this.currJob._id,
+        `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`
+      );
+
+      console.log(this.currJob.payload);
+      throw new InvalidJobError(
+        `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`
+      );
     }
 
-    if (!this.currJob.manifestPrefix) {
+    if (!this.currJob.payload.manifestPrefix) {
       this.logger.info(this.currJob._id, `Manifest prefix not found for ${this.currJob._id}`);
       throw new InvalidJobError(`Manifest prefix not found for ${this.currJob._id}`);
     }
@@ -87,9 +93,7 @@ export class ManifestJobHandler extends JobHandler {
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${this.currJob.payload.repoName}`,
-      'echo IGNORE: testing manifest generation deploy commands',
-      'ls -al',
-      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${jUaP(url,muP)} ${globalSearch}`,
+      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP)} ${globalSearch}`,
     ];
   }
 

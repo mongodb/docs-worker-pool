@@ -30,7 +30,9 @@ export type Payload = {
   newHead: string | null | undefined;
   patch: string | null | undefined;
   alias: string | null | undefined;
+  // manifestPrefix is the title of the manifest JSON file, e.g. compass-master.json
   manifestPrefix: string | undefined;
+  // pathPrefix
   pathPrefix: string | null | undefined;
   mutPrefix: string | null | undefined;
   aliased: boolean | null | undefined;
@@ -58,9 +60,6 @@ export type Job = {
   status: JobStatus | null;
   title: string;
   user: string;
-  manifestPrefix: string | undefined;
-  pathPrefix: string | null | undefined;
-  mutPrefix: string | null | undefined;
   buildCommands: string[];
   deployCommands: string[];
   invalidationStatusURL: string | null | undefined;
