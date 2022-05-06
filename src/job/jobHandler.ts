@@ -446,6 +446,11 @@ export abstract class JobHandler {
     if (doNotSearchProperties.includes(this.currJob.payload.repoName)) {
       return false;
     }
+    // Ensures that we only build a manifest for aliased properties if the job
+    // is for a primary alias
+    if (this.currJob.payload.aliased && !this.currJob.payload.primaryAlias) {
+      return false;
+    }
     // Edit this if you want to generate search manifests for dev environments, too
     if (this.currJob.payload.jobType !== 'productionDeploy') {
       return false;
