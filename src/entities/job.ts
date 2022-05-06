@@ -32,7 +32,6 @@ export type Payload = {
   alias: string | null | undefined;
   // manifestPrefix is the title of the manifest JSON file, e.g. compass-master.json
   manifestPrefix: string | undefined;
-  // pathPrefix
   pathPrefix: string | null | undefined;
   mutPrefix: string | null | undefined;
   aliased: boolean | null | undefined;

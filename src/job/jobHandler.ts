@@ -460,13 +460,6 @@ export abstract class JobHandler {
   public async queueManifestJob(): Promise<void> {
     this._logger.info(this.currJob._id, `Queueing associated search manifest job for job ${this.currJob.title}.`);
 
-    // Ensure there is always a manifestPrefix to upload to
-    let backupManifestPrefix = '';
-    if (!this._currJob.payload.manifestPrefix && !this._currJob.payload.manifestPrefix) {
-      backupManifestPrefix = this.constructManifestPrefix();
-      this._logger.info(this.currJob._id, `Using backup manifestPrefix: ${backupManifestPrefix}.`);
-    }
-
     // Rudimentary error prevention (manifest jobs should not queue new manifest jobs - autobuilder will explode)
     if (this._currJob.payload.jobType.includes('manifestGeneration')) {
       this._logger.error(
