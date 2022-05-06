@@ -1,8 +1,16 @@
 FROM ubuntu-python-node
 ARG SNOOTY_PARSER_VERSION=0.13.4
 ARG SNOOTY_FRONTEND_VERSION=0.13.12
+ARG NPM_CONFIG_REGISTRY
+ARG NPM_CONFIG_EMAIL
+ARG NPM_CONFIG__AUTH
+ARG NPM_CONFIG_ALWAYS_AUTH=true
 ARG FLIT_VERSION=3.0.0
 ENV FLIT_ROOT_INSTALL=1
+
+# TODO: revisit snooty npmrc config to remove extra npm environment variables
+ENV NPM_EMAIL=${NPM_CONFIG_EMAIL}
+ENV NPM_BASE_64_AUTH=${NPM_CONFIG__AUTH}
 # ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 WORKDIR /opt
@@ -20,7 +28,7 @@ RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/
 
 # install snooty frontend and docs-tools # TODO: install from npm?
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
-    && cd snooty                                                                                   \
+    && cd snooty                                                                                   \                                                                        \
     && npm install                                                                                 \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
     && mkdir -p static/images                                                                      \
