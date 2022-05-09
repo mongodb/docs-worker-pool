@@ -19,8 +19,11 @@ To add a new property:
 
 ## Build and Run Docker Image for local testing
 
+```shell
+docker build --tag=workerpool --build-arg NPM_BASE_64_AUTH=${NPM_CONFIG__AUTH} --build-arg NPM_EMAIL=${NPM_CONFIG_EMAIL} .
 ```
-docker build --tag=workerpool .
+
+```shell
 docker run \
 	--env MONGO_ATLAS_USERNAME \
 	--env MONGO_ATLAS_PASSWORD \
