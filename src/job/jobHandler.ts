@@ -305,7 +305,7 @@ export abstract class JobHandler {
     // name correction AND snooty frontend dropdown de-hardcoding
     const substitute = {
       cloudgov: 'AtlasGov',
-      cloud: 'atlas',
+      'cloud-docs': 'atlas',
       docs: 'manual',
     };
     const projectName = substitute[this.currJob.payload.project] ?? this.currJob.payload.project;
