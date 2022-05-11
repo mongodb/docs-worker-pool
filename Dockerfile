@@ -10,9 +10,13 @@ RUN npm run build
 
 # where repo work will happen
 FROM ubuntu:20.04
-ARG DEBIAN_FRONTEND=noninteractive
+ARG SNOOTY_PARSER_VERSION=0.13.4
+ARG SNOOTY_FRONTEND_VERSION=0.13.12
+ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
+ENV DEBIAN_FRONTEND=noninteractive
+ENV FLIT_ROOT_INSTALL=1
 
 # install legacy build environment for docs
 RUN apt-get -o Acquire::Check-Valid-Until=false update
@@ -54,30 +58,24 @@ WORKDIR /home/docsworker-xlarge
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
-RUN python3 -m pip uninstall -y snooty
-RUN python3 -m pip install pip==20.2 flit==3.0.0
-RUN git clone https://github.com/mongodb/snooty-parser.git && \
-	cd snooty-parser && \
-	git fetch --tags && \
-	git checkout v0.13.4 && \
-	FLIT_ROOT_INSTALL=1 python3 -m flit install
+RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
+    && python3 -m pip install pip==20.2 flit==${FLIT_VERSION}                                      \
+    && cd snooty-parser                                                                            \
+    && python3 -m flit install
 
-# install snooty front-end
-RUN git clone https://github.com/mongodb/snooty.git snooty
-RUN cd snooty && \
-	git fetch --all && \
-	git checkout v0.13.12 && \
-	npm install && \
-	git clone https://github.com/mongodb/docs-tools.git docs-tools && \
-	mkdir -p ./static/images && \
-	mv ./docs-tools/themes/mongodb/static ./static/docs-tools/ && \
-	mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+# install snooty frontend and docs-tools
+RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+    && cd snooty                                                                                   \                                                                        \
+    && npm install                                                                                 \
+    && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
+    && mkdir -p ./static/images                                                                    \
+    && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
+    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
-RUN git clone https://github.com/mongodb/devhub.git snooty-devhub
-RUN cd snooty-devhub && \
-	git fetch --all && \
-	git checkout master && \
-	npm install --production
+# install snooty devhub
+RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub                        \
+    && cd snooty-devhub                                                                            \
+    && npm install --production
 
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
