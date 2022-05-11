@@ -189,7 +189,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
         deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
         jobCount += 1;
       }
-      if (non_versioned) {
+      // handle non-versioned repos AND repos where only 1 version is active
+      if (non_versioned || (!publishOriginalBranchName && urlSlug === null)) {
         newPayload.urlSlug = '';
         deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
         jobCount += 1;
