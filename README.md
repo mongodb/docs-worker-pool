@@ -19,8 +19,16 @@ To add a new property:
 
 ## Build and Run Docker Image for local testing
 
+The npm build args are required for the portion of the dockerfile that installs the [snooty-frontend]. `NPM_CONFIG__AUTH`
+and `NPM_CONFIG_EMAIL` are environment variables available in our working directory. `NPM_CONFIG_{OPTION}` environment
+variables can actually be used instead of the `~/.npmrc` file. The reason we need the build args to be `NPM_BASE_64_AUTH`
+and `NPM_EMAIL` is because that's what's expected in the `.npmrc` within [snooty-frontend].
+
+```shell
+docker build --tag=workerpool --build-arg NPM_BASE_64_AUTH=${NPM_CONFIG__AUTH} --build-arg NPM_EMAIL=${NPM_CONFIG_EMAIL} .
 ```
-docker build --tag=workerpool .
+
+```shell
 docker run \
 	--env MONGO_ATLAS_USERNAME \
 	--env MONGO_ATLAS_PASSWORD \
@@ -105,3 +113,6 @@ docs-worker-pool contains various triggers for release to higher environments. C
 - Create release tags. We currently follow [semver](https://semver.org/) standards.
 - If you don't have push access, open an issue or otherwise contact a contributor with administrator privileges.
 - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
+
+
+[snooty-frontend]: https://github.com/mongodb/snooty
