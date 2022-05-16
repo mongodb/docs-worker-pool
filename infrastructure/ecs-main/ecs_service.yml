@@ -31,7 +31,7 @@ Resources:
           Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
           Environment:
             - Name: STAGE
-              value: ${self:provider.stage}
+              Value: ${self:provider.stage}
             - Name: SNOOTY_ENV
               Value: ${self:custom.env.${self:provider.stage}}
             - Name: MONGO_ATLAS_USERNAME
@@ -112,6 +112,12 @@ Resources:
               Value: ${self:custom.searchIndexBucket}
             - Name: SEARCH_INDEX_FOLDER
               Value: ${self:custom.searchIndexFolder.${self:provider.stage}}
+
+          Secrets:
+            - Name: MONGO_ATLAS_USERNAME
+              ValueFrom: {{resolve:ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}}
+            - Name: MONGO_ATLAS_PASSWORD
+              ValueFrom: {{resolve:ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}}
 
           LogConfiguration:
             LogDriver: awslogs
