@@ -87,7 +87,7 @@ describe('ManifestJobHandler Tests', () => {
       manifestPrefix: `AtlasGov-testSlug`,
     },
     {
-      project: 'cloud',
+      project: 'cloud-docs',
       urlSlug: 'testSlug',
       branchName: '',
       manifestPrefix: `atlas-testSlug`,
