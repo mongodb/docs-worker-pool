@@ -54,8 +54,8 @@ jobs:
         run: |
           cd infrastructure/ecs-main
           npm ci
-          echo AWS_DEFAULT_REGION
-          echo AWS_ACCOUNT_NUMBER
+          echo $AWS_DEFAULT_REGION
+          echo $AWS_ACCOUNT_NUMBER
           sls deploy --stage dev
       - name: Deploy Lambdas
         run: |
