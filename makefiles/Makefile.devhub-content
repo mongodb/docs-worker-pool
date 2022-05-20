@@ -56,6 +56,8 @@ next-gen-stage: ## Host online for review
 	mut-publish public ${BUCKET} --prefix=/developer --stage ${ARGS};
 	echo "${COMMIT_HASH}/${MUT_PREFIX}"
 	echo "Hosted at ${URL}/developer";
+	mut-publish public developer-test --prefix="${COMMIT_HASH/MUT_PREFIX}" --stage ${ARGS}
+	echo "Uploaded to seperate test bucket";
 
 next-gen-deploy:
 	yes | mut-publish ./public ${BUCKET} --prefix=/developer --deploy --deployed-url-prefix=https://mongodb.com/developer --json --all-subdirectories ${ARGS};
