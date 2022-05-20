@@ -46,6 +46,8 @@ next-gen-html: update-snooty
 next-gen-stage: ## Host online for review
 	mut-publish public ${BUCKET} --prefix="${COMMIT_HASH/MUT_PREFIX}" --stage ${ARGS};
 	echo "Hosted at ${URL}/${COMMIT_HASH}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
+	mut-publish public developer-test --prefix="${COMMIT_HASH/MUT_PREFIX}" --stage ${ARGS};
+	
 
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/devhub.yaml > ${REPO_DIR}/published-branches.yaml
