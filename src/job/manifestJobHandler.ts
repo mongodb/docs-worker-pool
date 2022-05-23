@@ -15,7 +15,7 @@ import { InvalidJobError } from '../errors/errors';
 const joinUrlAndPrefix = (url, prefix) => {
   const needsTrim = url.endsWith('/') && prefix.startsWith('/');
   const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
-
+  
   return needsTrim ? url.slice(-1) + prefix : needsSlash ? url + '/' + prefix : url + prefix;
 }
 
@@ -50,7 +50,7 @@ export class ManifestJobHandler extends JobHandler {
   }
 
   // TODO: Make this a non-state-mutating function, e.g. return the deployCommands?
-  // TODO: Separate logic for composing mut-index string into separate helper function?
+  // TODO: Separate logic for composing mut-index string into separate helper function? 
   prepDeployCommands(): void {
     const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
     // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
