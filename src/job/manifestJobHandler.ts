@@ -23,28 +23,28 @@ const joinUrlAndPrefix = (url, prefix) => {
 // build&deploy jobs and manifestGeneration jobs
 export class ManifestJobHandler extends JobHandler {
   constructor(
-      job: Job,
-      config: IConfig,
-      jobRepository: JobRepository,
-      fileSystemServices: IFileSystemServices,
-      commandExecutor: IJobCommandExecutor,
-      cdnConnector: ICDNConnector,
-      repoConnector: IRepoConnector,
-      logger: IJobRepoLogger,
-      validator: IJobValidator,
-      repoBranchesRepo: RepoBranchesRepository
+    job: Job,
+    config: IConfig,
+    jobRepository: JobRepository,
+    fileSystemServices: IFileSystemServices,
+    commandExecutor: IJobCommandExecutor,
+    cdnConnector: ICDNConnector,
+    repoConnector: IRepoConnector,
+    logger: IJobRepoLogger,
+    validator: IJobValidator,
+    repoBranchesRepo: RepoBranchesRepository
   ) {
     super(
-        job,
-        config,
-        jobRepository,
-        fileSystemServices,
-        commandExecutor,
-        cdnConnector,
-        repoConnector,
-        logger,
-        validator,
-        repoBranchesRepo
+      job,
+      config,
+      jobRepository,
+      fileSystemServices,
+      commandExecutor,
+      cdnConnector,
+      repoConnector,
+      logger,
+      validator,
+      repoBranchesRepo
     );
     this.name = 'Manifest';
   }
