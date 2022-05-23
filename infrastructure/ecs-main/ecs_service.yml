@@ -148,6 +148,7 @@ Resources:
                   - ssm:GetParameter
                 Resource:
                   - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/*
+                  - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/docs/${self:provider.stage}/*
 
   TaskRole:
     Type: 'AWS::IAM::Role'
