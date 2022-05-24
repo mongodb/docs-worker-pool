@@ -17,34 +17,34 @@ const joinUrlAndPrefix = (url, prefix) => {
   const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
 
   return needsTrim ? url.slice(-1) + prefix : needsSlash ? url + '/' + prefix : url + prefix;
-};
+}
 
 // Long term goal is to have mut script run off the AST so we can parallelize
 // build&deploy jobs and manifestGeneration jobs
 export class ManifestJobHandler extends JobHandler {
   constructor(
-    job: Job,
-    config: IConfig,
-    jobRepository: JobRepository,
-    fileSystemServices: IFileSystemServices,
-    commandExecutor: IJobCommandExecutor,
-    cdnConnector: ICDNConnector,
-    repoConnector: IRepoConnector,
-    logger: IJobRepoLogger,
-    validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+      job: Job,
+      config: IConfig,
+      jobRepository: JobRepository,
+      fileSystemServices: IFileSystemServices,
+      commandExecutor: IJobCommandExecutor,
+      cdnConnector: ICDNConnector,
+      repoConnector: IRepoConnector,
+      logger: IJobRepoLogger,
+      validator: IJobValidator,
+      repoBranchesRepo: RepoBranchesRepository
   ) {
     super(
-      job,
-      config,
-      jobRepository,
-      fileSystemServices,
-      commandExecutor,
-      cdnConnector,
-      repoConnector,
-      logger,
-      validator,
-      repoBranchesRepo
+        job,
+        config,
+        jobRepository,
+        fileSystemServices,
+        commandExecutor,
+        cdnConnector,
+        repoConnector,
+        logger,
+        validator,
+        repoBranchesRepo
     );
     this.name = 'Manifest';
   }
@@ -74,13 +74,8 @@ export class ManifestJobHandler extends JobHandler {
     }
 
     if (!url) {
-      this.logger.info(
-        this.currJob._id,
-        `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`
-      );
-      throw new InvalidJobError(
-        `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`
-      );
+      this.logger.info(this.currJob._id, `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
+      throw new InvalidJobError(`repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`);
     }
 
     if (!this.currJob.manifestPrefix) {
@@ -94,7 +89,7 @@ export class ManifestJobHandler extends JobHandler {
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
-      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP)} ${globalSearch}`,
+      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${jUaP(url,muP)} ${globalSearch}`,
     ];
   }
 
