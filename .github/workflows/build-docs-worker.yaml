@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/common/build-docker-ecr.yaml
+    uses: ./.github/workflows/build-docker-ecr.yaml
     with:
       name: docs-worker-pool
       region: us-east-2
