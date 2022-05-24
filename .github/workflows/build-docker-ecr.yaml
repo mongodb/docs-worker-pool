@@ -32,7 +32,7 @@ jobs:
 
       - name: config-environment
         env:
-          branch: ${{ github.github.head_ref || github.ref_name }}
+          branch: ${{ github.head_ref || github.ref_name }}
           commit: ${{ github.sha }}
           number: ${{ github.run_number }}
           name  : ${{ inputs.name }}
