@@ -1,0 +1,23 @@
+name: build-docs-worker
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/common/build-docker-ecr.yaml
+    with:
+      name: docs-worker-pool
+      region: us-east-2
+      context: .
+      build_args: |
+        NPM_BASE_64_AUTH=${{ NPM_BASE_64_AUTH }}
+        NPM_EMAIL=${{ NPM_EMAIL }}
+    secrets:
+      ecr_access_key: ${{ secrets.ECR_ACCESS_KEY }}
+      ecr_secret_key: ${{ secrets.ECR_SECRET_KEY }}
