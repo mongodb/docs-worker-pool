@@ -15,7 +15,9 @@ jobs:
       name: docs-worker-pool
       region: us-east-2
       context: .
-      build_args: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
     secrets:
       ecr_access_key: ${{ secrets.ECR_ACCESS_KEY }}
       ecr_secret_key: ${{ secrets.ECR_SECRET_KEY }}
+      build_args: |
+        NPM_EMAIL=${{ secrets.NPM_EMAIL }}
+        NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}

@@ -13,14 +13,13 @@ on:
       region:
         type: string
         required: true
-      build_args:
-        type: string
-        required: false
     secrets:
       ecr_access_key:
         required: true
       ecr_secret_key:
         required: true
+      build_args:
+        required: false
       build_secrets:
         required: false
 
@@ -81,7 +80,7 @@ jobs:
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}-${{ env.commit }}
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.number }}
-          build-args: ${{ inputs.build_args }}
+          build-args: ${{ secrets.build_args }}
           secrets:    ${{ secrets.build_secrets }}
           cache-from: type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache
           cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache,mode=max
