@@ -114,5 +114,4 @@ docs-worker-pool contains various triggers for release to higher environments. C
 - If you don't have push access, open an issue or otherwise contact a contributor with administrator privileges.
 - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
 
-
 [snooty-frontend]: https://github.com/mongodb/snooty
