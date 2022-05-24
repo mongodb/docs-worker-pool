@@ -33,7 +33,10 @@ let repoBranchesRepo: RepoBranchesRepository;
 let ssoConnector: ISSOConnector;
 
 async function init(): Promise<void> {
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  const atlasURL = `mongodb+srv://${c.get('dbUsername')}:${c.get('dbPassword')}@${c.get(
+    'dbHost'
+  )}/?retryWrites=true&w=majority`;
+  const client = new mongodb.MongoClient(atlasURL);
   await client.connect();
   db = client.db(c.get('dbName'));
   consoleLogger = new ConsoleLogger();

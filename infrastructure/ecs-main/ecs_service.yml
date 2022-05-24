@@ -31,19 +31,9 @@ Resources:
           Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
           Environment:
             - Name: STAGE
-              value: ${self:provider.stage}
+              Value: ${self:provider.stage}
             - Name: SNOOTY_ENV
               Value: ${self:custom.env.${self:provider.stage}}
-            - Name: MONGO_ATLAS_USERNAME
-              Value: ${self:custom.dbUsername}
-            - Name: MONGO_ATLAS_PASSWORD
-              Value: ${self:custom.dbPassword}
-            - Name: MONGO_ATLAS_HOST
-              Value: ${self:custom.dbhost}
-            - Name: MONGO_ATLAS_URL
-              Value: mongodb+srv://${self:custom.dbUsername}:${self:custom.dbPassword}@${self:custom.dbhost}/admin?retryWrites=true
-            - Name: DB_NAME
-              Value: ${self:custom.dbName}
             - Name: AWS_ACCESS_KEY_ID
               Value: ${self:custom.awsKey}
             - Name: AWS_SECRET_ACCESS_KEY
@@ -113,6 +103,16 @@ Resources:
             - Name: SEARCH_INDEX_FOLDER
               Value: ${self:custom.searchIndexFolder.${self:provider.stage}}
 
+          Secrets:
+            - Name: MONGO_ATLAS_USERNAME
+              ValueFrom: arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/worker_pool/atlas/username
+            - Name: MONGO_ATLAS_PASSWORD
+              ValueFrom: arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/worker_pool/atlas/password
+            - Name: MONGO_ATLAS_HOST
+              ValueFrom: arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/worker_pool/atlas/host
+            - Name: DB_NAME
+              ValueFrom: arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/worker_pool/atlas/dbname
+
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -136,6 +136,17 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+      Policies:
+        - PolicyName: AllowSSMAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource:
+                  - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/*
+                  - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/docs/${self:provider.stage}/*
 
   TaskRole:
     Type: 'AWS::IAM::Role'
