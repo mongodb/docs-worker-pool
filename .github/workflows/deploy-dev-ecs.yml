@@ -40,7 +40,7 @@ jobs:
         with:
           image: docs-worker-pool-dev
           tags: latest
-          registry: ${{ steps.config-aws.outputs.aws-account-id }}.dkr.ecr.${{ steps.config-aws.inputs.region }}.amazonaws.com
+          registry: ${{ steps.config-aws.outputs.aws-account-id }}.dkr.ecr.${{ steps.config-aws.with.region }}.amazonaws.com
           buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
