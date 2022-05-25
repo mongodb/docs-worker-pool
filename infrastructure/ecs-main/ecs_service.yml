@@ -133,9 +133,9 @@ Resources:
           - Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
       Policies:
         - PolicyName: AllowSSMAccess
           PolicyDocument:
@@ -164,10 +164,10 @@ Resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - 'sqs:SendMessage'
+                    - sqs:SendMessage
                   Resource:
-                    - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-job-updates-queue-${self:provider.stage}'
-                    - 'arn:aws:sqs:us-east-2:216656347858:autobuilder-jobs-queue-${self:provider.stage}'
+                    - arn:aws:sqs:${aws:region}:${aws:accountId}:autobuilder-job-updates-queue-${self:provider.stage}
+                    - arn:aws:sqs:${aws:region}:${aws:accountId}:autobuilder-jobs-queue-${self:provider.stage}
           - PolicyName: AllowSSMAccess
             PolicyDocument:
               Version: '2012-10-17'
@@ -176,4 +176,3 @@ Resources:
                   Action:
                     - 'ssm:GetParameter'
                   Resource: "*"
-
