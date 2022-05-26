@@ -142,46 +142,44 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
       false,
       '-g'
     );
-    if (!aliases) {
+
+    if (!aliases || aliases.length === 0) {
       if (non_versioned) {
         newPayload.urlSlug = '';
       }
       deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
+      continue;
     }
+
     // if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
-    else {
-      let stable = '';
-      if (isStableBranch) {
-        stable = '-g';
-      }
+    newPayload.stable = isStableBranch ? '-g' : '';
+    newPayload.aliased = true;
 
-      newPayload.stable = stable;
-      newPayload.aliased = true;
+    // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
+    if (urlSlug) {
+      newPayload.urlSlug = urlSlug;
+      newPayload.primaryAlias = true;
+      deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
+    }
 
-      // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
-      if (urlSlug) {
-        newPayload.urlSlug = urlSlug;
-        newPayload.primaryAlias = true;
-        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-      }
-      // handle non-versioned repos AND repos where only 1 version is active
-      if (non_versioned || (!publishOriginalBranchName && urlSlug === null)) {
-        newPayload.urlSlug = '';
-        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-      } else if (publishOriginalBranchName && urlSlug !== branchName) {
-        newPayload.urlSlug = branchName;
+    // handle non-versioned repos AND repos where only 1 version is active
+    if (non_versioned || (!publishOriginalBranchName && urlSlug === null)) {
+      newPayload.urlSlug = '';
+      deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
+    } else if (publishOriginalBranchName && urlSlug !== branchName) {
+      newPayload.urlSlug = branchName;
+      newPayload.primaryAlias = false;
+      deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
+    }
+
+    aliases.forEach(async (alias: string) => {
+      if (alias !== urlSlug) {
+        newPayload.stable = '';
+        newPayload.urlSlug = alias;
         newPayload.primaryAlias = false;
         deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
       }
-      aliases.forEach(async (alias: string) => {
-        if (alias !== urlSlug) {
-          newPayload.stable = '';
-          newPayload.urlSlug = alias;
-          newPayload.primaryAlias = false;
-          deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-        }
-      });
-    }
+    });
   }
 
   return deployable;
@@ -200,7 +198,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const branchRepository = new BranchRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
-  // This is coming in as urlencoded stirng, need to decode before parsing=
+  // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
@@ -221,6 +219,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     headers: { 'Content-Type': 'application/json' },
   };
 };
+
 function createPayload(
   jobType: string,
   repoOwner: string,
