@@ -3,6 +3,7 @@ on:
     branches:
       - "master"
       - "integration"
+      - "DOP-2902"
 concurrency:
   group: environment-${{ github.ref }}
   cancel-in-progress: true
