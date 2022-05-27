@@ -141,7 +141,7 @@ export class K8SCDNConnector implements ICDNConnector {
     });
 
     // perform wildcard invalidations when invalidating >= 250 objects
-    if (urls.length >= 1) {
+    if (urls.length >= 250) {
       const wildcardPatternURL = '/' + prefix + '/*';
       urls = [wildcardPatternURL];
     }
