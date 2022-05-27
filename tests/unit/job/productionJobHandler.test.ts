@@ -400,7 +400,11 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(
       TestDataProvider.getCommonDeployCommands(jobHandlerTestHelper.job)
     );
-    expect(jobHandlerTestHelper.cdnConnector.purge).toBeCalledWith(jobHandlerTestHelper.job._id, purgedUrls);
+    expect(jobHandlerTestHelper.cdnConnector.purge).toBeCalledWith(
+      jobHandlerTestHelper.job._id,
+      purgedUrls,
+      jobHandlerTestHelper.job.payload.prefix
+    );
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toBeCalledWith(jobHandlerTestHelper.job._id, purgedUrls);
     expect(jobHandlerTestHelper.cdnConnector.purgeAll).toHaveBeenCalledTimes(0);
   });
