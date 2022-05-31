@@ -100,36 +100,13 @@ const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) 
   deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail));
 };
 
-export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
-  const consoleLogger = new ConsoleLogger();
-  const slackConnector = new SlackConnector(consoleLogger, c);
-  if (!slackConnector.validateSlackRequest(event)) {
-    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
-  }
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
-  await client.connect();
-  const db = client.db(c.get('dbName'));
-  const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const branchRepository = new BranchRepository(db, c, consoleLogger);
-  const jobRepository = new JobRepository(db, c, consoleLogger);
-  const parallel = c.get<any>('parallel');
-  const env = c.get<string>('env');
+// For every repo/branch selected to be deployed, return an array of jobs with the payload data
+// needed for a successful build.
+export const getDeployableJobs = async (values, entitlement, branchRepository: BranchRepository) => {
   const deployable = [];
-  // This is coming in as urlencoded stirng, need to decode before parsing=
 
-  const decoded = decodeURIComponent(event.body).split('=')[1];
-  const parsed = JSON.parse(decoded);
-  const stateValues = parsed.view.state.values;
-
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
-  if (!isUserEntitled(entitlement)) {
-    return prepReponse(401, 'text/plain', 'User is not entitled!');
-  }
-
-  const values = slackConnector.parseSelection(stateValues);
-  let jobCount = 0;
   for (let i = 0; i < values.repo_option.length; i++) {
-    // // e.g. mongodb/docs-realm/master => (site/repo/branch)
+    // e.g. mongodb/docs-realm/master => (site/repo/branch)
     const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
     const hashOption = values?.hash_option ?? null;
     const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
@@ -137,21 +114,21 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     const jobUserEmail = entitlement?.email ?? '';
 
     const repoInfo = await branchRepository.getRepo(repoName);
-    const non_versioned = repoInfo.branches.length === 1 ? true : false;
+    const non_versioned = repoInfo.branches.length === 1;
 
     const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
     if (!branchObject?.aliasObject) continue;
 
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool
-    let aliases = branchObject.aliasObject.urlAliases; //array or null
-    let urlSlug = branchObject.aliasObject.urlSlug; //string or null, string must match value in urlAliases or gitBranchName
+    let aliases = branchObject.aliasObject.urlAliases; // array or null
+    let urlSlug = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
     aliases = aliases?.filter((a) => a);
-    if (!urlSlug || !!urlSlug.trim()) {
+    if (!urlSlug || !urlSlug.trim()) {
       urlSlug = branchName;
     }
 
-    //Generic payload, will be conditionaly modified appropriately
+    // Generic payload, will be conditionaly modified appropriately
     const newPayload = createPayload(
       'productionDeploy',
       repoOwner,
@@ -165,53 +142,75 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       false,
       '-g'
     );
-    if (!aliases) {
+
+    if (!aliases || aliases.length === 0) {
       if (non_versioned) {
         newPayload.urlSlug = '';
       }
       deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-      jobCount += 1;
+      continue;
     }
-    //if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
-    else {
-      let stable = '';
-      if (isStableBranch) {
-        stable = '-g';
-      }
 
-      newPayload.stable = stable;
-      newPayload.aliased = true;
+    // if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
+    newPayload.stable = isStableBranch ? '-g' : '';
+    newPayload.aliased = true;
+
+    // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
+    if (urlSlug) {
+      newPayload.urlSlug = urlSlug;
       newPayload.primaryAlias = true;
-
-      // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
-      if (urlSlug) {
-        newPayload.urlSlug = urlSlug;
-        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-        jobCount += 1;
-      }
-      // handle non-versioned repos AND repos where only 1 version is active
-      if (non_versioned || (!publishOriginalBranchName && urlSlug === null)) {
-        newPayload.urlSlug = '';
-        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-        jobCount += 1;
-      } else if (publishOriginalBranchName) {
-        newPayload.urlSlug = branchName;
-        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-        jobCount += 1;
-      }
-      aliases.forEach(async (alias) => {
-        if (alias != urlSlug) {
-          const primaryAlias = urlSlug === alias;
-          newPayload.stable = '';
-          newPayload.urlSlug = alias;
-          newPayload.primaryAlias = primaryAlias;
-          deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
-          jobCount += 1;
-        }
-      });
+      deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
     }
+
+    // handle non-versioned repos AND repos where only 1 version is active
+    if (non_versioned || (!publishOriginalBranchName && urlSlug === null)) {
+      newPayload.urlSlug = '';
+      deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
+    } else if (publishOriginalBranchName && urlSlug !== branchName) {
+      newPayload.urlSlug = branchName;
+      newPayload.primaryAlias = false;
+      deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
+    }
+
+    aliases.forEach(async (alias: string) => {
+      if (alias !== urlSlug) {
+        newPayload.stable = '';
+        newPayload.urlSlug = alias;
+        newPayload.primaryAlias = false;
+        deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
+      }
+    });
   }
 
+  return deployable;
+};
+
+export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
+  const consoleLogger = new ConsoleLogger();
+  const slackConnector = new SlackConnector(consoleLogger, c);
+  if (!slackConnector.validateSlackRequest(event)) {
+    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
+  }
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
+  const branchRepository = new BranchRepository(db, c, consoleLogger);
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+
+  // This is coming in as urlencoded string, need to decode before parsing
+  const decoded = decodeURIComponent(event.body).split('=')[1];
+  const parsed = JSON.parse(decoded);
+  const stateValues = parsed.view.state.values;
+
+  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
+  if (!isUserEntitled(entitlement)) {
+    return prepReponse(401, 'text/plain', 'User is not entitled!');
+  }
+
+  const values = slackConnector.parseSelection(stateValues);
+
+  const deployable = await getDeployableJobs(values, entitlement, branchRepository);
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
@@ -220,6 +219,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     headers: { 'Content-Type': 'application/json' },
   };
 };
+
 function createPayload(
   jobType: string,
   repoOwner: string,
