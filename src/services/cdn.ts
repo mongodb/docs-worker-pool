@@ -7,7 +7,7 @@ import { ISSOConnector } from './sso';
 export const axiosApi = axios.create();
 
 export interface ICDNConnector {
-  purge(jobId: string, urls: Array<string>): Promise<string | null>;
+  purge(jobId: string, urls: Array<string>, prefix: string): Promise<string | null>;
   purgeAll(creds: CDNCreds): Promise<any>;
   warm(jobId: string, url: string): Promise<any>;
   upsertEdgeDictionaryItem(keyValue: any, id: string, creds: CDNCreds): Promise<void>;
@@ -40,7 +40,7 @@ export class FastlyConnector implements ICDNConnector {
     return await axiosApi.get(url);
   }
 
-  async purge(jobId: string, urls: Array<string>): Promise<string> {
+  async purge(jobId: string, urls: Array<string>, prefix: string): Promise<string> {
     const purgeUrlPromises = urls.map((url) => this.purgeURL(url));
     await Promise.all(
       purgeUrlPromises.map((p) =>
@@ -130,7 +130,7 @@ export class K8SCDNConnector implements ICDNConnector {
     };
   }
 
-  async purge(jobId: string, urls: string[]): Promise<string | null> {
+  async purge(jobId: string, urls: string[], prefix: string): Promise<string | null> {
     console.log('K8SCDNConnector purge');
     const url = this._config.get<string>('cdnInvalidatorServiceURL');
     console.log(url);
@@ -139,6 +139,13 @@ export class K8SCDNConnector implements ICDNConnector {
     urls = urls.map((item) => {
       return `/${item}`;
     });
+
+    // perform wildcard invalidations when invalidating >= 250 objects
+    if (urls.length >= 250) {
+      const wildcardPatternURL = '/' + prefix + '/*';
+      urls = [wildcardPatternURL];
+    }
+
     try {
       const res = await axios.post(url, { paths: urls }, { headers: headers });
       this._logger.info(jobId, `Total urls purged ${urls.length}`);
