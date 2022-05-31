@@ -16,7 +16,7 @@ const joinUrlAndPrefix = (url, prefix) => {
   const needsTrim = url.endsWith('/') && prefix.startsWith('/');
   const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
 
-  return needsTrim ? url.slice(-1) + prefix : needsSlash ? url + '/' + prefix : url + prefix;
+  return needsTrim ? url.slice(0, -1) + prefix : needsSlash ? url + '/' + prefix : url + prefix;
 };
 
 // Long term goal is to have mut script run off the AST so we can parallelize
