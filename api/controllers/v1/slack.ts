@@ -15,7 +15,7 @@ function isRestrictedToDeploy(userId: string): boolean {
   return restrictedProdDeploy && !entitledSlackUsers.includes(userId);
 }
 
-function prepReponse(statusCode, contentType, body) {
+function prepResponse(statusCode, contentType, body) {
   return {
     statusCode: statusCode,
     headers: { 'Content-Type': contentType },
@@ -57,7 +57,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
-    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
+    return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -71,7 +71,7 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
     const response = restrictedProdDeploy
       ? 'Production freeze in place - please notify DOP if seeing this past 3/26'
       : 'User is not entitled!';
-    return prepReponse(401, 'text/plain', response);
+    return prepResponse(401, 'text/plain', response);
   }
   const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id']);
@@ -128,7 +128,7 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
       urlSlug = branchName;
     }
 
-    // Generic payload, will be conditionaly modified appropriately
+    // Generic payload, will be conditionally modified appropriately
     const newPayload = createPayload(
       'productionDeploy',
       repoOwner,
@@ -151,7 +151,7 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
       continue;
     }
 
-    // if this is stablebranch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
+    // if this is stable branch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
     newPayload.stable = isStableBranch ? '-g' : '';
     newPayload.aliased = true;
 
@@ -189,7 +189,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
-    return prepReponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
+    return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -205,7 +205,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
   if (!isUserEntitled(entitlement)) {
-    return prepReponse(401, 'text/plain', 'User is not entitled!');
+    return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
   const values = slackConnector.parseSelection(stateValues);
