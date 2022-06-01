@@ -156,6 +156,19 @@ custom:
     prd: "prd"
     dotcomstg: "preprd"
     dotcomprd: "prd"
+  site:
+    host:
+      dev: ""
+      stg: "mongodbcom-cdn.website.staging.corp.mongodb.com"
+      dotcomstg: "mongodbcom-cdn.website.staging.corp.mongodb.com"
+      prd: "www.mongodb.com"
+      dotcomprd: "www.mongodb.com"
+    prefix:
+      dev: ""
+      stg: "docs-qa"
+      dotcomstg: "docs-qa"
+      prd: "docs"
+      dotcomprd: "docs"
 
 resources:
   - ${file(./buckets.yml)}
