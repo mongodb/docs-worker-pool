@@ -56,7 +56,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           case JobStatus[JobStatus.inQueue]:
             queueUrl = c.get('jobsQueueUrl');
             await NotifyBuildProgress(jobId);
-            // start the task , dont start the process before processing the notification
+            // start the task , don't start the process before processing the notification
             const ecsServices = new ECSContainer(c, consoleLogger);
             const res = await ecsServices.execute(jobId);
             consoleLogger.info(jobId, JSON.stringify(res));
@@ -176,7 +176,7 @@ async function prepSummaryMessage(
       msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n- Url:<${url}|${repoName}>\n- InvalidationStatus:<${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
     }
   }
-  // Removes instances of two or more periods
+  // Remove instances of two or more periods
   return msg.replace(/\.{2,}/g, '');
 }
 
