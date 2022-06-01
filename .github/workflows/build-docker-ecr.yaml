@@ -13,6 +13,13 @@ on:
       region:
         type: string
         required: true
+      cache_name:
+        type: string
+        required: false
+        default: '{owner}/caches/{repo}/{name}'
+      cache_suffix:
+        type: string
+        required: false
     secrets:
       ecr_access_key:
         required: true
@@ -28,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: config-environment
         env:
@@ -36,14 +43,23 @@ jobs:
           commit: ${{ github.sha }}
           number: ${{ github.run_number }}
           name  : ${{ inputs.name }}
+          owner : ${{ github.repository_owner }}
+          repo  : ${{ github.event.repository.name }}
         run: |
           echo "branch=${branch//\//-}" >> $GITHUB_ENV
           echo "commit=${commit:0:7}"   >> $GITHUB_ENV
           echo "number=${number}"       >> $GITHUB_ENV
           echo "name=${name}"           >> $GITHUB_ENV
+          echo "repo=${repo}"           >> $GITHUB_ENV
+          echo "owner=${owner}"         >> $GITHUB_ENV
 
       - name: setup-buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: setup-python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
 
       - name: config-aws
         uses: aws-actions/configure-aws-credentials@v1
@@ -63,13 +79,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - id   : python-helper
+        shell: python
+        run  : |
+          import os
+          template, cache_suffix = '${{ inputs.cache_name }}', '${{ inputs.cache_suffix }}'
+          owner, repo, name, branch = map(os.environ.get, ['owner', 'repo', 'name', 'branch'])
+          github_image = f'ghcr.io/{template}'.format(owner=owner, repo=repo, name=name)
+          github_tag = '-'.join(filter(None, [branch, cache_suffix]))
+          print(f'::set-output name=github_image::{github_image}')
+          print(f'::set-output name=github_tag::{github_tag}')
+
       - name: config-environment
         env:
           ecr_registry: ${{ steps.login-ecr.outputs.registry }}
-          github_image: ghcr.io/${{ github.repository }}/${{ env.name }}
+          github_image: ${{ steps.python-helper.outputs.github_image }}
+          github_tag  : ${{ steps.python-helper.outputs.github_tag }}
         run: |
           echo "ecr_registry=${ecr_registry}" >> $GITHUB_ENV
           echo "github_image=${github_image}" >> $GITHUB_ENV
+          echo "github_tag=${github_tag}"     >> $GITHUB_ENV
 
       - name: docker-build-publish
         uses: docker/build-push-action@v3
@@ -82,5 +111,5 @@ jobs:
             ${{ env.ecr_registry }}/${{ env.name }}:github-${{ env.number }}
           build-args: ${{ secrets.build_args }}
           secrets:    ${{ secrets.build_secrets }}
-          cache-from: type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache
-          cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache,mode=max
+          cache-from: type=registry,ref=${{ env.github_image }}:${{ env.github_tag }}
+          cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.github_tag }},mode=max
