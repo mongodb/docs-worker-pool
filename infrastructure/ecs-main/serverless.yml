@@ -31,6 +31,10 @@ provider:
     subnetIds:
       - subnet-0a142842e8f13a042
       - subnet-0fba568cfd3839eee
+params:
+  default:
+    version: "master"
+
 custom:
   deploymentBucket:
     dev: worker-pool-deployment
@@ -40,7 +44,7 @@ custom:
     dotcomprd: worker-pool-deployment
   ecs:
     port: '80'
-    imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
+    imageUrl: ${aws:accountId}.dkr.ecr.${aws:region}.amazonaws.com/${self:service}:${param:version}
     containerCpu:
       dev: '2048'
       stg: '2048'

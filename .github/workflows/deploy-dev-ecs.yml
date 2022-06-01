@@ -34,25 +34,12 @@ jobs:
           cd infrastructure/ecs-repo
           npm ci
           sls deploy --stage dev
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: build and push to ECR
-        with:
-          image: docs-worker-pool-dev
-          tags: latest
-          registry: 216656347858.dkr.ecr.us-east-2.amazonaws.com
-          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
-          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
       - name: Deploy ECS
         run: |
           cd infrastructure/ecs-main
           npm ci
-          sls deploy --stage dev
+          sls deploy --stage dev --param="version=master"
       - name: Deploy Lambdas
         run: |
           npm ci
           sls deploy --stage dev
-
