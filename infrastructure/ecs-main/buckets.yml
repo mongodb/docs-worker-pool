@@ -7,11 +7,11 @@ Resources:
           IndexDocument: index.html
           RoutingRules:
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self.custom.site.prefix.${self:provider.stage}}/realm/cloud
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/realm/cloud
               RedirectRule:
                 Protocol: "https"
-                HostName: ${self.custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self.custom.site.prefix.${self:provider.stage}}/atlas/app-services
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/app-services
 
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
