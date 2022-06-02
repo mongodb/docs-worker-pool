@@ -158,7 +158,7 @@ custom:
     dotcomprd: "prd"
   site:
     host:
-      dev: ""
+      dev: "docs-dev.mongodb.com" # NOTE: cannot be empty in redirect
       stg: "mongodbcom-cdn.website.staging.corp.mongodb.com"
       dotcomstg: "mongodbcom-cdn.website.staging.corp.mongodb.com"
       prd: "www.mongodb.com"
