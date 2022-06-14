@@ -1,14 +1,15 @@
-import { BatchClient, SubmitJobCommand } from '@aws-sdk/client-batch';
+import { BatchClient, SubmitJobCommand, SubmitJobCommandOutput } from '@aws-sdk/client-batch';
 
 export class Batch {
-    private client: BatchClient;
     private readonly environment: string;
+    private readonly client: BatchClient;
 
-    constructor() {
+    constructor(environment: string = 'dev') {
         this.client = new BatchClient({});
-        this.environment = 'dev';
+        this.environment = environment;
     }
-    async submitArchiveJob(sourceBucket: string, targetBucket: string, siteName: string) {
+
+    async submitArchiveJob(sourceBucket: string, targetBucket: string, siteName: string): Promise<SubmitJobCommandOutput> {
         const command = new SubmitJobCommand({
             jobName: 'archive',
             jobQueue: `docs-archive-${this.environment}`,
@@ -19,7 +20,6 @@ export class Batch {
                 'site-name': siteName
             }
         });
-        const response = await this.client.send(command);
-        console.log(response);
+        return await this.client.send(command);
     }
 }
