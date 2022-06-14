@@ -5,6 +5,13 @@ Resources:
       BucketName: ${self:custom.bucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          RoutingRules:
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/docs/master
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/docs/upcoming
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
     Properties:
