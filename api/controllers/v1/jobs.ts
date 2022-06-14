@@ -231,6 +231,6 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
 async function SubmitArchiveJob(jobId: string) {
   const consoleLogger = new ConsoleLogger();
   const environment: string = c.get('env');
-  const response = await new Batch(environment).submitArchiveJob('',`docs-archive-${environment}-mongodb`,'');
-  consoleLogger.info('submit archive job', JSON.stringify({jobId: jobId, batchJobId: response.jobId}));
+  const response = await new Batch(environment).submitArchiveJob('', `docs-archive-${environment}-mongodb`, '');
+  consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
 }
