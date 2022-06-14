@@ -9,6 +9,7 @@ import { JobQueueMessage } from '../../../src/entities/queueMessage';
 import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
+import { Batch } from '../../../src/services/batch';
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -69,6 +70,10 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildSummary(jobId);
+            const environments = new Set(['dev', 'dotcomstg', 'dotcomprd']);
+            if (environments.has(c.get('env'))) {
+              await SubmitArchiveJob(jobId);
+            }
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');
@@ -221,4 +226,11 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   return {
     statusCode: 200,
   };
+}
+
+async function SubmitArchiveJob(jobId: string) {
+  const consoleLogger = new ConsoleLogger();
+  const environment: string = c.get('env');
+  const response = await new Batch(environment).submitArchiveJob('',`docs-archive-${environment}-mongodb`,'');
+  consoleLogger.info('submit archive job', JSON.stringify({jobId: jobId, batchJobId: response.jobId}));
 }

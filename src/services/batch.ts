@@ -4,9 +4,9 @@ export class Batch {
     private readonly environment: string;
     private readonly client: BatchClient;
 
-    constructor(environment: string = 'dev') {
-        this.client = new BatchClient({});
+    constructor(environment: string) {
         this.environment = environment;
+        this.client = new BatchClient({});
     }
 
     async submitArchiveJob(sourceBucket: string, targetBucket: string, siteName: string): Promise<SubmitJobCommandOutput> {
