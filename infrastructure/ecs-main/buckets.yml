@@ -70,7 +70,8 @@ Resources:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }]]
           - Effect: Allow
-            Principal: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+            Principal:
+              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
