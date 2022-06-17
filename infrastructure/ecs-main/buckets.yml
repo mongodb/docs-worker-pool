@@ -90,6 +90,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+            Action: 's3:PutObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
 
   CloudManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -105,6 +111,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+            Action: 's3:PutObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
 
   OpsManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -120,6 +132,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+            Action: 's3:PutObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
 
   JavaBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -135,6 +153,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+            Action: 's3:PutObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
 
   GoBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -150,6 +174,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+            Action: 's3:PutObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
 
   NodeBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -165,3 +195,9 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+            Action: 's3:PutObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
