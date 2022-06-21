@@ -226,6 +226,12 @@ functions:
         Action:
           - iam:PassRole
         Resource: "*"
+      - Effect: Allow
+        Action:
+          - batch:SubmitJob
+        Resource:
+          - arn:aws:batch:${aws:region}:${aws:accountId}:job-queue/docs-archive-${self:provider.stage}
+          - arn:aws:batch:${aws:region}:${aws:accountId}:job-definition/docs-archive-${self:provider.stage}:*
       environment:
         <<: *webhook-env-core
 
