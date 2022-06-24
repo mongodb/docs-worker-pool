@@ -1,16 +1,8 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
-
-SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
-
-
+USER=$(shell whoami)
+SNOOTY_ENV = $(shell printenv SNOOTY_ENV
 BUCKET = $(shell printenv BUCKET)
-URL = $(shell printenv URL)
 
-ifeq ($(STAGING_USERNAME),)
-	USER=$(shell whoami)
-else
-	USER=$(STAGING_USERNAME)
-endif
 REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
@@ -18,14 +10,13 @@ PROJECT=docs-404
 MUT_PREFIX=404
 CUSTOM_NEXT_GEN_DEPLOY=true
 
-
-ifeq ($(SNOOTY_ENV), production) 
-	DEPLOY_JOBS=docs-mongodb-org-prd
-else ifeq ($(SNOOTY_ENV), staging)
-	DEPLOY_JOBS=docs-mongodb-org-stg
-else ifeq ($(SNOOTY_ENV), regression)
-	DEPLOY_JOBS=docs-mongodb-org-intgr
+ifeq ($(SNOOTY_ENV), dotcomstg)
+	EXECUTE_DEPLOY=true
+else ifeq ($(SNOOTY_ENV), dotcomprd)
+	EXECUTE_DEPLOY=true
 endif
+
+DEPLOY_JOBS=job-$(BUCKET) job-docs-atlas-$(SNOOTY_ENV) job-docs-cloudmanager-$(SNOOTY_ENV) job-docs-opsmanager-$(SNOOTY_ENV) job-docs-java-$(SNOOTY_ENV) job-docs-go-$(SNOOTY_ENV) job-docs-node-$(SNOOTY_ENV)
 
 .PHONY: next-gen-html next-gen-stage next-gen-deploy $(DEPLOY_JOBS)
 
@@ -37,5 +28,7 @@ get-build-dependencies:
 
 next-gen-deploy: $(DEPLOY_JOBS)
 
+ifdef EXECUTE_DEPLOY
 $(DEPLOY_JOBS): job-%:
 	yes | mut-publish public $* --prefix="${MUT_PREFIX}" --deploy --all-subdirectories ${ARGS}
+endif
