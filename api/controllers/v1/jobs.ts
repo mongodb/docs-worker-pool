@@ -71,10 +71,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildSummary(jobId);
-            const environments = new Set(['dev', 'dotcomstg', 'dotcomprd']);
-            if (environments.has(c.get('env'))) {
-              await SubmitArchiveJob(jobId);
-            }
+            await SubmitArchiveJob(jobId);
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');
