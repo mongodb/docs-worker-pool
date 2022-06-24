@@ -1,6 +1,6 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 USER=$(shell whoami)
-SNOOTY_ENV = $(shell printenv SNOOTY_ENV
+SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 BUCKET = $(shell printenv BUCKET)
 
 REPO_DIR=$(shell pwd)
