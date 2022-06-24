@@ -24,6 +24,6 @@ export class Batch {
         'site-name': siteName,
       },
     });
-    return await this.client.send(command);
+    return this.client.send(command);
   }
 }
