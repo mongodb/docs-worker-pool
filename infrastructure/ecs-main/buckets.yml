@@ -71,8 +71,7 @@ Resources:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }]]
           - Effect: Allow
             Principal:
-              - AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
-              - AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
@@ -93,7 +92,7 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
-              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
@@ -114,7 +113,7 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
-              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
@@ -135,7 +134,7 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
-              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
@@ -156,7 +155,7 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
-              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
@@ -177,7 +176,7 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
-              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
@@ -198,7 +197,7 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
-              AWS: 'arn:aws:iam::${aws:accountId}:role/docs-archive-deploy-poc'
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
