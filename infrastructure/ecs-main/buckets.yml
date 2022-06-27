@@ -71,6 +71,12 @@ Resources:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }]]
           - Effect: Allow
             Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action: 's3:GetObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["DocsBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
@@ -90,6 +96,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action: 's3:GetObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["DocAtlasBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
@@ -113,6 +125,12 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action: 's3:GetObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["CloudManagerBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
@@ -132,6 +150,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action: 's3:GetObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
@@ -155,6 +179,12 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action: 's3:GetObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["JavaBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
@@ -176,6 +206,12 @@ Resources:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action: 's3:GetObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["GoBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
@@ -195,6 +231,12 @@ Resources:
               - s3:GetObject
             Resource:
             - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action: 's3:GetObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["NodeBucket", "Arn" ] }, '/*']]
           - Effect: Allow
             Principal:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
