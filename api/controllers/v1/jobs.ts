@@ -9,6 +9,8 @@ import { JobQueueMessage } from '../../../src/entities/queueMessage';
 import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
+import { Batch } from '../../../src/services/batch';
+import { IConfig } from 'config';
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -69,6 +71,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildSummary(jobId);
+            await SubmitArchiveJob(jobId);
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');
@@ -221,4 +224,34 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   return {
     statusCode: 200,
   };
+}
+
+function getMongoClient(config: IConfig): mongodb.MongoClient {
+  const url = `mongodb+srv://${config.get('username')}:${config.get('password')}@${config.get(
+    'host'
+  )}/?retryWrites=true&w=majority`;
+  return new mongodb.MongoClient(url);
+}
+
+async function SubmitArchiveJob(jobId: string) {
+  const consoleLogger = new ConsoleLogger();
+  const environment: string = c.get('env');
+  const client = getMongoClient(c);
+
+  // TODO: this part should probably be its own function so that we can close the connection
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const models = {
+    jobs: new JobRepository(db, c, consoleLogger),
+    branches: new BranchRepository(db, c, consoleLogger),
+  };
+  const job = await models.jobs.getJobById(jobId);
+  const repo = await models.branches.getRepo(job.payload.repoName);
+
+  const response = await new Batch(environment).submitArchiveJob(
+    repo.bucket[environment],
+    `docs-archive-${environment}-mongodb`,
+    repo.prefix[environment]
+  );
+  consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
 }
