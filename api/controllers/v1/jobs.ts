@@ -39,13 +39,11 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
 };
 
 export const TestRajan = async (event: any = {}): Promise<any> => {
+  const result = {message: 'hello world', count: 1}
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message: 'hello world',
-      count: 1,
-    }),
+    body: JSON.stringify(result),
   };
 };
 
