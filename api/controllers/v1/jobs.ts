@@ -38,7 +38,18 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
   }
 };
 
+/*
+ * sls deploy function --stage dev --function TestRajan
+ */
+
 export const TestRajan = async (event: any = {}): Promise<any> => {
+  const consoleLogger = new ConsoleLogger();
+  consoleLogger.info('lambda-env', JSON.stringify(process.env));
+  consoleLogger.info('lambda-config', JSON.stringify(c));
+  // const environment: string = c.get('env');
+  // const client = getMongoClient(c);
+  // await client.connect();
+  // const db = client.db(c.get('dbName'));
   const result = {message: 'hello world', count: 1}
   return {
     statusCode: 200,
