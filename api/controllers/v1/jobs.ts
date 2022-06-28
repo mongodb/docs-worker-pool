@@ -227,8 +227,8 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
 }
 
 function getMongoClient(config: IConfig): mongodb.MongoClient {
-  const url = `mongodb+srv://${config.get('username')}:${config.get('password')}@${config.get(
-    'host'
+  const url = `mongodb+srv://${config.get('dbUsername')}:${config.get('dbPassword')}@${config.get(
+    'dbHost'
   )}/?retryWrites=true&w=majority`;
   return new mongodb.MongoClient(url);
 }
