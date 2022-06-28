@@ -203,19 +203,16 @@ export class TestDataProvider {
     return [
       {
         value: itemValid,
-        error: null,
         pathPrefix: `${itemValid.prefix}/${job.payload.urlSlug}`,
         mutPrefix: `${itemValid.prefix}/${job.payload.urlSlug}`,
       },
       {
         value: itemNullVersion,
-        error: "Cannot read property 'active' of null",
-        pathPrefix: null,
-        mutPrefix: null,
+        pathPrefix: `${itemNullVersion.prefix}/${job.payload.urlSlug}`,
+        mutPrefix: `${itemNullVersion.prefix}/${job.payload.urlSlug}`,
       },
       {
         value: itemPrefixEmpty,
-        error: null,
         pathPrefix: `${itemPrefixEmpty.prefix}/${job.payload.urlSlug}`,
         mutPrefix: `${itemPrefixEmpty.prefix}/${job.payload.urlSlug}`,
       },

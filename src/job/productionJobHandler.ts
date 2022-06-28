@@ -70,10 +70,6 @@ export class ProductionJobHandler extends JobHandler {
     }
   }
 
-  getActiveBranchLength(): number {
-    return this.currJob.payload.repoBranches.branches.filter((b) => b['active']).length;
-  }
-
   getPathPrefix(): string {
     try {
       if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
@@ -100,7 +96,6 @@ export class ProductionJobHandler extends JobHandler {
       const updatedURLsArray = stdoutJSON.urls;
       // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
       await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
-      console.log('current job prefix to be used for wildcard url invalidation: ' + this.currJob.payload.prefix);
       const id = await this._cdnConnector.purge(this.currJob._id, updatedURLsArray, this.currJob.payload.prefix);
       await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
       if (id) {

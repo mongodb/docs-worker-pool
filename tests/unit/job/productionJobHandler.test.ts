@@ -136,7 +136,6 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
   });
 
-  // TODO: Fix failing test
   describe.each(TestDataProvider.getPathPrefixCases())('Validate all Generate path prefix cases', (element) => {
     test(`Testing Path prefix with input ${JSON.stringify(element)}`, async () => {
       jobHandlerTestHelper.job.payload.repoBranches = element.value;
@@ -144,21 +143,11 @@ describe('ProductionJobHandler Tests', () => {
       await jobHandlerTestHelper.jobHandler.execute();
       expect(jobHandlerTestHelper.repoConnector.pullRepo).toBeCalledTimes(1);
       expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
-      if (element.error) {
-        // Received number of calls: 0
-        expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(
-          jobHandlerTestHelper.job._id,
-          "Cannot read properties of null (reading 'forEach')"
-        );
-        expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
-      } else {
-        expect(jobHandlerTestHelper.job.payload.pathPrefix).toEqual(element.pathPrefix);
-        expect(jobHandlerTestHelper.job.payload.mutPrefix).toEqual(element.mutPrefix);
-      }
+      expect(jobHandlerTestHelper.job.payload.pathPrefix).toEqual(element.pathPrefix);
+      expect(jobHandlerTestHelper.job.payload.mutPrefix).toEqual(element.mutPrefix);
     });
   });
 
-  // TODO: Fix failing tests. Can this be removed as dupe of manifestJobHandler test?
   describe.each(TestDataProvider.getManifestPrefixCases())('Validate all Generate manifest prefix cases', (element) => {
     test(`Testing manifest prefix with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
       jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
