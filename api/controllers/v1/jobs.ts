@@ -38,6 +38,17 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
   }
 };
 
+export const TestRajan = async (event: any = {}): Promise<any> => {
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: 'hello world',
+      count: 1,
+    }),
+  };
+};
+
 export const HandleJobs = async (event: any = {}): Promise<any> => {
   /**
    * Check the status of the incoming jobs
