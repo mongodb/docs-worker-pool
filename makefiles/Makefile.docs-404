@@ -16,7 +16,7 @@ else ifeq ($(SNOOTY_ENV), dotcomprd)
 	EXECUTE_DEPLOY=true
 endif
 
-DEPLOY_JOBS=job-$(BUCKET) job-docs-atlas-$(SNOOTY_ENV) job-docs-cloudmanager-$(SNOOTY_ENV) job-docs-opsmanager-$(SNOOTY_ENV) job-docs-java-$(SNOOTY_ENV) job-docs-go-$(SNOOTY_ENV) job-docs-node-$(SNOOTY_ENV)
+DEPLOY_JOBS=job-$(BUCKET) job-docs-atlas-$(SNOOTY_ENV) job-docs-java-$(SNOOTY_ENV) job-docs-go-$(SNOOTY_ENV) job-docs-node-$(SNOOTY_ENV)
 
 .PHONY: next-gen-html next-gen-stage next-gen-deploy $(DEPLOY_JOBS)
 
