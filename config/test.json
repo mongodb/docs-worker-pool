@@ -22,7 +22,6 @@
   "LOG_PADDING": 15,
   "PORT": 3000,
   "GATSBY_PARSER_USER": "docsworker-xlarge",
-  "shouldPurgeAll": false,
   "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
   "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
   "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",

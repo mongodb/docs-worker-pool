@@ -8,7 +8,7 @@ import { ManifestJobHandler } from '../../src/job/manifestJobHandler';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
 import { ICDNConnector } from '../../src/services/cdn';
-import { IJobCommandExecutor } from '../../src/services/commandExecutor';
+import { IJobCommandExecutor, CommandExecutorResponse } from '../../src/services/commandExecutor';
 import { IFileSystemServices } from '../../src/services/fileServices';
 import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
@@ -117,9 +117,6 @@ export class JobHandlerTestHelper {
       .calledWith(`repos/${this.job.payload.repoName}/worker.sh`)
       .mockReturnValue(nextGenEntry);
     this.config.get.calledWith('GATSBY_PARSER_USER').mockReturnValue('TestUser');
-    this.jobCommandExecutor.getSnootyProjectName
-      .calledWith(this.job.payload.repoName)
-      .mockReturnValue({ output: this.job.payload.repoName });
-    this.jobCommandExecutor.execute.mockReturnValue({ status: 'success', output: 'Great work', error: null });
+    this.jobCommandExecutor.execute.mockResolvedValue({ status: 'success', output: 'Great work', error: null });
   }
 }

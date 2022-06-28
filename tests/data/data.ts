@@ -200,9 +200,6 @@ export class TestDataProvider {
     const itemPrefixEmpty = TestDataProvider.getPublishBranchesContent(job);
     itemPrefixEmpty.prefix = 'compass';
 
-    const itemVersionActiveEmpty = TestDataProvider.getPublishBranchesContent(job);
-    itemVersionActiveEmpty['branches'][0]['active'] = false;
-
     return [
       {
         value: itemValid,
@@ -451,10 +448,6 @@ export class TestDataProvider {
         url4: 'url4sk',
       },
     };
-  }
-
-  static getCommandsForSnootyProjectName(repoDirName: string): string[] {
-    return [`. /venv/bin/activate`, `cd ~/repos/${repoDirName}`, `make get-project-name`];
   }
 
   static getCommandsForGetServerUser(): string[] {

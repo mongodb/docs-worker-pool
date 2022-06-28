@@ -12,7 +12,7 @@ export class RepoBranchesRepository extends BaseRepository {
     const query = { repoName: repoName };
     const repoDetails = await this.findOne(
       query,
-      `Mongo Timeout Error: Timedout while retrieving Repoinformation for ${repoName}`
+      `Mongo Timeout Error: Timedout while retrieving repo information for ${repoName}`
     );
     if (repoDetails?.bucket && repoDetails?.url) {
       return repoDetails;
