@@ -122,11 +122,9 @@ export class K8SCDNConnector implements ICDNConnector {
   }
 
   async purge(jobId: string, urls: string[], prefix: string): Promise<string | null> {
-    console.log('K8SCDNConnector purge');
     const url = this._config.get<string>('cdnInvalidatorServiceURL');
-    console.log(url);
     const headers = await this.getHeaders();
-    console.log(headers);
+    this._logger.info(jobId, `K8SCDNConnector purge with URL ${url} and headers ${JSON.stringify(headers)}`);
     urls = urls.map((item) => {
       return `/${item}`;
     });

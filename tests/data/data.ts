@@ -435,18 +435,6 @@ export class TestDataProvider {
     };
   }
 
-  static getPurgeAllUrlWithSurrogateKeys(): any {
-    return {
-      urls: ['url1', 'url2', 'url3', 'url4'],
-      url_to_sk: {
-        url1: 'url1sk',
-        url2: 'url2sk',
-        url3: 'url3sk',
-        url4: 'url4sk',
-      },
-    };
-  }
-
   static getCommandsForGetServerUser(): string[] {
     return [`whoami`];
   }
