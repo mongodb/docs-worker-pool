@@ -1,5 +1,6 @@
 import * as c from 'config';
 import * as mongodb from 'mongodb';
+import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
@@ -10,7 +11,6 @@ import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
-import { IConfig } from 'config';
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -38,6 +38,7 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
   }
 };
 
+// TODO: use @types/aws-lambda
 export const HandleJobs = async (event: any = {}): Promise<any> => {
   /**
    * Check the status of the incoming jobs

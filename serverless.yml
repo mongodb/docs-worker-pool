@@ -76,6 +76,7 @@ custom:
 
 default-env: &default-env
   STAGE: ${self:provider.stage}
+  ENVIRONMENT: ${self:provider.stage}
   FASTLY_DOCHUB_MAP: ${self:custom.fastlyDochubMap}
   FASTLY_DOCHUB_SERVICE_ID: ${self:custom.fastlyDochubServiceId}
   FASTLY_DOCHUB_TOKEN: ${self:custom.fastlyDochubToken}
@@ -86,6 +87,7 @@ default-env: &default-env
 
 webhook-env-core: &webhook-env-core
   STAGE: ${self:provider.stage}
+  ENVIRONMENT: ${self:provider.stage}
   MONGO_ATLAS_USERNAME: ${self:custom.dbUsername}
   MONGO_ATLAS_PASSWORD: ${self:custom.dbPassword}
   MONGO_ATLAS_HOST: ${self:custom.dbhost}
