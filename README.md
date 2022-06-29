@@ -2,20 +2,19 @@
 
 As part of the Docs Tools Next Generation Project, the Docs Worker Pool seeks to make the build process for developers both easier and more scalable for developers.
 
-Docs worker pool will be running as ECS Service. Serverless is used for automating the cloudformation stack creation.
-Going forward, any new buckets should be specified in infrastructure/ecs-main/buckets.yml
+The Docs Worker Pool operates on ECS. The serverless framework and cloudformation are used to automate infrastructure.
+Going forward, any new buckets should be specified in `infrastructure/ecs-main/buckets.yml`
 
 ## To Add new properties
 
 All our properties are managed in parameter store and pulled by serverless framework during deploy time and pushed into the Task environment as part of task definition.
 
 To add a new property:
-
-- Add property to parameter store for all environments (stg/prd) by following the convention as other properties
-- Go to infrastructure/ecs-main/serverless.yml custom section
+- Add property to parameter store for all environments (`stg`/`prd`) by following the convention as other properties
+- Go to `infrastructure/ecs-main/serverless.yml` `custom` section
 - Define the variable pointing to the right parameter store path
-- Go to infrastructure/ecs-main/ecs-service.yml TaskDefinition section
-- Add the new property to the ContainerDefinitions/Environment section
+- Go to `infrastructure/ecs-main/ecs-service.yml` `TaskDefinition` section
+- Add the new property to the `ContainerDefinitions`/`Environment` section
 
 ## Build and Run Docker Image for local testing
 
@@ -113,5 +112,27 @@ docs-worker-pool contains various triggers for release to higher environments. C
 - Create release tags. We currently follow [semver](https://semver.org/) standards.
 - If you don't have push access, open an issue or otherwise contact a contributor with administrator privileges.
 - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
+
+### Serverless Development
+#### documentation
+- https://www.serverless.com/framework/docs/getting-started
+
+#### installation
+```shell
+npm install -g serverless
+```
+
+### aws config
+The serverless framework looks for credentials in `~/.aws/credentials`. So we need to set a profile there over `aws sso`.
+```text
+[docs-sls-admin]
+aws_access_key_id=REDACTED
+aws_secret_access_key=REDACTED
+```
+
+### deploy single function
+```shell
+sls deploy function --stage dev --function {FunctionName}
+```
 
 [snooty-frontend]: https://github.com/mongodb/snooty

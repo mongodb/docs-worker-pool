@@ -1,5 +1,7 @@
 import * as c from 'config';
 import * as mongodb from 'mongodb';
+import { Context, APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
+import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
@@ -10,7 +12,6 @@ import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
-import { IConfig } from 'config';
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -38,18 +39,15 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
   }
 };
 
-/*
- * sls deploy function --stage dev --function TestRajan
- */
-
-export const TestRajan = async (event: any = {}): Promise<any> => {
+export const TestRajan = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
   consoleLogger.info('lambda-env', JSON.stringify(process.env));
   consoleLogger.info('lambda-config', JSON.stringify(c));
-  // const environment: string = c.get('env');
-  // const client = getMongoClient(c);
-  // await client.connect();
-  // const db = client.db(c.get('dbName'));
+  const environment: string = c.get('env');
+  const client = getMongoClient(c);
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  console.log(db);
   const result = {message: 'hello world', count: 1}
   return {
     statusCode: 200,
@@ -58,6 +56,7 @@ export const TestRajan = async (event: any = {}): Promise<any> => {
   };
 };
 
+// TODO: use @types/aws-lambda
 export const HandleJobs = async (event: any = {}): Promise<any> => {
   /**
    * Check the status of the incoming jobs
