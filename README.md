@@ -114,15 +114,15 @@ docs-worker-pool contains various triggers for release to higher environments. C
 - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
 
 ### Serverless Development
-#### documentation
-- https://www.serverless.com/framework/docs/getting-started
+#### Documentation
+- [getting started][serverless]
 
-#### installation
+#### Installation
 ```shell
 npm install -g serverless
 ```
 
-### aws config
+#### AWS Config
 The serverless framework looks for credentials in `~/.aws/credentials`. So we need to set a profile there over `aws sso`.
 ```text
 [docs-sls-admin]
@@ -130,9 +130,10 @@ aws_access_key_id=REDACTED
 aws_secret_access_key=REDACTED
 ```
 
-### deploy single function
+#### Deploy Single Function
 ```shell
 sls deploy function --stage dev --function {FunctionName}
 ```
 
+[serverless]: https://www.serverless.com/framework/docs/getting-started
 [snooty-frontend]: https://github.com/mongodb/snooty
