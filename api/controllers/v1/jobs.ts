@@ -1,6 +1,5 @@
 import * as c from 'config';
 import * as mongodb from 'mongodb';
-import { Context, APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
@@ -37,23 +36,6 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
       body: err,
     };
   }
-};
-
-export const TestRajan = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
-  const consoleLogger = new ConsoleLogger();
-  consoleLogger.info('lambda-env', JSON.stringify(process.env));
-  consoleLogger.info('lambda-config', JSON.stringify(c));
-  const environment: string = c.get('env');
-  const client = getMongoClient(c);
-  await client.connect();
-  const db = client.db(c.get('dbName'));
-  console.log(db);
-  const result = {message: 'hello world', count: 1}
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(result),
-  };
 };
 
 // TODO: use @types/aws-lambda

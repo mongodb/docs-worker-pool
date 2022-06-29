@@ -109,15 +109,6 @@ resources:
   - ${file(./queues.yml)}
 
 functions:
-    TestRajan:
-      handler: api/controllers/v1/jobs.TestRajan
-      events:
-        - http:
-            path: /tests/rajan
-            method: GET
-      environment:
-        <<: *webhook-env-core
-
     v1GithubDeployRepo:
       handler: api/controllers/v1/github.TriggerBuild
       events:
