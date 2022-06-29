@@ -26,33 +26,6 @@
   "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
   "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
   "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
-  "cdn_creds": {
-    "cloudgov-docs": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "key": "FASTLY_ATLAS_TOKEN"
-    },
-    "cloud-docs": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "key": "FASTLY_ATLAS_TOKEN"
-    },
-    "cloud-docs-osb": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "key": "FASTLY_ATLAS_TOKEN"
-    },
-    "devhub-content": {
-      "id": "FASTLY_DEVHUB_SERVICE_ID",
-      "key": "FASTLY_DEVHUB_TOKEN"
-    },
-    "publishDochub": {
-      "id": "FASTLY_DOCHUB_SERVICE_ID",
-      "key": "FASTLY_DOCHUB_TOKEN"
-    },
-    "main": {
-      "id": "FASTLY_MAIN_SERVICE_ID",
-      "key": "FASTLY_MAIN_TOKEN"
-    }
-  },
-  "repo_dir": "repos",
-  "searchIndexBucket": "SEARCH_INDEX_BUCKET",
-  "searchIndexFolder": "SEARCH_INDEX_FOLDER"
+  "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
+  "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg"
 }

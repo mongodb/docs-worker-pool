@@ -14,12 +14,6 @@
   "taskDefinitionFamily": "TASK_DEFINITION_FAMILY",
   "jobsQueueUrl": "JOBS_QUEUE_URL",
   "jobUpdatesQueueUrl": "JOB_UPDATES_QUEUE_URL",
-  "cdn_creds": {
-    "dochub": {
-      "id": "FASTLY_DOCHUB_SERVICE_ID",
-      "token": "FASTLY_DOCHUB_TOKEN"
-    }
-  },
   "cdnClientID": "CDN_CLIENT_ID",
   "cdnClientSecret": "CDN_CLIENT_SECRET",
   "cdnInvalidatorServiceURL": "CDN_INVALIDATOR_SERVICE_URL",

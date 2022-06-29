@@ -57,28 +57,14 @@ describe('Job Repository Tests', () => {
       expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
     });
 
-    // TODO: Fix failing test
-    // [Error: Region is missing]
     test('Update with completion status succeeds', async () => {
-      const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
-        'Test_Job',
-        'completed',
-        'All good',
-        new Date()
-      );
-      dbRepoHelper.collection.updateOne.mockReturnValueOnce({ modifiedCount: 1 });
+      setupForUpdateOneSuccess();
       await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).resolves.toEqual(true);
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
       expect(dbRepoHelper.logger.error).toBeCalledTimes(0);
     });
 
     test('Update with completion status timesout', async () => {
-      const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
-        'Test_Job',
-        'completed',
-        'All good',
-        new Date()
-      );
       dbRepoHelper.config.get.calledWith('MONGO_TIMEOUT_S').mockReturnValueOnce(1);
       dbRepoHelper.collection.updateOne.mockImplementationOnce(() => {
         return new Promise((resolve, reject) => {
@@ -97,8 +83,6 @@ describe('Job Repository Tests', () => {
     });
   });
 
-  // TODO: Fix failing test
-  // [Error: Configuration property "jobUpdatesQueueUrl" is not defined]
   describe('Job Repository updateWithFailureStatus Tests', () => {
     test('updateWithFailureStatus succeeds', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
@@ -109,8 +93,7 @@ describe('Job Repository Tests', () => {
         true,
         'wierd reason'
       );
-      dbRepoHelper.collection.updateOne.mockReturnValueOnce({ modifiedCount: 1 });
-      dbRepoHelper.config.get.calledWith('MONGO_TIMEOUT_S').mockReturnValueOnce(1);
+      setupForUpdateOneSuccess();
       await expect(jobRepo.updateWithErrorStatus('Test_Job', 'wierd reason')).resolves.toEqual(true);
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query, testData.update);
@@ -121,24 +104,17 @@ describe('Job Repository Tests', () => {
 
   describe('getOneQueuedJobAndUpdate Tests', () => {
     test('getOneQueuedJobAndUpdate returns undefined as response is undefined', async () => {
-      const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
-        'Test_Job',
-        'completed',
-        'All good',
-        new Date()
-      );
       await expect(jobRepo.getOneQueuedJobAndUpdate()).rejects.toThrow(
         'JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job'
       );
     });
 
-    // TODO: Fix failing test
     test('getOneQueuedJobAndUpdate succeeds', async () => {
       const testData = TestDataProvider.getFindOneAndUpdateCallInfo();
-      // I wrapped data inside a value key to mimic the original implementation of this test
       const mockVal = { value: getBuildJobPlain() };
-      dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(mockVal);
-      // getOneQueuedJobAndUpdate() is returning null in this test
+      jest.spyOn(jobRepo, 'notify').mockResolvedValueOnce(true);
+      dbRepoHelper.collection.findOneAndUpdate.mockResolvedValueOnce(mockVal);
+
       await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(mockVal.value);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledWith(
@@ -211,6 +187,7 @@ describe('Job Repository Tests', () => {
 
   function setupForUpdateOneSuccess() {
     dbRepoHelper.collection.updateOne.mockReturnValueOnce({ modifiedCount: 1 });
+    jest.spyOn(jobRepo, 'notify').mockResolvedValueOnce(true);
     dbRepoHelper.config.get.calledWith('MONGO_TIMEOUT_S').mockReturnValueOnce(1);
   }
 });

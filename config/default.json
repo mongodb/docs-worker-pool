@@ -51,32 +51,6 @@
     "dotcomstg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches",
     "dotcomprd": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches"
   },
-  "cdn_creds": {
-    "cloudgov-docs": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "token": "FASTLY_ATLAS_TOKEN"
-    },
-    "cloud-docs": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "token": "FASTLY_ATLAS_TOKEN"
-    },
-    "cloud-docs-osb": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "token": "FASTLY_ATLAS_TOKEN"
-    },
-    "devhub-content": {
-      "id": "FASTLY_DEVHUB_SERVICE_ID",
-      "token": "FASTLY_DEVHUB_TOKEN"
-    },
-    "publishDochub": {
-      "id": "FASTLY_DOCHUB_SERVICE_ID",
-      "token": "FASTLY_DOCHUB_TOKEN"
-    },
-    "main": {
-      "id": "FASTLY_MAIN_SERVICE_ID",
-      "token": "FASTLY_MAIN_TOKEN"
-    }
-  },
   "repo_dir": "repos",
   "cdnInvalidationOauthScope": "mongodbcom-docs",
   "oauthTokenURL": "https://corp.mongodb.com/oauth2/aus4k4jv00hWjNnps297/v1/token",
