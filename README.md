@@ -12,6 +12,7 @@ infrastructure provisioning and management. Going forward, any new buckets shoul
 All our properties are managed in parameter store and pulled by serverless framework during deploy time and pushed into the Task environment as part of task definition.
 
 To add a new property:
+
 - Add property to parameter store for all environments (`stg`/`prd`) by following the convention as other properties
 - Go to `infrastructure/ecs-main/serverless.yml` `custom` section
 - Define the variable pointing to the right parameter store path
@@ -116,17 +117,22 @@ docs-worker-pool contains various triggers for release to higher environments. C
 - Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
 
 ### Serverless Development
+
 #### Documentation
+
 - [getting started][serverless]
 
 #### Installation
+
 ```shell
 npm install -g serverless
 ```
 
 #### AWS Config
+
 The serverless framework looks for credentials in `~/.aws/credentials`. So we need to set a profile there in addition to
 `aws sso login`.
+
 ```text
 [docs-sls-admin]
 aws_access_key_id=REDACTED
@@ -134,6 +140,7 @@ aws_secret_access_key=REDACTED
 ```
 
 #### Deploy Single Function
+
 ```shell
 sls deploy function --stage dev --function {FunctionName}
 ```
