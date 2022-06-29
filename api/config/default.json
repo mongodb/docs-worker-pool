@@ -1,6 +1,7 @@
 {
   "stage": "stage",
   "environment": "environment",
+  "env": "stage",
   "dbHost": "host",
   "dbUsername": "username",
   "dbPassword": "password",
