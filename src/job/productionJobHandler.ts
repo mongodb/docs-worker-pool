@@ -1,5 +1,4 @@
 import { IConfig } from 'config';
-import { debug } from 'console';
 import type { Job } from '../entities/job';
 import { InvalidJobError } from '../errors/errors';
 import { JobRepository } from '../repositories/jobRepository';
