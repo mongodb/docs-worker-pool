@@ -42,7 +42,9 @@ describe('Repo Branches Repository Tests', () => {
       });
       repoBranchesRepo.getRepoBranchesByRepoName('test_repo').catch((error) => {
         expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
-        expect(error.message).toContain(`Mongo Timeout Error: Timedout while retrieving Repoinformation for test_repo`);
+        expect(error.message).toContain(
+          `Mongo Timeout Error: Timedout while retrieving repo information for test_repo`
+        );
       });
       jest.runAllTimers();
     });
