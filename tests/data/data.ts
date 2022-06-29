@@ -92,6 +92,8 @@ export class TestDataProvider {
         dev: 'https://docs-mongodborg-staging.corp.mongodb.com',
         stg: 'https://docs-mongodborg-staging.corp.mongodb.com',
         prd: 'https://docs.mongodb.com',
+        dotcomstg: 'https://mongodbcom-cdn.website.staging.corp.mongodb.com/',
+        dotcomprd: 'http://mongodb.com/',
       },
       prefix: 'compass',
       project: 'compass',
