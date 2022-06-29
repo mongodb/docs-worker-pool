@@ -125,7 +125,8 @@ npm install -g serverless
 ```
 
 #### AWS Config
-The serverless framework looks for credentials in `~/.aws/credentials`. So we need to set a profile there over `aws sso`.
+The serverless framework looks for credentials in `~/.aws/credentials`. So we need to set a profile there in addition to
+`aws sso login`.
 ```text
 [docs-sls-admin]
 aws_access_key_id=REDACTED
