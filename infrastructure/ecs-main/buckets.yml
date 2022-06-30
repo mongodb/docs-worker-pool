@@ -5,6 +5,7 @@ Resources:
       BucketName: ${self:custom.bucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
           RoutingRules:
             - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/master
@@ -18,12 +19,14 @@ Resources:
       BucketName: ${self:custom.atlasBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketName: ${self:custom.cloudManagerBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
 
   OpsManagerBucket:
     Type: "AWS::S3::Bucket"
@@ -31,6 +34,7 @@ Resources:
       BucketName: ${self:custom.opsManagerBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
 
   JavaBucket:
     Type: "AWS::S3::Bucket"
@@ -38,6 +42,7 @@ Resources:
       BucketName: ${self:custom.javaBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
 
   GoBucket:
     Type: "AWS::S3::Bucket"
@@ -45,6 +50,7 @@ Resources:
       BucketName: ${self:custom.goBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
 
   NodeBucket:
     Type: "AWS::S3::Bucket"
@@ -52,6 +58,7 @@ Resources:
       BucketName: ${self:custom.nodeBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
 
   DocsBucketPolicy:
     Type: AWS::S3::BucketPolicy

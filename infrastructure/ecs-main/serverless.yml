@@ -169,6 +169,9 @@ custom:
       dotcomstg: "docs-qa"
       prd: "docs"
       dotcomprd: "docs"
+    errorDoc:
+      dotcomstg: "docs-qa/404/index.html"
+      dotcomprd: "docs/404/index.html"
 
 resources:
   - ${file(./buckets.yml)}
