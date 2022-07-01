@@ -95,6 +95,10 @@ export class ProductionJobHandler extends JobHandler {
       const updatedURLsArray = stdoutJSON.urls;
       // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
       await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
+      await this.logger.save(
+        this.currJob._id,
+        `current job prefix to be used for wildcard url invalidation: ${this.currJob.payload.prefix}`
+      );
       const id = await this._cdnConnector.purge(this.currJob._id, updatedURLsArray, this.currJob.payload.prefix);
       await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
       if (id) {
