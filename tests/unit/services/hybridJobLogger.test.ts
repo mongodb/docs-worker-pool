@@ -11,9 +11,17 @@ describe('HybridJobLogger Tests', () => {
   beforeEach(() => {
     jobRepo = mockDeep<JobRepository>();
     hybridJobLogger = new HybridJobLogger(jobRepo);
-    warnSpy = jest.spyOn(global.console, 'warn');
-    infoSpy = jest.spyOn(global.console, 'info');
-    errorSpy = jest.spyOn(global.console, 'error');
+
+    // Maintain clean test output by mocking the console
+    warnSpy = jest.spyOn(global.console, 'warn').mockImplementation(() => {
+      /* do nothing */
+    });
+    infoSpy = jest.spyOn(global.console, 'info').mockImplementation(() => {
+      /* do nothing */
+    });
+    errorSpy = jest.spyOn(global.console, 'error').mockImplementation(() => {
+      /* do nothing */
+    });
   });
 
   afterEach(() => {

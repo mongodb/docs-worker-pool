@@ -92,6 +92,8 @@ export class TestDataProvider {
         dev: 'https://docs-mongodborg-staging.corp.mongodb.com',
         stg: 'https://docs-mongodborg-staging.corp.mongodb.com',
         prd: 'https://docs.mongodb.com',
+        dotcomstg: 'https://mongodbcom-cdn.website.staging.corp.mongodb.com/',
+        dotcomprd: 'http://mongodb.com/',
       },
       prefix: 'compass',
       project: 'compass',
@@ -200,25 +202,19 @@ export class TestDataProvider {
     const itemPrefixEmpty = TestDataProvider.getPublishBranchesContent(job);
     itemPrefixEmpty.prefix = 'compass';
 
-    const itemVersionActiveEmpty = TestDataProvider.getPublishBranchesContent(job);
-    itemVersionActiveEmpty['branches'][0]['active'] = false;
-
     return [
       {
         value: itemValid,
-        error: null,
         pathPrefix: `${itemValid.prefix}/${job.payload.urlSlug}`,
         mutPrefix: `${itemValid.prefix}/${job.payload.urlSlug}`,
       },
       {
         value: itemNullVersion,
-        error: "Cannot read property 'active' of null",
-        pathPrefix: null,
-        mutPrefix: null,
+        pathPrefix: `${itemNullVersion.prefix}/${job.payload.urlSlug}`,
+        mutPrefix: `${itemNullVersion.prefix}/${job.payload.urlSlug}`,
       },
       {
         value: itemPrefixEmpty,
-        error: null,
         pathPrefix: `${itemPrefixEmpty.prefix}/${job.payload.urlSlug}`,
         mutPrefix: `${itemPrefixEmpty.prefix}/${job.payload.urlSlug}`,
       },
@@ -439,22 +435,6 @@ export class TestDataProvider {
     return {
       query: { repoName: repoName },
     };
-  }
-
-  static getPurgeAllUrlWithSurrogateKeys(): any {
-    return {
-      urls: ['url1', 'url2', 'url3', 'url4'],
-      url_to_sk: {
-        url1: 'url1sk',
-        url2: 'url2sk',
-        url3: 'url3sk',
-        url4: 'url4sk',
-      },
-    };
-  }
-
-  static getCommandsForSnootyProjectName(repoDirName: string): string[] {
-    return [`. /venv/bin/activate`, `cd ~/repos/${repoDirName}`, `make get-project-name`];
   }
 
   static getCommandsForGetServerUser(): string[] {

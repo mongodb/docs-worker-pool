@@ -8,7 +8,6 @@ export const axiosApi = axios.create();
 
 export interface ICDNConnector {
   purge(jobId: string, urls: Array<string>, prefix: string): Promise<string | null>;
-  purgeAll(creds: CDNCreds): Promise<any>;
   warm(jobId: string, url: string): Promise<any>;
   upsertEdgeDictionaryItem(keyValue: any, id: string, creds: CDNCreds): Promise<void>;
 }
@@ -26,14 +25,6 @@ export class FastlyConnector implements ICDNConnector {
       'Content-Type': 'application/json',
       'Fastly-Debug': 1,
     };
-  }
-
-  async purgeAll(creds: CDNCreds): Promise<any> {
-    return await axiosApi.post(
-      `https://api.fastly.com/service/${creds.id}/purge_all`,
-      {},
-      { headers: this.getHeaders(creds) }
-    );
   }
 
   async warm(url: string): Promise<any> {
@@ -131,11 +122,9 @@ export class K8SCDNConnector implements ICDNConnector {
   }
 
   async purge(jobId: string, urls: string[], prefix: string): Promise<string | null> {
-    console.log('K8SCDNConnector purge');
     const url = this._config.get<string>('cdnInvalidatorServiceURL');
-    console.log(url);
     const headers = await this.getHeaders();
-    console.log(headers);
+    this._logger.info(jobId, `K8SCDNConnector purge with URL ${url} and headers ${JSON.stringify(headers)}`);
     urls = urls.map((item) => {
       return `/${item}`;
     });
@@ -154,10 +143,6 @@ export class K8SCDNConnector implements ICDNConnector {
       this._logger.error(jobId, JSON.stringify(err?.response?.data));
     }
     return null;
-  }
-
-  purgeAll(creds: CDNCreds): Promise<any> {
-    throw new Error('Method not implemented.');
   }
 
   warm(jobId: string, url: string): Promise<any> {

@@ -3,7 +3,6 @@ import { mockDeep } from 'jest-mock-extended';
 import type { Job } from '../../src/entities/job';
 import { JobHandlerFactory } from '../../src/job/jobManager';
 import { JobValidator } from '../../src/job/jobValidator';
-import { ProductionJobHandler } from '../../src/job/productionJobHandler';
 import { JobManager } from '../../src/job/jobManager';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { ICDNConnector } from '../../src/services/cdn';
@@ -79,16 +78,22 @@ describe('JobManager Tests', () => {
     });
   });
 
-  // TODO: Fix failing test
   describe('JobManager workex Tests', () => {
-    test('JobManager workex doesnt throw error when there is no job', async () => {
-      const handler = mockDeep<ProductionJobHandler>();
-      jobRepo.getOneQueuedJobAndUpdate.mockResolvedValueOnce(job);
-      jobHandlerFactory.createJobHandler.mockReturnValueOnce(handler);
-      await jobManager.workEx();
-      expect(jobRepo.getOneQueuedJobAndUpdate.mock.calls).toHaveLength(1);
-      expect(jobHandlerFactory.createJobHandler.mock.calls).toHaveLength(1);
-      expect(handler.execute.mock.calls).toHaveLength(1);
+    test('JobManager workex doesnt get called when a queued job is not returned', async () => {
+      jobRepo.getOneQueuedJobAndUpdate.mockResolvedValueOnce(null);
+      jest.spyOn(jobManager, 'workEx');
+      jobManager.start();
+      expect(jobManager.workEx).not.toHaveBeenCalled();
+      jobManager.stop();
+      jest.runAllTimers();
+    });
+
+    test('JobManager workex updates job status when execution fails', async () => {
+      jest.spyOn(jobManager, 'createHandlerAndExecute').mockImplementationOnce(() => {
+        throw new Error('Bad!');
+      });
+      await jobManager.workEx(job);
+      expect(jobRepo.updateWithErrorStatus).toHaveBeenCalled();
     });
   });
 });

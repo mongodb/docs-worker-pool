@@ -49,7 +49,8 @@ describe('ManifestJobHandler Tests', () => {
       '. /venv/bin/activate',
       'cd repos/testauth',
       'echo IGNORE: testing manifest generation deploy commands',
-      'mut-index upload public -b sample-bucket -o example-preprd/test-job-mani-prefix.json -u https://github.com/skerschb/testauth.git/ ',
+      'ls -al',
+      'mut-index upload public -b sample-bucket -o example-preprd/test-job-mani-prefix.json -u https://mongodbcom-cdn.website.staging.corp.mongodb.com/ ',
     ];
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(o);
   });

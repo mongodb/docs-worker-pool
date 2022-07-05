@@ -117,9 +117,6 @@ export class JobHandlerTestHelper {
       .calledWith(`repos/${this.job.payload.repoName}/worker.sh`)
       .mockReturnValue(nextGenEntry);
     this.config.get.calledWith('GATSBY_PARSER_USER').mockReturnValue('TestUser');
-    this.jobCommandExecutor.getSnootyProjectName
-      .calledWith(this.job.payload.repoName)
-      .mockReturnValue({ output: this.job.payload.repoName });
-    this.jobCommandExecutor.execute.mockReturnValue({ status: 'success', output: 'Great work', error: null });
+    this.jobCommandExecutor.execute.mockResolvedValue({ status: 'success', output: 'Great work', error: null });
   }
 }
