@@ -144,7 +144,8 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
     );
 
     if (!aliases || aliases.length === 0) {
-      if (non_versioned) {
+      // handle non-versioned repos AND repos where only 1 version is active where there are no aliases
+      if (non_versioned || (!publishOriginalBranchName && urlSlug === null)) {
         newPayload.urlSlug = '';
       }
       deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
