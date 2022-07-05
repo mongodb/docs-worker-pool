@@ -1,5 +1,4 @@
 import { IConfig } from 'config';
-import { CDNCreds } from '../entities/creds';
 import type { Job } from '../entities/job';
 import { InvalidJobError } from '../errors/errors';
 import { JobRepository } from '../repositories/jobRepository';
@@ -70,10 +69,6 @@ export class ProductionJobHandler extends JobHandler {
     }
   }
 
-  getActiveBranchLength(): number {
-    return this.currJob.payload.repoBranches.branches.filter((b) => b['active']).length;
-  }
-
   getPathPrefix(): string {
     try {
       if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
@@ -100,7 +95,10 @@ export class ProductionJobHandler extends JobHandler {
       const updatedURLsArray = stdoutJSON.urls;
       // purgeCache purges the now stale content and requests the URLs to warm the cache for our users
       await this.logger.save(this.currJob._id, JSON.stringify(updatedURLsArray));
-      console.log('current job prefix to be used for wildcard url invalidation: ' + this.currJob.payload.prefix);
+      await this.logger.save(
+        this.currJob._id,
+        `current job prefix to be used for wildcard url invalidation: ${this.currJob.payload.prefix}`
+      );
       const id = await this._cdnConnector.purge(this.currJob._id, updatedURLsArray, this.currJob.payload.prefix);
       await this.jobRepository.insertPurgedUrls(this.currJob._id, updatedURLsArray);
       if (id) {
@@ -114,14 +112,6 @@ export class ProductionJobHandler extends JobHandler {
     } catch (error) {
       await this.logger.save(this.currJob._id, error);
     }
-  }
-
-  private getCdnCreds(): CDNCreds {
-    let creds = this._config.get<any>('cdn_creds')['main'];
-    if (this.currJob?.payload?.repoName in this._config.get<any>('cdn_creds')) {
-      creds = this._config.get<any>('cdn_creds')[this.currJob.payload.repoName];
-    }
-    return new CDNCreds(creds['id'], creds['token']);
   }
 
   async deploy(): Promise<CommandExecutorResponse> {

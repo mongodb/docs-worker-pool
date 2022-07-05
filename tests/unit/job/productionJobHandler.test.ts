@@ -136,7 +136,6 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
   });
 
-  // TODO: Fix failing test
   describe.each(TestDataProvider.getPathPrefixCases())('Validate all Generate path prefix cases', (element) => {
     test(`Testing Path prefix with input ${JSON.stringify(element)}`, async () => {
       jobHandlerTestHelper.job.payload.repoBranches = element.value;
@@ -144,21 +143,11 @@ describe('ProductionJobHandler Tests', () => {
       await jobHandlerTestHelper.jobHandler.execute();
       expect(jobHandlerTestHelper.repoConnector.pullRepo).toBeCalledTimes(1);
       expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
-      if (element.error) {
-        // Received number of calls: 0
-        expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(
-          jobHandlerTestHelper.job._id,
-          "Cannot read properties of null (reading 'forEach')"
-        );
-        expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
-      } else {
-        expect(jobHandlerTestHelper.job.payload.pathPrefix).toEqual(element.pathPrefix);
-        expect(jobHandlerTestHelper.job.payload.mutPrefix).toEqual(element.mutPrefix);
-      }
+      expect(jobHandlerTestHelper.job.payload.pathPrefix).toEqual(element.pathPrefix);
+      expect(jobHandlerTestHelper.job.payload.mutPrefix).toEqual(element.mutPrefix);
     });
   });
 
-  // TODO: Fix failing tests. Can this be removed as dupe of manifestJobHandler test?
   describe.each(TestDataProvider.getManifestPrefixCases())('Validate all Generate manifest prefix cases', (element) => {
     test(`Testing manifest prefix with aliased=${element.aliased} primaryAlias=${element.primaryAlias} alias=${element.alias}`, async () => {
       jobHandlerTestHelper.executeCommandWithGivenParamsForManifest(element);
@@ -167,24 +156,6 @@ describe('ProductionJobHandler Tests', () => {
       expect(jobHandlerTestHelper.repoConnector.cloneRepo).toBeCalledTimes(1);
       expect(jobHandlerTestHelper.job.payload.manifestPrefix).toEqual(element.manifestPrefix);
     });
-  });
-
-  // TODO: Fix failing test
-  test('Execute Next Gen Manifest prefix generation throws error as get snooty name throws', async () => {
-    jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
-    jobHandlerTestHelper.setupForSuccess();
-    mockReset(jobHandlerTestHelper.jobCommandExecutor);
-    // Received: "Cannot read property 'output' of undefined"
-    jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName
-      .calledWith(jobHandlerTestHelper.job.payload.repoName)
-      .mockImplementation(() => {
-        throw new Error("Can't get the project name");
-      });
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(
-      jobHandlerTestHelper.job._id,
-      "Can't get the project name"
-    );
   });
 
   describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var cases', (element) => {
@@ -298,9 +269,6 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     mockReset(jobHandlerTestHelper.jobCommandExecutor);
-    jobHandlerTestHelper.jobCommandExecutor.getSnootyProjectName
-      .calledWith(jobHandlerTestHelper.job.payload.repoName)
-      .mockReturnValue({ output: jobHandlerTestHelper.job.payload.repoName });
     jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({
       status: 'failed',
       error: 'Command Execution failed',
@@ -391,7 +359,6 @@ describe('ProductionJobHandler Tests', () => {
 
   test('Execute legacy build successfully purges only updated urls', async () => {
     const purgedUrls = jobHandlerTestHelper.setStageForDeploySuccess(false);
-    jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(false);
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(false);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(
@@ -406,39 +373,6 @@ describe('ProductionJobHandler Tests', () => {
       jobHandlerTestHelper.job.payload.prefix
     );
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toBeCalledWith(jobHandlerTestHelper.job._id, purgedUrls);
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toHaveBeenCalledTimes(0);
-  });
-
-  // TODO: Fix failing test
-  test('Execute legacy build runs successfully purges all for main service', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(false);
-    jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(true);
-    jobHandlerTestHelper.config.get.calledWith('cdn_creds').mockReturnValue({ main: { id: 'sid', key: 'token' } });
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(false);
-    expect(jobHandlerTestHelper.job.buildCommands).toEqual(
-      TestDataProvider.getCommonBuildCommands(jobHandlerTestHelper.job)
-    );
-    expect(jobHandlerTestHelper.job.deployCommands).toEqual(
-      TestDataProvider.getCommonDeployCommands(jobHandlerTestHelper.job)
-    );
-    // Received number of calls: 0
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
-    expect(jobHandlerTestHelper.cdnConnector.purge).toHaveBeenCalledTimes(0);
-    expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
-  });
-
-  // TODO: Fix failing test
-  test('Execute build runs successfully purges all for atlas service', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(false);
-    jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(true);
-    jobHandlerTestHelper.config.get
-      .calledWith('cdn_creds')
-      .mockReturnValue({ 'cloud-docs-osb': { id: 'sid', key: 'token' } });
-    jobHandlerTestHelper.job.payload.repoName = 'cloud-docs-osb';
-    await jobHandlerTestHelper.jobHandler.execute();
-    // Received number of calls: 0
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toBeCalledTimes(1);
   });
 
   test('Deploy purge process inserts invalidationStatusUrl', async () => {

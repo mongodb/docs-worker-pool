@@ -36,11 +36,7 @@ export class JobRepository extends BaseRepository {
       `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`
     );
     if (bRet) {
-      await this._queueConnector.sendMessage(
-        new JobQueueMessage(id, JobStatus.completed),
-        this._config.get('jobUpdatesQueueUrl'),
-        0
-      );
+      await this.notify(id, c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
     }
     return bRet;
   }
@@ -55,8 +51,7 @@ export class JobRepository extends BaseRepository {
       throw new JobExistsAlreadyError('InsertJobFailed: Job exists Already');
     }
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
-
-    await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inQueue), url, 0);
+    await this.notify(jobId, url, JobStatus.inQueue, 0);
     return jobId;
   }
 

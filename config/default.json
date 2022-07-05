@@ -23,7 +23,6 @@
   "PORT": 3000,
   "MAX_STDOUT_BUFFER_SIZE": 16000000,
   "GATSBY_PARSER_USER": "docsworker-xlarge",
-  "shouldPurgeAll": false,
   "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
   "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
   "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
@@ -51,32 +50,6 @@
     "stg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
     "dotcomstg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches",
     "dotcomprd": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches"
-  },
-  "cdn_creds": {
-    "cloudgov-docs": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "token": "FASTLY_ATLAS_TOKEN"
-    },
-    "cloud-docs": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "token": "FASTLY_ATLAS_TOKEN"
-    },
-    "cloud-docs-osb": {
-      "id": "FASTLY_ATLAS_SERVICE_ID",
-      "token": "FASTLY_ATLAS_TOKEN"
-    },
-    "devhub-content": {
-      "id": "FASTLY_DEVHUB_SERVICE_ID",
-      "token": "FASTLY_DEVHUB_TOKEN"
-    },
-    "publishDochub": {
-      "id": "FASTLY_DOCHUB_SERVICE_ID",
-      "token": "FASTLY_DOCHUB_TOKEN"
-    },
-    "main": {
-      "id": "FASTLY_MAIN_SERVICE_ID",
-      "token": "FASTLY_MAIN_TOKEN"
-    }
   },
   "repo_dir": "repos",
   "cdnInvalidationOauthScope": "mongodbcom-docs",

@@ -65,8 +65,12 @@ describe('Jobmanager integration Tests', () => {
       repoBranchesRepository
     );
   });
-  // TODO: Update this failing test - is this intended to test startSpecificJob()?
+
   test('E2E runs without any error if no job is present', async () => {
-    await jobManager.startSingleJob();
+    jest.spyOn(global.console, 'error').mockImplementation(() => {
+      /* do nothing */
+    });
+    await jobManager.startSpecificJob('not-a-job');
+    expect(console.error).toBeCalled();
   });
 });

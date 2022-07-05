@@ -34,44 +34,6 @@ describe('FastlyConnector Tests', () => {
     expect(new FastlyConnector(logger)).toBeDefined();
   });
 
-  describe('FastlyConnector purge  All Tests', () => {
-    test('FastlyConnector purge all succeeds', async () => {
-      mock
-        .onPost(
-          `https://api.fastly.com/service/id/purge_all`,
-          {},
-          {
-            'Fastly-Key': 'key',
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'Fastly-Debug': 1,
-          }
-        )
-        .reply(200, {});
-      await fastlyConnector.purgeAll({ id: 'id', token: 'key' });
-      expect(mock.history.post.length).toBe(1);
-    });
-
-    test('FastlyConnector purge all fails throws exception', async () => {
-      mock
-        .onPost(
-          `https://api.fastly.com/service/id/purge_all`,
-          {},
-          {
-            'Fastly-Key': 'key',
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'Fastly-Debug': 1,
-          }
-        )
-        .reply(401, {});
-      await expect(fastlyConnector.purgeAll({ id: 'id', token: 'key' })).rejects.toThrow(
-        'Request failed with status code 401'
-      );
-      expect(mock.history.post.length).toBe(1);
-    });
-  });
-
   describe('FastlyConnector Warm Tests', () => {
     test('FastlyConnector Warm with non 200 response returns false', async () => {
       mock.onGet(`test`).reply(404, {});

@@ -31,14 +31,12 @@ describe('StagingJobHandler Tests', () => {
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(
       TestDataProvider.getCommonDeployCommandsForStaging(jobHandlerTestHelper.job)
     );
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toHaveBeenCalledTimes(0);
     expect(jobHandlerTestHelper.cdnConnector.purge).toHaveBeenCalledTimes(0);
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
   });
 
   test('Execute nextgen build runs successfully without path prefix', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
-    jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(true);
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(true);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(
@@ -47,14 +45,12 @@ describe('StagingJobHandler Tests', () => {
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(
       TestDataProvider.getExpectedStageDeployNextGenCommands(jobHandlerTestHelper.job)
     );
-    expect(jobHandlerTestHelper.cdnConnector.purgeAll).toHaveBeenCalledTimes(0);
     expect(jobHandlerTestHelper.cdnConnector.purge).toHaveBeenCalledTimes(0);
     expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
   });
 
   test('Execute nextgen build runs successfully with pathprefix', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
-    jobHandlerTestHelper.config.get.calledWith('shouldPurgeAll').mockReturnValue(true);
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.job.payload.pathPrefix = 'Mutprefix';
     jobHandlerTestHelper.job.payload.mutPrefix = 'Mutprefix';
