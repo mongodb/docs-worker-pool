@@ -48,7 +48,7 @@ next-gen-html: get-build-dependencies
 		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
-	GATSBY_MANIFEST_PATH="${REPO_DIR}/bundle.zip" npm run build; \
+	GATSBY_MANIFEST_PATH="${REPO_DIR}/bundle.zip" GATSBY_MANIFEST_PATH="${BUNDLE_PATH}" npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
