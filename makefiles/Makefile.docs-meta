@@ -1,24 +1,22 @@
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
+USER=$(shell whoami)
 
-ifeq ($(STAGING_USERNAME),)
-	USER=$(shell whoami)
-else
-	USER=$(STAGING_USERNAME)
-endif
-
-DOTCOM_STAGING_URL=https://mongodbcom-cdn.website.staging.corp.mongodb.com
-DOTCOM_STAGING_BUCKET=docs-mongodb-org-dotcomstg
-
-PROJECT=docs-meta
-PREFIX=docs-meta
+PROJECT=meta
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
-DOTCOM_STGPREFIX= docs-qa/docs-meta
+
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
+CUSTOM_SEARCH_INDEX=true
+
 include ~/shared.mk
+
+# the following kept only since we've not dealt with removing the test logic in docs-worker-pool
+get-build-dependencies: 
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-kafka-connector.yaml > ${REPO_DIR}/published-branches.yaml
+
 
 .PHONY: help html stage
 
