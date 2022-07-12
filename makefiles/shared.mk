@@ -10,7 +10,6 @@ PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |
 
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
-BUNDLE_PATH=${REPO_DIR}/bundle.zip
 RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml
 
 ifeq ($(SNOOTY_INTEGRATION),true)
@@ -34,15 +33,15 @@ endif
 ifndef PUSHLESS_DEPLOY_SHARED_DISABLED
 next-gen-html:
 	# snooty parse and then build-front-end
-	if [ -n "${PATCH_ID}" ]; then \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
+	@if [ -n "${PATCH_ID}" ]; then \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
 			exit 0; \
 		fi \
 	else \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
+		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" ${RSTSPEC_FLAG}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
@@ -57,11 +56,11 @@ next-gen-html:
 		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
 		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
 	fi && \
-	GATSBY_MANIFEST_PATH="${BUNDLE_PATH}" npm run build; \
+	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 next-gen-stage: ## Host online for review
-	# stagel local jobs
+	# stagel local jobs \
 	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
 		mut-publish public ${BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
