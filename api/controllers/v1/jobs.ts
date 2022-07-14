@@ -249,6 +249,14 @@ async function SubmitArchiveJob(jobId: string) {
   const job = await models.jobs.getJobById(jobId);
   const repo = await models.branches.getRepo(job.payload.repoName);
 
+  /* NOTE
+   * we don't archive landing for two reasons:
+   * - we can't unless we add efs to batch for extra storage; or https://github.com/aws/containers-roadmap/issues/1383
+   * - other properties like realm are nested under s3
+   */
+  const archiveExclusions = ['docs-landing'];
+  if (archiveExclusions.includes(repo.repoName)) return;
+
   const response = await new Batch(environment).submitArchiveJob(
     repo.bucket[environment],
     `docs-archive-${environment}-mongodb`,
