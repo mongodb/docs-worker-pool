@@ -254,7 +254,8 @@ async function SubmitArchiveJob(jobId: string) {
    * - we can't unless we add efs to batch for extra storage; or https://github.com/aws/containers-roadmap/issues/1383
    * - other properties like realm are nested under s3
    */
-  if (repo.repoName == 'docs-landing') return;
+  const archiveExclusions = ['docs-landing'];
+  if (archiveExclusions.includes(repo.repoName)) return;
 
   const response = await new Batch(environment).submitArchiveJob(
     repo.bucket[environment],
