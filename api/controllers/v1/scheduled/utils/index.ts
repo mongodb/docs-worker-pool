@@ -139,9 +139,9 @@ const getDeployableJobs = async (repoOwner:string , repoName:string , branchName
 
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
     try {
-        await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
+        return jobRepository.insertBulkJobs(deployable, jobQueueUrl);
     } catch (err) {
-        logger.error('deployRepo', err);x
+        logger.error('deployRepo', err);
     }
 }
 
@@ -155,6 +155,6 @@ export const DeployRepo = async (repoOwner, repoName, branchName): Promise<any> 
     
     const deployable = await getDeployableJobs(repoOwner, repoName, branchName, branchRepository);
     if (deployable.length > 0) {
-      await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
+      return deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
     }
   };
