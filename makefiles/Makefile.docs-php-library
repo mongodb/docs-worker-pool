@@ -15,7 +15,7 @@ PUSHLESS_DEPLOY_SHARED_DISABLED=true
 
 include ~/shared.mk
 
-next-gen-html: get-build-dependencies
+next-gen-html: fetch-submodule
 	# snooty parse and then build-front-end
 	@if [ -n "${PATCH_ID}" ]; then \
 		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
@@ -42,9 +42,6 @@ next-gen-html: get-build-dependencies
 	fi && \
 	npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-
-get-build-dependencies: fetch-submodule
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-php-library.yaml > ${REPO_DIR}/published-branches.yaml
 
 fetch-submodule:
 	git submodule update --remote --init

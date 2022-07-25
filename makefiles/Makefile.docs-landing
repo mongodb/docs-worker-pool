@@ -16,11 +16,6 @@ include ~/shared.mk
 
 DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
 
-
-
-get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
-
 next-gen-html: build-legacy-pages
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" ${RSTSPEC_FLAG}; \

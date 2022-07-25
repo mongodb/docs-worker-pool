@@ -23,7 +23,7 @@ PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}";
 
 include ~/shared.mk
 
-next-gen-html: get-build-dependencies
+next-gen-html:
 	# snooty parse and then build-front-end
 	if [ -n "${PATCH_ID}" ]; then \
 		snooty build "${REPO_DIR}" --output "${REPO_DIR}/bundle.zip" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
@@ -61,9 +61,6 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
-
-get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-bi-connector.yaml > ${REPO_DIR}/published-branches.yaml
 
 redirects:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi

@@ -18,7 +18,7 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
 include ~/shared.mk
 
-next-gen-html: get-build-dependencies
+next-gen-html:
 	# snooty parse and then build-front-end
 	@if [ -n "${PATCH_ID}" ]; then \
 		echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
@@ -56,6 +56,3 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
-
-get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-compass.yaml > ${REPO_DIR}/published-branches.yaml

@@ -30,9 +30,6 @@ update-snooty:
 	git reset --hard origin/master; \
 	npm install --production
 
-get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/devhub-content.yaml > ${REPO_DIR}/published-branches.yaml
-
 next-gen-html: update-snooty
 	# snooty parse and then build-front-end
 	@echo ${SNOOTY_DB_PWD} | snooty build "${REPO_DIR}" "mongodb+srv://${SNOOTY_DB_USR}:@cluster0-ylwlz.mongodb.net/snooty?retryWrites=true" --commit "${COMMIT_HASH}"; \
@@ -42,7 +39,7 @@ next-gen-html: update-snooty
 		exit 0; \
 	fi
 	# If prod --> set PATH_PREFIX build arg to /developer
-	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR}; 
+	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty-devhub ${REPO_DIR};
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty-devhub;
 	cd snooty-devhub; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \

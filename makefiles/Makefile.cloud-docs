@@ -26,21 +26,3 @@ INDEX_NAME=$(subst cloud-docs,atlas,${MANIFEST_PREFIX})
 next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
 	@echo "Building search index"
 	mut-index upload public -b ${BUCKET} -o ${INDEX_NAME}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
-
-
-.PHONY: help stage fake-deploy deploy publish deploy-search-index remote-includes next-gen-html
-
-help:
-	@echo 'Targets'
-	@echo '  help         - Show this help message'
-	@echo '  html         - Builds the html files.  Need if staging.'
-	@echo '  stage        - Host online for review'
-	@echo '  fake-deploy  - Create a fake deployment in the staging bucket'
-	@echo '  deploy       - Deploy to the production bucket'
-	@echo ''
-	@echo 'Variables'
-	@echo '  ARGS         - Arguments to pass to mut-publish'
-
-
-get-build-dependencies: 
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/cloud-docs.yaml > ${REPO_DIR}/published-branches.yaml

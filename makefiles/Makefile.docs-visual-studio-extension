@@ -12,7 +12,3 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 
 include ~/shared.mk
-
-
-get-build-dependencies: 
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-visual-studio-extension.yaml > ${REPO_DIR}/published-branches.yaml

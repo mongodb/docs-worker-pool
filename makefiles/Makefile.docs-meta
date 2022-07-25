@@ -13,11 +13,6 @@ CUSTOM_SEARCH_INDEX=true
 
 include ~/shared.mk
 
-# the following kept only since we've not dealt with removing the test logic in docs-worker-pool
-get-build-dependencies: 
-	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-kafka-connector.yaml > ${REPO_DIR}/published-branches.yaml
-
-
 .PHONY: help html stage
 
 ## Builds this branch's HTML under build/<branch>/html
