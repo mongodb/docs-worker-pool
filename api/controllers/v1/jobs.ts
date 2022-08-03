@@ -184,7 +184,13 @@ async function prepSummaryMessage(
   return msg.replace(/\.{2,}/g, '');
 }
 
-function prepProgressMessage(jobUrl: string, jobId: string, jobTitle: string, status: string): string {
+function prepProgressMessage(
+  jobUrl: string,
+  jobId: string,
+  jobTitle: string,
+  status: string,
+  errorReason: string
+): string {
   const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
   const env = c.get<string>('env');
   switch (status) {
@@ -195,7 +201,13 @@ function prepProgressMessage(jobUrl: string, jobId: string, jobTitle: string, st
     case 'completed':
       return msg + 'has successfully completed.';
     case 'failed':
-      return msg + 'has failed and will not be placed back in the ' + env + ' queue.';
+      let failedMessage = msg + 'has failed and will not be placed back in the ' + env + ' queue.';
+      if (errorReason.match(/Repository not found/)) {
+        const autobuilderWikiUrl =
+          'https://wiki.corp.mongodb.com/pages/viewpage.action?spaceKey=DE&title=How-To%3A+Use+Snooty%27s+Autobuilder+to+Build+Your+Content#:~:text=origin%20master%3Astage%2Dmaster-,For%20Private%20repositories,-%3A%20in%20addition%20to';
+        failedMessage += `\n:point_right: Hint: If your repo is private, have you <${autobuilderWikiUrl}|added the docs-builder-bot as a collaborator?>`;
+      }
+      return failedMessage;
     default:
       return msg + 'has been updated to an unsupported status.';
   }
@@ -219,7 +231,13 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     return;
   }
   const resp = await slackConnector.sendMessage(
-    prepProgressMessage(c.get('dashboardUrl'), jobId, jobTitle, fullDocument.status as string),
+    prepProgressMessage(
+      c.get('dashboardUrl'),
+      jobId,
+      jobTitle,
+      fullDocument.status as string,
+      fullDocument?.error?.reason || ''
+    ),
     entitlement['slack_user_id']
   );
   return {
