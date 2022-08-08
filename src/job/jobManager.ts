@@ -101,10 +101,10 @@ export class JobManager {
   }
 
   async startSpecificJob(jobId: string): Promise<void> {
-    const containerId = ecsMetadata()?.DockerId;
+    const diagnostic = await ecsMetadata();
     const job = await this.getJob(jobId);
     if (job) {
-      job.containerId = containerId;
+      job.containerId = diagnostic.DockerId;
       await this.workEx(job);
     } else {
       this._logger.error(jobId, 'Unable to find the job to execute');
