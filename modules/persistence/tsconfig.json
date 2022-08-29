@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "rootDir": "./src",
+      "outDir": "./dist",
+      "target": "es6",
+      "module": "commonjs",
+      "strictNullChecks": true,
+      "esModuleInterop": true,
+      "baseUrl": "./types",
+      "experimentalDecorators": true
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["modules", "node_modules", "tests/**/*.ts", "api/**/*.ts"]
+  }
+  
