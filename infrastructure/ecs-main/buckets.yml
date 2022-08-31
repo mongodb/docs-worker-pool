@@ -190,6 +190,36 @@ Resources:
             Resource:
               - Fn::Join: ['', [{ "Fn::GetAtt": ["OpsManagerBucket", "Arn" ] }, '/*']]
 
+  CsharpBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: CsharpBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+            - Fn::Join: ['', [{ "Fn::GetAtt": ["CsharpBucket", "Arn" ] }, '/*']]
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-archive-job-${self:provider.stage}-batch
+            Action:
+              - 's3:GetObject'
+              - 's3:ListBucket'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["CsharpBucket", "Arn" ] }, '/*']]
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["CsharpBucket", "Arn" ] }]]
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
+            Action: 's3:PutObject'
+            Resource:
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["Csharpucket", "Arn" ] }, '/*']]
+
   JavaBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
