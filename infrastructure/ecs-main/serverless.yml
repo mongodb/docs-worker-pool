@@ -115,6 +115,7 @@ custom:
   fastlyDevhubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/service_id}
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
+  csharpBucketName: docs-csharp-${self:provider.stage}
   javaBucketName: docs-java-${self:provider.stage}
   goBucketName: docs-go-${self:provider.stage}
   javaIntgrBucketName: docs-java-intgr
