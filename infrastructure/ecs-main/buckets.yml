@@ -36,6 +36,14 @@ Resources:
           IndexDocument: index.html
           ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
 
+  CsharpBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: ${self:custom.csharpBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
+
   JavaBucket:
     Type: "AWS::S3::Bucket"
     Properties:
