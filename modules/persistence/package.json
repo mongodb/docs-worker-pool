@@ -1,0 +1,21 @@
+{
+  "name": "persistence",
+  "version": "1.0.0",
+  "description": "Basic persistence module to assure idempotency of docs entries.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.9",
+    "bson": "^4.7.0",
+    "config": "^3.3.7",
+    "minimist": "^1.2.6",
+    "mongodb": "^4.9.1"
+  }
+}
