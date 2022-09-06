@@ -218,7 +218,7 @@ Resources:
               AWS: arn:aws:iam::${aws:accountId}:role/docs-deploy-job-${self:provider.stage}-batch
             Action: 's3:PutObject'
             Resource:
-              - Fn::Join: ['', [{ "Fn::GetAtt": ["Csharpucket", "Arn" ] }, '/*']]
+              - Fn::Join: ['', [{ "Fn::GetAtt": ["CsharpBucket", "Arn" ] }, '/*']]
 
   JavaBucketPolicy:
     Type: AWS::S3::BucketPolicy
