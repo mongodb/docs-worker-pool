@@ -14,7 +14,12 @@ const app = async (path) => {
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
     Promise.all([insertEntries(buildId, zip), insertMetadata(buildId, zip)]);
-  } catch (error) {}
+  } catch (error) {
+    console.error(`ERROR: Persistence Module encountered a terminal error: ${error}`);
+    throw error;
+    process.exit(0);
+  }
+  process.exit(1);
 };
 
 app(argv['path']);
