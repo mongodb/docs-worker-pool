@@ -6,7 +6,8 @@ else
 	USER=$(STAGING_USERNAME)
 endif
 
-PROJECT=drivers/csharp
+PREFIX=drivers/csharp/current
+PROJECT=csharp
 MUT_PREFIX ?= $(PROJECT)
 
 REPO_DIR=$(shell pwd)
