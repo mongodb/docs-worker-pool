@@ -15,5 +15,5 @@ const entriesFromZip = async (zip) => {
 
 export const insertEntries = async (buildId, zip) => {
   const entries = await entriesFromZip(zip);
-  insert(entries, COLLECTION_NAME, buildId);
+  return insert(entries, COLLECTION_NAME, buildId);
 };
