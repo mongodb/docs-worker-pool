@@ -7,7 +7,7 @@
     "strictNullChecks": true,
     "esModuleInterop": true,
     "baseUrl": "./",
-    "types":[]
+    "types": []
   },
   "include": ["src/**/*.ts", "index.ts"],
   "exclude": ["node_modules", "tests/**/*.ts"]
