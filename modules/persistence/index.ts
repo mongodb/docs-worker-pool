@@ -20,9 +20,9 @@ const app = async (path) => {
     await Promise.all([insertEntries(buildId, zip), insertMetadata(buildId, zip)]);
   } catch (error) {
     console.error(`Persistence Module encountered a terminal error: ${error}`);
-    process.exit(0);
+    process.exit(1);
   }
-  process.exit(1);
+  process.exit(0);
 };
 
 app(argv['path']);
