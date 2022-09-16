@@ -13,7 +13,7 @@ dotenv.config();
 
 const app = async (path) => {
   try {
-    const zip = new AdmZip(path);
+    const zip = AdmZip(path);
     // atomic buildId for all artifacts read by this module - fundamental assumption
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
