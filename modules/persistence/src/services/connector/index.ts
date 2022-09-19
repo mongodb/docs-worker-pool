@@ -2,9 +2,7 @@ import * as mongodb from 'mongodb';
 import c from 'config';
 
 const db = async () => {
-  const atlasURL = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${c.get(
-    'dbHost'
-  )}/?retryWrites=true&w=majority`;
+  const atlasURL = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
   const client = new mongodb.MongoClient(atlasURL);
   await client.connect();
   return client.db(process.env.DB_NAME);
