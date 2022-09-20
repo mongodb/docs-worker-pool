@@ -115,10 +115,12 @@ custom:
   fastlyDevhubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/service_id}
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
-  javaBucketName: docs-java-${self:provider.stage}
+  cSharpBucketName: docs-csharp-${self:provider.stage}
+  cSharpIntgrBucketName: docs-csharp-dev
   goBucketName: docs-go-${self:provider.stage}
-  javaIntgrBucketName: docs-java-intgr
   goIntgrBucketName: docs-go-intgr
+  javaBucketName: docs-java-${self:provider.stage}
+  javaIntgrBucketName: docs-java-intgr
   nodeBucketName: docs-node-${self:provider.stage}
   nodeIntgrBucketName: docs-node-intgr
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
