@@ -4,7 +4,6 @@ import { ProductionJobHandler } from './productionJobHandler';
 import { RegressionJobHandler } from './regressionJobHandler';
 import { ManifestJobHandler } from './manifestJobHandler';
 import { StagingJobHandler } from './stagingJobHandler';
-import { ecsMetadata } from '../services/diagnostic';
 import { IRepoConnector } from '../services/repo';
 import { IJobRepoLogger } from '../services/logger';
 import { JobHandler } from './jobHandler';
@@ -101,10 +100,8 @@ export class JobManager {
   }
 
   async startSpecificJob(jobId: string): Promise<void> {
-    const diagnostic = await ecsMetadata();
     const job = await this.getJob(jobId);
     if (job) {
-      job.containerId = diagnostic.DockerId;
       await this.workEx(job);
     } else {
       this._logger.error(jobId, 'Unable to find the job to execute');
