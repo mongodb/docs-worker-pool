@@ -1,4 +1,5 @@
 import { deserialize } from 'bson';
+import { ObjectId } from 'mongodb';
 import { insert } from '../connector';
 
 const COLLECTION_NAME = 'documents';
@@ -13,7 +14,7 @@ const entriesFromZip = async (zip) => {
     .map((entry) => deserialize(entry.getData()));
 };
 
-export const insertEntries = async (buildId, zip) => {
+export const insertEntries = async (buildId: ObjectId, zip) => {
   const entries = await entriesFromZip(zip);
   return insert(entries, COLLECTION_NAME, buildId);
 };

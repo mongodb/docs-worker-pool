@@ -1,4 +1,5 @@
 import { deserialize } from 'bson';
+import { ObjectId } from 'mongodb';
 import { insert } from '../connector';
 
 const COLLECTION_NAME = 'metadata';
@@ -12,7 +13,7 @@ const metadataFromZip = (zip) => {
   return zipEntries.filter((entry) => entry.entryName === 'site.bson').map((entry) => deserialize(entry.getData()));
 };
 
-export const insertMetadata = async (buildId, zip) => {
+export const insertMetadata = async (buildId: ObjectId, zip) => {
   const metadata = metadataFromZip(zip);
   return insert(metadata, COLLECTION_NAME, buildId);
 };

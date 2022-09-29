@@ -1,5 +1,6 @@
 node_modules
 build
+modules/**/build
 modules/**/dist
 modules/**/.env
 npm-debug.log
