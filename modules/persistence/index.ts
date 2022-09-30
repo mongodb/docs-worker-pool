@@ -30,9 +30,14 @@ const app = async (path: string, strict: string) => {
   } catch (error) {
     console.error(`Persistence Module encountered a terminal error: ${error}`);
     // only exit with non zero error code if running with strict mode on
-    if (['y', 'yes', 'true'].includes(strict.toLowerCase())) process.exit(1);
+    if (['y', 'yes', 'true'].includes(strict.toLowerCase())) {
+      process.exit(1);
+    } else {
+      process.exit(0);
+    }
   }
-  process.exit(0);
 };
 
+// Callable via npm run dev, with -- -path='' -strict=''
+// being accepted args
 app(argv['path'], argv['strict']);
