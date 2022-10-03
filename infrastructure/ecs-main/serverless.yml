@@ -44,7 +44,7 @@ custom:
     containerCpu:
       dev: '2048'
       stg: '2048'
-      prd: '4096'
+      prd: '8192'
       dotcomstg: '2048'
       dotcomprd: '4096'
     containerMemory:
