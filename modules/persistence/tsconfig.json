@@ -7,9 +7,7 @@
     "strictNullChecks": true,
     "esModuleInterop": true,
     "baseUrl": "./",
-    "types": [
-      "adm-zip"
-    ]
+    "types": ["adm-zip"]
   },
   "include": ["src/**/*.ts", "index.ts"],
   "exclude": ["node_modules", "tests/**/*.ts"]

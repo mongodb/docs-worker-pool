@@ -12,7 +12,6 @@ Running `npm ci` to install all dependencies is required for usage.
 An example environment file is available at `sample.env`.
 Copy this file to `.env` in order to use a local environment file.
 
-
 ## Building and Running
 
 ### `npm run build`
@@ -50,6 +49,7 @@ Optional string formatted argument for whether module should exit with non-zero 
 Highly recommended for use in production environments.
 
 ## Using/Developing This Module
+
 Usage and development of this module requires specifying the following environment variables. Use of a `.env` file is supported, but only recommended for local development.
 
 If adding a new environment variable, please update the `sample.env`. The `sample.env` should be considered the primary documentation for supported environment variables within this module.
