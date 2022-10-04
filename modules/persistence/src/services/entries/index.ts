@@ -8,7 +8,7 @@ const COLLECTION_NAME = 'documents';
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
 // or within subfolders of this module
-const entriesFromZip = async (zip: AdmZip) => {
+const entriesFromZip = (zip: AdmZip) => {
   const zipEntries = zip.getEntries();
   return zipEntries
     .filter((entry) => entry.entryName?.startsWith('documents/'))
