@@ -10,8 +10,8 @@
     "lint": "eslint . --ext .ts",
     "test": "test",
     "build": "tsc",
-    "start": "node ./dist/index.js",
-    "dev": "tsc && node ./dist/index.js"
+    "start": "node --unhandled-rejections=strict ./dist/index.js",
+    "dev": "tsc && node --unhandled-rejections=strict ./dist/index.js --path ./build/artifacts.zip "
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +21,7 @@
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.15.0",
+    "@types/adm-zip": "^0.5.0",
     "adm-zip": "^0.5.9",
     "bson": "^4.7.0",
     "config": "^3.3.7",
