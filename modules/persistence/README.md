@@ -21,12 +21,14 @@ Compiles the module using `tsc`. By default, compiles to the `./dist` directory.
 ### `npm run start`
 
 Runs the contents of the `./dist` directory.
-Requires usage of `-- -path` argument.
-Recommended command for running in higher than local environments.
+Requires usage of `-- -path` argument, eg `npm run start -- --path ./build/artifacts.zip`.
+Recommended command for running this module in higher than local environments.
+Requires parser output artifacts to be present in specified directory and zip file at `--path` value specified.
 
 ### `npm run dev`
 
-Cleans dist, compiles, and runs with arguments `-- -path ./build/artifacts.zip`.
+Cleans dist, compiles, and runs with arguments `-path ./build/artifacts.zip`.
+Requires parser output artifacts to be present in specified directory and zip file at `./build/artifacts.zip`.
 
 ## Available Arguments
 
