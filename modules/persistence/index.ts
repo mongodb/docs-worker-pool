@@ -16,8 +16,9 @@ interface ModuleArgs {
 
 const missingPathMessage = 'No path specified in arguments - please specify a build directory at arg "path"';
 
-// Callable via npm run dev, with -- -path='' -strict=''
+// Callable via npm run start, with -- --path='' --strict=''
 // being accepted args
+// Also callable w/ default args via npm run dev
 // Load command line args into a parameterized argv
 const argv: ModuleArgs = minimist(process.argv.slice(2));
 
