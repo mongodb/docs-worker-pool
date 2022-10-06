@@ -8,17 +8,17 @@ const COLLECTION_NAME = 'documents';
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
 // or within subfolders of this module
-const entriesFromZip = (zip: AdmZip) => {
-  const zipEntries = zip.getEntries();
-  return zipEntries
+const pagesFromZip = (zip: AdmZip) => {
+  const zipPages = zip.getEntries();
+  return zipPages
     .filter((entry) => entry.entryName?.startsWith('documents/'))
     .map((entry) => deserialize(entry.getData()));
 };
 
-export const insertEntries = async (buildId: ObjectId, zip: AdmZip) => {
+export const insertPages = async (buildId: ObjectId, zip: AdmZip) => {
   try {
-    const entries = await entriesFromZip(zip);
-    return insert(entries, COLLECTION_NAME, buildId);
+    const pages = await pagesFromZip(zip);
+    return insert(pages, COLLECTION_NAME, buildId);
   } catch (error) {
     console.error(`Error at insertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;
