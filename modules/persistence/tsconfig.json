@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./dist",
+    "target": "es6",
+    "module": "commonjs",
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "types": ["adm-zip"]
+  },
+  "include": ["src/**/*.ts", "index.ts"],
+  "exclude": ["node_modules", "tests/**/*.ts"]
+}
