@@ -33,3 +33,16 @@ export const insert = async (docs: any[], collection: string, buildId: ObjectId)
     throw error;
   }
 };
+
+// Upsert wrapper, requires an _id field.
+export const upsert = async (payload: any, collection: string, _id: string | ObjectId) => {
+  const upsertSession = await db();
+  try {
+    const query = { _id };
+    const update = { $set: payload };
+    const options = { upsert: true };
+    return upsertSession.collection(collection).updateOne(query, update, options);
+  } catch (error) {
+    console.error(`Error at upsertion time for ${collection}: ${error}`);
+  }
+};
