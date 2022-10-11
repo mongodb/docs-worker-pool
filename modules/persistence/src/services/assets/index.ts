@@ -15,18 +15,7 @@ const assetsFromZip = (zip: AdmZip) => {
 export const upsertAssets = async (zip: AdmZip) => {
   try {
     const assets = await assetsFromZip(zip);
-    return Promise.all(
-      assets.map((asset) =>
-        upsert(
-          {
-            _id: asset._id,
-            data: asset.data,
-          },
-          COLLECTION_NAME,
-          asset._id
-        )
-      )
-    );
+    return Promise.all(assets.map((asset) => upsert(asset, COLLECTION_NAME, asset._id)));
   } catch (error) {
     console.error(`Error at upsertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;
