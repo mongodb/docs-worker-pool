@@ -1,14 +1,26 @@
+// Service that holds responsibility for initializing and exposing mdb interfaces.
+// Also exports helper functions for common operations (insert, upsert one by _id, etc.)
+// When adding helpers here, ask yourself if the helper will be used by more than one service
+// If no, the helper should be implemented in that service, not here
+
 import * as mongodb from 'mongodb';
 import { ObjectId, Db } from 'mongodb';
+import { db as poolDb } from './pool';
 
 // We should only ever have one client active at a time.
 const atlasURL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
 const client = new mongodb.MongoClient(atlasURL);
+
+// Initialize and export our pool connection
+// Try to limit access to pool as much as possible - we mostly want it for just repo_branches.
+export const pool = async () => {
+  return poolDb(client);
+};
+
 // cached db object, so we can handle initial connection process once if unitialized
 let dbInstance: Db;
-
 // Handles memoization of db object, and initial connection logic if needs to be initialized
-const db = async () => {
+export const db = async () => {
   if (!dbInstance) {
     try {
       await client.connect();

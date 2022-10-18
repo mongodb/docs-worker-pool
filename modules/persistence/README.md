@@ -1,4 +1,4 @@
-# Snooty Transport Module
+# Snooty Persistence Module
 
 As part of integrating Snooty Parser with the unified Snooty toolchain, this module holds exclusive responsibility over transporting and persisting AST and metadata output artifacts from the parser into datastores.
 
