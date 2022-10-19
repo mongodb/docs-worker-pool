@@ -2,6 +2,7 @@ import AdmZip from 'adm-zip';
 import { deserialize } from 'bson';
 import { ObjectId } from 'mongodb';
 import { insert } from '../connector';
+import { mergeAssociatedToCs } from './associations';
 
 const COLLECTION_NAME = 'metadata';
 
@@ -23,6 +24,12 @@ export const insertMetadata = async (buildId: ObjectId, zip: AdmZip) => {
   }
 };
 
-export const updateSharedEntry = async (zip) => {
-  return;
+export const insertUmbrellaMetadata = async (buildId: ObjectId, zip: AdmZip) => {
+  try {
+    const umbrellaMetadata = await mergeAssociatedToCs(metadataFromZip(zip));
+    return umbrellaMetadata ? insert(umbrellaMetadata, COLLECTION_NAME, buildId) : undefined;
+  } catch (error) {
+    console.error(`Error during umbrella metadata update: ${error}`);
+    throw error;
+  }
 };
