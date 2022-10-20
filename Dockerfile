@@ -35,6 +35,13 @@ RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
 RUN apt-get -y install vim
 RUN apt-get -y install git pkg-config libxml2-dev
 RUN python3 -m pip install -r https://raw.githubusercontent.com/mongodb/mut/master/requirements.txt
+
+# wacky stuff to install dev version of mut
+RUN git clone -b master --depth 1 https://github.com/mongodb/mut.git \
+    && python3 0m pip install -r https://raw.githubusercontent.com/mongodb/mut/master/requirements.txt \
+    && cd mut \
+    && python3 -m pip install -e .
+
 ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 14
@@ -65,7 +72,7 @@ RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/
 
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
-    && cd snooty                                                                                   \                                                                        \
+    && cd snooty                                                                                   \
     && npm install                                                                                 \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
     && mkdir -p ./static/images                                                                    \
