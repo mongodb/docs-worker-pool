@@ -98,6 +98,14 @@ export class ManifestJobHandler extends JobHandler {
     ];
   }
 
+  // TODO: Can this function be merged with prepBuildCommands?
+  prepStageSpecificNextGenCommands(): void {
+    if (this.currJob?.buildCommands) {
+      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
+      this.currJob.buildCommands.push('make next-gen-html');
+    }
+  }
+
   async deploy(): Promise<CommandExecutorResponse> {
     try {
       const resp = await this.deployGeneric(); // runs prepDeployCommands
