@@ -12,6 +12,7 @@ export interface SharedMetadata {
   branch: string;
   associated_products?: AssociatedProduct[];
   toctree: ToC;
+  toctreeOrder: any[];
   [key: string]: any;
 }
 

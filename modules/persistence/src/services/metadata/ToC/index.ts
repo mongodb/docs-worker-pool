@@ -32,21 +32,26 @@ const mergeNode = (node: ToC, tocs: ToCInsertions) => {
   return tocs[node?.options?.property]?.[node?.options?.branch] || node;
 };
 
-const mergeTocTreeOrder = (metadata: SharedMetadata, insertion) => {
-  const index = metadata.toctreeorder.find(insertion);
+const mergeTocTreeOrder = (metadata: SharedMetadata, node, insertions: TocOrderInsertions) => {
+  const insertion = insertions[metadata.project]?.[metadata.branch];
+  const index = metadata.toctreeOrder.indexOf('stub');
   return metadata.toctreeorder.splice(index, 0, ...insertion);
 };
 
 // BFS through the toctree from the metadata entry provided as an arg
 // and insert matching tocInsertion entries + tocOrders
-export const traverseAndMerge = (metadata: SharedMetadata, tocInsertions: ToCInsertions) => {
+export const traverseAndMerge = (
+  metadata: SharedMetadata,
+  tocInsertions: ToCInsertions,
+  tocOrderInsertions: TocOrderInsertions
+) => {
   const { toctree, associated_products } = metadata;
   let queue = [toctree];
   while (queue) {
     let next = queue.pop();
     if (next && isInsertionCandidateNode(next, associated_products)) {
       next = mergeNode(next, tocInsertions);
-      mergeTocTreeOrder(metadata, tocOrderInsertions);
+      metadata.toctreeorder = mergeTocTreeOrder(metadata, next, tocOrderInsertions);
     }
     if (next?.children) queue = [...queue, ...next.children];
   }

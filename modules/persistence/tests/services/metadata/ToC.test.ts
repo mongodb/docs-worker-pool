@@ -30,21 +30,20 @@ const mergedata = {
 };
 
 const mergeInsertions = {
-  tocInsertions: {
-    bar: {
-      '1.1': mergedata.toctree,
-    },
+  bar: {
+    '1.1': mergedata.toctree,
   },
-  tocOrderInsertions: {
-    bar: {
-      '1.1': mergedata.toctreeOrder,
-    },
+};
+
+const mergeOrderInsertions = {
+  bar: {
+    '1.1': mergedata.toctreeOrder,
   },
 };
 
 describe('traverseAndMerge', () => {
   test('statefully updates metadata object passed as an argument', () => {
-    traverseAndMerge(metadata, mergeInsertions, mergedata.toctreeOrder);
+    traverseAndMerge(metadata, mergeInsertions, mergeOrderInsertions);
     expect(true);
   });
 });
