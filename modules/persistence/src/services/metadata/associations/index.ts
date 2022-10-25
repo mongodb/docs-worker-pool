@@ -1,6 +1,6 @@
 import { AggregationCursor } from 'mongodb';
 import { pool, db } from '../../connector';
-import { ToC, ToCInsertions, traverseAndMerge } from '../ToC';
+import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge } from '../ToC';
 
 export interface AssociatedProduct {
   name: string;
@@ -40,7 +40,9 @@ const sharedMetadataEntry = async (metadata): Promise<SharedMetadata> => {
 };
 
 // Convert our cursor from the shared ToC aggregation query into a series of ToC objects
-const shapeToCsCursor = async (tocCursor: AggregationCursor): Promise<ToCInsertions> => {
+const shapeToCsCursor = async (
+  tocCursor: AggregationCursor
+): Promise<{ tocInsertions: ToCInsertions; tocOrderInsertions: TocOrderInsertions }> => {
   let tocInsertions, tocOrderInsertions;
   await tocCursor.forEach((doc) => {
     tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTree;

@@ -11,15 +11,14 @@ export interface ToC {
 }
 
 export interface ToCInsertions {
-  tocInsertions: {
-    [key: string]: {
-      [key: string]: ToC;
-    };
+  [key: string]: {
+    [key: string]: ToC;
   };
-  tocOrderInsertions: {
-    [key: string]: {
-      [key: string]: any[];
-    };
+}
+
+export interface TocOrderInsertions {
+  [key: string]: {
+    [key: string]: any[];
   };
 }
 
@@ -40,7 +39,7 @@ const mergeTocTreeOrder = (metadata: SharedMetadata, insertion) => {
 
 // BFS through the toctree from the metadata entry provided as an arg
 // and insert matching tocInsertion entries + tocOrders
-export const traverseAndMerge = (metadata: SharedMetadata, tocInsertions: ToCInsertions, tocOrderInsertions) => {
+export const traverseAndMerge = (metadata: SharedMetadata, tocInsertions: ToCInsertions) => {
   const { toctree, associated_products } = metadata;
   let queue = [toctree];
   while (queue) {
