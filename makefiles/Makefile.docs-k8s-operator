@@ -23,7 +23,7 @@ include ~/shared.mk
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/${PROJECT}-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
-.PHONY: help html publish stage deploy deploy-search-index
+.PHONY: help html publish stage deploy
 
 
 
@@ -79,22 +79,4 @@ publish:
 get-build-dependencies: 
 	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-k8s-operator.yaml > ${REPO_DIR}/published-branches.yaml
 
-
-
-
-#################################################################
-####  DEPLOY KUBERNETES OPERATOR DOCUMENTATION TO PRODUCTION ####
-#################################################################
-
-stage: ## Host online for review
-	mut-publish build/${GIT_BRANCH}/html ${BUCKET} --prefix=${PROJECT} --stage ${ARGS}
-	@echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
-
-## Deploy to the production bucket
-deploy: build/public
-	mut-publish build/public ${BUCKET} --prefix=${PROJECT} --deploy --redirect-prefix='${PROJECT}' ${ARGS}
-
-	@echo "\n\nHosted at ${URL}/${PROJECT}/index.html"
-
-	$(MAKE) next-gen-deploy-search-index
 

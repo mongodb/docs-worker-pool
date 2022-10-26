@@ -15,8 +15,6 @@ SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 PUSHLESS_DEPLOY_SHARED_DISABLED=true
 
-CUSTOM_SEARCH_INDEX=true
-
 include ~/shared.mk
 
 DRIVERS_PATH=source/driver-examples
@@ -36,7 +34,7 @@ URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 # the current "stable" branch. This is weird and dumb, yes.
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
-.PHONY: help lint html markdown stage deploy deploy-search-index examples redirects
+.PHONY: help lint html markdown stage deploy examples redirects
 
 next-gen-html: examples get-build-dependencies
 	# snooty parse and then build-front-end
@@ -77,16 +75,6 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
-
-INDEX_NAME=$(subst docs,manual,${MANIFEST_PREFIX})
-INDEX_NAME=$(subst null,manual,${MANIFEST_PREFIX})
-ifeq ($(INDEX_NAME), "manual-manual")
-	INDEX_NAME="manual-v5.0"
-endif
-
-next-gen-deploy-search-index: ##THESE ARE TERRIBLE HACKS THAT WE SHOULD BE (AND ARE) ASHAMED OF
-	@echo "Building search index"
-	mut-index upload public -b ${BUCKET} -o ${INDEX_NAME}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
 
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs.yaml > ${REPO_DIR}/published-branches.yaml
@@ -140,7 +128,6 @@ deploy: build/public ## Deploy to the production bucket
 
 	@echo "Hosted at ${URL}/index.html"
 
-	$(MAKE) next-gen-deploy-search-index
 
 redirects:
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
