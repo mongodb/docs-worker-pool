@@ -18,6 +18,3 @@ include ~/shared.mk
 get-build-dependencies: 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongodb-vscode.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-deploy-search-index: ## Update the search index for this branch
-	@echo "Building search index"
-	mut-index upload public -b ${BUCKET} -o ${PROJECT}-${GIT_BRANCH}.json -u "${URL}/${MUT_PREFIX}" -s

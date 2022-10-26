@@ -3,7 +3,7 @@ SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 REGRESSION = $(shell printenv REGRESSION)
 BUCKET = $(shell printenv BUCKET)
 URL = $(shell printenv URL)
-INTEGRATION_SEARCH_BUCKET=docs-search-indexes-integration
+
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
 PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
@@ -28,7 +28,6 @@ next-gen-deploy:
 	if [ -f config/redirects -a "${GIT_BRANCH}" = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	yes | mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${URL}/${MUT_PREFIX}";
-	if [ ${MANIFEST_PREFIX} ]; then $(MAKE) next-gen-deploy-search-index; fi
 endif
 
 ifndef PUSHLESS_DEPLOY_SHARED_DISABLED
@@ -72,12 +71,3 @@ next-gen-stage: ## Host online for review
 	fi
 endif
 
-## Update the search index for this branch
-## HACK-Y WORKAROUNDS:
-## docs && cloud-docs && cloudgov && mongocli have own search indexes to rename their manifests because of a bug in the workerpool code
-## Landing doesn't have search at all.
-ifndef CUSTOM_SEARCH_INDEX
-next-gen-deploy-search-index:
-	@echo "Building search index"
-	mut-index upload public -b ${BUCKET} -o ${MANIFEST_PREFIX}.json -u ${URL}/${MUT_PREFIX} -s ${GLOBAL_SEARCH_FLAG} $(BUCKET_FLAG)
-endif

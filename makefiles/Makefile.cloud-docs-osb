@@ -11,14 +11,7 @@ COMMIT_HASH=$(shell git rev-parse --short HEAD)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
-CUSTOM_SEARCH_INDEX=true
-
 include ~/shared.mk
-
-
-next-gen-deploy-search-index:
-	@echo "Not building search index as part of this deploy"
-
 
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/cloud-docs-osb.yaml > ${REPO_DIR}/published-branches.yaml

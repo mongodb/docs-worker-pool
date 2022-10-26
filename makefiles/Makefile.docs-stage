@@ -87,16 +87,6 @@ deploy: build/public ## Deploy to the production bucket
 
 	@echo "Hosted at ${URL}/index.html"
 
-	$(MAKE) next-gen-deploy-search-index
-
-next-gen-deploy-search-index: ## Update the search index for this branch
-	@echo "Building search index"
-	if [ ${STABLE_BRANCH} = ${GIT_BRANCH} ]; then \
-		mut-index upload build/public/${GIT_BRANCH} -o manual-current.json --aliases manual-${GIT_BRANCH} -u ${URL}/manual -g -s; \
-	else \
-		mut-index upload build/public/${GIT_BRANCH} -o manual-${GIT_BRANCH}.json -u ${URL}/${GIT_BRANCH} -s; \
-	fi
-
 next-gen-html: examples
 	# snooty parse and then build-front-end
 	@if [ ! -z "${PATCH_ID}" ]; then \
