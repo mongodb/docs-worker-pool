@@ -23,7 +23,7 @@ export interface TocOrderInsertions {
 }
 
 const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProduct[] = []) => {
-  const nodeInProducts = node.options?.version && associated_products.includes(node.options.version);
+  const nodeInProducts = node.options?.project && associated_products.find((p) => p.name === node.options?.product);
   const nodeHasNoChildren = node && (!node.children || node.children.length === 0);
   return nodeHasNoChildren && nodeInProducts;
 };
