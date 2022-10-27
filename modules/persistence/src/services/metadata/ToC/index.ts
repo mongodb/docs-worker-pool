@@ -29,7 +29,7 @@ const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProd
 };
 
 const mergeNode = (node: ToC, tocs: ToCInsertions) => {
-  const project = tocs[node?.options?.property];
+  const project = tocs[node?.options?.name];
   node.children = Object.keys(project).map((branch) => {
     const child = project[branch];
     const options = {
@@ -39,7 +39,7 @@ const mergeNode = (node: ToC, tocs: ToCInsertions) => {
     child[0].options = options;
     return child;
   });
-  return tocs[node?.options?.property]?.[node?.options?.branch] || node;
+  return node;
 };
 
 const mergeTocTreeOrder = (metadata: SharedMetadata, node, insertions: TocOrderInsertions) => {
