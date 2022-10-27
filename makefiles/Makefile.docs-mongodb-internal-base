@@ -22,9 +22,8 @@ DRIVERS_PATH=source/driver-examples
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongodb-internal-base.yaml > ${REPO_DIR}/published-branches.yaml
 
-
-next-gen-html: examples get-build-dependencies
-	# snooty parse and then build-front-end
+next-gen-parse:
+	# snooty parse -- separated from front-end to support index gen
 	@if [ -n "${PATCH_ID}" ]; then \
 		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
 		if [ $$? -eq 1 ]; then \
@@ -40,6 +39,9 @@ next-gen-html: examples get-build-dependencies
 			exit 0; \
 		fi \
 	fi
+
+next-gen-html: examples get-build-dependencies next-gen-parse 
+	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \

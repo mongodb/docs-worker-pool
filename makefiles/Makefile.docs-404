@@ -18,7 +18,7 @@ endif
 
 DEPLOY_JOBS=job-$(BUCKET) job-docs-atlas-$(SNOOTY_ENV) job-docs-java-$(SNOOTY_ENV) job-docs-go-$(SNOOTY_ENV) job-docs-node-$(SNOOTY_ENV)
 
-.PHONY: next-gen-html next-gen-stage next-gen-deploy $(DEPLOY_JOBS)
+.PHONY: next-gen-parse next-gen-html next-gen-stage next-gen-deploy $(DEPLOY_JOBS)
 
 include ~/shared.mk
 
