@@ -35,9 +35,8 @@ URL_APPENDIX=$(shell if [ ! -z "${PATCH_ID}" ]; then echo "_${PATCH_ID}"; fi)
 STABLE_BRANCH=`grep 'manual' build/docs-tools/data/manual-published-branches.yaml | cut -d ':' -f 2 | grep -Eo '[0-9a-z.]+'`
 
 .PHONY: help lint html markdown stage deploy examples redirects
-
-next-gen-html: examples get-build-dependencies
-	# snooty parse and then build-front-end
+next-gen-parse:
+	# snooty parse -- separated from front-end to support index gen
 	@if [ -n "${PATCH_ID}" ]; then \
 		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
 		if [ $$? -eq 1 ]; then \
@@ -53,6 +52,9 @@ next-gen-html: examples get-build-dependencies
 			exit 0; \
 		fi \
 	fi
+
+next-gen-html: examples get-build-dependencies next-gen-parse 
+	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
