@@ -23,18 +23,28 @@ export interface TocOrderInsertions {
 }
 
 const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProduct[] = []) => {
-  const nodeInProducts = node.options?.project && associated_products.find((p) => p.name === node.options?.product);
-  const nodeHasNoChildren = node && (!node.children || node.children.length === 0);
+  const nodeInProducts = node.options?.name && associated_products.find((p) => p.name === node.options?.name);
+  const nodeHasNoChildren = !node.children || node.children.length === 0;
   return nodeHasNoChildren && nodeInProducts;
 };
 
 const mergeNode = (node: ToC, tocs: ToCInsertions) => {
+  const project = tocs[node?.options?.property];
+  node.children = Object.keys(project).map((branch) => {
+    const child = project[branch];
+    const options = {
+      ...child[0].options,
+      version: branch,
+    };
+    child[0].options = options;
+    return child;
+  });
   return tocs[node?.options?.property]?.[node?.options?.branch] || node;
 };
 
 const mergeTocTreeOrder = (metadata: SharedMetadata, node, insertions: TocOrderInsertions) => {
   const insertion = insertions[metadata.project]?.[metadata.branch];
-  const index = metadata.toctreeOrder.indexOf('stub');
+  const index = metadata.toctreeOrder.indexOf(node.options?.name);
   return metadata.toctreeorder.splice(index, 0, ...insertion);
 };
 
