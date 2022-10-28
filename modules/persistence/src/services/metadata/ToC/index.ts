@@ -24,7 +24,7 @@ export interface TocOrderInsertions {
 }
 
 const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProduct[] = []) => {
-  const nodeInProducts = node.options?.name && associated_products.find((p) => p.name === node.options?.name);
+  const nodeInProducts = node.options?.project && associated_products.find((p) => p.name === node.options?.project);
   const nodeHasNoChildren = !node.children || node.children.length === 0;
   return nodeHasNoChildren && nodeInProducts;
 };
@@ -33,7 +33,7 @@ const mergeNode = (node: ToC, tocs: ToCInsertions) => {
   // Options might be undefined, so safely cast to {} if nullish
   node.options = node.options ?? {};
 
-  const project = tocs[node?.options?.name];
+  const project = tocs[node?.options?.project];
   const branches = Object.keys(project);
   node.options.versions = branches;
   node.children = branches.map((branch) => {
@@ -50,7 +50,7 @@ const mergeNode = (node: ToC, tocs: ToCInsertions) => {
 
 const mergeTocTreeOrder = (metadata: SharedMetadata, node, insertions: TocOrderInsertions) => {
   const insertion = insertions[metadata.project]?.[metadata.branch];
-  const index = metadata.toctreeOrder.indexOf(node.options?.name);
+  const index = metadata.toctreeOrder.indexOf(node.options?.project);
   return metadata.toctreeorder.splice(index, 0, ...insertion);
 };
 
