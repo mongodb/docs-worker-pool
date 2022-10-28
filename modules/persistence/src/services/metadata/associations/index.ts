@@ -1,6 +1,6 @@
 import { AggregationCursor } from 'mongodb';
 import { pool, db } from '../../connector';
-import { ToC, ToCInsertions, TocOrderInsertions, ReposBranchesDocument, traverseAndMerge } from '../ToC';
+import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge } from '../ToC';
 
 export interface AssociatedProduct {
   name: string;
@@ -83,6 +83,7 @@ const shapeToCsCursor = async (
 ): Promise<{ tocInsertions: ToCInsertions; tocOrderInsertions: TocOrderInsertions }> => {
   let tocInsertions, tocOrderInsertions;
   await tocCursor.forEach((doc) => {
+    // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesMap[doc._id.project][doc._id.branch]) {
       tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTree;
       tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTreeOrder;
