@@ -12,7 +12,8 @@ export interface ToC {
 
 export interface ToCInsertions {
   [key: string]: {
-    [key: string]: ToC;
+    // project : branch key value pair
+    [key: string]: ToC; // branch : ToC key value pair
   };
 }
 
@@ -29,8 +30,13 @@ const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProd
 };
 
 const mergeNode = (node: ToC, tocs: ToCInsertions) => {
+  // Options might be undefined, so safely cast to {} if nullish
+  node.options = node.options ?? {};
+
   const project = tocs[node?.options?.name];
-  node.children = Object.keys(project).map((branch) => {
+  const branches = Object.keys(project);
+  node.options.versions = branches;
+  node.children = branches.map((branch) => {
     const child = project[branch];
     const options = {
       ...child[0].options,
@@ -56,6 +62,7 @@ export const traverseAndMerge = (
   tocOrderInsertions: TocOrderInsertions
 ) => {
   const { toctree, associated_products } = metadata;
+
   let queue = [toctree];
   while (queue) {
     let next = queue.pop();

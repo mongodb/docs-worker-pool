@@ -1,6 +1,6 @@
 import { AggregationCursor } from 'mongodb';
 import { pool, db } from '../../connector';
-import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge } from '../ToC';
+import { ToC, ToCInsertions, TocOrderInsertions, ReposBranchesDocument, traverseAndMerge } from '../ToC';
 
 export interface AssociatedProduct {
   name: string;
@@ -16,24 +16,60 @@ export interface SharedMetadata {
   [key: string]: any;
 }
 
-// Queries pool.repos_branches for any entries for the given project and branch from a metadata entry.
+// TODO: move the branch/repobranch interfaces into their own file, or into a seperate abstraction?
+interface BranchEntry {
+  name: string;
+  gitBranchName: string;
+  [key: string]: any;
+}
+
+export interface ReposBranchesDocument {
+  repoName: string;
+  project: string;
+  branches: BranchEntry[];
+  [key: string]: any;
+}
+
+// Queries pool*.repos_branches for any entries for the given project and branch from a metadata entry.
 const repoBranchesEntry = async (project, branch) => {
   const db = await pool();
   return db.collection('repos_branches').find({ branches: { $elemMatch: { gitBranchName: branch } }, project });
 };
+
+// Queries pool*.repos_branches for all entries for associated_products in a shared metadata entry
+const allAssociatedRepoBranchesEntries = async (metadata: SharedMetadata) => {
+  const { associated_products = [] } = metadata;
+  const associatedProductNames = associated_products.map((a) => a.name);
+  const db = await pool();
+  const entries = await db
+    .collection('repos_branches')
+    .find({ project: { $in: associatedProductNames } })
+    .toArray();
+  return entries as unknown as ReposBranchesDocument[];
+};
+
+const mapRepoBranches = (repoBranches: ReposBranchesDocument[]) =>
+  Object.fromEntries(
+    repoBranches.map((entry) => {
+      const branches = Object.fromEntries(entry.branches.map((branch) => [branch.name, branch]));
+      return [entry.project, branches];
+    })
+  );
 
 const hasAssociations = (metadata) => !!metadata.associated_products?.length;
 
 const sharedMetadataEntry = async (metadata): Promise<SharedMetadata> => {
   try {
     const snooty = await db();
-    return snooty
+    const entry = await snooty
       .collection('metadata')
       .find({
         $elemMatch: { associated_products: metadata.project },
       })
       .sort({ build_id: -1 })
-      .limit(1)[0];
+      .limit(1)
+      .toArray();
+    return entry[0] as unknown as SharedMetadata;
   } catch (error) {
     console.log(`Error at time of querying for umbrella metadata entry: ${error}`);
     throw error;
@@ -42,19 +78,23 @@ const sharedMetadataEntry = async (metadata): Promise<SharedMetadata> => {
 
 // Convert our cursor from the shared ToC aggregation query into a series of ToC objects
 const shapeToCsCursor = async (
-  tocCursor: AggregationCursor
+  tocCursor: AggregationCursor,
+  repoBranchesMap
 ): Promise<{ tocInsertions: ToCInsertions; tocOrderInsertions: TocOrderInsertions }> => {
   let tocInsertions, tocOrderInsertions;
   await tocCursor.forEach((doc) => {
-    tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTree;
-    tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTreeOrder;
+    if (repoBranchesMap[doc._id.project][doc._id.branch]) {
+      tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTree;
+      tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTreeOrder;
+    }
   });
+
   return { tocInsertions, tocOrderInsertions };
 };
 
 const queryForAssociatedProducts = async (metadata, sharedMetadataEntry) => {
   try {
-    // Do a comparison between the local metadata entry and the shared me
+    // Do a comparison between the local metadata entry and the shared metadata
     const localNewerThanShared = metadata.created_at > sharedMetadataEntry.created_at;
     const { associated_products } = localNewerThanShared ? metadata : sharedMetadataEntry;
     const associatedProductNames = associated_products.map((a) => a.name);
@@ -78,7 +118,7 @@ const queryForAssociatedProducts = async (metadata, sharedMetadataEntry) => {
         },
       },
     ]);
-    return shapeToCsCursor(tocs);
+    return tocs;
   } catch (error) {
     console.log(`Error at time of aggregating existing associated product metadata entries: ${error}`);
     throw error;
@@ -88,13 +128,19 @@ const queryForAssociatedProducts = async (metadata, sharedMetadataEntry) => {
 export const mergeAssociatedToCs = async (metadata) => {
   const { project, branch } = metadata;
   const sharedMetadata = hasAssociations(metadata) ? metadata : await sharedMetadataEntry(metadata);
+
   // Short circuit execution here if there's no umbrella product metadata found
   if (!sharedMetadata) return;
 
   // Short circuit execution if the project branch is NOT in repo branches
+  // If we want to embed with staging builds, then this needs to be turned off
+  // or converted so that local metadata ToC is added to tocInsertions
   const isStagingBranch = await !repoBranchesEntry(project, branch);
   if (isStagingBranch) return;
 
-  const { tocInsertions, tocOrderInsertions } = await queryForAssociatedProducts(metadata, sharedMetadata);
+  const repoBranchesEntries = await allAssociatedRepoBranchesEntries(sharedMetadata);
+  const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
+  const tocsCursor = await queryForAssociatedProducts(metadata, sharedMetadata);
+  const { tocInsertions, tocOrderInsertions } = await shapeToCsCursor(tocsCursor, repoBranchesMap);
   return traverseAndMerge(sharedMetadata, tocInsertions, tocOrderInsertions);
 };
