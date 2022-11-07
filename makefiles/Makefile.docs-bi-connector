@@ -13,13 +13,6 @@ export DIAGNOSTICS_FORMAT=JSON
 
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
-PUSHLESS_DEPLOY_SHARED_DISABLED=true
-
-# "PATCH_ID" related shell commands to manage commitless builds
-
-PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
-
-PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
 include ~/shared.mk
 
