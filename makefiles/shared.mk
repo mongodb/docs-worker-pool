@@ -31,8 +31,8 @@ next-gen-deploy:
 endif
 
 ifndef PUSHLESS_DEPLOY_SHARED_DISABLED
-next-gen-parse:
-	# snooty parse -- separated from front-end to support index gen
+next-gen-html:
+	# snooty parse and then build-front-end
 	if [ -n "${PATCH_ID}" ]; then \
 		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
 		if [ $$? -eq 1 ]; then \
@@ -48,9 +48,6 @@ next-gen-parse:
 			exit 0; \
 		fi \
 	fi
-
-next-gen-html: next-gen-parse
-	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
