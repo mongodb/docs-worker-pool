@@ -442,7 +442,7 @@ export abstract class JobHandler {
   // based on information about this build&deploy job
   // TODO: Give 'shouldGenerateSearchManifest' boolean to users' control
   shouldGenerateSearchManifest(): boolean {
-    const doNotSearchProperties = ['docs-landing'];
+    const doNotSearchProperties = ['docs-landing', 'docs-404', 'docs-meta'];
     if (doNotSearchProperties.includes(this.currJob.payload.repoName)) {
       return false;
     }
