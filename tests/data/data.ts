@@ -148,6 +148,14 @@ export class TestDataProvider {
     ]);
   }
 
+  static getExpectedManifestBuildNextGenCommands(job: Job): Array<string> {
+    const genericCommands = TestDataProvider.getCommonBuildCommands(job);
+    return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
+      'make get-build-dependencies',
+      'make next-gen-parse',
+    ]);
+  }
+
   static getExpectedStagingBuildNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
@@ -283,7 +291,8 @@ export class TestDataProvider {
     ]);
     if (job.payload.manifestPrefix) {
       // TODO: is job.payload.stableBranch supposed to be includeInGlobalSearch?
-      ret[ret.length - 1] += ` MANIFEST_PREFIX=${job.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${job.payload.stable}`;
+      const stable = job.payload.stable ? '-g' : '';
+      ret[ret.length - 1] += ` MANIFEST_PREFIX=${job.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${stable}`;
     }
     return ret;
   }
