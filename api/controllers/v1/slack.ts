@@ -143,7 +143,7 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
       false
     );
 
-    newPayload.stable = isStableBranch ? true : false;
+    newPayload.stable = !!isStableBranch;
 
     if (!aliases || aliases.length === 0) {
       if (non_versioned) {
