@@ -1,0 +1,14 @@
+{
+  "name": "oas-page-builder",
+  "version": "1.0.0",
+  "description": "An autobuilder module responsible for building static pages for OpenAPI content.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.8.4"
+  }
+}
