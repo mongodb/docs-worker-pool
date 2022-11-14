@@ -36,7 +36,7 @@ export type Payload = {
   aliased: boolean | null | undefined;
   primaryAlias: string | null | undefined;
   repoBranches: any;
-  stable: string | null | undefined;
+  stable: boolean | null | undefined;
   isNextGen: boolean | null | undefined;
   regression: boolean | null | undefined;
   urlSlug: string | null | undefined;

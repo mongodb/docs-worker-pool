@@ -94,7 +94,7 @@ export class ManifestJobHandler extends JobHandler {
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
-      `mut-index upload public -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP)} ${globalSearch}`,
+      `mut-index upload bundle.zip -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP)} ${globalSearch}`,
     ];
   }
 
@@ -102,7 +102,7 @@ export class ManifestJobHandler extends JobHandler {
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob?.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
-      this.currJob.buildCommands.push('make next-gen-html');
+      this.currJob.buildCommands.push('make next-gen-parse');
     }
   }
 
