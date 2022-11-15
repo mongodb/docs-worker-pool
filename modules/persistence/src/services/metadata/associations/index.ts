@@ -64,7 +64,7 @@ const sharedMetadataEntry = async (metadata): Promise<SharedMetadata> => {
     const entry = await snooty
       .collection('metadata')
       .find({
-        $elemMatch: { associated_products: metadata.project },
+        'associated_products.name': metadata.project,
       })
       .sort({ build_id: -1 })
       .limit(1)
