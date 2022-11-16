@@ -1,3 +1,6 @@
+import fetch from 'node-fetch';
+import { normalizePath } from '../utils/normalizePath';
+import { findLastSavedGitHash } from './database';
 import { OASPageMapping, OASPageMetadata } from './types';
 
 const fetchTextData = async (url: string, errMsg: string) => {
@@ -26,30 +29,46 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
     oasFileURL = getOASFileUrl(gitHash);
 
     // Sometimes the latest git hash might not have a fully available spec file yet.
-    // If this is the case, we should default to using the last saved hash in our database.
+    // If this is the case, we should default to using the last successfully saved
+    // hash in our database.
     await fetchTextData(oasFileURL, `Error fetching data from ${oasFileURL}.`);
   } catch (e) {
     console.warn(e);
 
-    const lastSavedHash = '';
-    // If the spec at the new URL still does not exist, then Redoc should throw a build error
-    oasFileURL = getOASFileUrl(lastSavedHash);
+    const res = await findLastSavedGitHash(apiKeyword);
+    if (res) {
+      oasFileURL = getOASFileUrl(res.gitHash);
+    } else {
+      throw `Could not find a saved hash for API: ${apiKeyword}.`;
+    }
   }
 
   return oasFileURL;
 };
 
-export const constructOpenAPIPageMapping = async (entries: [string, OASPageMetadata][]) => {
+export const buildOpenAPIPages = async (entries: [string, OASPageMetadata][], destination: string) => {
   const mapping: OASPageMapping = {};
 
   for (const [slug, data] of entries) {
     const { source_type: sourceType, source } = data;
 
-    if (sourceType === 'url' || sourceType === 'local') {
-      // mapping[slug] = await createSerializedStore(source);
-      mapping[slug] = source;
-    } else if (sourceType === 'atlas') {
-      mapping[slug] = await getAtlasSpecUrl(source);
+    try {
+      let buildArg = '';
+
+      if (sourceType === 'url' || sourceType === 'local') {
+        buildArg = source.slice(0, 10);
+      } else if (sourceType === 'atlas') {
+        buildArg = await getAtlasSpecUrl(source);
+      }
+
+      // Placeholder for actual Redoc CLI or Redoc library call
+      console.log(`Building page for "${slug}" with arg: ${buildArg}`);
+      // Placeholder for file output path of static Redoc page
+      const finalFilename = normalizePath(`${destination}/${slug}`);
+      console.log(`Moving file to ${finalFilename}`);
+    } catch (e) {
+      console.error(e);
+      continue;
     }
   }
 
