@@ -38,7 +38,7 @@ async function buildEntitledBranchList(entitlement: any, branchRepository: Branc
       }
     }
   }
-  return entitledBranches;
+  return entitledBranches.sort();
 }
 
 function getQSString(qs: string) {
