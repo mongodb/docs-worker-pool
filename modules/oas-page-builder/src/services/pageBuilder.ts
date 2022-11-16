@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
+import { execRedoc } from './commandExecutor';
 import { findLastSavedGitHash } from './database';
 import { OASPageMapping, OASPageMetadata } from './types';
 
@@ -25,47 +26,53 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
   let oasFileURL;
   try {
     const versionURL = 'https://cloud.mongodb.com/version';
-    const gitHash = await fetchTextData(versionURL, 'Could not find current version or git hash.');
+    const gitHash = await fetchTextData(versionURL, 'Could not find current version or git hash');
     oasFileURL = getOASFileUrl(gitHash);
 
     // Sometimes the latest git hash might not have a fully available spec file yet.
     // If this is the case, we should default to using the last successfully saved
     // hash in our database.
-    await fetchTextData(oasFileURL, `Error fetching data from ${oasFileURL}.`);
+    await fetchTextData(oasFileURL, `Error fetching data from ${oasFileURL}`);
   } catch (e) {
-    console.warn(e);
+    console.error(e);
 
     const res = await findLastSavedGitHash(apiKeyword);
     if (res) {
       oasFileURL = getOASFileUrl(res.gitHash);
+      console.log(`Using ${oasFileURL}`);
     } else {
-      throw `Could not find a saved hash for API: ${apiKeyword}.`;
+      throw new Error(`Could not find a saved hash for API: ${apiKeyword}`);
     }
   }
 
   return oasFileURL;
 };
 
-export const buildOpenAPIPages = async (entries: [string, OASPageMetadata][], destination: string) => {
+export const buildOpenAPIPages = async (
+  entries: [string, OASPageMetadata][],
+  destination: string,
+  redocPath: string,
+  repoPath: string
+) => {
   const mapping: OASPageMapping = {};
 
-  for (const [slug, data] of entries) {
+  for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source } = data;
 
     try {
-      let buildArg = '';
+      let spec = '';
 
-      if (sourceType === 'url' || sourceType === 'local') {
-        buildArg = source.slice(0, 10);
+      if (sourceType === 'url') {
+        spec = source;
+      } else if (sourceType === 'local') {
+        const localFilePath = normalizePath(`${repoPath}/source/${source}`);
+        spec = localFilePath;
       } else if (sourceType === 'atlas') {
-        buildArg = await getAtlasSpecUrl(source);
+        spec = await getAtlasSpecUrl(source);
       }
 
-      // Placeholder for actual Redoc CLI or Redoc library call
-      console.log(`Building page for "${slug}" with arg: ${buildArg}`);
-      // Placeholder for file output path of static Redoc page
-      const finalFilename = normalizePath(`${destination}/${slug}`);
-      console.log(`Moving file to ${finalFilename}`);
+      const finalFilename = normalizePath(`${destination}/${pageSlug}/index.html`);
+      await execRedoc(spec, finalFilename, redocPath);
     } catch (e) {
       console.error(e);
       continue;

@@ -5,12 +5,16 @@ import minimist from 'minimist';
 import { getOASMetadata } from './src/services/buildMetadata';
 import { buildOpenAPIPages } from './src/services/pageBuilder';
 
+// Properties kept optional to avoid type issues with minimist's returned args
 interface ModuleArgs extends minimist.ParsedArgs {
   // bundle -- path to parsed bundle
   bundle?: string;
   // destination -- path to the directory to move the generated files to
   destination?: string;
-  prefix?: string;
+  // redoc -- path to the Redoc CLI program to run. Must be a JS file.
+  redoc?: string;
+  // repo -- path to repo being built. Used to source local OAS files.
+  repo?: string;
 }
 
 const args: ModuleArgs = minimist(process.argv.slice(2));
@@ -31,8 +35,8 @@ const args: ModuleArgs = minimist(process.argv.slice(2));
 //   return missingArgs;
 // };
 
-const app = async ({ bundle: bundlePath, destination }: ModuleArgs) => {
-  if (!(bundlePath && destination)) {
+const app = async ({ bundle: bundlePath, destination, redoc: redocPath, repo: repoPath }: ModuleArgs) => {
+  if (!(bundlePath && destination && redocPath && repoPath)) {
     throw 'Missing one or more required args.';
   }
 
@@ -46,12 +50,12 @@ const app = async ({ bundle: bundlePath, destination }: ModuleArgs) => {
   const numOASPages = oasMetadataEntries.length;
   console.log(`OpenAPI content pages found: ${numOASPages}.`);
 
-  await buildOpenAPIPages(oasMetadataEntries, destination);
-  process.exit(0);
+  await buildOpenAPIPages(oasMetadataEntries, destination, redocPath, repoPath);
 };
 
 app(args)
   .then(() => {
+    console.log('Finished building OpenAPI content pages.');
     process.exit(0);
   })
   .catch((e) => {
