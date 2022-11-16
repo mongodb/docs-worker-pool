@@ -1,45 +1,24 @@
 import dotenv from 'dotenv';
 // Ensures that env variables are loaded in immediately, before other imports
 dotenv.config();
-import minimist from 'minimist';
+import { Command } from 'commander';
 import { getOASMetadata } from './src/services/buildMetadata';
 import { buildOpenAPIPages } from './src/services/pageBuilder';
+import { ModuleOptions } from './src/types';
 
-// Properties kept optional to avoid type issues with minimist's returned args
-interface ModuleArgs extends minimist.ParsedArgs {
-  // bundle -- path to parsed bundle
-  bundle?: string;
-  // destination -- path to the directory to move the generated files to
-  destination?: string;
-  // redoc -- path to the Redoc CLI program to run. Must be a JS file.
-  redoc?: string;
-  // repo -- path to repo being built. Used to source local OAS files.
-  repo?: string;
-}
+const program = new Command();
+program
+  .usage('-- [options]')
+  .requiredOption('-b, --bundle <path>', 'path to parsed bundle zip')
+  .requiredOption('-d, --destination <path>', 'path to the directory to output generated files')
+  .requiredOption('--redoc <path>', 'path to the Redoc CLI program to run. Must be a JS file')
+  .requiredOption('--repo <path>', 'path to repo being built');
 
-const args: ModuleArgs = minimist(process.argv.slice(2));
+program.parse();
+const options = program.opts<ModuleOptions>();
 
-// Returns the missing required argument
-// Should DELETE this due to TypeScript type validation issues
-// const findMissingArgs = (args: ModuleArgs) => {
-//   const requiredArgs = ['bundle', 'frontend'];
-//   const missingArgs: string[] = [];
-
-//   const presentArgs = new Set(Object.keys(args));
-//   for (const arg of requiredArgs) {
-//     if (!presentArgs.has(arg)) {
-//       missingArgs.push(arg);
-//     }
-//   }
-
-//   return missingArgs;
-// };
-
-const app = async ({ bundle: bundlePath, destination, redoc: redocPath, repo: repoPath }: ModuleArgs) => {
-  if (!(bundlePath && destination && redocPath && repoPath)) {
-    throw 'Missing one or more required args.';
-  }
-
+const app = async (options: ModuleOptions) => {
+  const { bundle: bundlePath } = options;
   const oasMetadata = getOASMetadata(bundlePath);
   if (!oasMetadata) {
     console.log('No OpenAPI content pages found.');
@@ -50,10 +29,10 @@ const app = async ({ bundle: bundlePath, destination, redoc: redocPath, repo: re
   const numOASPages = oasMetadataEntries.length;
   console.log(`OpenAPI content pages found: ${numOASPages}.`);
 
-  await buildOpenAPIPages(oasMetadataEntries, destination, redocPath, repoPath);
+  await buildOpenAPIPages(oasMetadataEntries, options);
 };
 
-app(args)
+app(options)
   .then(() => {
     console.log('Finished building OpenAPI content pages.');
     process.exit(0);

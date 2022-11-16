@@ -4,4 +4,3 @@ export interface OASPageMetadata {
 }
 
 export type OASPagesMetadata = Record<string, OASPageMetadata>;
-export type OASPageMapping = Record<string, string>;

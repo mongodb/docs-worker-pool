@@ -19,8 +19,8 @@
   "dependencies": {
     "adm-zip": "^0.5.9",
     "bson": "^4.7.0",
+    "commander": "^9.4.1",
     "dotenv": "^16.0.3",
-    "minimist": "^1.2.7",
     "mongodb": "^4.11.0",
     "node-fetch": "^2.6.7"
   }

@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
+import { ModuleOptions } from '../types';
 import { normalizePath } from '../utils/normalizePath';
 import { execRedoc } from './commandExecutor';
 import { findLastSavedGitHash } from './database';
-import { OASPageMapping, OASPageMetadata } from './types';
+import { OASPageMetadata } from './types';
 
 const fetchTextData = async (url: string, errMsg: string) => {
   const res = await fetch(url);
@@ -50,12 +51,8 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
 
 export const buildOpenAPIPages = async (
   entries: [string, OASPageMetadata][],
-  destination: string,
-  redocPath: string,
-  repoPath: string
+  { destination, redoc: redocPath, repo: repoPath }: ModuleOptions
 ) => {
-  const mapping: OASPageMapping = {};
-
   for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source } = data;
 
@@ -78,6 +75,4 @@ export const buildOpenAPIPages = async (
       continue;
     }
   }
-
-  return mapping;
 };
