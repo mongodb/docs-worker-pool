@@ -101,7 +101,7 @@ describe('pageBuilder', () => {
   it('does not build atlas OAS when backup git hash is missing', async () => {
     mockFetchImplementation(false);
     // @ts-ignore
-    findLastSavedGitHash.mockReturnValue({});
+    findLastSavedGitHash.mockReturnValue(null);
 
     const testEntries: [string, OASPageMetadata][] = [['path/to/page/1', { source_type: 'atlas', source: 'cloud' }]];
 
