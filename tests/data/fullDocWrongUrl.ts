@@ -41,7 +41,7 @@ export default {
     url: 'https://github.com/mongodb/docs-java',
     newHead: null,
     primaryAlias: true,
-    stable: '',
+    stable: false,
   },
   logs: [
     '* Starting Job with ID: 6228fbb8f8498d4be9c237f9 and type: productionDeploy',

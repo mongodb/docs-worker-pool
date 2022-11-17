@@ -24,7 +24,7 @@ describe('ManifestJobHandler Tests', () => {
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
-    jobHandlerTestHelper.verifyNextGenSuccess();
+    jobHandlerTestHelper.verifyManifestSuccess();
     expect(queueManifestJobSpy).toBeCalledTimes(0);
   });
 
@@ -50,7 +50,7 @@ describe('ManifestJobHandler Tests', () => {
       'cd repos/testauth',
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
-      'mut-index upload public -b sample-bucket -o example-preprd/test-job-mani-prefix.json -u https://mongodbcom-cdn.website.staging.corp.mongodb.com/ ',
+      'mut-index upload bundle.zip -b sample-bucket -o example-preprd/test-job-mani-prefix.json -u https://mongodbcom-cdn.website.staging.corp.mongodb.com/ ',
     ];
     expect(jobHandlerTestHelper.job.deployCommands).toEqual(o);
   });
