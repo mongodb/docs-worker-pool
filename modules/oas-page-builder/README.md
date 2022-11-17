@@ -8,7 +8,7 @@ tasks, but before [mut](https://github.com/mongodb/mut) uploads files to S3.
 
 ## Installation
 
-If using `nvm`, perform run `nvm use` to ensure you're using the intended version
+If using `nvm`, run `nvm use` to ensure you're using the intended version
 of Node found in `.nvmrc`.
 
 To install dependencies, run:
