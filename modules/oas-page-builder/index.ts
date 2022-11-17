@@ -10,7 +10,7 @@ const program = new Command();
 program
   .usage('-- [options]')
   .requiredOption('-b, --bundle <path>', 'path to parsed bundle zip')
-  .requiredOption('-d, --destination <path>', 'path to the directory to output generated files')
+  .requiredOption('-o, --output <path>', 'path to the directory to output generated files')
   .requiredOption('--redoc <path>', 'path to the Redoc CLI program to run. Must be a JS file')
   .requiredOption('--repo <path>', 'path to repo being built');
 

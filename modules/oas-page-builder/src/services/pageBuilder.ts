@@ -51,7 +51,7 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
 
 export const buildOpenAPIPages = async (
   entries: [string, OASPageMetadata][],
-  { destination, redoc: redocPath, repo: repoPath }: ModuleOptions
+  { output, redoc: redocPath, repo: repoPath }: ModuleOptions
 ) => {
   for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source } = data;
@@ -70,7 +70,7 @@ export const buildOpenAPIPages = async (
         throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
       }
 
-      const finalFilename = normalizePath(`${destination}/${pageSlug}/index.html`);
+      const finalFilename = normalizePath(`${output}/${pageSlug}/index.html`);
       await execRedoc(spec, finalFilename, redocPath);
     } catch (e) {
       console.error(e);

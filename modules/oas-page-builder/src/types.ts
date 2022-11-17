@@ -1,6 +1,6 @@
 export interface ModuleOptions {
   bundle: string;
-  destination: string;
+  output: string;
   redoc: string;
   repo: string;
 }
