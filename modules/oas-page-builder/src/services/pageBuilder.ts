@@ -66,12 +66,16 @@ export const buildOpenAPIPages = async (
         spec = localFilePath;
       } else if (sourceType === 'atlas') {
         spec = await getAtlasSpecUrl(source);
+      } else {
+        throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
       }
 
       const finalFilename = normalizePath(`${destination}/${pageSlug}/index.html`);
       await execRedoc(spec, finalFilename, redocPath);
     } catch (e) {
       console.error(e);
+      // Continue to try to build other pages since it's possible that mut will
+      // still upload existing HTML files
       continue;
     }
   }
