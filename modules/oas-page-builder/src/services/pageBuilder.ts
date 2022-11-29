@@ -5,6 +5,8 @@ import { execRedoc } from './commandExecutor';
 import { findLastSavedGitHash } from './database';
 import { OASPageMetadata } from './types';
 
+const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
+
 const fetchTextData = async (url: string, errMsg: string) => {
   const res = await fetch(url);
   if (!res.ok) {
@@ -14,13 +16,13 @@ const fetchTextData = async (url: string, errMsg: string) => {
   return res.text();
 };
 
-const getOASFileUrl = (gitHash: string) =>
-  `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${gitHash}.json`;
+const getOASFileUrl = (gitHash: string) => `${OAS_FILE_SERVER}${gitHash}.json`;
 
 const getAtlasSpecUrl = async (apiKeyword: string) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
   // but it's possible to have more in the future with varying processes.
-  if (apiKeyword !== 'cloud') {
+  const keywords = ['cloud'];
+  if (keywords.includes(apiKeyword)) {
     throw new Error(`${apiKeyword} is not a supported API for building.`);
   }
 
