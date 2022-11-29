@@ -22,7 +22,7 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
   // but it's possible to have more in the future with varying processes.
   const keywords = ['cloud'];
-  if (keywords.includes(apiKeyword)) {
+  if (!keywords.includes(apiKeyword)) {
     throw new Error(`${apiKeyword} is not a supported API for building.`);
   }
 

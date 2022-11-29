@@ -35,7 +35,7 @@ const mockFetchImplementation = (ok: boolean) => {
 describe('pageBuilder', () => {
   const testOptions: ModuleOptions = {
     bundle: '/path/to/bundle.zip',
-    destination: '/path/to/destination',
+    output: '/path/to/destination',
     redoc: '/path/to/redoc/cli/index.js',
     repo: '/path/to/repo',
   };
@@ -66,19 +66,19 @@ describe('pageBuilder', () => {
     // Local
     expect(execRedoc).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.destination}/${testEntries[0][0]}/index.html`,
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
       testOptions.redoc
     );
     // Url
     expect(execRedoc).toBeCalledWith(
       `${testEntries[1][1].source}`,
-      getExpectedOutputPath(testOptions.destination, testEntries[1][0]),
+      getExpectedOutputPath(testOptions.output, testEntries[1][0]),
       testOptions.redoc
     );
     // Atlas
     expect(execRedoc).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
-      getExpectedOutputPath(testOptions.destination, testEntries[2][0]),
+      getExpectedOutputPath(testOptions.output, testEntries[2][0]),
       testOptions.redoc
     );
   });
@@ -93,7 +93,7 @@ describe('pageBuilder', () => {
     await buildOpenAPIPages(testEntries, testOptions);
     expect(execRedoc).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${LAST_SAVED_GIT_HASH}.json`,
-      getExpectedOutputPath(testOptions.destination, testEntries[0][0]),
+      getExpectedOutputPath(testOptions.output, testEntries[0][0]),
       testOptions.redoc
     );
   });
