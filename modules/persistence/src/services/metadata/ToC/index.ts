@@ -1,4 +1,4 @@
-import { SharedMetadata, AssociatedProduct } from '../associations';
+import { SharedMetadata, AssociatedProduct } from '../associated_products';
 
 export interface ToC {
   title: string;

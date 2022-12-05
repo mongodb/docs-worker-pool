@@ -37,7 +37,7 @@ const getRepoBranchesEntry = async (project, branch) => {
 };
 
 // Queries pool*.repos_branches for all entries for associated_products in a shared metadata entry
-const allAssociatedRepoBranchesEntries = async (metadata: SharedMetadata) => {
+const getAllAssociatedRepoBranchesEntries = async (metadata: SharedMetadata) => {
   const { associated_products } = metadata;
   if (!associated_products || !associated_products.length) return [];
   const associatedProductNames = associated_products.map((a) => a.name);
@@ -94,7 +94,7 @@ const shapeToCsCursor = async (
   return { tocInsertions, tocOrderInsertions };
 };
 
-const queryForAssociatedProducts = async (metadata, sharedMetadataEntry) => {
+const getAssociatedProducts = async (metadata, sharedMetadataEntry) => {
   try {
     // Do a comparison between the local metadata entry and the shared metadata
     const localNewerThanShared = metadata.created_at > sharedMetadataEntry.created_at;
@@ -140,9 +140,9 @@ export const mergeAssociatedToCs = async (metadata) => {
   const isStagingBranch = await !getRepoBranchesEntry(project, branch);
   if (isStagingBranch) return;
 
-  const repoBranchesEntries = await allAssociatedRepoBranchesEntries(sharedMetadata);
+  const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(sharedMetadata);
   const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
-  const tocsCursor = await queryForAssociatedProducts(metadata, sharedMetadata);
+  const tocsCursor = await getAssociatedProducts(metadata, sharedMetadata);
   const { tocInsertions, tocOrderInsertions } = await shapeToCsCursor(tocsCursor, repoBranchesMap);
   return traverseAndMerge(sharedMetadata, tocInsertions, tocOrderInsertions);
 };

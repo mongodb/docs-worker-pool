@@ -2,7 +2,7 @@ import AdmZip from 'adm-zip';
 import { deserialize } from 'bson';
 import { ObjectId } from 'mongodb';
 import { insert } from '../connector';
-import { mergeAssociatedToCs } from './associations';
+import { mergeAssociatedToCs } from './associated_products';
 
 const COLLECTION_NAME = 'metadata';
 
