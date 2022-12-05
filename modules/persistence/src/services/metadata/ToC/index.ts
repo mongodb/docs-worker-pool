@@ -10,11 +10,12 @@ export interface ToC {
   [key: string]: any;
 }
 
+type project = string;
+type branchName = string;
+type branch = { [key: branchName]: ToC };
+
 export interface ToCInsertions {
-  [key: string]: {
-    // project : branch key value pair
-    [key: string]: ToC; // branch : ToC key value pair
-  };
+  [key: project]: branch;
 }
 
 export interface TocOrderInsertions {
@@ -64,8 +65,8 @@ export const traverseAndMerge = (
   const { toctree, associated_products } = metadata;
 
   let queue = [toctree];
-  while (queue) {
-    let next = queue.pop();
+  while (queue?.length) {
+    let next = queue.shift();
     if (next && isInsertionCandidateNode(next, associated_products)) {
       next = mergeNode(next, tocInsertions);
       metadata.toctreeorder = mergeTocTreeOrder(metadata, next, tocOrderInsertions);

@@ -31,14 +31,15 @@ export interface ReposBranchesDocument {
 }
 
 // Queries pool*.repos_branches for any entries for the given project and branch from a metadata entry.
-const repoBranchesEntry = async (project, branch) => {
+const getRepoBranchesEntry = async (project, branch) => {
   const db = await pool();
-  return db.collection('repos_branches').find({ branches: { $elemMatch: { gitBranchName: branch } }, project });
+  return db.collection('repos_branches').findOne({ branches: { $elemMatch: { gitBranchName: branch } }, project });
 };
 
 // Queries pool*.repos_branches for all entries for associated_products in a shared metadata entry
 const allAssociatedRepoBranchesEntries = async (metadata: SharedMetadata) => {
-  const { associated_products = [] } = metadata;
+  const { associated_products } = metadata;
+  if (!associated_products || !associated_products.length) return [];
   const associatedProductNames = associated_products.map((a) => a.name);
   const db = await pool();
   const entries = await db
@@ -51,7 +52,7 @@ const allAssociatedRepoBranchesEntries = async (metadata: SharedMetadata) => {
 const mapRepoBranches = (repoBranches: ReposBranchesDocument[]) =>
   Object.fromEntries(
     repoBranches.map((entry) => {
-      const branches = Object.fromEntries(entry.branches.map((branch) => [branch.name, branch]));
+      const branches = Object.fromEntries(entry.branches.map((branch) => [branch.gitBranchName, branch]));
       return [entry.project, branches];
     })
   );
@@ -85,7 +86,7 @@ const shapeToCsCursor = async (
   await tocCursor.forEach((doc) => {
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesMap[doc._id.project][doc._id.branch]) {
-      tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTree;
+      tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.toctree;
       tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTreeOrder;
     }
   });
@@ -136,7 +137,7 @@ export const mergeAssociatedToCs = async (metadata) => {
   // Short circuit execution if the project branch is NOT in repo branches
   // If we want to embed with staging builds, then this needs to be turned off
   // or converted so that local metadata ToC is added to tocInsertions
-  const isStagingBranch = await !repoBranchesEntry(project, branch);
+  const isStagingBranch = await !getRepoBranchesEntry(project, branch);
   if (isStagingBranch) return;
 
   const repoBranchesEntries = await allAssociatedRepoBranchesEntries(sharedMetadata);
