@@ -139,7 +139,6 @@ export const mergeAssociatedToCs = async (metadata) => {
 
   // Short circuit execution here if there's no umbrella product metadata found
   if (!sharedMetadata) return;
-
   // Short circuit execution if the project branch is NOT in repo branches
   // If we want to embed with staging builds, then this needs to be turned off
   // or converted so that local metadata ToC is added to tocInsertions
@@ -150,5 +149,9 @@ export const mergeAssociatedToCs = async (metadata) => {
   const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
   const tocsCursor = await getAssociatedProducts(metadata, sharedMetadata);
   const { tocInsertions, tocOrderInsertions } = await shapeToCsCursor(tocsCursor, repoBranchesMap);
-  return traverseAndMerge(sharedMetadata, tocInsertions, tocOrderInsertions);
+  const mergedMetadataEntry = traverseAndMerge(sharedMetadata, tocInsertions, tocOrderInsertions);
+
+  // Remove the _id and treat the entry as a brand new document.
+  delete mergedMetadataEntry._id;
+  return mergedMetadataEntry;
 };
