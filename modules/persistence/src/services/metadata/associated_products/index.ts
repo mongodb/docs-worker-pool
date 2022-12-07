@@ -82,10 +82,16 @@ const shapeToCsCursor = async (
   tocCursor: AggregationCursor,
   repoBranchesMap
 ): Promise<{ tocInsertions: ToCInsertions; tocOrderInsertions: TocOrderInsertions }> => {
-  let tocInsertions, tocOrderInsertions;
+  const tocInsertions = {};
+  const tocOrderInsertions = {};
+
   await tocCursor.forEach((doc) => {
+    // Initialize to empty object if we haven't already, for a given project.
+    if (!tocInsertions[doc._id.project]) tocInsertions[doc._id.project] = {};
+    if (!tocOrderInsertions[doc._id.project]) tocInsertions[doc._id.project] = {};
+
     // TODO: If we want staging builds with embedded versions, it needs to be added here
-    if (repoBranchesMap[doc._id.project][doc._id.branch]) {
+    if (repoBranchesMap?.[doc._id.project]?.[doc._id.branch]) {
       tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.toctree;
       tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTreeOrder;
     }
