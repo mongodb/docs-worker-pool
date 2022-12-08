@@ -38,7 +38,7 @@ async function buildEntitledBranchList(entitlement: any, branchRepository: Branc
       }
     }
   }
-  return entitledBranches;
+  return entitledBranches.sort();
 }
 
 function getQSString(qs: string) {
@@ -140,8 +140,10 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
       urlSlug,
       false,
       false,
-      '-g'
+      false
     );
+
+    newPayload.stable = !!isStableBranch;
 
     if (!aliases || aliases.length === 0) {
       if (non_versioned) {
@@ -151,8 +153,6 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
       continue;
     }
 
-    // if this is stable branch, we want autobuilder to know this is unaliased branch and therefore can reindex for search
-    newPayload.stable = isStableBranch ? '-g' : '';
     newPayload.aliased = true;
 
     // we use the primary alias for indexing search, not the original branch name (ie 'master'), for aliased repos
@@ -174,7 +174,7 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
 
     aliases.forEach(async (alias: string) => {
       if (alias !== urlSlug) {
-        newPayload.stable = '';
+        newPayload.stable = false;
         newPayload.urlSlug = alias;
         newPayload.primaryAlias = false;
         deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
@@ -231,7 +231,7 @@ function createPayload(
   urlSlug,
   aliased = false,
   primaryAlias = false,
-  stable = ''
+  stable = false
 ) {
   return {
     jobType,
