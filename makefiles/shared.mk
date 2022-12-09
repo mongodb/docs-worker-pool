@@ -72,5 +72,8 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
+
+oas-page-build:
+	node ${OAS_MODULE_PATH} --bundle ${BUNDLE_PATH} --output ${REPO_DIR}/public --redoc ${REDOC_PATH} --repo ${REPO_DIR} --site-url ${URL}/${MUT_PREFIX}
 endif
 
