@@ -11,6 +11,10 @@ import { db as poolDb } from './pool';
 const atlasURL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
 const client = new mongodb.MongoClient(atlasURL);
 
+export const teardown = () => {
+  client.close();
+};
+
 // Initialize and export our pool connection
 // Try to limit access to pool as much as possible - we mostly want it for just repo_branches.
 export const pool = async () => {

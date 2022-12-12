@@ -5,6 +5,7 @@ dotenv.config();
 import AdmZip from 'adm-zip';
 import minimist from 'minimist';
 import * as mongodb from 'mongodb';
+import { teardown as closeDBConnection } from './src/services/connector';
 import { insertPages } from './src/services/pages';
 import { insertMetadata, insertUmbrellaMetadata } from './src/services/metadata';
 import { upsertAssets } from './src/services/assets';
@@ -36,9 +37,11 @@ const app = async (path: string) => {
       upsertAssets(zip),
       insertUmbrellaMetadata(buildId, zip),
     ]);
+    closeDBConnection();
     process.exit(0);
   } catch (error) {
     console.error(`Persistence Module encountered a terminal error: ${error}`);
+    closeDBConnection();
     throw error;
   }
 };

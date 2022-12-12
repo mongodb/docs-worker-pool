@@ -59,7 +59,7 @@ const mapRepoBranches = (repoBranches: ReposBranchesDocument[]) =>
 
 const hasAssociations = (metadata) => !!metadata.associated_products?.length;
 
-const sharedMetadataEntry = async (metadata): Promise<SharedMetadata> => {
+const umbrellaMetadataEntry = async (metadata): Promise<SharedMetadata> => {
   try {
     const snooty = await db();
     const entry = await snooty
@@ -88,23 +88,21 @@ const shapeToCsCursor = async (
   await tocCursor.forEach((doc) => {
     // Initialize to empty object if we haven't already, for a given project.
     if (!tocInsertions[doc._id.project]) tocInsertions[doc._id.project] = {};
-    if (!tocOrderInsertions[doc._id.project]) tocInsertions[doc._id.project] = {};
+    if (!tocOrderInsertions[doc._id.project]) tocOrderInsertions[doc._id.project] = {};
 
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesMap?.[doc._id.project]?.[doc._id.branch]) {
       tocInsertions[doc._id.project][doc._id.branch] = doc.most_recent.toctree;
-      tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.tocTreeOrder;
+      tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.toctreeOrder;
     }
   });
 
   return { tocInsertions, tocOrderInsertions };
 };
 
-const getAssociatedProducts = async (metadata, sharedMetadataEntry) => {
+const getAssociatedProducts = async (umbrellaMetadata) => {
   try {
-    // Do a comparison between the local metadata entry and the shared metadata
-    const localNewerThanShared = metadata.created_at > sharedMetadataEntry.created_at;
-    const { associated_products } = localNewerThanShared ? metadata : sharedMetadataEntry;
+    const { associated_products } = umbrellaMetadata;
     const associatedProductNames = associated_products.map((a) => a.name);
     const snooty = await db();
 
@@ -135,21 +133,21 @@ const getAssociatedProducts = async (metadata, sharedMetadataEntry) => {
 
 export const mergeAssociatedToCs = async (metadata) => {
   const { project, branch } = metadata;
-  const sharedMetadata = hasAssociations(metadata) ? metadata : await sharedMetadataEntry(metadata);
+  const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(metadata);
 
   // Short circuit execution here if there's no umbrella product metadata found
-  if (!sharedMetadata) return;
+  if (!umbrellaMetadata) return;
   // Short circuit execution if the project branch is NOT in repo branches
   // If we want to embed with staging builds, then this needs to be turned off
   // or converted so that local metadata ToC is added to tocInsertions
   const isStagingBranch = await !getRepoBranchesEntry(project, branch);
   if (isStagingBranch) return;
 
-  const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(sharedMetadata);
+  const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
   const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
-  const tocsCursor = await getAssociatedProducts(metadata, sharedMetadata);
+  const tocsCursor = await getAssociatedProducts(metadata, umbrellaMetadata);
   const { tocInsertions, tocOrderInsertions } = await shapeToCsCursor(tocsCursor, repoBranchesMap);
-  const mergedMetadataEntry = traverseAndMerge(sharedMetadata, tocInsertions, tocOrderInsertions);
+  const mergedMetadataEntry = traverseAndMerge(umbrellaMetadata, tocInsertions, tocOrderInsertions);
 
   // Remove the _id and treat the entry as a brand new document.
   delete mergedMetadataEntry._id;
