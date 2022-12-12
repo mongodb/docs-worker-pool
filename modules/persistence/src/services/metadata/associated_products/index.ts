@@ -106,11 +106,13 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
     const associatedProductNames = associated_products.map((a) => a.name);
     const snooty = await db();
 
-    // This query matches on projects in associated_products for our given metadata that have a build_id
+    // This query matches on projects in associated_products for our given metadata that have a build_id and that do not have merged tocs
     // then groups per branch and per project from those matches
     // and gets the most recent doc entry (by build_id), with the toctree and toctreeOrder fields.
     const tocs = snooty.collection('metadata').aggregate([
-      { $match: { project: { $in: associatedProductNames }, build_id: { $exists: true }, is_merged_toc: false } },
+      {
+        $match: { project: { $in: associatedProductNames }, build_id: { $exists: true }, is_merged_toc: { $ne: true } },
+      },
       {
         $group: {
           _id: { project: '$project', branch: '$branch' },
