@@ -110,7 +110,7 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
     // then groups per branch and per project from those matches
     // and gets the most recent doc entry (by build_id), with the toctree and toctreeOrder fields.
     const tocs = snooty.collection('metadata').aggregate([
-      { $match: { project: { $in: associatedProductNames }, build_id: { $exists: true } } },
+      { $match: { project: { $in: associatedProductNames }, build_id: { $exists: true }, is_merged_toc: false } },
       {
         $group: {
           _id: { project: '$project', branch: '$branch' },
@@ -151,5 +151,8 @@ export const mergeAssociatedToCs = async (metadata) => {
 
   // Remove the _id and treat the entry as a brand new document.
   delete mergedMetadataEntry._id;
+  // Add a flag to denote that the entry contains a merged ToC.
+  mergedMetadataEntry.is_merged_toc = true;
+
   return mergedMetadataEntry;
 };
