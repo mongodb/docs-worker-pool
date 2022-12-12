@@ -145,7 +145,7 @@ export const mergeAssociatedToCs = async (metadata) => {
 
   const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
   const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
-  const tocsCursor = await getAssociatedProducts(metadata, umbrellaMetadata);
+  const tocsCursor = await getAssociatedProducts(umbrellaMetadata);
   const { tocInsertions, tocOrderInsertions } = await shapeToCsCursor(tocsCursor, repoBranchesMap);
   const mergedMetadataEntry = traverseAndMerge(umbrellaMetadata, tocInsertions, tocOrderInsertions);
 
