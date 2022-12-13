@@ -18,6 +18,8 @@ RUN cd ./modules/oas-page-builder \
 FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=0.13.13
 ARG SNOOTY_FRONTEND_VERSION=0.13.33
+# TODO: Remove REDOC_VERSION or change to specific branch. We only care about the CLI and its dependencies, not Redoc itself
+ARG REDOC_VERSION=test-autobuilder-integration
 ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -60,7 +62,8 @@ RUN useradd -ms /bin/bash docsworker-xlarge
 RUN npm -g config set user root
 USER docsworker-xlarge
 
-WORKDIR /home/docsworker-xlarge
+ARG WORK_DIRECTORY=/home/docsworker-xlarge
+WORKDIR ${WORK_DIRECTORY}
 
 # get shared.mk
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
@@ -86,7 +89,7 @@ RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub     
     && npm install --production
 
 # install redoc fork
-RUN git clone -b test-autobuilder-integration --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+RUN git clone -b ${REDOC_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
 	&& cd redoc/cli \
 	&& npm ci --omit=dev \
 	&& npm install --prefix ./ github:mongodb-forks/redoc#dop-test \
@@ -105,6 +108,10 @@ RUN mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
 COPY --from=ts-compiler /home/docsworker-xlarge/modules/oas-page-builder/package*.json ./modules/oas-page-builder/
 COPY --from=ts-compiler /home/docsworker-xlarge/modules/oas-page-builder/dist ./modules/oas-page-builder/
 RUN cd ./modules/oas-page-builder/ && npm install
+
+# Needed for OAS Page Builder module in shared.mk
+ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
+ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
 
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
