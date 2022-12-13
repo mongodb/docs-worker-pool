@@ -106,11 +106,13 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
     const associatedProductNames = associated_products.map((a) => a.name);
     const snooty = await db();
 
-    // This query matches on projects in associated_products for our given metadata that have a build_id
+    // This query matches on projects in associated_products for our given metadata that have a build_id and that do not have merged tocs
     // then groups per branch and per project from those matches
     // and gets the most recent doc entry (by build_id), with the toctree and toctreeOrder fields.
     const tocs = snooty.collection('metadata').aggregate([
-      { $match: { project: { $in: associatedProductNames }, build_id: { $exists: true } } },
+      {
+        $match: { project: { $in: associatedProductNames }, build_id: { $exists: true }, is_merged_toc: { $ne: true } },
+      },
       {
         $group: {
           _id: { project: '$project', branch: '$branch' },
@@ -145,11 +147,14 @@ export const mergeAssociatedToCs = async (metadata) => {
 
   const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
   const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
-  const tocsCursor = await getAssociatedProducts(metadata, umbrellaMetadata);
+  const tocsCursor = await getAssociatedProducts(umbrellaMetadata);
   const { tocInsertions, tocOrderInsertions } = await shapeToCsCursor(tocsCursor, repoBranchesMap);
   const mergedMetadataEntry = traverseAndMerge(umbrellaMetadata, tocInsertions, tocOrderInsertions);
 
   // Remove the _id and treat the entry as a brand new document.
   delete mergedMetadataEntry._id;
+  // Add a flag to denote that the entry contains a merged ToC.
+  mergedMetadataEntry.is_merged_toc = true;
+
   return mergedMetadataEntry;
 };

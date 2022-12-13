@@ -40,19 +40,19 @@ const mergeNode = (node: ToC, tocs: ToCInsertions) => {
   node.children = branches.map((branch) => {
     const child = project[branch];
     const options = {
-      ...child[0].options,
+      ...child.options,
       version: branch,
     };
-    child[0].options = options;
+    child.options = options;
     return child;
   });
   return node;
 };
 
 const mergeTocTreeOrder = (metadata: SharedMetadata, node, insertions: TocOrderInsertions) => {
-  const insertion = insertions[metadata.project]?.[metadata.branch];
+  const insertion = insertions[metadata.project]?.[metadata.branch] || [];
   const index = metadata.toctreeOrder.indexOf(node.options?.project);
-  return metadata.toctreeorder.splice(index, 0, ...insertion);
+  return metadata.toctreeOrder.splice(index, 0, ...insertion);
 };
 
 // BFS through the toctree from the metadata entry provided as an arg
