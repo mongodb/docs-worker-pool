@@ -158,3 +158,7 @@ export const mergeAssociatedToCs = async (metadata) => {
 
   return mergedMetadataEntry;
 };
+
+export const _getRepoBranchesEntry = getRepoBranchesEntry;
+export const _getAllAssociatedRepoBranchesEntries = getAllAssociatedRepoBranchesEntries;
+export const _umbrellaMetadataEntry = umbrellaMetadataEntry;
