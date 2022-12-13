@@ -73,6 +73,9 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
 
+# Intended to be called by the autobuilder as a build command after frontend build, but before mut upload
+# Staging: https://github.com/mongodb/docs-worker-pool/blob/42bd36b1f52e49c646a79474c12d299f33d774cb/src/job/stagingJobHandler.ts#L57
+# Production: https://github.com/mongodb/docs-worker-pool/blob/1a482242fa6f1463abb059884cddb2c56ba9fad9/src/job/productionJobHandler.ts#L68
 oas-page-build:
 	node ${OAS_MODULE_PATH} --bundle ${BUNDLE_PATH} --output ${REPO_DIR}/public --redoc ${REDOC_PATH} --repo ${REPO_DIR} --site-url ${URL}/${MUT_PREFIX}
 endif
