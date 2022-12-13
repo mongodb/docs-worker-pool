@@ -8,6 +8,12 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
+# Build modules
+# OAS Page Builder
+RUN cd ./modules/oas-page-builder \
+  && npm install \
+	&& npm run build
+
 # where repo work will happen
 FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=0.13.13
@@ -79,10 +85,27 @@ RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub     
     && cd snooty-devhub                                                                            \
     && npm install --production
 
+# install redoc fork
+RUN git clone -b test-autobuilder-integration --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+	&& cd redoc/cli \
+	&& npm ci --omit=dev \
+	&& npm install --prefix ./ github:mongodb-forks/redoc#dop-test \
+	&& cd ../ \
+	&& npm ci --omit=dev --ignore-scripts \
+	&& npm run compile:cli
+
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
+
+# OAS Page Builder module copy
+# Create directory and add permissions to allow node module installation
+RUN mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/oas-page-builder/package*.json ./modules/oas-page-builder/
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/oas-page-builder/dist ./modules/oas-page-builder/
+RUN cd ./modules/oas-page-builder/ && npm install
+
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
 CMD ["node", "app.js"]
