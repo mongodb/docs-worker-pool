@@ -1,0 +1,123 @@
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
+USER=$(shell whoami)
+
+PROJECT=ruby-driver
+PREFIX=ruby-driver
+MUT_PREFIX ?= $(PROJECT)
+REPO_DIR=$(shell pwd)
+
+SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
+SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
+
+# Necessary to add the fetch-submodule dependency
+PUSHLESS_DEPLOY_SHARED_DISABLED=true
+
+include ~/shared.mk
+
+next-gen-parse: get-build-dependencies
+	# snooty parse -- separated from front-end to support index gen
+	@if [ -n "${PATCH_ID}" ]; then \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	else \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	fi
+
+next-gen-html: next-gen-parse
+	# build-front-end after running parse commands
+	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
+	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
+	cd snooty; \
+	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
+	if [ -n "${PATCH_ID}" ]; then \
+		echo "COMMIT_HASH=${COMMIT_HASH}" >> .env.production && \
+		echo "PATCH_ID=${PATCH_ID}" >> .env.production; \
+	fi && \
+	GATSBY_MANIFEST_PATH="${BUNDLE_PATH}" npm run build; \
+	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
+
+get-build-dependencies: fetch-submodule
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-php-library.yaml > ${REPO_DIR}/published-branches.yaml
+
+fetch-submodule:
+	git submodule update --remote --init
+	rsync -a --delete ${REPO_DIR}/mongo-ruby-driver/docs/ ${REPO_DIR}/source
+
+next-gen-stage: ## Host online for review
+	# stagel local jobs \
+	if [ -n "${PATCH_ID}" -a "${MUT_PREFIX}" = "${PROJECT}" ]; then \
+		mut-publish public ${BUCKET} --prefix="${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${COMMIT_HASH}/${PATCH_ID}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	# stagel commit jobs and regular git push jobs\
+	else \
+		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
+		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
+	fi
+
+########################
+# GIZA MAKEFILE COMMANDS
+########################
+
+html:
+	giza make html
+
+publish: ## Build docs locally
+# !!! DOES NOT PUT STUFF ONTO THE INTERNET !!!
+# Builds the artifacts that you will deploy with other targets.
+# Also builds an HTML rendering for local viewing.
+#
+# If master branch, giza creates any symlinks needed per integrations.yaml
+# If master, giza creates any redirects per build_conf.yaml / htaccess.yaml
+
+	# get the latest for mongo-ruby-driver/docs git submodule:
+	git submodule update --remote --init
+	# rsync the docs source from the submodule to the source/ directory:
+	rsync -a --delete mongo-ruby-driver/docs/ source/
+	# build the publish artefacts using giza:
+	giza make publish
+	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
+
+stage: ## Host online for review
+# !!! DEPLOY HTML TO STAGING WEBSITE !!!
+# Deploys the HTML from the build/<branch> directory to the BUCKET.
+#
+# mut-publish
+#       build/${GIT_BRANCH}/html  directory from which to grab the HTML to deploy to the BUCKET
+#       	BUCKET            Amazon s3 bucket used for the staging site
+#         --prefix=${PROJECT}      ${PROJECT} is the folder in the staging bucket in which to place the HTML
+#      --stage                    indicates that mut-publish should publish to the staging bucket (not the prod bucket)
+#      if ${ARGS}, then additonal arguments
+
+	mut-publish build/${GIT_BRANCH}/html ${BUCKET} --prefix=${PROJECT} --stage ${ARGS}
+	@echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
+
+
+
+deploy: publish ## Deploy to the production bucket
+# !!! DEPLOY BUILD ARTIFACTS TO PRODUCTION !!!
+# Deploys the build artifacts from the build/public directory to the PRODUCTION_BUCKET,
+# first doing a 'dry run' that lists all of the files that will be uploaded/deleted/etc.
+# and then asks you to press a key to perform the procedure.
+#
+# deploy: publish 	the :publish indicates that the publish target must happen before the deploy
+# mut-publish
+#      build/public         directory from which to grab the build artifacts to deploy to the PRODUCTION_BUCKET
+#      			BUCKET    Amazon s3 bucket that holds the production docs
+#      --prefix=${PROJECT}   ${PROJECT} is the folder in the prod. bucket in which to place the artifacts
+#      --deploy             indicates that mut-publish should publish to the production bucket (not the staging bucket)
+#      --verbose            prints out a detail of what files are being uploaded/deleted/etc.
+#      --dry-run            instructs mut-publish to do everything *except* actually put stuff on the internet.
+#      if ${ARGS}, then additonal arguments
+	mut-publish build/public ${BUCKET} --prefix=${PROJECT} --deploy ${ARGS}
+
+	@echo "Hosted at ${URL}/${PROJECT}/index.html"
