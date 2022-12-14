@@ -8,6 +8,10 @@ const mockInsertMany = jest.fn();
 const mockUpdateOne = jest.fn();
 const mockClose = jest.fn();
 
+// below is a "jest mock" of a mongodb client
+// TODO: update this test module to work with MongoDB memory server
+//       - create test db and verify connector's calls update memory server
+
 jest.mock('mongodb', () => ({
   MongoClient: class MongoClient {
     constructor() {

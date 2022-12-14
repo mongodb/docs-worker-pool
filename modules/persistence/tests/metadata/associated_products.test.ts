@@ -3,6 +3,8 @@ import {
   _getRepoBranchesEntry,
   _getAllAssociatedRepoBranchesEntries,
   _umbrellaMetadataEntry,
+  _getAssociatedProducts,
+  _shapeToCsCursor,
 } from '../../src/services/metadata/associated_products';
 import { ToC } from '../../src/services/metadata/ToC';
 
@@ -25,9 +27,13 @@ describe('associated_products module', () => {
 
   afterEach(async () => {
     await mockDb.collection('repos_branches').deleteMany({});
+    await mockDb.collection('metadata').deleteMany({});
   });
 
   beforeAll(async () => {
+    // process.env.MONGO_URL defaults to localhost
+    // https://github.com/shelfio/jest-mongodb#3-configure-mongodb-client
+    // or update jest-mongodb-config.js
     connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
     mockDb = await connection.db();
   });
@@ -114,6 +120,76 @@ describe('associated_products module', () => {
       };
       const umbrellaMeta = await _umbrellaMetadataEntry(metadata);
       expect(umbrellaMeta).toEqual(mockedMetadata);
+    });
+  });
+
+  describe('getAssociatedProducts and shapeToCsCursor', () => {
+    const proj = 'associated-proj';
+    const branch = 'master';
+    const umbrellaMetadata = {
+      associated_products: [
+        {
+          name: proj,
+          versions: [branch],
+        },
+      ],
+    };
+    const tocSample = {
+      title: 'sample1',
+      slug: 'slug1',
+      children: [],
+    };
+    const tocSample2 = {
+      title: 'sample2',
+      slug: 'slug2',
+      children: [],
+    };
+    const metadataSample = {
+      project: proj,
+      build_id: 1,
+      toctree: tocSample,
+      toctreeOrder: [1],
+      branch: branch,
+    };
+    const metadataSample2 = {
+      project: proj,
+      build_id: 2,
+      toctree: tocSample2,
+      toctreeOrder: [2],
+      branch: branch,
+    };
+    // ignored metadata due to branch mismatch
+    const testBranch = 'test-branch';
+    const metadataSample3 = {
+      project: proj,
+      build_id: 3,
+      toctree: { ...tocSample2, slug: 'slug3' },
+      toctreeOrder: [3],
+      branch: testBranch,
+    };
+
+    test('getAssociatedProducts returns an aggregation cursor for metadata, grouped by most recent build_id', async () => {
+      const metadataCollection = mockDb.collection('metadata');
+      await metadataCollection.insertMany([metadataSample, metadataSample2]);
+      const cursor = await _getAssociatedProducts(umbrellaMetadata);
+      await cursor.forEach((doc) => {
+        expect(doc['most_recent']['build_id']).toEqual(2);
+      });
+    });
+
+    test('shapeToCsCursor returns the toc and toctreeOrder to be inserted', async () => {
+      const metadataCollection = mockDb.collection('metadata');
+      await metadataCollection.insertMany([metadataSample, metadataSample2, metadataSample3]);
+      const cursor = await _getAssociatedProducts(umbrellaMetadata);
+      const repoBranchesMap = {};
+      repoBranchesMap[proj] = {
+        master: [],
+      };
+      const { tocInsertions, tocOrderInsertions } = await _shapeToCsCursor(cursor, repoBranchesMap);
+      expect(tocOrderInsertions[proj][branch]).toEqual(metadataSample2.toctreeOrder);
+      expect(tocOrderInsertions[proj][testBranch]).toBeUndefined();
+      expect(tocInsertions[proj][branch]).toEqual(metadataSample2.toctree);
+      expect(tocInsertions[proj][testBranch]).toBeUndefined();
     });
   });
 });

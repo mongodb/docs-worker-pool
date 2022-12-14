@@ -162,3 +162,5 @@ export const mergeAssociatedToCs = async (metadata) => {
 export const _getRepoBranchesEntry = getRepoBranchesEntry;
 export const _getAllAssociatedRepoBranchesEntries = getAllAssociatedRepoBranchesEntries;
 export const _umbrellaMetadataEntry = umbrellaMetadataEntry;
+export const _getAssociatedProducts = getAssociatedProducts;
+export const _shapeToCsCursor = shapeToCsCursor;
