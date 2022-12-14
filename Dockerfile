@@ -69,7 +69,7 @@ WORKDIR ${WORK_DIRECTORY}
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
-RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
+RUN git clone -b ${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
     && python3 -m pip install pip==20.2 flit==${FLIT_VERSION}                                      \
     && cd snooty-parser                                                                            \
     && python3 -m flit install
