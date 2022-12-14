@@ -59,6 +59,8 @@ const mapRepoBranches = (repoBranches: ReposBranchesDocument[]) =>
 
 const hasAssociations = (metadata) => !!metadata.associated_products?.length;
 
+// TODO: update param to target associated project name.
+// confusing - takes in associated metadata and returns umbrella metadata
 const umbrellaMetadataEntry = async (metadata): Promise<SharedMetadata> => {
   try {
     const snooty = await db();
