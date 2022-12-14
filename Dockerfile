@@ -11,8 +11,8 @@ RUN npm run build
 # Build modules
 # OAS Page Builder
 RUN cd ./modules/oas-page-builder \
-  && npm install \
-	&& npm run build
+    && npm install \
+    && npm run build
 
 # where repo work will happen
 FROM ubuntu:20.04
@@ -90,12 +90,12 @@ RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub     
 
 # install redoc fork
 RUN git clone -b ${REDOC_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
-	&& cd redoc/cli \
-	&& npm ci --omit=dev \
-	&& npm install --prefix ./ github:mongodb-forks/redoc#dop-test \
-	&& cd ../ \
-	&& npm ci --omit=dev --ignore-scripts \
-	&& npm run compile:cli
+    && cd redoc/cli \
+    && npm ci --omit=dev \
+    && npm install --prefix ./ github:mongodb-forks/redoc#dop-test \
+    && cd ../ \
+    && npm ci --omit=dev --ignore-scripts \
+    && npm run compile:cli
 
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
