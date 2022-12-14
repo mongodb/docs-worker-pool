@@ -47,6 +47,7 @@ export type Payload = {
 
 export type Job = {
   _id: string;
+  containerId?: string | undefined;
   payload: Payload;
   createdTime: Date;
   endTime: Date | null | undefined;

@@ -2,6 +2,7 @@ import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import type { Job } from '../entities/job';
 import { JobStatus } from '../entities/job';
+import { ecsMetadata } from '../services/diagnostic';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
 import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
@@ -42,6 +43,8 @@ export class JobRepository extends BaseRepository {
   }
 
   async insertJob(job: Omit<Job, '_id'>, url: string): Promise<string> {
+    const diagnostic = await ecsMetadata();
+    job.containerId = diagnostic.DockerId;
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,
