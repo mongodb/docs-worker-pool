@@ -12,7 +12,8 @@ program
   .requiredOption('-b, --bundle <path>', 'path to parsed bundle zip')
   .requiredOption('-o, --output <path>', 'path to the directory to output generated files')
   .requiredOption('--redoc <path>', 'path to the Redoc CLI program to run. Must be a JS file')
-  .requiredOption('--repo <path>', 'path to repo being built');
+  .requiredOption('--repo <path>', 'path to repo being built')
+  .option('--site-url <url>', 'url leading to index page of current docs site');
 
 program.parse();
 const options = program.opts<ModuleOptions>();
