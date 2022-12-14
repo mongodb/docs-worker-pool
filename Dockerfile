@@ -16,7 +16,7 @@ RUN cd ./modules/oas-page-builder \
 
 # where repo work will happen
 FROM ubuntu:20.04
-ARG SNOOTY_PARSER_VERSION=0.13.13
+ARG SNOOTY_PARSER_VERSION=revert-metadata-strings
 ARG SNOOTY_FRONTEND_VERSION=0.13.33
 # TODO: Remove REDOC_VERSION or change to specific branch. We only care about the CLI and its dependencies, not Redoc itself
 ARG REDOC_VERSION=test-autobuilder-integration
