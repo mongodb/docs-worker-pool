@@ -7,9 +7,9 @@ const COLLECTION_NAME = 'oas_files';
 const getAtlasURL = () => {
   const isHostLocal = process.env.DB_HOST?.includes('localhost');
   if (isHostLocal) {
-    return `mongodb://${process.env.DB_HOST}/?retryWrites=true&w=majority`;
+    return `mongodb://${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority`;
   }
-  return `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
+  return `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority`;
 };
 
 const atlasURL = getAtlasURL();
