@@ -2,8 +2,8 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
 USER=$(shell whoami)
 
-PROJECT=ruby-driver
-PREFIX=ruby-driver
+PROJECT=mongoid
+PREFIX=mongoid
 MUT_PREFIX ?= $(PROJECT)
 REPO_DIR=$(shell pwd)
 
@@ -47,12 +47,12 @@ next-gen-html: next-gen-parse
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 # a published-branches file needed until DOP-2246 is done, though never gets used
-get-build-dependencies: fetch-submodule
+get-build-dependencies: fetch-submodule 
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-php-library.yaml > ${REPO_DIR}/published-branches.yaml
 
 fetch-submodule:
 	git submodule update --remote --init
-	rsync -a --delete ${REPO_DIR}/mongo-ruby-driver/docs/ ${REPO_DIR}/source
+	rsync -a --delete ${REPO_DIR}/mongoid/docs/ ${REPO_DIR}/source
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
@@ -80,10 +80,10 @@ publish: ## Build docs locally
 # If master branch, giza creates any symlinks needed per integrations.yaml
 # If master, giza creates any redirects per build_conf.yaml / htaccess.yaml
 
-	# get the latest for mongo-ruby-driver/docs git submodule:
+	# get the latest for mongoid/docs git submodule:
 	git submodule update --remote --init
 	# rsync the docs source from the submodule to the source/ directory:
-	rsync -a --delete mongo-ruby-driver/docs/ source/
+	rsync -a --delete mongoid/docs/ source/
 	# build the publish artefacts using giza:
 	giza make publish
 	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
