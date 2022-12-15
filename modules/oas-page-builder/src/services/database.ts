@@ -1,7 +1,7 @@
 import { Db, MongoClient } from 'mongodb';
 import { OASFile, OASFileGitHash } from './models/OASFile';
 
-const DB_NAME = process.env.DB_NAME || 'snooty_dotcomprd';
+const DB_NAME = 'snooty_dotcomprd';
 const COLLECTION_NAME = 'oas_files';
 
 const getAtlasURL = () => {
