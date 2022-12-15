@@ -5,8 +5,10 @@ dotenv.config();
 import AdmZip from 'adm-zip';
 import minimist from 'minimist';
 import * as mongodb from 'mongodb';
+import { teardown as closeDBConnection } from './src/services/connector';
 import { insertPages } from './src/services/pages';
-import { insertMetadata } from './src/services/metadata';
+import { insertMetadata, insertUmbrellaMetadata } from './src/services/metadata';
+import { upsertAssets } from './src/services/assets';
 
 interface ModuleArgs {
   path: string;
@@ -29,10 +31,17 @@ const app = async (path: string) => {
     // atomic buildId for all artifacts read by this module - fundamental assumption
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
-    await Promise.all([insertPages(buildId, zip), insertMetadata(buildId, zip)]);
+    await Promise.all([
+      insertPages(buildId, zip),
+      insertMetadata(buildId, zip),
+      upsertAssets(zip),
+      insertUmbrellaMetadata(buildId, zip),
+    ]);
+    closeDBConnection();
     process.exit(0);
   } catch (error) {
     console.error(`Persistence Module encountered a terminal error: ${error}`);
+    closeDBConnection();
     throw error;
   }
 };
