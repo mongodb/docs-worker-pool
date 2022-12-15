@@ -29,9 +29,7 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
   let oasFileURL;
   try {
     const versionURL = 'https://cloud.mongodb.com/version';
-    // const gitHash = await fetchTextData(versionURL, 'Could not find current version or git hash');
-    // DELETE: Testing inaccessible OAS
-    const gitHash = 'c48a143e3ff5c8f9ce47ead35036b1b962210b18';
+    const gitHash = await fetchTextData(versionURL, 'Could not find current version or git hash');
     oasFileURL = getOASFileUrl(gitHash);
 
     // Sometimes the latest git hash might not have a fully available spec file yet.
