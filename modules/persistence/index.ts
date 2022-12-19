@@ -46,18 +46,15 @@ const app = async (path: string) => {
   }
 };
 
-setTimeout(() => {
-  try {
-    debugger;
-    console.log(argv);
-    app(argv['path']);
-  } catch (error) {
-    console.log('caught in terminal handling');
-    // only exit with non zero error code if running with strict mode on
-    if (['y', 'yes', 'true'].includes(argv['strict'].toLowerCase())) {
-      process.exit(1);
-    } else {
-      process.exit(0);
-    }
+try {
+  console.log(argv);
+  app(argv['path']);
+} catch (error) {
+  console.log('caught in terminal handling');
+  // only exit with non zero error code if running with strict mode on
+  if (['y', 'yes', 'true'].includes(argv['strict'].toLowerCase())) {
+    process.exit(1);
+  } else {
+    process.exit(0);
   }
-}, 5000);
+}
