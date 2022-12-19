@@ -24,10 +24,10 @@ export interface TocOrderInsertions {
   };
 }
 
-const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProduct[] = []) => {
+const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProduct[] = []): boolean => {
   const nodeInProducts = node.options?.project && associated_products.find((p) => p.name === node.options?.project);
   const nodeHasNoChildren = !node.children || node.children.length === 0;
-  return nodeHasNoChildren && nodeInProducts;
+  return !!(nodeHasNoChildren && nodeInProducts);
 };
 
 const mergeNode = (node: ToC, tocs: ToCInsertions) => {
@@ -75,3 +75,7 @@ export const traverseAndMerge = (
   }
   return metadata;
 };
+
+export const _isInsertionCandidateNode = isInsertionCandidateNode;
+export const _mergeNode = mergeNode;
+export const _mergeTocTreeOrder = mergeTocTreeOrder;
