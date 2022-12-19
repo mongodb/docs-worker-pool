@@ -1,16 +1,38 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-const execute = promisify(exec);
+const execCommand = promisify(exec);
 
-export const execRedoc = async (spec: string, outputPath: string, redocPath: string, siteUrl: string) => {
-  // DELETE-3414
-  // const customOptions = `--options.customOptions.backNavigationPath=https://mongodb.com/docs/atlas/ --options.customOptions.siteTitle="Atlas App Services"`;
-  const command = `node ${redocPath} build ${spec} --output ${outputPath}`;
-  const { stdout, stderr } = await execute(command);
-  if (stderr) {
-    console.error(`Error trying to build page ${outputPath} with Redoc.`);
-    throw stderr;
+export class RedocExecutor {
+  redocPath: string;
+  // Stringified options object for Redoc command. Redoc also accepts individual options or a JSON file
+  private _optionsString: string;
+
+  constructor(redocPath: string, siteUrl: string, siteTitle: string) {
+    this.redocPath = redocPath;
+
+    // Custom options DOP defines in the Redoc fork
+    const customOptions = {
+      backNavigationPath: siteUrl,
+      siteTitle,
+    };
+
+    // May contain both native Redoc options and custom DOP options in the future
+    this._optionsString = JSON.stringify({ customOptions });
   }
-  console.log(stdout);
-};
+
+  // Calls Redoc CLI to build spec at given output path
+  async execute(specSource: string, outputPath: string) {
+    const outputArg = `--output ${outputPath}`;
+    const optionsArg = `--options '${this._optionsString}'`;
+    const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg}`;
+
+    const { stdout, stderr } = await execCommand(command);
+    console.log(stdout);
+
+    if (stderr) {
+      console.error(`Error trying to build page ${outputPath} with Redoc.`);
+      throw stderr;
+    }
+  }
+}
