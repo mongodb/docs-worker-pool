@@ -53,7 +53,7 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
 
 export const buildOpenAPIPages = async (
   entries: [string, OASPageMetadata][],
-  { output, redoc: redocPath, repo: repoPath }: ModuleOptions
+  { output, redoc: redocPath, repo: repoPath, 'site-url': siteUrl }: ModuleOptions
 ) => {
   for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source } = data;
@@ -73,7 +73,7 @@ export const buildOpenAPIPages = async (
       }
 
       const finalFilename = normalizePath(`${output}/${pageSlug}/index.html`);
-      await execRedoc(spec, finalFilename, redocPath);
+      await execRedoc(spec, finalFilename, redocPath, siteUrl);
     } catch (e) {
       console.error(e);
       // Continue to try to build other pages since it's possible that mut will

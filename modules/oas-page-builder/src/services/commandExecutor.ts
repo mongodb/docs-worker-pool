@@ -3,7 +3,9 @@ import { promisify } from 'util';
 
 const execute = promisify(exec);
 
-export const execRedoc = async (spec: string, outputPath: string, redocPath: string) => {
+export const execRedoc = async (spec: string, outputPath: string, redocPath: string, siteUrl: string) => {
+  // DELETE-3414
+  // const customOptions = `--options.customOptions.backNavigationPath=https://mongodb.com/docs/atlas/ --options.customOptions.siteTitle="Atlas App Services"`;
   const command = `node ${redocPath} build ${spec} --output ${outputPath}`;
   const { stdout, stderr } = await execute(command);
   if (stderr) {
