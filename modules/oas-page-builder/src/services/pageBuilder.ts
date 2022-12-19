@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
-import { RedocExecutor } from './commandExecutor';
+import { RedocExecutor } from './redocExecutor';
 import { findLastSavedGitHash } from './database';
 import { OASPageMetadata, PageBuilderOptions } from './types';
 
