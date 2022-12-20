@@ -14,6 +14,7 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
+    'no-explicit-any': 'off',
     'no-console': 'off',
   },
 };

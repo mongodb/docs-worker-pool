@@ -1,16 +1,16 @@
-name: CI
+name: CI-persistence
 
 on:
   push:
     branches:
     - master
-    paths-ignore:
-    - 'modules/**'
+    paths:
+      - 'modules/persistence/**'
   pull_request:
     branches:
     - master
-    paths-ignore:
-    - 'modules/**'
+    paths:
+      - 'modules/persistence/**'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,9 +19,11 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '14.x'
+    - name: Navigate to persistence module
+      run: cd modules/persistence
     - name: Install dependencies
       run: npm install --dev
-    - name: Lint # TODO: set linter to be scoped to not modules
-      run: npm run lint && npm run format
+    - name: Lint
+      run: npm run lint
     - name: Test
       run: npm test

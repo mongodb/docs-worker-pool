@@ -1,0 +1,19 @@
+# skip required checks due to "paths-ignore" filter on jobs
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'modules/**'
+  pull_request:
+    branches:
+    - master
+    paths:
+    - 'modules/**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required"'
