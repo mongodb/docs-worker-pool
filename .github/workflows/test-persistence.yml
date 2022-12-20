@@ -23,7 +23,7 @@ jobs:
       with:
         node-version: '14.x'
     - name: Install dependencies
-      run: npm install --dev
+      run: npm ci
     - name: Lint
       run: npm run lint
     - name: Test
