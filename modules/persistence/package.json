@@ -8,7 +8,7 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "test": "jest --verbose",
+    "test": "jest --coverage",
     "build": "tsc",
     "start": "node --unhandled-rejections=strict ./dist/index.js",
     "dev": "tsc && node --unhandled-rejections=strict ./dist/index.js --path ./build/artifacts.zip "
