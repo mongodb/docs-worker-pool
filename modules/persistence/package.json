@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint -c eslintconfig.json --no-eslintrc . --ext .ts",
     "test": "jest --coverage",
     "build": "tsc",
     "start": "node --unhandled-rejections=strict ./dist/index.js",

@@ -66,7 +66,7 @@ describe('Connector module', () => {
           ...env,
           ...testEnv,
         };
-        const database = await db();
+        await db();
         expect(mockConnect).toHaveBeenCalled();
         expect(mockDb).toHaveBeenCalled();
         expect(mockDb).toHaveBeenCalledWith(testEnv.DB_NAME);
@@ -85,7 +85,7 @@ describe('Connector module', () => {
        */
       mockConnect.mockRejectedValueOnce(new Error('test error') as never);
       try {
-        const database = await db();
+        await db();
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
         expect(e.message).toEqual('test error');
