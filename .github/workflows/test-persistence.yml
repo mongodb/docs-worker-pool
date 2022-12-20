@@ -13,9 +13,6 @@ on:
       - 'modules/persistence/**'
 jobs:
   test:
-    defaults:
-      run:
-        working-directory: 'modules/persistence'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -23,10 +20,14 @@ jobs:
       with:
         node-version: '14.x'
     - name: Install dependencies
-      run: npm ci
+      run: |
+        cd modules/persistence
+        npm ci
     - name: Lint
       run: |
         cd modules/persistence
         npm run lint
     - name: Test
-      run: npm test
+      run: |
+        cd modules/persistence
+        npm test
