@@ -13,14 +13,15 @@ on:
       - 'modules/persistence/**'
 jobs:
   test:
+    defaults:
+      run:
+        working-directory: 'modules/persistence'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - uses: actions/setup-node@v1
       with:
         node-version: '14.x'
-    - name: Navigate to persistence module
-      run: cd modules/persistence
     - name: Install dependencies
       run: npm install --dev
     - name: Lint
