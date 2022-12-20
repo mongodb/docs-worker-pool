@@ -93,7 +93,6 @@ RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub     
 RUN git clone -b ${REDOC_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
     && cd redoc/cli \
     && npm ci --omit=dev \
-    && npm install --prefix ./ github:mongodb-forks/redoc#dop-test \
     && cd ../ \
     && npm ci --omit=dev --ignore-scripts \
     && npm run compile:cli
