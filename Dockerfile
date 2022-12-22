@@ -20,7 +20,7 @@ FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=revert-metadata-strings
 ARG SNOOTY_FRONTEND_VERSION=0.13.34
 # TODO: Remove REDOC_VERSION or change to specific branch. We only care about the CLI and its dependencies, not Redoc itself
-ARG REDOC_VERSION=test-autobuilder-integration
+ARG REDOC_VERSION=build-redoc-cli
 ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
