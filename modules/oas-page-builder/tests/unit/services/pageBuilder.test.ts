@@ -1,16 +1,19 @@
 import fetch from 'node-fetch';
-import { execRedoc } from '../../../src/services/commandExecutor';
+import { RedocExecutor } from '../../../src/services/redocExecutor';
 import { findLastSavedGitHash } from '../../../src/services/database';
 import { buildOpenAPIPages } from '../../../src/services/pageBuilder';
-import { OASPageMetadata } from '../../../src/services/types';
+import { OASPageMetadata, PageBuilderOptions } from '../../../src/services/types';
 import { ModuleOptions } from '../../../src/types';
 
 const MOCKED_GIT_HASH = '1234';
 const LAST_SAVED_GIT_HASH = '4321';
 
+const mockExecute = jest.fn();
 // Mock execRedoc since we only want to ensure pageBuilder properly calls the function
-jest.mock('../../../src/services/commandExecutor', () => ({
-  execRedoc: jest.fn(),
+jest.mock('../../../src/services/redocExecutor', () => ({
+  RedocExecutor: jest.fn().mockImplementation(() => ({
+    execute: mockExecute,
+  })),
 }));
 
 // Mock database since implementation relies on database instance. Returned values
@@ -33,17 +36,17 @@ const mockFetchImplementation = (ok: boolean) => {
 };
 
 describe('pageBuilder', () => {
-  const testOptions: ModuleOptions = {
-    bundle: '/path/to/bundle.zip',
+  const testOptions: PageBuilderOptions = {
     output: '/path/to/destination',
     redoc: '/path/to/redoc/cli/index.js',
     repo: '/path/to/repo',
+    siteUrl: 'https://mongodb.com/docs',
+    siteTitle: 'Test Docs',
   };
 
   beforeEach(() => {
     // Reset mock to reset call count
-    // @ts-ignore
-    execRedoc.mockReset();
+    mockExecute.mockReset();
   });
 
   it('builds OpenAPI pages', async () => {
@@ -62,24 +65,23 @@ describe('pageBuilder', () => {
     ];
 
     await buildOpenAPIPages(testEntries, testOptions);
-    expect(execRedoc).toBeCalledTimes(testEntries.length);
+    // const mockSoundPlayerInstance = SoundPlayer.mock.instances[0];
+    // const mockRedocExecutorInstance = RedocExecutor.mock.instances[0];
+    expect(mockExecute).toBeCalledTimes(testEntries.length);
     // Local
-    expect(execRedoc).toBeCalledWith(
+    expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/index.html`,
-      testOptions.redoc
+      `${testOptions.output}/${testEntries[0][0]}/index.html`
     );
     // Url
-    expect(execRedoc).toBeCalledWith(
+    expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
-      getExpectedOutputPath(testOptions.output, testEntries[1][0]),
-      testOptions.redoc
+      getExpectedOutputPath(testOptions.output, testEntries[1][0])
     );
     // Atlas
-    expect(execRedoc).toBeCalledWith(
+    expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
-      getExpectedOutputPath(testOptions.output, testEntries[2][0]),
-      testOptions.redoc
+      getExpectedOutputPath(testOptions.output, testEntries[2][0])
     );
   });
 
@@ -91,10 +93,9 @@ describe('pageBuilder', () => {
     const testEntries: [string, OASPageMetadata][] = [['path/to/page/1', { source_type: 'atlas', source: 'cloud' }]];
 
     await buildOpenAPIPages(testEntries, testOptions);
-    expect(execRedoc).toBeCalledWith(
+    expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${LAST_SAVED_GIT_HASH}.json`,
-      getExpectedOutputPath(testOptions.output, testEntries[0][0]),
-      testOptions.redoc
+      getExpectedOutputPath(testOptions.output, testEntries[0][0])
     );
   });
 
@@ -106,6 +107,6 @@ describe('pageBuilder', () => {
     const testEntries: [string, OASPageMetadata][] = [['path/to/page/1', { source_type: 'atlas', source: 'cloud' }]];
 
     await buildOpenAPIPages(testEntries, testOptions);
-    expect(execRedoc).toBeCalledTimes(0);
+    expect(mockExecute).toBeCalledTimes(0);
   });
 });
