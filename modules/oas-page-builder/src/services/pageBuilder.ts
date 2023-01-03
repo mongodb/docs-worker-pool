@@ -1,9 +1,8 @@
 import fetch from 'node-fetch';
-import { ModuleOptions } from '../types';
 import { normalizePath } from '../utils/normalizePath';
-import { execRedoc } from './commandExecutor';
+import { RedocExecutor } from './redocExecutor';
 import { findLastSavedGitHash } from './database';
-import { OASPageMetadata } from './types';
+import { OASPageMetadata, PageBuilderOptions } from './types';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
 
@@ -53,8 +52,10 @@ const getAtlasSpecUrl = async (apiKeyword: string) => {
 
 export const buildOpenAPIPages = async (
   entries: [string, OASPageMetadata][],
-  { output, redoc: redocPath, repo: repoPath }: ModuleOptions
+  { output, redoc: redocPath, repo: repoPath, siteUrl, siteTitle }: PageBuilderOptions
 ) => {
+  const redocExecutor = new RedocExecutor(redocPath, siteUrl, siteTitle);
+
   for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source } = data;
 
@@ -73,7 +74,7 @@ export const buildOpenAPIPages = async (
       }
 
       const finalFilename = normalizePath(`${output}/${pageSlug}/index.html`);
-      await execRedoc(spec, finalFilename, redocPath);
+      await redocExecutor.execute(spec, finalFilename);
     } catch (e) {
       console.error(e);
       // Continue to try to build other pages since it's possible that mut will
