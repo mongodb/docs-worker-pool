@@ -54,6 +54,8 @@ export const buildOpenAPIPages = async (
   entries: [string, OASPageMetadata][],
   { output, redoc: redocPath, repo: repoPath, siteUrl, siteTitle }: PageBuilderOptions
 ) => {
+  const redocExecutor = new RedocExecutor(redocPath, siteUrl, siteTitle);
+
   for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source } = data;
 
@@ -72,7 +74,6 @@ export const buildOpenAPIPages = async (
       }
 
       const finalFilename = normalizePath(`${output}/${pageSlug}/index.html`);
-      const redocExecutor = new RedocExecutor(redocPath, siteUrl, siteTitle);
       await redocExecutor.execute(spec, finalFilename);
     } catch (e) {
       console.error(e);
