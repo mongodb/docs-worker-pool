@@ -41,7 +41,7 @@ export const db = async () => {
 export const insert = async (docs: any[], collection: string, buildId: ObjectId) => {
   const insertSession = await db();
   try {
-    return insertSession
+    return await insertSession
       .collection(collection)
       .insertMany(docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })));
   } catch (error) {
@@ -57,7 +57,7 @@ export const upsert = async (payload: any, collection: string, _id: string | Obj
     const query = { _id };
     const update = { $set: payload };
     const options = { upsert: true };
-    return upsertSession.collection(collection).updateOne(query, update, options);
+    return await upsertSession.collection(collection).updateOne(query, update, options);
   } catch (error) {
     console.error(`Error at upsertion time for ${collection}: ${error}`);
   }
