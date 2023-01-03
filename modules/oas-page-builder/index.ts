@@ -13,24 +13,25 @@ program
   .requiredOption('-o, --output <path>', 'path to the directory to output generated files')
   .requiredOption('--redoc <path>', 'path to the Redoc CLI program to run. Must be a JS file')
   .requiredOption('--repo <path>', 'path to repo being built')
-  .option('--site-url <url>', 'url leading to index page of current docs site');
+  .requiredOption('--site-url <url>, url to landing page of specific docs site');
 
 program.parse();
 const options = program.opts<ModuleOptions>();
 
 const app = async (options: ModuleOptions) => {
   const { bundle: bundlePath } = options;
-  const oasMetadata = getOASMetadata(bundlePath);
-  if (!oasMetadata) {
+  const metadata = getOASMetadata(bundlePath);
+  if (!metadata) {
     console.log('No OpenAPI content pages found.');
     return;
   }
 
-  const oasMetadataEntries = Object.entries(oasMetadata);
+  const { siteTitle, openapiPages } = metadata;
+  const oasMetadataEntries = Object.entries(openapiPages);
   const numOASPages = oasMetadataEntries.length;
   console.log(`OpenAPI content pages found: ${numOASPages}.`);
 
-  await buildOpenAPIPages(oasMetadataEntries, options);
+  await buildOpenAPIPages(oasMetadataEntries, { ...options, siteTitle });
 };
 
 app(options)

@@ -3,5 +3,5 @@ export interface ModuleOptions {
   output: string;
   redoc: string;
   repo: string;
-  'site-url'?: string;
+  siteUrl: string;
 }
