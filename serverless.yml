@@ -168,6 +168,24 @@ functions:
       environment:
         <<: *webhook-env-core
 
+# SCHEDULED DEPLOYS START
+
+    v1ScheduledDeployDocsLanding:
+      handler: api/controllers/v1/scheduled/index.DeployDocsLanding
+      events:
+        - schedule: cron(0/2 * ? * MON-FRI *)
+      iamRoleStatementsName: 'dwpapi-v1ScheduledDeployDocsLanding-lr-${self:provider.region}-${self:provider.stage}'
+      iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "sqs:SendMessage"
+        Resource:
+          - "*"
+      environment:
+        <<: *webhook-env-core
+
+# SCHEDULED DEPLOYS END
+
     v1TriggerLocalBuild:
       handler: api/controllers/v1/jobs.TriggerLocalBuild
       events:
