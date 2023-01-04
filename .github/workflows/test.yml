@@ -9,6 +9,7 @@ on:
   pull_request:
     branches:
     - master
+    - DOP-3420
     paths-ignore:
     - 'modules/**'
 jobs:
@@ -21,7 +22,7 @@ jobs:
         node-version: '14.x'
     - name: Install dependencies
       run: npm install --dev
-    - name: Lint # TODO: set linter to be scoped to not modules
+    - name: Lint
       run: npm run lint && npm run format
     - name: Test
       run: npm test
