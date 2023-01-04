@@ -3,4 +3,5 @@ export interface ModuleOptions {
   output: string;
   redoc: string;
   repo: string;
+  siteUrl: string;
 }
