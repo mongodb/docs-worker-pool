@@ -4,15 +4,27 @@ on:
   push:
     branches:
     - master
-    paths:
-      - 'modules/persistence/**'
   pull_request:
     branches:
     - master
-    paths:
-      - 'modules/persistence/**'
+
 jobs:
+  # Checks for changes to the modules/persistence directory
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      persistence: ${{ steps.filter.outputs.persistence }}
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            persistence:
+              - 'modules/persistence/**'
+
   test:
+    needs: changes
+    if: ${{ needs.changes.outputs.persistence == 'true' }}
     defaults:
       run:
         working-directory: 'modules/persistence'
