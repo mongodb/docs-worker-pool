@@ -16,11 +16,12 @@ RUN cd ./modules/oas-page-builder \
 
 # where repo work will happen
 FROM ubuntu:20.04
-# TODO: Revert OpenAPI metadata change, and cut new parser version
-ARG SNOOTY_PARSER_VERSION=revert-metadata-strings
+# TODO: Cut new parser version. Using the master branch with OpenAPI metadata changes for now
+ARG SNOOTY_PARSER_VERSION=master
 ARG SNOOTY_FRONTEND_VERSION=0.13.34
-# TODO: Remove REDOC_VERSION or change to specific branch. We only care about the CLI and its dependencies, not Redoc itself
-ARG REDOC_VERSION=build-redoc-cli
+# The Redoc CLI branch will most likely stay static. Updates to the branch should 
+# be limited to CLI bug fixes and Redoc dependency version bumps
+ARG REDOC_CLI_VERSION=build-redoc-cli
 ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -90,7 +91,7 @@ RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub     
     && npm install --production
 
 # install redoc fork
-RUN git clone -b ${REDOC_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+RUN git clone -b ${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
     && cd redoc/cli \
     && npm ci --omit=dev \
     && cd ../ \
