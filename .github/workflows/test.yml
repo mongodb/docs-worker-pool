@@ -15,21 +15,22 @@ jobs:
     outputs:
       autobuilder: ${{ steps.filter.outputs.autobuilder }}
     steps:
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        # set autobuilder filter true
-        # if any changes outside of modules directory
-        filters: |
-          autobuilder:
-            - '!(modules/**)'
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          # set autobuilder filter true
+          # if any changes outside of modules directory
+          filters: |
+            autobuilder:
+              - '!(modules/**)'
 
   test:
     needs: changes
     if: ${{ needs.changes.outputs.autobuilder }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: '14.x'
