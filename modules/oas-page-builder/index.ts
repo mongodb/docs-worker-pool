@@ -18,7 +18,6 @@ program
 program.parse();
 const options = program.opts<ModuleOptions>();
 
-// TODO-3431: Delete this comment. Temporary comment to trigger GH workflow
 const app = async (options: ModuleOptions) => {
   const { bundle: bundlePath } = options;
   const metadata = getOASMetadata(bundlePath);
