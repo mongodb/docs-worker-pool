@@ -1,6 +1,7 @@
 import { AggregationCursor } from 'mongodb';
 import { pool, db } from '../../connector';
 import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge, urlifyToCTreeCopy } from '../ToC';
+import { prefixFromEnvironment } from '../ToC/utils/prefixFromEnvironment';
 
 export interface AssociatedProduct {
   name: string;
@@ -17,7 +18,7 @@ export interface Metadata {
 }
 
 // TODO: move the branch/repobranch interfaces into their own file, or into a seperate abstraction?
-interface BranchEntry {
+export interface BranchEntry {
   name: string;
   gitBranchName: string;
   [key: string]: any;
@@ -101,14 +102,10 @@ const shapeToCsCursor = async (
     const repoBranchesEntry = repoBranchesMap?.[doc._id.project]?.[doc._id.branch];
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesEntry) {
+      const { url, prefix } = prefixFromEnvironment(repoBranchesEntry);
       tocInsertions[doc._id.project][doc._id.branch] = {
         original: doc.most_recent.toctree,
-        urlified: urlifyToCTreeCopy(
-          doc.most_recent.toctree,
-          doc._id.project,
-          repoBranchesEntry.prefix,
-          repoBranchesEntry.url
-        ),
+        urlified: urlifyToCTreeCopy(doc.most_recent.toctree, doc._id.project, prefix, url),
       };
       // TODO: Can we urlify the order? SHOUD we urlify the order?
       tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.toctreeOrder;
