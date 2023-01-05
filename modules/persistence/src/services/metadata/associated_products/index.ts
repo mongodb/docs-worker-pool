@@ -169,16 +169,20 @@ export const mergeAssociatedToCs = async (metadata) => {
   const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
   const metadataCursor = await getAssociatedProducts(umbrellaMetadata);
 
-  const { tocInsertions, tocOrderInsertions } = await shapeToCsCursor(metadataCursor, repoBranchesMap);
+  const { tocInsertions, tocOrderInsertions, associatedMetadataEntries } = await shapeToCsCursor(
+    metadataCursor,
+    repoBranchesMap
+  );
 
-  const mergedMetadataEntry = traverseAndMerge(umbrellaMetadata, tocInsertions, tocOrderInsertions);
-
-  // Remove the _id and treat the entry as a brand new document.
-  delete mergedMetadataEntry._id;
-  // Add a flag to denote that the entry contains a merged ToC.
-  mergedMetadataEntry.is_merged_toc = true;
-
-  return mergedMetadataEntry;
+  const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
+    const mergedMetadataEntry = traverseAndMerge(metadataEntry, tocInsertions, tocOrderInsertions);
+    // Remove the _id and treat the entry as a brand new document.
+    delete mergedMetadataEntry._id;
+    // Add a flag to denote that the entry contains a merged ToC.
+    mergedMetadataEntry.is_merged_toc = true;
+    return mergedMetadataEntry;
+  });
+  return mergedMetadataEntries;
 };
 
 export const _getRepoBranchesEntry = getRepoBranchesEntry;
