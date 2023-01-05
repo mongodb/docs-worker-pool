@@ -1,8 +1,10 @@
-import { SharedMetadata, AssociatedProduct } from '../associated_products';
+import { SharedMetadata, AssociatedProduct, ReposBranchesDocument } from '../associated_products';
+import { convertSlugToUrl } from './utils/convertSlugToUrl';
 
 export interface ToC {
   title: string;
-  slug: string;
+  slug?: string;
+  url?: string;
   children: ToC[];
   options?: {
     [key: string]: any;
@@ -12,7 +14,12 @@ export interface ToC {
 
 type project = string;
 type branchName = string;
-type branch = { [key: branchName]: ToC };
+type branch = {
+  [key: branchName]: {
+    original: ToC;
+    urlified: ToC;
+  };
+};
 
 export interface ToCInsertions {
   [key: project]: branch;
@@ -67,13 +74,30 @@ export const traverseAndMerge = (
   let queue = [toctree];
   while (queue?.length) {
     let next = queue.shift();
+    // TODO: We can exit early here once we've found all the nodes. We should add some break logic.
     if (next && isInsertionCandidateNode(next, associated_products)) {
       next = mergeNode(next, tocInsertions);
       metadata.toctreeorder = mergeTocTreeOrder(metadata, next, tocOrderInsertions);
+    } else if (next?.children) {
+      queue = [...queue, ...next.children];
+    }
+  }
+  return metadata;
+};
+
+// Create a deep copy of a ToC, converting all slugs present to absolute urls.
+export const urlifyToCTreeCopy = (toBeCopied: ToC, project, prefix, url): ToC => {
+  const toctree = JSON.parse(JSON.stringify(toBeCopied));
+  let queue = [toctree];
+  while (queue?.length) {
+    const next = queue.shift();
+    if (next && next.slug) {
+      next.url = convertSlugToUrl(next.slug, project, prefix, url);
+      delete next.slug;
     }
     if (next?.children) queue = [...queue, ...next.children];
   }
-  return metadata;
+  return toctree;
 };
 
 export const _isInsertionCandidateNode = isInsertionCandidateNode;
