@@ -1,6 +1,9 @@
 name: CI - OAS Page Builder
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
     branches:
       - master
