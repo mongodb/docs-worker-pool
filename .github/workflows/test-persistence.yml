@@ -1,0 +1,42 @@
+name: CI-persistence
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  # Checks for changes to the modules/persistence directory
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      persistence: ${{ steps.filter.outputs.persistence }}
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            persistence:
+              - 'modules/persistence/**'
+
+  test:
+    needs: changes
+    if: ${{ needs.changes.outputs.persistence == 'true' }}
+    defaults:
+      run:
+        working-directory: 'modules/persistence'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+    - name: Install dependencies
+      run: npm install --dev
+    - name: Lint
+      run: npm run lint
+    - name: Test
+      run: npm test

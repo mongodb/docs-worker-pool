@@ -7,7 +7,6 @@ import {
   _shapeToCsCursor,
   SharedMetadata,
 } from '../../src/services/metadata/associated_products';
-import { ToC } from '../../src/services/metadata/ToC';
 
 import metadata from '../data/metadata.json';
 import repoBranches from '../data/repos_branches.json';
