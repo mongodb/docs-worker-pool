@@ -1,9 +1,7 @@
 import fetch from 'node-fetch';
-import { RedocExecutor } from '../../../src/services/redocExecutor';
 import { findLastSavedGitHash } from '../../../src/services/database';
 import { buildOpenAPIPages } from '../../../src/services/pageBuilder';
 import { OASPageMetadata, PageBuilderOptions } from '../../../src/services/types';
-import { ModuleOptions } from '../../../src/types';
 
 const MOCKED_GIT_HASH = '1234';
 const LAST_SAVED_GIT_HASH = '4321';
