@@ -28,8 +28,8 @@ export const insertMergedMetadataEntries = async (buildId: ObjectId, zip: AdmZip
   try {
     const mergedMetadataEntries = await mergeAssociatedToCs(metadataFromZip(zip)[0]);
     return mergedMetadataEntries
-      ? Promise.all(mergedMetadataEntries.map((m) => insert([m], COLLECTION_NAME, buildId)))
-      : undefined;
+      ? await Promise.all(mergedMetadataEntries.map((m) => insert([m], COLLECTION_NAME, buildId)))
+      : [];
   } catch (error) {
     console.error(`Error during umbrella metadata update: ${error}`);
     throw error;
