@@ -76,7 +76,7 @@ export const traverseAndMerge = (
 ) => {
   const { associated_products, project } = metadata;
 
-  const toctree = metadata.associated_products ? umbrellaToCs.original : umbrellaToCs.urlified;
+  const toctree = associated_products ? umbrellaToCs.original : umbrellaToCs.urlified;
 
   let queue = [toctree];
   while (queue?.length) {
