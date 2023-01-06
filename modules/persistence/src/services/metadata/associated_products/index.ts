@@ -1,6 +1,6 @@
 import { AggregationCursor } from 'mongodb';
 import { pool, db } from '../../connector';
-import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge, urlifyToCTreeCopy } from '../ToC';
+import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge, copyToCTree } from '../ToC';
 import { prefixFromEnvironment } from '../ToC/utils/prefixFromEnvironment';
 
 export interface AssociatedProduct {
@@ -104,8 +104,8 @@ const shapeToCsCursor = async (
     if (repoBranchesEntry) {
       const { url, prefix } = prefixFromEnvironment(repoBranchesEntry);
       tocInsertions[doc._id.project][doc._id.branch] = {
-        original: doc.most_recent.toctree,
-        urlified: urlifyToCTreeCopy(doc.most_recent.toctree, doc._id.project, prefix, url),
+        original: copyToCTree(doc.most_recent.toctree),
+        urlified: copyToCTree(doc.most_recent.toctree, doc._id.project, prefix, url),
       };
       // TODO: Can we urlify the order? SHOUD we urlify the order?
       tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.toctreeOrder;
@@ -162,6 +162,10 @@ export const mergeAssociatedToCs = async (metadata) => {
   const isStagingBranch = await !getRepoBranchesEntry(project, branch);
   if (isStagingBranch) return;
 
+  const umbrellaRepoBranchesEntry = await getRepoBranchesEntry(umbrellaMetadata.project, umbrellaMetadata.branch);
+  if (!umbrellaRepoBranchesEntry)
+    throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
+
   const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
   const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
   const metadataCursor = await getAssociatedProducts(umbrellaMetadata);
@@ -171,8 +175,19 @@ export const mergeAssociatedToCs = async (metadata) => {
     repoBranchesMap
   );
 
+  // We need to have copies of the main umbrella product's ToC here, to handle multiple metadata entry support
+  const umbrellaToCs = {
+    original: copyToCTree(umbrellaMetadata.toctree),
+    urlified: copyToCTree(
+      umbrellaMetadata.toctree,
+      umbrellaMetadata.url,
+      umbrellaRepoBranchesEntry?.prefix,
+      umbrellaRepoBranchesEntry?.url
+    ),
+  };
+
   const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
-    const mergedMetadataEntry = traverseAndMerge(metadataEntry, tocInsertions, tocOrderInsertions);
+    const mergedMetadataEntry = traverseAndMerge(metadataEntry, umbrellaToCs, tocInsertions, tocOrderInsertions);
     // Remove the _id and treat the entry as a brand new document.
     delete mergedMetadataEntry._id;
     // Add a flag to denote that the entry contains a merged ToC.
