@@ -3,7 +3,7 @@ import cp from 'child_process';
 
 jest.mock('child_process');
 // @ts-ignore
-cp.exec.mockImplementation((command: string, callback: any) => {
+cp.exec.mockImplementation((command: string, callback: (a: null, b: string) => void) => {
   callback(null, command);
 });
 
