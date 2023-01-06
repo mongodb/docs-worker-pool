@@ -1,4 +1,4 @@
-import { Metadata, AssociatedProduct, ReposBranchesDocument } from '../associated_products';
+import { Metadata, AssociatedProduct, ReposBranchesDocument, hasAssociations } from '../associated_products';
 import { convertSlugToUrl } from './utils/convertSlugToUrl';
 
 export interface ToC {
@@ -76,7 +76,7 @@ export const traverseAndMerge = (
 ) => {
   const { associated_products, project } = metadata;
 
-  const toctree = associated_products ? umbrellaToCs.original : umbrellaToCs.urlified;
+  const toctree = hasAssociations(metadata) ? umbrellaToCs.original : umbrellaToCs.urlified;
 
   let queue = [toctree];
   while (queue?.length) {
