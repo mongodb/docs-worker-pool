@@ -76,17 +76,6 @@ describe('JobValidator Tests', () => {
     expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
   });
 
-  test('Throw If branch not configured throws as branch configuration not found', async () => {
-    fileSystemServices.downloadYaml
-      .calledWith(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`
-      )
-      .mockReturnValue({ status: 'failure' });
-    await expect(jobValidator.throwIfBranchNotConfigured(job)).rejects.toThrow(
-      `repoBranches not found for ${job.payload.repoName}`
-    );
-  });
-
   test('throwIfNotPublishable throws as branch not configured for publishing', () => {
     expect(() => {
       jobValidator.throwIfNotPublishable(job);
@@ -106,13 +95,7 @@ describe('JobValidator Tests', () => {
       repos: [`${job.payload.repoOwner}/${job.payload.repoName}`],
       github_username: job.user,
     });
-    const pubBranchRetVal = TestDataProvider.getPublishBranchesContent(job);
     job.payload.isNextGen = true;
-    fileSystemServices.downloadYaml
-      .calledWith(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/${job.payload.repoName}.yaml`
-      )
-      .mockReturnValue({ status: 'success', content: pubBranchRetVal });
     await jobValidator.throwIfJobInvalid(job);
     expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
   });
