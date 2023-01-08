@@ -183,5 +183,3 @@ fake-deploy-opsmgr: build/public/onprem
 
 	mut-publish build/public/onprem/${GIT_BRANCH} ${STAGING_BUCKET_OPSMGR} --prefix=${GIT_BRANCH} --deploy --all-subdirectories ${ARGS}
 	@echo "\n\nHosted at ${STAGING_URL_OPSMGR}/${GIT_BRANCH}/index.html"
-
-
