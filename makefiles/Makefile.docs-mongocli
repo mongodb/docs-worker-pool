@@ -64,8 +64,5 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
 
-get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongocli.yaml > ${REPO_DIR}/published-branches.yaml
-
 fetch-submodule:
 	git submodule update --init
