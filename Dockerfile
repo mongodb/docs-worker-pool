@@ -8,6 +8,7 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
+# install persistence module
 RUN cd ./modules/persistence \
     && npm install \
     && npm run build
@@ -94,7 +95,7 @@ RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/package*.json ./modules/persistence/
 COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/dist ./modules/persistence/
 ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
-RUN cd ./modules/persistence/ && npm install
+RUN cd ./modules/persistence/ && ls && npm install
 
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
