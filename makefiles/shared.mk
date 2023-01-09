@@ -80,3 +80,5 @@ endif
 oas-page-build:
 	node ${OAS_MODULE_PATH} --bundle ${BUNDLE_PATH} --output ${REPO_DIR}/public --redoc ${REDOC_PATH} --repo ${REPO_DIR} --site-url ${URL}/${MUT_PREFIX}
 
+persist-data:
+	node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
