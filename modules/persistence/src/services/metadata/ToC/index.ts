@@ -41,13 +41,15 @@ const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProd
 const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
   // Options might be undefined, so safely cast to {} if nullish
   node.options = node.options ?? {};
-  const needsUrlifiedToC = currentProject === node?.options?.project;
+  console.log('currentProject: ', currentProject, ' Insertion Node Project: ', node?.options?.project);
+  const needsUrlifiedToC = currentProject !== node?.options?.project;
 
   const associatedProject = tocs[node?.options?.project];
   const branches = Object.keys(associatedProject);
   node.options.versions = branches;
   node.children = branches.map((branch) => {
-    const child = needsUrlifiedToC ? associatedProject[branch]?.urlified : associatedProject[branch]?.original;
+    console.log(needsUrlifiedToC);
+    const child = needsUrlifiedToC ? associatedProject[branch].urlified : associatedProject[branch].original;
     const options = {
       ...child.options,
       version: branch,

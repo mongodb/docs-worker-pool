@@ -1,11 +1,12 @@
 import { MongoClient } from 'mongodb';
-import { AssociatedProduct, SharedMetadata } from '../../src/services/metadata/associated_products';
+import { AssociatedProduct, Metadata } from '../../src/services/metadata/associated_products';
 import {
   ToC,
   ToCInsertions,
   TocOrderInsertions,
   traverseAndMerge,
   _isInsertionCandidateNode,
+  copyToCTree,
 } from '../../src/services/metadata/ToC';
 
 import metadata from '../data/metadata.json';
@@ -45,6 +46,16 @@ describe('ToC module', () => {
     await connection.close();
   });
 
+  describe('copyToCTree', () => {
+    it('creates a deep copy of a ToC when passed only the ToC', () => {
+      const toctree = metadata[0].toctree;
+      const copiedToCTree = copyToCTree(toctree);
+      toctree.slug = '/';
+      copiedToCTree.slug = 'test value';
+      expect(toctree.slug).toBe('/');
+    });
+  });
+
   describe('isInsertionCandidateNode', () => {
     const associatedProducts = metadata
       .map((m) => m.associated_products || [])
@@ -78,11 +89,14 @@ describe('ToC module', () => {
   });
 
   describe('traverseAndMerge', () => {
-    it('searches BFS through the ToC tree from metadata, inserts matching tocInsertions and tocOrders', () => {
+    it('searches via BFS through the ToC tree from metadata, inserts matching tocInsertions (slug or url as appropriate) and tocOrders', () => {
       const umbrellaMetadata = metadata[2];
       const tocInsertions = {
         'atlas-cli': {
-          master: metadata[0].toctree,
+          master: {
+            original: copyToCTree(metadata[0].toctree),
+            urlified: copyToCTree(metadata[0].toctree, 'atlas/cli', 'docs', 'www.mongodb.com'),
+          },
         },
       } as unknown as ToCInsertions;
       const tocOrderInsertions = {
@@ -109,8 +123,13 @@ describe('ToC module', () => {
       } as TocOrderInsertions;
       // console.log(traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions));
 
+      const umbrellaToCs = {
+        urlified: copyToCTree(umbrellaMetadata.toctree as ToC, 'atlas', 'docs', 'www.mongodb.com'),
+        original: copyToCTree(umbrellaMetadata.toctree as ToC),
+      };
+
       expect(
-        traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions)
+        traverseAndMerge(umbrellaMetadata as unknown as Metadata, umbrellaToCs, tocInsertions, tocOrderInsertions)
       ).toMatchSnapshot();
     });
   });
