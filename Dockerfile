@@ -8,6 +8,10 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
+RUN cd ./modules/persistence \
+    && npm install \
+    && npm run build
+
 # where repo work will happen
 FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=0.13.13
@@ -83,6 +87,15 @@ COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
+
+# Persistence module copy
+# Create directory and add permissions to allow node module installation
+RUN mkdir -p modules/persistence && chmod 755 modules/persistence
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/package*.json ./modules/persistence/
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/dist ./modules/persistence/
+ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
+RUN cd ./modules/persistence/ && npm install
+
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
 CMD ["node", "app.js"]
