@@ -11,7 +11,6 @@ RUN npm run build
 # Build modules
 # OAS Page Builder
 RUN cd ./modules/oas-page-builder \
-    && npm install \
     && npm run build
 
 # where repo work will happen
