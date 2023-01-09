@@ -66,8 +66,7 @@ export class ProductionJobHandler extends JobHandler {
     if (this.currJob?.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
       this.currJob.buildCommands.push('make next-gen-html');
-      // TODO: DOP-3377
-      // this.currJob.buildCommands.push('make persist-data');
+      this.currJob.buildCommands.push('make persist-data');
     }
   }
 
