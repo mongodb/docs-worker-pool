@@ -59,7 +59,8 @@ RUN useradd -ms /bin/bash docsworker-xlarge
 RUN npm -g config set user root
 USER docsworker-xlarge
 
-WORKDIR /home/docsworker-xlarge
+ARG WORK_DIRECTORY=/home/docsworker-xlarge
+WORKDIR ${WORK_DIRECTORY}
 
 # get shared.mk
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk

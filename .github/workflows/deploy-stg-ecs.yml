@@ -47,6 +47,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+          USE_PERSISTENCE: true
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR DOTCOM
         with:
@@ -59,6 +60,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+          USE_PERSISTENCE: true
       - name: Deploy ECS
         run: |
           cd infrastructure/ecs-main
