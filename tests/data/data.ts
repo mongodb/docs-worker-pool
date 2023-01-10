@@ -145,6 +145,7 @@ export class TestDataProvider {
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make get-build-dependencies',
       'make next-gen-html',
+      'make persist-data',
     ]);
   }
 
@@ -163,6 +164,8 @@ export class TestDataProvider {
     ]);
     if (job.payload.repoName == 'devhub-content-integration') {
       commands[commands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
+    } else {
+      commands.push('make persist-data');
     }
     return commands;
   }
