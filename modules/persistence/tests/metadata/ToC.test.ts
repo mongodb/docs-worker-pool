@@ -89,48 +89,94 @@ describe('ToC module', () => {
   });
 
   describe('traverseAndMerge', () => {
-    it('searches via BFS through the ToC tree from metadata, inserts matching tocInsertions (slug or url as appropriate) and tocOrders', () => {
-      const umbrellaMetadata = metadata[2];
-      const tocInsertions = {
-        'atlas-cli': {
-          master: {
-            original: copyToCTree(metadata[0].toctree),
-            urlified: copyToCTree(metadata[0].toctree, 'atlas/cli', 'docs', 'www.mongodb.com'),
+    describe('searches via BFS through the ToC tree from metadata, inserts matching tocInsertions (slug or url as appropriate) and tocOrders', () => {
+      it('Urlifies associated ToCs when invoked with an umbrellaMetadata entry', () => {
+        const umbrellaMetadata = metadata[2];
+        const tocInsertions = {
+          'atlas-cli': {
+            master: {
+              original: copyToCTree(metadata[0].toctree),
+              urlified: copyToCTree(metadata[0].toctree, 'atlas/cli', 'docs', 'www.mongodb.com'),
+            },
           },
-        },
-      } as unknown as ToCInsertions;
-      const tocOrderInsertions = {
-        'atlas-cli': {
-          master: [
-            '/',
-            '/',
-            'install-atlas-cli',
-            'compatibility',
-            'connect-atlas-cli',
-            'atlas-cli-save-connection-settings',
-            'atlas-cli-env-variables',
-            'migrate-to-atlas-cli',
-            'configure-optional-settings',
-            'telemetry',
-            'atlas-cli-tutorials',
-            'atlas-cli-getting-started',
-            'atlas-cli-quickstart',
-            'reference',
-            'cluster-config-file',
-            'atlas-cli-changelog',
-          ],
-        },
-      } as TocOrderInsertions;
-      // console.log(traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions));
+        } as unknown as ToCInsertions;
+        const tocOrderInsertions = {
+          'atlas-cli': {
+            master: [
+              '/',
+              '/',
+              'install-atlas-cli',
+              'compatibility',
+              'connect-atlas-cli',
+              'atlas-cli-save-connection-settings',
+              'atlas-cli-env-variables',
+              'migrate-to-atlas-cli',
+              'configure-optional-settings',
+              'telemetry',
+              'atlas-cli-tutorials',
+              'atlas-cli-getting-started',
+              'atlas-cli-quickstart',
+              'reference',
+              'cluster-config-file',
+              'atlas-cli-changelog',
+            ],
+          },
+        } as TocOrderInsertions;
+        // console.log(traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions));
 
-      const umbrellaToCs = {
-        urlified: copyToCTree(umbrellaMetadata.toctree as ToC, 'atlas', 'docs', 'www.mongodb.com'),
-        original: copyToCTree(umbrellaMetadata.toctree as ToC),
-      };
+        const umbrellaToCs = {
+          urlified: copyToCTree(umbrellaMetadata.toctree as ToC, 'atlas', 'docs', 'www.mongodb.com'),
+          original: copyToCTree(umbrellaMetadata.toctree as ToC),
+        };
 
-      expect(
-        traverseAndMerge(umbrellaMetadata as unknown as Metadata, umbrellaToCs, tocInsertions, tocOrderInsertions)
-      ).toMatchSnapshot();
+        expect(
+          traverseAndMerge(umbrellaMetadata as unknown as Metadata, umbrellaToCs, tocInsertions, tocOrderInsertions)
+        ).toMatchSnapshot();
+      });
+
+      it('urlifies umbrella ToCs when invoked with an associated metadata entry', () => {
+        const umbrellaMetadata = metadata[2];
+        const tocInsertions = {
+          'atlas-cli': {
+            master: {
+              original: copyToCTree(metadata[0].toctree),
+              urlified: copyToCTree(metadata[0].toctree, 'atlas/cli', 'docs', 'www.mongodb.com'),
+            },
+          },
+        } as unknown as ToCInsertions;
+        const tocOrderInsertions = {
+          'atlas-cli': {
+            master: [
+              '/',
+              '/',
+              'install-atlas-cli',
+              'compatibility',
+              'connect-atlas-cli',
+              'atlas-cli-save-connection-settings',
+              'atlas-cli-env-variables',
+              'migrate-to-atlas-cli',
+              'configure-optional-settings',
+              'telemetry',
+              'atlas-cli-tutorials',
+              'atlas-cli-getting-started',
+              'atlas-cli-quickstart',
+              'reference',
+              'cluster-config-file',
+              'atlas-cli-changelog',
+            ],
+          },
+        } as TocOrderInsertions;
+        // console.log(traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions));
+
+        const umbrellaToCs = {
+          urlified: copyToCTree(umbrellaMetadata.toctree as ToC, 'atlas', 'docs', 'www.mongodb.com'),
+          original: copyToCTree(umbrellaMetadata.toctree as ToC),
+        };
+
+        expect(
+          traverseAndMerge(metadata[0] as unknown as Metadata, umbrellaToCs, tocInsertions, tocOrderInsertions)
+        ).toMatchSnapshot();
+      });
     });
   });
 });

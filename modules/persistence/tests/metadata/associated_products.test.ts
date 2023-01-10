@@ -86,11 +86,18 @@ describe('associated_products module', () => {
       });
     });
 
-    test('shapeToCsCursor returns the toc and toctreeOrder to be inserted', async () => {
+    test('shapeToCsCursor returns copied ToCs (with slugs and urls), toctreeOrder, and their parent metadata document', async () => {
       const cursor = await _getAssociatedProducts(umbrellaMetadata);
       const repoBranchesMap = {};
       repoBranchesMap['atlas-cli'] = {
-        master: [],
+        master: {
+          url: {
+            dotcomprd: 'www.mongodb.com',
+          },
+          prefix: {
+            dotcomprd: 'docs',
+          },
+        },
       };
       const { tocInsertions, tocOrderInsertions } = await _shapeToCsCursor(cursor, repoBranchesMap);
       expect(tocInsertions).toMatchSnapshot();
