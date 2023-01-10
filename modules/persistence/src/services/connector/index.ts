@@ -28,7 +28,7 @@ export const db = async () => {
   if (!dbInstance) {
     try {
       await client.connect();
-      dbInstance = client.db(process.env.DB_NAME);
+      dbInstance = client.db(process.env.SNOOTY_DB_NAME);
     } catch (error) {
       console.error(`Error at db client connection: ${error}`);
       throw error;
