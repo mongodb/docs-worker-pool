@@ -144,7 +144,6 @@ export class TestDataProvider {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make get-build-dependencies',
-      'make persist-data',
       'make next-gen-html',
     ]);
   }
@@ -160,7 +159,6 @@ export class TestDataProvider {
   static getExpectedStagingBuildNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
-      'make persist-data',
       'make next-gen-html',
     ]);
     if (job.payload.repoName == 'devhub-content-integration') {
