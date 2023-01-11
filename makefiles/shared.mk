@@ -48,17 +48,12 @@ next-gen-parse:
 		else \
 			exit 0; \
 		fi \
-	fi && \
-
-	# persistence module - add bundle zip to Atlas documents
-	if [ -n "$USE_PERSISTENCE" ]; then \
-		# ignore errors "-" flag
-		-node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}; \
-	else  \
-		echo "Skipping persistence module - missing USE_PERSISTENCE flag"; \
-	fi 
+	fi
 
 next-gen-html: next-gen-parse
+	# persistence module - add bundle zip to Atlas documents
+	# ignore errors "-" flag
+	-node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH};
 	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
