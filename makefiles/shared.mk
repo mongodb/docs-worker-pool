@@ -48,7 +48,7 @@ next-gen-parse:
 		else \
 			exit 0; \
 		fi \
-	fi
+	fi && \
 
 	# persistence module - add bundle zip to Atlas documents
 	if [ -n "$USE_PERSISTENCE" ]; then \
