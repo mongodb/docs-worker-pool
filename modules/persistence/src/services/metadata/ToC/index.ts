@@ -41,14 +41,12 @@ const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProd
 const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
   // Options might be undefined, so safely cast to {} if nullish
   node.options = node.options ?? {};
-  console.log('currentProject: ', currentProject, ' Insertion Node Project: ', node?.options?.project);
   const needsUrlifiedToC = currentProject !== node?.options?.project;
 
   const associatedProject = tocs[node?.options?.project];
   const branches = Object.keys(associatedProject);
   node.options.versions = branches;
   node.children = branches.map((branch) => {
-    console.log(needsUrlifiedToC);
     const child = needsUrlifiedToC ? associatedProject[branch].urlified : associatedProject[branch].original;
     const options = {
       ...child.options,
@@ -72,11 +70,12 @@ const mergeTocTreeOrder = (metadata: Metadata, node, insertions: TocOrderInserti
 // contains an associated_products entry
 export const traverseAndMerge = (
   metadata: Metadata,
+  associated_products: AssociatedProduct[],
   umbrellaToCs: ToCCopies,
   tocInsertions: ToCInsertions,
   tocOrderInsertions: TocOrderInsertions
 ) => {
-  const { associated_products, project } = metadata;
+  const { project } = metadata;
 
   const toctree = hasAssociations(metadata) ? umbrellaToCs.original : umbrellaToCs.urlified;
 

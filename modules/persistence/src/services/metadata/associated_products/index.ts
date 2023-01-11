@@ -185,7 +185,13 @@ export const mergeAssociatedToCs = async (metadata) => {
   };
 
   const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
-    const mergedMetadataEntry = traverseAndMerge(metadataEntry, umbrellaToCs, tocInsertions, tocOrderInsertions);
+    const mergedMetadataEntry = traverseAndMerge(
+      metadataEntry,
+      umbrellaMetadata.associated_products,
+      umbrellaToCs,
+      tocInsertions,
+      tocOrderInsertions
+    );
     // Remove the _id and treat the entry as a brand new document.
     delete mergedMetadataEntry._id;
     // Add a flag to denote that the entry contains a merged ToC.

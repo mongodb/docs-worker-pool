@@ -99,9 +99,13 @@ describe('associated_products module', () => {
           },
         },
       };
-      const { tocInsertions, tocOrderInsertions } = await _shapeToCsCursor(cursor, repoBranchesMap);
+      const { tocInsertions, tocOrderInsertions, associatedMetadataEntries } = await _shapeToCsCursor(
+        cursor,
+        repoBranchesMap
+      );
       expect(tocInsertions).toMatchSnapshot();
       expect(tocOrderInsertions).toMatchSnapshot();
+      expect(associatedMetadataEntries).toMatchSnapshot();
     });
   });
 });
