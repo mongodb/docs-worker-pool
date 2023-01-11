@@ -3,6 +3,7 @@ SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 REGRESSION = $(shell printenv REGRESSION)
 BUCKET = $(shell printenv BUCKET)
 URL = $(shell printenv URL)
+USE_PERSISTENCE = $(shell printenv USE_PERSISTENCE)
 
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
@@ -50,12 +51,12 @@ next-gen-parse:
 	fi
 
 	# persistence module - add bundle zip to Atlas documents
-	ifeq ($(USE_PERSISTENCE), true)
+	if [ -n "$USE_PERSISTENCE" ]; then \
 		# ignore errors "-" flag
-		-node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
-	else
-		echo "Skipping persistence module - missing USE_PERSISTENCE flag"
-	endif
+		-node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}; \
+	else  \
+		echo "Skipping persistence module - missing USE_PERSISTENCE flag"; \
+	fi 
 
 next-gen-html: next-gen-parse
 	# build-front-end after running parse commands
