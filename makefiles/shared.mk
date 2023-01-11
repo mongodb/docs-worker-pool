@@ -49,6 +49,14 @@ next-gen-parse:
 		fi \
 	fi
 
+	# persistence module - add bundle zip to Atlas documents
+	ifeq ($(USE_PERSISTENCE), true)
+		# ignore errors "-" flag
+		-node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
+	else
+		echo "Skipping persistence module - missing USE_PERSISTENCE flag"
+	endif
+
 next-gen-html: next-gen-parse
 	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
@@ -72,14 +80,6 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
-
-persist-data: next-gen-parse
-	ifeq ($(USE_PERSISTENCE), true)
-		-node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
-	else
-		echo "Skipping persistence module - missing USE_PERSISTENCE flag"
-	endif
-
 endif
 
 # Intended to be called by the autobuilder as a build command after frontend build, but before mut upload
