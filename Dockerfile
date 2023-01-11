@@ -64,7 +64,7 @@ WORKDIR ${WORK_DIRECTORY}
 
 # get shared.mk
 # TODO: revert this change
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/a35812bb8b9c9d78880d4b8bfaaac5692e1ff80d/makefiles/shared.mk -o shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/53981185f773208420f20b21982e10e460fee62e/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
 RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
