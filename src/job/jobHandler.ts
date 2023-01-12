@@ -274,6 +274,7 @@ export abstract class JobHandler {
     }
     const snootyFrontEndVars = {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
+      NAV_FOOTER: this.currJob.payload.jobType === 'githubPush' ? 'omit' : 'present',
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
