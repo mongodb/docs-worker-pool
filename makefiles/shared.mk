@@ -3,7 +3,6 @@ SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 REGRESSION = $(shell printenv REGRESSION)
 BUCKET = $(shell printenv BUCKET)
 URL = $(shell printenv URL)
-USE_PERSISTENCE = $(shell printenv USE_PERSISTENCE)
 
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
