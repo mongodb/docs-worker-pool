@@ -274,12 +274,18 @@ export abstract class JobHandler {
     }
     const snootyFrontEndVars = {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
-      GATSBY_TEST_EMBED_VERSIONS: this._config.get<string>('gatsbyTestEmbedVersions'),
+      GATSBY_TEST_EMBED_VERSIONS: this._config.get<boolean>('gatsbyTestEmbedVersions'),
     };
+    this._logger.info(this._currJob._id, 'check snootyFrontEndVars');
+    this._logger.info(this._currJob._id, JSON.stringify(snootyFrontEndVars));
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
       if (envValue) envVars += `${envName}=${envValue}\n`;
     }
+
+    this._logger.info(this._currJob._id, 'check envValue');
+    this._logger.info(this._currJob._id, envVars);
+
     this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, {
       encoding: 'utf8',
       flag: 'w',
