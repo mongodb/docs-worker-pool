@@ -274,6 +274,7 @@ export abstract class JobHandler {
     }
     const snootyFrontEndVars = {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
+      GATSBY_TEST_EMBED_VERSIONS: this._config.get<string>('gatsbyTestEmbedVersions'),
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
