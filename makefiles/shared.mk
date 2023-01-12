@@ -83,3 +83,4 @@ endif
 # Production: https://github.com/mongodb/docs-worker-pool/blob/1a482242fa6f1463abb059884cddb2c56ba9fad9/src/job/productionJobHandler.ts#L68
 oas-page-build:
 	node ${OAS_MODULE_PATH} --bundle ${BUNDLE_PATH} --output ${REPO_DIR}/public --redoc ${REDOC_PATH} --repo ${REPO_DIR} --site-url ${URL}/${MUT_PREFIX}
+
