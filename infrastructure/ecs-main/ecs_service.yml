@@ -62,6 +62,8 @@ Resources:
               Value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
             - Name: GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN
               Value: ${self:custom.gatsbyFeatureFlagVersionDropdown}
+            - Name: GATSBY_TEST_EMBED_VERSIONS
+              Value: ${self:custom.gatsbyTestEmbedVersions}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
