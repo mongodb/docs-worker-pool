@@ -52,7 +52,7 @@ next-gen-parse:
 next-gen-html: next-gen-parse
 	# persistence module - add bundle zip to Atlas documents
 	# ignore errors "-" flag
-	node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
+	-node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
 	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
