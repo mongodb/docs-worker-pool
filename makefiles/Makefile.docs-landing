@@ -28,6 +28,9 @@ next-gen-html: build-legacy-pages
 	else \
 		exit 0; \
 	fi
+	# persistence module - add bundle zip to Atlas documents
+	# ignore errors "-" flag
+	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
