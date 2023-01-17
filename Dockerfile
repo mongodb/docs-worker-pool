@@ -10,8 +10,8 @@ RUN npm run build
 
 # where repo work will happen
 FROM ubuntu:20.04
-ARG SNOOTY_PARSER_VERSION=0.13.7
-ARG SNOOTY_FRONTEND_VERSION=0.13.23
+ARG SNOOTY_PARSER_VERSION=0.13.15
+ARG SNOOTY_FRONTEND_VERSION=0.13.35
 ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -34,7 +34,9 @@ RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tool
 RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
 RUN apt-get -y install vim
 RUN apt-get -y install git pkg-config libxml2-dev
-RUN python3 -m pip install -r https://raw.githubusercontent.com/mongodb/mut/master/requirements.txt
+RUN python3 -m pip install https://github.com/mongodb/mut/releases/download/v0.10.2/mut-0.10.2-py3-none-any.whl
+
+
 ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 14
@@ -65,7 +67,7 @@ RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/
 
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
-    && cd snooty                                                                                   \                                                                        \
+    && cd snooty                                                                                   \
     && npm install                                                                                 \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
     && mkdir -p ./static/images                                                                    \
