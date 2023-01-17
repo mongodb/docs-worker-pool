@@ -1,20 +1,14 @@
 import { AggregationCursor } from 'mongodb';
+import { Metadata } from '..';
 import { pool, db } from '../../connector';
-import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge } from '../ToC';
+import { ToCInsertions, TocOrderInsertions, traverseAndMerge } from '../ToC';
 
 export interface AssociatedProduct {
   name: string;
   versions: string[];
 }
 
-export interface SharedMetadata {
-  project: string;
-  branch: string;
-  associated_products?: AssociatedProduct[];
-  toctree: ToC;
-  toctreeOrder: any[];
-  [key: string]: any;
-}
+export type SharedMetadata = Metadata;
 
 // TODO: move the branch/repobranch interfaces into their own file, or into a seperate abstraction?
 interface BranchEntry {
@@ -135,7 +129,7 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
   }
 };
 
-export const mergeAssociatedToCs = async (metadata) => {
+export const mergeAssociatedToCs = async (metadata: Metadata) => {
   const { project, branch } = metadata;
   const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(metadata);
 

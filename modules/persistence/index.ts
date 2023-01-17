@@ -7,7 +7,7 @@ import minimist from 'minimist';
 import * as mongodb from 'mongodb';
 import { teardown as closeDBConnection } from './src/services/connector';
 import { insertPages } from './src/services/pages';
-import { insertMetadata, insertUmbrellaMetadata } from './src/services/metadata';
+import { insertMetadata, insertUmbrellaMetadata, deleteStaleMetadata } from './src/services/metadata';
 import { upsertAssets } from './src/services/assets';
 
 interface ModuleArgs {
@@ -32,11 +32,15 @@ const app = async (path: string) => {
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
     await Promise.all([
-      insertPages(buildId, zip),
+      // insertPages(buildId, zip),
       insertMetadata(buildId, zip),
-      upsertAssets(zip),
-      insertUmbrellaMetadata(buildId, zip),
+      // upsertAssets(zip),
+      // insertUmbrellaMetadata(buildId, zip),
     ]);
+
+    // DOP-3447 clean up stale metadata
+    await deleteStaleMetadata(buildId, zip);
+
     closeDBConnection();
     process.exit(0);
   } catch (error) {
