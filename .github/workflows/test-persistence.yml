@@ -1,4 +1,4 @@
-name: CI
+name: CI-persistence
 
 on:
   push:
@@ -9,34 +9,35 @@ on:
     - master
 
 jobs:
-  # Checks for changes outside of /modules directory
+  # Checks for changes to the modules/persistence directory
   changes:
     runs-on: ubuntu-latest
     outputs:
-      autobuilder: ${{ steps.filter.outputs.autobuilder }}
+      persistence: ${{ steps.filter.outputs.persistence }}
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          # set autobuilder filter true
-          # if any changes outside of modules directory
           filters: |
-            autobuilder:
-              - '!(modules/**)'
+            persistence:
+              - 'modules/persistence/**'
 
   test:
     needs: changes
-    if: ${{ needs.changes.outputs.autobuilder }}
+    if: ${{ needs.changes.outputs.persistence == 'true' }}
+    defaults:
+      run:
+        working-directory: 'modules/persistence'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions/setup-node@v1
       with:
         node-version: '14.x'
     - name: Install dependencies
       run: npm install --dev
     - name: Lint
-      run: npm run lint && npm run format
+      run: npm run lint
     - name: Test
       run: npm test
