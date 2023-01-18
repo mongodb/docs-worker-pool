@@ -45,7 +45,7 @@ export const insertUmbrellaMetadata = async (buildId: ObjectId, zip: AdmZip) => 
   }
 };
 
-export const deleteStaleMetadata = async (buildId: ObjectId, zip: AdmZip) => {
+export const deleteStaleMetadata = async (zip: AdmZip) => {
   try {
     const { project, branch } = metadataFromZip(zip);
     const LIMIT = 4;
@@ -59,12 +59,16 @@ export const deleteStaleMetadata = async (buildId: ObjectId, zip: AdmZip) => {
       })
       .sort({
         build_id: -1,
+        _id: -1,
       })
       .toArray();
-    const deleteCandidateIds = entries.slice(LIMIT).map((doc) => doc.build_id);
+
+    const deleteCandidateIds = entries.slice(LIMIT).map((doc) => doc._id);
     return await deleteDocuments(deleteCandidateIds, COLLECTION_NAME);
   } catch (error) {
     console.error(`Error deleting stale metadata: ${error}`);
     throw error;
   }
 };
+
+export const _metadataFromZip = metadataFromZip;

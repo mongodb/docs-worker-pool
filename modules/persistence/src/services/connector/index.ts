@@ -64,11 +64,11 @@ export const upsert = async (payload: any, collection: string, _id: string | Obj
   }
 };
 
-export const deleteDocuments = async (buildIds: ObjectId[], collection: string) => {
+export const deleteDocuments = async (_ids: ObjectId[], collection: string) => {
   const deleteSession = await db();
   try {
     const query = {
-      build_id: { $in: buildIds },
+      _id: { $in: _ids },
     };
     const res = await deleteSession.collection(collection).deleteMany(query);
     console.log(`Deleted ${res.deletedCount} documents in ${collection}`);
