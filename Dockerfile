@@ -20,7 +20,7 @@ ARG SNOOTY_PARSER_VERSION=0.13.15
 ARG SNOOTY_FRONTEND_VERSION=0.13.35
 # The Redoc CLI branch will most likely stay static. Updates to the branch should 
 # be limited to CLI bug fixes and Redoc dependency version bumps
-ARG REDOC_CLI_VERSION=build-redoc-cli
+ARG REDOC_CLI_VERSION=0.1.0
 ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -70,7 +70,7 @@ WORKDIR ${WORK_DIRECTORY}
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
-RUN git clone -b ${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
+RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
     && python3 -m pip install pip==20.2 flit==${FLIT_VERSION}                                      \
     && cd snooty-parser                                                                            \
     && python3 -m flit install
@@ -90,7 +90,7 @@ RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub     
     && npm install --production
 
 # install redoc fork
-RUN git clone -b ${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+RUN git clone -b redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
     # Install dependencies for Redoc CLI
     && cd redoc/cli \
     && npm ci --omit=dev \
