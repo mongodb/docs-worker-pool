@@ -16,9 +16,8 @@ RUN cd ./modules/oas-page-builder \
 
 # where repo work will happen
 FROM ubuntu:20.04
-# TODO: Cut new parser version. Using the master branch with OpenAPI metadata changes for now
-ARG SNOOTY_PARSER_VERSION=master
-ARG SNOOTY_FRONTEND_VERSION=0.13.34
+ARG SNOOTY_PARSER_VERSION=0.13.15
+ARG SNOOTY_FRONTEND_VERSION=0.13.35
 # The Redoc CLI branch will most likely stay static. Updates to the branch should 
 # be limited to CLI bug fixes and Redoc dependency version bumps
 ARG REDOC_CLI_VERSION=build-redoc-cli
