@@ -260,7 +260,7 @@ describe('ProductionJobHandler Tests', () => {
 
     expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
       `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\n`,
+      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\n`,
       { encoding: 'utf8', flag: 'w' }
     );
   });
