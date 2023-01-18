@@ -17,6 +17,12 @@ export interface Metadata {
   [key: string]: any;
 }
 
+type EnvKeyedObject = {
+  prd: any;
+  preprd: any;
+  dotcomstg: any;
+  dotcomprd: any;
+};
 // TODO: move the branch/repobranch interfaces into their own file, or into a seperate abstraction?
 export interface BranchEntry {
   name: string;
@@ -28,6 +34,8 @@ export interface ReposBranchesDocument {
   repoName: string;
   project: string;
   branches: BranchEntry[];
+  url: EnvKeyedObject;
+  prefix: EnvKeyedObject;
   [key: string]: any;
 }
 
@@ -149,56 +157,61 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
 };
 
 export const mergeAssociatedToCs = async (metadata) => {
-  const { project, branch } = metadata;
-  const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
+  try {
+    const { project, branch } = metadata;
+    const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
 
-  // Short circuit execution here if there's no umbrella product metadata found
-  if (!umbrellaMetadata) return;
-  // Short circuit execution if the project branch is NOT in repo branches
-  // If we want to embed with staging builds, then this needs to be turned off
-  // or converted so that local metadata ToC is added to tocInsertions
-  const isStagingBranch = await !getRepoBranchesEntry(project, branch);
-  if (isStagingBranch) return;
+    // Short circuit execution here if there's no umbrella product metadata found
+    if (!umbrellaMetadata) return;
+    // Short circuit execution if the project branch is NOT in repo branches
+    // If we want to embed with staging builds, then this needs to be turned off
+    // or converted so that local metadata ToC is added to tocInsertions
+    const isStagingBranch = !(await getRepoBranchesEntry(project, branch));
+    if (isStagingBranch) return;
 
-  const umbrellaRepoBranchesEntry = await getRepoBranchesEntry(umbrellaMetadata.project, umbrellaMetadata.branch);
-  if (!umbrellaRepoBranchesEntry)
-    throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
+    const umbrellaRepoBranchesEntry = await getRepoBranchesEntry(umbrellaMetadata.project, umbrellaMetadata.branch);
+    if (!umbrellaRepoBranchesEntry)
+      throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
 
-  const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
-  const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
-  const metadataCursor = await getAssociatedProducts(umbrellaMetadata);
+    const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
+    const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
+    const metadataCursor = await getAssociatedProducts(umbrellaMetadata);
 
-  const { tocInsertions, tocOrderInsertions, associatedMetadataEntries } = await shapeToCsCursor(
-    metadataCursor,
-    repoBranchesMap
-  );
-
-  // We need to have copies of the main umbrella product's ToC here, to handle multiple metadata entry support
-  const umbrellaToCs = {
-    original: copyToCTree(umbrellaMetadata.toctree),
-    urlified: copyToCTree(
-      umbrellaMetadata.toctree,
-      umbrellaMetadata.url,
-      umbrellaRepoBranchesEntry?.prefix,
-      umbrellaRepoBranchesEntry?.url
-    ),
-  };
-
-  const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
-    const mergedMetadataEntry = traverseAndMerge(
-      metadataEntry,
-      umbrellaMetadata.associated_products,
-      umbrellaToCs,
-      tocInsertions,
-      tocOrderInsertions
+    const { tocInsertions, tocOrderInsertions, associatedMetadataEntries } = await shapeToCsCursor(
+      metadataCursor,
+      repoBranchesMap
     );
-    // Remove the _id and treat the entry as a brand new document.
-    delete mergedMetadataEntry._id;
-    // Add a flag to denote that the entry contains a merged ToC.
-    mergedMetadataEntry.is_merged_toc = true;
-    return mergedMetadataEntry;
-  });
-  return mergedMetadataEntries;
+
+    // We need to have copies of the main umbrella product's ToC here, to handle multiple metadata entry support
+    const umbrellaToCs = {
+      original: copyToCTree(umbrellaMetadata.toctree),
+      urlified: copyToCTree(
+        umbrellaMetadata.toctree,
+        umbrellaMetadata.project,
+        umbrellaRepoBranchesEntry?.prefix,
+        umbrellaRepoBranchesEntry?.url
+      ),
+    };
+
+    const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
+      const mergedMetadataEntry = traverseAndMerge(
+        metadataEntry,
+        umbrellaMetadata.associated_products,
+        umbrellaToCs,
+        tocInsertions,
+        tocOrderInsertions
+      );
+      // Remove the _id and treat the entry as a brand new document.
+      delete mergedMetadataEntry._id;
+      // Add a flag to denote that the entry contains a merged ToC.
+      mergedMetadataEntry.is_merged_toc = true;
+      return mergedMetadataEntry;
+    });
+    return mergedMetadataEntries;
+  } catch (error) {
+    console.log(`Error at time of merging associated ToC entries: ${error}`);
+    throw error;
+  }
 };
 
 export const _getRepoBranchesEntry = getRepoBranchesEntry;

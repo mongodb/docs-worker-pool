@@ -44,6 +44,7 @@ const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
   const needsUrlifiedToC = currentProject !== node?.options?.project;
 
   const associatedProject = tocs[node?.options?.project];
+  if (!associatedProject) return node;
   const branches = Object.keys(associatedProject);
   node.options.versions = branches;
   node.children = branches.map((branch) => {
