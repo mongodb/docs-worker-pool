@@ -5,6 +5,7 @@ import { Command } from 'commander';
 import { getOASMetadata } from './src/services/buildMetadata';
 import { buildOpenAPIPages } from './src/services/pageBuilder';
 import { ModuleOptions } from './src/types';
+import { normalizeUrl } from './src/utils/normalizeUrl';
 
 const program = new Command();
 program
@@ -30,6 +31,9 @@ const app = async (options: ModuleOptions) => {
   const oasMetadataEntries = Object.entries(openapiPages);
   const numOASPages = oasMetadataEntries.length;
   console.log(`OpenAPI content pages found: ${numOASPages}.`);
+
+  // Normalize url since Autobuilder's MUT_PREFIX could be malformed
+  options.siteUrl = normalizeUrl(options.siteUrl);
 
   await buildOpenAPIPages(oasMetadataEntries, { ...options, siteTitle });
 };
