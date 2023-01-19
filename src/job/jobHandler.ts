@@ -397,7 +397,10 @@ export abstract class JobHandler {
         try {
           resp = await this._commandExecutor.execute(this.currJob.deployCommands);
         } catch (error) {
-          const errorMessage = `Execute Error: ${JSON.stringify(error)}`;
+          const e = error as Error;
+
+          const errorStack = e.stack;
+          const errorMessage = `Execute Error: ${e.message} \n\n ${errorStack}`;
 
           this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)} ${errorMessage}`);
           throw new Error(errorMessage);
@@ -429,7 +432,10 @@ export abstract class JobHandler {
         throw new PublishError(`Failed pushing to ${this.name}, No commands to execute`);
       }
     } catch (error) {
-      const errorMessage = `Unknown Error: ${JSON.stringify(error)}`;
+      const e = error as Error;
+
+      const errorStack = e.stack;
+      const errorMessage = `Unknown Error: ${e.message} \n\n ${errorStack}`;
 
       this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)} ${errorMessage}`);
       throw new Error(errorMessage);
