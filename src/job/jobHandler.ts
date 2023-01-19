@@ -393,7 +393,16 @@ export abstract class JobHandler {
       );
 
       if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
-        const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
+        let resp;
+        try {
+          resp = await this._commandExecutor.execute(this.currJob.deployCommands);
+        } catch (error) {
+          const errorMessage = `Execute Error: ${JSON.stringify(error)}`;
+
+          this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)} ${errorMessage}`);
+          throw new Error(errorMessage);
+        }
+
         if (resp?.error?.includes('ERROR')) {
           await this._logger.save(
             this.currJob._id,
