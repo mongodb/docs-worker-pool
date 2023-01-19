@@ -405,22 +405,46 @@ export abstract class JobHandler {
           this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)} ${errorMessage}`);
           throw new Error(errorMessage);
         }
+        let isError;
 
-        if (resp?.error?.includes('ERROR')) {
+        try {
+          isError = resp?.error?.includes('ERROR');
+        } catch (error) {
+          const e = error as Error;
+
+          const errorStack = e.stack;
+          const errorMessage = `includes Error: ${e.message} \n\n ${errorStack}`;
+
+          this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)} ${errorMessage}`);
+          throw new Error(errorMessage);
+        }
+
+        try {
+          if (isError) {
+            await this._logger.save(
+              this.currJob._id,
+              `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`
+            );
+            throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`);
+          }
           await this._logger.save(
             this.currJob._id,
-            `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`
+            `${this._config.get<string>('stage').padEnd(15)}Finished pushing to ${this.name}`
           );
-          throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`);
+          await this._logger.save(
+            this.currJob._id,
+            `${this._config.get<string>('stage').padEnd(15)}push details:\n\n${resp.output}`
+          );
+        } catch (error) {
+          const e = error as Error;
+
+          const errorStack = e.stack;
+          const errorMessage = `_logger error: ${e.message} \n\n ${errorStack}`;
+
+          this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)} ${errorMessage}`);
+          throw new Error(errorMessage);
         }
-        await this._logger.save(
-          this.currJob._id,
-          `${this._config.get<string>('stage').padEnd(15)}Finished pushing to ${this.name}`
-        );
-        await this._logger.save(
-          this.currJob._id,
-          `${this._config.get<string>('stage').padEnd(15)}push details:\n\n${resp.output}`
-        );
+
         return resp;
       } else {
         await this._logger.save(
