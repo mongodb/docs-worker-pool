@@ -60,10 +60,6 @@ Resources:
               Value: ${self:custom.gatsbyBaseUrl}
             - Name: PREVIEW_BUILD_ENABLED
               Value: ${self:custom.previewBuildEnabled}
-            - Name: GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION
-              Value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
-            - Name: GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN
-              Value: ${self:custom.gatsbyFeatureFlagVersionDropdown}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID

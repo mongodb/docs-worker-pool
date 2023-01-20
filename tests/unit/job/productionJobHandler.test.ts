@@ -158,28 +158,18 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
-  describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var cases', (element) => {
+  test('Validate set env var cases', (element) => {
     test(`Testing commit check returns ${JSON.stringify(element)}`, async () => {
       jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
       jobHandlerTestHelper.job.payload.aliased = true;
       jobHandlerTestHelper.job.payload.primaryAlias = null;
       jobHandlerTestHelper.setupForSuccess();
-      jobHandlerTestHelper.config.get
-        .calledWith('GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION')
-        .mockReturnValue(element['GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION']);
-      jobHandlerTestHelper.config.get
-        .calledWith('GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN')
-        .mockReturnValue(element['GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN']);
       await jobHandlerTestHelper.jobHandler.execute();
       jobHandlerTestHelper.verifyNextGenSuccess();
       // TODO: Correct number of arguments
       expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
         `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-        TestDataProvider.getEnvVarsWithPathPrefixWithFlags(
-          jobHandlerTestHelper.job,
-          element['navString'],
-          element['versionString']
-        ),
+        TestDataProvider.getEnvVarsWithPathPrefixWithFlags(jobHandlerTestHelper.job),
         { encoding: 'utf8', flag: 'w' }
       );
     });
