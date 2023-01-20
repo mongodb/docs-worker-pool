@@ -392,7 +392,7 @@ export abstract class JobHandler {
 
     if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
       const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
-      if (resp?.error?.includes('ERROR')) {
+      if (resp?.error?.includes?.('ERROR')) {
         await this._logger.save(
           this.currJob._id,
           `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`
