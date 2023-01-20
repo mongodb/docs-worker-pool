@@ -104,6 +104,9 @@ next-gen-html: examples
 			exit 0; \
 		fi \
 	fi
+	# persistence module - add bundle zip to Atlas documents
+	# ignore errors "-" flag
+	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR} && \
 	cd snooty && \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production && \

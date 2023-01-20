@@ -50,6 +50,9 @@ next-gen-parse:
 	fi
 
 next-gen-html: next-gen-parse
+	# persistence module - add bundle zip to Atlas documents
+	# ignore errors "-" flag
+	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
 	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
@@ -80,5 +83,3 @@ endif
 oas-page-build:
 	node ${OAS_MODULE_PATH} --bundle ${BUNDLE_PATH} --output ${REPO_DIR}/public --redoc ${REDOC_PATH} --repo ${REPO_DIR} --site-url ${URL}/${MUT_PREFIX}
 
-persist-data:
-	node ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
