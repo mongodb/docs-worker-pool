@@ -30,6 +30,7 @@
   "repoBranchesCollection": "repo_branches",
   "aws_region": "us-east-2",
   "gatsbyBaseUrl": "GATSBY_BASE_URL",
+  "previewBuildEnabled": "false",
   "parallel": {
     "enabled": true,
     "stg": {
