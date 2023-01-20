@@ -425,7 +425,7 @@ export abstract class JobHandler {
       if (error instanceof Error) {
         const errorMessage = error.message;
 
-        throw new Error(`Error occurred when deploying ${errorMessage}`);
+        throw new Error(`Caught the following error when deploying ${errorMessage}`);
       }
 
       throw new Error(`Unknown Error occurred when deploying ${error}`);
