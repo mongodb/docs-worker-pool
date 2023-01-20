@@ -8,6 +8,11 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
+# install persistence module
+RUN cd ./modules/persistence \
+    && npm install \
+    && npm run build
+
 # Build modules
 # OAS Page Builder
 RUN cd ./modules/oas-page-builder \
@@ -103,6 +108,14 @@ COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
+
+# Persistence module copy
+# Create directory and add permissions to allow node module installation
+RUN mkdir -p modules/persistence && chmod 755 modules/persistence
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/package*.json ./modules/persistence/
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/dist ./modules/persistence/
+ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
+RUN cd ./modules/persistence/ && ls && npm install
 
 # OAS Page Builder module copy
 # Create directory and add permissions to allow node module installation
