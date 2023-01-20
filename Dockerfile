@@ -13,10 +13,19 @@ RUN cd ./modules/persistence \
     && npm install \
     && npm run build
 
+# Build modules
+# OAS Page Builder
+RUN cd ./modules/oas-page-builder \
+    && npm install \
+    && npm run build
+
 # where repo work will happen
 FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=0.13.15
 ARG SNOOTY_FRONTEND_VERSION=0.13.35
+# The Redoc CLI branch will most likely stay static. Updates to the branch should 
+# be limited to CLI bug fixes and Redoc dependency version bumps
+ARG REDOC_CLI_VERSION=0.1.0
 ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -86,11 +95,22 @@ RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub     
     && cd snooty-devhub                                                                            \
     && npm install --production
 
+# install redoc fork
+RUN git clone -b redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+    # Install dependencies for Redoc CLI
+    && cd redoc/cli \
+    && npm ci --omit=dev \
+    # Install dependencies for Redoc component and building/compiling
+    && cd ../ \
+    && npm ci --omit=dev --ignore-scripts \
+    && npm run compile:cli
+
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
 
+<<<<<<< HEAD
 # Persistence module copy
 # Create directory and add permissions to allow node module installation
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
@@ -98,6 +118,18 @@ COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/package*.jso
 COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/dist ./modules/persistence/
 ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
 RUN cd ./modules/persistence/ && ls && npm install
+=======
+# OAS Page Builder module copy
+# Create directory and add permissions to allow node module installation
+RUN mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/oas-page-builder/package*.json ./modules/oas-page-builder/
+COPY --from=ts-compiler /home/docsworker-xlarge/modules/oas-page-builder/dist ./modules/oas-page-builder/
+RUN cd ./modules/oas-page-builder/ && npm install
+
+# Needed for OAS Page Builder module in shared.mk
+ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
+ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
+>>>>>>> master
 
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
