@@ -145,6 +145,7 @@ export class TestDataProvider {
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make get-build-dependencies',
       'make next-gen-html',
+      `make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);
   }
 
@@ -163,12 +164,14 @@ export class TestDataProvider {
     ]);
     if (job.payload.repoName == 'devhub-content-integration') {
       commands[commands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
+    } else {
+      commands.push(`make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`);
     }
     return commands;
   }
 
   static getEnvVarsWithPathPrefixWithFlags(job: Job): string {
-    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\n`;
+    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\n`;
   }
   static getEnvVarsTestCases(): Array<any> {
     return [

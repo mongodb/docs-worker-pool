@@ -27,7 +27,7 @@ jobs:
 
   test:
     needs: changes
-    if: ${{ needs.changes.outputs.autobuilder }}
+    if: ${{ needs.changes.outputs.autobuilder == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

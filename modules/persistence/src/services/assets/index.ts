@@ -1,7 +1,7 @@
 import AdmZip from 'adm-zip';
 import { upsert } from '../connector';
 
-const COLLECTION_NAME = 'documents';
+const COLLECTION_NAME = 'assets';
 
 // Service responsible for upsertion of any image or blob assets.
 
