@@ -158,7 +158,7 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
-  test('Validate set env var case', async () => {
+  test('Validate setting env vars', async () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.job.payload.aliased = true;
     jobHandlerTestHelper.job.payload.primaryAlias = null;
