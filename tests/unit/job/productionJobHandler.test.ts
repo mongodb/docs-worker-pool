@@ -158,21 +158,19 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
-  test('Validate set env var cases', (element) => {
-    test(`Testing commit check returns ${JSON.stringify(element)}`, async () => {
-      jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
-      jobHandlerTestHelper.job.payload.aliased = true;
-      jobHandlerTestHelper.job.payload.primaryAlias = null;
-      jobHandlerTestHelper.setupForSuccess();
-      await jobHandlerTestHelper.jobHandler.execute();
-      jobHandlerTestHelper.verifyNextGenSuccess();
-      // TODO: Correct number of arguments
-      expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
-        `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-        TestDataProvider.getEnvVarsWithPathPrefixWithFlags(jobHandlerTestHelper.job),
-        { encoding: 'utf8', flag: 'w' }
-      );
-    });
+  test('Validate set env var case', async () => {
+    jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
+    jobHandlerTestHelper.job.payload.aliased = true;
+    jobHandlerTestHelper.job.payload.primaryAlias = null;
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+    // TODO: Correct number of arguments
+    expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
+      `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
+      TestDataProvider.getEnvVarsWithPathPrefixWithFlags(jobHandlerTestHelper.job),
+      { encoding: 'utf8', flag: 'w' }
+    );
   });
 
   test('Default production deploy kicks off manifest generation', async () => {
