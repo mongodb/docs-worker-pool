@@ -183,10 +183,10 @@ export abstract class JobHandler {
     try {
       this._logger.info(
         this.currJob._id,
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/makefiles/Makefile.${this.currJob.payload.repoName}`
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`
       );
       await this._fileSystemServices.saveUrlAsFile(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/makefiles/Makefile.${this.currJob.payload.repoName}`,
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
         `repos/${this.currJob.payload.repoName}/Makefile`,
         {
           encoding: 'utf8',
