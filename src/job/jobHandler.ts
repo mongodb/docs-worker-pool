@@ -385,35 +385,48 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   protected async deployGeneric(): Promise<CommandExecutorResponse> {
-    this.prepDeployCommands();
-    await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
+    try {
+      this.prepDeployCommands();
+      await this._logger.save(
+        this.currJob._id,
+        `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`
+      );
 
-    if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
-      const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
-      if (resp?.error?.includes?.('ERROR')) {
+      if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
+        const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
+        if (resp?.error?.includes?.('ERROR')) {
+          await this._logger.save(
+            this.currJob._id,
+            `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`
+          );
+          throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`);
+        }
         await this._logger.save(
           this.currJob._id,
-          `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`
+          `${this._config.get<string>('stage').padEnd(15)}Finished pushing to ${this.name}`
         );
-        throw new PublishError(`Failed pushing to ${this.name}: ${resp.error}`);
+        await this._logger.save(
+          this.currJob._id,
+          `${this._config.get<string>('stage').padEnd(15)}push details:\n\n${resp.output}`
+        );
+        return resp;
+      } else {
+        await this._logger.save(
+          this.currJob._id,
+          `${this._config.get<string>('stage').padEnd(15)}Pushing to ${
+            this.name
+          } failed as there is no commands to execute`
+        );
+        throw new PublishError(`Failed pushing to ${this.name}, No commands to execute`);
       }
-      await this._logger.save(
-        this.currJob._id,
-        `${this._config.get<string>('stage').padEnd(15)}Finished pushing to ${this.name}`
-      );
-      await this._logger.save(
-        this.currJob._id,
-        `${this._config.get<string>('stage').padEnd(15)}push details:\n\n${resp.output}`
-      );
-      return resp;
-    } else {
-      await this._logger.save(
-        this.currJob._id,
-        `${this._config.get<string>('stage').padEnd(15)}Pushing to ${
-          this.name
-        } failed as there is no commands to execute`
-      );
-      throw new PublishError(`Failed pushing to ${this.name}, No commands to execute`);
+    } catch (error) {
+      if (error instanceof Error) {
+        const errorMessage = error.message;
+
+        throw new Error(`Error occurred when deploying ${errorMessage}`);
+      }
+
+      throw new Error(`Unknown Error occurred when deploying ${error}`);
     }
   }
 
