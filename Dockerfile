@@ -72,8 +72,7 @@ ARG WORK_DIRECTORY=/home/docsworker-xlarge
 WORKDIR ${WORK_DIRECTORY}
 
 # get shared.mk
-# TODO: revert this change
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-3377-makefile-follow/makefiles/shared.mk -o shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty parser
 RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
