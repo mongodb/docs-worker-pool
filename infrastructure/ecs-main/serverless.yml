@@ -104,6 +104,7 @@ custom:
   previewBuildEnabled: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_build/enabled}
   gatsbyFeatureFlagConsistentNavigation: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/consistent_nav/enabled}
   gatsbyFeatureFlagVersionDropdown: false
+  gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
   fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
   fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}

@@ -64,6 +64,8 @@ Resources:
               Value: ${self:custom.gatsbyFeatureFlagConsistentNavigation}
             - Name: GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN
               Value: ${self:custom.gatsbyFeatureFlagVersionDropdown}
+            - Name: GATSBY_TEST_EMBED_VERSIONS
+              Value: ${self:custom.gatsbyTestEmbedVersions}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
@@ -114,6 +116,8 @@ Resources:
               ValueFrom: arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/worker_pool/atlas/host
             - Name: DB_NAME
               ValueFrom: arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/worker_pool/atlas/dbname
+            - Name: SNOOTY_DB_NAME
+              ValueFrom: arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/env/${self:provider.stage}/docs/worker_pool/atlas/collections/snooty
 
           LogConfiguration:
             LogDriver: awslogs

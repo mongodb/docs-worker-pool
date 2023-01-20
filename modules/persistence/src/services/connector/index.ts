@@ -8,7 +8,7 @@ import { ObjectId, Db } from 'mongodb';
 import { db as poolDb } from './pool';
 
 // We should only ever have one client active at a time.
-const atlasURL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
+const atlasURL = `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority`;
 const client = new mongodb.MongoClient(atlasURL);
 
 export const teardown = () => {
@@ -28,7 +28,7 @@ export const db = async () => {
   if (!dbInstance) {
     try {
       await client.connect();
-      dbInstance = client.db(process.env.DB_NAME);
+      dbInstance = client.db(process.env.SNOOTY_DB_NAME);
     } catch (error) {
       console.error(`Error at db client connection: ${error}`);
       throw error;
