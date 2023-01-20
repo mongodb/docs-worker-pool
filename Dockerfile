@@ -110,7 +110,6 @@ COPY --from=ts-compiler /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler /home/docsworker-xlarge/build ./
 RUN npm install
 
-<<<<<<< HEAD
 # Persistence module copy
 # Create directory and add permissions to allow node module installation
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
@@ -118,7 +117,7 @@ COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/package*.jso
 COPY --from=ts-compiler /home/docsworker-xlarge/modules/persistence/dist ./modules/persistence/
 ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
 RUN cd ./modules/persistence/ && ls && npm install
-=======
+
 # OAS Page Builder module copy
 # Create directory and add permissions to allow node module installation
 RUN mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
@@ -129,7 +128,6 @@ RUN cd ./modules/oas-page-builder/ && npm install
 # Needed for OAS Page Builder module in shared.mk
 ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
 ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
->>>>>>> master
 
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
