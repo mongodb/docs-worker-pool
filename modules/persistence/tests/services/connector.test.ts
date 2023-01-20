@@ -57,10 +57,10 @@ describe('Connector module', () => {
     test('calls client to connect with env variables and returns a mongoDB Db instance', async () => {
       try {
         const testEnv = {
-          DB_NAME: 'test-db-name',
-          DB_USER: 'user',
-          DB_PASSWORD: 'password',
-          DB_HOST: 'host',
+          SNOOTY_DB_NAME: 'test-db-name',
+          MONGO_ATLAS_USERNAME: 'user',
+          MONGO_ATLAS_PASSWORD: 'password',
+          MONGO_ATLAS_HOST: 'host',
         };
         process.env = {
           ...env,
@@ -69,7 +69,7 @@ describe('Connector module', () => {
         await db();
         expect(mockConnect).toHaveBeenCalled();
         expect(mockDb).toHaveBeenCalled();
-        expect(mockDb).toHaveBeenCalledWith(testEnv.DB_NAME);
+        expect(mockDb).toHaveBeenCalledWith(testEnv.SNOOTY_DB_NAME);
       } catch (e) {
         console.error(e);
         throw e;
