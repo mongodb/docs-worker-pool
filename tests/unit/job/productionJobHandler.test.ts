@@ -353,7 +353,7 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.verifyNextGenSuccess();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(
       jobHandlerTestHelper.job._id,
-      'Failed pushing to Production: ERROR:BAD ONE'
+      'Caught the following error when performing generic deploy Failed pushing to Production: ERROR:BAD ONE'
     );
   });
 

@@ -424,11 +424,9 @@ export abstract class JobHandler {
     } catch (error) {
       if (error instanceof Error) {
         const errorMessage = error.message;
-
-        throw new Error(`Caught the following error when deploying ${errorMessage}`);
+        throw new Error(`Caught the following error when performing generic deploy ${errorMessage}`);
       }
-
-      throw new Error(`Unknown Error occurred when deploying ${error}`);
+      throw new Error(`Unknown Error occurred when performing generic deploy ${error}`);
     }
   }
 
