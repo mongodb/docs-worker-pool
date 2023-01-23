@@ -13,8 +13,6 @@
   "fastlyDochubMap": "devfslydochubmap",
   "entitlementCollection": "entitlements",
   "reposBranchesCollection": "allison_repos_branches",
-  "gatsbyConsitentNavFlag": "true",
-  "gatsbySDKVersionDropdownFlag": "true",
   "MONGO_TIMEOUT_S": 1,
   "JOB_TIMEOUT_S": 10,
   "RETRY_TIMEOUT_MS": 10,
