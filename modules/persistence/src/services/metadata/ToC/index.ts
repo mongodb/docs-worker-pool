@@ -105,7 +105,7 @@ export const copyToCTree = (toBeCopied: ToC, prefix?: string, url?: string): ToC
   while (queue?.length) {
     const next = queue.shift();
     if (next && next.slug) {
-      next.url = convertSlugToUrl(next.slug, project, prefix, url);
+      next.url = convertSlugToUrl(next.slug, prefix, url);
       delete next.slug;
     }
     if (next?.children) queue = [...queue, ...next.children];
