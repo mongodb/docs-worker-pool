@@ -3,7 +3,7 @@ on:
     tags:
       - 'v*'
 concurrency:
-  group: environment-${{ github.ref }}
+  group: environment-prd-${{ github.ref }}
   cancel-in-progress: true
 name: Deploy Production ECS
 jobs:
