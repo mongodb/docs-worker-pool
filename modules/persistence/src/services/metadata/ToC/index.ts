@@ -98,9 +98,9 @@ export const traverseAndMerge = (
 
 // Create a deep copy of a ToC, converting all slugs present to absolute urls if project, prefix and url is provided.
 // Copy logic should be tightly coupled to the urlification logic here - we DON'T want to mutate the base ToC objects.
-export const copyToCTree = (toBeCopied: ToC, project?: string, prefix?: string, url?: string): ToC => {
+export const copyToCTree = (toBeCopied: ToC, prefix?: string, url?: string): ToC => {
   const toctree = JSON.parse(JSON.stringify(toBeCopied));
-  if (!prefix || !url || !project) return toctree;
+  if (!prefix || !url) return toctree;
   let queue = [toctree];
   while (queue?.length) {
     const next = queue.shift();

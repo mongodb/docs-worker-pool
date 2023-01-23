@@ -1,5 +1,5 @@
-export const convertSlugToUrl = (slug, projectSlug, prefix, url) => {
-  return ensureTrailingSlash(url) + ensureTrailingSlash(prefix) + projectSlug + ensureLeadingSlash(slug);
+export const convertSlugToUrl = (slug, prefix, url) => {
+  return ensureTrailingSlash(url) + ensureTrailingSlash(prefix) + ensureLeadingSlash(slug);
 };
 
 const ensureTrailingSlash = (subpath: string) => {

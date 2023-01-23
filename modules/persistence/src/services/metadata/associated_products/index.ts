@@ -17,6 +17,14 @@ export interface Metadata {
   [key: string]: any;
 }
 
+interface AggregatedMetadata {
+  _id: {
+    project: string;
+    branch: string;
+  };
+  most_recent: Metadata;
+}
+
 type EnvKeyedObject = {
   prd: any;
   preprd: any;
@@ -100,23 +108,25 @@ const shapeToCsCursor = async (
   const tocOrderInsertions = {};
   const associatedMetadataEntries: Metadata[] = [];
 
-  await tocCursor.forEach((doc) => {
+  await tocCursor.forEach((doc: AggregatedMetadata) => {
+    const { project, branch } = doc._id;
+    const { metadata } = doc.most_recent;
     // Initialize to empty object if we haven't already, for a given project.
-    if (!tocInsertions[doc._id.project]) tocInsertions[doc._id.project] = {};
-    if (!tocOrderInsertions[doc._id.project]) tocOrderInsertions[doc._id.project] = {};
+    if (!tocInsertions[project]) tocInsertions[project] = {};
+    if (!tocOrderInsertions[project]) tocOrderInsertions[project] = {};
 
-    const projectEntry = repoBranchesMap?.[doc._id.project];
-    const branchesEntry = projectEntry?.[doc._id.branch];
+    const projectEntry = repoBranchesMap?.[project];
+    const branchesEntry = projectEntry?.[branch];
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (branchesEntry) {
       const { url, prefix } = prefixFromEnvironment(projectEntry);
-      tocInsertions[doc._id.project][doc._id.branch] = {
-        original: copyToCTree(doc.most_recent.toctree),
-        urlified: copyToCTree(doc.most_recent.toctree, doc._id.project, prefix, url),
+      tocInsertions[project][branch] = {
+        original: copyToCTree(metadata.toctree),
+        urlified: copyToCTree(metadata.toctree, prefix, url),
       };
       // TODO: Can we urlify the order? SHOUD we urlify the order?
-      tocOrderInsertions[doc._id.project][doc._id.branch] = doc.most_recent.toctreeOrder;
-      associatedMetadataEntries.push(doc.most_recent as Metadata);
+      tocOrderInsertions[project][branch] = metadata.toctreeOrder;
+      associatedMetadataEntries.push(metadata as Metadata);
     }
   });
 
@@ -184,14 +194,10 @@ export const mergeAssociatedToCs = async (metadata) => {
     );
 
     // We need to have copies of the main umbrella product's ToC here, to handle multiple metadata entry support
+    const umbrellaPrefixes = prefixFromEnvironment(umbrellaRepoBranchesEntry as any as ReposBranchesDocument);
     const umbrellaToCs = {
       original: copyToCTree(umbrellaMetadata.toctree),
-      urlified: copyToCTree(
-        umbrellaMetadata.toctree,
-        umbrellaMetadata.project,
-        umbrellaRepoBranchesEntry?.prefix,
-        umbrellaRepoBranchesEntry?.url
-      ),
+      urlified: copyToCTree(umbrellaMetadata.toctree, umbrellaPrefixes.prefix, umbrellaPrefixes.url),
     };
 
     const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
