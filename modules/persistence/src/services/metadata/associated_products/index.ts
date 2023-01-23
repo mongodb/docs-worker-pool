@@ -110,7 +110,7 @@ const shapeToCsCursor = async (
 
   await tocCursor.forEach((doc: AggregatedMetadata) => {
     const { project, branch } = doc._id;
-    const { metadata } = doc.most_recent;
+    const metadata = doc.most_recent;
     // Initialize to empty object if we haven't already, for a given project.
     if (!tocInsertions[project]) tocInsertions[project] = {};
     if (!tocOrderInsertions[project]) tocOrderInsertions[project] = {};
