@@ -173,34 +173,6 @@ export class TestDataProvider {
   static getEnvVarsWithPathPrefixWithFlags(job: Job): string {
     return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\n`;
   }
-  static getEnvVarsTestCases(): Array<any> {
-    return [
-      {
-        GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION: true,
-        GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN: true,
-        navString: 'TRUE',
-        versionString: 'TRUE',
-      },
-      {
-        GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION: true,
-        GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN: false,
-        navString: 'TRUE',
-        versionString: null,
-      },
-      {
-        GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION: false,
-        GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN: true,
-        navString: null,
-        versionString: 'TRUE',
-      },
-      {
-        GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION: false,
-        GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN: false,
-        navString: null,
-        versionString: null,
-      },
-    ];
-  }
 
   static getPathPrefixCases(): Array<any> {
     const job = getBuildJobDef();
