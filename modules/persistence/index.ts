@@ -39,7 +39,7 @@ const app = async (path: string) => {
     ]);
 
     // DOP-3447 clean up stale metadata
-    await deleteStaleMetadata(buildId);
+    await deleteStaleMetadata(zip);
 
     closeDBConnection();
     process.exit(0);
