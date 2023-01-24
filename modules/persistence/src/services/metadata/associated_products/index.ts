@@ -115,11 +115,11 @@ const shapeToCsCursor = async (
     if (!tocInsertions[project]) tocInsertions[project] = {};
     if (!tocOrderInsertions[project]) tocOrderInsertions[project] = {};
 
-    const projectEntry = repoBranchesMap?.[project];
-    const branchesEntry = projectEntry?.[branch];
+    const branches = repoBranchesMap?.[project];
+    const repoBranchesEntry = branches?.[branch];
     // TODO: If we want staging builds with embedded versions, it needs to be added here
-    if (branchesEntry) {
-      const { url, prefix } = prefixFromEnvironment(branchesEntry);
+    if (repoBranchesEntry) {
+      const { url, prefix } = prefixFromEnvironment(repoBranchesEntry);
       tocInsertions[project][branch] = {
         original: copyToCTree(metadata.toctree),
         urlified: copyToCTree(metadata.toctree, prefix, url),
