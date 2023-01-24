@@ -13,8 +13,6 @@
   "fastlyDochubMap": "devfslydochubmap",
   "entitlementCollection": "entitlements",
   "reposBranchesCollection": "allison_repos_branches",
-  "gatsbyConsitentNavFlag": "true",
-  "gatsbySDKVersionDropdownFlag": "true",
   "MONGO_TIMEOUT_S": 15,
   "JOB_TIMEOUT_S": 900,
   "RETRY_TIMEOUT_MS": 5000,
@@ -30,6 +28,7 @@
   "repoBranchesCollection": "repo_branches",
   "aws_region": "us-east-2",
   "gatsbyBaseUrl": "GATSBY_BASE_URL",
+  "previewBuildEnabled": "false",
   "parallel": {
     "enabled": true,
     "stg": {

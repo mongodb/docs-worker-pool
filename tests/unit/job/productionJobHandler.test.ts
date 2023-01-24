@@ -158,31 +158,19 @@ describe('ProductionJobHandler Tests', () => {
     });
   });
 
-  describe.each(TestDataProvider.getEnvVarsTestCases())('Validate all set env var cases', (element) => {
-    test(`Testing commit check returns ${JSON.stringify(element)}`, async () => {
-      jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
-      jobHandlerTestHelper.job.payload.aliased = true;
-      jobHandlerTestHelper.job.payload.primaryAlias = null;
-      jobHandlerTestHelper.setupForSuccess();
-      jobHandlerTestHelper.config.get
-        .calledWith('GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION')
-        .mockReturnValue(element['GATSBY_FEATURE_FLAG_CONSISTENT_NAVIGATION']);
-      jobHandlerTestHelper.config.get
-        .calledWith('GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN')
-        .mockReturnValue(element['GATSBY_FEATURE_FLAG_SDK_VERSION_DROPDOWN']);
-      await jobHandlerTestHelper.jobHandler.execute();
-      jobHandlerTestHelper.verifyNextGenSuccess();
-      // TODO: Correct number of arguments
-      expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
-        `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-        TestDataProvider.getEnvVarsWithPathPrefixWithFlags(
-          jobHandlerTestHelper.job,
-          element['navString'],
-          element['versionString']
-        ),
-        { encoding: 'utf8', flag: 'w' }
-      );
-    });
+  test('Validate setting env vars', async () => {
+    jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
+    jobHandlerTestHelper.job.payload.aliased = true;
+    jobHandlerTestHelper.job.payload.primaryAlias = null;
+    jobHandlerTestHelper.setupForSuccess();
+    await jobHandlerTestHelper.jobHandler.execute();
+    jobHandlerTestHelper.verifyNextGenSuccess();
+    // TODO: Correct number of arguments
+    expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
+      `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
+      TestDataProvider.getEnvVarsWithPathPrefixWithFlags(jobHandlerTestHelper.job),
+      { encoding: 'utf8', flag: 'w' }
+    );
   });
 
   test('Default production deploy kicks off manifest generation', async () => {
@@ -260,7 +248,7 @@ describe('ProductionJobHandler Tests', () => {
 
     expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
       `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\n`,
+      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\n`,
       { encoding: 'utf8', flag: 'w' }
     );
   });

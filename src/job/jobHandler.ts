@@ -274,6 +274,8 @@ export abstract class JobHandler {
     }
     const snootyFrontEndVars = {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
+      GATSBY_TEST_EMBED_VERSIONS: this._config.get<string>('gatsbyTestEmbedVersions'),
+      PREVIEW_BUILD_ENABLED: this._config.get<string>('previewBuildEnabled'),
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
@@ -390,7 +392,7 @@ export abstract class JobHandler {
 
     if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
       const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
-      if (resp?.error?.includes('ERROR')) {
+      if (resp?.error?.includes?.('ERROR')) {
         await this._logger.save(
           this.currJob._id,
           `${this._config.get<string>('stage').padEnd(15)}Failed to push to ${this.name}`

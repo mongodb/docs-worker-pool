@@ -60,3 +60,7 @@ npm run start -- --bundle /home/docsworker-xlarge/repos/cloud-docs/bundle.zip --
 | output | Path to the directory that the OpenAPI content pages should be built to. Typically, this would be the same output `public/` directory of a Snooty frontend build.                      |
 | redoc  | Path to the local installation of Redoc CLI to use. This should point to the team's [fork of Redoc](https://github.com/mongodb-forks/redoc), with the target being a compiled JS file. |
 | repo   | Path to the parsed docs repo's directory. This is to ensure that OpenAPI content pages using local OAS files can be properly sourced and passed down as an argument to Redoc CLI.      |
+
+## Usage in Production
+
+In production, this module is installed as part of the [Docker](https://github.com/mongodb/docs-worker-pool/blob/master/Dockerfile) image build and is called as part of a target in [shared.mk](https://github.com/mongodb/docs-worker-pool/blob/meta/makefiles/shared.mk) by the autobuilder. The module is intended to be used after the frontend has completed building pages, but before `mut` uploads them.

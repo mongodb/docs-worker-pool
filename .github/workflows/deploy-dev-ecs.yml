@@ -1,14 +1,10 @@
 on:
-  push:
-    branches:
-      - "master"
-      - "integration"
   pull_request:
     branches:
       - master
       - integration
 concurrency:
-  group: environment-${{ github.ref }}
+  group: environment-dev-${{ github.ref }}
   cancel-in-progress: true
 name: Deploy Dev ECS
 jobs:
