@@ -1,11 +1,12 @@
 import { MongoClient } from 'mongodb';
-import { AssociatedProduct, SharedMetadata } from '../../src/services/metadata/associated_products';
+import { AssociatedProduct, Metadata } from '../../src/services/metadata/associated_products';
 import {
   ToC,
   ToCInsertions,
   TocOrderInsertions,
   traverseAndMerge,
   _isInsertionCandidateNode,
+  copyToCTree,
 } from '../../src/services/metadata/ToC';
 
 import metadata from '../data/metadata.json';
@@ -45,6 +46,16 @@ describe('ToC module', () => {
     await connection.close();
   });
 
+  describe('copyToCTree', () => {
+    it('creates a deep copy of a ToC when passed only the ToC', () => {
+      const toctree = metadata[0].toctree;
+      const copiedToCTree = copyToCTree(toctree);
+      toctree.slug = '/';
+      copiedToCTree.slug = 'test value';
+      expect(toctree.slug).toBe('/');
+    });
+  });
+
   describe('isInsertionCandidateNode', () => {
     const associatedProducts = metadata
       .map((m) => m.associated_products || [])
@@ -78,40 +89,70 @@ describe('ToC module', () => {
   });
 
   describe('traverseAndMerge', () => {
-    it('searches BFS through the ToC tree from metadata, inserts matching tocInsertions and tocOrders', () => {
-      const umbrellaMetadata = metadata[2];
-      const tocInsertions = {
-        'atlas-cli': {
-          master: metadata[0].toctree,
+    const umbrellaMetadata = metadata[2] as unknown as Metadata;
+    const associatedMetadata = metadata[0] as unknown as Metadata;
+    const tocInsertions = {
+      'atlas-cli': {
+        master: {
+          original: copyToCTree(associatedMetadata.toctree),
+          urlified: copyToCTree(associatedMetadata.toctree, 'docs/atlas/cli', 'www.mongodb.com'),
         },
-      } as unknown as ToCInsertions;
-      const tocOrderInsertions = {
-        'atlas-cli': {
-          master: [
-            '/',
-            '/',
-            'install-atlas-cli',
-            'compatibility',
-            'connect-atlas-cli',
-            'atlas-cli-save-connection-settings',
-            'atlas-cli-env-variables',
-            'migrate-to-atlas-cli',
-            'configure-optional-settings',
-            'telemetry',
-            'atlas-cli-tutorials',
-            'atlas-cli-getting-started',
-            'atlas-cli-quickstart',
-            'reference',
-            'cluster-config-file',
-            'atlas-cli-changelog',
-          ],
-        },
-      } as TocOrderInsertions;
-      // console.log(traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions));
+      },
+    } as unknown as ToCInsertions;
+    const tocOrderInsertions = {
+      'atlas-cli': {
+        master: [
+          '/',
+          '/',
+          'install-atlas-cli',
+          'compatibility',
+          'connect-atlas-cli',
+          'atlas-cli-save-connection-settings',
+          'atlas-cli-env-variables',
+          'migrate-to-atlas-cli',
+          'configure-optional-settings',
+          'telemetry',
+          'atlas-cli-tutorials',
+          'atlas-cli-getting-started',
+          'atlas-cli-quickstart',
+          'reference',
+          'cluster-config-file',
+          'atlas-cli-changelog',
+        ],
+      },
+    } as TocOrderInsertions;
+    // console.log(traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions));
 
-      expect(
-        traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions)
-      ).toMatchSnapshot();
+    const umbrellaToCs = {
+      urlified: copyToCTree(umbrellaMetadata.toctree as ToC, 'docs/atlas', 'www.mongodb.com'),
+      original: copyToCTree(umbrellaMetadata.toctree as ToC),
+    };
+
+    describe('When invoked with an umbrella metadata entry arg', () => {
+      it('Urlifies associated ToCs', () => {
+        expect(
+          traverseAndMerge(
+            umbrellaMetadata as unknown as Metadata,
+            umbrellaMetadata.associated_products || [],
+            umbrellaToCs,
+            tocInsertions,
+            tocOrderInsertions
+          )
+        ).toMatchSnapshot();
+      });
+    });
+    describe('When invoked with an associated metadata entry', () => {
+      it('urlifies umbrella ToCs when invoked with an associated metadata entry', () => {
+        expect(
+          traverseAndMerge(
+            metadata[0] as unknown as Metadata,
+            umbrellaMetadata.associated_products || [],
+            umbrellaToCs,
+            tocInsertions,
+            tocOrderInsertions
+          )
+        ).toMatchSnapshot();
+      });
     });
   });
 });

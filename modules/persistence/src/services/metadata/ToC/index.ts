@@ -1,8 +1,10 @@
-import { SharedMetadata, AssociatedProduct } from '../associated_products';
+import { Metadata, AssociatedProduct, ReposBranchesDocument, hasAssociations } from '../associated_products';
+import { convertSlugToUrl } from './utils/convertSlugToUrl';
 
 export interface ToC {
   title: string;
-  slug: string;
+  slug?: string;
+  url?: string;
   children: ToC[];
   options?: {
     [key: string]: any;
@@ -12,7 +14,13 @@ export interface ToC {
 
 type project = string;
 type branchName = string;
-type branch = { [key: branchName]: ToC };
+type branch = {
+  [key: branchName]: ToCCopies;
+};
+type ToCCopies = {
+  original: ToC;
+  urlified: ToC;
+};
 
 export interface ToCInsertions {
   [key: project]: branch;
@@ -30,15 +38,17 @@ const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProd
   return !!(nodeHasNoChildren && nodeInProducts);
 };
 
-const mergeNode = (node: ToC, tocs: ToCInsertions) => {
+const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
   // Options might be undefined, so safely cast to {} if nullish
   node.options = node.options ?? {};
+  const needsUrlifiedToC = currentProject !== node?.options?.project;
 
-  const project = tocs[node?.options?.project];
-  const branches = Object.keys(project);
+  const associatedProject = tocs[node?.options?.project];
+  if (!associatedProject) return node;
+  const branches = Object.keys(associatedProject);
   node.options.versions = branches;
   node.children = branches.map((branch) => {
-    const child = project[branch];
+    const child = needsUrlifiedToC ? associatedProject[branch].urlified : associatedProject[branch].original;
     const options = {
       ...child.options,
       version: branch,
@@ -49,7 +59,7 @@ const mergeNode = (node: ToC, tocs: ToCInsertions) => {
   return node;
 };
 
-const mergeTocTreeOrder = (metadata: SharedMetadata, node, insertions: TocOrderInsertions) => {
+const mergeTocTreeOrder = (metadata: Metadata, node, insertions: TocOrderInsertions) => {
   const insertion = insertions[metadata.project]?.[metadata.branch] || [];
   const index = metadata.toctreeOrder.indexOf(node.options?.project);
   return metadata.toctreeOrder.splice(index, 0, ...insertion);
@@ -57,23 +67,50 @@ const mergeTocTreeOrder = (metadata: SharedMetadata, node, insertions: TocOrderI
 
 // BFS through the toctree from the metadata entry provided as an arg
 // and insert matching tocInsertion entries + tocOrders
+// determines base vs. urlified umbrellaToC by whether or not the metadata provided
+// contains an associated_products entry
 export const traverseAndMerge = (
-  metadata: SharedMetadata,
+  metadata: Metadata,
+  associated_products: AssociatedProduct[],
+  umbrellaToCs: ToCCopies,
   tocInsertions: ToCInsertions,
   tocOrderInsertions: TocOrderInsertions
 ) => {
-  const { toctree, associated_products } = metadata;
+  const { project } = metadata;
+
+  const toctree = hasAssociations(metadata) ? umbrellaToCs.original : umbrellaToCs.urlified;
 
   let queue = [toctree];
   while (queue?.length) {
     let next = queue.shift();
+    // TODO: We can exit early here once we've found all the nodes.
+    // We should track remaining insertions in a set and add some break logic.
     if (next && isInsertionCandidateNode(next, associated_products)) {
-      next = mergeNode(next, tocInsertions);
+      next = mergeNode(next, tocInsertions, project);
       metadata.toctreeorder = mergeTocTreeOrder(metadata, next, tocOrderInsertions);
+    } else if (next?.children) {
+      queue = [...queue, ...next.children];
+    }
+  }
+  metadata.toctree = toctree;
+  return metadata;
+};
+
+// Create a deep copy of a ToC, converting all slugs present to absolute urls if project, prefix and url is provided.
+// Copy logic should be tightly coupled to the urlification logic here - we DON'T want to mutate the base ToC objects.
+export const copyToCTree = (toBeCopied: ToC, prefix?: string, url?: string): ToC => {
+  const toctree = JSON.parse(JSON.stringify(toBeCopied));
+  if (!prefix || !url) return toctree;
+  let queue = [toctree];
+  while (queue?.length) {
+    const next = queue.shift();
+    if (next && next.slug) {
+      next.url = convertSlugToUrl(next.slug, prefix, url);
+      delete next.slug;
     }
     if (next?.children) queue = [...queue, ...next.children];
   }
-  return metadata;
+  return toctree;
 };
 
 export const _isInsertionCandidateNode = isInsertionCandidateNode;
