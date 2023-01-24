@@ -94,7 +94,7 @@ describe('associated_products module', () => {
             dotcomprd: 'www.mongodb.com',
           },
           prefix: {
-            dotcomprd: 'docs',
+            dotcomprd: 'docs/atlas/cli',
           },
         },
       };

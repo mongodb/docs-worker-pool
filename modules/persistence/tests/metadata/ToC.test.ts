@@ -95,7 +95,7 @@ describe('ToC module', () => {
       'atlas-cli': {
         master: {
           original: copyToCTree(associatedMetadata.toctree),
-          urlified: copyToCTree(associatedMetadata.toctree, 'atlas/cli', 'docs', 'www.mongodb.com'),
+          urlified: copyToCTree(associatedMetadata.toctree, 'docs/atlas/cli', 'www.mongodb.com'),
         },
       },
     } as unknown as ToCInsertions;
@@ -124,7 +124,7 @@ describe('ToC module', () => {
     // console.log(traverseAndMerge(umbrellaMetadata as unknown as SharedMetadata, tocInsertions, tocOrderInsertions));
 
     const umbrellaToCs = {
-      urlified: copyToCTree(umbrellaMetadata.toctree as ToC, 'atlas', 'docs', 'www.mongodb.com'),
+      urlified: copyToCTree(umbrellaMetadata.toctree as ToC, 'docs/atlas', 'www.mongodb.com'),
       original: copyToCTree(umbrellaMetadata.toctree as ToC),
     };
 

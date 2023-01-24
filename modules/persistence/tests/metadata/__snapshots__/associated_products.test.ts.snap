@@ -1215,7 +1215,7 @@ Object {
                 "value": "Overview",
               },
             ],
-            "url": "www.mongodb.com/docs/atlas-cli/",
+            "url": "www.mongodb.com/docs/atlas/cli/",
           },
           Object {
             "children": Array [
@@ -1235,7 +1235,7 @@ Object {
                     "value": "Check Compatibility",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/compatibility",
+                "url": "www.mongodb.com/docs/atlas/cli/compatibility",
               },
             ],
             "options": Object {
@@ -1252,7 +1252,7 @@ Object {
                 "value": "Install or Update the Atlas CLI",
               },
             ],
-            "url": "www.mongodb.com/docs/atlas-cli/install-atlas-cli",
+            "url": "www.mongodb.com/docs/atlas/cli/install-atlas-cli",
           },
           Object {
             "children": Array [
@@ -1272,7 +1272,7 @@ Object {
                     "value": "Save Connection Settings",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/atlas-cli-save-connection-settings",
+                "url": "www.mongodb.com/docs/atlas/cli/atlas-cli-save-connection-settings",
               },
               Object {
                 "children": Array [],
@@ -1290,7 +1290,7 @@ Object {
                     "value": "Atlas CLI Environment Variables",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/atlas-cli-env-variables",
+                "url": "www.mongodb.com/docs/atlas/cli/atlas-cli-env-variables",
               },
               Object {
                 "children": Array [],
@@ -1308,7 +1308,7 @@ Object {
                     "value": "Migrate to the Atlas CLI",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/migrate-to-atlas-cli",
+                "url": "www.mongodb.com/docs/atlas/cli/migrate-to-atlas-cli",
               },
             ],
             "options": Object {
@@ -1325,7 +1325,7 @@ Object {
                 "value": "Connect from the Atlas CLI",
               },
             ],
-            "url": "www.mongodb.com/docs/atlas-cli/connect-atlas-cli",
+            "url": "www.mongodb.com/docs/atlas/cli/connect-atlas-cli",
           },
           Object {
             "children": Array [
@@ -1345,7 +1345,7 @@ Object {
                     "value": "Configure Telemetry",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/telemetry",
+                "url": "www.mongodb.com/docs/atlas/cli/telemetry",
               },
             ],
             "options": Object {
@@ -1362,7 +1362,7 @@ Object {
                 "value": "Configure Optional Settings",
               },
             ],
-            "url": "www.mongodb.com/docs/atlas-cli/configure-optional-settings",
+            "url": "www.mongodb.com/docs/atlas/cli/configure-optional-settings",
           },
           Object {
             "children": Array [
@@ -1402,7 +1402,7 @@ Object {
                     "type": "substitution_reference",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/atlas-cli-getting-started",
+                "url": "www.mongodb.com/docs/atlas/cli/atlas-cli-getting-started",
               },
               Object {
                 "children": Array [],
@@ -1449,7 +1449,7 @@ Object {
                     "value": " Cluster",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/atlas-cli-quickstart",
+                "url": "www.mongodb.com/docs/atlas/cli/atlas-cli-quickstart",
               },
             ],
             "options": Object {
@@ -1495,7 +1495,7 @@ Object {
                 "value": " from the Atlas CLI",
               },
             ],
-            "url": "www.mongodb.com/docs/atlas-cli/atlas-cli-tutorials",
+            "url": "www.mongodb.com/docs/atlas/cli/atlas-cli-tutorials",
           },
           Object {
             "children": Array [
@@ -1515,7 +1515,7 @@ Object {
                     "value": "Cluster Configuration File",
                   },
                 ],
-                "url": "www.mongodb.com/docs/atlas-cli/cluster-config-file",
+                "url": "www.mongodb.com/docs/atlas/cli/cluster-config-file",
               },
             ],
             "options": Object {
@@ -1532,7 +1532,7 @@ Object {
                 "value": "Reference",
               },
             ],
-            "url": "www.mongodb.com/docs/atlas-cli/reference",
+            "url": "www.mongodb.com/docs/atlas/cli/reference",
           },
           Object {
             "children": Array [],
@@ -1550,7 +1550,7 @@ Object {
                 "value": "Atlas CLI Changelog",
               },
             ],
-            "url": "www.mongodb.com/docs/atlas-cli/atlas-cli-changelog",
+            "url": "www.mongodb.com/docs/atlas/cli/atlas-cli-changelog",
           },
         ],
         "title": Array [
@@ -1564,7 +1564,7 @@ Object {
             "value": "Atlas Command Line Interface",
           },
         ],
-        "url": "www.mongodb.com/docs/atlas-cli/",
+        "url": "www.mongodb.com/docs/atlas/cli/",
       },
     },
   },

@@ -119,7 +119,7 @@ const shapeToCsCursor = async (
     const branchesEntry = projectEntry?.[branch];
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (branchesEntry) {
-      const { url, prefix } = prefixFromEnvironment(projectEntry);
+      const { url, prefix } = prefixFromEnvironment(branchesEntry);
       tocInsertions[project][branch] = {
         original: copyToCTree(metadata.toctree),
         urlified: copyToCTree(metadata.toctree, prefix, url),
