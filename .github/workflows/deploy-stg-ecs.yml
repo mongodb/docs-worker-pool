@@ -4,7 +4,7 @@ on:
       - "master"
       - "integration"
 concurrency:
-  group: environment-${{ github.ref }}
+  group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
 name: Deploy Staging ECS
 jobs:

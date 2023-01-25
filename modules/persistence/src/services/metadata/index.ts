@@ -35,10 +35,12 @@ export const insertMetadata = async (buildId: ObjectId, zip: AdmZip) => {
   }
 };
 
-export const insertUmbrellaMetadata = async (buildId: ObjectId, zip: AdmZip) => {
+export const insertMergedMetadataEntries = async (buildId: ObjectId, zip: AdmZip) => {
   try {
-    const umbrellaMetadata = await mergeAssociatedToCs(metadataFromZip(zip));
-    return umbrellaMetadata ? insert([umbrellaMetadata], COLLECTION_NAME, buildId) : undefined;
+    const mergedMetadataEntries = await mergeAssociatedToCs(metadataFromZip(zip)[0]);
+    return mergedMetadataEntries
+      ? await Promise.all(mergedMetadataEntries.map((m) => insert([m], COLLECTION_NAME, buildId)))
+      : [];
   } catch (error) {
     console.error(`Error during umbrella metadata update: ${error}`);
     throw error;
