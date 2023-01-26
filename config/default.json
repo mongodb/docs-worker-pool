@@ -21,6 +21,7 @@
   "PORT": 3000,
   "MAX_STDOUT_BUFFER_SIZE": 16000000,
   "GATSBY_PARSER_USER": "docsworker-xlarge",
+  "gatsbyTestEmbedVersions": false,
   "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
   "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
   "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
