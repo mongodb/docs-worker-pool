@@ -1,4 +1,4 @@
-import { Metadata, AssociatedProduct, ReposBranchesDocument, hasAssociations } from '../associated_products';
+import { Metadata, AssociatedProduct, hasAssociations } from '../associated_products';
 import { convertSlugToUrl } from './utils/convertSlugToUrl';
 
 export interface ToC {

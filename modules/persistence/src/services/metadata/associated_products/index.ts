@@ -98,7 +98,7 @@ const umbrellaMetadataEntry = async (project: string): Promise<Metadata> => {
 // Convert our cursor from the associated metadata aggregation query into a series of ToC objects and their parent metadata entries
 const shapeToCsCursor = async (
   tocCursor: AggregationCursor,
-  repoBranchesMap
+  repoBranchesMap: { [k: string]: ReposBranchesDocument }
 ): Promise<{
   tocInsertions: ToCInsertions;
   tocOrderInsertions: TocOrderInsertions;
@@ -119,7 +119,7 @@ const shapeToCsCursor = async (
     const repoBranchesEntry = branches?.[branch];
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesEntry) {
-      const { url, prefix } = prefixFromEnvironment(repoBranchesEntry);
+      const { url, prefix } = prefixFromEnvironment(branches);
       tocInsertions[project][branch] = {
         original: copyToCTree(metadata.toctree),
         urlified: copyToCTree(metadata.toctree, prefix, url),
@@ -190,7 +190,7 @@ export const mergeAssociatedToCs = async (metadata) => {
 
     const { tocInsertions, tocOrderInsertions, associatedMetadataEntries } = await shapeToCsCursor(
       metadataCursor,
-      repoBranchesMap
+      repoBranchesMap as ReposBranchesDocument
     );
 
     // We need to have copies of the main umbrella product's ToC here, to handle multiple metadata entry support
