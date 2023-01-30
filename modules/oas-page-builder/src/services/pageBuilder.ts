@@ -70,6 +70,7 @@ export const buildOpenAPIPages = async (
         spec = localFilePath;
       } else if (sourceType === 'atlas') {
         spec = await getAtlasSpecUrl(source);
+        // Ignore "incompatible types" warnings for Atlas Admin API/cloud-docs
         buildOptions['ignoreIncompatibleTypes'] = true;
       } else {
         throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);

@@ -8,21 +8,38 @@ cp.exec.mockImplementation((command: string, callback: (a: null, b: string) => v
 });
 
 describe('RedocExecutor', () => {
-  it('calls the Redoc build command with expected parameters', async () => {
-    const testRedocPath = '/path/to/redoc/cli/index.js';
-    const testSiteUrl = 'https://mongodb.com/docs';
-    const testSiteTitle = 'Test Docs';
-    const redocExecutor = new RedocExecutor(testRedocPath, testSiteUrl, testSiteTitle);
+  const testRedocPath = '/path/to/redoc/cli/index.js';
+  const testSiteUrl = 'https://mongodb.com/docs';
+  const testSiteTitle = 'Test Docs';
+  const testSpecSource = '/path/to/spec.json';
+  const testOutputPath = '/path/to/output/index.html';
 
-    const testSpecSource = '/path/to/spec.json';
-    const testOutputPath = '/path/to/output/index.html';
+  it('calls the Redoc build command with expected parameters', async () => {
+    const redocExecutor = new RedocExecutor(testRedocPath, testSiteUrl, testSiteTitle);
     await redocExecutor.execute(testSpecSource, testOutputPath);
 
     const expectedOptions = {
-      customOptions: {
-        backNavigationPath: testSiteUrl,
-        siteTitle: testSiteTitle,
-      },
+      backNavigationPath: testSiteUrl,
+      siteTitle: testSiteTitle,
+    };
+    const expectedCommand = `node ${testRedocPath} build ${testSpecSource} --output ${testOutputPath} --options '${JSON.stringify(
+      expectedOptions
+    )}'`;
+    expect(cp.exec).toBeCalledWith(expectedCommand, expect.anything());
+  });
+
+  it('accepts additional build options', async () => {
+    const redocExecutor = new RedocExecutor(testRedocPath, testSiteUrl, testSiteTitle);
+    const testBuildOptions = {
+      ignoreIncompatibleTypes: true,
+    };
+    await redocExecutor.execute(testSpecSource, testOutputPath, testBuildOptions);
+
+    // Options should be concatenated together
+    const expectedOptions = {
+      backNavigationPath: testSiteUrl,
+      siteTitle: testSiteTitle,
+      ignoreIncompatibleTypes: true,
     };
     const expectedCommand = `node ${testRedocPath} build ${testSpecSource} --output ${testOutputPath} --options '${JSON.stringify(
       expectedOptions

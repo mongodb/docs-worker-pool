@@ -36,10 +36,11 @@ export class RedocExecutor {
 
   // Adds any additional options required for current page
   private finalizeOptions(buildOptions: RedocBuildOptions = {}): string {
-    const options = this.options;
-    for (const [option, val] of Object.entries(buildOptions)) {
-      options[option] = val;
-    }
+    const options = {
+      ...this.options,
+      ...buildOptions,
+    };
+    // Stringify JSON object to avoid syntax error when passing object
     return JSON.stringify(options);
   }
 }
