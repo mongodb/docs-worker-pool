@@ -25,7 +25,7 @@ ARG SNOOTY_PARSER_VERSION=0.13.16
 ARG SNOOTY_FRONTEND_VERSION=0.13.36
 # The Redoc CLI branch will most likely stay static. Updates to the branch should 
 # be limited to CLI bug fixes and Redoc dependency version bumps
-ARG REDOC_CLI_VERSION=0.1.1
+ARG REDOC_CLI_VERSION=0.2.0
 ARG FLIT_VERSION=3.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
