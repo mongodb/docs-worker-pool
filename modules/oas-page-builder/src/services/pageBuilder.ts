@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
 import { RedocExecutor } from './redocExecutor';
 import { findLastSavedGitHash } from './database';
-import { OASPageMetadata, PageBuilderOptions } from './types';
+import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions } from './types';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
 
@@ -61,6 +61,7 @@ export const buildOpenAPIPages = async (
 
     try {
       let spec = '';
+      const buildOptions: RedocBuildOptions = {};
 
       if (sourceType === 'url') {
         spec = source;
@@ -69,12 +70,13 @@ export const buildOpenAPIPages = async (
         spec = localFilePath;
       } else if (sourceType === 'atlas') {
         spec = await getAtlasSpecUrl(source);
+        buildOptions['ignoreIncompatibleTypes'] = true;
       } else {
         throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
       }
 
       const finalFilename = normalizePath(`${output}/${pageSlug}/index.html`);
-      await redocExecutor.execute(spec, finalFilename);
+      await redocExecutor.execute(spec, finalFilename, buildOptions);
     } catch (e) {
       console.error(e);
       // Continue to try to build other pages since it's possible that mut will

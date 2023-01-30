@@ -15,3 +15,5 @@ export interface BuildMetadata {
 export interface PageBuilderOptions extends Omit<ModuleOptions, 'bundle'> {
   siteTitle: string;
 }
+
+export type RedocBuildOptions = Record<string, any>;
