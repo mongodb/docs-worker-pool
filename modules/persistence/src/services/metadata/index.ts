@@ -27,7 +27,7 @@ const metadataFromZip = (zip: AdmZip) => {
 
 export const insertMetadata = async (buildId: ObjectId, zip: AdmZip) => {
   try {
-    const metadata = await metadataFromZip(zip);
+    const metadata = metadataFromZip(zip);
     return insert([metadata], COLLECTION_NAME, buildId);
   } catch (error) {
     console.error(`Error at insertion time for ${COLLECTION_NAME}: ${error}`);
@@ -37,7 +37,7 @@ export const insertMetadata = async (buildId: ObjectId, zip: AdmZip) => {
 
 export const insertMergedMetadataEntries = async (buildId: ObjectId, zip: AdmZip) => {
   try {
-    const mergedMetadataEntries = await mergeAssociatedToCs(metadataFromZip(zip)[0]);
+    const mergedMetadataEntries = await mergeAssociatedToCs(metadataFromZip(zip));
     return mergedMetadataEntries
       ? await Promise.all(mergedMetadataEntries.map((m) => insert([m], COLLECTION_NAME, buildId)))
       : [];
