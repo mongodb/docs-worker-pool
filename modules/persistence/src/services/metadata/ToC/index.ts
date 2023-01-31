@@ -47,15 +47,24 @@ const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
   if (!associatedProject) return node;
   const branches = Object.keys(associatedProject);
   node.options.versions = branches;
-  node.children = branches.map((branch) => {
-    const child = needsUrlifiedToC ? associatedProject[branch].urlified : associatedProject[branch].original;
-    const options = {
-      ...child.options,
-      version: branch,
-    };
-    child.options = options;
-    return child;
-  });
+  node.options.urls = node.options.urls || {};
+  for (const branch of branches) {
+    node.options.urls[branch] = associatedProject[branch]['urlified']?.url;
+  }
+
+  node.children = branches.reduce((children: ToC[], branch) => {
+    // when merging ToC nodes, copy the nested children within the root node of associated product.
+    // we are skipping the root node that leads to '/' path within the project itself
+    const rootChild = needsUrlifiedToC ? associatedProject[branch].urlified : associatedProject[branch].original;
+    const copiedChildren = rootChild.children.map((originalNode: ToC) => {
+      originalNode.options = {
+        ...originalNode.options,
+        version: branch,
+      };
+      return originalNode;
+    });
+    return copiedChildren;
+  }, []);
   return node;
 };
 
