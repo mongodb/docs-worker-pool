@@ -60,5 +60,21 @@ export const upsert = async (payload: any, collection: string, _id: string | Obj
     return await upsertSession.collection(collection).updateOne(query, update, options);
   } catch (error) {
     console.error(`Error at upsertion time for ${collection}: ${error}`);
+    throw error;
+  }
+};
+
+export const deleteDocuments = async (_ids: ObjectId[], collection: string) => {
+  const deleteSession = await db();
+  try {
+    const query = {
+      _id: { $in: _ids },
+    };
+    const res = await deleteSession.collection(collection).deleteMany(query);
+    console.log(`Deleted ${res.deletedCount} documents in ${collection}`);
+    return res;
+  } catch (error) {
+    console.error(`Error at delete time for ${collection}: ${error}`);
+    throw error;
   }
 };
