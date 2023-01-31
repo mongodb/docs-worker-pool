@@ -3,8 +3,6 @@ on:
     branches:
       - "master"
       - "integration"
-      # TODO-3484: DELETE THIS
-      - "DOP-3484"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
