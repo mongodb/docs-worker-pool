@@ -89,13 +89,12 @@ describe('associated_products module', () => {
       const cursor = await _getAssociatedProducts(umbrellaMetadata);
       const repoBranchesMap = {};
       repoBranchesMap['atlas-cli'] = {
-        master: {
-          url: {
-            dotcomprd: 'www.mongodb.com',
-          },
-          prefix: {
-            dotcomprd: 'docs/atlas/cli',
-          },
+        master: {},
+        url: {
+          dotcomprd: 'www.mongodb.com',
+        },
+        prefix: {
+          dotcomprd: 'docs/atlas/cli',
         },
       };
       const { tocInsertions, tocOrderInsertions, associatedMetadataEntries } = await _shapeToCsCursor(
