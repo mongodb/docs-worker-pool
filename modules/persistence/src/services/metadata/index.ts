@@ -27,7 +27,7 @@ const metadataFromZip = (zip: AdmZip) => {
 
 export const insertMetadata = async (buildId: ObjectId, zip: AdmZip) => {
   try {
-    const metadata = await metadataFromZip(zip);
+    const metadata = metadataFromZip(zip);
     return insert([metadata], COLLECTION_NAME, buildId);
   } catch (error) {
     console.error(`Error at insertion time for ${COLLECTION_NAME}: ${error}`);
