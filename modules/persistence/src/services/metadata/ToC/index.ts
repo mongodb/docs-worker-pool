@@ -53,6 +53,17 @@ const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
     node.options.urls[branch] = associatedProject[branch]['urlified']?.url;
   }
 
+  if (node.options?.project === currentProject) {
+    // this node is targeted to be this same project.
+    // update the slug to be the root slug.
+    node.slug = '/';
+    delete node.url;
+  } else {
+    // umbrella project targeting associated ToC node
+    // handle slugs with node.options.urls instead
+    delete node.slug;
+  }
+
   node.children = branches.reduce((children: ToC[], branch) => {
     // when merging ToC nodes, copy the nested children within the root node of associated product.
     // we are skipping the root node that leads to '/' path within the project itself

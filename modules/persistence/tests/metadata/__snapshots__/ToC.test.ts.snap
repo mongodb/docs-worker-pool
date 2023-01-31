@@ -15769,6 +15769,7 @@ Object {
             "master",
           ],
         },
+        "slug": "/",
         "title": Array [
           Object {
             "position": Object {
