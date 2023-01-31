@@ -1,4 +1,5 @@
-import { Metadata, AssociatedProduct, hasAssociations } from '../associated_products';
+import { AssociatedProduct, hasAssociations } from '../associated_products';
+import { Metadata } from '..';
 import { convertSlugToUrl } from './utils/convertSlugToUrl';
 
 export interface ToC {
