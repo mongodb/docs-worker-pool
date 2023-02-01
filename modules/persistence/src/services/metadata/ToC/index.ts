@@ -48,15 +48,35 @@ const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
   if (!associatedProject) return node;
   const branches = Object.keys(associatedProject);
   node.options.versions = branches;
-  node.children = branches.map((branch) => {
-    const child = needsUrlifiedToC ? associatedProject[branch].urlified : associatedProject[branch].original;
-    const options = {
-      ...child.options,
-      version: branch,
-    };
-    child.options = options;
-    return child;
-  });
+  node.options.urls = node.options.urls || {};
+  for (const branch of branches) {
+    node.options.urls[branch] = associatedProject[branch]['urlified']?.url;
+  }
+
+  if (node.options?.project === currentProject) {
+    // this node is targeted to be this same project.
+    // update the slug to be the root slug.
+    node.slug = '/';
+    delete node.url;
+  } else {
+    // umbrella project targeting associated ToC node
+    // handle slugs with node.options.urls instead
+    delete node.slug;
+  }
+
+  node.children = branches.reduce((children: ToC[], branch) => {
+    // when merging ToC nodes, copy the nested children within the root node of associated product.
+    // we are skipping the root node that leads to '/' path within the project itself
+    const rootChild = needsUrlifiedToC ? associatedProject[branch].urlified : associatedProject[branch].original;
+    const copiedChildren = rootChild.children.map((originalNode: ToC) => {
+      originalNode.options = {
+        ...originalNode.options,
+        version: branch,
+      };
+      return originalNode;
+    });
+    return copiedChildren;
+  }, []);
   return node;
 };
 
