@@ -57,9 +57,6 @@ RUN curl --location https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
-# use npm 7.*
-RUN npm install npm@7
-
 # install snooty parser
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
