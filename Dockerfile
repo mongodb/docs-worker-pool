@@ -77,16 +77,12 @@ RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefil
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
-    && npm ci --legacy-peer-deps                                                                                 \
+    && npm ci --legacy-peer-deps --omit=dev                                                        \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
     && mkdir -p ./static/images                                                                    \
     && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
     && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
-# install snooty devhub
-RUN git clone --depth 1 https://github.com/mongodb/devhub.git snooty-devhub                        \
-    && cd snooty-devhub                                                                            \
-    && npm install --production
 
 # install redoc fork
 RUN git clone -b redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
