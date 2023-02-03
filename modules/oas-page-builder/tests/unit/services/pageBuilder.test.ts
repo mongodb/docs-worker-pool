@@ -41,6 +41,10 @@ describe('pageBuilder', () => {
     siteUrl: 'https://mongodb.com/docs',
     siteTitle: 'Test Docs',
   };
+  const expectedAtlasBuildOptions = {
+    ignoreIncompatibleTypes: true,
+  };
+  const expectedDefaultBuildOptions = {};
 
   beforeEach(() => {
     // Reset mock to reset call count
@@ -69,17 +73,20 @@ describe('pageBuilder', () => {
     // Local
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/index.html`
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
+      expectedDefaultBuildOptions
     );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
-      getExpectedOutputPath(testOptions.output, testEntries[1][0])
+      getExpectedOutputPath(testOptions.output, testEntries[1][0]),
+      expectedDefaultBuildOptions
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
-      getExpectedOutputPath(testOptions.output, testEntries[2][0])
+      getExpectedOutputPath(testOptions.output, testEntries[2][0]),
+      expectedAtlasBuildOptions
     );
   });
 
@@ -93,7 +100,8 @@ describe('pageBuilder', () => {
     await buildOpenAPIPages(testEntries, testOptions);
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${LAST_SAVED_GIT_HASH}.json`,
-      getExpectedOutputPath(testOptions.output, testEntries[0][0])
+      getExpectedOutputPath(testOptions.output, testEntries[0][0]),
+      expectedAtlasBuildOptions
     );
   });
 
