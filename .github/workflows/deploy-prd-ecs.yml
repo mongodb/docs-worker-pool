@@ -39,11 +39,11 @@ jobs:
           image: docs-worker-pool-prd
           tags: latest, ${{ github.sha }}
           registry: ${{ steps.login-ecr.outputs.registry }}
-          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
+          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE64_AUTH }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE64_AUTH }}
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR Dotcom
@@ -51,11 +51,11 @@ jobs:
           image: docs-worker-pool-dotcomprd
           tags: latest, ${{ github.sha }}
           registry: ${{ steps.login-ecr.outputs.registry }}
-          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE_64_AUTH }}
+          buildArgs: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE64_AUTH }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE_64_AUTH }}
+          NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE64_AUTH }}
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
       - name: Deploy ECS
         run: |
