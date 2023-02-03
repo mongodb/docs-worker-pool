@@ -1,6 +1,7 @@
 import { AggregationCursor } from 'mongodb';
+import { Metadata } from '..';
 import { pool, db } from '../../connector';
-import { ToC, ToCInsertions, TocOrderInsertions, traverseAndMerge, copyToCTree } from '../ToC';
+import { ToCInsertions, TocOrderInsertions, traverseAndMerge, copyToCTree } from '../ToC';
 import { prefixFromEnvironment } from '../ToC/utils/prefixFromEnvironment';
 
 export interface AssociatedProduct {
@@ -8,14 +9,7 @@ export interface AssociatedProduct {
   versions: string[];
 }
 
-export interface Metadata {
-  project: string;
-  branch: string;
-  associated_products?: AssociatedProduct[];
-  toctree: ToC;
-  toctreeOrder: any[];
-  [key: string]: any;
-}
+export type SharedMetadata = Metadata;
 
 interface AggregatedMetadata {
   _id: {
@@ -167,7 +161,7 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
   }
 };
 
-export const mergeAssociatedToCs = async (metadata) => {
+export const mergeAssociatedToCs = async (metadata: Metadata) => {
   try {
     const { project, branch } = metadata;
     const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
@@ -203,7 +197,7 @@ export const mergeAssociatedToCs = async (metadata) => {
     const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
       const mergedMetadataEntry = traverseAndMerge(
         metadataEntry,
-        umbrellaMetadata.associated_products,
+        umbrellaMetadata.associated_products || [],
         umbrellaToCs,
         tocInsertions,
         tocOrderInsertions
