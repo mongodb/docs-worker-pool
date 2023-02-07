@@ -23,9 +23,7 @@ RUN cd ./modules/oas-page-builder \
 FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=0.13.16
 ARG SNOOTY_FRONTEND_VERSION=0.13.36
-# The Redoc CLI branch will most likely stay static. Updates to the branch should
-# be limited to CLI bug fixes and Redoc dependency version bumps
-ARG REDOC_CLI_VERSION=0.2.0
+ARG REDOC_CLI_VERSION=1.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ENV DEBIAN_FRONTEND=noninteractive
@@ -83,14 +81,12 @@ RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongod
     && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
     && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
-
 # install redoc fork
-RUN git clone -b redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
     # Install dependencies for Redoc CLI
-    && cd redoc/cli \
-    && npm ci --omit=dev \
+    && cd redoc/ \
+    && npm ci --prefix cli/ --omit=dev \
     # Install dependencies for Redoc component and building/compiling
-    && cd ../ \
     && npm ci --omit=dev --ignore-scripts \
     && npm run compile:cli
 
