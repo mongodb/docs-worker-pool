@@ -33,8 +33,8 @@ describe('ToC module', () => {
     try {
       connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
       mockDb = await connection.db();
-      mockDb.collection('repos_branches').insertMany(repoBranches);
-      mockDb.collection('metadata').insertMany(metadata);
+      await mockDb.collection('repos_branches').insertMany(repoBranches);
+      await mockDb.collection('metadata').insertMany(metadata);
     } catch (e) {
       console.error(e);
     }
