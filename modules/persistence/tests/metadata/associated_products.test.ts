@@ -67,10 +67,8 @@ describe('associated_products module', () => {
   });
 
   describe('umbrellaMetadataEntry', () => {
-    const associatedMetadata = metadata.find((m) => !m['associated_products']) as unknown as SharedMetadata;
-
     it('returns the most recent umbrella metadata for specified project in passed metadata', async () => {
-      const umbrellaMeta = await _umbrellaMetadataEntry(associatedMetadata);
+      const umbrellaMeta = await _umbrellaMetadataEntry('atlas-cli');
       expect(umbrellaMeta).toMatchSnapshot();
     });
   });
