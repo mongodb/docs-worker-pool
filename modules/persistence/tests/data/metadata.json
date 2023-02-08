@@ -673,9 +673,9 @@
     }
   },
   {
-    "_id": "638f6d6895aec59ccde1bc86",
+    "_id": "63e2aa4d29d636971ac076c3",
     "project": "atlas-cli",
-    "branch": "master",
+    "branch": "v1.0",
     "title": "Atlas Command Line Interface",
     "eol": false,
     "slugToTitle": {
@@ -690,7 +690,7 @@
           "value": "Reference"
         }
       ],
-      "telemetry": [
+      "atlas-cli-save-connection-settings": [
         {
           "type": "text",
           "position": {
@@ -698,7 +698,7 @@
               "line": 4
             }
           },
-          "value": "Configure Telemetry"
+          "value": "Save Connection Settings"
         }
       ],
       "atlas-cli-env-variables": [
@@ -712,15 +712,15 @@
           "value": "Atlas CLI Environment Variables"
         }
       ],
-      "atlas-cli-save-connection-settings": [
+      "index": [
         {
           "type": "text",
           "position": {
             "start": {
-              "line": 4
+              "line": 6
             }
           },
-          "value": "Save Connection Settings"
+          "value": "Atlas CLI"
         }
       ],
       "atlas-cli-changelog": [
@@ -732,183 +732,6 @@
             }
           },
           "value": "Atlas CLI Changelog"
-        }
-      ],
-      "atlas-cli-commands": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": "Atlas CLI Commands"
-        }
-      ],
-      "atlas-cli-tutorials": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": "Manage "
-        },
-        {
-          "type": "substitution_reference",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "children": [
-            {
-              "type": "text",
-              "position": {
-                "start": {
-                  "line": 0
-                }
-              },
-              "value": "Atlas"
-            }
-          ],
-          "name": "service"
-        },
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": " from the Atlas CLI"
-        }
-      ],
-      "migrate-to-atlas-cli": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": "Migrate to the Atlas CLI"
-        }
-      ],
-      "cluster-config-file": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": "Cluster Configuration File"
-        }
-      ],
-      "index": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 8
-            }
-          },
-          "value": "What is the Atlas CLI?"
-        }
-      ],
-      "atlas-cli-getting-started": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": "Get Started with "
-        },
-        {
-          "type": "substitution_reference",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "children": [
-            {
-              "type": "text",
-              "position": {
-                "start": {
-                  "line": 0
-                }
-              },
-              "value": "Atlas"
-            }
-          ],
-          "name": "service"
-        }
-      ],
-      "compatibility": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": "Check Compatibility"
-        }
-      ],
-      "configure-optional-settings": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 3
-            }
-          },
-          "value": "Configure Optional Settings"
-        }
-      ],
-      "atlas-cli-quickstart": [
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": "Create and Configure an "
-        },
-        {
-          "type": "substitution_reference",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "children": [
-            {
-              "type": "text",
-              "position": {
-                "start": {
-                  "line": 0
-                }
-              },
-              "value": "Atlas"
-            }
-          ],
-          "name": "service"
-        },
-        {
-          "type": "text",
-          "position": {
-            "start": {
-              "line": 4
-            }
-          },
-          "value": " Cluster"
         }
       ],
       "install-atlas-cli": [
@@ -931,6 +754,98 @@
             }
           },
           "value": "Connect from the Atlas CLI"
+        }
+      ],
+      "cluster-config-file": [
+        {
+          "type": "text",
+          "position": {
+            "start": {
+              "line": 4
+            }
+          },
+          "value": "Cluster Configuration File"
+        }
+      ],
+      "migrate-to-atlas-cli": [
+        {
+          "type": "text",
+          "position": {
+            "start": {
+              "line": 4
+            }
+          },
+          "value": "Migrate to the Atlas CLI"
+        }
+      ],
+      "atlas-cli-commands": [
+        {
+          "type": "text",
+          "position": {
+            "start": {
+              "line": 4
+            }
+          },
+          "value": "Atlas CLI Commands"
+        }
+      ],
+      "atlas-cli-quickstart": [
+        {
+          "type": "text",
+          "position": {
+            "start": {
+              "line": 4
+            }
+          },
+          "value": "Set Up "
+        },
+        {
+          "type": "substitution_reference",
+          "position": {
+            "start": {
+              "line": 4
+            }
+          },
+          "children": [
+            {
+              "type": "text",
+              "position": {
+                "start": {
+                  "line": 0
+                }
+              },
+              "value": "Atlas"
+            }
+          ],
+          "name": "service"
+        },
+        {
+          "type": "text",
+          "position": {
+            "start": {
+              "line": 4
+            }
+          },
+          "value": " with "
+        },
+        {
+          "type": "literal",
+          "position": {
+            "start": {
+              "line": 4
+            }
+          },
+          "children": [
+            {
+              "type": "text",
+              "position": {
+                "start": {
+                  "line": 4
+                }
+              },
+              "value": "atlas quickstart"
+            }
+          ]
         }
       ]
     },
@@ -979,26 +894,7 @@
             }
           ],
           "slug": "install-atlas-cli",
-          "children": [
-            {
-              "title": [
-                {
-                  "type": "text",
-                  "position": {
-                    "start": {
-                      "line": 4
-                    }
-                  },
-                  "value": "Check Compatibility"
-                }
-              ],
-              "slug": "compatibility",
-              "children": [],
-              "options": {
-                "drawer": false
-              }
-            }
-          ],
+          "children": [],
           "options": {
             "drawer": false
           }
@@ -1082,47 +978,10 @@
               "type": "text",
               "position": {
                 "start": {
-                  "line": 3
-                }
-              },
-              "value": "Configure Optional Settings"
-            }
-          ],
-          "slug": "configure-optional-settings",
-          "children": [
-            {
-              "title": [
-                {
-                  "type": "text",
-                  "position": {
-                    "start": {
-                      "line": 4
-                    }
-                  },
-                  "value": "Configure Telemetry"
-                }
-              ],
-              "slug": "telemetry",
-              "children": [],
-              "options": {
-                "drawer": false
-              }
-            }
-          ],
-          "options": {
-            "drawer": true
-          }
-        },
-        {
-          "title": [
-            {
-              "type": "text",
-              "position": {
-                "start": {
                   "line": 4
                 }
               },
-              "value": "Manage "
+              "value": "Set Up "
             },
             {
               "type": "substitution_reference",
@@ -1151,97 +1010,30 @@
                   "line": 4
                 }
               },
-              "value": " from the Atlas CLI"
-            }
-          ],
-          "slug": "atlas-cli-tutorials",
-          "children": [
-            {
-              "title": [
-                {
-                  "type": "text",
-                  "position": {
-                    "start": {
-                      "line": 4
-                    }
-                  },
-                  "value": "Get Started with "
-                },
-                {
-                  "type": "substitution_reference",
-                  "position": {
-                    "start": {
-                      "line": 4
-                    }
-                  },
-                  "children": [
-                    {
-                      "type": "text",
-                      "position": {
-                        "start": {
-                          "line": 0
-                        }
-                      },
-                      "value": "Atlas"
-                    }
-                  ],
-                  "name": "service"
-                }
-              ],
-              "slug": "atlas-cli-getting-started",
-              "children": [],
-              "options": {
-                "drawer": true
-              }
+              "value": " with "
             },
             {
-              "title": [
-                {
-                  "type": "text",
-                  "position": {
-                    "start": {
-                      "line": 4
-                    }
-                  },
-                  "value": "Create and Configure an "
-                },
-                {
-                  "type": "substitution_reference",
-                  "position": {
-                    "start": {
-                      "line": 4
-                    }
-                  },
-                  "children": [
-                    {
-                      "type": "text",
-                      "position": {
-                        "start": {
-                          "line": 0
-                        }
-                      },
-                      "value": "Atlas"
-                    }
-                  ],
-                  "name": "service"
-                },
-                {
-                  "type": "text",
-                  "position": {
-                    "start": {
-                      "line": 4
-                    }
-                  },
-                  "value": " Cluster"
+              "type": "literal",
+              "position": {
+                "start": {
+                  "line": 4
                 }
-              ],
-              "slug": "atlas-cli-quickstart",
-              "children": [],
-              "options": {
-                "drawer": false
-              }
+              },
+              "children": [
+                {
+                  "type": "text",
+                  "position": {
+                    "start": {
+                      "line": 4
+                    }
+                  },
+                  "value": "atlas quickstart"
+                }
+              ]
             }
           ],
+          "slug": "atlas-cli-quickstart",
+          "children": [],
           "options": {
             "drawer": false
           }
@@ -1307,15 +1099,10 @@
       "/",
       "/",
       "install-atlas-cli",
-      "compatibility",
       "connect-atlas-cli",
       "atlas-cli-save-connection-settings",
       "atlas-cli-env-variables",
       "migrate-to-atlas-cli",
-      "configure-optional-settings",
-      "telemetry",
-      "atlas-cli-tutorials",
-      "atlas-cli-getting-started",
       "atlas-cli-quickstart",
       "reference",
       "cluster-config-file",
@@ -1323,25 +1110,30 @@
     ],
     "parentPaths": {
       "install-atlas-cli": [],
-      "compatibility": ["install-atlas-cli"],
       "connect-atlas-cli": [],
-      "atlas-cli-save-connection-settings": ["connect-atlas-cli"],
-      "atlas-cli-env-variables": ["connect-atlas-cli"],
-      "migrate-to-atlas-cli": ["connect-atlas-cli"],
-      "configure-optional-settings": [],
-      "telemetry": ["configure-optional-settings"],
-      "atlas-cli-tutorials": [],
-      "atlas-cli-getting-started": ["atlas-cli-tutorials"],
-      "atlas-cli-quickstart": ["atlas-cli-tutorials"],
+      "atlas-cli-save-connection-settings": [
+        "connect-atlas-cli"
+      ],
+      "atlas-cli-env-variables": [
+        "connect-atlas-cli"
+      ],
+      "migrate-to-atlas-cli": [
+        "connect-atlas-cli"
+      ],
+      "atlas-cli-quickstart": [],
       "reference": [],
-      "cluster-config-file": ["reference"],
+      "cluster-config-file": [
+        "reference"
+      ],
       "atlas-cli-changelog": []
     },
     "static_files": {},
-    "build_id": "638f6d6895aec59ccde1bc6a",
+    "build_id": {
+      "$oid": "63e2aa4c29d636971ac076ad"
+    },
     "created_at": {
       "$date": {
-        "$numberLong": "1670344040000"
+        "$numberLong": "1675799116000"
       }
     }
   },
