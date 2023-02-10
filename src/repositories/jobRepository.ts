@@ -246,7 +246,7 @@ export class JobRepository extends BaseRepository {
     await Promise.all(
       stuckJobs.map((stuckJob: any) => {
         const id: string = stuckJob._id.toString();
-        return this.notify(id, c.get('jobsUpdateQueueUrl'), JobStatus.failed, 0);
+        return this.notify(id, c.get('jobUpdatesQueueUrl'), JobStatus.failed, 0);
       })
     );
   }
