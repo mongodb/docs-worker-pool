@@ -245,7 +245,7 @@ export class JobRepository extends BaseRepository {
     }
 
     this._logger.info('failStuckJobs', `Creating notifactions`);
-    const jobUpdatesQueueUrl: string = c.get('jobUpdatesQueueUrl');
+    const jobUpdatesQueueUrl: string = this._config.get('jobUpdatesQueueUrl');
     this._logger.info('failStuckJobs', `queue url: ${jobUpdatesQueueUrl}`);
     await Promise.all(
       stuckJobs.map((stuckJob: any) => {
