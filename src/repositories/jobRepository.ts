@@ -233,6 +233,7 @@ export class JobRepository extends BaseRepository {
     // Mongo's updateMany does not return the IDs of documents changed, so we find them first
     const stuckJobsCursor = await this.find(query, `Mongo Timeout Error: Timed out finding stuck jobs.`, findOptions);
     const stuckJobs = await stuckJobsCursor.toArray();
+    this._logger.info('failStuckJobs', `Found ${stuckJobs.length} jobs.`);
     // No stuck jobs found
     if (!stuckJobs.length) return;
 
@@ -243,11 +244,15 @@ export class JobRepository extends BaseRepository {
       throw new DBError('failStuckJobs: Unable to update stuck jobs.');
     }
 
+    this._logger.info('failStuckJobs', `Creating notifactions`);
+    const jobUpdatesQueueUrl: string = c.get('jobUpdatesQueueUrl');
+    this._logger.info('failStuckJobs', `queue url: ${jobUpdatesQueueUrl}`);
     await Promise.all(
       stuckJobs.map((stuckJob: any) => {
         const id: string = stuckJob._id.toString();
-        return this.notify(id, c.get('jobUpdatesQueueUrl'), JobStatus.failed, 0);
+        return this.notify(id, jobUpdatesQueueUrl, JobStatus.failed, 0);
       })
     );
+    this._logger.info('failStuckJobs', `Done?`);
   }
 }
