@@ -79,6 +79,40 @@ export abstract class BaseRepository {
       throw error;
     }
   }
+
+  protected async find(query: any, errorMsg: string, options?: mongodb.FindOptions): Promise<any> {
+    try {
+      return this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.find(query, options), errorMsg);
+    } catch (error) {
+      this._logger.error(`${this._repoName}:find`, `Failed to find (${JSON.stringify(query)}) error: ${error}`);
+      throw error;
+    }
+  }
+
+  protected async updateMany(query: any, update: any, errorMsg: string): Promise<boolean> {
+    try {
+      const updateResult = await this.promiseTimeoutS(
+        this._config.get('MONGO_TIMEOUT_S'),
+        this._collection.updateMany(query, update),
+        errorMsg
+      );
+      // If no documents were found, this is not necessarily an error.
+      if ((updateResult?.matchedCount ?? 0) < 1) {
+        return false;
+      }
+      if ((updateResult?.modifiedCount ?? 0) < 1) {
+        throw new DBError(`Failed to modify jobs with query ${JSON.stringify(query)}`);
+      }
+    } catch (error) {
+      this._logger.error(
+        `${this._repoName}:updateMany`,
+        `Failed to update many with (${JSON.stringify(query)}) error: ${error}`
+      );
+      throw error;
+    }
+    return true;
+  }
+
   protected async updateOne(query: any, update: any, errorMsg: string): Promise<boolean> {
     try {
       const updateResult = await this.update(query, update, errorMsg);

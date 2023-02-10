@@ -86,6 +86,21 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
   );
 };
 
+export const FailStuckJobs = async () => {
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const consoleLogger = new ConsoleLogger();
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+  try {
+    // TODO-2565: Change back to 8 hours. For now, leave as 2 minutes
+    const hours = 0.03333333333;
+    await jobRepository.failStuckJobs(hours);
+  } catch (err) {
+    consoleLogger.error('Unable to fail stuck jobs', err);
+  }
+};
+
 async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
   try {
     const tries = message.tries;

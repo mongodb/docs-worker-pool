@@ -205,4 +205,49 @@ export class JobRepository extends BaseRepository {
     }
     return bRet;
   }
+
+  async failStuckJobs(hours: number) {
+    const hourInMS = 1000 * 60 * 60;
+    const currentTime = new Date();
+    const failReason = `Job timeout error: Job has been running for at least ${hours} hours`;
+
+    const query = {
+      status: JobStatus.inProgress,
+      startTime: {
+        $lte: new Date(currentTime.getTime() - hourInMS * hours),
+      },
+    };
+    const findOptions = {
+      projection: {
+        _id: 1,
+      },
+    };
+    const update = {
+      $set: {
+        status: JobStatus.failed,
+        endTime: currentTime,
+        error: { time: currentTime.toString(), reason: failReason },
+      },
+    };
+
+    // Mongo's updateMany does not return the IDs of documents changed, so we find them first
+    const stuckJobsCursor = await this.find(query, `Mongo Timeout Error: Timed out finding stuck jobs.`, findOptions);
+    const stuckJobs = await stuckJobsCursor.toArray();
+    // No stuck jobs found
+    if (!stuckJobs.length) return;
+
+    // Since the same query is split into 2 operations, there's a very small chance
+    // that there might be a mismatch between jobs updated in the db vs. in the queue.
+    const bRet = await this.updateMany(query, update, `Mongo Timeout Error: Timed out updating stuck jobs.`).then();
+    if (!bRet) {
+      throw new DBError('failStuckJobs: Unable to update stuck jobs.');
+    }
+
+    await Promise.all(
+      stuckJobs.map((stuckJob: any) => {
+        const id: string = stuckJob._id.toString();
+        return this.notify(id, c.get('jobsUpdateQueueUrl'), JobStatus.failed, 0);
+      })
+    );
+  }
 }
