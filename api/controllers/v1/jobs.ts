@@ -69,6 +69,13 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             await NotifyBuildProgress(jobId);
             break;
           case JobStatus[JobStatus.failed]:
+            await NotifyBuildSummary(jobId);
+            const ecs = new ECSContainer(c, consoleLogger);
+            const taskArn = body['taskArn'];
+            if (taskArn) {
+              ecs.stopZombieECSTask(taskArn);
+            }
+            break;
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildSummary(jobId);
@@ -129,10 +136,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
-  // TODO: Remove unused vars, and validate existing vars
-  const branchesRepo = new BranchRepository(db, c, consoleLogger);
-  const slackMsgs = fullDocument.comMessage;
-  const jobTitle = fullDocument.title;
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
   const slackConnector = new SlackConnector(consoleLogger, c);
@@ -142,7 +145,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     consoleLogger.error(username, 'Entitlement failed');
     return;
   }
-  const resp = await slackConnector.sendMessage(
+  await slackConnector.sendMessage(
     await prepSummaryMessage(
       env,
       fullDocument,
@@ -216,6 +219,7 @@ function prepProgressMessage(
       return msg + 'is now being processed.';
     case 'completed':
       return msg + 'has successfully completed.';
+    case 'timedOut':
     case 'failed':
       let failedMessage = msg + 'has failed and will not be placed back in the ' + env + ' queue.';
       if (errorReason.match(/Repository not found/)) {
