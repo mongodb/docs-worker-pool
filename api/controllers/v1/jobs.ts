@@ -118,12 +118,14 @@ export const FailStuckJobs = async () => {
 
 async function saveTaskId(jobId: string, taskExecutionRes: any): Promise<void> {
   const taskArn = taskExecutionRes?.tasks[0]?.taskArn;
+  const consoleLogger = new ConsoleLogger();
+  consoleLogger.info('saveTaskId', taskArn);
   if (!taskArn) return;
 
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
-  const consoleLogger = new ConsoleLogger();
+  // const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
   try {

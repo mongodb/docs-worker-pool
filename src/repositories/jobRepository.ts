@@ -258,7 +258,7 @@ export class JobRepository extends BaseRepository {
   }
 
   async addTaskIdToJob(id: string, taskId: string): Promise<void> {
-    const query = { _id: id };
+    const query = { _id: new objectId(id) };
     const update = {
       $set: {
         taskId: taskId,
