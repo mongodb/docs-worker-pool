@@ -62,6 +62,9 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             // start the task , don't start the process before processing the notification
             const ecsServices = new ECSContainer(c, consoleLogger);
             const res = await ecsServices.execute(jobId);
+            if (res) {
+              await saveTaskId(jobId, res);
+            }
             consoleLogger.info(jobId, JSON.stringify(res));
             break;
           case JobStatus[JobStatus.inProgress]:
@@ -70,12 +73,13 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             break;
           case JobStatus[JobStatus.failed]:
             await NotifyBuildSummary(jobId);
+            // TODO-2565: Split logic below into separate function
             const ecs = new ECSContainer(c, consoleLogger);
-            const taskArn = body['taskArn'];
-            consoleLogger.info('taskArn:', taskArn);
-            consoleLogger.info('body:', body);
-            if (taskArn) {
-              ecs.stopZombieECSTask(taskArn);
+            const taskId = body['taskId'];
+            consoleLogger.info('taskArn:', taskId);
+            consoleLogger.info('body:', message.body);
+            if (taskId) {
+              ecs.stopZombieECSTask(taskId);
             }
             break;
           case JobStatus[JobStatus.completed]:
@@ -101,6 +105,7 @@ export const FailStuckJobs = async () => {
   const db = client.db(c.get('dbName'));
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
+
   try {
     // TODO-2565: Change back to 8 hours. For now, leave as 2 minutes
     const hours = 0.03333333333;
@@ -110,6 +115,25 @@ export const FailStuckJobs = async () => {
     consoleLogger.error('FailStuckJobs', err);
   }
 };
+
+async function saveTaskId(jobId: string, taskExecutionRes: any): Promise<void> {
+  const taskArn = taskExecutionRes?.tasks[0]?.taskArn;
+  if (!taskArn) return;
+
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const consoleLogger = new ConsoleLogger();
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+
+  try {
+    // Only interested in the actual task ID since the whole ARN might have sensitive information
+    const taskId = taskArn.split('/').pop();
+    await jobRepository.addTaskIdToJob(jobId, taskId);
+  } catch (err) {
+    consoleLogger.error('saveTaskId', err);
+  }
+}
 
 async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
   try {

@@ -89,8 +89,8 @@ export class JobRepository extends BaseRepository {
     return await this.findOneAndUpdateJob(query);
   }
 
-  async notify(jobId: string, url: string, status: JobStatus, delay: number) {
-    await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status), url, delay);
+  async notify(jobId: string, url: string, status: JobStatus, delay: number, taskId?: string) {
+    await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status, 0, taskId), url, delay);
   }
 
   async findOneAndUpdateJob(query): Promise<Job | null> {
@@ -220,6 +220,7 @@ export class JobRepository extends BaseRepository {
     const findOptions = {
       projection: {
         _id: 1,
+        taskId: 1,
       },
     };
     const update = {
@@ -250,9 +251,20 @@ export class JobRepository extends BaseRepository {
     await Promise.all(
       stuckJobs.map((stuckJob: any) => {
         const id: string = stuckJob._id.toString();
-        return this.notify(id, jobUpdatesQueueUrl, JobStatus.failed, 0);
+        return this.notify(id, jobUpdatesQueueUrl, JobStatus.failed, 0, stuckJob.taskId);
       })
     );
     this._logger.info('failStuckJobs', `Done?`);
+  }
+
+  async addTaskIdToJob(id: string, taskId: string): Promise<void> {
+    const query = { _id: id };
+    const update = {
+      $set: {
+        taskId: taskId,
+      },
+    };
+
+    await this.updateOne(query, update, `Mongo Timeout Error: Timed out while updating taskId for jobId: ${id}`);
   }
 }
