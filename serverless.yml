@@ -214,6 +214,7 @@ functions:
       - Effect: Allow
         Action:
           - "ecs:RunTask"
+          - "ecs:StopTask"
         Resource:
           - arn:aws:ecs:${aws:region}:${aws:accountId}:task-definition/docs-worker-pool-${self:provider.stage}:*
       - Effect: Allow
