@@ -73,6 +73,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             const ecs = new ECSContainer(c, consoleLogger);
             const taskArn = body['taskArn'];
             consoleLogger.info('taskArn:', taskArn);
+            consoleLogger.info('body:', body);
             if (taskArn) {
               ecs.stopZombieECSTask(taskArn);
             }
