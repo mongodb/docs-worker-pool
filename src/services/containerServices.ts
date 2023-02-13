@@ -93,7 +93,7 @@ export class ECSContainer implements IContainerServices {
     const clusterName = this._config.get<string>('taskDefinitionFamily');
     try {
       this._logger.info('stopZombieECSTask', 'stopping task');
-      this._client.stopTask({
+      await this._client.stopTask({
         cluster: clusterName,
         task: taskId,
       });
