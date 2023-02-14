@@ -75,7 +75,7 @@ const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
       };
       return originalNode;
     });
-    return copiedChildren;
+    return children.concat(copiedChildren);
   }, []);
   return node;
 };

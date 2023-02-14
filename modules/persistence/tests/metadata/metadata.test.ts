@@ -91,6 +91,7 @@ describe('metadata module', () => {
       const testDoc = {
         ...meta,
         idx,
+        _id: buildId,
         build_id: buildId,
         created_at: buildId.getTimestamp(),
       };
