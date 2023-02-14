@@ -114,9 +114,11 @@ const shapeToCsCursor = async (
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesEntry) {
       const { url, prefix } = prefixFromEnvironment(branches);
+      const { urlSlug, urlAliases, gitBranchName } = repoBranchesEntry;
+      const alias = urlSlug || urlAliases[0] || gitBranchName;
       tocInsertions[project][branch] = {
         original: copyToCTree(metadata.toctree),
-        urlified: copyToCTree(metadata.toctree, prefix, url),
+        urlified: copyToCTree(metadata.toctree, prefix, url, alias),
       };
       // TODO: Can we urlify the order? SHOUD we urlify the order?
       tocOrderInsertions[project][branch] = metadata.toctreeOrder;
