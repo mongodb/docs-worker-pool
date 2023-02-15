@@ -245,16 +245,13 @@ export class JobRepository extends BaseRepository {
       throw new DBError('failStuckJobs: Unable to update stuck jobs.');
     }
 
-    this._logger.info('failStuckJobs', `Creating notifactions`);
     const jobUpdatesQueueUrl: string = this._config.get('jobUpdatesQueueUrl');
-    this._logger.info('failStuckJobs', `queue url: ${jobUpdatesQueueUrl}`);
     await Promise.all(
       stuckJobs.map((stuckJob: any) => {
         const id: string = stuckJob._id.toString();
         return this.notify(id, jobUpdatesQueueUrl, JobStatus.failed, 0, stuckJob.taskId);
       })
     );
-    this._logger.info('failStuckJobs', `Done?`);
   }
 
   async addTaskIdToJob(id: string, taskId: string): Promise<void> {
