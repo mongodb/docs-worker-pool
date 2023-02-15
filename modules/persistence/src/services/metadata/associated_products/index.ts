@@ -114,7 +114,7 @@ const shapeToCsCursor = async (
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesEntry) {
       const { url, prefix } = prefixFromEnvironment(branches);
-      const { urlSlug, urlAliases, gitBranchName, publishOriginalBranchName } = repoBranchesEntry;
+      const { urlSlug, urlAliases = [], gitBranchName, publishOriginalBranchName } = repoBranchesEntry;
       const alias = urlSlug || urlAliases[0] || (publishOriginalBranchName && gitBranchName);
       tocInsertions[project][branch] = {
         original: copyToCTree(metadata.toctree),
