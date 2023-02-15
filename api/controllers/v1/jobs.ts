@@ -79,7 +79,8 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             consoleLogger.info('taskArn:', taskId);
             consoleLogger.info('body:', message.body);
             if (taskId) {
-              ecs.stopZombieECSTask(taskId);
+              await ecs.stopZombieECSTask(taskId);
+              consoleLogger.info('failed job', 'ecs task stopped');
             }
             break;
           case JobStatus[JobStatus.completed]:
