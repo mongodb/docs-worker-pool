@@ -243,7 +243,6 @@ function prepProgressMessage(
       return msg + 'is now being processed.';
     case 'completed':
       return msg + 'has successfully completed.';
-    case 'timedOut':
     case 'failed':
       let failedMessage = msg + 'has failed and will not be placed back in the ' + env + ' queue.';
       if (errorReason.match(/Repository not found/)) {
