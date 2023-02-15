@@ -217,6 +217,7 @@ functions:
           - "ecs:StopTask"
         Resource:
           - arn:aws:ecs:${aws:region}:${aws:accountId}:task-definition/docs-worker-pool-${self:provider.stage}:*
+          - arn:aws:ecs:${aws:region}:${aws:accountId}:task/docs-worker-pool-${self:provider.stage}/*
       - Effect: Allow
         Action:
           - ecs:DescribeTaskDefinition
