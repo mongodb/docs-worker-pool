@@ -34,8 +34,8 @@ describe('associated_products module', () => {
     // or update jest-mongodb-config.js
     connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
     mockDb = await connection.db();
-    mockDb.collection('repos_branches').insertMany(repoBranches);
-    mockDb.collection('metadata').insertMany(metadata);
+    await mockDb.collection('repos_branches').insertMany(repoBranches);
+    await mockDb.collection('metadata').insertMany(metadata);
   });
 
   afterAll(async () => {
@@ -67,10 +67,8 @@ describe('associated_products module', () => {
   });
 
   describe('umbrellaMetadataEntry', () => {
-    const associatedMetadata = metadata.find((m) => !m['associated_products']) as unknown as SharedMetadata;
-
     it('returns the most recent umbrella metadata for specified project in passed metadata', async () => {
-      const umbrellaMeta = await _umbrellaMetadataEntry(associatedMetadata);
+      const umbrellaMeta = await _umbrellaMetadataEntry('atlas-cli');
       expect(umbrellaMeta).toMatchSnapshot();
     });
   });
