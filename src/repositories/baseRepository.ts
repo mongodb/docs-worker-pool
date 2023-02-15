@@ -80,7 +80,7 @@ export abstract class BaseRepository {
     }
   }
 
-  protected async find(query: any, errorMsg: string, options?: mongodb.FindOptions): Promise<any> {
+  protected async find(query: any, errorMsg: string, options?: mongodb.FindOptions): Promise<mongodb.FindCursor> {
     try {
       return this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.find(query, options), errorMsg);
     } catch (error) {
