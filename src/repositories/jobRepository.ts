@@ -240,7 +240,7 @@ export class JobRepository extends BaseRepository {
 
     // Since the same query is split into 2 operations, there's a very small chance
     // that there might be a mismatch between jobs updated in the db vs. in the queue.
-    const bRet = await this.updateMany(query, update, `Mongo Timeout Error: Timed out updating stuck jobs.`).then();
+    const bRet = await this.updateMany(query, update, `Mongo Timeout Error: Timed out updating stuck jobs.`);
     if (!bRet) {
       throw new DBError('failStuckJobs: Unable to update stuck jobs.');
     }
