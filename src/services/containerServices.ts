@@ -91,17 +91,20 @@ export class ECSContainer implements IContainerServices {
   async stopZombieECSTask(taskId: string) {
     const clusterName = this._config.get<string>('taskDefinitionFamily');
     try {
-      await this._client.stopTask({
+      const res = await this._client.describeTasks({
         cluster: clusterName,
-        task: taskId,
+        tasks: [taskId],
       });
-    } catch (error) {
-      // If task not found, then the task should have already been stopped properly
-      if (error.code === 'TaskNotFoundException') {
-        this._logger.error('stopZombieECSTask', error.message);
-      } else {
-        throw error;
+
+      // Only stop ECS task if it's still running
+      if (res.tasks?.[0].lastStatus === 'RUNNING') {
+        await this._client.stopTask({
+          cluster: clusterName,
+          task: taskId,
+        });
       }
+    } catch (error) {
+      throw error;
     }
   }
 }
