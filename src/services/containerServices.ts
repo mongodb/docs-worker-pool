@@ -98,7 +98,7 @@ export class ECSContainer implements IContainerServices {
     } catch (error) {
       // If task not found, then the task should have already been stopped properly
       if (error.code === 'TaskNotFoundException') {
-        this._logger.error('stopZombieECSTask:', error.message);
+        this._logger.error('stopZombieECSTask', error.message);
       } else {
         throw error;
       }
