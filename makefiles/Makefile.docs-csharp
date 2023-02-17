@@ -16,3 +16,6 @@ SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 include ~/shared.mk
+
+get-build-dependencies:
+	echo "Published branches information stored in Atlas collection"

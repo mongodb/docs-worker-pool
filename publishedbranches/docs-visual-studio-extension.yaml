@@ -1,0 +1,19 @@
+prefix: 'mongodb-analyzer'
+version:
+  published:
+    - 'master'
+    - 'v1.0'
+  active:
+    - 'master'
+    - 'v1.0'
+  stable: 'v1.0'
+  upcoming: 'master'
+git:
+  branches:
+    manual: 'master'
+    published:
+      - 'master'
+      - 'v1.0'
+      # the branches/published list **must** be ordered from most to
+      # least recent release.
+...

@@ -22,6 +22,10 @@ DEPLOY_JOBS=job-$(BUCKET) job-docs-atlas-$(SNOOTY_ENV) job-docs-java-$(SNOOTY_EN
 
 include ~/shared.mk
 
+get-build-dependencies:
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-404.yaml > ${REPO_DIR}/published-branches.yaml
+
+
 next-gen-deploy: $(DEPLOY_JOBS)
 
 ifdef EXECUTE_DEPLOY

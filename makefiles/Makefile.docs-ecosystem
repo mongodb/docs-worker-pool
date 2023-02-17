@@ -27,3 +27,7 @@ assets: ## pulls assets from the docs-assets
 	cd docs-assets; git checkout ecosystem; cp * ../source/figures
 
 get-build-dependencies: assets
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-ecosystem.yaml > ${REPO_DIR}/published-branches.yaml
+
+
+

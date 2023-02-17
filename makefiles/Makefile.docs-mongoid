@@ -50,7 +50,8 @@ next-gen-html: next-gen-parse
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
 
 # a published-branches file needed until DOP-2246 is done, though never gets used
-get-build-dependencies: fetch-submodule
+get-build-dependencies: fetch-submodule 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-php-library.yaml > ${REPO_DIR}/published-branches.yaml
 
 fetch-submodule:
 	git submodule update --remote --init

@@ -16,5 +16,10 @@ include ~/shared.mk
 
 .PHONY: help stage fake-deploy deploy publish remote-includes api-docs
 
+
+get-build-dependencies: 
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/cloudgov-docs.yaml > ${REPO_DIR}/published-branches.yaml
+
+
 html: ## Builds this branch's HTML under build/<branch>/html
 	giza make html

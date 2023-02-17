@@ -75,6 +75,10 @@ publish:
 ####   DEPLOY KUBERNETES OPERATOR DOCUMENTATION TO STAGING   ####
 #################################################################
 
+
+get-build-dependencies: 
+	curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-k8s-operator.yaml > ${REPO_DIR}/published-branches.yaml
+
 stage: ## Host online for review
 	mut-publish build/${GIT_BRANCH}/html ${BUCKET} --prefix=${PROJECT} --stage ${ARGS}
 	@echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
