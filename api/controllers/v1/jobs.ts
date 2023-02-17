@@ -103,7 +103,8 @@ export const FailStuckJobs = async () => {
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
   try {
-    const hours = 8;
+    // TODO-2565: Change back to 8 hours
+    const hours = 0.03333333333;
     await jobRepository.failStuckJobs(hours);
   } catch (err) {
     consoleLogger.error('FailStuckJobs', err);

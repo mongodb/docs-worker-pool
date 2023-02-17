@@ -3,6 +3,8 @@ on:
     branches:
       - "master"
       - "integration"
+      # TODO-2565: Remove branch after testing
+      - "DOP-2565"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
