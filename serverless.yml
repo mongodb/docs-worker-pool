@@ -244,8 +244,7 @@ functions:
     v1FailStuckJobs:
       handler: api/controllers/v1/jobs.FailStuckJobs
       events:
-        # TODO-2565: Change back to 8 hours
-        - schedule: rate(2 minutes)
+        - schedule: rate(8 hours)
       environment:
         <<: *webhook-env-core
 
