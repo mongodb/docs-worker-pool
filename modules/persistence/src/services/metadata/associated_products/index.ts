@@ -84,10 +84,15 @@ const umbrellaMetadataEntry = async (project: string): Promise<Metadata> => {
     const snooty = await db();
 
     // first find any umbrella
-    const umbrella = await snooty.collection('metadata').findOne({
-      'associated_products.name': project,
-      is_merged_toc: false,
-    });
+    const umbrella = await snooty.collection('metadata').findOne(
+      {
+        'associated_products.name': project,
+        is_merged_toc: { $ne: true },
+      },
+      {
+        sort: { build_id: -1 },
+      }
+    );
 
     if (!umbrella) {
       return null as unknown as Metadata;
@@ -99,7 +104,7 @@ const umbrellaMetadataEntry = async (project: string): Promise<Metadata> => {
       .collection('metadata')
       .find({
         'associated_products.name': project,
-        is_merged_toc: false,
+        is_merged_toc: { $ne: true },
         branch: { $in: branchNames },
       })
       .sort({ build_id: -1 })
