@@ -12,7 +12,7 @@
     "format:fix": "npm run prettier -- --write",
     "lint": "eslint --ext .ts .",
     "lint:fix": "npm run lint -- --fix",
-    "prettier": "prettier '**/*.{js,jsx,json,md,ts}'",
+    "prettier": "prettier '**/*.{js,jsx,json,md,ts}' '!modules/**'",
     "prepare": "husky install"
   },
   "repository": {

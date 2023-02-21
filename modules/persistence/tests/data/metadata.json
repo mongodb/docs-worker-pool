@@ -1111,20 +1111,12 @@
     "parentPaths": {
       "install-atlas-cli": [],
       "connect-atlas-cli": [],
-      "atlas-cli-save-connection-settings": [
-        "connect-atlas-cli"
-      ],
-      "atlas-cli-env-variables": [
-        "connect-atlas-cli"
-      ],
-      "migrate-to-atlas-cli": [
-        "connect-atlas-cli"
-      ],
+      "atlas-cli-save-connection-settings": ["connect-atlas-cli"],
+      "atlas-cli-env-variables": ["connect-atlas-cli"],
+      "migrate-to-atlas-cli": ["connect-atlas-cli"],
       "atlas-cli-quickstart": [],
       "reference": [],
-      "cluster-config-file": [
-        "reference"
-      ],
+      "cluster-config-file": ["reference"],
       "atlas-cli-changelog": []
     },
     "static_files": {},
