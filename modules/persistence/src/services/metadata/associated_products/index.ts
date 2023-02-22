@@ -1,12 +1,13 @@
 import { AggregationCursor } from 'mongodb';
-import { Metadata } from '..';
-import { pool, db } from '../../connector';
-import { ToCInsertions, TocOrderInsertions, traverseAndMerge, copyToCTree } from '../ToC';
+import { Metadata, verifyMetadata } from '..';
+import { db } from '../../connector';
+import { getAllAssociatedRepoBranchesEntries, getRepoBranchesEntry } from '../repos_branches';
+import { ToCInsertions, TocOrderInsertions, traverseAndMerge, copyToCTree, project } from '../ToC';
 import { prefixFromEnvironment } from '../ToC/utils/prefixFromEnvironment';
 
 export interface AssociatedProduct {
-  name: string;
-  versions: string[];
+  name: project;
+  versions?: string[];
 }
 
 export type SharedMetadata = Metadata;
@@ -40,33 +41,6 @@ export interface ReposBranchesDocument {
   prefix: EnvKeyedObject;
   [key: string]: any;
 }
-
-// Queries pool*.repos_branches for any entries for the given project and branch from a metadata entry.
-const getRepoBranchesEntry = async (project, branch = ''): Promise<ReposBranchesDocument> => {
-  const db = await pool();
-  const query = {
-    project,
-  };
-  if (branch) {
-    query['branches'] = {
-      $elemMatch: { gitBranchName: branch },
-    };
-  }
-  return db.collection('repos_branches').findOne(query) as unknown as ReposBranchesDocument;
-};
-
-// Queries pool*.repos_branches for all entries for associated_products in a shared metadata entry
-const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) => {
-  const { associated_products } = metadata;
-  if (!associated_products || !associated_products.length) return [];
-  const associatedProductNames = associated_products.map((a) => a.name);
-  const db = await pool();
-  const entries = await db
-    .collection('repos_branches')
-    .find({ project: { $in: associatedProductNames } })
-    .toArray();
-  return entries as unknown as ReposBranchesDocument[];
-};
 
 const mapRepoBranches = (repoBranches: ReposBranchesDocument[]) =>
   Object.fromEntries(
@@ -194,8 +168,6 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
 export const mergeAssociatedToCs = async (metadata: Metadata) => {
   try {
     const { project, branch } = metadata;
-    // TODO: DOP-3518
-    // should get an umbrella metadata entry that is in repos branches
     const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
 
     // Short circuit execution here if there's no umbrella product metadata found
@@ -209,6 +181,8 @@ export const mergeAssociatedToCs = async (metadata: Metadata) => {
     const umbrellaRepoBranchesEntry = await getRepoBranchesEntry(umbrellaMetadata.project, umbrellaMetadata.branch);
     if (!umbrellaRepoBranchesEntry)
       throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
+
+    await verifyMetadata(umbrellaMetadata);
 
     const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
     const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
