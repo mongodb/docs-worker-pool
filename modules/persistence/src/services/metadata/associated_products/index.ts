@@ -194,9 +194,15 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
 export const mergeAssociatedToCs = async (metadata: Metadata) => {
   try {
     const { project, branch } = metadata;
-    // TODO: DOP-3518
-    // should get an umbrella metadata entry that is in repos branches
-    const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
+    let umbrellaMetadata: Metadata,
+      isZippedUmbrella = false;
+
+    if (hasAssociations(metadata)) {
+      umbrellaMetadata = metadata;
+      isZippedUmbrella = true;
+    } else {
+      umbrellaMetadata = await umbrellaMetadataEntry(project);
+    }
 
     // Short circuit execution here if there's no umbrella product metadata found
     if (!umbrellaMetadata) return;
@@ -211,6 +217,11 @@ export const mergeAssociatedToCs = async (metadata: Metadata) => {
       throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
 
     const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
+    if (!repoBranchesEntries.length && isZippedUmbrella) {
+      throw new Error(
+        `No branches found for associated project(s) [${umbrellaMetadata.associated_products?.map((ap) => ap.name)}]`
+      );
+    }
     const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
     const metadataCursor = await getAssociatedProducts(umbrellaMetadata);
 
