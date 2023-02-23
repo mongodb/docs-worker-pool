@@ -12,7 +12,6 @@ import {
   insertMergedMetadataEntries,
   deleteStaleMetadata,
   metadataFromZip,
-  verifyMetadata,
 } from './src/services/metadata';
 import { upsertAssets } from './src/services/assets';
 
@@ -37,8 +36,7 @@ const app = async (path: string) => {
     // atomic buildId for all artifacts read by this module - fundamental assumption
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
-    const metadata = metadataFromZip(zip);
-    await verifyMetadata(metadata);
+    const metadata = await metadataFromZip(zip);
     await Promise.all([insertPages(buildId, zip), insertMetadata(buildId, metadata), upsertAssets(zip)]);
     await insertMergedMetadataEntries(buildId, metadata);
     // DOP-3447 clean up stale metadata

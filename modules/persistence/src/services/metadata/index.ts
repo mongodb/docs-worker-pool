@@ -19,18 +19,20 @@ export interface Metadata {
 // Service responsible for memoization of metadata entries.
 // Any extraneous logic performed on metadata entries as part of upload should be added here
 // or within subfolders of this module
-export const metadataFromZip = (zip: AdmZip) => {
+export const metadataFromZip = async (zip: AdmZip) => {
   const zipEntries = zip.getEntries();
-  return zipEntries
+  const metadata = zipEntries
     .filter((entry) => entry.entryName === 'site.bson')
     .map((entry) => deserialize(entry.getData()))[0] as Metadata;
+  await verifyMetadata(metadata);
+  return metadata;
 };
 
 // Verifies the entries for associated_products in metadata
-export const verifyMetadata = async (metadata: Metadata) => {
+const verifyMetadata = async (metadata: Metadata) => {
   try {
     if (!metadata['associated_products']?.length) {
-      return;
+      return metadata;
     }
     const invalidNames: project[] = [];
     const promises = metadata['associated_products'].map(async (ap) => {
@@ -47,6 +49,7 @@ export const verifyMetadata = async (metadata: Metadata) => {
     if (!metadata['associated_products'].length) {
       delete metadata['associated_products'];
     }
+    return metadata;
   } catch (e) {
     console.error(`Error while verifying metadata ${e}`);
     throw e;

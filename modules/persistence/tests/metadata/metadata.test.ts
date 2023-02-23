@@ -64,8 +64,8 @@ describe('metadata module', () => {
   });
 
   describe('metadataFromZip', () => {
-    const metaFromZip = _metadataFromZip(zip);
-    it('should get metadata from site.bson', () => {
+    it('should get metadata from site.bson', async () => {
+      const metaFromZip = await _metadataFromZip(zip);
       expect(metaFromZip).toEqual(meta);
     });
   });
@@ -74,7 +74,7 @@ describe('metadata module', () => {
     const buildId = new ObjectId();
     it('should insert metadata docs into metadata collection', async () => {
       try {
-        const metaFromZip = _metadataFromZip(zip);
+        const metaFromZip = await _metadataFromZip(zip);
         await insertMetadata(buildId, metaFromZip);
       } catch (e) {
         console.log(e);
@@ -101,7 +101,7 @@ describe('metadata module', () => {
 
     it('removes copies of metadata for same project-branch, keeping the most recent ones', async () => {
       await mockDb.collection('metadata').insertMany(testData);
-      const metaFromZip = _metadataFromZip(zip);
+      const metaFromZip = await _metadataFromZip(zip);
       await deleteStaleMetadata(metaFromZip);
       const res = await mockDb
         .collection('metadata')

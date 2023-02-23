@@ -1,5 +1,5 @@
 import { AggregationCursor } from 'mongodb';
-import { Metadata, verifyMetadata } from '..';
+import { Metadata } from '..';
 import { db } from '../../connector';
 import { getAllAssociatedRepoBranchesEntries, getRepoBranchesEntry } from '../repos_branches';
 import { ToCInsertions, TocOrderInsertions, traverseAndMerge, copyToCTree, project } from '../ToC';
@@ -181,8 +181,6 @@ export const mergeAssociatedToCs = async (metadata: Metadata) => {
     const umbrellaRepoBranchesEntry = await getRepoBranchesEntry(umbrellaMetadata.project, umbrellaMetadata.branch);
     if (!umbrellaRepoBranchesEntry)
       throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
-
-    await verifyMetadata(umbrellaMetadata);
 
     const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
     const repoBranchesMap = mapRepoBranches(repoBranchesEntries);

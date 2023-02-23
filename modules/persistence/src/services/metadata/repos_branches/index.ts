@@ -86,7 +86,8 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
       };
     }
     const res = (await db.collection('repos_branches').findOne(query)) as unknown as ReposBranchesDocument;
-    if (!branch) {
+    // if not already set, set cache value for repo_branches
+    if (!internals[project]) {
       internals[project] = res;
     }
     return res;
