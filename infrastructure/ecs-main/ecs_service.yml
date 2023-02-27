@@ -52,10 +52,6 @@ Resources:
               Value: ${self:custom.npmBase64Auth}
             - Name: NPM_EMAIL
               Value: ${self:custom.npmEmail}
-            - Name: AWS_ACCESS_KEY_ID_DEVHUB
-              Value: ${self:custom.awsKeyDevhub}
-            - Name: AWS_SECRET_ACCESS_KEY_DEVHUB
-              Value: ${self:custom.awsSecretDevhub}
             - Name: GATSBY_BASE_URL
               Value: ${self:custom.gatsbyBaseUrl}
             - Name: PREVIEW_BUILD_ENABLED
@@ -74,10 +70,6 @@ Resources:
               Value: ${self:custom.fastlyAtlasToken}
             - Name: FASTLY_ATLAS_SERVICE_ID
               Value: ${self:custom.fastlyAtlasServiceId}
-            - Name: FASTLY_DEVHUB_TOKEN
-              Value: ${self:custom.fastlyDevhubToken}
-            - Name: FASTLY_DEVHUB_SERVICE_ID
-              Value: ${self:custom.fastlyDevhubServiceId}
             - Name: FASTLY_OPS_MANAGER_TOKEN
               Value: ${self:custom.fastlyOpsManagerToken}
             - Name: FASTLY_OPS_MANAGER_SERVICE_ID
