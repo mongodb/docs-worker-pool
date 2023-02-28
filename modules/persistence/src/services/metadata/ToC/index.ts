@@ -37,8 +37,8 @@ const isInsertionCandidateNode = (node: ToC, toBeInserted: Set<string> = new Set
   // TODO: STRONGLY RECONSIDER POST LAUNCH, SHOULD PREFER 'ATLAS CLI <|atlas-cli|>' and only node.options?.project
   const projectName = node.options?.project || node.slug;
   const nodeInProducts = node.options?.project && toBeInserted.has(projectName);
-  const nodeHasNoChildren = !node.children || node.children.length === 0 || !node.options?.project;
-  return !!(nodeHasNoChildren && nodeInProducts);
+  const nodeHasNoChildren = !node.children || node.children.length === 0;
+  return !!((nodeHasNoChildren && nodeInProducts) || (!node.options?.project && nodeInProducts));
 };
 
 const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
