@@ -3,6 +3,7 @@ on:
     branches:
       - "master"
       - "integration"
+      - "embedded-atlas-cli-launch"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
