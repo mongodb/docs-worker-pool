@@ -55,7 +55,7 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
 
     const res = await findLastSavedGitHash(apiKeyword);
     if (res) {
-      oasFileURL = `${OAS_FILE_SERVER}${res.gitHash}.json`;
+      oasFileURL = `${OAS_FILE_SERVER}${res.gitHash}${versionExtension}.json`;
       console.log(`Using ${oasFileURL}`);
     } else {
       throw new Error(`Could not find a saved hash for API: ${apiKeyword}`);
@@ -68,14 +68,24 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
 interface GetOASpecParams {
   sourceType: string;
   source: string;
-  apiVersion?: string;
-  resourceVersion?: string;
-  redocExecutor: RedocExecutor;
   output: string;
   pageSlug: string;
   repoPath: string;
+  redocExecutor: RedocExecutor;
+  apiVersion?: string;
+  resourceVersion?: string;
 }
-async function getOASpec({ source, sourceType, repoPath, pageSlug, redocExecutor, output }: GetOASpecParams) {
+
+async function getOASpec({
+  source,
+  sourceType,
+  repoPath,
+  pageSlug,
+  redocExecutor,
+  output,
+  apiVersion,
+  resourceVersion,
+}: GetOASpecParams) {
   try {
     let spec = '';
     const buildOptions: RedocBuildOptions = {};
@@ -86,7 +96,7 @@ async function getOASpec({ source, sourceType, repoPath, pageSlug, redocExecutor
       const localFilePath = normalizePath(`${repoPath}/source/${source}`);
       spec = localFilePath;
     } else if (sourceType === 'atlas') {
-      spec = await getAtlasSpecUrl({ apiKeyword: source });
+      spec = await getAtlasSpecUrl({ apiKeyword: source, apiVersion, resourceVersion });
       // Ignore "incompatible types" warnings for Atlas Admin API/cloud-docs
       buildOptions['ignoreIncompatibleTypes'] = true;
     } else {
