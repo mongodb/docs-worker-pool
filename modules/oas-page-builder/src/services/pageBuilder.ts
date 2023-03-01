@@ -57,7 +57,7 @@ export const buildOpenAPIPages = async (
   const redocExecutor = new RedocExecutor(redocPath, siteUrl, siteTitle);
 
   for (const [pageSlug, data] of entries) {
-    const { source_type: sourceType, source } = data;
+    const { source_type: sourceType, source, api_version: apiVersion, resource_versions: resourceVersions } = data;
 
     try {
       let spec = '';
