@@ -34,11 +34,9 @@ export interface TocOrderInsertions {
 }
 
 const isInsertionCandidateNode = (node: ToC, toBeInserted: Set<string> = new Set([])): boolean => {
-  // TODO: STRONGLY RECONSIDER POST LAUNCH, SHOULD PREFER 'ATLAS CLI <|atlas-cli|>' and only node.options?.project
-  const projectName = node.options?.project || node.slug;
-  const nodeInProducts = node.options?.project && toBeInserted.has(projectName);
-  const nodeHasNoChildren = !node.children || node.children.length === 0;
-  return !!((nodeHasNoChildren && nodeInProducts) || (!node.options?.project && nodeInProducts));
+  const projectName = node.options?.project;
+  const nodeInProducts = projectName && toBeInserted.has(projectName);
+  return !!nodeInProducts;
 };
 
 const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
