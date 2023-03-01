@@ -67,8 +67,7 @@ describe('pageBuilder', () => {
     ];
 
     await buildOpenAPIPages(testEntries, testOptions);
-    // const mockSoundPlayerInstance = SoundPlayer.mock.instances[0];
-    // const mockRedocExecutorInstance = RedocExecutor.mock.instances[0];
+
     expect(mockExecute).toBeCalledTimes(testEntries.length);
     // Local
     expect(mockExecute).toBeCalledWith(
@@ -85,6 +84,91 @@ describe('pageBuilder', () => {
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
+      getExpectedOutputPath(testOptions.output, testEntries[2][0]),
+      expectedAtlasBuildOptions
+    );
+  });
+
+  it('builds OpenAPI pages with api version', async () => {
+    mockFetchImplementation(true);
+
+    const testEntries: [string, OASPageMetadata][] = [
+      ['path/to/page/1', { source_type: 'local', source: '/local-spec.json', api_version: 'v1' }],
+      [
+        'path/to/page/2',
+        {
+          source_type: 'url',
+          source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
+          api_version: 'v1',
+        },
+      ],
+      ['path/to/page/3', { source_type: 'atlas', source: 'cloud', api_version: 'v1' }],
+    ];
+
+    await buildOpenAPIPages(testEntries, testOptions);
+
+    expect(mockExecute).toBeCalledTimes(testEntries.length);
+    // Local
+    expect(mockExecute).toBeCalledWith(
+      `${testOptions.repo}/source${testEntries[0][1].source}`,
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
+      expectedDefaultBuildOptions
+    );
+    // Url
+    expect(mockExecute).toBeCalledWith(
+      `${testEntries[1][1].source}`,
+      getExpectedOutputPath(testOptions.output, testEntries[1][0]),
+      expectedDefaultBuildOptions
+    );
+    // Atlas
+    expect(mockExecute).toBeCalledWith(
+      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1.json`,
+      getExpectedOutputPath(testOptions.output, testEntries[2][0]),
+      expectedAtlasBuildOptions
+    );
+  });
+
+  it('builds OpenAPI pages with api version and resource version', async () => {
+    mockFetchImplementation(true);
+
+    const testEntries: [string, OASPageMetadata][] = [
+      [
+        'path/to/page/1',
+        { source_type: 'local', source: '/local-spec.json', api_version: 'v1', resource_versions: ['01-01-2020'] },
+      ],
+      [
+        'path/to/page/2',
+        {
+          source_type: 'url',
+          source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
+          api_version: 'v1',
+          resource_versions: ['01-01-2020'],
+        },
+      ],
+      [
+        'path/to/page/3',
+        { source_type: 'atlas', source: 'cloud', api_version: 'v1', resource_versions: ['01-01-2020'] },
+      ],
+    ];
+
+    await buildOpenAPIPages(testEntries, testOptions);
+
+    expect(mockExecute).toBeCalledTimes(testEntries.length);
+    // Local
+    expect(mockExecute).toBeCalledWith(
+      `${testOptions.repo}/source${testEntries[0][1].source}`,
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
+      expectedDefaultBuildOptions
+    );
+    // Url
+    expect(mockExecute).toBeCalledWith(
+      `${testEntries[1][1].source}`,
+      getExpectedOutputPath(testOptions.output, testEntries[1][0]),
+      expectedDefaultBuildOptions
+    );
+    // Atlas
+    expect(mockExecute).toBeCalledWith(
+      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1-01-01-2020.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0]),
       expectedAtlasBuildOptions
     );
