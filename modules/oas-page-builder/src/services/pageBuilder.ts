@@ -119,14 +119,12 @@ export const buildOpenAPIPages = async (
   for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source, api_version: apiVersion, resource_versions: resourceVersions } = data;
 
-    if (apiVersion && resourceVersions) {
+    if (resourceVersions) {
       for (const resourceVersion in resourceVersions) {
         getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion, resourceVersion });
       }
-    } else if (apiVersion && !resourceVersions) {
-      getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
     } else {
-      getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath });
+      getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
     }
   }
 };
