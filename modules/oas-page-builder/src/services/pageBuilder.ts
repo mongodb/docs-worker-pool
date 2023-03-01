@@ -130,11 +130,11 @@ export const buildOpenAPIPages = async (
       // if a resource versions array is provided, then we can loop through the resourceVersions array and call the getOASpec
       // for each minor version
       for (const resourceVersion in resourceVersions) {
-        getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion, resourceVersion });
+        await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion, resourceVersion });
       }
     } else {
       // apiVersion can be undefined, this case is handled within the getOASpec function
-      getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
+      await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
     }
   }
 };
