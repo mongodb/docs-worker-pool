@@ -119,11 +119,21 @@ export const buildOpenAPIPages = async (
   for (const [pageSlug, data] of entries) {
     const { source_type: sourceType, source, api_version: apiVersion, resource_versions: resourceVersions } = data;
 
+    if (!apiVersion && resourceVersions && resourceVersions.length > 0) {
+      console.error(
+        `ERROR: API version is not specified, but resource version is present for source ${source} and sourceType: ${sourceType}`
+      );
+      continue;
+    }
+
     if (resourceVersions) {
+      // if a resource versions array is provided, then we can loop through the resourceVersions array and call the getOASpec
+      // for each minor version
       for (const resourceVersion in resourceVersions) {
         getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion, resourceVersion });
       }
     } else {
+      // apiVersion can be undefined, this case is handled within the getOASpec function
       getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
     }
   }
