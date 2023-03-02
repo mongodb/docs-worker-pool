@@ -21,7 +21,10 @@ jest.mock('../../../src/services/database', () => ({
 }));
 
 // Helper function for concatendated output path
-const getExpectedOutputPath = (destination: string, pageSlug: string) => `${destination}/${pageSlug}/index.html`;
+const getExpectedOutputPath = (destination: string, pageSlug: string, apiVersion?: string, resourceVersion?: string) =>
+  `${destination}/${pageSlug}${apiVersion ? `/${apiVersion}` : ''}${
+    resourceVersion ? `/${resourceVersion}` : ''
+  }/index.html`;
 
 // Allows node-fetch to be mockable
 jest.mock('node-fetch');
@@ -93,16 +96,16 @@ describe('pageBuilder', () => {
     mockFetchImplementation(true);
 
     const testEntries: [string, OASPageMetadata][] = [
-      ['path/to/page/1', { source_type: 'local', source: '/local-spec.json', api_version: 'v1' }],
+      ['path/to/page/1', { source_type: 'local', source: '/local-spec.json', api_version: '1.0' }],
       [
         'path/to/page/2',
         {
           source_type: 'url',
           source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
-          api_version: 'v1',
+          api_version: '1.0',
         },
       ],
-      ['path/to/page/3', { source_type: 'atlas', source: 'cloud', api_version: 'v1' }],
+      ['path/to/page/3', { source_type: 'atlas', source: 'cloud', api_version: '1.0' }],
     ];
 
     await buildOpenAPIPages(testEntries, testOptions);
@@ -134,26 +137,26 @@ describe('pageBuilder', () => {
     const testEntries: [string, OASPageMetadata][] = [
       [
         'path/to/page/1',
-        { source_type: 'local', source: '/local-spec.json', api_version: 'v1', resource_versions: ['01-01-2020'] },
+        { source_type: 'local', source: '/local-spec.json', api_version: '2.0', resource_versions: ['01-01-2020'] },
       ],
       [
         'path/to/page/2',
         {
           source_type: 'url',
           source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
-          api_version: 'v1',
+          api_version: '2.0',
           resource_versions: ['01-01-2020'],
         },
       ],
       [
         'path/to/page/3',
-        { source_type: 'atlas', source: 'cloud', api_version: 'v1', resource_versions: ['01-01-2020'] },
+        { source_type: 'atlas', source: 'cloud', api_version: '2.0', resource_versions: ['01-01-2020'] },
       ],
     ];
 
     await buildOpenAPIPages(testEntries, testOptions);
 
-    expect(mockExecute).toBeCalledTimes(testEntries.length);
+    expect(mockExecute).toBeCalledTimes(testEntries.length * 2);
     // Local
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
