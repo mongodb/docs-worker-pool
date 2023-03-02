@@ -75,7 +75,7 @@ describe('ToC module', () => {
         if (candidate) break;
         candidate = findTargetToc([metadata[metadataIdx].toctree as unknown as ToC]);
       }
-      expect(_isInsertionCandidateNode(candidate, associatedProducts)).toBeTruthy();
+      expect(_isInsertionCandidateNode(candidate, new Set(associatedProducts.map((p) => p.name)))).toBeTruthy();
     });
 
     test('it returns false if node is not an associated product, or node has children', () => {
@@ -84,7 +84,7 @@ describe('ToC module', () => {
         if (candidate) break;
         candidate = findTargetToc([metadata[metadataIdx].toctree as unknown as ToC], false);
       }
-      expect(_isInsertionCandidateNode(candidate, associatedProducts)).toBeFalsy();
+      expect(_isInsertionCandidateNode(candidate, new Set(associatedProducts.map((p) => p.name)))).toBeFalsy();
     });
   });
 
