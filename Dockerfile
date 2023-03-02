@@ -48,6 +48,10 @@ RUN python3 -m pip install https://github.com/mongodb/mut/releases/download/v0.1
 
 ENV PATH="${PATH}:/opt/snooty:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
+# setup user and root directory
+RUN useradd -ms /bin/bash docsworker-xlarge
+USER docsworker-xlarge
+
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
 WORKDIR ${WORK_DIRECTORY}
 
@@ -64,10 +68,6 @@ RUN npm install npm@8
 # install snooty parser
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
-
-# setup user and root directory
-RUN useradd -ms /bin/bash docsworker-xlarge
-USER docsworker-xlarge
 
 # get shared.mk
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
