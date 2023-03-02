@@ -48,15 +48,15 @@ RUN python3 -m pip install https://github.com/mongodb/mut/releases/download/v0.1
 
 ENV PATH="${PATH}:/opt/snooty:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
-# get node 14
+# get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
 RUN apt-get install --yes curl
-RUN curl --location https://deb.nodesource.com/setup_14.x | bash -
+RUN curl --location https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 
 # use npm 7.*
-RUN npm install npm@7
+RUN npm install npm@8
 
 # install snooty parser
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
