@@ -14,11 +14,7 @@ program
   .requiredOption('-o, --output <path>', 'path to the directory to output generated files')
   .requiredOption('--redoc <path>', 'path to the Redoc CLI program to run. Must be a JS file')
   .requiredOption('--repo <path>', 'path to repo being built')
-  .requiredOption('--site-url <url>, url to landing page of specific docs site')
-  .option('--api-version <api-version>, major version for the OpenAPI spec e.g. v1, v2')
-  .option(
-    '--resource-version <resource-version>, minor resource version for a major api version. Format should be a date in the format of MM-DD-YYYY.'
-  );
+  .requiredOption('--site-url <url>, url to landing page of specific docs site');
 
 program.parse();
 const options = program.opts<ModuleOptions>();

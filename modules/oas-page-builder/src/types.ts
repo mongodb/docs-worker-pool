@@ -4,6 +4,4 @@ export interface ModuleOptions {
   redoc: string;
   repo: string;
   siteUrl: string;
-  majorVersion?: string;
-  minorVersion?: string;
 }
