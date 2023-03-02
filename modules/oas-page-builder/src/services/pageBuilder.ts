@@ -88,10 +88,7 @@ async function getOASpec({
 }: GetOASpecParams) {
   try {
     let spec = '';
-    const buildOptions: RedocBuildOptions = {
-      apiVersion,
-      resourceVersion,
-    };
+    const buildOptions: RedocBuildOptions = {};
 
     if (sourceType === 'url') {
       spec = source;
@@ -102,6 +99,8 @@ async function getOASpec({
       spec = await getAtlasSpecUrl({ apiKeyword: source, apiVersion, resourceVersion });
       // Ignore "incompatible types" warnings for Atlas Admin API/cloud-docs
       buildOptions['ignoreIncompatibleTypes'] = true;
+      buildOptions['apiVersion'] = apiVersion;
+      buildOptions['resourceVersion'] = resourceVersion;
     } else {
       throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
     }

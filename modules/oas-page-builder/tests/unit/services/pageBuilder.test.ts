@@ -124,7 +124,7 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0]),
-      expectedAtlasBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: 'v1' }
     );
   });
 
@@ -170,7 +170,7 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1-01-01-2020.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0]),
-      expectedAtlasBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: 'v1', resourceVersion: '01-01-2020' }
     );
   });
 
