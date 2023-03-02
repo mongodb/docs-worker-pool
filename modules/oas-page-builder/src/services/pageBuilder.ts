@@ -32,7 +32,7 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
   let versionExtension = '';
 
   if (apiVersion) {
-    versionExtension += `-${apiVersion}`;
+    versionExtension += `-${apiVersion.split('.')[0]}`;
   }
 
   if (apiVersion && resourceVersion) {
