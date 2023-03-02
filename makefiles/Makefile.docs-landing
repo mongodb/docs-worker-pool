@@ -20,7 +20,7 @@ DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
 
-next-gen-html: build-legacy-pages
+next-gen-html:
 	# snooty parse and then build-front-end
 	snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
 	if [ $$? -eq 1 ]; then \
@@ -37,41 +37,9 @@ next-gen-html: build-legacy-pages
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \
 	GATSBY_MANIFEST_PATH="${BUNDLE_PATH}" npm run build; \
 	cp -r "${REPO_DIR}/snooty/public" ${REPO_DIR};
-	mv build-legacy-pages/sitemap-index.xml public/
-	mv build-legacy-pages/tools public/
-	mv build-legacy-pages/cloud public/
 
 next-gen-stage:
 	mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS};
 	echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/";
 	echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/cloud";
 	echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/tools";
-
-build-legacy-pages:
-	@# Pull docs-tools updates
-	git submodule init
-	git submodule update --remote
-
-	@# Clean build directory
-	rm -rf $@
-
-	@# Create output directories
-	mkdir -p $@
-	mkdir -p $@/cloud
-	mkdir -p $@/tools
-
-	@# Copy CSS and JS files to output directories
-	cp static/sitemap-index.xml $@/sitemap-index.xml
-	cp static/favicon.png $@/favicon.ico
-	for prefix in $@/ $@/tools $@/cloud; do \
-		mkdir -p $$prefix/js || exit 1; \
-		cp -r static/images $$prefix || exit 1; \
-		cp -r static/css $$prefix || exit 1; \
-		cp ${DOCS_TOOLS_THEME}/landing.min.js* $$prefix/js || exit 1; \
-		cp ${DOCS_TOOLS_THEME}/navbar.min.js* $$prefix/js || exit 1; \
-		cp ${DOCS_TOOLS_THEME}/landing.css $$prefix/css || exit 1; \
-		cp ${DOCS_TOOLS_THEME}/navbar.min.css $$prefix/css || exit 1; \
-	done
-
-	@# Run the script to generate each landing page
-	python3 ./gen_landings.py $@
