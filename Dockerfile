@@ -22,7 +22,7 @@ RUN cd ./modules/oas-page-builder \
 # where repo work will happen
 FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=0.13.17
-ARG SNOOTY_FRONTEND_VERSION=0.13.39
+ARG SNOOTY_FRONTEND_VERSION=gatsbyv4
 ARG REDOC_CLI_VERSION=1.0.0
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -73,7 +73,7 @@ WORKDIR ${WORK_DIRECTORY}
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b ${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
