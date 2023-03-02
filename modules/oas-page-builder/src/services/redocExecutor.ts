@@ -20,7 +20,7 @@ export class RedocExecutor {
   }
 
   // Calls Redoc CLI to build spec at given output path
-  async execute(specSource: string, outputPath: string, buildOptions: RedocBuildOptions = {}) {
+  async execute(specSource: string, outputPath: string, buildOptions: RedocBuildOptions) {
     const outputArg = `--output ${outputPath}`;
     const optionsArg = `--options '${this.finalizeOptions(buildOptions)}'`;
     const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg}`;
@@ -35,7 +35,7 @@ export class RedocExecutor {
   }
 
   // Adds any additional options required for current page
-  private finalizeOptions(buildOptions: RedocBuildOptions = {}): string {
+  private finalizeOptions(buildOptions: RedocBuildOptions): string {
     const options = {
       ...this.options,
       ...buildOptions,

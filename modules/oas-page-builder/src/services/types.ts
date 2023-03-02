@@ -18,4 +18,8 @@ export interface PageBuilderOptions extends Omit<ModuleOptions, 'bundle'> {
   siteTitle: string;
 }
 
-export type RedocBuildOptions = Record<string, any>;
+export interface RedocBuildOptions {
+  ignoreIncompatibleTypes?: boolean;
+  apiVersion?: string;
+  resourceVersion?: string;
+}
