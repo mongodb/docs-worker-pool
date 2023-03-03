@@ -64,7 +64,7 @@ RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releas
 
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
-USER docsworker-xlarge
+# USER docsworker-xlarge
 
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
 WORKDIR ${WORK_DIRECTORY}
@@ -115,5 +115,6 @@ ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
 ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
 
 RUN mkdir repos && chmod 755 repos
+USER docsworker-xlarge
 EXPOSE 3000
 CMD ["node", "app.js"]
