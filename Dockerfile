@@ -114,7 +114,7 @@ RUN cd ./modules/oas-page-builder/ && npm install
 ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
 ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
 
-RUN mkdir repos && chmod 755 repos
 USER docsworker-xlarge
+RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
-CMD ["node", "app.js"]
+CMD ["echo", "app.js"]
