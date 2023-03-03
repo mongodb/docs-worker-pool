@@ -82,13 +82,13 @@ RUN git clone -b ${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb
     && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
 # install redoc fork
-RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
-    # Install dependencies for Redoc CLI
-    && cd redoc/ \
-    && npm ci --prefix cli/ --omit=dev \
-    # Install dependencies for Redoc component and building/compiling
-    && npm ci --omit=dev --ignore-scripts \
-    && npm run compile:cli
+# RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+#     # Install dependencies for Redoc CLI
+#     && cd redoc/ \
+#     && npm ci --prefix cli/ --omit=dev \
+#     # Install dependencies for Redoc component and building/compiling
+#     && npm ci --omit=dev --ignore-scripts \
+#     && npm run compile:cli
 
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/
