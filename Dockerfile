@@ -117,4 +117,4 @@ ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
 USER docsworker-xlarge
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
-CMD ["echo", "app.js"]
+CMD ["node", "app.js"]
