@@ -29,15 +29,9 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
     throw new Error(`${apiKeyword} is not a supported API for building.`);
   }
 
-  let versionExtension = '';
-
-  if (apiVersion) {
-    versionExtension += `-v${apiVersion.split('.')[0]}`;
-  }
-
-  if (apiVersion && resourceVersion) {
-    versionExtension += `-${resourceVersion}`;
-  }
+  const versionExtension = `${apiVersion ? `-v${apiVersion.split('.')[0]}` : ''}${
+    apiVersion && resourceVersion ? `-${resourceVersion}` : ''
+  }`;
 
   let oasFileURL;
 
