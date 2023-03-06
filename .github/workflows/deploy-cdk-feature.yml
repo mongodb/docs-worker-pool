@@ -1,0 +1,22 @@
+on: [workflow_dispatch]
+jobs:
+  aws_cdk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14.x"
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: 'us-west-2'
+      - name: Install dependencies
+        run: npm ci
+      - name: Synth stack
+        run: npm run cdk synth
+      - name: Deploy stack
+        run: npm run cdk deploy
