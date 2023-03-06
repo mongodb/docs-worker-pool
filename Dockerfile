@@ -1,5 +1,5 @@
 # Build the Typescript app
-FROM 14.20.1-alpine3.16 as ts-compiler
+FROM node:14.20.1-alpine3.16 as ts-compiler
 WORKDIR /home/docsworker-xlarge
 COPY  config config/
 COPY package*.json ./
