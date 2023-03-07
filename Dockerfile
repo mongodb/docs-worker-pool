@@ -70,16 +70,13 @@ ARG WORK_DIRECTORY=/home/docsworker-xlarge
 WORKDIR ${WORK_DIRECTORY}
 
 # get shared.mk
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta-sw-2023-instruqt/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-RUN git clone -b ${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
-    && cd snooty                                                                                   \
-    && npm ci --legacy-peer-deps --omit=dev                                                        \
-    && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
-    && mkdir -p ./static/images                                                                    \
-    && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
-    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+RUN git clone -b ${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
+    && python3 -m pip install poetry
+    && cd snooty-parser                                                                            \
+    && python3 -m poetry install
 
 # install redoc fork
 RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
