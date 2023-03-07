@@ -3,6 +3,7 @@ on:
     branches:
       - "master"
       - "integration"
+      - "sw-2023-test-instruqt"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
