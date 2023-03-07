@@ -59,7 +59,7 @@ RUN apt-get install --yes build-essential
 RUN npm install npm@7
 
 # install snooty parser
-RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/archive/refs/heads/sw-2023-instruqt.zip \
     && unzip -d /opt/ snooty-parser.zip
 
 # setup user and root directory
@@ -73,7 +73,7 @@ WORKDIR ${WORK_DIRECTORY}
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b ${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
