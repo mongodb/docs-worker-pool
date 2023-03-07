@@ -74,8 +74,8 @@ RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta-sw-2023
 
 # install snooty frontend and docs-tools
 RUN git clone -b ${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
-    && python3 -m pip install poetry
-    && cd snooty-parser                                                                            \
+    && python3 -m pip install poetry                                                              \
+    && cd snooty-parser                                                                           \
     && python3 -m poetry install
 
 # install redoc fork
