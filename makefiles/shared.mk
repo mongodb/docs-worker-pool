@@ -11,7 +11,7 @@ PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
 BUNDLE_PATH=${REPO_DIR}/bundle.zip
-RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml
+RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/sw-2023-instruqt/snooty/rstspec.toml
 
 ifeq ($(SNOOTY_INTEGRATION),true)
 	BUCKET_FLAG=-b ${INTEGRATION_SEARCH_BUCKET}
