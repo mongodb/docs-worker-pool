@@ -59,8 +59,10 @@ RUN apt-get install --yes build-essential
 RUN npm install npm@7
 
 # install snooty parser
-RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/archive/refs/heads/sw-2023-instruqt.zip \
-    && unzip -d /opt/ snooty-parser.zip
+RUN git clone -b ${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
+    && python3 -m pip install poetry                                                              \
+    && cd snooty-parser                                                                           \
+    && python3 -m poetry install
 
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
@@ -73,10 +75,13 @@ WORKDIR ${WORK_DIRECTORY}
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta-sw-2023-instruqt/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-RUN git clone -b ${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
-    && python3 -m pip install poetry                                                              \
-    && cd snooty-parser                                                                           \
-    && python3 -m poetry install
+RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+    && cd snooty                                                                                   \
+    && npm ci --legacy-peer-deps --omit=dev                                                        \
+    && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
+    && mkdir -p ./static/images                                                                    \
+    && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
+    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 
 # install redoc fork
 RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
