@@ -46,7 +46,7 @@ RUN apt-get -y install git pkg-config libxml2-dev
 RUN python3 -m pip install https://github.com/mongodb/mut/releases/download/v0.10.2/mut-0.10.2-py3-none-any.whl
 
 
-ENV PATH="${PATH}:/opt/snooty:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
+ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 14
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
