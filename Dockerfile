@@ -59,7 +59,7 @@ RUN apt-get install --yes build-essential
 RUN npm install npm@7
 
 # install snooty parser
-RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/untagged-b253fcc90e06c7de1a00/snooty-v0.13.18-instruqt-unstable-1-linux_x86_64.zip \
+RUN curl -L -o snooty-parser.zip https://objects.githubusercontent.com/github-production-release-asset-2e65be/168234055/8aaf2846-ea68-4a18-94ab-e1a53c0244b9?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20230308%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230308T174049Z&X-Amz-Expires=300&X-Amz-Signature=edfcf7908890f09e7053652a24015633620c305aa3a99fa1bbce363f5d0d5a5d&X-Amz-SignedHeaders=host&actor_id=13054820&key_id=0&repo_id=168234055&response-content-disposition=attachment%3B%20filename%3Dsnooty-v0.13.18-instruqt-unstable-1-linux_x86_64.zip&response-content-type=application%2Foctet-stream \
     && unzip -d /opt/ snooty-parser.zip
 
 # setup user and root directory
