@@ -21,7 +21,7 @@ RUN cd ./modules/oas-page-builder \
 
 # where repo work will happen
 FROM ubuntu:20.04
-ARG SNOOTY_PARSER_VERSION=sw-2023-instruqt
+ARG SNOOTY_PARSER_VERSION=0.13.18-instruqt-unstable-1
 ARG SNOOTY_FRONTEND_VERSION=sw-2023-instruqt
 ARG REDOC_CLI_VERSION=1.0.0
 ARG NPM_BASE_64_AUTH
@@ -46,7 +46,7 @@ RUN apt-get -y install git pkg-config libxml2-dev
 RUN python3 -m pip install https://github.com/mongodb/mut/releases/download/v0.10.2/mut-0.10.2-py3-none-any.whl
 
 
-ENV PATH="${PATH}:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
+ENV PATH="${PATH}:/opt/snooty:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 14
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -59,10 +59,8 @@ RUN apt-get install --yes build-essential
 RUN npm install npm@7
 
 # install snooty parser
-RUN git clone -b ${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git  \
-    && python3 -m pip install poetry                                                              \
-    && cd snooty-parser                                                                           \
-    && python3 -m poetry install
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ snooty-parser.zip
 
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
