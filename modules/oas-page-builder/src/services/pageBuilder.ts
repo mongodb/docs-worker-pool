@@ -101,7 +101,8 @@ async function getOASpec({
       resourceVersion && apiVersion ? `/${resourceVersion}` : ''
     }`;
 
-    const finalFilename = normalizePath(`${output}/${pageSlug}${filePathExtension}/index.html`);
+    const path = `${output}/${pageSlug}${filePathExtension}/index.html`;
+    const finalFilename = normalizePath(path);
     await redocExecutor.execute(spec, finalFilename, buildOptions);
   } catch (e) {
     console.error(e);
