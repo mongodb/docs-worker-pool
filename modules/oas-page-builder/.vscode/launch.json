@@ -8,14 +8,10 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/tests/unit/services/pageBuilder.test.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": [
-        "${workspaceFolder}/build/**/*.js"
-      ]
+      "outFiles": ["${workspaceFolder}/build/**/*.js"]
     }
   ]
 }

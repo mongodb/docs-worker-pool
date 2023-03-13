@@ -23,7 +23,7 @@ jest.mock('../../../src/services/database', () => ({
 // Helper function for concatenated output path
 const getExpectedOutputPath = (destination: string, pageSlug: string, apiVersion?: string, resourceVersion?: string) =>
   `${destination}/${pageSlug}${apiVersion ? `${apiVersion ? `/v${apiVersion.split('.')[0]}` : ''}` : ''}${
-    resourceVersion ? `/${resourceVersion}` : ''
+    resourceVersion && apiVersion ? `/${resourceVersion}` : ''
   }/index.html`;
 
 // Allows node-fetch to be mockable
