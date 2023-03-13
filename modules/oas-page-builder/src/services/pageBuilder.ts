@@ -98,7 +98,7 @@ async function getOASpec({
     }
 
     const filePathExtension = `${apiVersion ? `/v${apiVersion.split('.')[0]}` : ''}${
-      resourceVersion ? `/${resourceVersion}` : ''
+      resourceVersion && apiVersion ? `/${resourceVersion}` : ''
     }`;
 
     const finalFilename = normalizePath(`${output}/${pageSlug}${filePathExtension}/index.html`);

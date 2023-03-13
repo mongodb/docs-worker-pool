@@ -20,7 +20,7 @@ jest.mock('../../../src/services/database', () => ({
   findLastSavedGitHash: jest.fn(),
 }));
 
-// Helper function for concatendated output path
+// Helper function for concatenated output path
 const getExpectedOutputPath = (destination: string, pageSlug: string, apiVersion?: string, resourceVersion?: string) =>
   `${destination}/${pageSlug}${apiVersion ? `${apiVersion ? `/v${apiVersion.split('.')[0]}` : ''}` : ''}${
     resourceVersion ? `/${resourceVersion}` : ''
@@ -109,12 +109,12 @@ describe('pageBuilder', () => {
     ];
 
     await buildOpenAPIPages(testEntries, testOptions);
-    console.log(getExpectedOutputPath(testOptions.output, testEntries[1][0], '1.0'));
+    console.log(getExpectedOutputPath(testOptions.output, testEntries[0][0], '1.0'));
     expect(mockExecute).toBeCalledTimes(testEntries.length);
     // Local
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/index.html`,
+      getExpectedOutputPath(testOptions.repo, testEntries[0][0], '1.0'),
       expectedDefaultBuildOptions
     );
     // Url
