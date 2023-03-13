@@ -22,9 +22,7 @@ jest.mock('../../../src/services/database', () => ({
 
 // Helper function for concatenated output path
 const getExpectedOutputPath = (destination: string, pageSlug: string, apiVersion?: string, resourceVersion?: string) =>
-  `${destination}/${pageSlug}${apiVersion ? `${apiVersion ? `/v${apiVersion.split('.')[0]}` : ''}` : ''}${
-    resourceVersion && apiVersion ? `/${resourceVersion}` : ''
-  }/index.html`;
+  `${destination}/${pageSlug}${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}/index.html`;
 
 // Allows node-fetch to be mockable
 jest.mock('node-fetch');
@@ -96,16 +94,16 @@ describe('pageBuilder', () => {
     mockFetchImplementation(true);
 
     const testEntries: [string, OASPageMetadata][] = [
-      ['path/to/page/1', { source_type: 'local', source: '/local-spec.json', api_version: '1.0' }],
+      ['path/to/page/1/v1', { source_type: 'local', source: '/local-spec/v1.json', api_version: '1.0' }],
       [
-        'path/to/page/2',
+        'path/to/page/2/v1',
         {
           source_type: 'url',
-          source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
+          source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum/v1.json',
           api_version: '1.0',
         },
       ],
-      ['path/to/page/3', { source_type: 'atlas', source: 'cloud', api_version: '1.0' }],
+      ['path/to/page/3/v1', { source_type: 'atlas', source: 'cloud', api_version: '1.0' }],
     ];
 
     await buildOpenAPIPages(testEntries, testOptions);
@@ -114,7 +112,7 @@ describe('pageBuilder', () => {
     // Local
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/v1/index.html`,
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
       expectedDefaultBuildOptions
     );
     // Url
@@ -136,11 +134,11 @@ describe('pageBuilder', () => {
 
     const testEntries: [string, OASPageMetadata][] = [
       [
-        'path/to/page/1',
+        'path/to/page/1/v2',
         { source_type: 'local', source: '/local-spec.json', api_version: '2.0', resource_versions: ['01-01-2020'] },
       ],
       [
-        'path/to/page/2',
+        'path/to/page/2/v2',
         {
           source_type: 'url',
           source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
@@ -149,7 +147,7 @@ describe('pageBuilder', () => {
         },
       ],
       [
-        'path/to/page/3',
+        'path/to/page/3/v2',
         { source_type: 'atlas', source: 'cloud', api_version: '2.0', resource_versions: ['01-01-2020'] },
       ],
     ];
@@ -160,13 +158,13 @@ describe('pageBuilder', () => {
     // Local
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/v2/01-01-2020/index.html`,
+      `${testOptions.output}/${testEntries[0][0]}/01-01-2020/index.html`,
       expectedDefaultBuildOptions
     );
 
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/v2/index.html`,
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
       expectedDefaultBuildOptions
     );
     // Url

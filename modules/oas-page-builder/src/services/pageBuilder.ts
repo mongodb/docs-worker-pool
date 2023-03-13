@@ -97,9 +97,7 @@ async function getOASpec({
       throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
     }
 
-    const filePathExtension = `${apiVersion ? `/v${apiVersion.split('.')[0]}` : ''}${
-      resourceVersion && apiVersion ? `/${resourceVersion}` : ''
-    }`;
+    const filePathExtension = `${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}`;
 
     const path = `${output}/${pageSlug}${filePathExtension}/index.html`;
     const finalFilename = normalizePath(path);
