@@ -2,7 +2,6 @@ import { Db, MongoClient } from 'mongodb';
 import { OASFile, OASFilePartial } from './models/OASFile';
 
 const COLLECTION_NAME = 'oas_files';
-console.log(process.env);
 
 const getAtlasURL = () => {
   const isHostLocal = process.env.DB_HOST?.includes('localhost');
@@ -18,6 +17,7 @@ const client = new MongoClient(atlasURL);
 let dbInstance: Db;
 
 const getDbName = () => {
+  return 'hapley_staging';
   const env = process.env.SNOOTY_ENV ?? '';
 
   switch (env) {
@@ -86,8 +86,8 @@ export const saveSuccessfulBuildVersionData = async (
       upsert: true,
     };
 
-    // const oasFilesCollection = dbSession.collection<OASFile>(COLLECTION_NAME);
-    // await oasFilesCollection.updateOne(query, update, options);
+    const oasFilesCollection = dbSession.collection<OASFile>(COLLECTION_NAME);
+    await oasFilesCollection.updateOne(query, update, options);
   } catch (error) {
     console.error(`Error updating lastest git hash and versions for API: ${apiKeyword}.`);
     throw error;
