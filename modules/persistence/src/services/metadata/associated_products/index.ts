@@ -42,9 +42,17 @@ export interface ReposBranchesDocument {
 }
 
 // Queries pool*.repos_branches for any entries for the given project and branch from a metadata entry.
-const getRepoBranchesEntry = async (project, branch) => {
+const getRepoBranchesEntry = async (project, branch = ''): Promise<ReposBranchesDocument> => {
   const db = await pool();
-  return db.collection('repos_branches').findOne({ branches: { $elemMatch: { gitBranchName: branch } }, project });
+  const query = {
+    project,
+  };
+  if (branch) {
+    query['branches'] = {
+      $elemMatch: { gitBranchName: branch },
+    };
+  }
+  return db.collection('repos_branches').findOne(query) as unknown as ReposBranchesDocument;
 };
 
 // Queries pool*.repos_branches for all entries for associated_products in a shared metadata entry
@@ -74,10 +82,30 @@ export const hasAssociations = (metadata) => !!metadata.associated_products?.len
 const umbrellaMetadataEntry = async (project: string): Promise<Metadata> => {
   try {
     const snooty = await db();
+
+    // first find any umbrella
+    const umbrella = await snooty.collection('metadata').findOne(
+      {
+        'associated_products.name': project,
+        is_merged_toc: { $ne: true },
+      },
+      {
+        sort: { build_id: -1 },
+      }
+    );
+
+    if (!umbrella) {
+      return null as unknown as Metadata;
+    }
+
+    const repoDoc = await getRepoBranchesEntry(project);
+    const branchNames = repoDoc.branches.map((branchEntry) => branchEntry.gitBranchName);
     const entry = await snooty
       .collection('metadata')
       .find({
         'associated_products.name': project,
+        is_merged_toc: { $ne: true },
+        branch: { $in: branchNames },
       })
       .sort({ build_id: -1 })
       .limit(1)
@@ -114,9 +142,11 @@ const shapeToCsCursor = async (
     // TODO: If we want staging builds with embedded versions, it needs to be added here
     if (repoBranchesEntry) {
       const { url, prefix } = prefixFromEnvironment(branches);
+      const { urlSlug, urlAliases = [], gitBranchName, publishOriginalBranchName } = repoBranchesEntry;
+      const alias = urlSlug || urlAliases[0] || (publishOriginalBranchName && gitBranchName);
       tocInsertions[project][branch] = {
         original: copyToCTree(metadata.toctree),
-        urlified: copyToCTree(metadata.toctree, prefix, url),
+        urlified: copyToCTree(metadata.toctree, prefix, url, alias),
       };
       // TODO: Can we urlify the order? SHOUD we urlify the order?
       tocOrderInsertions[project][branch] = metadata.toctreeOrder;
@@ -164,6 +194,8 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
 export const mergeAssociatedToCs = async (metadata: Metadata) => {
   try {
     const { project, branch } = metadata;
+    // TODO: DOP-3518
+    // should get an umbrella metadata entry that is in repos branches
     const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
 
     // Short circuit execution here if there's no umbrella product metadata found

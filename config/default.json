@@ -45,12 +45,6 @@
       "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd"
     }
   },
-  "publishBranchesUrl": {
-    "prd": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
-    "stg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches",
-    "dotcomstg": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches",
-    "dotcomprd": "https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-2747-meta/publishedbranches"
-  },
   "repo_dir": "repos",
   "cdnInvalidationOauthScope": "mongodbcom-docs",
   "oauthTokenURL": "https://corp.mongodb.com/oauth2/aus4k4jv00hWjNnps297/v1/token",

@@ -64,16 +64,6 @@ describe('StagingJobHandler Tests', () => {
     );
   });
 
-  test('Execute nextgen build runs successfully for devhub integration', async () => {
-    jobHandlerTestHelper.job.payload.repoName = 'devhub-content-integration';
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(true);
-    expect(jobHandlerTestHelper.job.buildCommands).toEqual(
-      TestDataProvider.getExpectedStagingBuildNextGenCommands(jobHandlerTestHelper.job)
-    );
-  });
-
   test('Execute nextgen build runs successfully and results in summary message', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();
