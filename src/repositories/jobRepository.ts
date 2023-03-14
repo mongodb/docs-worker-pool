@@ -225,7 +225,7 @@ export class JobRepository extends BaseRepository {
     };
     const update = {
       $set: {
-        status: JobStatus.failed,
+        status: JobStatus.timedOut,
         endTime: currentTime,
         error: { time: currentTime.toString(), reason: failReason },
       },
@@ -249,7 +249,7 @@ export class JobRepository extends BaseRepository {
     await Promise.all(
       stuckJobs.map((stuckJob: any) => {
         const id: string = stuckJob._id.toString();
-        return this.notify(id, jobUpdatesQueueUrl, JobStatus.failed, 0, stuckJob.taskId);
+        return this.notify(id, jobUpdatesQueueUrl, JobStatus.timedOut, 0, stuckJob.taskId);
       })
     );
   }

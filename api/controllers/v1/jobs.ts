@@ -71,13 +71,14 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildProgress(jobId);
             break;
-          case JobStatus[JobStatus.failed]:
+          case JobStatus[JobStatus.timedOut]:
             await NotifyBuildSummary(jobId);
             const taskId = body['taskId'];
             if (taskId) {
               await stopECSTask(taskId, consoleLogger);
             }
             break;
+          case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildSummary(jobId);
