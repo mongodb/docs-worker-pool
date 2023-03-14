@@ -29,15 +29,9 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
     throw new Error(`${apiKeyword} is not a supported API for building.`);
   }
 
-  let versionExtension = '';
-
-  if (apiVersion) {
-    versionExtension += `-${apiVersion.split('.')[0]}`;
-  }
-
-  if (apiVersion && resourceVersion) {
-    versionExtension += `-${resourceVersion}`;
-  }
+  const versionExtension = `${apiVersion ? `-v${apiVersion.split('.')[0]}` : ''}${
+    apiVersion && resourceVersion ? `-${resourceVersion}` : ''
+  }`;
 
   let oasFileURL;
 
@@ -89,7 +83,6 @@ async function getOASpec({
   try {
     let spec = '';
     const buildOptions: RedocBuildOptions = {};
-
     if (sourceType === 'url') {
       spec = source;
     } else if (sourceType === 'local') {
@@ -98,14 +91,16 @@ async function getOASpec({
     } else if (sourceType === 'atlas') {
       spec = await getAtlasSpecUrl({ apiKeyword: source, apiVersion, resourceVersion });
       // Ignore "incompatible types" warnings for Atlas Admin API/cloud-docs
+
       buildOptions['ignoreIncompatibleTypes'] = true;
-      buildOptions['apiVersion'] = apiVersion;
-      buildOptions['resourceVersion'] = resourceVersion;
     } else {
       throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
     }
 
-    const finalFilename = normalizePath(`${output}/${pageSlug}/index.html`);
+    const filePathExtension = `${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}`;
+
+    const path = `${output}/${pageSlug}${filePathExtension}/index.html`;
+    const finalFilename = normalizePath(path);
     await redocExecutor.execute(spec, finalFilename, buildOptions);
   } catch (e) {
     console.error(e);
@@ -134,9 +129,8 @@ export const buildOpenAPIPages = async (
       for (const resourceVersion of resourceVersions) {
         await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion, resourceVersion });
       }
-    } else {
-      // apiVersion can be undefined, this case is handled within the getOASpec function
-      await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
     }
+    // apiVersion can be undefined, this case is handled within the getOASpec function
+    await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
   }
 };
