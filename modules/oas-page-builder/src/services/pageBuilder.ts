@@ -24,9 +24,6 @@ interface AtlasSpecUrlParams {
 const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: AtlasSpecUrlParams) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
   // but it's possible to have more in the future with varying processes.
-  const res = await findLastSavedVersionData(apiKeyword);
-  console.log('got it! ', res);
-
   const keywords = ['cloud'];
   if (!keywords.includes(apiKeyword)) {
     throw new Error(`${apiKeyword} is not a supported API for building.`);
@@ -50,9 +47,15 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
   } catch (e) {
     console.error(e);
 
+    const res = await findLastSavedVersionData(apiKeyword);
     if (res) {
-      // Check that these are all still part of this versionData
-
+      // Check  that requested versions are included in saved version data
+      if (
+        (apiVersion && !res.versions.major.includes(apiVersion)) ||
+        (apiVersion && resourceVersion && !res.versions[apiVersion].includes(resourceVersion))
+      ) {
+        throw new Error('Last successful saved build data does not include necessary version data');
+      }
       oasFileURL = `${OAS_FILE_SERVER}${res.gitHash}${versionExtension}.json`;
       console.log(`Using ${oasFileURL}`);
     } else {
@@ -139,5 +142,4 @@ export const buildOpenAPIPages = async (
   }
 
   // Make sure all successful, then save to db
-  // saveSuccessfulBuildVersionData
 };

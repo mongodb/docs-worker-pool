@@ -1,5 +1,5 @@
 import { Db, MongoClient } from 'mongodb';
-import { OASFile, OASFileGitHash } from './models/OASFile';
+import { OASFile, OASFilePartial } from './models/OASFile';
 
 const COLLECTION_NAME = 'oas_files';
 console.log(process.env);
@@ -13,7 +13,6 @@ const getAtlasURL = () => {
 };
 
 const atlasURL = getAtlasURL();
-console.log(atlasURL);
 const client = new MongoClient(atlasURL);
 // cached db object, so we can handle initial connection process once if unitialized
 let dbInstance: Db;
@@ -59,7 +58,7 @@ export const findLastSavedVersionData = async (apiKeyword: string) => {
     const projection = { gitHash: 1, versions: 1 };
     const filter = { api: apiKeyword };
     const oasFilesCollection = dbSession.collection<OASFile>(COLLECTION_NAME);
-    return oasFilesCollection.findOne<OASFileGitHash>(filter, { projection });
+    return oasFilesCollection.findOne<OASFilePartial>(filter, { projection });
   } catch (error) {
     console.error(`Error fetching lastest git hash for API: ${apiKeyword}.`);
     throw error;
@@ -87,8 +86,8 @@ export const saveSuccessfulBuildVersionData = async (
       upsert: true,
     };
 
-    const oasFilesCollection = dbSession.collection<OASFile>(COLLECTION_NAME);
-    await oasFilesCollection.updateOne(query, update, options);
+    // const oasFilesCollection = dbSession.collection<OASFile>(COLLECTION_NAME);
+    // await oasFilesCollection.updateOne(query, update, options);
   } catch (error) {
     console.error(`Error updating lastest git hash and versions for API: ${apiKeyword}.`);
     throw error;
