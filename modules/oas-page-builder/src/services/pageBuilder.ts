@@ -82,7 +82,10 @@ async function getOASpec({
 }: GetOASpecParams) {
   try {
     let spec = '';
-    const buildOptions: RedocBuildOptions = {};
+    const buildOptions: RedocBuildOptions = {
+      apiVersion,
+      resourceVersion,
+    };
     if (sourceType === 'url') {
       spec = source;
     } else if (sourceType === 'local') {

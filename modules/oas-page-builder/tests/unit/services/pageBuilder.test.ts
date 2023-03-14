@@ -113,19 +113,19 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/index.html`,
-      expectedDefaultBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: '1.0', resourceVersion: undefined }
     );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
       getExpectedOutputPath(testOptions.output, testEntries[1][0], '1.0'),
-      expectedDefaultBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: '1.0', resourceVersion: undefined }
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '1.0'),
-      expectedAtlasBuildOptions
+      { ...expectedAtlasBuildOptions, apiVersion: '1.0', resourceVersion: undefined }
     );
   });
 
@@ -159,37 +159,37 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/01-01-2020/index.html`,
-      expectedDefaultBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: '01-01-2020' }
     );
 
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/index.html`,
-      expectedDefaultBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: undefined }
     );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
       getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0', '01-01-2020'),
-      expectedDefaultBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: '01-01-2020' }
     );
 
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
       getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0'),
-      expectedDefaultBuildOptions
+      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: undefined }
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-01-01-2020.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0', '01-01-2020'),
-      expectedAtlasBuildOptions
+      { ...expectedAtlasBuildOptions, apiVersion: '2.0', resourceVersion: '01-01-2020' }
     );
 
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0'),
-      expectedAtlasBuildOptions
+      { ...expectedAtlasBuildOptions, apiVersion: '2.0', resourceVersion: undefined }
     );
   });
 
