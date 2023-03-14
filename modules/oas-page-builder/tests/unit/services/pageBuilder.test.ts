@@ -20,8 +20,9 @@ jest.mock('../../../src/services/database', () => ({
   findLastSavedGitHash: jest.fn(),
 }));
 
-// Helper function for concatendated output path
-const getExpectedOutputPath = (destination: string, pageSlug: string) => `${destination}/${pageSlug}/index.html`;
+// Helper function for concatenated output path
+const getExpectedOutputPath = (destination: string, pageSlug: string, apiVersion?: string, resourceVersion?: string) =>
+  `${destination}/${pageSlug}${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}/index.html`;
 
 // Allows node-fetch to be mockable
 jest.mock('node-fetch');
@@ -67,8 +68,7 @@ describe('pageBuilder', () => {
     ];
 
     await buildOpenAPIPages(testEntries, testOptions);
-    // const mockSoundPlayerInstance = SoundPlayer.mock.instances[0];
-    // const mockRedocExecutorInstance = RedocExecutor.mock.instances[0];
+
     expect(mockExecute).toBeCalledTimes(testEntries.length);
     // Local
     expect(mockExecute).toBeCalledWith(
@@ -86,6 +86,109 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0]),
+      expectedAtlasBuildOptions
+    );
+  });
+
+  it('builds OpenAPI pages with api version', async () => {
+    mockFetchImplementation(true);
+
+    const testEntries: [string, OASPageMetadata][] = [
+      ['path/to/page/1/v1', { source_type: 'local', source: '/local-spec/v1.json', api_version: '1.0' }],
+      [
+        'path/to/page/2/v1',
+        {
+          source_type: 'url',
+          source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum/v1.json',
+          api_version: '1.0',
+        },
+      ],
+      ['path/to/page/3/v1', { source_type: 'atlas', source: 'cloud', api_version: '1.0' }],
+    ];
+
+    await buildOpenAPIPages(testEntries, testOptions);
+    console.log(getExpectedOutputPath(testOptions.output, testEntries[0][0], '1.0'));
+    expect(mockExecute).toBeCalledTimes(testEntries.length);
+    // Local
+    expect(mockExecute).toBeCalledWith(
+      `${testOptions.repo}/source${testEntries[0][1].source}`,
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
+      expectedDefaultBuildOptions
+    );
+    // Url
+    expect(mockExecute).toBeCalledWith(
+      `${testEntries[1][1].source}`,
+      getExpectedOutputPath(testOptions.output, testEntries[1][0], '1.0'),
+      expectedDefaultBuildOptions
+    );
+    // Atlas
+    expect(mockExecute).toBeCalledWith(
+      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1.json`,
+      getExpectedOutputPath(testOptions.output, testEntries[2][0], '1.0'),
+      expectedAtlasBuildOptions
+    );
+  });
+
+  it('builds OpenAPI pages with api version and resource version', async () => {
+    mockFetchImplementation(true);
+
+    const testEntries: [string, OASPageMetadata][] = [
+      [
+        'path/to/page/1/v2',
+        { source_type: 'local', source: '/local-spec.json', api_version: '2.0', resource_versions: ['01-01-2020'] },
+      ],
+      [
+        'path/to/page/2/v2',
+        {
+          source_type: 'url',
+          source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
+          api_version: '2.0',
+          resource_versions: ['01-01-2020'],
+        },
+      ],
+      [
+        'path/to/page/3/v2',
+        { source_type: 'atlas', source: 'cloud', api_version: '2.0', resource_versions: ['01-01-2020'] },
+      ],
+    ];
+
+    await buildOpenAPIPages(testEntries, testOptions);
+
+    expect(mockExecute).toBeCalledTimes(testEntries.length * 2);
+    // Local
+    expect(mockExecute).toBeCalledWith(
+      `${testOptions.repo}/source${testEntries[0][1].source}`,
+      `${testOptions.output}/${testEntries[0][0]}/01-01-2020/index.html`,
+      expectedDefaultBuildOptions
+    );
+
+    expect(mockExecute).toBeCalledWith(
+      `${testOptions.repo}/source${testEntries[0][1].source}`,
+      `${testOptions.output}/${testEntries[0][0]}/index.html`,
+      expectedDefaultBuildOptions
+    );
+    // Url
+    expect(mockExecute).toBeCalledWith(
+      `${testEntries[1][1].source}`,
+      getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0', '01-01-2020'),
+      expectedDefaultBuildOptions
+    );
+
+    expect(mockExecute).toBeCalledWith(
+      `${testEntries[1][1].source}`,
+      getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0'),
+      expectedDefaultBuildOptions
+    );
+    // Atlas
+    expect(mockExecute).toBeCalledWith(
+      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-01-01-2020.json`,
+      getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0', '01-01-2020'),
+      expectedAtlasBuildOptions
+    );
+
+    expect(mockExecute).toBeCalledWith(
+      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2.json`,
+      getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0'),
       expectedAtlasBuildOptions
     );
   });
