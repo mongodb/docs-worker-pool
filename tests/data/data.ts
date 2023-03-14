@@ -162,11 +162,7 @@ export class TestDataProvider {
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make next-gen-html',
     ]);
-    if (job.payload.repoName == 'devhub-content-integration') {
-      commands[commands.length - 1] += ` STRAPI_PUBLICATION_STATE=preview`;
-    } else {
-      commands.push(`make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`);
-    }
+    commands.push(`make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`);
     return commands;
   }
 
