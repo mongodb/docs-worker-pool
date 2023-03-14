@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
 import { RedocExecutor } from './redocExecutor';
-import { findLastSavedGitHash } from './database';
+import { findLastSavedVersionData } from './database';
 import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions } from './types';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
@@ -24,6 +24,9 @@ interface AtlasSpecUrlParams {
 const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: AtlasSpecUrlParams) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
   // but it's possible to have more in the future with varying processes.
+  const res = await findLastSavedVersionData(apiKeyword);
+  console.log('got it! ', res);
+
   const keywords = ['cloud'];
   if (!keywords.includes(apiKeyword)) {
     throw new Error(`${apiKeyword} is not a supported API for building.`);
@@ -47,8 +50,9 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
   } catch (e) {
     console.error(e);
 
-    const res = await findLastSavedGitHash(apiKeyword);
     if (res) {
+      // Check that these are all still part of this versionData
+
       oasFileURL = `${OAS_FILE_SERVER}${res.gitHash}${versionExtension}.json`;
       console.log(`Using ${oasFileURL}`);
     } else {
@@ -133,4 +137,7 @@ export const buildOpenAPIPages = async (
     // apiVersion can be undefined, this case is handled within the getOASpec function
     await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
   }
+
+  // Make sure all successful, then save to db
+  // saveSuccessfulBuildVersionData
 };

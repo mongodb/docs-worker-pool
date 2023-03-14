@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { findLastSavedGitHash } from '../../../src/services/database';
+import { findLastSavedVersionData } from '../../../src/services/database';
 import { buildOpenAPIPages } from '../../../src/services/pageBuilder';
 import { OASPageMetadata, PageBuilderOptions } from '../../../src/services/types';
 
@@ -17,7 +17,7 @@ jest.mock('../../../src/services/redocExecutor', () => ({
 // Mock database since implementation relies on database instance. Returned values
 // are mocked for each test.
 jest.mock('../../../src/services/database', () => ({
-  findLastSavedGitHash: jest.fn(),
+  findLastSavedVersionData: jest.fn(),
 }));
 
 // Helper function for concatenated output path
@@ -196,7 +196,7 @@ describe('pageBuilder', () => {
   it('builds Atlas Cloud API with backup git hash', async () => {
     mockFetchImplementation(false);
     // @ts-ignore
-    findLastSavedGitHash.mockReturnValue({ gitHash: LAST_SAVED_GIT_HASH });
+    findLastSavedVersionData.mockReturnValue({ gitHash: LAST_SAVED_GIT_HASH });
 
     const testEntries: [string, OASPageMetadata][] = [['path/to/page/1', { source_type: 'atlas', source: 'cloud' }]];
 
@@ -211,7 +211,7 @@ describe('pageBuilder', () => {
   it('does not build atlas OAS when backup git hash is missing', async () => {
     mockFetchImplementation(false);
     // @ts-ignore
-    findLastSavedGitHash.mockReturnValue(null);
+    findLastSavedVersionData.mockReturnValue(null);
 
     const testEntries: [string, OASPageMetadata][] = [['path/to/page/1', { source_type: 'atlas', source: 'cloud' }]];
 

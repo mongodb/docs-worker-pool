@@ -2,6 +2,7 @@ import { Db, MongoClient } from 'mongodb';
 import { OASFile, OASFileGitHash } from './models/OASFile';
 
 const COLLECTION_NAME = 'oas_files';
+console.log(process.env);
 
 const getAtlasURL = () => {
   const isHostLocal = process.env.DB_HOST?.includes('localhost');
@@ -12,6 +13,7 @@ const getAtlasURL = () => {
 };
 
 const atlasURL = getAtlasURL();
+console.log(atlasURL);
 const client = new MongoClient(atlasURL);
 // cached db object, so we can handle initial connection process once if unitialized
 let dbInstance: Db;
@@ -49,17 +51,46 @@ const db = async () => {
   return dbInstance;
 };
 
-// Finds the last saved git hash in our db for an OpenAPI spec file. This git hash
+// Finds the last saved git hash and version data in our db for an OpenAPI spec file. The git hash
 // should have an existing spec file but the hash may be subject to change every 24 hours.
-export const findLastSavedGitHash = async (apiKeyword: string) => {
+export const findLastSavedVersionData = async (apiKeyword: string) => {
   const dbSession = await db();
   try {
-    const projection = { gitHash: 1 };
+    const projection = { gitHash: 1, versions: 1 };
     const filter = { api: apiKeyword };
     const oasFilesCollection = dbSession.collection<OASFile>(COLLECTION_NAME);
     return oasFilesCollection.findOne<OASFileGitHash>(filter, { projection });
   } catch (error) {
     console.error(`Error fetching lastest git hash for API: ${apiKeyword}.`);
+    throw error;
+  }
+};
+
+export const saveSuccessfulBuildVersionData = async (
+  apiKeyword: string,
+  gitHash: string,
+  versionData: { [k: string]: string[] }
+) => {
+  const dbSession = await db();
+  try {
+    const query = {
+      api: apiKeyword,
+    };
+    const update = {
+      $set: {
+        gitHash: gitHash,
+        versions: versionData,
+        lastUpdated: new Date().toISOString(),
+      },
+    };
+    const options = {
+      upsert: true,
+    };
+
+    const oasFilesCollection = dbSession.collection<OASFile>(COLLECTION_NAME);
+    await oasFilesCollection.updateOne(query, update, options);
+  } catch (error) {
+    console.error(`Error updating lastest git hash and versions for API: ${apiKeyword}.`);
     throw error;
   }
 };
