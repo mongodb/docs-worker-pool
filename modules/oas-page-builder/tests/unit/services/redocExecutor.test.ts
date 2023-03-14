@@ -22,9 +22,7 @@ describe('RedocExecutor', () => {
       backNavigationPath: testSiteUrl,
       siteTitle: testSiteTitle,
     };
-    const expectedCommand = `node ${testRedocPath} build ${testSpecSource} --output ${testOutputPath} --options '${JSON.stringify(
-      expectedOptions
-    )}'`;
+    const expectedCommand = `node ${testRedocPath} build ${testSpecSource} --output ${testOutputPath} --options options.json`;
     expect(cp.exec).toBeCalledWith(expectedCommand, expect.anything());
   });
 
@@ -41,9 +39,7 @@ describe('RedocExecutor', () => {
       siteTitle: testSiteTitle,
       ignoreIncompatibleTypes: true,
     };
-    const expectedCommand = `node ${testRedocPath} build ${testSpecSource} --output ${testOutputPath} --options '${JSON.stringify(
-      expectedOptions
-    )}'`;
+    const expectedCommand = `node ${testRedocPath} build ${testSpecSource} --output ${testOutputPath} --options options.json`;
     expect(cp.exec).toBeCalledWith(expectedCommand, expect.anything());
   });
 });

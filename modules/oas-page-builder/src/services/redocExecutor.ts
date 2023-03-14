@@ -1,6 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { RedocBuildOptions } from './types';
+import { writeFileSync } from 'fs';
 
 const execCommand = promisify(exec);
 
@@ -21,8 +22,10 @@ export class RedocExecutor {
 
   // Calls Redoc CLI to build spec at given output path
   async execute(specSource: string, outputPath: string, buildOptions: RedocBuildOptions) {
+    this.createOptionsFile(buildOptions);
+
     const outputArg = `--output ${outputPath}`;
-    const optionsArg = `--options '${this.finalizeOptions(buildOptions)}'`;
+    const optionsArg = `--options options.json`;
     const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg}`;
 
     const { stdout, stderr } = await execCommand(command);
@@ -34,13 +37,12 @@ export class RedocExecutor {
     }
   }
 
-  // Adds any additional options required for current page
-  private finalizeOptions(buildOptions: RedocBuildOptions): string {
+  private createOptionsFile(buildOptions: RedocBuildOptions): void {
     const options = {
       ...this.options,
       ...buildOptions,
     };
-    // Stringify JSON object to avoid syntax error when passing object
-    return JSON.stringify(options);
+
+    writeFileSync('options.json', JSON.stringify(options));
   }
 }
