@@ -3,6 +3,7 @@ import { normalizePath } from '../utils/normalizePath';
 import { RedocExecutor } from './redocExecutor';
 import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from './database';
 import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions } from './types';
+import { VersionData } from './models/OASFile';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
 
@@ -42,6 +43,15 @@ interface AtlasSpecUrlParams {
   resourceVersion?: string;
 }
 
+const ensureSavedVersionDataMatches = async (versions: VersionData, apiVersion?: string, resourceVersion?: string) => {
+  // Check that requested versions are included in saved version data
+  if (apiVersion) {
+    if (!versions.major.includes(apiVersion) || (resourceVersion && !versions[apiVersion].includes(resourceVersion))) {
+      throw new Error('Last successful saved build data does not include necessary version data');
+    }
+  }
+};
+
 const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: AtlasSpecUrlParams) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
   // but it's possible to have more in the future with varying processes.
@@ -71,15 +81,7 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
 
     const res = await findLastSavedVersionData(apiKeyword);
     if (res) {
-      // Check  that requested versions are included in saved version data
-      if (apiVersion) {
-        if (
-          !res.versions.major.includes(apiVersion) ||
-          (resourceVersion && !res.versions[apiVersion].includes(resourceVersion))
-        ) {
-          throw new Error('Last successful saved build data does not include necessary version data');
-        }
-      }
+      ensureSavedVersionDataMatches(res.versions, apiVersion, resourceVersion);
       oasFileURL = `${OAS_FILE_SERVER}${res.gitHash}${versionExtension}.json`;
       console.log(`Using ${oasFileURL}`);
     } else {
