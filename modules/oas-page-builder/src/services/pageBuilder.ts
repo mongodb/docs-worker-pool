@@ -15,10 +15,26 @@ const fetchTextData = async (url: string, errMsg: string) => {
   return res.text();
 };
 
-const fetchGitHash = async () => {
-  const versionURL = 'https://cloud.mongodb.com/version';
-  return fetchTextData(versionURL, 'Could not find current version or git hash');
+const createFetchGitHash = () => {
+  let gitHashCache: string;
+  return {
+    fetchGitHash: async () => {
+      if (gitHashCache) return gitHashCache;
+      try {
+        const versionURL = 'https://cloud.mongodb.com/version';
+        const gitHash = await fetchTextData(versionURL, 'Could not find current version or git hash');
+        gitHashCache = gitHash;
+        return gitHash;
+      } catch (e) {
+        throw new Error('Unsuccessful git hash fetch');
+      }
+    },
+    resetGitHashCache: () => {
+      gitHashCache = '';
+    },
+  };
 };
+const { fetchGitHash, resetGitHashCache } = createFetchGitHash();
 
 interface AtlasSpecUrlParams {
   apiKeyword: string;
@@ -29,8 +45,6 @@ interface AtlasSpecUrlParams {
 const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: AtlasSpecUrlParams) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
   // but it's possible to have more in the future with varying processes.
-  const res = await findLastSavedVersionData(apiKeyword);
-  console.log('res ', res);
   const keywords = ['cloud'];
   if (!keywords.includes(apiKeyword)) {
     throw new Error(`${apiKeyword} is not a supported API for building.`);
@@ -182,7 +196,7 @@ export const buildOpenAPIPages = async (
     });
     if (!isSuccessfulBuild) totalSuccess = false;
 
-    // Make sure all successful, then save to db
+    // If all builds successful, persist git hash and version data in db
     if (totalSuccess) {
       try {
         const gitHash = await fetchGitHash();
@@ -195,5 +209,6 @@ export const buildOpenAPIPages = async (
       }
     }
     totalSuccess = true;
+    resetGitHashCache();
   }
 };
