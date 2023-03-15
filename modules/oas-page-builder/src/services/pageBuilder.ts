@@ -66,6 +66,8 @@ interface GetOASpecParams {
   pageSlug: string;
   repoPath: string;
   redocExecutor: RedocExecutor;
+  activeResourceVersion?: string;
+  resourceVersions?: string[];
   apiVersion?: string;
   resourceVersion?: string;
 }

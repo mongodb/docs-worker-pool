@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { RedocBuildOptions } from './types';
+import { RedocBuildOptions, RedocVersionOptions } from './types';
 import { writeFileSync } from 'fs';
 
 const execCommand = promisify(exec);
@@ -21,12 +21,23 @@ export class RedocExecutor {
   }
 
   // Calls Redoc CLI to build spec at given output path
-  async execute(specSource: string, outputPath: string, buildOptions: RedocBuildOptions) {
-    this.createOptionsFile(buildOptions);
-
+  async execute(
+    specSource: string,
+    outputPath: string,
+    buildOptions: RedocBuildOptions,
+    versionOptions?: RedocVersionOptions
+  ) {
     const outputArg = `--output ${outputPath}`;
-    const optionsArg = `--options options.json`;
-    const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg}`;
+    const optionsArg = `--options '${this.finalizeOptions(buildOptions)}'`;
+
+    let versionDataOptionsArgs = '';
+
+    if (versionOptions) {
+      this.createVersionDataFile(versionOptions);
+      versionDataOptionsArgs = '--options.versionData=version-data.json';
+    }
+
+    const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg} ${versionDataOptionsArgs}`;
 
     const { stdout, stderr } = await execCommand(command);
     console.log(stdout);
@@ -37,12 +48,17 @@ export class RedocExecutor {
     }
   }
 
-  private createOptionsFile(buildOptions: RedocBuildOptions): void {
+  private createVersionDataFile(versionOptions: RedocVersionOptions): void {
+    writeFileSync('version-data.json', JSON.stringify(versionOptions));
+  }
+
+  // Adds any additional options required for current page
+  private finalizeOptions(buildOptions: RedocBuildOptions): string {
     const options = {
       ...this.options,
       ...buildOptions,
     };
-
-    writeFileSync('options.json', JSON.stringify(options));
+    // Stringify JSON object to avoid syntax error when passing object
+    return JSON.stringify(options);
   }
 }

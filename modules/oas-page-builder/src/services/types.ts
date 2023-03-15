@@ -23,3 +23,12 @@ export interface RedocBuildOptions {
   apiVersion?: string;
   resourceVersion?: string;
 }
+
+export interface RedocVersionOptions {
+  active: {
+    apiVersion: string;
+    resourceVersion: string;
+  };
+  rootUrl: string;
+  resourceVersions: string[];
+}
