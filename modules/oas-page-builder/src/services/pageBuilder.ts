@@ -158,10 +158,10 @@ export const buildOpenAPIPages = async (
   entries: [string, OASPageMetadata][],
   { output, redoc: redocPath, repo: repoPath, siteUrl, siteTitle }: PageBuilderOptions
 ) => {
-  let totalSuccess = true;
   const redocExecutor = new RedocExecutor(redocPath, siteUrl, siteTitle);
 
   for (const [pageSlug, data] of entries) {
+    let totalSuccess = true;
     const { source_type: sourceType, source, api_version: apiVersion, resource_versions: resourceVersions } = data;
 
     if (!apiVersion && resourceVersions && resourceVersions.length > 0) {
