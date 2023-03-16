@@ -7,6 +7,7 @@ import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions } from './types'
 import { VersionData } from './models/OASFile';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
+const GIT_HASH_URL = 'https://cloud.mongodb.com/version';
 
 const fetchTextData = async (url: string, errMsg: string) => {
   const res = await fetch(url);
@@ -23,8 +24,7 @@ const createFetchGitHash = () => {
     fetchGitHash: async () => {
       if (gitHashCache) return gitHashCache;
       try {
-        const versionURL = 'https://cloud.mongodb.com/version';
-        const gitHash = await fetchTextData(versionURL, 'Could not find current version or git hash');
+        const gitHash = await fetchTextData(GIT_HASH_URL, 'Could not find current version or git hash');
         gitHashCache = gitHash;
         return gitHash;
       } catch (e) {
