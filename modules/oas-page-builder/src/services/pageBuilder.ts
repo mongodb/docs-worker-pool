@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
+import { fetchVersionData } from '../utils/fetchVersionData';
 import { RedocExecutor } from './redocExecutor';
 import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from './database';
 import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions } from './types';
@@ -35,6 +36,7 @@ const createFetchGitHash = () => {
     },
   };
 };
+
 const { fetchGitHash, resetGitHashCache } = createFetchGitHash();
 
 interface AtlasSpecUrlParams {
@@ -199,12 +201,10 @@ export const buildOpenAPIPages = async (
     if (!isSuccessfulBuild) totalSuccess = false;
 
     // If all builds successful, persist git hash and version data in db
-    if (totalSuccess) {
+    if (totalSuccess && sourceType == 'atlas') {
       try {
         const gitHash = await fetchGitHash();
-        const versionUrl = `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${gitHash}-api-versions.json`;
-        const res = await fetch(versionUrl);
-        const { versions } = await res.json();
+        const versions = await fetchVersionData(gitHash);
         await saveSuccessfulBuildVersionData(source, gitHash, versions);
       } catch (e) {
         console.log(e);
