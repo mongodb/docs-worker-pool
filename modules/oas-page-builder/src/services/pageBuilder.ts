@@ -28,7 +28,8 @@ const createFetchGitHash = () => {
         gitHashCache = gitHash;
         return gitHash;
       } catch (e) {
-        throw new Error('Unsuccessful git hash fetch');
+        console.error(e);
+        throw new Error(`Unsuccessful git hash fetch`);
       }
     },
     resetGitHashCache: () => {
@@ -45,11 +46,12 @@ interface AtlasSpecUrlParams {
   resourceVersion?: string;
 }
 
-const ensureSavedVersionDataMatches = async (versions: VersionData, apiVersion?: string, resourceVersion?: string) => {
+const ensureSavedVersionDataMatches = (versions: VersionData, apiVersion?: string, resourceVersion?: string) => {
   // Check that requested versions are included in saved version data
   if (apiVersion) {
     if (!versions.major.includes(apiVersion) || (resourceVersion && !versions[apiVersion].includes(resourceVersion))) {
-      throw new Error('Last successful saved build data does not include necessary version data');
+      throw new Error(`Last successful build data does not include necessary version data:\n
+      Version requested: ${apiVersion}${resourceVersion ? ` - ${resourceVersion}` : ``}`);
     }
   }
 };
@@ -207,10 +209,9 @@ export const buildOpenAPIPages = async (
         const versions = await fetchVersionData(gitHash);
         await saveSuccessfulBuildVersionData(source, gitHash, versions);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
-    totalSuccess = true;
     resetGitHashCache();
   }
 };

@@ -1,5 +1,5 @@
 import { Db, MongoClient } from 'mongodb';
-import { OASFile, OASFilePartial } from './models/OASFile';
+import { OASFile, OASFilePartial, VersionData } from './models/OASFile';
 
 const COLLECTION_NAME = 'oas_files';
 
@@ -64,11 +64,7 @@ export const findLastSavedVersionData = async (apiKeyword: string) => {
   }
 };
 
-export const saveSuccessfulBuildVersionData = async (
-  apiKeyword: string,
-  gitHash: string,
-  versionData: { [k: string]: string[] }
-) => {
+export const saveSuccessfulBuildVersionData = async (apiKeyword: string, gitHash: string, versionData: VersionData) => {
   const dbSession = await db();
   try {
     const query = {
