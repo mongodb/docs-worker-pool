@@ -34,10 +34,10 @@ export interface TocOrderInsertions {
   };
 }
 
-const isInsertionCandidateNode = (node: ToC, associated_products: AssociatedProduct[] = []): boolean => {
-  const nodeInProducts = node.options?.project && associated_products.find((p) => p.name === node.options?.project);
-  const nodeHasNoChildren = !node.children || node.children.length === 0;
-  return !!(nodeHasNoChildren && nodeInProducts);
+const isInsertionCandidateNode = (node: ToC, toBeInserted: Set<string> = new Set([])): boolean => {
+  const projectName = node.options?.project;
+  const nodeInProducts = projectName && toBeInserted.has(projectName);
+  return !!nodeInProducts;
 };
 
 const mergeNode = (node: ToC, tocs: ToCInsertions, currentProject) => {
@@ -101,15 +101,16 @@ export const traverseAndMerge = (
   const { project } = metadata;
 
   const toctree = hasAssociations(metadata) ? umbrellaToCs.original : umbrellaToCs.urlified;
-
+  const toBeInserted = new Set(associated_products.map((p) => p.name));
   let queue = [toctree];
-  while (queue?.length) {
+  while (queue?.length && toBeInserted.size) {
     let next = queue.shift();
     // TODO: We can exit early here once we've found all the nodes.
     // We should track remaining insertions in a set and add some break logic.
-    if (next && isInsertionCandidateNode(next, associated_products)) {
+    if (next && isInsertionCandidateNode(next, toBeInserted)) {
       next = mergeNode(next, tocInsertions, project);
       metadata.toctreeorder = mergeTocTreeOrder(metadata, next, tocOrderInsertions);
+      toBeInserted.delete(next.options?.project);
     } else if (next?.children) {
       queue = [...queue, ...next.children];
     }

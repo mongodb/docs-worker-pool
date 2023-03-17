@@ -93,13 +93,10 @@ custom:
   atlasBucketName: docs-atlas-${self:provider.stage}
   atlasOsbBucketName: docs-atlas-osb-${self:provider.stage}
   atlasGovBucketName: docs-govcloud-${self:provider.stage}
-  devhubBucketName: docs-devhub-${self:provider.stage}
   cloudManagerBucketName: docs-cloudmanager-${self:provider.stage}
   opsManagerBucketName: docs-opsmanager-${self:provider.stage}
   npmBase64Auth: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/auth}
   npmEmail: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/email}
-  awsKeyDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/key}
-  awsSecretDevhub: ${ssm:/env/${self:provider.stage}/docs/worker_pool/devhub/aws/secret}
   gatsbyBaseUrl: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/base_url}
   previewBuildEnabled: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_build/enabled}
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
@@ -111,8 +108,6 @@ custom:
   fastlyAtlasServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/atlas/service_id}
   fastlyOpsManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/opsmanager/token}
   fastlyOpsManagerServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/opsmanager/service_id}
-  fastlyDevhubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/token}
-  fastlyDevhubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/devhub/service_id}
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
   cSharpBucketName: docs-csharp-${self:provider.stage}

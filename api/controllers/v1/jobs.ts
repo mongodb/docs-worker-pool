@@ -62,11 +62,21 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             // start the task , don't start the process before processing the notification
             const ecsServices = new ECSContainer(c, consoleLogger);
             const res = await ecsServices.execute(jobId);
+            if (res) {
+              await saveTaskId(jobId, res, consoleLogger);
+            }
             consoleLogger.info(jobId, JSON.stringify(res));
             break;
           case JobStatus[JobStatus.inProgress]:
             queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildProgress(jobId);
+            break;
+          case JobStatus[JobStatus.timedOut]:
+            await NotifyBuildSummary(jobId);
+            const taskId = body['taskId'];
+            if (taskId) {
+              await stopECSTask(taskId, consoleLogger);
+            }
             break;
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
@@ -85,6 +95,44 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
     })
   );
 };
+
+export const FailStuckJobs = async () => {
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const consoleLogger = new ConsoleLogger();
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+
+  try {
+    const hours = 8;
+    await jobRepository.failStuckJobs(hours);
+  } catch (err) {
+    consoleLogger.error('FailStuckJobs', err);
+  }
+};
+
+async function saveTaskId(jobId: string, taskExecutionRes: any, consoleLogger: ConsoleLogger): Promise<void> {
+  const taskArn = taskExecutionRes?.tasks[0]?.taskArn;
+  if (!taskArn) return;
+
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+
+  try {
+    // Only interested in the actual task ID since the whole ARN might have sensitive information
+    const taskId = taskArn.split('/').pop();
+    await jobRepository.addTaskIdToJob(jobId, taskId);
+  } catch (err) {
+    consoleLogger.error('saveTaskId', err);
+  }
+}
+
+async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
+  const ecs = new ECSContainer(c, consoleLogger);
+  await ecs.stopZombieECSTask(taskId);
+}
 
 async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
   try {
@@ -113,10 +161,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
-  // TODO: Remove unused vars, and validate existing vars
-  const branchesRepo = new BranchRepository(db, c, consoleLogger);
-  const slackMsgs = fullDocument.comMessage;
-  const jobTitle = fullDocument.title;
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
   const slackConnector = new SlackConnector(consoleLogger, c);
@@ -126,7 +170,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     consoleLogger.error(username, 'Entitlement failed');
     return;
   }
-  const resp = await slackConnector.sendMessage(
+  await slackConnector.sendMessage(
     await prepSummaryMessage(
       env,
       fullDocument,
@@ -172,12 +216,12 @@ async function prepSummaryMessage(
   }
   let msg = '';
   if (failed) {
-    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n Check logs for more errors!!\nSorry  :disappointed:! `;
+    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n Check logs for more errors!!\nSorry  :disappointed:! `;
   } else {
     if (repoName == 'mms-docs') {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n*Urls*\n   *CM*:<${mms_urls[0]}|Cloud Manager> \n   *OPM*:<${mms_urls[1]}|OPS Manager>\n- InvalidationStatus:<${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- Commit: *${fullDocument.payload.newHead}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n*Urls*\n   *CM*: <${mms_urls[0]}|Cloud Manager> \n   *OPM*: <${mms_urls[1]}|OPS Manager>\n- InvalidationStatus: <${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
     } else {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo:*${repoName}*\n- Branch:*${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env:*${env}*\n- Url:<${url}|${repoName}>\n- InvalidationStatus:<${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- Commit: *${fullDocument.payload.newHead}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n- Url: <${url}|${repoName}>\n- InvalidationStatus: <${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
     }
   }
   // Remove instances of two or more periods

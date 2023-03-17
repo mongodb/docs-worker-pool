@@ -2,6 +2,7 @@ import { JobRepository } from '../../../src/repositories/jobRepository';
 import { getBuildJobPlain } from '../../data/jobDef';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
+import { ObjectId } from 'mongodb';
 
 describe('Job Repository Tests', () => {
   let jobRepo: JobRepository;
@@ -179,6 +180,14 @@ describe('Job Repository Tests', () => {
     });
   });
 
+  describe('failStuckJobs Tests', () => {
+    test('failStuckJobs succeeds', async () => {
+      setupForFindSuccess();
+      setupForUpdateManySuccess();
+      await expect(jobRepo.failStuckJobs(8)).resolves.toEqual(undefined);
+    });
+  });
+
   function validateSuccessfulUpdate(testData: any) {
     expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
     expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query, testData.update);
@@ -188,6 +197,23 @@ describe('Job Repository Tests', () => {
   function setupForUpdateOneSuccess() {
     dbRepoHelper.collection.updateOne.mockReturnValueOnce({ modifiedCount: 1 });
     jest.spyOn(jobRepo, 'notify').mockResolvedValueOnce(true);
+    dbRepoHelper.config.get.calledWith('MONGO_TIMEOUT_S').mockReturnValueOnce(1);
+  }
+
+  function setupForFindSuccess() {
+    dbRepoHelper.collection.find.mockReturnValueOnce({
+      toArray: () => [
+        { _id: new ObjectId(), status: 'inProgress' },
+        { _id: new ObjectId(), status: 'inQueue' },
+        { _id: new ObjectId(), status: 'inProgress' },
+      ],
+    });
+    dbRepoHelper.config.get.calledWith('MONGO_TIMEOUT_S').mockReturnValueOnce(1);
+  }
+
+  function setupForUpdateManySuccess() {
+    dbRepoHelper.collection.updateMany.mockReturnValueOnce({ matchedCount: 2, modifiedCount: 2 });
+    jest.spyOn(jobRepo, 'notify').mockResolvedValue(true);
     dbRepoHelper.config.get.calledWith('MONGO_TIMEOUT_S').mockReturnValueOnce(1);
   }
 });
