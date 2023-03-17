@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
 import { RedocExecutor } from './redocExecutor';
 import { findLastSavedGitHash } from './database';
-import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions } from './types';
+import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions, RedocVersionOptions } from './types';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
 
@@ -66,6 +66,7 @@ interface GetOASpecParams {
   pageSlug: string;
   repoPath: string;
   redocExecutor: RedocExecutor;
+  siteUrl: string;
   activeResourceVersion?: string;
   resourceVersions?: string[];
   apiVersion?: string;
@@ -81,13 +82,12 @@ async function getOASpec({
   output,
   apiVersion,
   resourceVersion,
+  resourceVersions,
+  siteUrl,
 }: GetOASpecParams) {
   try {
     let spec = '';
-    const buildOptions: RedocBuildOptions = {
-      apiVersion,
-      resourceVersion,
-    };
+    const buildOptions: RedocBuildOptions = {};
     if (sourceType === 'url') {
       spec = source;
     } else if (sourceType === 'local') {
@@ -96,17 +96,29 @@ async function getOASpec({
     } else if (sourceType === 'atlas') {
       spec = await getAtlasSpecUrl({ apiKeyword: source, apiVersion, resourceVersion });
       // Ignore "incompatible types" warnings for Atlas Admin API/cloud-docs
-
       buildOptions['ignoreIncompatibleTypes'] = true;
     } else {
       throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
+    }
+
+    let versionOptions: RedocVersionOptions | undefined;
+
+    if (resourceVersions && apiVersion) {
+      versionOptions = {
+        active: {
+          apiVersion,
+          resourceVersion: resourceVersion || '',
+        },
+        rootUrl: siteUrl,
+        resourceVersions: [],
+      };
     }
 
     const filePathExtension = `${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}`;
 
     const path = `${output}/${pageSlug}${filePathExtension}/index.html`;
     const finalFilename = normalizePath(path);
-    await redocExecutor.execute(spec, finalFilename, buildOptions);
+    await redocExecutor.execute(spec, finalFilename, buildOptions, versionOptions);
   } catch (e) {
     console.error(e);
   }
@@ -132,10 +144,45 @@ export const buildOpenAPIPages = async (
       // if a resource versions array is provided, then we can loop through the resourceVersions array and call the getOASpec
       // for each minor version
       for (const resourceVersion of resourceVersions) {
-        await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion, resourceVersion });
+        // there is a minor version and major version
+        await getOASpec({
+          source,
+          sourceType,
+          output,
+          pageSlug,
+          redocExecutor,
+          repoPath,
+          apiVersion,
+          resourceVersion,
+          siteUrl,
+          resourceVersions,
+        });
       }
+
+      // provide no resource version in this context
+      await getOASpec({
+        source,
+        sourceType,
+        output,
+        pageSlug,
+        redocExecutor,
+        repoPath,
+        apiVersion,
+        siteUrl,
+        resourceVersions,
+      });
+    } else {
+      // apiVersion can be undefined, this case is handled within the getOASpec function
+      await getOASpec({
+        source,
+        sourceType,
+        output,
+        pageSlug,
+        redocExecutor,
+        repoPath,
+        apiVersion,
+        siteUrl,
+      });
     }
-    // apiVersion can be undefined, this case is handled within the getOASpec function
-    await getOASpec({ source, sourceType, output, pageSlug, redocExecutor, repoPath, apiVersion });
   }
 };

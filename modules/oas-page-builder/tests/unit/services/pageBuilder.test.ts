@@ -74,19 +74,22 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/index.html`,
-      expectedDefaultBuildOptions
+      expectedDefaultBuildOptions,
+      undefined
     );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
       getExpectedOutputPath(testOptions.output, testEntries[1][0]),
-      expectedDefaultBuildOptions
+      expectedDefaultBuildOptions,
+      undefined
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0]),
-      expectedAtlasBuildOptions
+      expectedAtlasBuildOptions,
+      undefined
     );
   });
 
