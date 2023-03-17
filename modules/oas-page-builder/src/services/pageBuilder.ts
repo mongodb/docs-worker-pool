@@ -110,7 +110,7 @@ async function getOASpec({
           resourceVersion: resourceVersion || '',
         },
         rootUrl: siteUrl,
-        resourceVersions: [],
+        resourceVersions,
       };
     }
 
@@ -159,7 +159,7 @@ export const buildOpenAPIPages = async (
         });
       }
 
-      // provide no resource version in this context
+      // provide no resource version in this context for the base version
       await getOASpec({
         source,
         sourceType,
