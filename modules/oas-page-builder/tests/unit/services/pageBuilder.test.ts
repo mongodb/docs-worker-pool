@@ -15,7 +15,6 @@ jest.mock('../../../src/services/redocExecutor', () => ({
   })),
 }));
 
-// const mockSaveSuccessfulBuildVersionData = jest.fn();
 // Mock database since implementation relies on database instance. Returned values
 // are mocked for each test.
 jest.mock('../../../src/services/database', () => ({
