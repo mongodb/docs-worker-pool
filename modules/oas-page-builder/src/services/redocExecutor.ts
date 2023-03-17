@@ -27,17 +27,12 @@ export class RedocExecutor {
     buildOptions: RedocBuildOptions,
     versionOptions?: RedocVersionOptions
   ) {
+    this.finalizeOptions(buildOptions, versionOptions);
+
     const outputArg = `--output ${outputPath}`;
-    const optionsArg = `--options '${this.finalizeOptions(buildOptions)}'`;
+    const optionsArg = `--options options.json`;
 
-    let versionDataOptionsArgs = '';
-
-    if (versionOptions) {
-      this.createVersionDataFile(versionOptions);
-      versionDataOptionsArgs = '--options.versionData=version-data.json';
-    }
-
-    const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg} ${versionDataOptionsArgs}`;
+    const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg}`;
 
     const { stdout, stderr } = await execCommand(command);
     console.log(stdout);
@@ -49,16 +44,17 @@ export class RedocExecutor {
   }
 
   private createVersionDataFile(versionOptions: RedocVersionOptions): void {
-    writeFileSync('version-data.json', JSON.stringify(versionOptions));
+    writeFileSync('options.json', JSON.stringify(versionOptions));
   }
 
   // Adds any additional options required for current page
-  private finalizeOptions(buildOptions: RedocBuildOptions): string {
+  private finalizeOptions(buildOptions: RedocBuildOptions, versionOptions?: RedocVersionOptions): void {
     const options = {
       ...this.options,
       ...buildOptions,
+      ...versionOptions,
     };
-    // Stringify JSON object to avoid syntax error when passing object
-    return JSON.stringify(options);
+
+    writeFileSync('options.json', JSON.stringify(options));
   }
 }
