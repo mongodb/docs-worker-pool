@@ -29,10 +29,9 @@ const internals: { [key: project]: ReposBranchesDocument } = {};
 
 // Queries pool*.repos_branches for all entries for associated_products in a shared metadata entry
 export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) => {
-  const { associated_products } = metadata;
-  if (!associated_products || !associated_products.length) return [];
+  const { associated_products = [] } = metadata;
+  if (!associated_products.length) return [];
 
-  const associatedProductNames = associated_products.map((a) => a.name);
   const res: ReposBranchesDocument[] = [],
     fetch: project[] = [];
   associated_products.forEach((ap) => {
@@ -43,11 +42,15 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
     }
   });
 
+  if (!fetch.length) {
+    return res;
+  }
+
   try {
     const db = await pool();
     await db
       .collection('repos_branches')
-      .find({ project: { $in: associatedProductNames } })
+      .find({ project: { $in: fetch } })
       .forEach((doc: ReposBranchesDocument) => {
         // TODO: store in cache
         internals[doc['project']] = doc;
