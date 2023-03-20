@@ -177,7 +177,7 @@ async function getOASpec({
         versionOptions = {
           active: {
             apiVersion,
-            resourceVersion: resourceVersion,
+            resourceVersion,
           },
           rootUrl,
           resourceVersions,
