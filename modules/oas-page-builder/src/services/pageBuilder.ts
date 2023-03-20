@@ -1,10 +1,13 @@
 import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
+import { fetchVersionData } from '../utils/fetchVersionData';
 import { RedocExecutor } from './redocExecutor';
-import { findLastSavedGitHash } from './database';
 import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions, RedocVersionOptions } from './types';
+import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from './database';
+import { VersionData } from './models/OASFile';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
+const GIT_HASH_URL = 'https://cloud.mongodb.com/version';
 
 const fetchTextData = async (url: string, errMsg: string) => {
   const res = await fetch(url);
@@ -15,11 +18,43 @@ const fetchTextData = async (url: string, errMsg: string) => {
   return res.text();
 };
 
+const createFetchGitHash = () => {
+  let gitHashCache: string;
+  return {
+    fetchGitHash: async () => {
+      if (gitHashCache) return gitHashCache;
+      try {
+        const gitHash = await fetchTextData(GIT_HASH_URL, 'Could not find current version or git hash');
+        gitHashCache = gitHash;
+        return gitHash;
+      } catch (e) {
+        console.error(e);
+        throw new Error(`Unsuccessful git hash fetch`);
+      }
+    },
+    resetGitHashCache: () => {
+      gitHashCache = '';
+    },
+  };
+};
+
+const { fetchGitHash, resetGitHashCache } = createFetchGitHash();
+
 interface AtlasSpecUrlParams {
   apiKeyword: string;
   apiVersion?: string;
   resourceVersion?: string;
 }
+
+const ensureSavedVersionDataMatches = (versions: VersionData, apiVersion?: string, resourceVersion?: string) => {
+  // Check that requested versions are included in saved version data
+  if (apiVersion) {
+    if (!versions.major.includes(apiVersion) || (resourceVersion && !versions[apiVersion].includes(resourceVersion))) {
+      throw new Error(`Last successful build data does not include necessary version data:\n
+      Version requested: ${apiVersion}${resourceVersion ? ` - ${resourceVersion}` : ``}`);
+    }
+  }
+};
 
 const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: AtlasSpecUrlParams) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
@@ -34,10 +69,10 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
   }`;
 
   let oasFileURL;
+  let successfulGitHash = true;
 
   try {
-    const versionURL = 'https://cloud.mongodb.com/version';
-    const gitHash = await fetchTextData(versionURL, 'Could not find current version or git hash');
+    const gitHash = await fetchGitHash();
     oasFileURL = `${OAS_FILE_SERVER}${gitHash}${versionExtension}.json`;
 
     // Sometimes the latest git hash might not have a fully available spec file yet.
@@ -46,9 +81,11 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
     await fetchTextData(oasFileURL, `Error fetching data from ${oasFileURL}`);
   } catch (e) {
     console.error(e);
+    successfulGitHash = false;
 
-    const res = await findLastSavedGitHash(apiKeyword);
+    const res = await findLastSavedVersionData(apiKeyword);
     if (res) {
+      ensureSavedVersionDataMatches(res.versions, apiVersion, resourceVersion);
       oasFileURL = `${OAS_FILE_SERVER}${res.gitHash}${versionExtension}.json`;
       console.log(`Using ${oasFileURL}`);
     } else {
@@ -56,7 +93,10 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
     }
   }
 
-  return oasFileURL;
+  return {
+    oasFileURL,
+    successfulGitHash,
+  };
 };
 
 interface GetOASpecParams {
@@ -87,6 +127,7 @@ async function getOASpec({
 }: GetOASpecParams) {
   try {
     let spec = '';
+    let isSuccessfulBuild = true;
     const buildOptions: RedocBuildOptions = {};
     if (sourceType === 'url') {
       spec = source;
@@ -94,7 +135,13 @@ async function getOASpec({
       const localFilePath = normalizePath(`${repoPath}/source/${source}`);
       spec = localFilePath;
     } else if (sourceType === 'atlas') {
-      spec = await getAtlasSpecUrl({ apiKeyword: source, apiVersion, resourceVersion });
+      const { oasFileURL, successfulGitHash } = await getAtlasSpecUrl({
+        apiKeyword: source,
+        apiVersion,
+        resourceVersion,
+      });
+      spec = oasFileURL;
+      isSuccessfulBuild = successfulGitHash;
       // Ignore "incompatible types" warnings for Atlas Admin API/cloud-docs
       buildOptions['ignoreIncompatibleTypes'] = true;
     } else {
@@ -139,8 +186,10 @@ async function getOASpec({
     }
 
     await redocExecutor.execute(spec, finalFilename, buildOptions, versionOptions);
+    return isSuccessfulBuild;
   } catch (e) {
     console.error(e);
+    return false;
   }
 }
 
@@ -151,6 +200,7 @@ export const buildOpenAPIPages = async (
   const redocExecutor = new RedocExecutor(redocPath, siteUrl, siteTitle);
 
   for (const [pageSlug, data] of entries) {
+    let totalSuccess = true;
     const { source_type: sourceType, source, api_version: apiVersion, resource_versions: resourceVersions } = data;
 
     if (!apiVersion && resourceVersions && resourceVersions.length > 0) {
@@ -164,8 +214,7 @@ export const buildOpenAPIPages = async (
       // if a resource versions array is provided, then we can loop through the resourceVersions array and call the getOASpec
       // for each minor version
       for (const resourceVersion of resourceVersions) {
-        // there is a minor version and major version
-        await getOASpec({
+        const isSuccessfulBuild = await getOASpec({
           source,
           sourceType,
           output,
@@ -177,6 +226,8 @@ export const buildOpenAPIPages = async (
           siteUrl,
           resourceVersions,
         });
+
+        if (!isSuccessfulBuild) totalSuccess = false;
       }
 
       // provide no resource version in this context for the base version
@@ -204,5 +255,29 @@ export const buildOpenAPIPages = async (
         siteUrl,
       });
     }
+    // apiVersion can be undefined, this case is handled within the getOASpec function
+    const isSuccessfulBuild = await getOASpec({
+      source,
+      sourceType,
+      output,
+      pageSlug,
+      redocExecutor,
+      repoPath,
+      apiVersion,
+      siteUrl,
+    });
+    if (!isSuccessfulBuild) totalSuccess = false;
+
+    // If all builds successful, persist git hash and version data in db
+    if (totalSuccess && sourceType == 'atlas') {
+      try {
+        const gitHash = await fetchGitHash();
+        const versions = await fetchVersionData(gitHash);
+        await saveSuccessfulBuildVersionData(source, gitHash, versions);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    resetGitHashCache();
   }
 };

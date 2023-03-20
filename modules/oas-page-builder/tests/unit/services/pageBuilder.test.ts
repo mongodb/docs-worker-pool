@@ -1,7 +1,8 @@
 import fetch from 'node-fetch';
-import { findLastSavedGitHash } from '../../../src/services/database';
+import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from '../../../src/services/database';
 import { buildOpenAPIPages } from '../../../src/services/pageBuilder';
 import { OASPageMetadata, PageBuilderOptions, RedocVersionOptions } from '../../../src/services/types';
+import { fetchVersionData } from '../../../src/utils/fetchVersionData';
 
 const MOCKED_GIT_HASH = '1234';
 const LAST_SAVED_GIT_HASH = '4321';
@@ -18,7 +19,13 @@ jest.mock('../../../src/services/redocExecutor', () => ({
 // Mock database since implementation relies on database instance. Returned values
 // are mocked for each test.
 jest.mock('../../../src/services/database', () => ({
-  findLastSavedGitHash: jest.fn(),
+  findLastSavedVersionData: jest.fn(),
+  saveSuccessfulBuildVersionData: jest.fn(),
+}));
+
+// Mock version data fetch to override mocked node-fetch
+jest.mock('../../../src/utils/fetchVersionData', () => ({
+  fetchVersionData: jest.fn(),
 }));
 
 // Helper function for concatenated output path
@@ -51,6 +58,7 @@ describe('pageBuilder', () => {
   beforeEach(() => {
     // Reset mock to reset call count
     mockExecute.mockReset();
+    jest.clearAllMocks();
   });
 
   it('builds OpenAPI pages', async () => {
@@ -137,6 +145,9 @@ describe('pageBuilder', () => {
   });
 
   it('builds OpenAPI pages with api version and resource version', async () => {
+    const expectedVersionData = { major: ['1.0', '2.0'], '2.0': ['01-01-2020'] };
+    // @ts-ignore
+    fetchVersionData.mockReturnValue(expectedVersionData);
     mockFetchImplementation(true);
 
     const RESOURCE_VERSION = '01-01-2020';
@@ -259,6 +270,9 @@ describe('pageBuilder', () => {
         rootUrl: `${SITE_URL}/${testEntries[2][0]}`,
       }
     );
+
+    expect(saveSuccessfulBuildVersionData).toBeCalledTimes(1);
+    expect(saveSuccessfulBuildVersionData).toBeCalledWith('cloud', MOCKED_GIT_HASH, expectedVersionData);
   });
 
   it('uses the latest resource version for a base API version', async () => {
@@ -322,7 +336,7 @@ describe('pageBuilder', () => {
   it('builds Atlas Cloud API with backup git hash', async () => {
     mockFetchImplementation(false);
     // @ts-ignore
-    findLastSavedGitHash.mockReturnValue({ gitHash: LAST_SAVED_GIT_HASH });
+    findLastSavedVersionData.mockReturnValue({ gitHash: LAST_SAVED_GIT_HASH });
 
     const testEntries: [string, OASPageMetadata][] = [['path/to/page/1', { source_type: 'atlas', source: 'cloud' }]];
 
@@ -333,16 +347,18 @@ describe('pageBuilder', () => {
       expectedAtlasBuildOptions,
       undefined
     );
+    expect(saveSuccessfulBuildVersionData).toBeCalledTimes(0);
   });
 
   it('does not build atlas OAS when backup git hash is missing', async () => {
     mockFetchImplementation(false);
     // @ts-ignore
-    findLastSavedGitHash.mockReturnValue(null);
+    findLastSavedVersionData.mockReturnValue(null);
 
     const testEntries: [string, OASPageMetadata][] = [['path/to/page/1', { source_type: 'atlas', source: 'cloud' }]];
 
     await buildOpenAPIPages(testEntries, testOptions);
     expect(mockExecute).toBeCalledTimes(0);
+    expect(saveSuccessfulBuildVersionData).toBeCalledTimes(0);
   });
 });
