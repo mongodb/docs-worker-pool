@@ -13,8 +13,9 @@ export interface ToC {
   [key: string]: any;
 }
 
-type project = string;
-type branchName = string;
+// TODO: move this typing to outer scope ie. metadata/index.ts
+export type project = string;
+export type branchName = string;
 type branch = {
   [key: branchName]: ToCCopies;
 };
