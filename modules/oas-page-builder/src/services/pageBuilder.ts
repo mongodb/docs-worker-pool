@@ -101,9 +101,16 @@ async function getOASpec({
       throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
     }
 
+    const filePathExtension = `${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}`;
+
+    const path = `${output}/${pageSlug}${filePathExtension}/index.html`;
+    const finalFilename = normalizePath(path);
+
     let versionOptions: RedocVersionOptions | undefined;
 
     if (resourceVersions && apiVersion) {
+      const rootUrl = `${siteUrl}/${pageSlug}`;
+
       // if there is no resource version provided, but there is a resourceVersions array present,
       // get the latest resource version from the array, and assign it to the active resource version
       if (!resourceVersion) {
@@ -116,7 +123,7 @@ async function getOASpec({
             apiVersion,
             resourceVersion: latestResourceVersion,
           },
-          rootUrl: siteUrl,
+          rootUrl,
           resourceVersions,
         };
       } else {
@@ -125,16 +132,12 @@ async function getOASpec({
             apiVersion,
             resourceVersion: resourceVersion,
           },
-          rootUrl: siteUrl,
+          rootUrl,
           resourceVersions,
         };
       }
     }
 
-    const filePathExtension = `${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}`;
-
-    const path = `${output}/${pageSlug}${filePathExtension}/index.html`;
-    const finalFilename = normalizePath(path);
     await redocExecutor.execute(spec, finalFilename, buildOptions, versionOptions);
   } catch (e) {
     console.error(e);
