@@ -43,10 +43,6 @@ export class RedocExecutor {
     }
   }
 
-  private createVersionDataFile(versionOptions: RedocVersionOptions): void {
-    writeFileSync('options.json', JSON.stringify(versionOptions));
-  }
-
   // Adds any additional options required for current page
   private finalizeOptions(buildOptions: RedocBuildOptions, versionOptions?: RedocVersionOptions): void {
     const options = {

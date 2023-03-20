@@ -104,14 +104,31 @@ async function getOASpec({
     let versionOptions: RedocVersionOptions | undefined;
 
     if (resourceVersions && apiVersion) {
-      versionOptions = {
-        active: {
-          apiVersion,
-          resourceVersion: resourceVersion || '',
-        },
-        rootUrl: siteUrl,
-        resourceVersions,
-      };
+      // if there is no resource version provided, but there is a resourceVersions array present,
+      // get the latest resource version from the array, and assign it to the active resource version
+      if (!resourceVersion) {
+        const latestResourceVersion = resourceVersions.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[
+          resourceVersions.length - 1
+        ];
+
+        versionOptions = {
+          active: {
+            apiVersion,
+            resourceVersion: latestResourceVersion,
+          },
+          rootUrl: siteUrl,
+          resourceVersions,
+        };
+      } else {
+        versionOptions = {
+          active: {
+            apiVersion,
+            resourceVersion: resourceVersion,
+          },
+          rootUrl: siteUrl,
+          resourceVersions,
+        };
+      }
     }
 
     const filePathExtension = `${resourceVersion && apiVersion ? `/${resourceVersion}` : ''}`;
