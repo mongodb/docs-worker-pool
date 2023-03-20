@@ -154,15 +154,6 @@ describe('pageBuilder', () => {
     const RESOURCE_VERSIONS = [RESOURCE_VERSION];
     const API_VERSION = '2.0';
 
-    const EXPECTED_BUILD_OPTIONS: RedocVersionOptions = {
-      active: {
-        apiVersion: API_VERSION,
-        resourceVersion: RESOURCE_VERSION,
-      },
-      rootUrl: SITE_URL,
-      resourceVersions: RESOURCE_VERSIONS,
-    };
-
     const testEntries: [string, OASPageMetadata][] = [
       [
         'path/to/page/1/v2',
