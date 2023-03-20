@@ -1,10 +1,11 @@
 import fetch from 'node-fetch';
 import { findLastSavedGitHash } from '../../../src/services/database';
 import { buildOpenAPIPages } from '../../../src/services/pageBuilder';
-import { OASPageMetadata, PageBuilderOptions } from '../../../src/services/types';
+import { OASPageMetadata, PageBuilderOptions, RedocVersionOptions } from '../../../src/services/types';
 
 const MOCKED_GIT_HASH = '1234';
 const LAST_SAVED_GIT_HASH = '4321';
+const SITE_URL = 'https://mongodb.com/docs';
 
 const mockExecute = jest.fn();
 // Mock execRedoc since we only want to ensure pageBuilder properly calls the function
@@ -39,7 +40,7 @@ describe('pageBuilder', () => {
     output: '/path/to/destination',
     redoc: '/path/to/redoc/cli/index.js',
     repo: '/path/to/repo',
-    siteUrl: 'https://mongodb.com/docs',
+    siteUrl: SITE_URL,
     siteTitle: 'Test Docs',
   };
   const expectedAtlasBuildOptions = {
@@ -116,29 +117,45 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/index.html`,
-      { ...expectedDefaultBuildOptions, apiVersion: '1.0', resourceVersion: undefined }
+      expectedDefaultBuildOptions,
+      undefined
     );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
       getExpectedOutputPath(testOptions.output, testEntries[1][0], '1.0'),
-      { ...expectedDefaultBuildOptions, apiVersion: '1.0', resourceVersion: undefined }
+      expectedDefaultBuildOptions,
+      undefined
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '1.0'),
-      { ...expectedAtlasBuildOptions, apiVersion: '1.0', resourceVersion: undefined }
+      expectedAtlasBuildOptions,
+      undefined
     );
   });
 
   it('builds OpenAPI pages with api version and resource version', async () => {
     mockFetchImplementation(true);
 
+    const RESOURCE_VERSION = '01-01-2020';
+    const RESOURCE_VERSIONS = [RESOURCE_VERSION];
+    const API_VERSION = '2.0';
+
+    const EXPECTED_BUILD_OPTIONS: RedocVersionOptions = {
+      active: {
+        apiVersion: API_VERSION,
+        resourceVersion: RESOURCE_VERSION,
+      },
+      rootUrl: SITE_URL,
+      resourceVersions: RESOURCE_VERSIONS,
+    };
+
     const testEntries: [string, OASPageMetadata][] = [
       [
         'path/to/page/1/v2',
-        { source_type: 'local', source: '/local-spec.json', api_version: '2.0', resource_versions: ['01-01-2020'] },
+        { source_type: 'local', source: '/local-spec.json', api_version: '2.0', resource_versions: RESOURCE_VERSIONS },
       ],
       [
         'path/to/page/2/v2',
@@ -146,12 +163,12 @@ describe('pageBuilder', () => {
           source_type: 'url',
           source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
           api_version: '2.0',
-          resource_versions: ['01-01-2020'],
+          resource_versions: RESOURCE_VERSIONS,
         },
       ],
       [
         'path/to/page/3/v2',
-        { source_type: 'atlas', source: 'cloud', api_version: '2.0', resource_versions: ['01-01-2020'] },
+        { source_type: 'atlas', source: 'cloud', api_version: '2.0', resource_versions: RESOURCE_VERSIONS },
       ],
     ];
 
@@ -162,37 +179,43 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/01-01-2020/index.html`,
-      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: '01-01-2020' }
+      expectedDefaultBuildOptions,
+      EXPECTED_BUILD_OPTIONS
     );
 
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/index.html`,
-      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: undefined }
+      expectedDefaultBuildOptions,
+      EXPECTED_BUILD_OPTIONS
     );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
       getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0', '01-01-2020'),
-      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: '01-01-2020' }
+      expectedDefaultBuildOptions,
+      EXPECTED_BUILD_OPTIONS
     );
 
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
       getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0'),
-      { ...expectedDefaultBuildOptions, apiVersion: '2.0', resourceVersion: undefined }
+      expectedDefaultBuildOptions,
+      EXPECTED_BUILD_OPTIONS
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-01-01-2020.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0', '01-01-2020'),
-      { ...expectedAtlasBuildOptions, apiVersion: '2.0', resourceVersion: '01-01-2020' }
+      expectedAtlasBuildOptions,
+      EXPECTED_BUILD_OPTIONS
     );
 
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0'),
-      { ...expectedAtlasBuildOptions, apiVersion: '2.0', resourceVersion: undefined }
+      expectedAtlasBuildOptions,
+      EXPECTED_BUILD_OPTIONS
     );
   });
 
@@ -207,7 +230,8 @@ describe('pageBuilder', () => {
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${LAST_SAVED_GIT_HASH}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[0][0]),
-      expectedAtlasBuildOptions
+      expectedAtlasBuildOptions,
+      undefined
     );
   });
 

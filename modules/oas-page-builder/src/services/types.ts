@@ -20,8 +20,6 @@ export interface PageBuilderOptions extends Omit<ModuleOptions, 'bundle'> {
 
 export interface RedocBuildOptions {
   ignoreIncompatibleTypes?: boolean;
-  apiVersion?: string;
-  resourceVersion?: string;
 }
 
 export interface RedocVersionOptions {
