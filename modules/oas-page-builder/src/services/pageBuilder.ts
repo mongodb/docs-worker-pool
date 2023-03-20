@@ -244,7 +244,7 @@ export const buildOpenAPIPages = async (
       });
     } else {
       // apiVersion can be undefined, this case is handled within the getOASpec function
-      await getOASpec({
+      const isSuccessfulBuild = await getOASpec({
         source,
         sourceType,
         output,
@@ -254,19 +254,8 @@ export const buildOpenAPIPages = async (
         apiVersion,
         siteUrl,
       });
+      if (!isSuccessfulBuild) totalSuccess = false;
     }
-    // apiVersion can be undefined, this case is handled within the getOASpec function
-    const isSuccessfulBuild = await getOASpec({
-      source,
-      sourceType,
-      output,
-      pageSlug,
-      redocExecutor,
-      repoPath,
-      apiVersion,
-      siteUrl,
-    });
-    if (!isSuccessfulBuild) totalSuccess = false;
 
     // If all builds successful, persist git hash and version data in db
     if (totalSuccess && sourceType == 'atlas') {
