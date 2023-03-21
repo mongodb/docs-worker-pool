@@ -5,6 +5,7 @@ import { RedocExecutor } from './redocExecutor';
 import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions, RedocVersionOptions } from './types';
 import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from './database';
 import { VersionData } from './models/OASFile';
+import { normalizeUrl } from '../utils/normalizeUrl';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
 const GIT_HASH_URL = 'https://cloud.mongodb.com/version';
@@ -155,8 +156,8 @@ async function getOASpec({
 
     let versionOptions: RedocVersionOptions | undefined;
 
-    if (resourceVersions && apiVersion) {
-      const rootUrl = `${siteUrl}/${pageSlug}`;
+    if (resourceVersions && resourceVersions.length > 0 && apiVersion) {
+      const rootUrl = normalizeUrl(`${siteUrl}/${pageSlug}`);
 
       // if there is no resource version provided, but there is a resourceVersions array present,
       // get the latest resource version from the array, and assign it to the active resource version
@@ -229,34 +230,22 @@ export const buildOpenAPIPages = async (
 
         if (!isSuccessfulBuild) totalSuccess = false;
       }
-
-      // provide no resource version in this context for the base version
-      await getOASpec({
-        source,
-        sourceType,
-        output,
-        pageSlug,
-        redocExecutor,
-        repoPath,
-        apiVersion,
-        siteUrl,
-        resourceVersions,
-      });
-    } else {
-      // apiVersion can be undefined, this case is handled within the getOASpec function
-      const isSuccessfulBuild = await getOASpec({
-        source,
-        sourceType,
-        output,
-        pageSlug,
-        redocExecutor,
-        repoPath,
-        apiVersion,
-        siteUrl,
-      });
-      if (!isSuccessfulBuild) totalSuccess = false;
     }
 
+    // apiVersion can be undefined, this case is handled within the getOASpec function
+    // resourceVersions can also be undefined, but again, this is handled within the getOASpec function
+    const isSuccessfulBuild = await getOASpec({
+      source,
+      sourceType,
+      output,
+      pageSlug,
+      redocExecutor,
+      repoPath,
+      apiVersion,
+      siteUrl,
+      resourceVersions,
+    });
+    if (!isSuccessfulBuild) totalSuccess = false;
     // If all builds successful, persist git hash and version data in db
     if (totalSuccess && sourceType == 'atlas') {
       try {

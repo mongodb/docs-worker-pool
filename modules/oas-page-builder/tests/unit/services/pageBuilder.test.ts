@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from '../../../src/services/database';
 import { buildOpenAPIPages } from '../../../src/services/pageBuilder';
-import { OASPageMetadata, PageBuilderOptions, RedocVersionOptions } from '../../../src/services/types';
+import { OASPageMetadata, PageBuilderOptions } from '../../../src/services/types';
 import { fetchVersionData } from '../../../src/utils/fetchVersionData';
 
 const MOCKED_GIT_HASH = '1234';
