@@ -39,7 +39,7 @@
     "fs-extra": "^7.0.1",
     "jest-mock-extended": "^2.0.2-beta2",
     "js-yaml": "^3.13.1",
-    "mongodb": "^4.1.1",
+    "mongodb": "^5.1.0",
     "simple-git": "^2.45.1",
     "tsscmp": "^1.0.6",
     "validator": "^10.11.0"
