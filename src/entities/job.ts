@@ -6,6 +6,7 @@ export enum JobStatus {
   inProgress = 'inProgress',
   completed = 'completed',
   failed = 'failed',
+  timedOut = 'timedOut',
 }
 
 // TODO: Formalize JobTypes

@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { mockDeep } from 'jest-mock-extended';
-import { Db } from 'mongodb';
+import { Db, FindCursor, FindOptions } from 'mongodb';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
@@ -11,6 +11,8 @@ export class DBRepositoryHelper {
   logger: ILogger;
   db: Db;
   updateOne: (query: any, update: any, errorMsg: string) => Promise<boolean>;
+  updateMany: (query: any, update: any, errorMsg: string) => Promise<boolean>;
+  find: (query: any, errorMsg: string, options?: FindOptions) => Promise<FindCursor>;
   findOne: (query: any, errorMsg: string) => Promise<any>;
   findOneAndUpdate: (query: any, update: any, options: any, errorMsg: string) => Promise<any>;
   collection: any;
@@ -29,10 +31,14 @@ export class DBRepositoryHelper {
     this.logger = mockDeep<ILogger>();
     this.db = mockDeep<Db>();
     this.updateOne = jest.fn();
+    this.updateMany = jest.fn();
+    this.find = jest.fn();
     this.findOne = jest.fn();
     this.findOneAndUpdate = jest.fn();
     this.collection = {
       updateOne: this.updateOne,
+      updateMany: this.updateMany,
+      find: this.find,
       findOne: this.findOne,
       findOneAndUpdate: this.findOneAndUpdate,
     };
