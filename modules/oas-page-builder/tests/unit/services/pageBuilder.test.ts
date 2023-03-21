@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from '../../../src/services/database';
 import { buildOpenAPIPages } from '../../../src/services/pageBuilder';
-import { OASPageMetadata, PageBuilderOptions } from '../../../src/services/types';
+import { OASPageMetadata, PageBuilderOptions, RedocVersionOptions } from '../../../src/services/types';
 import { fetchVersionData } from '../../../src/utils/fetchVersionData';
 
 const MOCKED_GIT_HASH = '1234';
@@ -154,23 +154,37 @@ describe('pageBuilder', () => {
     const RESOURCE_VERSIONS = [RESOURCE_VERSION];
     const API_VERSION = '2.0';
 
+    const getExpectedVersionOptions = (rootUrl: string): RedocVersionOptions => ({
+      active: {
+        apiVersion: API_VERSION,
+        resourceVersion: RESOURCE_VERSION,
+      },
+      resourceVersions: RESOURCE_VERSIONS,
+      rootUrl,
+    });
+
     const testEntries: [string, OASPageMetadata][] = [
       [
         'path/to/page/1/v2',
-        { source_type: 'local', source: '/local-spec.json', api_version: '2.0', resource_versions: RESOURCE_VERSIONS },
+        {
+          source_type: 'local',
+          source: '/local-spec.json',
+          api_version: API_VERSION,
+          resource_versions: RESOURCE_VERSIONS,
+        },
       ],
       [
         'path/to/page/2/v2',
         {
           source_type: 'url',
           source: 'https://raw.githubusercontent.com/mongodb/docs-landing/master/source/openapi/loremipsum.json',
-          api_version: '2.0',
+          api_version: API_VERSION,
           resource_versions: RESOURCE_VERSIONS,
         },
       ],
       [
         'path/to/page/3/v2',
-        { source_type: 'atlas', source: 'cloud', api_version: '2.0', resource_versions: RESOURCE_VERSIONS },
+        { source_type: 'atlas', source: 'cloud', api_version: API_VERSION, resource_versions: RESOURCE_VERSIONS },
       ],
     ];
 
@@ -180,86 +194,44 @@ describe('pageBuilder', () => {
     // Local
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/01-01-2020/index.html`,
+      `${testOptions.output}/${testEntries[0][0]}/${RESOURCE_VERSION}/index.html`,
       expectedDefaultBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: RESOURCE_VERSION,
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[0][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`)
     );
 
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
       `${testOptions.output}/${testEntries[0][0]}/index.html`,
       expectedDefaultBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: RESOURCE_VERSION,
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[0][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`)
     );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
-      getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0', '01-01-2020'),
+      getExpectedOutputPath(testOptions.output, testEntries[1][0], API_VERSION, RESOURCE_VERSION),
       expectedDefaultBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: RESOURCE_VERSION,
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[1][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[1][0]}`)
     );
 
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
-      getExpectedOutputPath(testOptions.output, testEntries[1][0], '2.0'),
+      getExpectedOutputPath(testOptions.output, testEntries[1][0], API_VERSION),
       expectedDefaultBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: RESOURCE_VERSION,
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[1][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[1][0]}`)
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-01-01-2020.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0', '01-01-2020'),
       expectedAtlasBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: RESOURCE_VERSION,
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[2][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[2][0]}`)
     );
 
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], '2.0'),
       expectedAtlasBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: RESOURCE_VERSION,
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[2][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[2][0]}`)
     );
 
     expect(saveSuccessfulBuildVersionData).toBeCalledTimes(1);
@@ -276,9 +248,17 @@ describe('pageBuilder', () => {
     const testEntries: [string, OASPageMetadata][] = [
       [
         'path/to/page/3/v2',
-        { source_type: 'atlas', source: 'cloud', api_version: '2.0', resource_versions: RESOURCE_VERSIONS },
+        { source_type: 'atlas', source: 'cloud', api_version: API_VERSION, resource_versions: RESOURCE_VERSIONS },
       ],
     ];
+    const getExpectedVersionOptions = (rootUrl: string, resourceVersion?: string): RedocVersionOptions => ({
+      active: {
+        apiVersion: API_VERSION,
+        resourceVersion: resourceVersion ?? '01-01-2020',
+      },
+      resourceVersions: RESOURCE_VERSIONS,
+      rootUrl,
+    });
 
     await buildOpenAPIPages(testEntries, testOptions);
 
@@ -286,42 +266,21 @@ describe('pageBuilder', () => {
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-01-01-2020.json`,
       getExpectedOutputPath(testOptions.output, testEntries[0][0], '2.0', '01-01-2020'),
       expectedAtlasBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: '01-01-2020',
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[0][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`)
     );
 
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-01-01-2021.json`,
-      getExpectedOutputPath(testOptions.output, testEntries[0][0], '2.0', '01-01-2021'),
+      getExpectedOutputPath(testOptions.output, testEntries[0][0], API_VERSION, LATEST_RESOURCE_VERSION),
       expectedAtlasBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: '01-01-2021',
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[0][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`, LATEST_RESOURCE_VERSION)
     );
 
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2.json`,
       getExpectedOutputPath(testOptions.output, testEntries[0][0], '2.0'),
       expectedAtlasBuildOptions,
-      {
-        active: {
-          apiVersion: API_VERSION,
-          resourceVersion: LATEST_RESOURCE_VERSION,
-        },
-        resourceVersions: RESOURCE_VERSIONS,
-        rootUrl: `${SITE_URL}/${testEntries[0][0]}`,
-      }
+      getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`, LATEST_RESOURCE_VERSION)
     );
   });
   it('builds Atlas Cloud API with backup git hash', async () => {
