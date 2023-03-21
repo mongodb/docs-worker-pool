@@ -42,7 +42,7 @@
     "mongodb": "^5.1.0",
     "simple-git": "^2.45.1",
     "tsscmp": "^1.0.6",
-    "validator": "^10.11.0"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",
