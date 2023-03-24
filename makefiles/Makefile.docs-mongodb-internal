@@ -122,6 +122,7 @@ examples:
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-ruby-driver/master/spec/integration/transactions_examples_spec.rb -o ${DRIVERS_PATH}/transactions_examples_spec.rb
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-ruby-driver/master/spec/integration/transactions_api_examples_spec.rb -o ${DRIVERS_PATH}/with_transactions_examples_spec.rb
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-ruby-driver/master/spec/integration/versioned_api_examples_spec.rb -o ${DRIVERS_PATH}/versioned_api_examples_spec.rb
+	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-ruby-driver/master/spec/integration/snapshot_query_examples_spec.rb -o ${DRIVERS_PATH}/snapshot_query_examples_spec.rb
 
 # rust
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-rust-driver/main/src/test/documentation_examples/mod.rs -o ${DRIVERS_PATH}/mod.rs
