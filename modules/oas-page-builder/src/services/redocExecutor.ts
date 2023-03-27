@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { RedocBuildOptions, RedocVersionOptions } from './types';
 import { writeFileSync } from 'fs';
-import { normalizeUrl } from '../utils/normalizeUrl';
+import { normalizePath } from '../utils/normalizePath';
 
 const execCommand = promisify(exec);
 
@@ -52,8 +52,9 @@ export class RedocExecutor {
       ...versionOptions,
     };
 
-    console.log(normalizeUrl(`${this.redocPath}/options.json`));
+    console.log(normalizePath(`../../options.json`));
+    console.log(this.redocPath.split('cli/')?.[0]);
 
-    writeFileSync(normalizeUrl(`${this.redocPath}/options.json`), JSON.stringify(options));
+    writeFileSync(normalizePath(`../../redoc/options.json`), JSON.stringify(options));
   }
 }
