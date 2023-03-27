@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { RedocBuildOptions, RedocVersionOptions } from './types';
 import { writeFileSync } from 'fs';
+import { normalizeUrl } from '../utils/normalizeUrl';
 
 const execCommand = promisify(exec);
 
@@ -51,6 +52,8 @@ export class RedocExecutor {
       ...versionOptions,
     };
 
-    writeFileSync('options.json', JSON.stringify(options));
+    console.log(normalizeUrl(`${this.redocPath}/options.json`));
+
+    writeFileSync(normalizeUrl(`${this.redocPath}/options.json`), JSON.stringify(options));
   }
 }
