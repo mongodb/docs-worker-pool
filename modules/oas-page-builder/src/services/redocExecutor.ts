@@ -49,11 +49,10 @@ export class RedocExecutor {
     const options = {
       ...this.options,
       ...buildOptions,
-      ...versionOptions,
+      versionData: { ...versionOptions },
     };
 
-    console.log('FIRST ', normalizePath(`../../options.json`));
-    console.log('SECOND ', this.redocPath.split('/cli/')?.[0]);
+    console.log('FINAL : ', normalizePath(`${this.redocPath.split('cli/')?.[0]}/options.json`));
 
     writeFileSync(normalizePath(`${this.redocPath.split('cli/')?.[0]}/options.json`), JSON.stringify(options));
   }
