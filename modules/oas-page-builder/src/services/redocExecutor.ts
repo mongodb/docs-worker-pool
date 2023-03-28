@@ -50,7 +50,7 @@ export class RedocExecutor {
     const options = {
       ...this.options,
       ...buildOptions,
-      versionData: { ...versionOptions },
+      versionData: versionOptions ? { ...versionOptions } : undefined,
     };
 
     console.log('FINAL : ', normalizePath(`${this.redocPath.split('cli/')?.[0]}/options.json`));
