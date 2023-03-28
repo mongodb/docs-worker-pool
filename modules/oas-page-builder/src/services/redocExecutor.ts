@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { RedocBuildOptions, RedocVersionOptions } from './types';
 import { writeFileSync } from 'fs';
-import { normalizePath } from '../utils/normalizePath';
+import { getRedocOptionsPath } from '../utils/getRedocOptionsPath';
 
 const execCommand = promisify(exec);
 
@@ -31,8 +31,7 @@ export class RedocExecutor {
     this.finalizeOptions(buildOptions, versionOptions);
 
     const outputArg = `--output ${outputPath}`;
-    const pathToOptions = normalizePath(`${this.redocPath.split('cli/')?.[0]}/options.json`);
-    const optionsArg = `--options ${pathToOptions}`;
+    const optionsArg = `--options ${getRedocOptionsPath(this.redocPath)}`;
 
     const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg}`;
 
@@ -53,8 +52,6 @@ export class RedocExecutor {
       versionData: versionOptions ? { ...versionOptions } : undefined,
     };
 
-    console.log('FINAL : ', normalizePath(`${this.redocPath.split('cli/')?.[0]}/options.json`));
-
-    writeFileSync(normalizePath(`${this.redocPath.split('cli/')?.[0]}/options.json`), JSON.stringify(options));
+    writeFileSync(getRedocOptionsPath(this.redocPath), JSON.stringify(options));
   }
 }
