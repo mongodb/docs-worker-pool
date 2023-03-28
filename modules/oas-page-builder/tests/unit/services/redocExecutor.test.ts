@@ -1,12 +1,15 @@
 import { RedocExecutor } from '../../../src/services/redocExecutor';
 import cp from 'child_process';
 import { readFileSync } from 'fs';
+import * as getRedocOptionsPath from '../../../src/utils/getRedocOptionsPath';
 
 jest.mock('child_process');
 // @ts-ignore
 cp.exec.mockImplementation((command: string, callback: (a: null, b: string) => void) => {
   callback(null, command);
 });
+
+jest.spyOn(getRedocOptionsPath, 'getRedocOptionsPath').mockImplementation(() => 'options.json');
 
 describe('RedocExecutor', () => {
   const testRedocPath = '/path/to/redoc/cli/index.js';
