@@ -31,7 +31,8 @@ export class RedocExecutor {
     this.finalizeOptions(buildOptions, versionOptions);
 
     const outputArg = `--output ${outputPath}`;
-    const optionsArg = `--options options.json`;
+    const pathToOptions = normalizePath(`${this.redocPath.split('cli/')?.[0]}/options.json`);
+    const optionsArg = `--options ${pathToOptions}`;
 
     const command = `node ${this.redocPath} build ${specSource} ${outputArg} ${optionsArg}`;
 
