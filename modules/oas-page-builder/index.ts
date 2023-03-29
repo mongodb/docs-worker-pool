@@ -6,6 +6,7 @@ import { getOASMetadata } from './src/services/buildMetadata';
 import { buildOpenAPIPages } from './src/services/pageBuilder';
 import { ModuleOptions } from './src/types';
 import { normalizeUrl } from './src/utils/normalizeUrl';
+import { teardown as closeDBConnection } from './src/services/database';
 
 const program = new Command();
 program
@@ -46,4 +47,5 @@ app(options)
   .catch((e) => {
     console.error(e);
     process.exit(1);
-  });
+  })
+  .finally(closeDBConnection);

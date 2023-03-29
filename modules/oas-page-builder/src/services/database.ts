@@ -16,6 +16,10 @@ const client = new MongoClient(atlasURL);
 // cached db object, so we can handle initial connection process once if unitialized
 let dbInstance: Db;
 
+export const teardown = () => {
+  client.close();
+};
+
 const getDbName = () => {
   const env = process.env.SNOOTY_ENV ?? '';
 
