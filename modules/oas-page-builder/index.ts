@@ -42,11 +42,10 @@ const app = async (options: ModuleOptions) => {
 app(options)
   .then(() => {
     console.log('Finished building OpenAPI content pages.');
-    closeDBConnection();
     process.exit(0);
   })
   .catch((e) => {
     console.error(e);
-    closeDBConnection();
     process.exit(1);
-  });
+  })
+  .finally(closeDBConnection);
