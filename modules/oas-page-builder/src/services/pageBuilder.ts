@@ -2,9 +2,10 @@ import fetch from 'node-fetch';
 import { normalizePath } from '../utils/normalizePath';
 import { fetchVersionData } from '../utils/fetchVersionData';
 import { RedocExecutor } from './redocExecutor';
+import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions, RedocVersionOptions } from './types';
 import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from './database';
-import { OASPageMetadata, PageBuilderOptions, RedocBuildOptions } from './types';
 import { VersionData } from './models/OASFile';
+import { normalizeUrl } from '../utils/normalizeUrl';
 
 const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
 const GIT_HASH_URL = 'https://cloud.mongodb.com/version';
@@ -106,6 +107,9 @@ interface GetOASpecParams {
   pageSlug: string;
   repoPath: string;
   redocExecutor: RedocExecutor;
+  siteUrl: string;
+  activeResourceVersion?: string;
+  resourceVersions?: string[];
   apiVersion?: string;
   resourceVersion?: string;
 }
@@ -119,6 +123,8 @@ async function getOASpec({
   output,
   apiVersion,
   resourceVersion,
+  resourceVersions,
+  siteUrl,
 }: GetOASpecParams) {
   try {
     let spec = '';
@@ -138,7 +144,6 @@ async function getOASpec({
       spec = oasFileURL;
       isSuccessfulBuild = successfulGitHash;
       // Ignore "incompatible types" warnings for Atlas Admin API/cloud-docs
-
       buildOptions['ignoreIncompatibleTypes'] = true;
     } else {
       throw new Error(`Unsupported source type "${sourceType}" for ${pageSlug}`);
@@ -148,7 +153,40 @@ async function getOASpec({
 
     const path = `${output}/${pageSlug}${filePathExtension}/index.html`;
     const finalFilename = normalizePath(path);
-    await redocExecutor.execute(spec, finalFilename, buildOptions);
+
+    let versionOptions: RedocVersionOptions | undefined;
+
+    if (resourceVersions && resourceVersions.length > 0 && apiVersion) {
+      const rootUrl = normalizeUrl(`${siteUrl}/${pageSlug}`);
+
+      // if there is no resource version provided, but there is a resourceVersions array present,
+      // get the latest resource version from the array, and assign it to the active resource version
+      if (!resourceVersion) {
+        const latestResourceVersion = resourceVersions.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[
+          resourceVersions.length - 1
+        ];
+
+        versionOptions = {
+          active: {
+            apiVersion,
+            resourceVersion: latestResourceVersion,
+          },
+          rootUrl,
+          resourceVersions,
+        };
+      } else {
+        versionOptions = {
+          active: {
+            apiVersion,
+            resourceVersion,
+          },
+          rootUrl,
+          resourceVersions,
+        };
+      }
+    }
+
+    await redocExecutor.execute(spec, finalFilename, buildOptions, versionOptions);
     return isSuccessfulBuild;
   } catch (e) {
     console.error(e);
@@ -186,11 +224,16 @@ export const buildOpenAPIPages = async (
           repoPath,
           apiVersion,
           resourceVersion,
+          siteUrl,
+          resourceVersions,
         });
+
         if (!isSuccessfulBuild) totalSuccess = false;
       }
     }
+
     // apiVersion can be undefined, this case is handled within the getOASpec function
+    // resourceVersions can also be undefined, but again, this is handled within the getOASpec function
     const isSuccessfulBuild = await getOASpec({
       source,
       sourceType,
@@ -199,9 +242,10 @@ export const buildOpenAPIPages = async (
       redocExecutor,
       repoPath,
       apiVersion,
+      siteUrl,
+      resourceVersions,
     });
     if (!isSuccessfulBuild) totalSuccess = false;
-
     // If all builds successful, persist git hash and version data in db
     if (totalSuccess && sourceType == 'atlas') {
       try {
