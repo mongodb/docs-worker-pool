@@ -11,8 +11,8 @@ import { db as poolDb } from './pool';
 const atlasURL = `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority&maxPoolSize=20`;
 const client = new mongodb.MongoClient(atlasURL);
 
-export const teardown = () => {
-  client.close();
+export const teardown = async () => {
+  await client.close();
 };
 
 // Initialize and export our pool connection
