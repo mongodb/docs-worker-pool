@@ -40,12 +40,13 @@ const app = async (options: ModuleOptions) => {
 };
 
 app(options)
-  .then(() => {
+  .then(async () => {
     console.log('Finished building OpenAPI content pages.');
+    await closeDBConnection();
     process.exit(0);
   })
-  .catch((e) => {
+  .catch(async (e) => {
     console.error(e);
+    await closeDBConnection();
     process.exit(1);
-  })
-  .finally(closeDBConnection);
+  });
