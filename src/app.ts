@@ -73,7 +73,7 @@ process.on('SIGTERM', async () => {
   console.log('Received SIGTERM');
   await jobManager.stop();
   if (client) {
-    client.close();
+    await client.close();
     consoleLogger.info('App', '\nServer has closed mongo client connection');
   }
   process.exit(0);
