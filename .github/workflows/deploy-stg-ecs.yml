@@ -3,8 +3,6 @@ on:
     branches:
       - "master"
       - "integration"
-      # TODO-3613: Remove after testing
-      - "DOP-3613-built-cli-js"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
