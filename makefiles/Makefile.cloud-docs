@@ -17,6 +17,9 @@ REPO_DIR=$(shell pwd)
 SNOOTY_DB_USR = $(shell printenv MONGO_ATLAS_USERNAME)
 SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
+# Temporary (hopefully) as part of DOP-3531
+export SNOOTY_NO_AMBIGUOUS_LITERAL_DIAGNOSTICS=1
+
 include ~/shared.mk
 
 
@@ -34,5 +37,5 @@ help:
 	@echo '  ARGS         - Arguments to pass to mut-publish'
 
 
-get-build-dependencies: 
+get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/cloud-docs.yaml > ${REPO_DIR}/published-branches.yaml
