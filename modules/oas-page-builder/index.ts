@@ -6,6 +6,7 @@ import { getOASMetadata } from './src/services/buildMetadata';
 import { buildOpenAPIPages } from './src/services/pageBuilder';
 import { ModuleOptions } from './src/types';
 import { normalizeUrl } from './src/utils/normalizeUrl';
+import { teardown as closeDBConnection } from './src/services/database';
 
 const program = new Command();
 program
@@ -39,11 +40,13 @@ const app = async (options: ModuleOptions) => {
 };
 
 app(options)
-  .then(() => {
+  .then(async () => {
     console.log('Finished building OpenAPI content pages.');
+    await closeDBConnection();
     process.exit(0);
   })
-  .catch((e) => {
+  .catch(async (e) => {
     console.error(e);
+    await closeDBConnection();
     process.exit(1);
   });

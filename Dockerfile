@@ -21,10 +21,10 @@ RUN cd ./modules/oas-page-builder \
 
 # where repo work will happen
 FROM ubuntu:20.04
-ARG SNOOTY_PARSER_VERSION=0.13.18
-ARG SNOOTY_FRONTEND_VERSION=0.13.44
+ARG SNOOTY_PARSER_VERSION=0.14.0
+ARG SNOOTY_FRONTEND_VERSION=0.14.0
 ARG MUT_VERSION=0.10.3
-ARG REDOC_CLI_VERSION=1.1.0
+ARG REDOC_CLI_VERSION=1.1.2
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ENV DEBIAN_FRONTEND=noninteractive
@@ -87,10 +87,7 @@ RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongod
 RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
     # Install dependencies for Redoc CLI
     && cd redoc/ \
-    && npm ci --prefix cli/ --omit=dev \
-    # Install dependencies for Redoc component and building/compiling
-    && npm ci --omit=dev --ignore-scripts \
-    && npm run compile:cli
+    && npm ci --prefix cli/ --omit=dev
 
 COPY --from=ts-compiler /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler /home/docsworker-xlarge/config config/

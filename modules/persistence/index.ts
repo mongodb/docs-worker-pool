@@ -41,11 +41,11 @@ const app = async (path: string) => {
     await insertMergedMetadataEntries(buildId, metadata);
     // DOP-3447 clean up stale metadata
     await deleteStaleMetadata(metadata);
-    closeDBConnection();
+    await closeDBConnection();
     process.exit(0);
   } catch (error) {
     console.error(`Persistence Module encountered a terminal error: ${error}`);
-    closeDBConnection();
+    await closeDBConnection();
     throw error;
   }
 };
