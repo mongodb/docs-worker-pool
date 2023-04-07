@@ -56,8 +56,6 @@ Resources:
               Value: ${self:custom.gatsbyBaseUrl}
             - Name: PREVIEW_BUILD_ENABLED
               Value: ${self:custom.previewBuildEnabled}
-            - Name: GATSBY_TEST_EMBED_VERSIONS
-              Value: ${self:custom.gatsbyTestEmbedVersions}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
