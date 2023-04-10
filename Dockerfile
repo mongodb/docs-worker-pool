@@ -1,5 +1,5 @@
 # Build the Typescript app
-FROM node:14-alpine3.10 as ts-compiler
+FROM node:14.20.1-alpine3.16 as ts-compiler
 WORKDIR /home/docsworker-xlarge
 COPY  config config/
 COPY package*.json ./
@@ -22,9 +22,10 @@ RUN cd ./modules/oas-page-builder \
 # where repo work will happen
 FROM ubuntu:20.04
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
-ARG SNOOTY_PARSER_VERSION=0.13.17
+ARG SNOOTY_PARSER_VERSION=0.14.0
 ARG SNOOTY_FRONTEND_VERSION=gatsbyv4
-ARG REDOC_CLI_VERSION=1.0.0
+ARG MUT_VERSION=0.10.3
+ARG REDOC_CLI_VERSION=1.1.2
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,13 +42,10 @@ RUN /venv/bin/pip install --upgrade --force setuptools
 RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
 
 # helper libraries for docs builds
-RUN apt-get update && apt-get install -y python3 python3-dev python3-pip
-RUN apt-get -y install vim
-RUN apt-get -y install git pkg-config libxml2-dev
-RUN python3 -m pip install https://github.com/mongodb/mut/releases/download/v0.10.2/mut-0.10.2-py3-none-any.whl
+RUN apt-get update && apt-get install -y vim git
 
 
-ENV PATH="${PATH}:/opt/snooty:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
+ENV PATH="${PATH}:/opt/snooty:/opt/mut:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -62,6 +60,10 @@ RUN npm install -g npm@8
 # install snooty parser
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
+
+# install mut
+RUN curl -L -o mut.zip https://github.com/mongodb/mut/releases/download/v${MUT_VERSION}/mut-v${MUT_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ mut.zip
 
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge

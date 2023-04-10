@@ -21,7 +21,6 @@
   "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
   "gatsbyBaseUrl": "GATSBY_BASE_URL",
   "previewBuildEnabled": "PREVIEW_BUILD_ENABLED",
-  "gatsbyTestEmbedVersions": "GATSBY_TEST_EMBED_VERSIONS",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "repo_dir": "repos",
   "jobId": "jobId",

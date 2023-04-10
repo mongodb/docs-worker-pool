@@ -87,4 +87,24 @@ export class ECSContainer implements IContainerServices {
     }
     return '';
   }
+
+  async stopZombieECSTask(taskId: string) {
+    const clusterName = this._config.get<string>('taskDefinitionFamily');
+    try {
+      const res = await this._client.describeTasks({
+        cluster: clusterName,
+        tasks: [taskId],
+      });
+
+      // Only stop ECS task if it's still running
+      if (res.tasks?.[0].lastStatus === 'RUNNING') {
+        await this._client.stopTask({
+          cluster: clusterName,
+          task: taskId,
+        });
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }

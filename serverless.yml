@@ -214,8 +214,11 @@ functions:
       - Effect: Allow
         Action:
           - "ecs:RunTask"
+          - "ecs:StopTask"
+          - "ecs:DescribeTasks"
         Resource:
           - arn:aws:ecs:${aws:region}:${aws:accountId}:task-definition/docs-worker-pool-${self:provider.stage}:*
+          - arn:aws:ecs:${aws:region}:${aws:accountId}:task/docs-worker-pool-${self:provider.stage}/*
       - Effect: Allow
         Action:
           - ecs:DescribeTaskDefinition
@@ -235,6 +238,13 @@ functions:
           - arn:aws:batch:${aws:region}:${aws:accountId}:job-queue/docs-archive-${self:provider.stage}
           - arn:aws:batch:${aws:region}:${aws:accountId}:job-definition/docs-archive-${self:provider.stage}
           - arn:aws:batch:${aws:region}:${aws:accountId}:job-definition/docs-archive-${self:provider.stage}:*
+      environment:
+        <<: *webhook-env-core
+
+    v1FailStuckJobs:
+      handler: api/controllers/v1/jobs.FailStuckJobs
+      events:
+        - schedule: rate(8 hours)
       environment:
         <<: *webhook-env-core
 
