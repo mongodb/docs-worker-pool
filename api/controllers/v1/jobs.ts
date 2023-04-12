@@ -299,6 +299,12 @@ function getMongoClient(config: IConfig): mongodb.MongoClient {
 async function SubmitArchiveJob(jobId: string) {
   const consoleLogger = new ConsoleLogger();
   const environment: string = c.get('env');
+
+  if (environment === 'staging') {
+    consoleLogger.info('Cancelling archive job for staging', JSON.stringify({ jobId }));
+    return;
+  }
+
   const client = getMongoClient(c);
 
   // TODO: this part should probably be its own function so that we can close the connection
