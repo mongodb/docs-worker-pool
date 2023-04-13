@@ -296,11 +296,13 @@ function getMongoClient(config: IConfig): mongodb.MongoClient {
   return new mongodb.MongoClient(url);
 }
 
+const STAGING_ENVS = ['stg', 'prd'];
+
 async function SubmitArchiveJob(jobId: string) {
   const consoleLogger = new ConsoleLogger();
   const environment: string = c.get('env');
 
-  if (environment === 'staging') {
+  if (STAGING_ENVS.includes(environment)) {
     consoleLogger.info('Cancelling archive job for staging', JSON.stringify({ jobId }));
     return;
   }
