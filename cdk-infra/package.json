@@ -2,7 +2,7 @@
   "name": "cdk-infra",
   "version": "0.1.0",
   "bin": {
-    "cdk-infra": "bin/cdk-infra.js"
+    "cdk-infra": "dist/bin/cdk-infra.js"
   },
   "scripts": {
     "build": "tsc",
