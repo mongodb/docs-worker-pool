@@ -1,6 +1,11 @@
-cd build/api/contollers/v1
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-for FILE in *
+cd "$parent_path"
+cd ../
+cd build/api/controllers/v1
+
+for FILE in *.js
 do
-  if [-f "$FILE"]
-  
+  echo $FILE
+  zip ${FILE%.*}.zip $FILE
+done
