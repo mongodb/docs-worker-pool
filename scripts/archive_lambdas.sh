@@ -8,4 +8,5 @@ for FILE in *.js
 do
   echo $FILE
   zip ${FILE%.*}.zip $FILE
+  rm $FILE
 done
