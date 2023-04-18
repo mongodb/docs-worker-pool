@@ -5,7 +5,10 @@ import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const UpsertEdgeDictionaryItem = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
-    throw new Error('event.body is null');
+    return {
+      statusCode: 400,
+      body: 'event.body is null',
+    };
   }
 
   const body = JSON.parse(event.body);
