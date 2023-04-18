@@ -20,7 +20,16 @@ export const TriggerLocalBuild = async (event: APIGatewayEvent): Promise<APIGate
   const consoleLogger = new ConsoleLogger();
   const sqs = new SQSConnector(consoleLogger, c);
 
-  if (!event.body) throw new Error('Trigger local build ');
+  if (!event.body) {
+    const err = 'Trigger local build does not have a body in event payload';
+    consoleLogger.error('TriggerLocalBuildError', err);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+
   const body = JSON.parse(event.body);
   try {
     consoleLogger.info(body.jobId, 'enqueuing Job');
@@ -41,7 +50,6 @@ export const TriggerLocalBuild = async (event: APIGatewayEvent): Promise<APIGate
   }
 };
 
-// TODO: use @types/aws-lambda
 export const HandleJobs = async (event: SQSEvent): Promise<void> => {
   /**
    * Check the status of the incoming jobs
@@ -162,7 +170,8 @@ async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url
     const maxRetries = c.get('maxRetries');
 
     if (!isNumber(maxRetries)) {
-      throw new Error('ERROR! The property "maxRetries" is not a valid number');
+      consoleLogger.error('retry Error', 'ERROR! The property "maxRetries" is not a valid number');
+      return;
     }
 
     if (tries < maxRetries) {

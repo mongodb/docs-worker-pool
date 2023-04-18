@@ -1,6 +1,8 @@
 import * as c from 'config';
 import * as crypto from 'crypto';
 import * as mongodb from 'mongodb';
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
@@ -59,20 +61,30 @@ async function prepGithubPushPayload(
   };
 }
 
-export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<any> => {
+export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
-  const sig = event.headers['X-Hub-Signature-256'];
+
   if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
       statusCode: 401,
       headers: { 'Content-Type': 'text/plain' },
       body: errMsg,
+    };
+  }
+
+  if (!event.body) {
+    const err = 'Trigger local build does not have a body in event payload';
+    consoleLogger.error('TriggerLocalBuildError', err);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
     };
   }
   const body = JSON.parse(event.body);
