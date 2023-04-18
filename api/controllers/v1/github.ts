@@ -4,6 +4,7 @@ import * as mongodb from 'mongodb';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { Job, JobStatus } from '../../../src/entities/job';
 
 // This function will validate your payload from GitHub
 // See docs at https://developer.github.com/webhooks/securing/#validating-payloads-from-github
@@ -16,7 +17,11 @@ function validateJsonWebhook(request: any, secret: string) {
   return true;
 }
 
-async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchRepository, prefix: string) {
+async function prepGithubPushPayload(
+  githubEvent: any,
+  branchRepository: BranchRepository,
+  prefix: string
+): Promise<Omit<Job, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await branchRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
@@ -27,7 +32,7 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
     title: githubEvent.repository.full_name,
     user: githubEvent.pusher.name,
     email: githubEvent.pusher.email,
-    status: 'inQueue',
+    status: JobStatus.inQueue,
     createdTime: new Date(),
     startTime: null,
     endTime: null,
@@ -83,8 +88,9 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const env = c.get<string>('env');
   const repoInfo = await branchRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-  // TODO: Make job be of type Job
+
   const job = await prepGithubPushPayload(body, branchRepository, jobPrefix);
+
   try {
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));

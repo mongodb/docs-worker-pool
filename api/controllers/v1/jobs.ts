@@ -11,13 +11,16 @@ import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
+import { APIGatewayEvent, APIGatewayProxyResult, SQSEvent, SQSRecord } from 'aws-lambda';
 
-export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
+export const TriggerLocalBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
-  const db = client.db(c.get('dbName'));
+
   const consoleLogger = new ConsoleLogger();
   const sqs = new SQSConnector(consoleLogger, c);
+
+  if (!event.body) throw new Error('Trigger local build ');
   const body = JSON.parse(event.body);
   try {
     consoleLogger.info(body.jobId, 'enqueuing Job');
@@ -39,16 +42,16 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
 };
 
 // TODO: use @types/aws-lambda
-export const HandleJobs = async (event: any = {}): Promise<any> => {
+export const HandleJobs = async (event: SQSEvent): Promise<void> => {
   /**
    * Check the status of the incoming jobs
    * if it is inqueue start a task
    * if it is inprogress call NotifyBuildProgress
    * if it is completed call NotifyBuildSummary
    */
-  const messages: JobQueueMessage[] = event.Records;
+  const messages = event.Records;
   await Promise.all(
-    messages.map(async (message: any) => {
+    messages.map(async (message: SQSRecord) => {
       const consoleLogger = new ConsoleLogger();
       const body = JSON.parse(message.body);
       let queueUrl = '';
@@ -134,11 +137,38 @@ async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
   await ecs.stopZombieECSTask(taskId);
 }
 
-async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
+/**
+ * Type guard to check whether or not the val is a number.
+ * This performs the necessary validation to ensure that a given value is
+ * a number at runtime
+ * @param val the value we want to validate
+ * @returns a boolean that states whether or not the val is a number
+ */
+function isNumber(val: unknown): val is number {
+  if (typeof val !== 'number') {
+    if (typeof val === 'string') {
+      return isNaN(parseInt(val));
+    }
+    return false;
+  }
+
+  return true;
+}
+
+async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<void> {
   try {
     const tries = message.tries;
     // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
-    if (tries < c.get('maxRetries')) {
+
+    const maxRetries = c.get('maxRetries');
+
+    if (!isNumber(maxRetries)) {
+      throw new Error('ERROR! The property "maxRetries" is not a valid number');
+    }
+
+    if (isNaN(maxRetries)) {
+    }
+    if (tries < maxRetries) {
       const sqs = new SQSConnector(consoleLogger, c);
       message['tries'] += 1;
       let retryDelay = 10;
@@ -159,8 +189,12 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const env = c.get<string>('env');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
+
+  if (!fullDocument) {
+    throw new Error(`Notify build summary failed. Job does not exist for Job ID: ${jobId}`);
+  }
+
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
   const slackConnector = new SlackConnector(consoleLogger, c);
@@ -201,12 +235,11 @@ async function prepSummaryMessage(
   failed = false
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls = [null, null];
+  let mms_urls: Array<string | null> = [null, null];
   // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
   // so we need to extract both URLs
   if (repoName === 'mms-docs') {
     if (urls.length >= 2) {
-      // TODO: Type 'string[]' is not assignable to type 'null[]'.
       mms_urls = urls.slice(-2);
     }
   }
@@ -264,8 +297,13 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const db = client.db(c.get('dbName'));
   const slackConnector = new SlackConnector(consoleLogger, c);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  // TODO: Make fullDocument be of type Job, validate existence
+
   const fullDocument = await jobRepository.getJobById(jobId);
+
+  if (!fullDocument) {
+    throw new Error(`Notify build progress failed. Job does not exist for Job ID: ${jobId}`);
+  }
+
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -274,7 +312,8 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     consoleLogger.error(username, 'Entitlement Failed');
     return;
   }
-  const resp = await slackConnector.sendMessage(
+
+  await slackConnector.sendMessage(
     prepProgressMessage(
       c.get('dashboardUrl'),
       jobId,
@@ -284,6 +323,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
+
   return {
     statusCode: 200,
   };
@@ -317,6 +357,11 @@ async function SubmitArchiveJob(jobId: string) {
     branches: new BranchRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
+
+  if (!job) {
+    throw new Error(`Submit archive job failed. Job does not exist for Job ID: ${jobId}`);
+  }
+
   const repo = await models.branches.getRepo(job.payload.repoName);
 
   /* NOTE
