@@ -85,7 +85,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   }
 
   if (!event.body) {
-    const err = 'Trigger local build does not have a body in event payload';
+    const err = 'Trigger build does not have a body in event payload';
     consoleLogger.error('TriggerBuildError', err);
     return {
       statusCode: 400,
