@@ -7,11 +7,17 @@ import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { Job, JobStatus } from '../../../src/entities/job';
+import { PushEvent } from '@octokit/webhooks-types';
 
 // This function will validate your payload from GitHub
 // See docs at https://developer.github.com/webhooks/securing/#validating-payloads-from-github
-function validateJsonWebhook(request: any, secret: string) {
-  const expectedSignature = 'sha256=' + crypto.createHmac('sha256', secret).update(request.body).digest('hex');
+function validateJsonWebhook(request: APIGatewayEvent, secret: string) {
+  const expectedSignature =
+    'sha256=' +
+    crypto
+      .createHmac('sha256', secret)
+      .update(request.body ?? '')
+      .digest('hex');
   const signature = request.headers['X-Hub-Signature-256'];
   if (signature !== expectedSignature) {
     return false;
@@ -20,7 +26,7 @@ function validateJsonWebhook(request: any, secret: string) {
 }
 
 async function prepGithubPushPayload(
-  githubEvent: any,
+  githubEvent: PushEvent,
   branchRepository: BranchRepository,
   prefix: string
 ): Promise<Omit<Job, '_id'>> {
