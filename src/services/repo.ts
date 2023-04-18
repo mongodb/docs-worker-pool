@@ -32,6 +32,7 @@ export class GitHubConnector implements IRepoConnector {
     this._fileSystemService = fileSystemService;
   }
 
+  // make everything use credentials to support "internal" repos
   private getBasePath(job: Job): string {
     const botName = this._config.get<string>('githubBotUserName');
     const botPw = this._config.get<string>('githubBotPW');
