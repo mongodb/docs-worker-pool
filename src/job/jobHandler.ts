@@ -389,7 +389,7 @@ export abstract class JobHandler {
     this.prepDeployCommands();
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
-    if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
+    if (this.currJob?.deployCommands?.length && this.currJob?.deployCommands?.length > 0) {
       const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
       if (resp?.error?.includes?.('ERROR')) {
         await this._logger.save(
