@@ -158,7 +158,6 @@ function isNumber(val: unknown): val is number {
 async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<void> {
   try {
     const tries = message.tries;
-    // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
 
     const maxRetries = c.get('maxRetries');
 
@@ -166,8 +165,6 @@ async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url
       throw new Error('ERROR! The property "maxRetries" is not a valid number');
     }
 
-    if (isNaN(maxRetries)) {
-    }
     if (tries < maxRetries) {
       const sqs = new SQSConnector(consoleLogger, c);
       message['tries'] += 1;
