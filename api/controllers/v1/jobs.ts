@@ -62,13 +62,11 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
     messages.map(async (message: SQSRecord) => {
       const consoleLogger = new ConsoleLogger();
       const body = JSON.parse(message.body);
-      let queueUrl = '';
       const jobId = body['jobId'];
       const jobStatus = body['jobStatus'];
       try {
         switch (jobStatus) {
           case JobStatus[JobStatus.inQueue]:
-            queueUrl = c.get('jobsQueueUrl');
             await NotifyBuildProgress(jobId);
             // start the task , don't start the process before processing the notification
             const ecsServices = new ECSContainer(c, consoleLogger);
@@ -79,7 +77,6 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             consoleLogger.info(jobId, JSON.stringify(res));
             break;
           case JobStatus[JobStatus.inProgress]:
-            queueUrl = c.get('jobUpdatesQueueUrl');
             await NotifyBuildProgress(jobId);
             break;
           case JobStatus[JobStatus.timedOut]:
@@ -91,9 +88,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             break;
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
-            queueUrl = c.get('jobUpdatesQueueUrl');
-            await NotifyBuildSummary(jobId);
-            await SubmitArchiveJob(jobId);
+            await Promise.all([NotifyBuildSummary(jobId), SubmitArchiveJob(jobId)]);
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');
@@ -187,7 +182,7 @@ async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url
     consoleLogger.error(message['jobId'], err);
   }
 }
-async function NotifyBuildSummary(jobId: string): Promise<any> {
+async function NotifyBuildSummary(jobId: string): Promise<void> {
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -206,10 +201,12 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const slackConnector = new SlackConnector(consoleLogger, c);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
+
   if (!entitlement?.['slack_user_id']) {
     consoleLogger.error(username, 'Entitlement failed');
     return;
   }
+
   await slackConnector.sendMessage(
     await prepSummaryMessage(
       env,
@@ -221,9 +218,6 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
-  return {
-    statusCode: 200,
-  };
 }
 
 export const extractUrlFromMessage = (fullDocument): string[] => {
@@ -296,7 +290,7 @@ function prepProgressMessage(
   }
 }
 
-async function NotifyBuildProgress(jobId: string): Promise<any> {
+async function NotifyBuildProgress(jobId: string): Promise<void> {
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -307,7 +301,11 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const fullDocument = await jobRepository.getJobById(jobId);
 
   if (!fullDocument) {
-    throw new Error(`Notify build progress failed. Job does not exist for Job ID: ${jobId}`);
+    consoleLogger.error(
+      `NotifyBuildProgress_${jobId}`,
+      `Notify build progress failed. Job does not exist for Job ID: ${jobId}`
+    );
+    return;
   }
 
   const jobTitle = fullDocument.title;
@@ -329,10 +327,6 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
-
-  return {
-    statusCode: 200,
-  };
 }
 
 function getMongoClient(config: IConfig): mongodb.MongoClient {
