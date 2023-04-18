@@ -193,7 +193,11 @@ async function NotifyBuildSummary(jobId: string): Promise<void> {
   const fullDocument = await jobRepository.getJobById(jobId);
 
   if (!fullDocument) {
-    throw new Error(`Notify build summary failed. Job does not exist for Job ID: ${jobId}`);
+    consoleLogger.error(
+      `NotifyBuildSummary_${jobId}`,
+      `Notify build summary failed. Job does not exist for Job ID: ${jobId}`
+    );
+    return;
   }
 
   const repoName = fullDocument.payload.repoName;
@@ -359,7 +363,11 @@ async function SubmitArchiveJob(jobId: string) {
   const job = await models.jobs.getJobById(jobId);
 
   if (!job) {
-    throw new Error(`Submit archive job failed. Job does not exist for Job ID: ${jobId}`);
+    consoleLogger.error(
+      `SubmitArchiveJob_${jobId}`,
+      `Submit archive job failed. Job does not exist for Job ID: ${jobId}`
+    );
+    return;
   }
 
   const repo = await models.branches.getRepo(job.payload.repoName);
