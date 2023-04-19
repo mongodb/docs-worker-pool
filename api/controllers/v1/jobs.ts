@@ -150,7 +150,7 @@ async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
 function isNumber(val: unknown): val is number {
   if (typeof val !== 'number') {
     if (typeof val === 'string') {
-      return isNaN(parseInt(val));
+      return !isNaN(parseInt(val));
     }
     return false;
   }
