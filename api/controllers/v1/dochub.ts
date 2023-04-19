@@ -21,15 +21,24 @@ export const UpsertEdgeDictionaryItem = async (event: APIGatewayEvent): Promise<
   const { FASTLY_DOCHUB_SERVICE_ID, FASTLY_DOCHUB_TOKEN, FASTLY_DOCHUB_MAP } = process.env;
 
   if (!FASTLY_DOCHUB_SERVICE_ID) {
-    throw new Error('Fastly dochub service ID is not defined');
+    return {
+      statusCode: 500,
+      body: 'Fastly dochub service ID is not defined',
+    };
   }
 
   if (!FASTLY_DOCHUB_TOKEN) {
-    throw new Error('Fastly dochub token is not defined');
+    return {
+      statusCode: 500,
+      body: 'Fastly dochub token is not defined',
+    };
   }
 
   if (!FASTLY_DOCHUB_MAP) {
-    throw new Error('Fastly dochub map is not defined');
+    return {
+      statusCode: 500,
+      body: 'Fastly dochub map is not defined',
+    };
   }
 
   const creds = new CDNCreds(FASTLY_DOCHUB_SERVICE_ID, FASTLY_DOCHUB_TOKEN);
