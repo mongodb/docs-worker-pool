@@ -140,31 +140,13 @@ async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
   await ecs.stopZombieECSTask(taskId);
 }
 
-/**
- * Type guard to check whether or not the val is a number.
- * This performs the necessary validation to ensure that a given value is
- * a number at runtime
- * @param val the value we want to validate
- * @returns a boolean that states whether or not the val is a number
- */
-function isNumber(val: unknown): val is number {
-  if (typeof val !== 'number') {
-    if (typeof val === 'string') {
-      return !isNaN(parseInt(val));
-    }
-    return false;
-  }
-
-  return true;
-}
-
 async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<void> {
   try {
     const tries = message.tries;
 
-    const maxRetries = c.get('maxRetries');
+    const maxRetries = parseInt(c.get('maxRetries'));
 
-    if (!isNumber(maxRetries)) {
+    if (isNaN(maxRetries)) {
       consoleLogger.error('retry Error', 'ERROR! The property "maxRetries" is not a valid number');
       return;
     }
