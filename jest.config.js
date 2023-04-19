@@ -2,7 +2,7 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
   coveragePathIgnorePatterns: ['node_modules', 'modules', 'tests', 'errors', 'app', 'app_test'],
-  modulePathIgnorePatterns: ['<rootDir>/infrastructure/', '<rootDir>/modules'],
+  modulePathIgnorePatterns: ['<rootDir>/infrastructure/', '<rootDir>/modules', '<rootDir>/cdk-infra'],
   coverageDirectory: '<rootDir>/coverage/',
   verbose: false,
   // coverageThreshold: {
