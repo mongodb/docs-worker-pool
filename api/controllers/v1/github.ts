@@ -75,15 +75,6 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
 
-  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
-    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-    return {
-      statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
-      body: errMsg,
-    };
-  }
-
   if (!event.body) {
     const err = 'Trigger build does not have a body in event payload';
     consoleLogger.error('TriggerBuildError', err);
@@ -93,6 +84,16 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       body: err,
     };
   }
+
+  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+
   const body = JSON.parse(event.body);
 
   if (body.deleted) {
