@@ -14,9 +14,6 @@ import { Batch } from '../../../src/services/batch';
 import { APIGatewayEvent, APIGatewayProxyResult, SQSEvent, SQSRecord } from 'aws-lambda';
 
 export const TriggerLocalBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
-  await client.connect();
-
   const consoleLogger = new ConsoleLogger();
   const sqs = new SQSConnector(consoleLogger, c);
 
