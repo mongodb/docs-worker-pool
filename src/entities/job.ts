@@ -25,7 +25,6 @@ export type Payload = {
   branchName: string;
   isFork: boolean;
   private: boolean;
-  isXlarge?: boolean | null;
   repoOwner: string;
   url: string;
   newHead?: string | null;

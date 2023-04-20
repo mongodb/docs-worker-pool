@@ -140,30 +140,6 @@ async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
   await ecs.stopZombieECSTask(taskId);
 }
 
-async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<void> {
-  try {
-    const tries = message.tries;
-
-    const maxRetries = parseInt(c.get('maxRetries'));
-
-    if (isNaN(maxRetries)) {
-      consoleLogger.error('retry Error', 'ERROR! The property "maxRetries" is not a valid number');
-      return;
-    }
-
-    if (tries < maxRetries) {
-      const sqs = new SQSConnector(consoleLogger, c);
-      message['tries'] += 1;
-      let retryDelay = 10;
-      if (c.get('retryDelay')) {
-        retryDelay = c.get('retryDelay');
-      }
-      await sqs.sendMessage(message, url, retryDelay * tries);
-    }
-  } catch (err) {
-    consoleLogger.error(message['jobId'], err);
-  }
-}
 async function NotifyBuildSummary(jobId: string): Promise<void> {
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));

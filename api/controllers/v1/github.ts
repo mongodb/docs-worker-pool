@@ -55,7 +55,6 @@ async function prepGithubPushPayload(
       branchName: githubEvent.ref.split('/')[2],
       isFork: githubEvent.repository.fork,
       private: githubEvent.repository.private,
-      isXlarge: true,
       repoOwner: githubEvent.repository.owner.login,
       url: githubEvent.repository.clone_url,
       newHead: githubEvent.after,
