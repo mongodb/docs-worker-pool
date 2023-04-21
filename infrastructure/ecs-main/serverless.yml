@@ -38,6 +38,8 @@ custom:
     prd: worker-pool-deployment
     dotcomstg: worker-pool-deployment
     dotcomprd: worker-pool-deployment
+    legacydotcomstg: worker-pool-deployment
+    legacydotcomprd: worker-pool-deployment
   ecs:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
@@ -47,30 +49,40 @@ custom:
       prd: '4096'
       dotcomstg: '2048'
       dotcomprd: '4096'
+      legacydotcomstg: '2048'
+      legacydotcomprd: '4096'
     containerMemory:
       dev: '8192'
       stg: '8192'
       prd: '24576'
       dotcomstg: '8192'
       dotcomprd: '24576'
+      legacydotcomstg: '8192'
+      legacydotcomprd: '24576'
     desiredCount:
       dev: '4'
       stg: '4'
       prd: '4'
       dotcomstg: '4'
       dotcomprd: '4'
+      legacydotcomstg: '4'
+      legacydotcomprd: '4'
     minimumHealthyPercent:
       dev: 100
       stg: 100
       prd: 100
       dotcomstg: 100
       dotcomprd: 100
+      legacydotcomstg: 100
+      legacydotcomprd: 100
     maximumPercent:
       dev: 200
       stg: 200
       prd: 200
       dotcomstg: 200
       dotcomprd: 200
+      legacydotcomstg: 200
+      legacydotcomprd: 200
     deregistrationDelaySecs: '10'
   targetGroupName: docs-worker-pool
   accountId:
@@ -79,6 +91,8 @@ custom:
     prd: 216656347858
     dotcomstg: 216656347858
     dotcomprd: 216656347858
+    legacydotcomstg: 216656347858
+    legacydotcomprd: 216656347858
 
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
@@ -131,12 +145,16 @@ custom:
     prd: https://cdnvalidator.devops.prod.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
     dotcomstg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
     dotcomprd: https://cdnvalidator.devops.prod.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    legacydotcomstg: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
+    legacydotcomprd: https://cdnvalidator.devops.prod.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
     dev: https://cdnvalidator.devops.staging.corp.mongodb.com/api/v1beta1/distributions/${self:custom.distributionName.${self:provider.stage}}/invalidations
   distributionName:
     stg: mongodbcom-staging-docs
     dotcomstg: mongodbcom-staging-docs
+    legacydotcomstg: mongodbcom-staging-docs
     dev: mongodbcom-staging-docs
     dotcomprd: mongodbcom-prod-docs
+    legacydotcomprd: mongodbcom-prod-docs
     prd: mongodbcom-prod-docs
   env:
     stg: "staging"
@@ -144,6 +162,8 @@ custom:
     dev: "staging"
     dotcomstg: "dotcomstg"
     dotcomprd: "dotcomprd"
+    legacydotcomstg: "dotcomstg"
+    legacydotcomprd: "dotcomprd"
   # TODO: When satisfied with manifest generation, remove '-test'
   searchIndexBucket: docs-search-indexes-test
   # TODO: In future, use duplicate mapping of dotcomstg -> preprd to have
@@ -154,22 +174,30 @@ custom:
     prd: "prd"
     dotcomstg: "preprd"
     dotcomprd: "prd"
+    legacydotcomstg: "preprd"
+    legacydotcomprd: "prd"
   site:
     host:
       dev: "docs-dev.mongodb.com"
       stg: "mongodbcom-cdn.website.staging.corp.mongodb.com"
       dotcomstg: "mongodbcom-cdn.website.staging.corp.mongodb.com"
+      legacydotcomstg: "mongodbcom-cdn.website.staging.corp.mongodb.com"
       prd: "www.mongodb.com"
       dotcomprd: "www.mongodb.com"
+      legacydotcomprd: "www.mongodb.com"
     prefix:
       dev: "docs"
       stg: "docs-qa"
       dotcomstg: "docs-qa"
+      legacydotcomstg: "docs-qa"
       prd: "docs"
       dotcomprd: "docs"
+      legacydotcomprd: "docs"
     errorDoc:
       dotcomstg: "docs-qa/404/index.html"
       dotcomprd: "docs/404/index.html"
+      legacydotcomstg: "docs-qa/404/index.html"
+      legacydotcomprd: "docs/404/index.html"
 
 resources:
   - ${file(./buckets.yml)}

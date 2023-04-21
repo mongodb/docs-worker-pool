@@ -32,11 +32,15 @@ custom:
     prd: worker-pool-deployment
     dotcomstg: worker-pool-deployment
     dotcomprd: worker-pool-deployment
+    legacydotcomstg: worker-pool-deployment
+    legacydotcomprd: worker-pool-deployment
   searchIndexBucket:
     dev: "" # I'm just here so I don't get fined
     # TODO: When satisfied with manifest generation, remove the '-test'
     dotcomstg: docs-search-indexes-test/preprd
     dotcomprd: docs-search-indexes-test/prd
+    legacydotcomstg: docs-search-indexes-test/preprd
+    legacydotcomprd: docs-search-indexes-test/prd
   fastlyDochubToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/token}
   fastlyDochubServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/dochub/service_id}
   fastlyDochubMap: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/dochub_map}
@@ -46,6 +50,8 @@ custom:
     dev: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     dotcomstg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
     dotcomprd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    legacydotcomstg: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
+    legacydotcomprd: aws.partner/mongodb.com/stitch.trigger/5e00b7afec293c6507679c4d
   dochubEventBus: arn:aws:events:${aws:region}:${aws:accountId}:event-bus/${self:custom.docuhubEventSource.${self:provider.stage}}
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
@@ -66,6 +72,8 @@ custom:
     prd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
     dotcomstg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
     dotcomprd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    legacydotcomstg: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
+    legacydotcomprd: https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
     dev: https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=${self:custom.jobCollection}&jobId=
   env:
     stg: "staging"
@@ -189,7 +197,7 @@ functions:
             - Fn::GetAtt: [AutobuilderJobsQueue, Arn]
       environment:
         <<: *webhook-env-core
-    
+
     v1HandleJobs:
       handler: api/controllers/v1/jobs.HandleJobs
       timeout: 180
