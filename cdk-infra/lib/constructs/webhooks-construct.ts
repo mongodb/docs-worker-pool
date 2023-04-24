@@ -4,8 +4,6 @@ import { IQueue, Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 
 export class WebhookConstruct extends Construct {
-  private readonly jobQueue: IQueue;
-
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
@@ -62,7 +60,5 @@ export class WebhookConstruct extends Construct {
     jobQueue.grantSendMessages(slackTriggerLambda);
     jobQueue.grantSendMessages(dochubTriggerLambda);
     jobQueue.grantSendMessages(githubTriggerLambda);
-
-    this.jobQueue = jobQueue;
   }
 }
