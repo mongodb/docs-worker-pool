@@ -3,6 +3,8 @@ import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 
+const HANDLERS_PATH = '../build/api/controllers/v1/handlers';
+
 export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -10,7 +12,7 @@ export class AutoBuilderApiConstruct extends Construct {
     const slackTriggerName = 'dochubTriggerLambda';
 
     const slackTriggerLambda = new Function(this, slackTriggerName, {
-      code: Code.fromAsset('../build/controllers/v1/handlers/slackTrigger.zip'),
+      code: Code.fromAsset(`${HANDLERS_PATH}/slackTrigger.zip`),
       runtime: Runtime.NODEJS_14_X,
       handler: slackTriggerName,
     });
@@ -18,7 +20,7 @@ export class AutoBuilderApiConstruct extends Construct {
     const dochubTriggerName = 'dochubTriggerLambda';
 
     const dochubTriggerLambda = new Function(this, dochubTriggerName, {
-      code: Code.fromAsset('../build/controllers/v1/handlers/dochubTriggerUpsert.zip'),
+      code: Code.fromAsset(`${HANDLERS_PATH}/dochubTriggerUpsert.zip`),
       runtime: Runtime.NODEJS_14_X,
       handler: dochubTriggerName,
     });
@@ -26,7 +28,7 @@ export class AutoBuilderApiConstruct extends Construct {
     const githubTriggerName = 'githubTriggerLambda';
 
     const githubTriggerLambda = new Function(this, githubTriggerName, {
-      code: Code.fromAsset('../build/controllers/v1/handlers/githubTriggerBuild.zip'),
+      code: Code.fromAsset(`${HANDLERS_PATH}/githubTriggerBuild.zip`),
       runtime: Runtime.NODEJS_14_X,
       handler: githubTriggerName,
     });
