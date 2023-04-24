@@ -1,9 +1,9 @@
 import { LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { IQueue, Queue } from 'aws-cdk-lib/aws-sqs';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 
-export class WebhookConstruct extends Construct {
+export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
