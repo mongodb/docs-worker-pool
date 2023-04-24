@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { AutoBuilderApiConstruct } from './constructs/webhooks-construct';
+import { AutoBuilderApiConstruct } from './constructs/auto-builder-api-construct';
 
 export class AutoBuilderStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {

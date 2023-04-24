@@ -24,12 +24,28 @@ export class AutoBuilderApiConstruct extends Construct {
       },
     });
 
+    const fastlyDochubToken = StringParameter.valueFromLookup(
+      this,
+      '/env/dev/docs/worker_pool/fastly/docs/dochub/token'
+    );
+    const fastlyDochubServiceId = StringParameter.valueFromLookup(
+      this,
+      '/env/dev/docs/worker_pool/fastly/docs/dochub/service_id'
+    );
+    const fastlyDochubMap = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/fastly/dochub_map');
+
     const dochubTriggerName = 'dochubTriggerLambda';
 
     const dochubTriggerLambda = new Function(this, dochubTriggerName, {
       code: Code.fromAsset(`${HANDLERS_PATH}/dochubTriggerUpsert.zip`),
       runtime: Runtime.NODEJS_14_X,
       handler: dochubTriggerName,
+
+      environment: {
+        FASTLY_DOCHUB_MAP: fastlyDochubMap,
+        FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
+        FASTLY_DOCHUB_TOKEN: fastlyDochubToken,
+      },
     });
 
     const githubTriggerName = 'githubTriggerLambda';
