@@ -9,12 +9,31 @@ export class WebhookConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const slackLambda = new Function(this, 'slackLambda', {
-      code: Code.fromAsset('../build/controllers/v1/slack.zip'),
+    const slackTriggerName = 'dochubTriggerLambda';
+
+    const slackTriggerLambda = new Function(this, slackTriggerName, {
+      code: Code.fromAsset('../build/controllers/v1/handlers/slackTrigger.zip'),
       runtime: Runtime.NODEJS_14_X,
-      handler: 'slackLambda',
+      handler: slackTriggerName,
     });
 
+    const dochubTriggerName = 'dochubTriggerLambda';
+
+    const dochubTriggerLambda = new Function(this, dochubTriggerName, {
+      code: Code.fromAsset('../build/controllers/v1/handlers/dochubTriggerUpsert.zip'),
+      runtime: Runtime.NODEJS_14_X,
+      handler: dochubTriggerName,
+    });
+
+    const githubTriggerName = 'githubTriggerLambda';
+
+    const githubTriggerLambda = new Function(this, githubTriggerName, {
+      code: Code.fromAsset('../build/controllers/v1/handlers/githubTriggerBuild.zip'),
+      runtime: Runtime.NODEJS_14_X,
+      handler: githubTriggerName,
+    });
+
+    // generic handler for the root endpoint
     const rootEndpointLambda = new Function(this, 'RootEndpointLambda', {
       code: Code.fromInline('exports.default = (event) => { console.log("hello, world!!"); }'),
       runtime: Runtime.NODEJS_14_X,
@@ -32,9 +51,17 @@ export class WebhookConstruct extends Construct {
     const dochubEndpoint = v1Endpoint.addResource('dochub');
     const githubEndpoint = v1Endpoint.addResource('githubEndpoint');
 
-    slackEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(slackLambda));
+    // add resources and post methods for trigger endpoints
+    slackEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(slackTriggerLambda));
+    dochubEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(dochubTriggerLambda));
+    githubEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
     const jobQueue = new Queue(this, 'JobQueue');
+
+    // grant permission for lambdas to enqueue messages to the queue
+    jobQueue.grantSendMessages(slackTriggerLambda);
+    jobQueue.grantSendMessages(dochubTriggerLambda);
+    jobQueue.grantSendMessages(githubTriggerLambda);
 
     this.jobQueue = jobQueue;
   }
