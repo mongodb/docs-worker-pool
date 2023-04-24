@@ -11,9 +11,7 @@ export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // I don't think we need these, but we might...
-    const slackSecret = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/webhook/secret');
-    const slackAuthToken = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/auth/token');
+    const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
 
     const slackTriggerName = 'slackTriggerLambda';
 
@@ -22,8 +20,7 @@ export class AutoBuilderApiConstruct extends Construct {
       runtime: Runtime.NODEJS_14_X,
       handler: slackTriggerName,
       environment: {
-        SLACK_SECRET: slackSecret,
-        SLACK_TOKEN: slackAuthToken,
+        DB_NAME: dbName,
       },
     });
 
