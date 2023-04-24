@@ -1,11 +1,10 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 
-const HANDLERS_PATH = '../build/api/controllers/v1/handlers';
+const HANDLERS_FILE_PATH = '../build/api/controllers/v1/handlers';
 
 export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string) {
@@ -16,7 +15,7 @@ export class AutoBuilderApiConstruct extends Construct {
     const slackTriggerName = 'slackTriggerLambda';
 
     const slackTriggerLambda = new Function(this, slackTriggerName, {
-      code: Code.fromAsset(`${HANDLERS_PATH}/slackTrigger.zip`),
+      code: Code.fromAsset(`${HANDLERS_FILE_PATH}/slackTrigger.zip`),
       runtime: Runtime.NODEJS_14_X,
       handler: slackTriggerName,
       environment: {
@@ -34,13 +33,12 @@ export class AutoBuilderApiConstruct extends Construct {
     );
     const fastlyDochubMap = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/fastly/dochub_map');
 
-    const dochubTriggerName = 'dochubTriggerLambda';
+    const dochubTriggerName = 'dochubTriggerUpsertLambda';
 
-    const dochubTriggerLambda = new Function(this, dochubTriggerName, {
-      code: Code.fromAsset(`${HANDLERS_PATH}/dochubTriggerUpsert.zip`),
+    const dochubTriggerUpsertLambda = new Function(this, dochubTriggerName, {
+      code: Code.fromAsset(`${HANDLERS_FILE_PATH}/dochubTriggerUpsert.zip`),
       runtime: Runtime.NODEJS_14_X,
       handler: dochubTriggerName,
-
       environment: {
         FASTLY_DOCHUB_MAP: fastlyDochubMap,
         FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
@@ -51,7 +49,7 @@ export class AutoBuilderApiConstruct extends Construct {
     const githubTriggerName = 'githubTriggerLambda';
 
     const githubTriggerLambda = new Function(this, githubTriggerName, {
-      code: Code.fromAsset(`${HANDLERS_PATH}/githubTriggerBuild.zip`),
+      code: Code.fromAsset(`${HANDLERS_FILE_PATH}/githubTriggerBuild.zip`),
       runtime: Runtime.NODEJS_14_X,
       handler: githubTriggerName,
     });
@@ -81,7 +79,7 @@ export class AutoBuilderApiConstruct extends Construct {
 
     // add resources and post methods for trigger endpoints
     slackEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(slackTriggerLambda));
-    dochubEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(dochubTriggerLambda));
+    dochubEndpoint.addResource('upsert').addMethod('POST', new LambdaIntegration(dochubTriggerUpsertLambda));
     githubEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
     const jobQueue = new Queue(this, 'JobQueue');
