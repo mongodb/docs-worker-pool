@@ -6,17 +6,24 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import path = require('path');
 
-const HANDLERS_FILE_PATH = '../api/controllers/v1';
+const HANDLERS_FILE_PATH = '/../../../api/controllers/v1';
 
 export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
+
+    const bundling = {
+      loader: {
+        '.node': 'file',
+      },
+    };
 
     const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
 
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/slack.ts`),
       runtime: Runtime.NODEJS_14_X,
+      bundling,
       handler: 'DeployRepo',
       environment: {
         DB_NAME: dbName,
@@ -34,8 +41,9 @@ export class AutoBuilderApiConstruct extends Construct {
     }).stringValue;
 
     const dochubTriggerUpsertLambda = new NodejsFunction(this, 'dochubTriggerUpsertLambda', {
-      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/dochub.zip`),
+      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/dochub.ts`),
       runtime: Runtime.NODEJS_14_X,
+      bundling,
       handler: 'UpsertEdgeDictionaryItem',
       environment: {
         FASTLY_DOCHUB_MAP: fastlyDochubMap,
@@ -46,6 +54,7 @@ export class AutoBuilderApiConstruct extends Construct {
 
     const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/github.ts`),
+      bundling,
       runtime: Runtime.NODEJS_14_X,
       handler: 'TriggerBuild',
     });
@@ -53,6 +62,7 @@ export class AutoBuilderApiConstruct extends Construct {
     const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/jobs.ts`),
       runtime: Runtime.NODEJS_14_X,
+      bundling,
       handler: 'TriggerLocalBuild',
     });
 
