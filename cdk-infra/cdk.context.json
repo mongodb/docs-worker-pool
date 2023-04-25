@@ -1,0 +1,3 @@
+{
+  "ssm:account=216656347858:parameterName=/env/dev/docs/worker_pool/atlas/dbname:region=us-east-2": "pool_test"
+}

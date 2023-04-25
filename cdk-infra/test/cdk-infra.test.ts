@@ -4,11 +4,14 @@ import { AutoBuilderStack } from '../lib/auto-builder-stack';
 
 // example test. To run these tests, uncomment this file along with the
 // example resource in lib/cdk-infra-stack.ts
-test('The stack is created with no issue', () => {
+test('The stack contains a SQS queue', () => {
   const app = new cdk.App();
   // WHEN
-  const stack = new AutoBuilderStack(app, 'MyTestStack');
+  console.log(process.env);
+  const stack = new AutoBuilderStack(app, 'MyTestStack', {
+    env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+  });
   // THEN
   const template = Template.fromStack(stack);
-  template.resourceCountIs('AWS::SQS::Queue', 0);
+  template.resourceCountIs('AWS::SQS::Queue', 1);
 });

@@ -23,15 +23,15 @@ export class AutoBuilderApiConstruct extends Construct {
       },
     });
 
-    const fastlyDochubToken = StringParameter.valueFromLookup(
-      this,
-      '/env/dev/docs/worker_pool/fastly/docs/dochub/token'
-    );
-    const fastlyDochubServiceId = StringParameter.valueFromLookup(
-      this,
-      '/env/dev/docs/worker_pool/fastly/docs/dochub/service_id'
-    );
-    const fastlyDochubMap = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/fastly/dochub_map');
+    const fastlyDochubToken = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubToken', {
+      parameterName: '/env/dev/docs/worker_pool/fastly/docs/dochub/token',
+    }).stringValue;
+    const fastlyDochubServiceId = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubServiceId', {
+      parameterName: '/env/dev/docs/worker_pool/fastly/docs/dochub/service_id',
+    }).stringValue;
+    const fastlyDochubMap = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubMap', {
+      parameterName: '/env/dev/docs/worker_pool/fastly/dochub_map',
+    }).stringValue;
 
     const dochubTriggerName = 'dochubTriggerUpsertLambda';
 
@@ -86,7 +86,7 @@ export class AutoBuilderApiConstruct extends Construct {
 
     // grant permission for lambdas to enqueue messages to the queue
     jobQueue.grantSendMessages(slackTriggerLambda);
-    jobQueue.grantSendMessages(dochubTriggerLambda);
+    jobQueue.grantSendMessages(dochubTriggerUpsertLambda);
     jobQueue.grantSendMessages(githubTriggerLambda);
   }
 }

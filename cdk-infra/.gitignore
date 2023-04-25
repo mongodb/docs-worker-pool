@@ -9,3 +9,6 @@ cdk.out
 
 # Build artifacts
 dist
+
+.env
+.env.local
