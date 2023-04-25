@@ -102,7 +102,7 @@ export class AutoBuilderApiConstruct extends Construct {
     jobsQueue.grantSendMessages(githubTriggerLambda);
     jobsQueue.grantSendMessages(triggerLocalBuildLambda);
 
-    // grant permission for lambds to enqueue messages to the job updates queue
+    // grant permission for lambdas to enqueue messages to the job updates queue
     jobUpdatesQueue.grantSendMessages(triggerLocalBuildLambda);
   }
 }
