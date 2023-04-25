@@ -61,8 +61,8 @@ export class AutoBuilderApiConstruct extends Construct {
 
     const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/jobs.ts`),
-      runtime: Runtime.NODEJS_14_X,
       bundling,
+      runtime: Runtime.NODEJS_14_X,
       handler: 'TriggerLocalBuild',
     });
 
