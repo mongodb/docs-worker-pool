@@ -7,8 +7,8 @@ export class AutoBuilderStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const queues = new AutoBuilderQueuesConstruct(this, id);
+    const queues = new AutoBuilderQueuesConstruct(this, 'queues');
 
-    new AutoBuilderApiConstruct(this, id, queues);
+    new AutoBuilderApiConstruct(this, 'api', queues);
   }
 }
