@@ -1,15 +1,19 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { IQueue, Queue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import path = require('path');
 
 const HANDLERS_FILE_PATH = '/../../../api/controllers/v1';
 
+interface AutoBuilderApiConstructProps {
+  jobsQueue: IQueue;
+  jobUpdatesQueue: IQueue;
+}
 export class AutoBuilderApiConstruct extends Construct {
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
 
     const bundling = {
@@ -94,8 +98,7 @@ export class AutoBuilderApiConstruct extends Construct {
     dochubEndpoint.addResource('upsert').addMethod('POST', new LambdaIntegration(dochubTriggerUpsertLambda));
     githubEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
-    const jobsQueue = new Queue(this, 'JobsQueue');
-    const jobUpdatesQueue = new Queue(this, 'JobUpdatesQueue');
+    const { jobsQueue, jobUpdatesQueue } = props;
 
     // grant permission for lambdas to enqueue messages to the jobs queue
     jobsQueue.grantSendMessages(slackTriggerLambda);
