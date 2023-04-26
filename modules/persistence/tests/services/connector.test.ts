@@ -15,7 +15,7 @@ const mockClose = jest.fn();
 jest.mock('mongodb', () => ({
   MongoClient: class MongoClient {
     constructor() {
-      console.log('constructor');
+      // console.log('constructor');
     }
     connect() {
       return mockConnect();

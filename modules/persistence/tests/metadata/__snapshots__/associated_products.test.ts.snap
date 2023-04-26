@@ -129,6 +129,480 @@ Object {
 exports[`associated_products module getAssociatedProducts and shapeToCsCursor getAssociatedProducts returns an aggregation cursor for metadata, grouped by most recent build_id 1`] = `
 Object {
   "_id": Object {
+    "branch": "v1.0",
+    "project": "atlas-cli",
+  },
+  "most_recent": Object {
+    "_id": "63e2aa4d29d636971ac076c3",
+    "branch": "v1.0",
+    "build_id": Object {
+      "$oid": "63e2aa4c29d636971ac076ad",
+    },
+    "created_at": Object {
+      "$date": Object {
+        "$numberLong": "1675799116000",
+      },
+    },
+    "eol": false,
+    "parentPaths": Object {
+      "atlas-cli-changelog": Array [],
+      "atlas-cli-env-variables": Array [
+        "connect-atlas-cli",
+      ],
+      "atlas-cli-quickstart": Array [],
+      "atlas-cli-save-connection-settings": Array [
+        "connect-atlas-cli",
+      ],
+      "cluster-config-file": Array [
+        "reference",
+      ],
+      "connect-atlas-cli": Array [],
+      "install-atlas-cli": Array [],
+      "migrate-to-atlas-cli": Array [
+        "connect-atlas-cli",
+      ],
+      "reference": Array [],
+    },
+    "project": "atlas-cli",
+    "slugToTitle": Object {
+      "atlas-cli-changelog": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Atlas CLI Changelog",
+        },
+      ],
+      "atlas-cli-commands": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Atlas CLI Commands",
+        },
+      ],
+      "atlas-cli-env-variables": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Atlas CLI Environment Variables",
+        },
+      ],
+      "atlas-cli-quickstart": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Set Up ",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 0,
+                },
+              },
+              "type": "text",
+              "value": "Atlas",
+            },
+          ],
+          "name": "service",
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "substitution_reference",
+        },
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": " with ",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "text",
+              "value": "atlas quickstart",
+            },
+          ],
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "literal",
+        },
+      ],
+      "atlas-cli-save-connection-settings": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Save Connection Settings",
+        },
+      ],
+      "cluster-config-file": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Cluster Configuration File",
+        },
+      ],
+      "connect-atlas-cli": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Connect from the Atlas CLI",
+        },
+      ],
+      "index": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 6,
+            },
+          },
+          "type": "text",
+          "value": "Atlas CLI",
+        },
+      ],
+      "install-atlas-cli": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Install or Update the Atlas CLI",
+        },
+      ],
+      "migrate-to-atlas-cli": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 4,
+            },
+          },
+          "type": "text",
+          "value": "Migrate to the Atlas CLI",
+        },
+      ],
+      "reference": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 3,
+            },
+          },
+          "type": "text",
+          "value": "Reference",
+        },
+      ],
+    },
+    "static_files": Object {},
+    "title": "Atlas Command Line Interface",
+    "toctree": Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "options": Object {
+            "drawer": true,
+          },
+          "slug": "/",
+          "title": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 0,
+                },
+              },
+              "type": "text",
+              "value": "Overview",
+            },
+          ],
+        },
+        Object {
+          "children": Array [],
+          "options": Object {
+            "drawer": false,
+          },
+          "slug": "install-atlas-cli",
+          "title": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "text",
+              "value": "Install or Update the Atlas CLI",
+            },
+          ],
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "options": Object {
+                "drawer": true,
+              },
+              "slug": "atlas-cli-save-connection-settings",
+              "title": Array [
+                Object {
+                  "position": Object {
+                    "start": Object {
+                      "line": 4,
+                    },
+                  },
+                  "type": "text",
+                  "value": "Save Connection Settings",
+                },
+              ],
+            },
+            Object {
+              "children": Array [],
+              "options": Object {
+                "drawer": false,
+              },
+              "slug": "atlas-cli-env-variables",
+              "title": Array [
+                Object {
+                  "position": Object {
+                    "start": Object {
+                      "line": 4,
+                    },
+                  },
+                  "type": "text",
+                  "value": "Atlas CLI Environment Variables",
+                },
+              ],
+            },
+            Object {
+              "children": Array [],
+              "options": Object {
+                "drawer": false,
+              },
+              "slug": "migrate-to-atlas-cli",
+              "title": Array [
+                Object {
+                  "position": Object {
+                    "start": Object {
+                      "line": 4,
+                    },
+                  },
+                  "type": "text",
+                  "value": "Migrate to the Atlas CLI",
+                },
+              ],
+            },
+          ],
+          "options": Object {
+            "drawer": false,
+          },
+          "slug": "connect-atlas-cli",
+          "title": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "text",
+              "value": "Connect from the Atlas CLI",
+            },
+          ],
+        },
+        Object {
+          "children": Array [],
+          "options": Object {
+            "drawer": false,
+          },
+          "slug": "atlas-cli-quickstart",
+          "title": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "text",
+              "value": "Set Up ",
+            },
+            Object {
+              "children": Array [
+                Object {
+                  "position": Object {
+                    "start": Object {
+                      "line": 0,
+                    },
+                  },
+                  "type": "text",
+                  "value": "Atlas",
+                },
+              ],
+              "name": "service",
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "substitution_reference",
+            },
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "text",
+              "value": " with ",
+            },
+            Object {
+              "children": Array [
+                Object {
+                  "position": Object {
+                    "start": Object {
+                      "line": 4,
+                    },
+                  },
+                  "type": "text",
+                  "value": "atlas quickstart",
+                },
+              ],
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "literal",
+            },
+          ],
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "options": Object {
+                "drawer": true,
+              },
+              "slug": "cluster-config-file",
+              "title": Array [
+                Object {
+                  "position": Object {
+                    "start": Object {
+                      "line": 4,
+                    },
+                  },
+                  "type": "text",
+                  "value": "Cluster Configuration File",
+                },
+              ],
+            },
+          ],
+          "options": Object {
+            "drawer": true,
+          },
+          "slug": "reference",
+          "title": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 3,
+                },
+              },
+              "type": "text",
+              "value": "Reference",
+            },
+          ],
+        },
+        Object {
+          "children": Array [],
+          "options": Object {
+            "drawer": false,
+          },
+          "slug": "atlas-cli-changelog",
+          "title": Array [
+            Object {
+              "position": Object {
+                "start": Object {
+                  "line": 4,
+                },
+              },
+              "type": "text",
+              "value": "Atlas CLI Changelog",
+            },
+          ],
+        },
+      ],
+      "slug": "/",
+      "title": Array [
+        Object {
+          "position": Object {
+            "start": Object {
+              "line": 0,
+            },
+          },
+          "type": "text",
+          "value": "Atlas Command Line Interface",
+        },
+      ],
+    },
+    "toctreeOrder": Array [
+      "/",
+      "/",
+      "install-atlas-cli",
+      "connect-atlas-cli",
+      "atlas-cli-save-connection-settings",
+      "atlas-cli-env-variables",
+      "migrate-to-atlas-cli",
+      "atlas-cli-quickstart",
+      "reference",
+      "cluster-config-file",
+      "atlas-cli-changelog",
+    ],
+  },
+}
+`;
+
+exports[`associated_products module getAssociatedProducts and shapeToCsCursor getAssociatedProducts returns an aggregation cursor for metadata, grouped by most recent build_id 2`] = `
+Object {
+  "_id": Object {
     "branch": "master",
     "project": "atlas-cli",
   },
@@ -815,480 +1289,6 @@ Object {
       "telemetry",
       "atlas-cli-tutorials",
       "atlas-cli-getting-started",
-      "atlas-cli-quickstart",
-      "reference",
-      "cluster-config-file",
-      "atlas-cli-changelog",
-    ],
-  },
-}
-`;
-
-exports[`associated_products module getAssociatedProducts and shapeToCsCursor getAssociatedProducts returns an aggregation cursor for metadata, grouped by most recent build_id 2`] = `
-Object {
-  "_id": Object {
-    "branch": "v1.0",
-    "project": "atlas-cli",
-  },
-  "most_recent": Object {
-    "_id": "63e2aa4d29d636971ac076c3",
-    "branch": "v1.0",
-    "build_id": Object {
-      "$oid": "63e2aa4c29d636971ac076ad",
-    },
-    "created_at": Object {
-      "$date": Object {
-        "$numberLong": "1675799116000",
-      },
-    },
-    "eol": false,
-    "parentPaths": Object {
-      "atlas-cli-changelog": Array [],
-      "atlas-cli-env-variables": Array [
-        "connect-atlas-cli",
-      ],
-      "atlas-cli-quickstart": Array [],
-      "atlas-cli-save-connection-settings": Array [
-        "connect-atlas-cli",
-      ],
-      "cluster-config-file": Array [
-        "reference",
-      ],
-      "connect-atlas-cli": Array [],
-      "install-atlas-cli": Array [],
-      "migrate-to-atlas-cli": Array [
-        "connect-atlas-cli",
-      ],
-      "reference": Array [],
-    },
-    "project": "atlas-cli",
-    "slugToTitle": Object {
-      "atlas-cli-changelog": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Atlas CLI Changelog",
-        },
-      ],
-      "atlas-cli-commands": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Atlas CLI Commands",
-        },
-      ],
-      "atlas-cli-env-variables": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Atlas CLI Environment Variables",
-        },
-      ],
-      "atlas-cli-quickstart": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Set Up ",
-        },
-        Object {
-          "children": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 0,
-                },
-              },
-              "type": "text",
-              "value": "Atlas",
-            },
-          ],
-          "name": "service",
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "substitution_reference",
-        },
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": " with ",
-        },
-        Object {
-          "children": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "text",
-              "value": "atlas quickstart",
-            },
-          ],
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "literal",
-        },
-      ],
-      "atlas-cli-save-connection-settings": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Save Connection Settings",
-        },
-      ],
-      "cluster-config-file": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Cluster Configuration File",
-        },
-      ],
-      "connect-atlas-cli": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Connect from the Atlas CLI",
-        },
-      ],
-      "index": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 6,
-            },
-          },
-          "type": "text",
-          "value": "Atlas CLI",
-        },
-      ],
-      "install-atlas-cli": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Install or Update the Atlas CLI",
-        },
-      ],
-      "migrate-to-atlas-cli": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 4,
-            },
-          },
-          "type": "text",
-          "value": "Migrate to the Atlas CLI",
-        },
-      ],
-      "reference": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 3,
-            },
-          },
-          "type": "text",
-          "value": "Reference",
-        },
-      ],
-    },
-    "static_files": Object {},
-    "title": "Atlas Command Line Interface",
-    "toctree": Object {
-      "children": Array [
-        Object {
-          "children": Array [],
-          "options": Object {
-            "drawer": true,
-          },
-          "slug": "/",
-          "title": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 0,
-                },
-              },
-              "type": "text",
-              "value": "Overview",
-            },
-          ],
-        },
-        Object {
-          "children": Array [],
-          "options": Object {
-            "drawer": false,
-          },
-          "slug": "install-atlas-cli",
-          "title": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "text",
-              "value": "Install or Update the Atlas CLI",
-            },
-          ],
-        },
-        Object {
-          "children": Array [
-            Object {
-              "children": Array [],
-              "options": Object {
-                "drawer": true,
-              },
-              "slug": "atlas-cli-save-connection-settings",
-              "title": Array [
-                Object {
-                  "position": Object {
-                    "start": Object {
-                      "line": 4,
-                    },
-                  },
-                  "type": "text",
-                  "value": "Save Connection Settings",
-                },
-              ],
-            },
-            Object {
-              "children": Array [],
-              "options": Object {
-                "drawer": false,
-              },
-              "slug": "atlas-cli-env-variables",
-              "title": Array [
-                Object {
-                  "position": Object {
-                    "start": Object {
-                      "line": 4,
-                    },
-                  },
-                  "type": "text",
-                  "value": "Atlas CLI Environment Variables",
-                },
-              ],
-            },
-            Object {
-              "children": Array [],
-              "options": Object {
-                "drawer": false,
-              },
-              "slug": "migrate-to-atlas-cli",
-              "title": Array [
-                Object {
-                  "position": Object {
-                    "start": Object {
-                      "line": 4,
-                    },
-                  },
-                  "type": "text",
-                  "value": "Migrate to the Atlas CLI",
-                },
-              ],
-            },
-          ],
-          "options": Object {
-            "drawer": false,
-          },
-          "slug": "connect-atlas-cli",
-          "title": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "text",
-              "value": "Connect from the Atlas CLI",
-            },
-          ],
-        },
-        Object {
-          "children": Array [],
-          "options": Object {
-            "drawer": false,
-          },
-          "slug": "atlas-cli-quickstart",
-          "title": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "text",
-              "value": "Set Up ",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "position": Object {
-                    "start": Object {
-                      "line": 0,
-                    },
-                  },
-                  "type": "text",
-                  "value": "Atlas",
-                },
-              ],
-              "name": "service",
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "substitution_reference",
-            },
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "text",
-              "value": " with ",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "position": Object {
-                    "start": Object {
-                      "line": 4,
-                    },
-                  },
-                  "type": "text",
-                  "value": "atlas quickstart",
-                },
-              ],
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "literal",
-            },
-          ],
-        },
-        Object {
-          "children": Array [
-            Object {
-              "children": Array [],
-              "options": Object {
-                "drawer": true,
-              },
-              "slug": "cluster-config-file",
-              "title": Array [
-                Object {
-                  "position": Object {
-                    "start": Object {
-                      "line": 4,
-                    },
-                  },
-                  "type": "text",
-                  "value": "Cluster Configuration File",
-                },
-              ],
-            },
-          ],
-          "options": Object {
-            "drawer": true,
-          },
-          "slug": "reference",
-          "title": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 3,
-                },
-              },
-              "type": "text",
-              "value": "Reference",
-            },
-          ],
-        },
-        Object {
-          "children": Array [],
-          "options": Object {
-            "drawer": false,
-          },
-          "slug": "atlas-cli-changelog",
-          "title": Array [
-            Object {
-              "position": Object {
-                "start": Object {
-                  "line": 4,
-                },
-              },
-              "type": "text",
-              "value": "Atlas CLI Changelog",
-            },
-          ],
-        },
-      ],
-      "slug": "/",
-      "title": Array [
-        Object {
-          "position": Object {
-            "start": Object {
-              "line": 0,
-            },
-          },
-          "type": "text",
-          "value": "Atlas Command Line Interface",
-        },
-      ],
-    },
-    "toctreeOrder": Array [
-      "/",
-      "/",
-      "install-atlas-cli",
-      "connect-atlas-cli",
-      "atlas-cli-save-connection-settings",
-      "atlas-cli-env-variables",
-      "migrate-to-atlas-cli",
       "atlas-cli-quickstart",
       "reference",
       "cluster-config-file",

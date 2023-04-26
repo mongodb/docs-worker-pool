@@ -78,7 +78,7 @@ describe('associated_products module', () => {
 
     test('getAssociatedProducts returns an aggregation cursor for metadata, grouped by most recent build_id', async () => {
       const cursor = await _getAssociatedProducts(umbrellaMetadata);
-      await cursor.forEach((doc) => {
+      await cursor.sort({ '_id.branch': -1 }).forEach((doc) => {
         expect(doc).toMatchSnapshot();
       });
     });
