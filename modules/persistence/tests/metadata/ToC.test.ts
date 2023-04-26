@@ -33,6 +33,8 @@ describe('ToC module', () => {
     try {
       connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
       mockDb = await connection.db();
+      await mockDb.collection('repos_branches').deleteMany({});
+      await mockDb.collection('metadata').deleteMany({});
       await mockDb.collection('repos_branches').insertMany(repoBranches);
       await mockDb.collection('metadata').insertMany(metadata);
     } catch (e) {
@@ -41,8 +43,6 @@ describe('ToC module', () => {
   });
 
   afterAll(async () => {
-    await mockDb.collection('repos_branches').deleteMany({});
-    await mockDb.collection('metadata').deleteMany({});
     await connection.close();
   });
 

@@ -53,13 +53,13 @@ describe('metadata module', () => {
     // or update jest-mongodb-config.js
     connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
     mockDb = connection.db();
+    await mockDb.collection('repos_branches').deleteMany({});
+    await mockDb.collection('metadata').deleteMany({});
     await mockDb.collection('repos_branches').insertMany(convertToBuildId(repoBranches));
     await mockDb.collection('metadata').insertMany(convertToBuildId(metadata));
   });
 
   afterAll(async () => {
-    await mockDb.collection('repos_branches').deleteMany({});
-    await mockDb.collection('metadata').deleteMany({});
     await connection.close();
   });
 

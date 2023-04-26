@@ -34,13 +34,13 @@ describe('associated_products module', () => {
     // or update jest-mongodb-config.js
     connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
     mockDb = await connection.db();
+    await mockDb.collection('repos_branches').deleteMany({});
+    await mockDb.collection('metadata').deleteMany({});
     await mockDb.collection('repos_branches').insertMany(repoBranches);
     await mockDb.collection('metadata').insertMany(metadata);
   });
 
   afterAll(async () => {
-    await mockDb.collection('repos_branches').deleteMany({});
-    await mockDb.collection('metadata').deleteMany({});
     await connection.close();
   });
 
