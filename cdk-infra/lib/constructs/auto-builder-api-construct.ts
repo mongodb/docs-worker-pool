@@ -1,6 +1,6 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -19,21 +19,28 @@ export class AutoBuilderApiConstruct extends Construct {
     // some of the dependencies in the node_modules
     // .node files are binaries which esbuild doesn't handle out
     // of the box
-    const bundling = {
+    const bundling: BundlingOptions = {
       loader: {
         '.node': 'file',
       },
     };
 
     const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
+    const slackSecret = StringParameter.fromSecureStringParameterAttributes(this, 'slackSecret', {
+      parameterName: '/env/dev/docs/worker_pool/slack/webhook/secret',
+    }).stringValue;
+
+    const slackEnvironment = {
+      DB_NAME: dbName,
+      SLACK_SECRET: slackSecret,
+      NODE_CONFIG_DIR: './api/config',
+    };
 
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/slack.ts`),
       runtime: Runtime.NODEJS_14_X,
       handler: 'DeployRepo',
-      environment: {
-        DB_NAME: dbName,
-      },
+      environment: slackEnvironment,
       bundling,
     });
 
@@ -41,9 +48,7 @@ export class AutoBuilderApiConstruct extends Construct {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/slack.ts`),
       runtime: Runtime.NODEJS_14_X,
       handler: 'DisplayRepoOptions',
-      environment: {
-        DB_NAME: dbName,
-      },
+      environment: slackEnvironment,
       bundling,
     });
 
@@ -65,6 +70,7 @@ export class AutoBuilderApiConstruct extends Construct {
         FASTLY_DOCHUB_MAP: fastlyDochubMap,
         FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
         FASTLY_DOCHUB_TOKEN: fastlyDochubToken,
+        NODE_CONFIG_DIR: './api/config',
       },
       bundling,
     });
