@@ -15,7 +15,6 @@ interface AutoBuilderApiConstructProps {
 export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
-
     // this is for issues with bundling .node files that exist within
     // some of the dependencies in the node_modules
     // .node files are binaries which esbuild doesn't handle out
