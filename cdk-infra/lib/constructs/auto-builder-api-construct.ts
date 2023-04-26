@@ -1,7 +1,7 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { IQueue, Queue } from 'aws-cdk-lib/aws-sqs';
+import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import path = require('path');
@@ -16,6 +16,10 @@ export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
 
+    // this is for issues with bundling .node files that exist within
+    // some of the dependencies in the node_modules
+    // .node files are binaries which esbuild doesn't handle out
+    // of the box
     const bundling = {
       loader: {
         '.node': 'file',
@@ -27,11 +31,21 @@ export class AutoBuilderApiConstruct extends Construct {
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/slack.ts`),
       runtime: Runtime.NODEJS_14_X,
-      bundling,
       handler: 'DeployRepo',
       environment: {
         DB_NAME: dbName,
       },
+      bundling,
+    });
+
+    const slackDisplayRepoLambda = new NodejsFunction(this, 'slackDisplayRepoLambda', {
+      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/slack.ts`),
+      runtime: Runtime.NODEJS_14_X,
+      handler: 'DisplayRepoOptions',
+      environment: {
+        DB_NAME: dbName,
+      },
+      bundling,
     });
 
     const fastlyDochubToken = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubToken', {
@@ -47,13 +61,13 @@ export class AutoBuilderApiConstruct extends Construct {
     const dochubTriggerUpsertLambda = new NodejsFunction(this, 'dochubTriggerUpsertLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/dochub.ts`),
       runtime: Runtime.NODEJS_14_X,
-      bundling,
       handler: 'UpsertEdgeDictionaryItem',
       environment: {
         FASTLY_DOCHUB_MAP: fastlyDochubMap,
         FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
         FASTLY_DOCHUB_TOKEN: fastlyDochubToken,
       },
+      bundling,
     });
 
     const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
@@ -65,9 +79,9 @@ export class AutoBuilderApiConstruct extends Construct {
 
     const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
       entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/jobs.ts`),
-      bundling,
       runtime: Runtime.NODEJS_14_X,
       handler: 'TriggerLocalBuild',
+      bundling,
     });
 
     // generic handler for the root endpoint
@@ -82,21 +96,42 @@ export class AutoBuilderApiConstruct extends Construct {
       proxy: false,
     });
 
-    const controllersEndpoint = restApi.root.addResource('controllers');
-    const v1Endpoint = controllersEndpoint.addResource('v1');
+    const webhookEndpoint = restApi.root.addResource('webhook');
+
+    const slackEndpoint = webhookEndpoint.addResource('slack');
+    const dochubEndpoint = webhookEndpoint.addResource('dochub');
+    const githubEndpoint = webhookEndpoint.addResource('githubEndpoint');
+    const localEndpoint = webhookEndpoint.addResource('local');
 
     const defaultCorsPreflightOptions: CorsOptions = {
       allowOrigins: Cors.ALL_ORIGINS,
     };
 
-    const slackEndpoint = v1Endpoint.addResource('slack', { defaultCorsPreflightOptions });
-    const dochubEndpoint = v1Endpoint.addResource('dochub', { defaultCorsPreflightOptions });
-    const githubEndpoint = v1Endpoint.addResource('githubEndpoint', { defaultCorsPreflightOptions });
-
     // add resources and post methods for trigger endpoints
-    slackEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(slackTriggerLambda));
-    dochubEndpoint.addResource('upsert').addMethod('POST', new LambdaIntegration(dochubTriggerUpsertLambda));
-    githubEndpoint.addResource('trigger').addMethod('POST', new LambdaIntegration(githubTriggerLambda));
+    slackEndpoint
+      .addResource('trigger')
+      .addResource('build', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(slackTriggerLambda));
+
+    slackEndpoint
+      .addResource('display')
+      .addResource('repos', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(slackDisplayRepoLambda));
+
+    dochubEndpoint
+      .addResource('trigger')
+      .addResource('upsert', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(dochubTriggerUpsertLambda));
+
+    githubEndpoint
+      .addResource('trigger')
+      .addResource('build', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(githubTriggerLambda));
+
+    localEndpoint
+      .addResource('trigger')
+      .addResource('build', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(triggerLocalBuildLambda));
 
     const { jobsQueue, jobUpdatesQueue } = props;
 
