@@ -5,6 +5,7 @@ import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 function isUserEntitled(entitlementsObject: any): boolean {
   return (entitlementsObject?.repos?.length ?? 0) > 0;
@@ -53,9 +54,17 @@ function getQSString(qs: string) {
   return key_val;
 }
 
-export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Promise<any> => {
+export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      body: 'Event body is undefined',
+    };
+  }
+
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
@@ -185,11 +194,18 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
   return deployable;
 };
 
-export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
+export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
+  }
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      body: 'Event body is undefined',
+    };
   }
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -217,6 +233,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
+    body: 'success!',
   };
 };
 
