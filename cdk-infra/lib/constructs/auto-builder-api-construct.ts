@@ -22,10 +22,14 @@ export class AutoBuilderApiConstruct extends Construct {
     const slackSecret = StringParameter.fromSecureStringParameterAttributes(this, 'slackSecret', {
       parameterName: '/env/dev/docs/worker_pool/slack/webhook/secret',
     }).stringValue;
+    const slackAuthToken = StringParameter.fromSecureStringParameterAttributes(this, 'slackAuthToken', {
+      parameterName: '/env/dev/docs/worker_pool/slack/auth/token',
+    }).stringValue;
 
     const slackEnvironment = {
       DB_NAME: dbName,
       SLACK_SECRET: slackSecret,
+      SLACK_TOKEN: slackAuthToken,
       NODE_CONFIG_DIR: './api/config',
     };
 
