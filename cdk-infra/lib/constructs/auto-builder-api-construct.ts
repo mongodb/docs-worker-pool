@@ -1,12 +1,12 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import path = require('path');
 
-const HANDLERS_FILE_PATH = '/../../../api/controllers/v1';
+const HANDLERS_FILE_PATH = path.join(__dirname, '../../../build.zip');
+const API_DIR_PATH = 'api/controllers/v1';
 
 interface AutoBuilderApiConstructProps {
   jobsQueue: IQueue;
@@ -15,15 +15,8 @@ interface AutoBuilderApiConstructProps {
 export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
-    // this is for issues with bundling .node files that exist within
-    // some of the dependencies in the node_modules
-    // .node files are binaries which esbuild doesn't handle out
-    // of the box
-    const bundling: BundlingOptions = {
-      loader: {
-        '.node': 'file',
-      },
-    };
+
+    const code = Code.fromAsset(HANDLERS_FILE_PATH);
 
     const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
     const slackSecret = StringParameter.fromSecureStringParameterAttributes(this, 'slackSecret', {
@@ -36,20 +29,18 @@ export class AutoBuilderApiConstruct extends Construct {
       NODE_CONFIG_DIR: './api/config',
     };
 
-    const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
-      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/slack.ts`),
+    const slackTriggerLambda = new Function(this, 'slackTriggerLambda', {
+      code,
       runtime: Runtime.NODEJS_14_X,
-      handler: 'DeployRepo',
+      handler: `${API_DIR_PATH}/slack.DeployRepo`,
       environment: slackEnvironment,
-      bundling,
     });
 
-    const slackDisplayRepoLambda = new NodejsFunction(this, 'slackDisplayRepoLambda', {
-      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/slack.ts`),
+    const slackDisplayRepoLambda = new Function(this, 'slackDisplayRepoLambda', {
+      code,
       runtime: Runtime.NODEJS_14_X,
-      handler: 'DisplayRepoOptions',
+      handler: `${API_DIR_PATH}/slack.DeployRepoDisplayRepoOptions`,
       environment: slackEnvironment,
-      bundling,
     });
 
     const fastlyDochubToken = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubToken', {
@@ -62,31 +53,28 @@ export class AutoBuilderApiConstruct extends Construct {
       parameterName: '/env/dev/docs/worker_pool/fastly/dochub_map',
     }).stringValue;
 
-    const dochubTriggerUpsertLambda = new NodejsFunction(this, 'dochubTriggerUpsertLambda', {
-      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/dochub.ts`),
+    const dochubTriggerUpsertLambda = new Function(this, 'dochubTriggerUpsertLambda', {
+      code,
       runtime: Runtime.NODEJS_14_X,
-      handler: 'UpsertEdgeDictionaryItem',
+      handler: `${API_DIR_PATH}/dochub.UpsertEdgeDictionaryItem`,
       environment: {
         FASTLY_DOCHUB_MAP: fastlyDochubMap,
         FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
         FASTLY_DOCHUB_TOKEN: fastlyDochubToken,
         NODE_CONFIG_DIR: './api/config',
       },
-      bundling,
     });
 
-    const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
-      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/github.ts`),
-      bundling,
+    const githubTriggerLambda = new Function(this, 'githubTriggerLambda', {
+      code,
       runtime: Runtime.NODEJS_14_X,
-      handler: 'TriggerBuild',
+      handler: `${API_DIR_PATH}/github.TriggerBuild`,
     });
 
-    const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
-      entry: path.join(__dirname, `${HANDLERS_FILE_PATH}/jobs.ts`),
+    const triggerLocalBuildLambda = new Function(this, 'triggerLocalBuildLambda', {
+      code,
       runtime: Runtime.NODEJS_14_X,
-      handler: 'TriggerLocalBuild',
-      bundling,
+      handler: `${API_DIR_PATH}/jobs.TriggerLocalBuild`,
     });
 
     // generic handler for the root endpoint
