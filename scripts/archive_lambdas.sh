@@ -10,4 +10,3 @@ cp -a api/config/. build/api/config
 cp -a node_modules build
 
 zip -r build.zip build
-mv build.zip cdk_infra/
