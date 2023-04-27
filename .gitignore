@@ -12,3 +12,4 @@ out
 local.json
 globalConfig.json
 .serverless
+build.zip
