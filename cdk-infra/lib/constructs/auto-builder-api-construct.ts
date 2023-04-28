@@ -21,6 +21,12 @@ export class AutoBuilderApiConstruct extends Construct {
     const code = Code.fromAsset(HANDLERS_FILE_PATH);
 
     const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
+    const dbUsername = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/username');
+    const dbHost = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/host');
+
+    const dbPassword = StringParameter.fromSecureStringParameterAttributes(this, 'dbPassword', {
+      parameterName: '/env/dev/docs/worker_pool/atlas/password',
+    }).stringValue;
     const slackSecret = StringParameter.fromSecureStringParameterAttributes(this, 'slackSecret', {
       parameterName: '/env/dev/docs/worker_pool/slack/webhook/secret',
     }).stringValue;
@@ -32,6 +38,7 @@ export class AutoBuilderApiConstruct extends Construct {
     const { jobsQueue, jobUpdatesQueue } = props;
 
     const slackEnvironment = {
+      MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
       SLACK_SECRET: slackSecret,
       SLACK_TOKEN: slackAuthToken,
