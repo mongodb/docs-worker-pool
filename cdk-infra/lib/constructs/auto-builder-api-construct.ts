@@ -16,6 +16,8 @@ export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
 
+    // this Code object contains a bundle of all of the lambdas
+    // each lambda function will reference this bundle for the source code
     const code = Code.fromAsset(HANDLERS_FILE_PATH);
 
     const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
@@ -26,11 +28,16 @@ export class AutoBuilderApiConstruct extends Construct {
       parameterName: '/env/dev/docs/worker_pool/slack/auth/token',
     }).stringValue;
 
+    // retrieving queues
+    const { jobsQueue, jobUpdatesQueue } = props;
+
     const slackEnvironment = {
       DB_NAME: dbName,
       SLACK_SECRET: slackSecret,
       SLACK_TOKEN: slackAuthToken,
       NODE_CONFIG_DIR: './api/config',
+      JOBS_QUEUE_URL: jobsQueue.queueUrl,
+      JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
     };
 
     const slackTriggerLambda = new Function(this, 'slackTriggerLambda', {
@@ -129,8 +136,6 @@ export class AutoBuilderApiConstruct extends Construct {
       .addResource('trigger')
       .addResource('build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(triggerLocalBuildLambda));
-
-    const { jobsQueue, jobUpdatesQueue } = props;
 
     // grant permission for lambdas to enqueue messages to the jobs queue
     jobsQueue.grantSendMessages(slackTriggerLambda);
