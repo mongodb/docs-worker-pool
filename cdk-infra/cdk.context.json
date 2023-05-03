@@ -1,5 +1,0 @@
-{
-  "ssm:account=216656347858:parameterName=/env/dev/docs/worker_pool/atlas/dbname:region=us-east-2": "pool_test",
-  "ssm:account=216656347858:parameterName=/env/dev/docs/worker_pool/atlas/username:region=us-east-2": "aws-dev",
-  "ssm:account=216656347858:parameterName=/env/dev/docs/worker_pool/atlas/host:region=us-east-2": "cluster0-ylwlz.mongodb.net"
-}
