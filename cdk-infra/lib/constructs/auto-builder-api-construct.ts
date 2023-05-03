@@ -25,15 +25,9 @@ export class AutoBuilderApiConstruct extends Construct {
     const dbUsername = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/username');
     const dbHost = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/host');
 
-    const dbPassword = StringParameter.fromSecureStringParameterAttributes(this, 'dbPassword', {
-      parameterName: '/env/dev/docs/worker_pool/atlas/password',
-    }).stringValue;
-    const slackSecret = StringParameter.fromSecureStringParameterAttributes(this, 'slackSecret', {
-      parameterName: '/env/dev/docs/worker_pool/slack/webhook/secret',
-    });
-    const slackAuthToken = StringParameter.fromSecureStringParameterAttributes(this, 'slackAuthToken', {
-      parameterName: '/env/dev/docs/worker_pool/slack/auth/token',
-    });
+    const dbPassword = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/password');
+    const slackSecret = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/webhook/secret');
+    const slackAuthToken = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/auth/token');
 
     // retrieving queues
     const { jobsQueue, jobUpdatesQueue } = props;
@@ -41,8 +35,8 @@ export class AutoBuilderApiConstruct extends Construct {
     const slackEnvironment = {
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
-      SLACK_SECRET: slackSecret.parameterName,
-      SLACK_TOKEN: slackAuthToken.parameterName,
+      SLACK_SECRET: slackSecret,
+      SLACK_TOKEN: slackAuthToken,
       NODE_CONFIG_DIR: './api/config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
@@ -61,9 +55,6 @@ export class AutoBuilderApiConstruct extends Construct {
       handler: `${API_DIR_PATH}/slack.DeployRepoDisplayRepoOptions`,
       environment: slackEnvironment,
     });
-
-    slackSecret.grantRead(slackTriggerLambda);
-    slackSecret.grantRead(slackDisplayRepoLambda);
 
     const fastlyDochubToken = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubToken', {
       parameterName: '/env/dev/docs/worker_pool/fastly/docs/dochub/token',
