@@ -1,5 +1,6 @@
-import { MongoClient } from 'mongodb';
-import { AssociatedProduct, Metadata } from '../../src/services/metadata/associated_products';
+import { Db, MongoClient } from 'mongodb';
+import { AssociatedProduct } from '../../src/services/metadata/associated_products';
+import { Metadata } from '../../src/services/metadata/';
 import {
   ToC,
   ToCInsertions,
@@ -10,10 +11,10 @@ import {
 } from '../../src/services/metadata/ToC';
 
 import metadata from '../data/metadata.json';
-import repoBranches from '../data/repos_branches.json';
+import { setMockDB, closeDb } from '../utils';
 
-let connection;
-let mockDb;
+let connection: MongoClient;
+let mockDb: Db;
 jest.mock('../../src/services/connector', () => {
   return {
     pool: jest.fn(() => {
@@ -27,29 +28,17 @@ jest.mock('../../src/services/connector', () => {
 
 describe('ToC module', () => {
   beforeAll(async () => {
-    // process.env.MONGO_URL defaults to localhost
-    // https://github.com/shelfio/jest-mongodb#3-configure-mongodb-client
-    // or update jest-mongodb-config.js
-    try {
-      connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
-      mockDb = await connection.db();
-      await mockDb.collection('repos_branches').insertMany(repoBranches);
-      await mockDb.collection('metadata').insertMany(metadata);
-    } catch (e) {
-      console.error(e);
-    }
+    [mockDb, connection] = await setMockDB();
   });
 
   afterAll(async () => {
-    await mockDb.collection('repos_branches').deleteMany({});
-    await mockDb.collection('metadata').deleteMany({});
-    await connection.close();
+    await closeDb(mockDb, connection);
   });
 
   describe('copyToCTree', () => {
     it('creates a deep copy of a ToC when passed only the ToC', () => {
       const toctree = metadata[0].toctree;
-      const copiedToCTree = copyToCTree(toctree);
+      const copiedToCTree = copyToCTree(toctree as unknown as ToC);
       toctree.slug = '/';
       copiedToCTree.slug = 'test value';
       expect(toctree.slug).toBe('/');

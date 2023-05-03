@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { Db, MongoClient } from 'mongodb';
 import {
   _getRepoBranchesEntry,
   _getAllAssociatedRepoBranchesEntries,
@@ -9,10 +9,10 @@ import {
 } from '../../src/services/metadata/associated_products';
 
 import metadata from '../data/metadata.json';
-import repoBranches from '../data/repos_branches.json';
+import { setMockDB, closeDb } from '../utils';
 
-let connection;
-let mockDb;
+let connection: MongoClient;
+let mockDb: Db;
 jest.mock('../../src/services/connector', () => {
   return {
     pool: jest.fn(() => {
@@ -29,19 +29,11 @@ describe('associated_products module', () => {
   const project = 'atlas-cli';
 
   beforeAll(async () => {
-    // process.env.MONGO_URL defaults to localhost
-    // https://github.com/shelfio/jest-mongodb#3-configure-mongodb-client
-    // or update jest-mongodb-config.js
-    connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
-    mockDb = await connection.db();
-    await mockDb.collection('repos_branches').insertMany(repoBranches);
-    await mockDb.collection('metadata').insertMany(metadata);
+    [mockDb, connection] = await setMockDB();
   });
 
   afterAll(async () => {
-    await mockDb.collection('repos_branches').deleteMany({});
-    await mockDb.collection('metadata').deleteMany({});
-    await connection.close();
+    await closeDb(mockDb, connection);
   });
 
   describe('getRepoBranchesEntry', () => {
