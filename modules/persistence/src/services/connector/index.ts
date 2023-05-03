@@ -4,7 +4,7 @@
 // If no, the helper should be implemented in that service, not here
 
 import * as mongodb from 'mongodb';
-import { ObjectId, Db } from 'mongodb';
+import { ObjectId, Db, Document } from 'mongodb';
 import { db as poolDb } from './pool';
 
 // We should only ever have one client active at a time.
@@ -51,15 +51,23 @@ export const insert = async (docs: any[], collection: string, buildId: ObjectId)
 };
 
 // Upsert wrapper, requires an _id field.
-export const upsert = async (payload: any, collection: string, _id: string | ObjectId) => {
+export const bulkUpsert = async (items: Document[], collection: string) => {
   const upsertSession = await db();
   try {
-    const query = { _id };
-    const update = { $set: payload };
-    const options = { upsert: true };
-    return await upsertSession.collection(collection).updateOne(query, update, options);
+    const operations: mongodb.AnyBulkWriteOperation[] = [];
+    items.forEach((item: Document) => {
+      const op = {
+        updateOne: {
+          filter: { _id: item._id },
+          update: { $set: item },
+          upsert: true,
+        },
+      };
+      operations.push(op);
+    });
+    return upsertSession.collection(collection).bulkWrite(operations);
   } catch (error) {
-    console.error(`Error at upsertion time for ${collection}: ${error}`);
+    console.error(`Error at bulk upsertion time for ${collection}: ${error}`);
     throw error;
   }
 };
