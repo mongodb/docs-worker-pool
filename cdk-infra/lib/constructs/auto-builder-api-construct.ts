@@ -12,6 +12,7 @@ interface AutoBuilderApiConstructProps {
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
 }
+
 export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
@@ -29,10 +30,10 @@ export class AutoBuilderApiConstruct extends Construct {
     }).stringValue;
     const slackSecret = StringParameter.fromSecureStringParameterAttributes(this, 'slackSecret', {
       parameterName: '/env/dev/docs/worker_pool/slack/webhook/secret',
-    }).stringValue;
+    });
     const slackAuthToken = StringParameter.fromSecureStringParameterAttributes(this, 'slackAuthToken', {
       parameterName: '/env/dev/docs/worker_pool/slack/auth/token',
-    }).stringValue;
+    });
 
     // retrieving queues
     const { jobsQueue, jobUpdatesQueue } = props;
@@ -40,8 +41,8 @@ export class AutoBuilderApiConstruct extends Construct {
     const slackEnvironment = {
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
-      SLACK_SECRET: slackSecret,
-      SLACK_TOKEN: slackAuthToken,
+      SLACK_SECRET: slackSecret.parameterName,
+      SLACK_TOKEN: slackAuthToken.parameterName,
       NODE_CONFIG_DIR: './api/config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
@@ -61,27 +62,34 @@ export class AutoBuilderApiConstruct extends Construct {
       environment: slackEnvironment,
     });
 
+    slackSecret.grantRead(slackTriggerLambda);
+    slackSecret.grantRead(slackDisplayRepoLambda);
+
     const fastlyDochubToken = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubToken', {
       parameterName: '/env/dev/docs/worker_pool/fastly/docs/dochub/token',
-    }).stringValue;
+    });
     const fastlyDochubServiceId = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubServiceId', {
       parameterName: '/env/dev/docs/worker_pool/fastly/docs/dochub/service_id',
-    }).stringValue;
+    });
     const fastlyDochubMap = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubMap', {
       parameterName: '/env/dev/docs/worker_pool/fastly/dochub_map',
-    }).stringValue;
+    });
 
     const dochubTriggerUpsertLambda = new Function(this, 'dochubTriggerUpsertLambda', {
       code,
       runtime: Runtime.NODEJS_14_X,
       handler: `${API_DIR_PATH}/dochub.UpsertEdgeDictionaryItem`,
       environment: {
-        FASTLY_DOCHUB_MAP: fastlyDochubMap,
-        FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
-        FASTLY_DOCHUB_TOKEN: fastlyDochubToken,
+        FASTLY_DOCHUB_MAP: fastlyDochubMap.parameterName,
+        FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId.parameterName,
+        FASTLY_DOCHUB_TOKEN: fastlyDochubToken.parameterName,
         NODE_CONFIG_DIR: './api/config',
       },
     });
+
+    fastlyDochubToken.grantRead(dochubTriggerUpsertLambda);
+    fastlyDochubServiceId.grantRead(dochubTriggerUpsertLambda);
+    fastlyDochubMap.grantRead(dochubTriggerUpsertLambda);
 
     const githubTriggerLambda = new Function(this, 'githubTriggerLambda', {
       code,
