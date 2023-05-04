@@ -1,4 +1,4 @@
-import { pool, db } from '../../connector';
+import { pool } from '../../connector';
 import { Metadata } from '..';
 import { project } from '../ToC';
 import { WithId } from 'mongodb';
