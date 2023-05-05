@@ -1,9 +1,10 @@
 import AdmZip from 'adm-zip';
 import { deserialize } from 'bson';
 import { ObjectId } from 'mongodb';
-import { insert } from '../connector';
+import { bulkUpsertUpdatedPageDocuments, insert } from '../connector';
 
 const COLLECTION_NAME = 'documents';
+const UPDATED_AST_COLL_NAME = 'updated_documents';
 
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
@@ -17,8 +18,12 @@ const pagesFromZip = (zip: AdmZip) => {
 
 export const insertPages = async (buildId: ObjectId, zip: AdmZip) => {
   try {
-    const pages = await pagesFromZip(zip);
-    return insert(pages, COLLECTION_NAME, buildId);
+    const pages = pagesFromZip(zip);
+    return Promise.all([
+      insert(pages, COLLECTION_NAME, buildId),
+      bulkUpsertUpdatedPageDocuments(pages, UPDATED_AST_COLL_NAME),
+    ]);
+    // return insert(pages, COLLECTION_NAME, buildId);
   } catch (error) {
     console.error(`Error at insertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;
