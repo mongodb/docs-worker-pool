@@ -1,12 +1,30 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+
 import path = require('path');
 
-const HANDLERS_FILE_PATH = path.join(__dirname, '../../../build.zip');
-const API_DIR_PATH = 'api/controllers/v1';
+const HANDLERS_PATH = path.join(__dirname, '/../../../api/controllers/v1/');
+
+const bundling: BundlingOptions = {
+  sourceMap: true,
+  minify: true,
+  loader: {
+    '.node': 'file',
+  },
+  commandHooks: {
+    beforeBundling: (inputDir: string, outputDir: string): string[] => {
+      return [`cp -a ${inputDir}/static/api/config ${outputDir}`];
+    },
+    afterBundling: (): string[] => [],
+    beforeInstall: (): string[] => [],
+  },
+};
+
+const runtime = Runtime.NODEJS_18_X;
 
 interface AutoBuilderApiConstructProps {
   jobsQueue: IQueue;
@@ -17,21 +35,15 @@ export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
 
-    // this Code object contains a bundle of all of the lambdas
-    // each lambda function will reference this bundle for the source code
-    const code = Code.fromAsset(HANDLERS_FILE_PATH);
-
     const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
     const dbUsername = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/username');
     const dbHost = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/host');
-
     const dbPassword = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/password');
     const slackSecret = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/webhook/secret');
     const slackAuthToken = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/auth/token');
 
     // retrieving queues
     const { jobsQueue, jobUpdatesQueue } = props;
-
     const slackEnvironment = {
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
@@ -42,18 +54,20 @@ export class AutoBuilderApiConstruct extends Construct {
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
     };
 
-    const slackTriggerLambda = new Function(this, 'slackTriggerLambda', {
-      code,
-      runtime: Runtime.NODEJS_14_X,
-      handler: `${API_DIR_PATH}/slack.DeployRepo`,
+    const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
+      entry: `${HANDLERS_PATH}/slack.ts`,
+      runtime,
+      handler: 'DeployRepo',
       environment: slackEnvironment,
+      bundling,
     });
 
-    const slackDisplayRepoLambda = new Function(this, 'slackDisplayRepoLambda', {
-      code,
-      runtime: Runtime.NODEJS_14_X,
-      handler: `${API_DIR_PATH}/slack.DeployRepoDisplayRepoOptions`,
+    const slackDisplayRepoLambda = new NodejsFunction(this, 'slackDisplayRepoLambda', {
+      entry: `${HANDLERS_PATH}/slack.ts`,
+      runtime,
+      handler: 'DeployRepoDisplayRepoOptions',
       environment: slackEnvironment,
+      bundling,
     });
 
     const fastlyDochubToken = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubToken', {
@@ -66,10 +80,10 @@ export class AutoBuilderApiConstruct extends Construct {
       parameterName: '/env/dev/docs/worker_pool/fastly/dochub_map',
     });
 
-    const dochubTriggerUpsertLambda = new Function(this, 'dochubTriggerUpsertLambda', {
-      code,
-      runtime: Runtime.NODEJS_14_X,
-      handler: `${API_DIR_PATH}/dochub.UpsertEdgeDictionaryItem`,
+    const dochubTriggerUpsertLambda = new NodejsFunction(this, 'dochubTriggerUpsertLambda', {
+      entry: `${HANDLERS_PATH}/dochub.ts`,
+      runtime,
+      handler: 'UpsertEdgeDictionaryItem',
       environment: {
         FASTLY_DOCHUB_MAP: fastlyDochubMap.parameterName,
         FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId.parameterName,
@@ -82,22 +96,27 @@ export class AutoBuilderApiConstruct extends Construct {
     fastlyDochubServiceId.grantRead(dochubTriggerUpsertLambda);
     fastlyDochubMap.grantRead(dochubTriggerUpsertLambda);
 
-    const githubTriggerLambda = new Function(this, 'githubTriggerLambda', {
-      code,
-      runtime: Runtime.NODEJS_14_X,
-      handler: `${API_DIR_PATH}/github.TriggerBuild`,
+    const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
+      entry: `${HANDLERS_PATH}/github.ts`,
+      runtime,
+      handler: 'TriggerBuild',
+      bundling,
     });
 
-    const triggerLocalBuildLambda = new Function(this, 'triggerLocalBuildLambda', {
-      code,
-      runtime: Runtime.NODEJS_14_X,
-      handler: `${API_DIR_PATH}/jobs.TriggerLocalBuild`,
+    const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
+      entry: `${HANDLERS_PATH}/jobs.ts`,
+      runtime,
+      handler: 'TriggerLocalBuild',
+      environment: {
+        JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
+      },
+      bundling,
     });
 
     // generic handler for the root endpoint
     const rootEndpointLambda = new Function(this, 'RootEndpointLambda', {
       code: Code.fromInline('exports.default = (event) => { console.log("hello, world!!"); }'),
-      runtime: Runtime.NODEJS_14_X,
+      runtime,
       handler: 'RootEndpointLambda',
     });
 
