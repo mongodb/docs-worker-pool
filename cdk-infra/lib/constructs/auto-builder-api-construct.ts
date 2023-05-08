@@ -29,36 +29,20 @@ const runtime = Runtime.NODEJS_18_X;
 interface AutoBuilderApiConstructProps {
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
+  environment: Record<string, string>;
 }
 
 export class AutoBuilderApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
     super(scope, id);
 
-    const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
-    const dbUsername = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/username');
-    const dbHost = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/host');
-    const dbPassword = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/password');
-    const slackSecret = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/webhook/secret');
-    const slackAuthToken = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/auth/token');
-
-    // retrieving queues
-    const { jobsQueue, jobUpdatesQueue } = props;
-    const slackEnvironment = {
-      MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
-      DB_NAME: dbName,
-      SLACK_SECRET: slackSecret,
-      SLACK_TOKEN: slackAuthToken,
-      NODE_CONFIG_DIR: './api/config',
-      JOBS_QUEUE_URL: jobsQueue.queueUrl,
-      JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
-    };
+    const { jobsQueue, jobUpdatesQueue, environment } = props;
 
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: `${HANDLERS_PATH}/slack.ts`,
       runtime,
       handler: 'DeployRepo',
-      environment: slackEnvironment,
+      environment,
       bundling,
     });
 
@@ -66,7 +50,7 @@ export class AutoBuilderApiConstruct extends Construct {
       entry: `${HANDLERS_PATH}/slack.ts`,
       runtime,
       handler: 'DeployRepoDisplayRepoOptions',
-      environment: slackEnvironment,
+      environment,
       bundling,
     });
 
@@ -84,12 +68,7 @@ export class AutoBuilderApiConstruct extends Construct {
       entry: `${HANDLERS_PATH}/dochub.ts`,
       runtime,
       handler: 'UpsertEdgeDictionaryItem',
-      environment: {
-        FASTLY_DOCHUB_MAP: fastlyDochubMap.parameterName,
-        FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId.parameterName,
-        FASTLY_DOCHUB_TOKEN: fastlyDochubToken.parameterName,
-        NODE_CONFIG_DIR: './api/config',
-      },
+      environment,
     });
 
     fastlyDochubToken.grantRead(dochubTriggerUpsertLambda);
@@ -101,15 +80,14 @@ export class AutoBuilderApiConstruct extends Construct {
       runtime,
       handler: 'TriggerBuild',
       bundling,
+      environment,
     });
 
     const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
       entry: `${HANDLERS_PATH}/jobs.ts`,
       runtime,
       handler: 'TriggerLocalBuild',
-      environment: {
-        JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
-      },
+      environment,
       bundling,
     });
 
