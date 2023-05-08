@@ -5,6 +5,7 @@
 
 import * as mongodb from 'mongodb';
 import { ObjectId, Db, Document } from 'mongodb';
+import isEqual from 'fast-deep-equal';
 import { db as poolDb } from './pool';
 
 // We should only ever have one client active at a time.
@@ -153,13 +154,12 @@ const checkForPageDiffs = (
       return;
     }
 
-    const stringifiedAst = JSON.stringify(page.ast);
     const currentPageId = page.page_id;
-    const previousAst = JSON.stringify(prevPageDocsMapping[currentPageId]);
     prevPageIds.delete(currentPageId);
 
-    // Update the document if page's current AST is different from previous build's
-    if (stringifiedAst !== previousAst) {
+    // Update the document if page's current AST is different from previous build's.
+    // New pages should always count as having a "different" AST
+    if (!isEqual(page.ast, prevPageDocsMapping[currentPageId])) {
       const operation = {
         updateOne: {
           filter: { page_id: currentPageId },
@@ -233,9 +233,6 @@ export const bulkUpsertUpdatedPageDocuments = async (pages: Document[], collecti
     console.log(res);
   }
   console.timeEnd('updated_documents');
-
-  console.log(pages.length);
-  console.log(operations.length);
 };
 
 export const deleteDocuments = async (_ids: ObjectId[], collection: string) => {
