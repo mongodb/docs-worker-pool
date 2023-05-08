@@ -3,6 +3,7 @@ variablesResolutionMode: 20210326
 
 plugins:
   - serverless-plugin-typescript
+  - serverless-prune-plugin
   - serverless-iam-roles-per-function
 
 provider:

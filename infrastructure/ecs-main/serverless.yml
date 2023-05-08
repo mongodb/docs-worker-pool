@@ -3,6 +3,7 @@ variablesResolutionMode: 20210326
 
 plugins:
   - serverless-pseudo-parameters
+  - serverless-prune-plugin
 provider:
   name: aws
   stage: ${opt:stage, 'stg'}
