@@ -164,6 +164,15 @@ const markUnseenPagesAsDeleted = (
   });
 };
 
+/**
+ *
+ * Upserts pages in separate collection. Copies of a page are created by page_id.
+ * Updated pages within the same Snooty project name + branch should only update
+ * related page documents.
+ *
+ * @param pages
+ * @param collection
+ */
 export const updatePages = async (pages: Document[], collection: string) => {
   if (pages.length === 0) {
     return;
