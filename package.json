@@ -8,7 +8,6 @@
     "start": "node index.js",
     "clean": "node maintain.js",
     "build": "tsc",
-    "bundle": "rm -rf build && tsc && npm prune --omit=dev && ./scripts/archive_lambdas.sh",
     "format": "npm run prettier -- --check",
     "format:fix": "npm run prettier -- --write",
     "lint": "eslint --ext .ts .",
