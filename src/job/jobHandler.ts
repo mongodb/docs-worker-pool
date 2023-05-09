@@ -85,6 +85,7 @@ export abstract class JobHandler {
     this.logger.error(this.currJob._id, message);
   }
   private async update(publishResult: CommandExecutorResponse): Promise<void> {
+    console.log('current job payload in update method', this.currJob.payload);
     if (publishResult) {
       if (publishResult?.status === 'success') {
         const files = this._fileSystemServices.getFilesInDirectory(
