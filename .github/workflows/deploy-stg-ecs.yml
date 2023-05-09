@@ -66,6 +66,7 @@ jobs:
           sls deploy --stage dotcomstg
       - name: Deploy Lambdas	
         run: |
-          npm ci          
+          npm ci         
           sls deploy --stage stg
-          sls deploy --stage dotcomstg
+          sls deploy --stage dotcomstg 
+          sls prune -n 5
