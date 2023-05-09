@@ -66,7 +66,6 @@ If you are running a local version of the docker image for testing, we have a se
 ## Run Tests
 
 ```
-cd worker
 npm install --dev
 npm test  // runs ~ jest --detectOpenHandles --coverage
 ```
@@ -74,7 +73,6 @@ npm test  // runs ~ jest --detectOpenHandles --coverage
 ## Run Linter
 
 ```
-cd worker
 npm install --dev
 ./node_modules/.bin/eslint .
 ```
