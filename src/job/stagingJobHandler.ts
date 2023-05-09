@@ -53,9 +53,13 @@ export class StagingJobHandler extends JobHandler {
   }
 
   prepStageSpecificNextGenCommands(): void {
+    console.log('current job build commands', this.currJob.buildCommands);
     if (this.currJob.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-html';
+      console.log('current job build commands after adding a new one', this.currJob.buildCommands);
       this.currJob.buildCommands.push(`make oas-page-build MUT_PREFIX=${this.currJob.payload.mutPrefix}`);
+      console.log('this current job payload', this.currJob.payload);
+      console.log('current job build commands after adding make oas-page', this.currJob.buildCommands);
     }
   }
   async deploy(): Promise<CommandExecutorResponse> {
