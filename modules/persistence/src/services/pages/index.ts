@@ -80,89 +80,95 @@ const createPageAstMapping = async (docsCursor: FindCursor) => {
   return { mapping, pageIds };
 };
 
-/**
- *
- * Compares the ASTs of the current pages with the previous pages. New update
- * operations are added whenever a diff in the page ASTs is found. Page IDs are
- * removed from `prevPageIds` to signal that the previous page has been "seen"
- *
- * @param operations - array of db operations. New operations will be pushed to this array when page diffs are found
- * @param updateTime - the time to set updates to
- * @param currentPages - the page documents for the current build
- * @param prevPageDocsMapping - a mapping of the page ASTs from the previous build
- * @param prevPageIds - a set of all page IDs from the previous build
- */
-const checkForPageDiffs = (
-  operations: AnyBulkWriteOperation[],
-  updateTime: Date,
-  currentPages: Document[],
-  prevPageDocsMapping: Record<string, object>,
-  prevPageIds: Set<string>
-) => {
-  currentPages.forEach((page) => {
-    // Filter out rst (non-page) files
-    if (!page.filename.endsWith('.txt')) {
-      return;
-    }
+class UpdatedPagesManager {
+  currentPages: Document[];
+  operations: AnyBulkWriteOperation[];
+  prevPageDocsMapping: Record<string, object>;
+  prevPageIds: Set<string>;
 
-    const currentPageId = page.page_id;
-    prevPageIds.delete(currentPageId);
+  constructor(prevPageDocsMapping: Record<string, object>, prevPagesIds: Set<string>, pages: Document[]) {
+    this.currentPages = pages;
+    this.operations = [];
+    this.prevPageDocsMapping = prevPageDocsMapping;
+    this.prevPageIds = prevPagesIds;
 
-    // Update the document if page's current AST is different from previous build's.
-    // New pages should always count as having a "different" AST
-    if (!isEqual(page.ast, prevPageDocsMapping[currentPageId])) {
+    const updateTime = new Date();
+    this.checkForPageDiffs(updateTime);
+    this.markUnseenPagesAsDeleted(updateTime);
+  }
+
+  /**
+   *
+   * Compares the ASTs of the current pages with the previous pages. New update
+   * operations are added whenever a diff in the page ASTs is found. Page IDs are
+   * removed from `prevPageIds` to signal that the previous page has been "seen"
+   *
+   * @param updateTime - the time to set updates to
+   */
+  checkForPageDiffs(updateTime: Date) {
+    this.currentPages.forEach((page) => {
+      // Filter out rst (non-page) files
+      if (!page.filename.endsWith('.txt')) {
+        return;
+      }
+
+      const currentPageId = page.page_id;
+      this.prevPageIds.delete(currentPageId);
+
+      // Update the document if page's current AST is different from previous build's.
+      // New pages should always count as having a "different" AST
+      if (!isEqual(page.ast, this.prevPageDocsMapping[currentPageId])) {
+        const operation = {
+          updateOne: {
+            filter: { page_id: currentPageId },
+            update: {
+              $set: {
+                page_id: currentPageId,
+                filename: page.filename,
+                ast: page.ast,
+                static_assets: page.static_assets,
+                updated_at: updateTime,
+                deleted: false,
+              },
+              $setOnInsert: {
+                created_at: updateTime,
+              },
+            },
+            upsert: true,
+          },
+        };
+        this.operations.push(operation);
+      }
+    });
+  }
+
+  /**
+   *
+   * Marks any pages from the previous build that were not used as "deleted"
+   *
+   * @param updateTime - the time to set updates to
+   */
+  markUnseenPagesAsDeleted(updateTime: Date) {
+    this.prevPageIds.forEach((unseenPageId) => {
       const operation = {
         updateOne: {
-          filter: { page_id: currentPageId },
+          filter: { page_id: unseenPageId },
           update: {
             $set: {
-              page_id: currentPageId,
-              filename: page.filename,
-              ast: page.ast,
-              static_assets: page.static_assets,
+              deleted: true,
               updated_at: updateTime,
-              deleted: false,
-            },
-            $setOnInsert: {
-              created_at: updateTime,
             },
           },
-          upsert: true,
         },
       };
-      operations.push(operation);
-    }
-  });
-};
+      this.operations.push(operation);
+    });
+  }
 
-/**
- *
- * Marks any pages from the previous build that were not used as "deleted"
- *
- * @param operations - array of db operations. New operations will be pushed to this array when pages are "deleted"
- * @param updateTime - the time to set updates to
- * @param unseenPageIds - a set of page IDs from the previous build that were not used for any comparisons
- */
-const markUnseenPagesAsDeleted = (
-  operations: AnyBulkWriteOperation[],
-  updateTime: Date,
-  unusedPageIds: Set<string>
-) => {
-  unusedPageIds.forEach((unseenPageId) => {
-    const operation = {
-      updateOne: {
-        filter: { page_id: unseenPageId },
-        update: {
-          $set: {
-            deleted: true,
-            updated_at: updateTime,
-          },
-        },
-      },
-    };
-    operations.push(operation);
-  });
-};
+  getOperations() {
+    return this.operations;
+  }
+}
 
 /**
  *
@@ -173,7 +179,7 @@ const markUnseenPagesAsDeleted = (
  * @param pages
  * @param collection
  */
-export const updatePages = async (pages: Document[], collection: string) => {
+const updatePages = async (pages: Document[], collection: string) => {
   if (pages.length === 0) {
     return;
   }
@@ -184,11 +190,8 @@ export const updatePages = async (pages: Document[], collection: string) => {
   const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection);
   const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
 
-  const operations: AnyBulkWriteOperation[] = [];
-  const updateTime = new Date();
-
-  checkForPageDiffs(operations, updateTime, pages, prevPageDocsMapping, prevPageIds);
-  markUnseenPagesAsDeleted(operations, updateTime, prevPageIds);
+  const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages);
+  const operations = updatedPagesManager.getOperations();
 
   if (operations.length > 0) {
     await bulkWrite(operations, collection);
@@ -204,3 +207,5 @@ export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip) => {
     throw error;
   }
 };
+
+export const _updatePages = updatePages;

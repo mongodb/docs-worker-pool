@@ -1,5 +1,5 @@
 import { Db, MongoClient } from 'mongodb';
-import { UpdatedPage, updatePages } from '../../src/services/pages';
+import { UpdatedPage, _updatePages } from '../../src/services/pages';
 import { closeDb, setMockDB } from '../utils';
 import { ObjectID } from 'bson';
 
@@ -59,7 +59,7 @@ describe('pages module', () => {
         ast: { foo: 'foo', bar: { foo: 'foo' } },
       };
       pages.push(rstFile);
-      await updatePages(pages, collection);
+      await _updatePages(pages, collection);
 
       res = await mockDb.collection(collection).find(findQuery).toArray();
       expect(res).toHaveLength(2);
@@ -70,7 +70,7 @@ describe('pages module', () => {
     it('should update modified pages', async () => {
       const pagePrefix = generatePagePrefix();
       const pages = generatePages(pagePrefix);
-      await updatePages(pages, collection);
+      await _updatePages(pages, collection);
 
       const findQuery = {
         page_id: { $regex: new RegExp(`^${pagePrefix}`) },
@@ -85,7 +85,7 @@ describe('pages module', () => {
         { page_id: `${pagePrefix}/page0.txt`, filename: 'page0.txt', ast: { foo: 'foo', bar: { foo: 'foo' } } },
         { page_id: `${pagePrefix}/page1.txt`, filename: 'page1.txt', ast: { foo: 'foo', bar: { foo: 'baz' } } },
       ];
-      await updatePages(updatedPages, collection);
+      await _updatePages(updatedPages, collection);
 
       res = await mockDb.collection<UpdatedPage>(collection).find(findQuery).toArray();
       expect(res).toHaveLength(2);
@@ -98,7 +98,7 @@ describe('pages module', () => {
     it('should mark pages for deletion', async () => {
       const pagePrefix = generatePagePrefix();
       const pages = generatePages(pagePrefix);
-      await updatePages(pages, collection);
+      await _updatePages(pages, collection);
 
       const findQuery = {
         page_id: { $regex: new RegExp(`^${pagePrefix}`) },
@@ -110,7 +110,7 @@ describe('pages module', () => {
       const updatedPages = [
         { page_id: `${pagePrefix}/page1.txt`, filename: 'page1.txt', ast: { foo: 'foo', bar: { foo: 'bar' } } },
       ];
-      await updatePages(updatedPages, collection);
+      await _updatePages(updatedPages, collection);
 
       // There should be 1 page marked as deleted
       res = await mockDb.collection(collection).find(findQuery).toArray();
@@ -118,7 +118,7 @@ describe('pages module', () => {
       expect(res[0]).toHaveProperty('filename', 'page0.txt');
 
       // Re-adding the deleted page should lead to no deleted pages
-      await updatePages(pages, collection);
+      await _updatePages(pages, collection);
       res = await mockDb.collection(collection).find(findQuery).toArray();
       expect(res).toHaveLength(0);
     });
