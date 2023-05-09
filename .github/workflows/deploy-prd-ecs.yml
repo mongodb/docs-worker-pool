@@ -66,6 +66,6 @@ jobs:
       - name: Deploy Lambdas	
         run: |
           npm ci
-          sls prune -n 5
           sls deploy --stage prd
           sls deploy --stage dotcomprd
+          sls prune -n 5
