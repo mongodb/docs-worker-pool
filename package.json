@@ -32,7 +32,7 @@
     "@types/config": "^0.0.39",
     "@types/tsscmp": "^1.0.0",
     "async-retry": "^1.2.3",
-    "aws-sdk": "^2.1095.0",
+    "aws-sdk": "^2.1376.0",
     "axios": "^0.21.1",
     "config": "^3.3.6",
     "core-js": "^3.1.4",
