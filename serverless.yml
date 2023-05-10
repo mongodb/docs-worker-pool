@@ -3,10 +3,12 @@ variablesResolutionMode: 20210326
 
 plugins:
   - serverless-plugin-typescript
+  - serverless-prune-plugin
   - serverless-iam-roles-per-function
 
 provider:
   name: aws
+  runtime: nodejs18.x
   stage: ${opt:stage, 'stg'}
   iamRoleStatements:
     - Effect: Allow

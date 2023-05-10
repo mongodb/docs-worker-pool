@@ -36,6 +36,7 @@ export default {
     urlSlug: 'upcoming',
     isFork: true,
     private: false,
+    isXlarge: true,
     repoOwner: 'mongodb',
     url: 'https://github.com/mongodb/docs-java',
     newHead: null,
