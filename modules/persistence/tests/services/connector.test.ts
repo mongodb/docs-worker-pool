@@ -1,5 +1,5 @@
 import { ObjectID } from 'bson';
-import { bulkUpsert, db, insert } from '../../src/services/connector';
+import { bulkUpsertAll, db, insert } from '../../src/services/connector';
 
 const mockConnect = jest.fn();
 const mockDb = jest.fn();
@@ -123,7 +123,7 @@ describe('Connector module', () => {
     const collection = 'metadata';
 
     test('it calls on collection to update one with upsert option true', async () => {
-      await bulkUpsert([payload], collection);
+      await bulkUpsertAll([payload], collection);
       expect(mockCollection).toBeCalledWith(collection);
       expect(mockBulkWrite).toBeCalledWith([
         {
@@ -136,10 +136,10 @@ describe('Connector module', () => {
       ]);
     });
 
-    test('it throws error on updateone error', async () => {
+    test('it throws error on bulkWrite error', async () => {
       mockBulkWrite.mockRejectedValueOnce(new Error('test error') as never);
       try {
-        await bulkUpsert([payload], collection);
+        await bulkUpsertAll([payload], collection);
       } catch (e) {
         expect(e.message).toEqual('test error');
       }
