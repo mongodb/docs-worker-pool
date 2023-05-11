@@ -81,14 +81,17 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
     // hash in our database.
     await fetchTextData(oasFileURL, `Error fetching data from ${oasFileURL}`);
   } catch (e) {
-    console.error(e);
+    const unsuccessfulOasFileURL = oasFileURL;
     successfulGitHash = false;
 
     const res = await findLastSavedVersionData(apiKeyword);
     if (res) {
       ensureSavedVersionDataMatches(res.versions, apiVersion, resourceVersion);
       oasFileURL = `${OAS_FILE_SERVER}${res.gitHash}${versionExtension}.json`;
-      console.log(`Using ${oasFileURL}`);
+      console.log(`Error occurred fetching from newest OAS spec at ${unsuccessfulOasFileURL}.\n
+      This error is a rare but expected result of upload timing between gitHashes and specs.\n
+      If you see this error multiple times, let the DOP team know!\n\n
+      Using last successfully fetched OAS spec at ${oasFileURL}!`);
     } else {
       throw new Error(`Could not find a saved hash for API: ${apiKeyword}`);
     }

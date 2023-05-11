@@ -1,5 +1,5 @@
 import AdmZip from 'adm-zip';
-import { upsert } from '../connector';
+import { bulkUpsertAll } from '../connector';
 
 const COLLECTION_NAME = 'assets';
 
@@ -14,8 +14,8 @@ const assetsFromZip = (zip: AdmZip) => {
 
 export const upsertAssets = async (zip: AdmZip) => {
   try {
-    const assets = await assetsFromZip(zip);
-    return Promise.all(assets.map((asset) => upsert(asset, COLLECTION_NAME, asset._id)));
+    const assets = assetsFromZip(zip);
+    return bulkUpsertAll(assets, COLLECTION_NAME);
   } catch (error) {
     console.error(`Error at upsertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;

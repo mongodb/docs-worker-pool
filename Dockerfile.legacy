@@ -1,0 +1,43 @@
+# Debian Bookworm removes Python 2, and Bullseye exits its support period in 2024.
+# The solution is probably to switch to Ubuntu 22.04 at that point, which is supported until 2027.
+FROM node:14-bullseye-slim
+
+ARG MUT_VERSION=0.10.3
+
+ENV PATH="${PATH}:/opt/mut"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        python2.7 \
+        rsync \
+        unzip \
+        && rm -rf /var/lib/apt/lists/* \
+    && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && python2.7 get-pip.py && rm get-pip.py \
+    && python2.7 -m pip install --no-cache-dir virtualenv==20.15.1 \
+    && virtualenv /venv \
+    && /venv/bin/pip install --no-cache-dir -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt \
+    \
+    && curl -L -o mut.zip https://github.com/mongodb/mut/releases/download/v${MUT_VERSION}/mut-v${MUT_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ mut.zip \
+    && rm mut.zip \
+    && apt-get purge -y --auto-remove unzip
+
+RUN groupadd -r builduser && useradd --no-log-init -ms /bin/bash -r -g builduser builduser
+ARG WORK_DIRECTORY=/home/builduser
+WORKDIR ${WORK_DIRECTORY}
+
+COPY --chown=builduser:builduser config config/
+COPY --chown=builduser:builduser package*.json ./
+COPY --chown=builduser:builduser tsconfig*.json ./
+COPY --chown=builduser:builduser . ./
+
+USER builduser
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+RUN npm install
+RUN npm run build
+
+RUN mkdir repos && chmod 755 repos
+EXPOSE 3000
+CMD ["node", "build/app.js"]

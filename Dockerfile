@@ -1,5 +1,5 @@
 # Build the Typescript app
-FROM node:14.20.1-alpine3.16 as ts-compiler
+FROM node:18.16.0-alpine as ts-compiler
 WORKDIR /home/docsworker-xlarge
 COPY  config config/
 COPY package*.json ./
@@ -23,7 +23,7 @@ RUN cd ./modules/oas-page-builder \
 FROM ubuntu:20.04
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
 ARG SNOOTY_PARSER_VERSION=0.14.0
-ARG SNOOTY_FRONTEND_VERSION=0.14.1
+ARG SNOOTY_FRONTEND_VERSION=0.14.3
 ARG MUT_VERSION=0.10.3
 ARG REDOC_CLI_VERSION=1.2.0
 ARG NPM_BASE_64_AUTH

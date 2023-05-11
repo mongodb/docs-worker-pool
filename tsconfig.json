@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "./build",
     "target": "es6",
     "module": "commonjs",
@@ -10,6 +10,6 @@
     "sourceMap": true,
     "experimentalDecorators": true
   },
-  "include": ["src/**/*.ts", "api/**/*.ts"],
-  "exclude": ["modules", "node_modules", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["modules", "node_modules", "tests/**/*.ts", "api/**/*.ts"]
 }

@@ -1,11 +1,11 @@
 import { ObjectID } from 'bson';
-import { db, insert, upsert } from '../../src/services/connector';
+import { bulkUpsertAll, db, insert } from '../../src/services/connector';
 
 const mockConnect = jest.fn();
 const mockDb = jest.fn();
 const mockCollection = jest.fn();
 const mockInsertMany = jest.fn();
-const mockUpdateOne = jest.fn();
+const mockBulkWrite = jest.fn();
 const mockClose = jest.fn();
 
 // below is a "jest mock" of a mongodb client
@@ -31,8 +31,8 @@ jest.mock('mongodb', () => ({
     async insertMany() {
       return mockInsertMany();
     }
-    async updateOne(...args) {
-      return mockUpdateOne(...args);
+    async bulkWrite(...args) {
+      return mockBulkWrite(...args);
     }
     close() {
       mockClose();
@@ -118,20 +118,28 @@ describe('Connector module', () => {
     });
   });
 
-  describe('upsert', () => {
-    const payload = { name: 'upsert-doc' };
+  describe('bulkUpsert', () => {
+    const payload = { _id: 'test-id', name: 'upsert-doc' };
     const collection = 'metadata';
-    const id = 'test-id';
+
     test('it calls on collection to update one with upsert option true', async () => {
-      await upsert(payload, collection, id);
+      await bulkUpsertAll([payload], collection);
       expect(mockCollection).toBeCalledWith(collection);
-      expect(mockUpdateOne).toBeCalledWith({ _id: 'test-id' }, { $set: { name: 'upsert-doc' } }, { upsert: true });
+      expect(mockBulkWrite).toBeCalledWith([
+        {
+          updateOne: {
+            filter: { _id: payload._id },
+            update: { $set: payload },
+            upsert: true,
+          },
+        },
+      ]);
     });
 
-    test('it throws error on updateone error', async () => {
-      mockUpdateOne.mockRejectedValueOnce(new Error('test error') as never);
+    test('it throws error on bulkWrite error', async () => {
+      mockBulkWrite.mockRejectedValueOnce(new Error('test error') as never);
       try {
-        await upsert(payload, collection, id);
+        await bulkUpsertAll([payload], collection);
       } catch (e) {
         expect(e.message).toEqual('test error');
       }

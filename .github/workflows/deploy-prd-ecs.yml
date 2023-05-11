@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: '14.x'
+          node-version: '18.x'
       - name: Install Serverless Framework
         run: npm install -g serverless
       - name: Serverless AWS authentication
@@ -68,3 +68,4 @@ jobs:
           npm ci
           sls deploy --stage prd
           sls deploy --stage dotcomprd
+          sls prune -n 5

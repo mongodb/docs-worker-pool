@@ -2,8 +2,7 @@ import AdmZip from 'adm-zip';
 import { serialize } from 'bson';
 import { Db, Document, MongoClient, ObjectId, WithId } from 'mongodb';
 import { _metadataFromZip, insertMetadata, deleteStaleMetadata } from '../../src/services/metadata';
-import metadata from '../data/metadata.json';
-import repoBranches from '../data/repos_branches.json';
+import { setMockDB, closeDb } from '../utils';
 
 let connection: MongoClient;
 let mockDb: Db;
@@ -28,14 +27,6 @@ jest.mock('../../src/services/connector', () => {
   };
 });
 
-const convertToBuildId = (docs: any[]) => {
-  // convert _id field into a ObjectId
-  return docs.map((d) => {
-    d._id = new ObjectId(d._id);
-    return d;
-  });
-};
-
 describe('metadata module', () => {
   const branch = 'master';
   const project = 'atlas-cli';
@@ -48,19 +39,11 @@ describe('metadata module', () => {
   zip.addFile('site.bson', Buffer.from(serialize(meta)));
 
   beforeAll(async () => {
-    // process.env.MONGO_URL defaults to localhost
-    // https://github.com/shelfio/jest-mongodb#3-configure-mongodb-client
-    // or update jest-mongodb-config.js
-    connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
-    mockDb = connection.db();
-    await mockDb.collection('repos_branches').insertMany(convertToBuildId(repoBranches));
-    await mockDb.collection('metadata').insertMany(convertToBuildId(metadata));
+    [mockDb, connection] = await setMockDB();
   });
 
   afterAll(async () => {
-    await mockDb.collection('repos_branches').deleteMany({});
-    await mockDb.collection('metadata').deleteMany({});
-    await connection.close();
+    await closeDb(mockDb, connection);
   });
 
   describe('metadataFromZip', () => {
