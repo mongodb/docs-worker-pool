@@ -239,6 +239,7 @@ export abstract class JobHandler {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
+      await this._logger.save(this.currJob._id, `'(COMMANDS)'${this.currJob.buildCommands.join(' ')}`);
       const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
       await this._logger.save(
@@ -500,6 +501,9 @@ export abstract class JobHandler {
       email: '',
       endTime: null,
       error: null,
+      nextGenParserExeTime: 0,
+      nextGenHTMLExeTime: 0,
+      nextGenStageExeTime: 0,
       invalidationStatusURL: '',
       logs: [],
       // Note: Be cautious - there are prefixes from both job and payload

@@ -34,6 +34,9 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
     priority: 1,
     error: {},
     result: null,
+    nextGenParserExeTime: 0,
+    nextGenHTMLExeTime: 0,
+    nextGenStageExeTime: 0,
     payload: {
       jobType: 'githubPush',
       source: 'github',

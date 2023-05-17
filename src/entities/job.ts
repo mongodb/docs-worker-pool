@@ -69,4 +69,7 @@ export type Job = {
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;
   shouldGenerateSearchManifest: boolean;
+  nextGenParserExeTime: number;
+  nextGenHTMLExeTime: number;
+  nextGenStageExeTime: number;
 };
