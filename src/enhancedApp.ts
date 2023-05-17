@@ -76,9 +76,12 @@ async function init(): Promise<void> {
     repoBranchesRepo,
     cleanUp
   );
-  jobManager.start().catch((err) => {
+
+  try {
+    jobManager.start();
+  } catch (err) {
     consoleLogger.error('App', `ERROR: ${err}`);
-  });
+  }
 }
 
 init();
