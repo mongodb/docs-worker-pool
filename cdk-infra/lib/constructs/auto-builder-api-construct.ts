@@ -7,7 +7,7 @@ import { Construct } from 'constructs';
 
 import path = require('path');
 
-const HANDLERS_PATH = path.join(__dirname, '/../../../api/controllers/v2/');
+const HANDLERS_PATH = path.join(__dirname, '/../../../api/controllers/v2');
 
 const bundling: BundlingOptions = {
   sourceMap: true,
