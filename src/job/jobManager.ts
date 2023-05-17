@@ -61,11 +61,11 @@ export class JobManager {
   private _logger: IJobRepoLogger;
   private _shouldStop: boolean;
   private _jobHandler: JobHandler | null | undefined;
+  private _fileSystemServices: IFileSystemServices;
   private _jobValidator: IJobValidator;
   private _jobHandlerFactory: JobHandlerFactory;
   private _jobCommandExecutor: IJobCommandExecutor;
   private _repoBranchesRepo: RepoBranchesRepository;
-  protected _fileSystemServices: IFileSystemServices;
   protected _config: IConfig;
 
   constructor(
