@@ -9,3 +9,5 @@ cdk.out
 
 # Build artifacts
 dist
+
+cdk.context.json
