@@ -201,7 +201,14 @@ const updatePages = async (pages: Document[], collection: string) => {
 export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip) => {
   try {
     const pages = pagesFromZip(zip);
-    return Promise.all([insert(pages, COLLECTION_NAME, buildId), updatePages(pages, UPDATED_AST_COLL_NAME)]);
+    const ops: PromiseLike<any>[] = [insert(pages, COLLECTION_NAME, buildId)];
+
+    const featureEnabled = process.env.FEATURE_FLAG_UPDATE_DOCUMENTS;
+    if (featureEnabled && featureEnabled.toUpperCase() === 'TRUE') {
+      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME));
+    }
+
+    return Promise.all(ops);
   } catch (error) {
     console.error(`Error at insertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;
