@@ -49,7 +49,7 @@ next-gen-parse:
 		fi \
 	fi
 
-next-gen-html: next-gen-parse
+next-gen-html:
 	# persistence module - add bundle zip to Atlas documents
 	# ignore errors "-" flag
 	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
