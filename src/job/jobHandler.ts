@@ -269,12 +269,13 @@ export abstract class JobHandler {
       // running a promise.all for the execute commands
       const results = await Promise.all(
         this.currJob.buildCommands.reduce((commands: Promise<CommandExecutorResponse>[], command: string) => {
-          const targets = ['make next-gen-parse', 'make next-gen-html', 'make oas-page-build'];
-          if (targets.includes(command)) {
-            commands.push(this.callWithBenchmark(command));
-          } else {
-            commands.push(this._commandExecutor.execute([command]));
-          }
+          // const targets = ['make next-gen-parse', 'make next-gen-html', 'make oas-page-build'];
+          // if (targets.includes(command)) {
+          //   commands.push(this.callWithBenchmark(command));
+          // } else {
+
+          // }
+          commands.push(this._commandExecutor.execute([command]));
           return commands;
         }, [])
       );
