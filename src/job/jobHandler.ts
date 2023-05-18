@@ -2,7 +2,7 @@ import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { ICDNConnector } from '../services/cdn';
-import { CommandExecutorResponse, IJobCommandExecutor } from '../services/commandExecutor';
+import { CommandExecutorResponse, ICommandExecutor, IJobCommandExecutor } from '../services/commandExecutor';
 import { IJobRepoLogger, ILogger } from '../services/logger';
 import { IRepoConnector } from '../services/repo';
 import { IFileSystemServices } from '../services/fileServices';
@@ -234,23 +234,55 @@ export abstract class JobHandler {
     }
   }
 
+  private async validateExecute(results: CommandExecutorResponse[]): Promise<void> {
+    for (const resp of results) {
+      await this._logger.save(this.currJob._id, `\n\n${resp.output}\n---\n${resp.error}`);
+
+      if (resp.status != 'success') {
+        const error = new AutoBuilderError(resp.error, 'BuildError');
+        await this.logError(error);
+        throw error;
+      }
+    }
+  }
+
+  private async callWithBenchmark(command: string): Promise<CommandExecutorResponse> {
+    const stages = {
+      ['make next-gen-parse']: 'nextGenParserExeTime',
+      ['make next-gen-html']: 'nextGenHTMLExeTime',
+      ['make oas-page-build']: 'nextGenStageExeTime',
+    };
+    const start = performance.now();
+    const resp = await this._commandExecutor.execute([command]);
+    const end = performance.now();
+    this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, stages[command], end - start);
+    return resp;
+  }
+
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
       await this._logger.save(this.currJob._id, `'(COMMANDS)'${this.currJob.buildCommands.join(' ')}`);
-      const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
-      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
-      await this._logger.save(
-        this.currJob._id,
-        `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
+
+      // running a promise.all for the execute commands
+      const results = await Promise.all(
+        this.currJob.buildCommands.reduce((commands: Promise<CommandExecutorResponse>[], command: string) => {
+          const targets = ['make next-gen-parse', 'make next-gen-html', 'make oas-page-build'];
+          if (targets.includes(command)) {
+            commands.push(this.callWithBenchmark(command));
+          } else {
+            commands.push(this._commandExecutor.execute([command]));
+          }
+          return commands;
+        }, [])
       );
-      if (resp.status != 'success') {
-        const error = new AutoBuilderError(resp.error, 'BuildError');
-        await this.logError(error);
-        throw error;
-      }
+
+      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
+      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}worker.sh run details:`);
+
+      await this.validateExecute(results);
     } else {
       const error = new AutoBuilderError('No commands to execute', 'BuildError');
       await this.logError(error);
