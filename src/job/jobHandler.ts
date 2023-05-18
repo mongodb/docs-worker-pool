@@ -501,9 +501,6 @@ export abstract class JobHandler {
       email: '',
       endTime: null,
       error: null,
-      nextGenParserExeTime: 0,
-      nextGenHTMLExeTime: 0,
-      nextGenStageExeTime: 0,
       invalidationStatusURL: '',
       logs: [],
       // Note: Be cautious - there are prefixes from both job and payload
