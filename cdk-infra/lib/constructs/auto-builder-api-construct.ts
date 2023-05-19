@@ -54,26 +54,12 @@ export class AutoBuilderApiConstruct extends Construct {
       bundling,
     });
 
-    const fastlyDochubToken = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubToken', {
-      parameterName: '/env/dev/docs/worker_pool/fastly/docs/dochub/token',
-    });
-    const fastlyDochubServiceId = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubServiceId', {
-      parameterName: '/env/dev/docs/worker_pool/fastly/docs/dochub/service_id',
-    });
-    const fastlyDochubMap = StringParameter.fromSecureStringParameterAttributes(this, 'fastlyDochubMap', {
-      parameterName: '/env/dev/docs/worker_pool/fastly/dochub_map',
-    });
-
     const dochubTriggerUpsertLambda = new NodejsFunction(this, 'dochubTriggerUpsertLambda', {
       entry: `${HANDLERS_PATH}/dochub.ts`,
       runtime,
       handler: 'UpsertEdgeDictionaryItem',
       environment,
     });
-
-    fastlyDochubToken.grantRead(dochubTriggerUpsertLambda);
-    fastlyDochubServiceId.grantRead(dochubTriggerUpsertLambda);
-    fastlyDochubMap.grantRead(dochubTriggerUpsertLambda);
 
     const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
       entry: `${HANDLERS_PATH}/github.ts`,
