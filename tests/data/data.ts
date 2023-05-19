@@ -162,7 +162,9 @@ export class TestDataProvider {
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make next-gen-html',
     ]);
-    commands.push(`make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`);
+    commands.push(
+      `make oas-page-build MUT_PREFIX=${job.payload.mutPrefix} PROJECT=${job.payload.project} BRANCH_NAME=${job.payload.branchName}`
+    );
     return commands;
   }
 
