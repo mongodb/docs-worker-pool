@@ -2,7 +2,6 @@ import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 
 import path = require('path');
