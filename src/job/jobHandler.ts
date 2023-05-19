@@ -236,7 +236,7 @@ export abstract class JobHandler {
 
   private async validateExecute(resp: CommandExecutorResponse): Promise<void> {
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
-    await this._logger.save(this.currJob._id, `${'(RESP)'.padEnd(15)}${resp}`);
+    await this._logger.save(this.currJob._id, `${'(RESP)'.padEnd(15)}${JSON.stringify(resp)}`);
     await this._logger.save(
       this.currJob._id,
       `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
@@ -266,7 +266,7 @@ export abstract class JobHandler {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      await this._logger.save(this.currJob._id, `'(COMMANDS)'${this.currJob.buildCommands.join(' ')}`);
+      await this._logger.save(this.currJob._id, `'(COMMANDS)'${this.currJob.buildCommands.join(' && ')}`);
 
       const targets = ['make next-gen-parse', 'make next-gen-html', 'make oas-page-build'];
       for (const command of this.currJob.buildCommands) {
