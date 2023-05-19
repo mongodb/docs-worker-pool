@@ -296,7 +296,12 @@ export abstract class JobHandler {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
       await this._logger.save(this.currJob._id, `'(COMMANDS)'${this.currJob.buildCommands.join(' && ')}`);
-      await this.originalExecuteBuild(this.currJob.buildCommands);
+
+      if (this.currJob.buildCommands.includes('make next-gen-html')) {
+        await this.modifiedExecuteBuild(this.currJob.buildCommands);
+      } else {
+        await this.originalExecuteBuild(this.currJob.buildCommands);
+      }
     } else {
       const error = new AutoBuilderError('No commands to execute', 'BuildError');
       await this.logError(error);
@@ -474,6 +479,7 @@ export abstract class JobHandler {
     try {
       await this.build();
       const resp = await this.deploy();
+      console.log('resp from deploy -->', resp);
       await this.update(resp);
       this.cleanup();
     } catch (error) {
