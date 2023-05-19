@@ -49,7 +49,7 @@ const pagesFromZip = (zip: AdmZip) => {
 const findPrevPageDocs = async (pageIdPrefix: string, collection: string) => {
   const dbSession = await db();
   const findQuery = {
-    page_id: { $regex: new RegExp(`^${pageIdPrefix}`) },
+    page_id: { $regex: new RegExp(`^${pageIdPrefix}/`) },
     deleted: false,
   };
   const projection = {
