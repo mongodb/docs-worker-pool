@@ -241,6 +241,7 @@ export abstract class JobHandler {
       this.currJob._id,
       `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
     );
+    console.log('resp -->', resp);
     if (resp.status != 'success') {
       const error = new AutoBuilderError(resp.error, 'BuildError');
       await this.logError(error);
@@ -261,24 +262,41 @@ export abstract class JobHandler {
     return resp;
   }
 
+  private async originalExecuteBuild(buildCommands: string[]): Promise<void> {
+    const resp = await this._commandExecutor.execute(buildCommands);
+    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
+    await this._logger.save(
+      this.currJob._id,
+      `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
+    );
+    if (resp.status != 'success') {
+      const error = new AutoBuilderError(resp.error, 'BuildError');
+      await this.logError(error);
+      throw error;
+    }
+  }
+
+  private async modifiedExecuteBuild(buildCommands: string[]): Promise<void> {
+    const targets = ['make next-gen-parse', 'make next-gen-html', 'make oas-page-build'];
+    for (const command of buildCommands) {
+      await this._logger.save(this.currJob._id, `${'(COMMAND)'.padEnd(15)}${command}`);
+      if (targets.includes(command)) {
+        const resp = await this.callWithBenchmark(command);
+        await this.validateExecute(resp);
+      } else {
+        const resp = await this._commandExecutor.execute([command]);
+        await this.validateExecute(resp);
+      }
+    }
+  }
+
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
       await this._logger.save(this.currJob._id, `'(COMMANDS)'${this.currJob.buildCommands.join(' && ')}`);
-
-      const targets = ['make next-gen-parse', 'make next-gen-html', 'make oas-page-build'];
-      for (const command of this.currJob.buildCommands) {
-        await this._logger.save(this.currJob._id, `${'(COMMAND)'.padEnd(15)}${command}`);
-        if (targets.includes(command)) {
-          const resp = await this.callWithBenchmark(command);
-          await this.validateExecute(resp);
-        } else {
-          const resp = await this._commandExecutor.execute([command]);
-          await this.validateExecute(resp);
-        }
-      }
+      await this.originalExecuteBuild(this.currJob.buildCommands);
     } else {
       const error = new AutoBuilderError('No commands to execute', 'BuildError');
       await this.logError(error);
