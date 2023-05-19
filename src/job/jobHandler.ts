@@ -248,7 +248,7 @@ export abstract class JobHandler {
 
   private async callWithBenchmark(command: string): Promise<CommandExecutorResponse> {
     const stages = {
-      ['make next-gen-parse']: 'nextGenParserExeTime',
+      ['make next-gen-parse']: 'nextGenParserExeTime', //temporarily won't use (coupled it with next-gen-html)
       ['make next-gen-html']: 'nextGenHTMLExeTime',
       ['make oas-page-build']: 'nextGenStageExeTime',
     };
@@ -278,6 +278,8 @@ export abstract class JobHandler {
           return commands;
         }, [])
       );
+
+      await this._logger.save(this.currJob._id, `'(RESULT)' ${results}`);
 
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}worker.sh run details:`);
