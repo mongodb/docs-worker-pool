@@ -43,9 +43,10 @@ export const insert = async (docs: any[], collection: string, buildId: ObjectId)
   console.time(timerLabel);
   const insertSession = await db();
   try {
-    const res = await insertSession
-      .collection(collection)
-      .insertMany(docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })));
+    const res = await insertSession.collection(collection).insertMany(
+      docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })),
+      { ordered: false }
+    );
     console.timeEnd(timerLabel);
     return res;
   } catch (error) {
@@ -57,7 +58,7 @@ export const insert = async (docs: any[], collection: string, buildId: ObjectId)
 export const bulkWrite = async (operations: mongodb.AnyBulkWriteOperation[], collection: string) => {
   const dbSession = await db();
   try {
-    return dbSession.collection(collection).bulkWrite(operations);
+    return dbSession.collection(collection).bulkWrite(operations, { ordered: false });
   } catch (error) {
     console.error(`Error at bulk write time for ${collection}: ${error}`);
     throw error;
