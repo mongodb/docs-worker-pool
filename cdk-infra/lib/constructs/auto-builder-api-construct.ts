@@ -3,8 +3,7 @@ import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
-
-import path = require('path');
+import path from 'path';
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../api/controllers/v2');
 
