@@ -12,7 +12,7 @@ import * as mongodb from 'mongodb';
 import { FileSystemServices } from './services/fileServices';
 import { JobValidator } from './job/jobValidator';
 import { RepoBranchesRepository } from './repositories/repoBranchesRepository';
-import { EnhancedJobManager } from './job/enhancedJobManager';
+import { EnhancedJobManager } from './job/EnhancedJobManager';
 
 let db: mongodb.Db;
 let consoleLogger: ConsoleLogger;
@@ -80,7 +80,7 @@ async function init(): Promise<void> {
   try {
     jobManager.start();
   } catch (err) {
-    consoleLogger.error('App', `ERROR: ${err}`);
+    consoleLogger.error('enhancedApp', `ERROR: ${err}`);
   }
 }
 
