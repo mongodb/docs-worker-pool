@@ -14,6 +14,7 @@ import { JobRepository } from '../repositories/jobRepository';
 import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { listenToJobQueue } from '../utils/queue/listen-to-job-queue';
 
 export const jobHandlerMap = {
   githubPush: StagingJobHandler,
@@ -165,6 +166,7 @@ export class JobManager {
   }
 
   async work(): Promise<void> {
+    const jobPayload = await listenToJobQueue();
     while (!this._shouldStop) {
       const job = await this.getQueuedJob();
       if (job) {
