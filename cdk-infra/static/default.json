@@ -1,0 +1,59 @@
+{
+  "stage": "dev",
+  "dbUsername": "un",
+  "dbPassword": "pw",
+  "dbHost": "host",
+  "dbName": "pool_test",
+  "dbUrl": "url",
+  "jobQueueCollection": "allison_test_queue",
+  "awsKey": "devkey",
+  "awsSecret": "devsecret",
+  "githubBotUserName": "bot",
+  "githubBotPW": "q1w",
+  "fastlyDochubMap": "devfslydochubmap",
+  "entitlementCollection": "entitlements",
+  "reposBranchesCollection": "allison_repos_branches",
+  "MONGO_TIMEOUT_S": 15,
+  "JOB_TIMEOUT_S": 900,
+  "RETRY_TIMEOUT_MS": 5000,
+  "MIN_TIMEOUT_MS": 1,
+  "LOG_PADDING": 15,
+  "PORT": 3000,
+  "MAX_STDOUT_BUFFER_SIZE": 16000000,
+  "GATSBY_PARSER_USER": "docsworker-xlarge",
+  "gatsbyTestEmbedVersions": false,
+  "fastlyOpsManagerToken": "FASTLY_OPS_MANAGER_TOKEN",
+  "fastlyOpsManagerServiceId": "FASTLY_OPS_MANAGER_SERVICE_ID",
+  "fastlyCloudManagerToken": "FASTLY_CLOUD_MANAGER_TOKEN",
+  "fastlyCloudManagerServiceId": "FASTLY_CLOUD_MANAGER_SERVICE_ID",
+  "repoBranchesCollection": "repo_branches",
+  "aws_region": "us-east-2",
+  "gatsbyBaseUrl": "GATSBY_BASE_URL",
+  "previewBuildEnabled": "false",
+  "parallel": {
+    "enabled": true,
+    "stg": {
+      "dbName": "pool_test",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg"
+    },
+    "prd": {
+      "dbName": "pool",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomprd",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd"
+    }
+  },
+  "repo_dir": "repos",
+  "cdnInvalidationOauthScope": "mongodbcom-docs",
+  "oauthTokenURL": "https://corp.mongodb.com/oauth2/aus4k4jv00hWjNnps297/v1/token",
+  "grantType": "client_credentials",
+  "oauthTokenPath": "docs/worker_pool/cdn/invalidator/token",
+  "searchIndexBucket": "docs-search-indexes-test",
+  "searchIndexFolder": {
+    "dev": "",
+    "dotcomstg": "preprd",
+    "dotcomprd": "prd"
+  }
+}
