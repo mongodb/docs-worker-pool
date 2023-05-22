@@ -82,11 +82,8 @@ endif
 # Production: https://github.com/mongodb/docs-worker-pool/blob/1a482242fa6f1463abb059884cddb2c56ba9fad9/src/job/productionJobHandler.ts#L68
 oas-page-build:
 	echo "oas page build - MUT_PREFIX = ${MUT_PREFIX}, URL = ${URL}, PROJECT/USER/BRANCHNAME = /${PROJECT} + /${USER} + /${BRANCH_NAME}"
-	ifeq ($(MUT_PREFIX), "")
-		echo "Mut is empty"
-	ifeq ($(PROJECT), "cloud-docs")
+	ifeq ($(PROJECT),cloud-docs)
 		echo "Project is equal!!!"
-	ifeq ($(PROJECT), "")
-		echo "Project is equal!!!"
+	endif
 	node ${OAS_MODULE_PATH} --bundle ${BUNDLE_PATH} --output ${REPO_DIR}/public --redoc ${REDOC_PATH} --repo ${REPO_DIR} --site-url ${URL}/${PROJECT}/${USER}/${BRANCH_NAME}
 
