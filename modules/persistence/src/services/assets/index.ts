@@ -13,15 +13,16 @@ const assetsFromZip = (zip: AdmZip) => {
 };
 
 export const upsertAssets = async (zip: AdmZip) => {
+  const timerLabel = 'asset upsertion';
+  console.time(timerLabel);
   try {
     const assets = assetsFromZip(zip);
-    const timerLabel = 'asset upsertion';
-    console.time(timerLabel);
     const res = await bulkUpsertAll(assets, COLLECTION_NAME);
-    console.timeEnd(timerLabel);
     return res;
   } catch (error) {
     console.error(`Error at upsertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;
+  } finally {
+    console.timeEnd(timerLabel);
   }
 };

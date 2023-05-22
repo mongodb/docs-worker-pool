@@ -187,26 +187,35 @@ const updatePages = async (pages: Document[], collection: string) => {
   const timerLabel = 'page document updates';
   console.time(timerLabel);
 
-  // Find all pages that share the same project name + branch. Expects page IDs
-  // to include these two properties after parse
-  const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
-  const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection);
-  const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
+  try {
+    // Find all pages that share the same project name + branch. Expects page IDs
+    // to include these two properties after parse
+    const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
+    const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection);
+    const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
 
-  const diffsTimerLabel = 'finding page differences';
-  console.time(diffsTimerLabel);
-  const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages);
-  const operations = updatedPagesManager.getOperations();
-  console.timeEnd(diffsTimerLabel);
+    const diffsTimerLabel = 'finding page differences';
+    console.time(diffsTimerLabel);
+    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages);
+    const operations = updatedPagesManager.getOperations();
+    console.timeEnd(diffsTimerLabel);
 
-  if (operations.length > 0) {
-    const bulkWriteTimerLabel = 'page document update writes';
-    console.time(bulkWriteTimerLabel);
-    await bulkWrite(operations, collection);
-    console.timeEnd(bulkWriteTimerLabel);
+    if (operations.length > 0) {
+      const bulkWriteTimerLabel = 'page document update writes';
+      console.time(bulkWriteTimerLabel);
+
+      try {
+        await bulkWrite(operations, collection);
+      } finally {
+        console.timeEnd(bulkWriteTimerLabel);
+      }
+    }
+  } catch (error) {
+    console.error(`Error when trying to update pages: ${error}`);
+    throw error;
+  } finally {
+    console.timeEnd(timerLabel);
   }
-
-  console.timeEnd(timerLabel);
 };
 
 export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip) => {
