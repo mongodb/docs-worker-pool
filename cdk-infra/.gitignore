@@ -7,7 +7,13 @@ node_modules
 .cdk.staging
 cdk.out
 
+# NOTE: This is a temporary measure. Ideally, this file should
+# be committed, but we cannot at this time.
+cdk.context.json
+
 # Build artifacts
 dist
 
 cdk.context.json
+.env
+.env.local
