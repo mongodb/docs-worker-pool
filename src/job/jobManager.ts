@@ -166,7 +166,6 @@ export class JobManager {
   }
 
   async work(): Promise<void> {
-    const jobPayload = await listenToJobQueue();
     while (!this._shouldStop) {
       const job = await this.getQueuedJob();
       if (job) {
