@@ -8,15 +8,18 @@ import { IJobRepoLogger } from '../services/logger';
 import { IRepoConnector } from '../services/repo';
 import { JobHandlerFactory, JobManager } from './jobManager';
 import { IJobValidator } from './jobValidator';
+import { Job } from '../entities/job';
+import { EnhancedJobRepository } from '../repositories/enhancedJobRepository';
 
 export class EnhancedJobManager extends JobManager {
+  private readonly _enhancedJobRepository: EnhancedJobRepository;
   private _cleanUp: () => Promise<void>;
   constructor(
     config: IConfig,
     jobValidator: IJobValidator,
     jobHandlerFactory: JobHandlerFactory,
     jobCommandExecutor: IJobCommandExecutor,
-    jobRepository: JobRepository,
+    jobRepository: EnhancedJobRepository,
     cdnConnector: ICDNConnector,
     repoConnector: IRepoConnector,
     fileSystemServices: IFileSystemServices,
