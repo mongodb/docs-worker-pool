@@ -43,11 +43,10 @@ export const insert = async (docs: any[], collection: string, buildId: ObjectId)
   console.time(timerLabel);
   const insertSession = await db();
   try {
-    const res = await insertSession.collection(collection).insertMany(
+    return insertSession.collection(collection).insertMany(
       docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })),
       { ordered: false }
     );
-    return res;
   } catch (error) {
     console.error(`Error at insertion time for ${collection}: ${error}`);
     throw error;
