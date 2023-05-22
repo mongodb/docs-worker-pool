@@ -2,15 +2,11 @@ import { SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
 import { JobsQueuePayload, isJobQueuePayload } from './types';
 
-let client: SQS;
-
 export async function listenToJobQueue(): Promise<JobsQueuePayload> {
   const region = config.get<string>('aws_region');
   const queueUrl = config.get<string>('jobsQueueUrl');
 
-  if (!client) {
-    client = new SQS({ region });
-  }
+  const client = new SQS({ region });
 
   while (true) {
     const receiveMessage = { QueueUrl: queueUrl, MaxNumberOfMessages: 1, WaitTimeSeconds: 2 };
