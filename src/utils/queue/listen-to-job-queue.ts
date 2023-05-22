@@ -2,6 +2,10 @@ import { SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
 import { JobsQueuePayload, isJobQueuePayload } from './types';
 
+/**
+ * This function listens to the job queue until a message is received.
+ * @returns {Promise<JobsQueuePayload>} the promise for the payload object after a message has been received
+ */
 export async function listenToJobQueue(): Promise<JobsQueuePayload> {
   const region = config.get<string>('aws_region');
   const queueUrl = config.get<string>('jobsQueueUrl');
