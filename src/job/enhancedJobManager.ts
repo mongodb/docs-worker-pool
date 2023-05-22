@@ -12,7 +12,6 @@ import { Job } from '../entities/job';
 import { EnhancedJobRepository } from '../repositories/enhancedJobRepository';
 
 export class EnhancedJobManager extends JobManager {
-  private readonly _enhancedJobRepository: EnhancedJobRepository;
   private _cleanUp: () => Promise<void>;
   constructor(
     config: IConfig,
