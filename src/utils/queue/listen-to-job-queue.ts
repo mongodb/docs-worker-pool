@@ -1,9 +1,10 @@
 import { SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
+import { JobsQueuePayload, isJobQueuePayload } from './types';
 
 let client: SQS;
 
-export async function listenToJobQueue(): Promise<unknown> {
+export async function listenToJobQueue(): Promise<JobsQueuePayload> {
   const region = config.get<string>('aws_region');
   const queueUrl = config.get<string>('jobsQueueUrl');
 
@@ -23,7 +24,20 @@ export async function listenToJobQueue(): Promise<unknown> {
         continue;
       }
 
-      const body = JSON.parse(message.Body);
+      const payload = JSON.parse(message.Body);
+
+      if (!isJobQueuePayload(payload)) {
+        console.error(
+          `ERROR! Invalid payload data received from message ID: ${
+            message.MessageId
+          }. Payload received: ${JSON.stringify(payload)}`
+        );
+        continue;
+      }
+
+      // Great! we received a proper message from the queue. Return this object as we will no longer
+      // want to poll for more messages.
+      return payload;
     }
   }
 }
