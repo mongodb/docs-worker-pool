@@ -1,0 +1,64 @@
+{
+  "stage": "stage",
+  "environment": "environment",
+  "env": "stage",
+  "dbHost": "host",
+  "dbUsername": "username",
+  "dbPassword": "password",
+  "dbName": "db_name",
+  "dbUrl": "url",
+  "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
+  "githubSecret": "GITHUB_SECRET",
+  "slackSecret": "SLACK_SECRET",
+  "slackAuthToken": "SLACK_TOKEN",
+  "slackViewOpenUrl": "https://slack.com/api/views.open",
+  "jobQueueCollection": "JOB_QUEUE_COL_NAME",
+  "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
+  "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
+  "MONGO_TIMEOUT_S": 15,
+  "JOB_TIMEOUT_S": 900,
+  "RETRY_TIMEOUT_MS": 5000,
+  "MAX_STDOUT_BUFFER_SIZE": 16000000,
+  "aws_region": "us-east-2",
+  "MIN_TIMEOUT_MS": 1,
+  "LOG_PADDING": 15,
+  "PORT": 3000,
+  "maxRetries": 3,
+  "retryDelay": 60,
+  "commandOverride": ["node", "onDemandApp.js"],
+  "subnets": ["subnet-0a142842e8f13a042", "subnet-0fba568cfd3839eee"],
+  "parallel": {
+    "enabled": false,
+    "stg": {
+      "dbName": "pool_test",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg",
+      "parallelStgName": "dotcomstg"
+    },
+    "prd": {
+      "dbName": "pool",
+      "jobQueueCollection": "dotcom_queue",
+      "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomprd",
+      "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd",
+      "parallelStgName": "dotcomprd"
+    }
+  },
+  "prodDeploy": {
+    "restrictedProdDeploy": false,
+    "entitledSlackUsers": [
+      "U0V6H55D2",
+      "U0V2WGRFC",
+      "U01S32X6GJV",
+      "URF5PJS6Q",
+      "U02HJ4P5MJS",
+      "U015S53G8TT",
+      "U01QVEWPL5B",
+      "UKF72EJRF"
+    ]
+  },
+  "cdnInvalidationOauthScope": "mongodbcom-docs",
+  "oauthTokenURL": "https://corp.mongodb.com/oauth2/aus4k4jv00hWjNnps297/v1/token",
+  "grantType": "client_credentials",
+  "oauthTokenPath": "docs/worker_pool/cdn/invalidator/token"
+}
