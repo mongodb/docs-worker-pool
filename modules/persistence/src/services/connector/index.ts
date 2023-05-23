@@ -39,37 +39,46 @@ export const db = async () => {
 
 // all docs should be inserted with the buildId for the run.
 export const insert = async (docs: any[], collection: string, buildId: ObjectId) => {
+  const timerLabel = `insert - ${collection}`;
+  console.time(timerLabel);
   const insertSession = await db();
   try {
-    return await insertSession
-      .collection(collection)
-      .insertMany(docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })));
+    return insertSession.collection(collection).insertMany(
+      docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })),
+      { ordered: false }
+    );
   } catch (error) {
     console.error(`Error at insertion time for ${collection}: ${error}`);
+    throw error;
+  } finally {
+    console.timeEnd(timerLabel);
+  }
+};
+
+export const bulkWrite = async (operations: mongodb.AnyBulkWriteOperation[], collection: string) => {
+  const dbSession = await db();
+  try {
+    return dbSession.collection(collection).bulkWrite(operations, { ordered: false });
+  } catch (error) {
+    console.error(`Error at bulk write time for ${collection}: ${error}`);
     throw error;
   }
 };
 
 // Upsert wrapper, requires an _id field.
-export const bulkUpsert = async (items: Document[], collection: string) => {
-  const upsertSession = await db();
-  try {
-    const operations: mongodb.AnyBulkWriteOperation[] = [];
-    items.forEach((item: Document) => {
-      const op = {
-        updateOne: {
-          filter: { _id: item._id },
-          update: { $set: item },
-          upsert: true,
-        },
-      };
-      operations.push(op);
-    });
-    return upsertSession.collection(collection).bulkWrite(operations);
-  } catch (error) {
-    console.error(`Error at bulk upsertion time for ${collection}: ${error}`);
-    throw error;
-  }
+export const bulkUpsertAll = async (items: Document[], collection: string) => {
+  const operations: mongodb.AnyBulkWriteOperation[] = [];
+  items.forEach((item: Document) => {
+    const op = {
+      updateOne: {
+        filter: { _id: item._id },
+        update: { $set: item },
+        upsert: true,
+      },
+    };
+    operations.push(op);
+  });
+  return bulkWrite(operations, collection);
 };
 
 export const deleteDocuments = async (_ids: ObjectId[], collection: string) => {
