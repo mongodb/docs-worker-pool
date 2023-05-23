@@ -8,8 +8,10 @@ export class AutoBuilderQueuesConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const jobsQueue = new Queue(this, 'JobsQueue');
-    const jobUpdatesQueue = new Queue(this, 'JobUpdatesQueue');
+    const config = { fifo: true };
+
+    const jobsQueue = new Queue(this, 'JobsQueue', config);
+    const jobUpdatesQueue = new Queue(this, 'JobUpdatesQueue', config);
 
     this.jobsQueue = jobsQueue;
     this.jobUpdatesQueue = jobUpdatesQueue;
