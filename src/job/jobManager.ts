@@ -14,7 +14,6 @@ import { JobRepository } from '../repositories/jobRepository';
 import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
-import { listenToJobQueue } from '../utils/queue/listen-to-job-queue';
 
 export const jobHandlerMap = {
   githubPush: StagingJobHandler,
@@ -62,12 +61,12 @@ export class JobManager {
   private _logger: IJobRepoLogger;
   private _shouldStop: boolean;
   private _jobHandler: JobHandler | null | undefined;
+  private _config: IConfig;
   private _fileSystemServices: IFileSystemServices;
   private _jobValidator: IJobValidator;
   private _jobHandlerFactory: JobHandlerFactory;
   private _jobCommandExecutor: IJobCommandExecutor;
   private _repoBranchesRepo: RepoBranchesRepository;
-  protected _config: IConfig;
 
   constructor(
     config: IConfig,
