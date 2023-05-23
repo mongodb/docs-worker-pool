@@ -77,11 +77,13 @@ next-gen-stage: ## Host online for review
 	fi
 endif
 
+# Set --site-url for oas-module build command based on availability of MUT_PREFIX
 ifeq ($(MUT_PREFIX),)
 SITE_URL=${URL}/${PROJECT}/${USER}/${BRANCH_NAME}
 else
 SITE_URL=${URL}/${MUT_PREFIX}
 endif
+
 # Intended to be called by the autobuilder as a build command after frontend build, but before mut upload
 # Staging: https://github.com/mongodb/docs-worker-pool/blob/42bd36b1f52e49c646a79474c12d299f33d774cb/src/job/stagingJobHandler.ts#L57
 # Production: https://github.com/mongodb/docs-worker-pool/blob/1a482242fa6f1463abb059884cddb2c56ba9fad9/src/job/productionJobHandler.ts#L68
