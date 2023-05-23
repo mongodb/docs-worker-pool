@@ -6,7 +6,7 @@ import AdmZip from 'adm-zip';
 import minimist from 'minimist';
 import * as mongodb from 'mongodb';
 import { teardown as closeDBConnection } from './src/services/connector';
-import { insertPages } from './src/services/pages';
+import { insertAndUpdatePages } from './src/services/pages';
 import {
   insertMetadata,
   insertMergedMetadataEntries,
@@ -37,7 +37,7 @@ const app = async (path: string) => {
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
     const metadata = await metadataFromZip(zip);
-    await Promise.all([insertPages(buildId, zip), insertMetadata(buildId, metadata), upsertAssets(zip)]);
+    await Promise.all([insertAndUpdatePages(buildId, zip), insertMetadata(buildId, metadata), upsertAssets(zip)]);
     await insertMergedMetadataEntries(buildId, metadata);
     // DOP-3447 clean up stale metadata
     await deleteStaleMetadata(metadata);
