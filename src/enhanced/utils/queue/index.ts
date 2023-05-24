@@ -29,7 +29,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     // We have the message body, now we can delete it from the queue.
     try {
-      client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
+      await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
     } catch (e) {
       // We want to keep the task alive because we do not want to process multiple jobs.
       // This could lead to multiple tasks completing jobs, without new tasks being spun up.
