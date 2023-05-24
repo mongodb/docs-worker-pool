@@ -125,15 +125,18 @@ describe('Connector module', () => {
     test('it calls on collection to update one with upsert option true', async () => {
       await bulkUpsertAll([payload], collection);
       expect(mockCollection).toBeCalledWith(collection);
-      expect(mockBulkWrite).toBeCalledWith([
-        {
-          updateOne: {
-            filter: { _id: payload._id },
-            update: { $set: payload },
-            upsert: true,
+      expect(mockBulkWrite).toBeCalledWith(
+        [
+          {
+            updateOne: {
+              filter: { _id: payload._id },
+              update: { $set: payload },
+              upsert: true,
+            },
           },
-        },
-      ]);
+        ],
+        { ordered: false }
+      );
     });
 
     test('it throws error on bulkWrite error', async () => {

@@ -99,6 +99,7 @@ custom:
   npmEmail: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/email}
   gatsbyBaseUrl: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/base_url}
   previewBuildEnabled: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_build/enabled}
+  featureFlagUpdatePages: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/update_pages}
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
   fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}

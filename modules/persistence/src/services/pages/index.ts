@@ -49,7 +49,7 @@ const pagesFromZip = (zip: AdmZip) => {
 const findPrevPageDocs = async (pageIdPrefix: string, collection: string) => {
   const dbSession = await db();
   const findQuery = {
-    page_id: { $regex: new RegExp(`^${pageIdPrefix}`) },
+    page_id: { $regex: new RegExp(`^${pageIdPrefix}/`) },
     deleted: false,
   };
   const projection = {
@@ -184,24 +184,51 @@ const updatePages = async (pages: Document[], collection: string) => {
     return;
   }
 
-  // Find all pages that share the same project name + branch. Expects page IDs
-  // to include these two properties after parse
-  const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
-  const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection);
-  const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
+  const timerLabel = 'page document updates';
+  console.time(timerLabel);
 
-  const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages);
-  const operations = updatedPagesManager.getOperations();
+  try {
+    // Find all pages that share the same project name + branch. Expects page IDs
+    // to include these two properties after parse
+    const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
+    const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection);
+    const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
 
-  if (operations.length > 0) {
-    await bulkWrite(operations, collection);
+    const diffsTimerLabel = 'finding page differences';
+    console.time(diffsTimerLabel);
+    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages);
+    const operations = updatedPagesManager.getOperations();
+    console.timeEnd(diffsTimerLabel);
+
+    if (operations.length > 0) {
+      const bulkWriteTimerLabel = 'page document update writes';
+      console.time(bulkWriteTimerLabel);
+
+      try {
+        await bulkWrite(operations, collection);
+      } finally {
+        console.timeEnd(bulkWriteTimerLabel);
+      }
+    }
+  } catch (error) {
+    console.error(`Error when trying to update pages: ${error}`);
+    throw error;
+  } finally {
+    console.timeEnd(timerLabel);
   }
 };
 
 export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip) => {
   try {
     const pages = pagesFromZip(zip);
-    return Promise.all([insert(pages, COLLECTION_NAME, buildId), updatePages(pages, UPDATED_AST_COLL_NAME)]);
+    const ops: PromiseLike<any>[] = [insert(pages, COLLECTION_NAME, buildId)];
+
+    const featureEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
+    if (featureEnabled && featureEnabled.toUpperCase() === 'TRUE') {
+      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME));
+    }
+
+    return Promise.all(ops);
   } catch (error) {
     console.error(`Error at insertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;

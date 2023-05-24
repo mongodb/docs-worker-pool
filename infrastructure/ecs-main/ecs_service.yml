@@ -56,6 +56,8 @@ Resources:
               Value: ${self:custom.gatsbyBaseUrl}
             - Name: PREVIEW_BUILD_ENABLED
               Value: ${self:custom.previewBuildEnabled}
+            - Name: FEATURE_FLAG_UPDATE_PAGES
+              Value: ${self:custom.featureFlagUpdatePages}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID

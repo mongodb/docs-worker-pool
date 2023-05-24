@@ -1,0 +1,1484 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`autobuilder stack tests snapshot test 1`] = `
+{
+  "Outputs": {
+    "apiwebhookHandlersEndpoint89595EBC": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "apiwebhookHandlers2D78E826",
+            },
+            ".execute-api.us-east-2.",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "apiwebhookHandlersDeploymentStageprodD963BF88",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "apiRootEndpointLambda716D65E6": {
+      "DependsOn": [
+        "apiRootEndpointLambdaServiceRole0F132FC6",
+      ],
+      "Properties": {
+        "Code": {
+          "ZipFile": "exports.default = (event) => { console.log("hello, world!!"); }",
+        },
+        "Handler": "RootEndpointLambda",
+        "Role": {
+          "Fn::GetAtt": [
+            "apiRootEndpointLambdaServiceRole0F132FC6",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs14.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "apiRootEndpointLambdaServiceRole0F132FC6": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "apidochubTriggerUpsertLambda6C8DFA43": {
+      "DependsOn": [
+        "apidochubTriggerUpsertLambdaServiceRoleBC944DFE",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-216656347858-us-east-2",
+          "S3Key": "50f529f67321689dcbd6a13de2b5ea7698046c561446eb4bf19f0eb2eb7aae15.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "FASTLY_DOCHUB_MAP": "{{resolve:ssm-secure:/env/dev/docs/worker_pool/fastly/dochub_map}}",
+            "FASTLY_DOCHUB_SERVICE_ID": "{{resolve:ssm-secure:/env/dev/docs/worker_pool/fastly/docs/dochub/service_id}}",
+            "FASTLY_DOCHUB_TOKEN": "{{resolve:ssm-secure:/env/dev/docs/worker_pool/fastly/docs/dochub/token}}",
+            "NODE_CONFIG_DIR": "./api/config",
+          },
+        },
+        "Handler": "api/controllers/v1/dochub.UpsertEdgeDictionaryItem",
+        "Role": {
+          "Fn::GetAtt": [
+            "apidochubTriggerUpsertLambdaServiceRoleBC944DFE",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs14.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "apidochubTriggerUpsertLambdaServiceRoleBC944DFE": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "apigithubTriggerLambdaA2F712AB": {
+      "DependsOn": [
+        "apigithubTriggerLambdaServiceRoleDefaultPolicy28D9EC99",
+        "apigithubTriggerLambdaServiceRoleEEAFA68C",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-216656347858-us-east-2",
+          "S3Key": "50f529f67321689dcbd6a13de2b5ea7698046c561446eb4bf19f0eb2eb7aae15.zip",
+        },
+        "Handler": "api/controllers/v1/github.TriggerBuild",
+        "Role": {
+          "Fn::GetAtt": [
+            "apigithubTriggerLambdaServiceRoleEEAFA68C",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs14.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "apigithubTriggerLambdaServiceRoleDefaultPolicy28D9EC99": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "queuesJobsQueue07E5CBE7",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "apigithubTriggerLambdaServiceRoleDefaultPolicy28D9EC99",
+        "Roles": [
+          {
+            "Ref": "apigithubTriggerLambdaServiceRoleEEAFA68C",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "apigithubTriggerLambdaServiceRoleEEAFA68C": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "apislackDisplayRepoLambda3523B2B6": {
+      "DependsOn": [
+        "apislackDisplayRepoLambdaServiceRoleA2235066",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-216656347858-us-east-2",
+          "S3Key": "50f529f67321689dcbd6a13de2b5ea7698046c561446eb4bf19f0eb2eb7aae15.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "DB_NAME": "dummy-value-for-/env/dev/docs/worker_pool/atlas/dbname",
+            "NODE_CONFIG_DIR": "./api/config",
+            "SLACK_SECRET": "{{resolve:ssm-secure:/env/dev/docs/worker_pool/slack/webhook/secret}}",
+          },
+        },
+        "Handler": "api/controllers/v1/slack.DeployRepoDisplayRepoOptions",
+        "Role": {
+          "Fn::GetAtt": [
+            "apislackDisplayRepoLambdaServiceRoleA2235066",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs14.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "apislackDisplayRepoLambdaServiceRoleA2235066": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "apislackTriggerLambda4A19AC25": {
+      "DependsOn": [
+        "apislackTriggerLambdaServiceRoleDefaultPolicy322761F5",
+        "apislackTriggerLambdaServiceRole0208D965",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-216656347858-us-east-2",
+          "S3Key": "50f529f67321689dcbd6a13de2b5ea7698046c561446eb4bf19f0eb2eb7aae15.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "DB_NAME": "dummy-value-for-/env/dev/docs/worker_pool/atlas/dbname",
+            "NODE_CONFIG_DIR": "./api/config",
+            "SLACK_SECRET": "{{resolve:ssm-secure:/env/dev/docs/worker_pool/slack/webhook/secret}}",
+          },
+        },
+        "Handler": "api/controllers/v1/slack.DeployRepo",
+        "Role": {
+          "Fn::GetAtt": [
+            "apislackTriggerLambdaServiceRole0208D965",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs14.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "apislackTriggerLambdaServiceRole0208D965": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "apislackTriggerLambdaServiceRoleDefaultPolicy322761F5": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "queuesJobsQueue07E5CBE7",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "apislackTriggerLambdaServiceRoleDefaultPolicy322761F5",
+        "Roles": [
+          {
+            "Ref": "apislackTriggerLambdaServiceRole0208D965",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "apitriggerLocalBuildLambda7509E651": {
+      "DependsOn": [
+        "apitriggerLocalBuildLambdaServiceRoleDefaultPolicyFD91CE49",
+        "apitriggerLocalBuildLambdaServiceRoleC8753500",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-216656347858-us-east-2",
+          "S3Key": "50f529f67321689dcbd6a13de2b5ea7698046c561446eb4bf19f0eb2eb7aae15.zip",
+        },
+        "Handler": "api/controllers/v1/jobs.TriggerLocalBuild",
+        "Role": {
+          "Fn::GetAtt": [
+            "apitriggerLocalBuildLambdaServiceRoleC8753500",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs14.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "apitriggerLocalBuildLambdaServiceRoleC8753500": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "apitriggerLocalBuildLambdaServiceRoleDefaultPolicyFD91CE49": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "queuesJobsQueue07E5CBE7",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "queuesJobUpdatesQueue60725415",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "apitriggerLocalBuildLambdaServiceRoleDefaultPolicyFD91CE49",
+        "Roles": [
+          {
+            "Ref": "apitriggerLocalBuildLambdaServiceRoleC8753500",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "apiwebhookHandlers2D78E826": {
+      "Properties": {
+        "Name": "webhookHandlers",
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "apiwebhookHandlersAccount351D7ED9": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "apiwebhookHandlers2D78E826",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "apiwebhookHandlersCloudWatchRole3A37938A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "apiwebhookHandlersCloudWatchRole3A37938A": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "apiwebhookHandlersDeploymentADB7DB8Dfe376421d048f14734af618dbf68f6ec": {
+      "DependsOn": [
+        "apiwebhookHandlerswebhookdochubA8377835",
+        "apiwebhookHandlerswebhookdochubtrigger868C66E7",
+        "apiwebhookHandlerswebhookdochubtriggerupsertOPTIONS4DE24FB4",
+        "apiwebhookHandlerswebhookdochubtriggerupsertPOSTB3D1C312",
+        "apiwebhookHandlerswebhookdochubtriggerupsertE8DD905B",
+        "apiwebhookHandlerswebhookgithubEndpoint63B9B794",
+        "apiwebhookHandlerswebhookgithubEndpointtriggerbuildOPTIONS850A13B2",
+        "apiwebhookHandlerswebhookgithubEndpointtriggerbuildPOST96B8763B",
+        "apiwebhookHandlerswebhookgithubEndpointtriggerbuild15B0211A",
+        "apiwebhookHandlerswebhookgithubEndpointtriggerF396DDBA",
+        "apiwebhookHandlerswebhooklocalCA05DD99",
+        "apiwebhookHandlerswebhooklocaltriggerbuildOPTIONSCF191ABC",
+        "apiwebhookHandlerswebhooklocaltriggerbuildPOST378FD855",
+        "apiwebhookHandlerswebhooklocaltriggerbuild185409E7",
+        "apiwebhookHandlerswebhooklocaltriggerCC9DA6EA",
+        "apiwebhookHandlerswebhook95D89C88",
+        "apiwebhookHandlerswebhookslackdisplayreposOPTIONS0338E28D",
+        "apiwebhookHandlerswebhookslackdisplayreposPOSTABB1228A",
+        "apiwebhookHandlerswebhookslackdisplayreposD58BDF15",
+        "apiwebhookHandlerswebhookslackdisplayAEF47449",
+        "apiwebhookHandlerswebhookslack13FC4143",
+        "apiwebhookHandlerswebhookslacktriggerbuildOPTIONSCB35B7C3",
+        "apiwebhookHandlerswebhookslacktriggerbuildPOSTF197EFAE",
+        "apiwebhookHandlerswebhookslacktriggerbuildBF491285",
+        "apiwebhookHandlerswebhookslacktrigger7E69A10B",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "apiwebhookHandlersDeploymentStageprodD963BF88": {
+      "DependsOn": [
+        "apiwebhookHandlersAccount351D7ED9",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "apiwebhookHandlersDeploymentADB7DB8Dfe376421d048f14734af618dbf68f6ec",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+        "StageName": "prod",
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "apiwebhookHandlerswebhook95D89C88": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "apiwebhookHandlers2D78E826",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "webhook",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookdochubA8377835": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhook95D89C88",
+        },
+        "PathPart": "dochub",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookdochubtrigger868C66E7": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookdochubA8377835",
+        },
+        "PathPart": "trigger",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookdochubtriggerupsertE8DD905B": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookdochubtrigger868C66E7",
+        },
+        "PathPart": "upsert",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookdochubtriggerupsertOPTIONS4DE24FB4": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookdochubtriggerupsertE8DD905B",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhookdochubtriggerupsertPOSTApiPermissionMyTestStackapiwebhookHandlers063C3BD5POSTwebhookdochubtriggerupsert8C5F8165": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apidochubTriggerUpsertLambda6C8DFA43",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/",
+              {
+                "Ref": "apiwebhookHandlersDeploymentStageprodD963BF88",
+              },
+              "/POST/webhook/dochub/trigger/upsert",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookdochubtriggerupsertPOSTApiPermissionTestMyTestStackapiwebhookHandlers063C3BD5POSTwebhookdochubtriggerupsertA2CE8701": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apidochubTriggerUpsertLambda6C8DFA43",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/test-invoke-stage/POST/webhook/dochub/trigger/upsert",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookdochubtriggerupsertPOSTB3D1C312": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:us-east-2:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "apidochubTriggerUpsertLambda6C8DFA43",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookdochubtriggerupsertE8DD905B",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhookgithubEndpoint63B9B794": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhook95D89C88",
+        },
+        "PathPart": "githubEndpoint",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookgithubEndpointtriggerF396DDBA": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookgithubEndpoint63B9B794",
+        },
+        "PathPart": "trigger",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookgithubEndpointtriggerbuild15B0211A": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookgithubEndpointtriggerF396DDBA",
+        },
+        "PathPart": "build",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookgithubEndpointtriggerbuildOPTIONS850A13B2": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookgithubEndpointtriggerbuild15B0211A",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhookgithubEndpointtriggerbuildPOST96B8763B": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:us-east-2:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "apigithubTriggerLambdaA2F712AB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookgithubEndpointtriggerbuild15B0211A",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhookgithubEndpointtriggerbuildPOSTApiPermissionMyTestStackapiwebhookHandlers063C3BD5POSTwebhookgithubEndpointtriggerbuildEB3EAA8C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apigithubTriggerLambdaA2F712AB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/",
+              {
+                "Ref": "apiwebhookHandlersDeploymentStageprodD963BF88",
+              },
+              "/POST/webhook/githubEndpoint/trigger/build",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookgithubEndpointtriggerbuildPOSTApiPermissionTestMyTestStackapiwebhookHandlers063C3BD5POSTwebhookgithubEndpointtriggerbuildEF2D4077": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apigithubTriggerLambdaA2F712AB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/test-invoke-stage/POST/webhook/githubEndpoint/trigger/build",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhooklocalCA05DD99": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhook95D89C88",
+        },
+        "PathPart": "local",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhooklocaltriggerCC9DA6EA": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhooklocalCA05DD99",
+        },
+        "PathPart": "trigger",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhooklocaltriggerbuild185409E7": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhooklocaltriggerCC9DA6EA",
+        },
+        "PathPart": "build",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhooklocaltriggerbuildOPTIONSCF191ABC": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhooklocaltriggerbuild185409E7",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhooklocaltriggerbuildPOST378FD855": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:us-east-2:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "apitriggerLocalBuildLambda7509E651",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhooklocaltriggerbuild185409E7",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhooklocaltriggerbuildPOSTApiPermissionMyTestStackapiwebhookHandlers063C3BD5POSTwebhooklocaltriggerbuildBF9EDD56": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apitriggerLocalBuildLambda7509E651",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/",
+              {
+                "Ref": "apiwebhookHandlersDeploymentStageprodD963BF88",
+              },
+              "/POST/webhook/local/trigger/build",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhooklocaltriggerbuildPOSTApiPermissionTestMyTestStackapiwebhookHandlers063C3BD5POSTwebhooklocaltriggerbuildBDDBD4B2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apitriggerLocalBuildLambda7509E651",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/test-invoke-stage/POST/webhook/local/trigger/build",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookslack13FC4143": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhook95D89C88",
+        },
+        "PathPart": "slack",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookslackdisplayAEF47449": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookslack13FC4143",
+        },
+        "PathPart": "display",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookslackdisplayreposD58BDF15": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookslackdisplayAEF47449",
+        },
+        "PathPart": "repos",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookslackdisplayreposOPTIONS0338E28D": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookslackdisplayreposD58BDF15",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhookslackdisplayreposPOSTABB1228A": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:us-east-2:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "apislackDisplayRepoLambda3523B2B6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookslackdisplayreposD58BDF15",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhookslackdisplayreposPOSTApiPermissionMyTestStackapiwebhookHandlers063C3BD5POSTwebhookslackdisplayreposDEF7BE76": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apislackDisplayRepoLambda3523B2B6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/",
+              {
+                "Ref": "apiwebhookHandlersDeploymentStageprodD963BF88",
+              },
+              "/POST/webhook/slack/display/repos",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookslackdisplayreposPOSTApiPermissionTestMyTestStackapiwebhookHandlers063C3BD5POSTwebhookslackdisplayreposEEE8A030": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apislackDisplayRepoLambda3523B2B6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/test-invoke-stage/POST/webhook/slack/display/repos",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookslacktrigger7E69A10B": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookslack13FC4143",
+        },
+        "PathPart": "trigger",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookslacktriggerbuildBF491285": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "apiwebhookHandlerswebhookslacktrigger7E69A10B",
+        },
+        "PathPart": "build",
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "apiwebhookHandlerswebhookslacktriggerbuildOPTIONSCB35B7C3": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookslacktriggerbuildBF491285",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "apiwebhookHandlerswebhookslacktriggerbuildPOSTApiPermissionMyTestStackapiwebhookHandlers063C3BD5POSTwebhookslacktriggerbuild79F4A070": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apislackTriggerLambda4A19AC25",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/",
+              {
+                "Ref": "apiwebhookHandlersDeploymentStageprodD963BF88",
+              },
+              "/POST/webhook/slack/trigger/build",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookslacktriggerbuildPOSTApiPermissionTestMyTestStackapiwebhookHandlers063C3BD5POSTwebhookslacktriggerbuild1793D766": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "apislackTriggerLambda4A19AC25",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-2:216656347858:",
+              {
+                "Ref": "apiwebhookHandlers2D78E826",
+              },
+              "/test-invoke-stage/POST/webhook/slack/trigger/build",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "apiwebhookHandlerswebhookslacktriggerbuildPOSTF197EFAE": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:us-east-2:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "apislackTriggerLambda4A19AC25",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "apiwebhookHandlerswebhookslacktriggerbuildBF491285",
+        },
+        "RestApiId": {
+          "Ref": "apiwebhookHandlers2D78E826",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "queuesJobUpdatesQueue60725415": {
+      "DeletionPolicy": "Delete",
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "queuesJobsQueue07E5CBE7": {
+      "DeletionPolicy": "Delete",
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

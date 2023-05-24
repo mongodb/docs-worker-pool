@@ -39,21 +39,26 @@ export const db = async () => {
 
 // all docs should be inserted with the buildId for the run.
 export const insert = async (docs: any[], collection: string, buildId: ObjectId) => {
+  const timerLabel = `insert - ${collection}`;
+  console.time(timerLabel);
   const insertSession = await db();
   try {
-    return await insertSession
-      .collection(collection)
-      .insertMany(docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })));
+    return insertSession.collection(collection).insertMany(
+      docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })),
+      { ordered: false }
+    );
   } catch (error) {
     console.error(`Error at insertion time for ${collection}: ${error}`);
     throw error;
+  } finally {
+    console.timeEnd(timerLabel);
   }
 };
 
 export const bulkWrite = async (operations: mongodb.AnyBulkWriteOperation[], collection: string) => {
   const dbSession = await db();
   try {
-    return dbSession.collection(collection).bulkWrite(operations);
+    return dbSession.collection(collection).bulkWrite(operations, { ordered: false });
   } catch (error) {
     console.error(`Error at bulk write time for ${collection}: ${error}`);
     throw error;
