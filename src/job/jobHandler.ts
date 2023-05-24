@@ -276,10 +276,11 @@ export abstract class JobHandler {
 
       for (const command of this.currJob.buildCommands.slice(3)) {
         if (stages[command]) {
-          this.callWithBenchmark(command, stages[command]);
+          const makeCommandsWithBenchmarks = await this.callWithBenchmark(command, stages[command]);
+          await this.loggingMessage(makeCommandsWithBenchmarks);
         } else {
           const makeCommandsResp = await this._commandExecutor.execute([command]);
-          this.loggingMessage(makeCommandsResp);
+          await this.loggingMessage(makeCommandsResp);
         }
       }
     } else {
