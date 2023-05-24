@@ -21,7 +21,7 @@ export class CommandExecutorResponse {
 }
 
 export interface ICommandExecutor {
-  execute(commands: Array<string>, cwd?: string): Promise<CommandExecutorResponse>;
+  execute(commands: Array<string>): Promise<CommandExecutorResponse>;
 }
 
 export interface IJobCommandExecutor extends ICommandExecutor {
@@ -47,13 +47,10 @@ export class ShellCommandExecutor implements ICommandExecutor {
     const exec = promisify(cp.exec);
     const resp = new CommandExecutorResponse();
     try {
-      const options: { maxBuffer: number; cwd?: string } = {
+      const options: { maxBuffer: number } = {
         maxBuffer: c.get('MAX_STDOUT_BUFFER_SIZE'),
       };
 
-      if (cwd) {
-        options.cwd = cwd;
-      }
       const { stdout, stderr } = await exec(commands.join(' && '), options);
 
       resp.output = stdout.trim();
