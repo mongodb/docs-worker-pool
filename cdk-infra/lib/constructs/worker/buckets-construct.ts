@@ -1,6 +1,7 @@
 import { Construct } from 'constructs';
 import { DocsBucketMap, docsBucketNames } from '../../utils/buckets';
 import { BlockPublicAccess, Bucket, RoutingRule } from 'aws-cdk-lib/aws-s3';
+import { RemovalPolicy } from 'aws-cdk-lib';
 
 interface WorkerBucketsProps {
   env: string;
@@ -20,6 +21,7 @@ export class WorkerBucketsConstruct extends Construct {
       }
 
       const bucket = new Bucket(this, bucketName, {
+        removalPolicy: RemovalPolicy.DESTROY,
         websiteRoutingRules,
         bucketName: `${bucketName}-${env}`,
         websiteIndexDocument: 'index.html',
