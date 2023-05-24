@@ -18,7 +18,7 @@ export class WorkerConstruct extends Construct {
     });
 
     taskDef.addContainer('workerContainer', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../')), // path to the directory of the Dockerfile
+      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../')), // path to the directory that contains the docker file
     });
 
     this.taskDefinitionArn = taskDef.taskDefinitionArn;

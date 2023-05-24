@@ -1,4 +1,6 @@
-const docsBucketNames = [
+import { Bucket } from 'aws-cdk-lib/aws-s3';
+
+export const docsBucketNames = [
   'docs-mongodb-org',
   'docs-atlas',
   'docs-atlas-osb',
@@ -9,8 +11,7 @@ const docsBucketNames = [
   'docs-go',
   'docs-java',
   'docs-node',
-];
+] as const;
 
-export function getBucketNamesForEnv(env: string): string[] {
-  return docsBucketNames.map((bucketName) => `${bucketName}-${env}`);
-}
+export type DocsBucketName = typeof docsBucketNames[number];
+export type DocsBucketMap = { [BucketName in DocsBucketName]+?: Bucket };
