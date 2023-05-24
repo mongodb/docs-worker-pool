@@ -12,10 +12,13 @@ export class WorkerConstruct extends Construct {
 
     new Cluster(this, 'cluster', { vpc, enableFargateCapacityProviders: true });
 
-    const taskDef = new FargateTaskDefinition(this, 'fargateTaskDef');
+    const taskDef = new FargateTaskDefinition(this, 'workerTaskDef', {
+      cpu: 2048,
+      memoryLimitMiB: 8192,
+    });
 
     taskDef.addContainer('workerContainer', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../Dockerfile')),
+      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../')),
     });
 
     this.taskDefinitionArn = taskDef.taskDefinitionArn;
