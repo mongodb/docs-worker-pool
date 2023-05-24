@@ -34,6 +34,8 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
     priority: 1,
     error: {},
     result: null,
+    nextGenBuildExeStartTime: 0,
+    nextGenBuildExeEndTime: 0,
     nextGenParserExeStartTime: 0,
     nextGenParserExeEndTime: 0,
     nextGenHTMLExeStartTime: 0,
