@@ -8,15 +8,17 @@ interface WorkerBucketsProps {
 }
 
 export class WorkerBucketsConstruct extends Construct {
+  readonly buckets: Bucket[];
   constructor(scope: Construct, id: string, { env }: WorkerBucketsProps) {
     super(scope, id);
 
-    const bucketMap: DocsBucketMap = {};
+    const buckets: Bucket[] = [];
 
     docsBucketNames.forEach((bucketName) => {
       let websiteRoutingRules: RoutingRule[] | undefined;
 
       if (bucketName === 'docs-mongodb-org') {
+        // docs-mongodb-org has specific routing roles that the rest of the buckets do not have
         websiteRoutingRules = [];
       }
 
@@ -34,9 +36,9 @@ export class WorkerBucketsConstruct extends Construct {
         }),
       });
 
-      // apply specific rules DocsBucket
-
-      bucketMap[bucketName] = bucket;
+      buckets.push(bucket);
     });
+
+    this.buckets = buckets;
   }
 }

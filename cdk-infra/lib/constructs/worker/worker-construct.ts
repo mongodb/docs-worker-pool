@@ -1,9 +1,11 @@
 import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { IRole, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import path from 'path';
 
 export class WorkerConstruct extends Construct {
+  readonly ecsTaskRole: IRole;
   readonly taskDefinitionArn: string;
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -12,9 +14,14 @@ export class WorkerConstruct extends Construct {
 
     new Cluster(this, 'cluster', { vpc, enableFargateCapacityProviders: true });
 
+    const taskRole = new Role(this, 'fargateTaskRole', {
+      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
+    });
+
     const taskDef = new FargateTaskDefinition(this, 'workerTaskDef', {
       cpu: 2048,
       memoryLimitMiB: 8192,
+      taskRole,
     });
 
     taskDef.addContainer('workerContainer', {
@@ -22,5 +29,6 @@ export class WorkerConstruct extends Construct {
     });
 
     this.taskDefinitionArn = taskDef.taskDefinitionArn;
+    this.ecsTaskRole = taskRole;
   }
 }
