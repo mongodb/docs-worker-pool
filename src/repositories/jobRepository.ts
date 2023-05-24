@@ -93,11 +93,11 @@ export class JobRepository extends BaseRepository {
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status, 0, taskId), url, delay);
   }
 
-  async findOneAndUpdateExecutionTime(id: string, stage: string, value: number): Promise<void> {
+  async findOneAndUpdateExecutionTime(id: string, setValues: { [key: string]: number }): Promise<void> {
     const query = {
       _id: new objectId(id),
     };
-    const update = { $set: { [stage]: value } };
+    const update = { $set: { setValues } };
     const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: false };
     const response = await this.findOneAndUpdate(
       query,
@@ -166,10 +166,12 @@ export class JobRepository extends BaseRepository {
   }
 
   async insertNotificationMessages(id: string, message: string): Promise<boolean> {
+    console.log('calling the insertNotificationMessages within insertNotificationMessages ');
     const query = { _id: id };
     const update = {
       $push: { comMessage: message },
     };
+    console.log('called with id:', id);
     return await this.updateOne(
       query,
       update,
