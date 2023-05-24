@@ -1,4 +1,4 @@
-import { SQS } from '@aws-sdk/client-sqs';
+import { ReceiveMessageCommand, ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
 import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
@@ -15,7 +15,11 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
   // We want to loop indefinitely so that we continue to poll the queue.
   while (true) {
-    const receiveMessage = { QueueUrl: queueUrl, MaxNumberOfMessages: 1, WaitTimeSeconds: 2 };
+    const receiveMessage: ReceiveMessageCommandInput = {
+      QueueUrl: queueUrl,
+      MaxNumberOfMessages: 1,
+      WaitTimeSeconds: 2,
+    };
 
     const res = await client.receiveMessage(receiveMessage);
 
@@ -24,7 +28,20 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     const message = res.Messages[0];
 
     // We have the message body, now we can delete it from the queue.
-    client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
+    try {
+      client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
+    } catch (e) {
+      // We want to keep the task alive because we do not want to process multiple jobs.
+      // This could lead to multiple tasks completing jobs, without new tasks being spun up.
+      console.error(
+        `ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
+          e,
+          null,
+          4
+        )}`
+      );
+      continue;
+    }
 
     if (!message.Body) {
       console.error(`ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`);
