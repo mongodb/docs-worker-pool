@@ -1,17 +1,20 @@
 import { Construct } from 'constructs';
-import { AutoBuilderApiConstruct } from './api/api-construct';
-import { AutoBuilderEnvConstruct } from './api/env-construct';
 import { AutoBuilderQueuesConstruct } from './queue/queues-construct';
 import { WorkerConstruct } from './worker/worker-construct';
+import { WebhookEnvConstruct } from './api/webhook-env-construct';
+import { WebhookApiConstruct } from './api/webhook-api-construct';
 
 export class AutoBuilderConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
     const queues = new AutoBuilderQueuesConstruct(this, 'queues');
-    const { environment } = new AutoBuilderEnvConstruct(this, 'ssmVars', queues);
-    new WorkerConstruct(this, 'worker');
+    const { environment } = new WebhookEnvConstruct(this, 'ssmVars', queues);
 
-    new AutoBuilderApiConstruct(this, 'api', { ...queues, environment });
+    const { taskDefinitionArn } = new WorkerConstruct(this, 'worker');
+    new WebhookApiConstruct(this, 'api', {
+      ...queues,
+      environment: { ...environment, TASK_DEFINITION_FAMILY: taskDefinitionArn },
+    });
   }
 }

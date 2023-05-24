@@ -2,14 +2,14 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 
-interface AutoBuilderEnvConstructProps {
+interface WebhookEnvConstructProps {
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
 }
-export class AutoBuilderEnvConstruct extends Construct {
+export class WebhookEnvConstruct extends Construct {
   readonly environment: Record<string, string>;
 
-  constructor(scope: Construct, id: string, props: AutoBuilderEnvConstructProps) {
+  constructor(scope: Construct, id: string, props: WebhookEnvConstructProps) {
     super(scope, id);
 
     const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');

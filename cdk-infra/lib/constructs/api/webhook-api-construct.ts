@@ -24,14 +24,14 @@ const bundling: BundlingOptions = {
 
 const runtime = Runtime.NODEJS_18_X;
 
-interface AutoBuilderApiConstructProps {
+interface WebhookApiConstructProps {
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
   environment: Record<string, string>;
 }
 
-export class AutoBuilderApiConstruct extends Construct {
-  constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
+export class WebhookApiConstruct extends Construct {
+  constructor(scope: Construct, id: string, props: WebhookApiConstructProps) {
     super(scope, id);
 
     const { jobsQueue, jobUpdatesQueue, environment } = props;
