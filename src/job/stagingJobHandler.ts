@@ -55,8 +55,12 @@ export class StagingJobHandler extends JobHandler {
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-html';
+      const project = this.currJob.payload.project === 'cloud-docs' ? this.currJob.payload.project : '';
+      const branchName = /^[a-zA-Z0-9_\-\./]+$/.test(this.currJob.payload.branchName)
+        ? this.currJob.payload.branchName
+        : '';
       this.currJob.buildCommands.push(
-        `make oas-page-build MUT_PREFIX=${this.currJob.payload.mutPrefix} PROJECT=${this.currJob.payload.project} BRANCH_NAME=${this.currJob.payload.branchName}`
+        `make oas-page-build MUT_PREFIX=${this.currJob.payload.mutPrefix} PROJECT=${project} BRANCH_NAME=${branchName}`
       );
     }
   }

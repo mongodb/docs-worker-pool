@@ -162,8 +162,10 @@ export class TestDataProvider {
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make next-gen-html',
     ]);
+    const project = job.payload.project === 'cloud-docs' ? job.payload.project : '';
+    const branchName = /^[a-zA-Z0-9_\-\./]+$/.test(job.payload.branchName) ? job.payload.branchName : '';
     commands.push(
-      `make oas-page-build MUT_PREFIX=${job.payload.mutPrefix} PROJECT=${job.payload.project} BRANCH_NAME=${job.payload.branchName}`
+      `make oas-page-build MUT_PREFIX=${job.payload.mutPrefix} PROJECT=${project} BRANCH_NAME=${branchName}`
     );
     return commands;
   }
