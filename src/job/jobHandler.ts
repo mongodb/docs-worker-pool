@@ -268,7 +268,7 @@ export abstract class JobHandler {
   private async executeBuild(): Promise<boolean> {
     const stages = {
       ['make get-build-dependencies']: 'nextGenBuildExe',
-      ['make next-gen-parse']: 'nextGenParserExe', //temporarily won't use (coupled it with next-gen-html)
+      ['make next-gen-parse']: 'nextGenParserExe', // temporarily won't use (coupled it with next-gen-html)
       ['make next-gen-html']: 'nextGenHTMLExe',
       ['make oas-page-build']: 'nextGenStageExe',
     };
