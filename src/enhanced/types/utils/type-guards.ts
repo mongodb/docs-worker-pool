@@ -29,6 +29,7 @@ export function isJobQueuePayload(obj: unknown): obj is JobsQueuePayload {
     urlSlug,
     aliased,
     newHead,
+    private: isPrivate,
   } = unsafePayload;
 
   // validate payload
@@ -48,6 +49,6 @@ export function isJobQueuePayload(obj: unknown): obj is JobsQueuePayload {
     (typeof urlSlug === 'undefined' || typeof urlSlug === 'string') &&
     (typeof aliased === 'undefined' || typeof aliased === 'boolean') &&
     (typeof newHead === 'undefined' || typeof newHead === 'string') &&
-    (typeof unsafePayload.private === 'undefined' || typeof unsafePayload.private === 'string') // can't object destructure private since it is a reserved word :S
+    (typeof isPrivate === 'undefined' || typeof isPrivate === 'string')
   );
 }

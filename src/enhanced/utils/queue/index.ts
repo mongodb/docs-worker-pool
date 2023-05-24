@@ -19,30 +19,33 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     const res = await client.receiveMessage(receiveMessage);
 
-    if (res.Messages && res.Messages.length > 0) {
-      const message = res.Messages[0];
+    if (!res.Messages || res.Messages.length === 0) continue;
 
-      if (!message.Body) {
-        console.error(`ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`);
-        continue;
-      }
+    const message = res.Messages[0];
 
-      const payload = JSON.parse(message.Body);
+    // We have the message body, now we can delete it from the queue.
+    client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
 
-      // Use type guard here to validate payload we have received from the queue.
-      // This ensures that the `payload` object will be of type `JobQueuePayload` after the if statement.
-      if (!isJobQueuePayload(payload)) {
-        console.error(
-          `ERROR! Invalid payload data received from message ID: ${
-            message.MessageId
-          }. Payload received: ${JSON.stringify(payload)}`
-        );
-        continue;
-      }
-
-      // Great! we received a proper message from the queue. Return this object as we will no longer
-      // want to poll for more messages.
-      return payload;
+    if (!message.Body) {
+      console.error(`ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`);
+      continue;
     }
+
+    const payload = JSON.parse(message.Body);
+
+    // Use type guard here to validate payload we have received from the queue.
+    // This ensures that the `payload` object will be of type `JobQueuePayload` after the if statement.
+    if (!isJobQueuePayload(payload)) {
+      console.error(
+        `ERROR! Invalid payload data received from message ID: ${message.MessageId}. Payload received: ${JSON.stringify(
+          payload
+        )}`
+      );
+      continue;
+    }
+
+    // Great! we received a proper message from the queue. Return this object as we will no longer
+    // want to poll for more messages.
+    return payload;
   }
 }
