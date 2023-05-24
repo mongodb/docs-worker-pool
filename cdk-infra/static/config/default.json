@@ -30,7 +30,6 @@
   "aws_region": "us-east-2",
   "gatsbyBaseUrl": "GATSBY_BASE_URL",
   "previewBuildEnabled": "false",
-  "featureFlagUpdatePages": "false",
   "parallel": {
     "enabled": true,
     "stg": {
