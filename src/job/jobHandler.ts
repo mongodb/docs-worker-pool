@@ -249,7 +249,7 @@ export abstract class JobHandler {
 
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const resp = await this._commandExecutor.execute([command]);
+    const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
     const end = performance.now();
     const update = {
       [`${stage}StartTime`]: start,
