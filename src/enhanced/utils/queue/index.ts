@@ -1,4 +1,4 @@
-import { ReceiveMessageCommand, ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
+import { ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
 import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
