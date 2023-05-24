@@ -247,9 +247,14 @@ export abstract class JobHandler {
     }
   }
 
+  // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
     const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
+    await this._logger.save(
+      this.currJob._id,
+      `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
+    );
     const end = performance.now();
     const update = {
       [`${stage}StartTime`]: start,
@@ -269,10 +274,15 @@ export abstract class JobHandler {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      await this._logger.save(this.currJob._id, `'(COMMANDS)'${this.currJob.buildCommands.join(' && ')}`);
+      await this._logger.save(
+        this.currJob._id,
+        `'(PREREQUISITE COMMANDS)'${this.currJob.buildCommands.slice(0, 3).join(' && ')}`
+      );
+      await this._logger.save(this.currJob._id, `'(MAKE COMMANDS)'${this.currJob.buildCommands.slice(3).join(' && ')}`);
 
+      // call prerequisite commands
       const prerequisiteResp = await this._commandExecutor.execute(this.currJob.buildCommands.slice(0, 3));
-      this.loggingMessage(prerequisiteResp);
+      await this.loggingMessage(prerequisiteResp);
 
       for (const command of this.currJob.buildCommands.slice(3)) {
         if (stages[command]) {
