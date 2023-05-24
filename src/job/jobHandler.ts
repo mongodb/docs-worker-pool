@@ -250,11 +250,7 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const resp = await this._commandExecutor.execute([
-      '. /venv/bin/activate',
-      `cd repos/${this.currJob.payload.repoName}`,
-      command,
-    ]);
+    const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
     await this._logger.save(
       this.currJob._id,
       `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
@@ -271,6 +267,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
     const stages = {
+      ['make get-build-dependencies']: 'nextGenBuildExe',
       ['make next-gen-parse']: 'nextGenParserExe', //temporarily won't use (coupled it with next-gen-html)
       ['make next-gen-html']: 'nextGenHTMLExe',
       ['make oas-page-build']: 'nextGenStageExe',
