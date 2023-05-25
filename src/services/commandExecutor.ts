@@ -51,9 +51,9 @@ export class ShellCommandExecutor implements ICommandExecutor {
         maxBuffer: c.get('MAX_STDOUT_BUFFER_SIZE'),
       };
 
-      // if (cwd) {
-      //   options.cwd = cwd;
-      // }
+      if (cwd) {
+        options.cwd = cwd;
+      }
       const { stdout, stderr } = await exec(commands.join(' && '), options);
 
       resp.output = stdout.trim();

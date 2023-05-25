@@ -250,8 +250,7 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const preCommands = ['. /venv/bin/activate', 'cd repos/cloud-docs'];
-    const resp = await this._commandExecutor.execute([...preCommands, command]);
+    const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
     await this._logger.save(
       this.currJob._id,
       `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
@@ -268,10 +267,10 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
     const stages = {
-      ['make get-build-dependencies']: 'nextGenBuildExe',
-      ['make next-gen-parse']: 'nextGenParserExe', // temporarily won't use (coupled it with next-gen-html)
-      ['make next-gen-html']: 'nextGenHTMLExe',
-      ['make oas-page-build']: 'nextGenStageExe',
+      ['get-build-dependencies']: 'nextGenBuildExe',
+      ['next-gen-parse']: 'nextGenParserExe', // temporarily won't use (coupled it with next-gen-html)
+      ['next-gen-html']: 'nextGenHTMLExe',
+      ['oas-page-build']: 'nextGenStageExe',
     };
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
@@ -287,8 +286,9 @@ export abstract class JobHandler {
       await this.loggingMessage(prerequisiteResp);
 
       for (const command of this.currJob.buildCommands.slice(3)) {
-        if (stages[command]) {
-          const makeCommandsWithBenchmarks = await this.callWithBenchmark(command, stages[command]);
+        const key = command.split(' ')[1].trim();
+        if (stages[key]) {
+          const makeCommandsWithBenchmarks = await this.callWithBenchmark(command, stages[key]);
           await this.loggingMessage(makeCommandsWithBenchmarks);
         } else {
           const makeCommandsResp = await this._commandExecutor.execute([command]);
