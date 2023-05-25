@@ -264,6 +264,8 @@ function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserE
     startTime: null,
     endTime: null,
     priority: 1,
+    nextGenBuildExeStartTime: 0,
+    nextGenBuildExeEndTime: 0,
     nextGenParserExeStartTime: 0,
     nextGenParserExeEndTime: 0,
     nextGenHTMLExeStartTime: 0,
