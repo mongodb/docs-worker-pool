@@ -98,7 +98,7 @@ export class JobRepository extends BaseRepository {
       _id: new objectId(id),
     };
     const update = { $set: setValues };
-    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: false };
+    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
     const response = await this.findOneAndUpdate(
       query,
       update,
