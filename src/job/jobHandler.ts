@@ -260,7 +260,8 @@ export abstract class JobHandler {
       [`${stage}StartTime`]: start,
       [`${stage}EndTime`]: end,
     };
-    await this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
+    const jobValue = await this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
+    await this._logger.save(this.currJob._id, `${'(JOB VALUE AFTER UPDATE)'.padEnd(15)} ${jobValue}`);
     return resp;
   }
 
