@@ -250,7 +250,8 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
+    const preCommands = ['. /venv/bin/activate', 'cd repos/cloud-docs'];
+    const resp = await this._commandExecutor.execute([...preCommands, command]);
     await this._logger.save(
       this.currJob._id,
       `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
