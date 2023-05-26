@@ -3,6 +3,11 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketName: ${self:custom.bucketName}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
@@ -76,6 +81,11 @@ Resources:
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       BucketName: ${self:custom.atlasBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -83,6 +93,11 @@ Resources:
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      PublicAccessBlockConfiguration:  
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       BucketName: ${self:custom.cloudManagerBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -91,6 +106,11 @@ Resources:
   OpsManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       BucketName: ${self:custom.opsManagerBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -99,6 +119,11 @@ Resources:
   JavaBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       BucketName: ${self:custom.javaBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -107,6 +132,11 @@ Resources:
   GoBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       BucketName: ${self:custom.goBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -115,6 +145,11 @@ Resources:
   NodeBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       BucketName: ${self:custom.nodeBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
@@ -123,6 +158,11 @@ Resources:
   CSharpBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       BucketName: ${self:custom.cSharpBucketName}
       WebsiteConfiguration:
           IndexDocument: index.html
