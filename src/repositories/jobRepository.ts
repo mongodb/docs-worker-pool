@@ -171,12 +171,10 @@ export class JobRepository extends BaseRepository {
   }
 
   async insertNotificationMessages(id: string, message: string): Promise<boolean> {
-    console.log('calling the insertNotificationMessages within insertNotificationMessages ');
     const query = { _id: id };
     const update = {
       $push: { comMessage: message },
     };
-    console.log('called with id:', id);
     return await this.updateOne(
       query,
       update,
