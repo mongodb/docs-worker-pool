@@ -53,7 +53,7 @@ next-gen-parse: examples
 		fi \
 	fi
 
-next-gen-html:  get-build-dependencies next-gen-parse 
+next-gen-html:  get-build-dependencies
 	# persistence module - add bundle zip to Atlas documents
 	# ignore errors "-" flag
 	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
