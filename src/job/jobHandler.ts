@@ -274,7 +274,6 @@ export abstract class JobHandler {
       ['oas-page-build']: 'nextGenStageExe',
     };
 
-    const targets = ['get-build-dependencies', 'next-gen-html', 'oas-page-build'];
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
@@ -288,33 +287,11 @@ export abstract class JobHandler {
       const prerequisiteResp = await this._commandExecutor.execute(this.currJob.buildCommands.slice(0, 3));
       await this.loggingMessage(prerequisiteResp);
 
-      // for (const command of this.currJob.buildCommands.slice(3)) {
-      //   const key = command.split(' ')[1].trim();
-      //   if (stages[key]) {
-      //     const makeCommandsWithBenchmarks = await this.callWithBenchmark(command, stages[key]);
-      //     await this.loggingMessage(makeCommandsWithBenchmarks);
-      //   } else {
-      //     const makeCommandsResp = await this._commandExecutor.execute([command]);
-      //     await this.loggingMessage(makeCommandsResp);
-      //   }
-      // }
-
-      // grabs the make commands
-      const makeCommands = this.currJob.buildCommands.slice(3);
-      for (const target of targets) {
-        // confirms the target commands is in the list of make commands
-        const parsedCommand = makeCommands.join(' ').match(target)![0];
-        // obtains the original command, for calling it with .execute
-        const command = makeCommands.find((c) => c.includes(parsedCommand));
-
-        if (!command) {
-          const error = new AutoBuilderError('No commands to execute', 'BuildError');
-          await this.logError(error);
-          throw error;
-        }
-        // if in staging object call with benchmark
-        if (stages[parsedCommand]) {
-          const makeCommandsWithBenchmarks = await this.callWithBenchmark(command, stages[parsedCommand]);
+      for (const command of this.currJob.buildCommands.slice(3)) {
+        // works for any make command with the following signature make <make-rule>
+        const key = command.split(' ')[1].trim();
+        if (stages[key]) {
+          const makeCommandsWithBenchmarks = await this.callWithBenchmark(command, stages[key]);
           await this.loggingMessage(makeCommandsWithBenchmarks);
         } else {
           const makeCommandsResp = await this._commandExecutor.execute([command]);
