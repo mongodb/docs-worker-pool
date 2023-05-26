@@ -54,7 +54,7 @@ export class StagingJobHandler extends JobHandler {
 
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob.buildCommands) {
-      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'next-gen-parse';
+      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-parse';
       this.currJob.buildCommands.push('make next-gen-html');
       this.currJob.buildCommands.push(`make oas-page-build MUT_PREFIX=${this.currJob.payload.mutPrefix}`);
     }
