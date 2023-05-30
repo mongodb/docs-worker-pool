@@ -64,19 +64,6 @@ describe('StagingJobHandler Tests', () => {
     );
   });
 
-  test('Execute build commands successfully', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false, {
-      status: 'success',
-      output: 'Great work',
-      error: null,
-    });
-    jobHandlerTestHelper.job.useWithBenchmark = true;
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.findOneAndUpdateExecutionTime).toBeCalledTimes(
-      jobHandlerTestHelper.job.buildCommands.slice(3).length
-    );
-  });
-
   test('Execute nextgen build runs successfully and results in summary message', async () => {
     jobHandlerTestHelper.setStageForDeploySuccess(true, false);
     await jobHandlerTestHelper.jobHandler.execute();

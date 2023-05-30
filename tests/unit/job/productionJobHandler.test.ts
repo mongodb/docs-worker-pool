@@ -253,6 +253,19 @@ describe('ProductionJobHandler Tests', () => {
     );
   });
 
+  test('Execute Next Gen Build successfully', async () => {
+    jobHandlerTestHelper.setStageForDeploySuccess(true, false, {
+      status: 'success',
+      output: 'Great work',
+      error: null,
+    });
+    jobHandlerTestHelper.job.useWithBenchmark = true;
+    await jobHandlerTestHelper.jobHandler.execute();
+    expect(jobHandlerTestHelper.jobRepo.findOneAndUpdateExecutionTime).toBeCalledTimes(
+      jobHandlerTestHelper.job.buildCommands.slice(3).length
+    );
+  });
+
   test('Execute Next Gen Build throws error while executing commands', async () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
