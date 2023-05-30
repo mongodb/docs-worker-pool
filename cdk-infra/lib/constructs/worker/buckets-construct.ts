@@ -1,8 +1,9 @@
 import { Construct } from 'constructs';
 import { docsBucketNames } from '../../utils/buckets';
-import { BlockPublicAccess, Bucket, RoutingRule } from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket, RedirectProtocol, RoutingRule } from 'aws-cdk-lib/aws-s3';
 import { RemovalPolicy } from 'aws-cdk-lib';
 import { getEnv } from '../../utils/env';
+import { getHostUrl, getPrefixUrl } from '../../utils/url';
 
 export class WorkerBucketsConstruct extends Construct {
   readonly buckets: Bucket[];
@@ -18,7 +19,18 @@ export class WorkerBucketsConstruct extends Construct {
 
       if (bucketName === 'docs-mongodb-org') {
         // docs-mongodb-org has specific routing roles that the rest of the buckets do not have
-        websiteRoutingRules = []; // TODO: Populate this array with correct routing rules for root bucket
+        websiteRoutingRules = [
+          {
+            condition: {
+              keyPrefixEquals: `${getPrefixUrl(env)}/master`,
+            },
+            protocol: RedirectProtocol.HTTPS,
+            hostName: getHostUrl(env),
+            replaceKey: {
+              prefixWithKey: `${getPrefixUrl(env)}/upcoming`,
+            },
+          },
+        ]; // TODO: Populate this array with correct routing rules for root bucket
       }
 
       const bucket = new Bucket(this, bucketName, {
