@@ -1,6 +1,8 @@
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { getEnv } from '../../utils/env';
+import { getSsmPathPrefix } from '../../utils/ssm';
 
 interface WebhookEnvConstructProps {
   jobsQueue: IQueue;
@@ -9,28 +11,26 @@ interface WebhookEnvConstructProps {
 export class WebhookEnvConstruct extends Construct {
   readonly environment: Record<string, string>;
 
-  constructor(scope: Construct, id: string, props: WebhookEnvConstructProps) {
+  constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue }: WebhookEnvConstructProps) {
     super(scope, id);
 
-    const dbName = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/dbname');
-    const dbUsername = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/username');
-    const dbHost = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/host');
-    const dbPassword = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/atlas/password');
-    const slackSecret = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/webhook/secret');
-    const slackAuthToken = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/slack/auth/token');
+    const env = getEnv(this);
+    const ssmPathPrefix = getSsmPathPrefix(env);
 
-    const fastlyDochubToken = StringParameter.valueFromLookup(
-      this,
-      '/env/dev/docs/worker_pool/fastly/docs/dochub/token'
-    );
+    const dbName = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/atlas/dbname`);
+    const dbUsername = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/atlas/username`);
+    const dbHost = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/atlas/host`);
+    const dbPassword = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/atlas/password`);
+    const slackSecret = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/slack/webhook/secret`);
+    const slackAuthToken = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/slack/auth/token`);
+
+    const fastlyDochubToken = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/fastly/docs/dochub/token`);
     const fastlyDochubServiceId = StringParameter.valueFromLookup(
       this,
-      '/env/dev/docs/worker_pool/fastly/docs/dochub/service_id'
+      `${ssmPathPrefix}/fastly/docs/dochub/service_id`
     );
-    const fastlyDochubMap = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/fastly/dochub_map');
-    const githubSecret = StringParameter.valueFromLookup(this, '/env/dev/docs/worker_pool/github/webhook/secret');
-
-    const { jobsQueue, jobUpdatesQueue } = props;
+    const fastlyDochubMap = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/fastly/dochub_map`);
+    const githubSecret = StringParameter.valueFromLookup(this, `${ssmPathPrefix}/github/webhook/secret`);
 
     this.environment = {
       GITHUB_SECRET: githubSecret,

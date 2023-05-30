@@ -10,6 +10,8 @@ export class WorkerConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
+    const isEnhanced = !!this.node.tryGetContext('enhanced');
+
     const vpc = new Vpc(this, 'vpc', {
       gatewayEndpoints: {
         S3: { service: GatewayVpcEndpointAwsService.S3 },
@@ -38,7 +40,7 @@ export class WorkerConstruct extends Construct {
 
     taskDef.addContainer('workerContainer', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
-        file: 'Dockerfile.enhanced',
+        file: isEnhanced ? 'Dockerfile.enhanced' : undefined,
       }), // path to the directory that contains the docker file
     });
 

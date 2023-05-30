@@ -13,6 +13,6 @@ export class AutoBuilderStack extends Stack {
         'ERROR! The context variable env must be defined. Please define it by providing the flag -c env=<env>'
       );
 
-    new AutoBuilderConstruct(this, `autobuilder-stack-${env}`, { env });
+    new AutoBuilderConstruct(this, `autobuilder-stack-${env}`);
   }
 }

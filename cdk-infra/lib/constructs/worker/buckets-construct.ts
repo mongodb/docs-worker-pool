@@ -2,15 +2,14 @@ import { Construct } from 'constructs';
 import { docsBucketNames } from '../../utils/buckets';
 import { BlockPublicAccess, Bucket, RoutingRule } from 'aws-cdk-lib/aws-s3';
 import { RemovalPolicy } from 'aws-cdk-lib';
-
-interface WorkerBucketsProps {
-  env: string;
-}
+import { getEnv } from '../../utils/env';
 
 export class WorkerBucketsConstruct extends Construct {
   readonly buckets: Bucket[];
-  constructor(scope: Construct, id: string, { env }: WorkerBucketsProps) {
+  constructor(scope: Construct, id: string) {
     super(scope, id);
+
+    const env = getEnv(this);
 
     const buckets: Bucket[] = [];
 

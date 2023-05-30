@@ -5,11 +5,8 @@ import { WebhookEnvConstruct } from './api/webhook-env-construct';
 import { WebhookApiConstruct } from './api/webhook-api-construct';
 import { WorkerBucketsConstruct } from './worker/buckets-construct';
 
-interface AutoBuilderConstructProps {
-  env: string;
-}
 export class AutoBuilderConstruct extends Construct {
-  constructor(scope: Construct, id: string, { env }: AutoBuilderConstructProps) {
+  constructor(scope: Construct, id: string) {
     super(scope, id);
 
     const queues = new AutoBuilderQueuesConstruct(this, 'queues');
@@ -17,7 +14,7 @@ export class AutoBuilderConstruct extends Construct {
 
     const { taskDefinitionArn, ecsTaskRole } = new WorkerConstruct(this, 'worker');
 
-    const { buckets } = new WorkerBucketsConstruct(this, 'workerBuckets', { env });
+    const { buckets } = new WorkerBucketsConstruct(this, 'workerBuckets');
 
     buckets.forEach((bucket) => {
       bucket.grantReadWrite(ecsTaskRole);
