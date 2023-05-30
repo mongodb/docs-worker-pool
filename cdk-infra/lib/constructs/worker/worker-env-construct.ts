@@ -76,7 +76,6 @@ export class WorkerEnvConstruct extends Construct {
       MONGO_ATLAS_PASSWORD: dbPassword,
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
-      NODE_CONFIG_DIR: './config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
       FASTLY_DOCHUB_MAP: fastlyDochubMap,
