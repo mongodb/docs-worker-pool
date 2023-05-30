@@ -72,7 +72,9 @@ describe('StagingJobHandler Tests', () => {
     });
     jobHandlerTestHelper.job.useWithBenchmark = true;
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.findOneAndUpdateExecutionTime).toBeCalledTimes(1);
+    expect(jobHandlerTestHelper.jobRepo.findOneAndUpdateExecutionTime).toBeCalledTimes(
+      jobHandlerTestHelper.job.buildCommands.slice(3).length
+    );
   });
 
   test('Execute nextgen build runs successfully and results in summary message', async () => {

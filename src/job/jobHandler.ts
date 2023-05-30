@@ -240,6 +240,11 @@ export abstract class JobHandler {
       this.currJob._id,
       `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
     );
+    if (resp.status != 'success') {
+      const error = new AutoBuilderError(resp.error, 'BuildError');
+      await this.logError(error);
+      throw error;
+    }
   }
 
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
@@ -255,8 +260,7 @@ export abstract class JobHandler {
       [`${stage}StartTime`]: start,
       [`${stage}EndTime`]: end,
     };
-    const jobValue = await this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
-    await this._logger.save(this.currJob._id, `${'(JOB VALUE AFTER UPDATE)'.padEnd(15)} ${JSON.stringify(jobValue)}`);
+    await this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
     return resp;
   }
 
@@ -267,7 +271,6 @@ export abstract class JobHandler {
       ['next-gen-html']: 'nextGenHTMLExe',
       ['oas-page-build']: 'nextGenStageExe',
     };
-    const responseTracker: CommandExecutorResponse[] = [];
 
     const prerequisiteCommands = this.currJob.buildCommands.slice(0, 3);
     await this._logger.save(this.currJob._id, `'(PREREQUISITE COMMANDS)'${prerequisiteCommands.join(' && ')}`);
@@ -279,28 +282,16 @@ export abstract class JobHandler {
     const prerequisiteResp = await this._commandExecutor.execute(prerequisiteCommands);
     await this.loggingMessage(prerequisiteResp);
 
-    for (const command of this.currJob.buildCommands.slice(3)) {
+    for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>
       const key = command.split(' ')[1].trim();
       if (stages[key]) {
         const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
         await this.loggingMessage(makeCommandsWithBenchmarksResponse);
-        responseTracker.push(makeCommandsWithBenchmarksResponse);
       } else {
         const makeCommandsResp = await this._commandExecutor.execute([command]);
         await this.loggingMessage(makeCommandsResp);
-        responseTracker.push(makeCommandsResp);
       }
-    }
-
-    const resp = responseTracker.find((_resp) => {
-      return _resp.status !== 'success';
-    });
-
-    if (resp) {
-      const error = new AutoBuilderError(resp.error, 'BuildError');
-      await this.logError(error);
-      throw error;
     }
   }
 
