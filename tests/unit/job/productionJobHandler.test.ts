@@ -261,9 +261,7 @@ describe('ProductionJobHandler Tests', () => {
     });
     jobHandlerTestHelper.job.useWithBenchmark = true;
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.findOneAndUpdateExecutionTime).toBeCalledTimes(
-      jobHandlerTestHelper.job.buildCommands.slice(3).length
-    );
+    jobHandlerTestHelper.verifyNextGenSuccess();
   });
 
   test('Execute Next Gen Build throws error while executing commands', async () => {
