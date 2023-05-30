@@ -2,7 +2,9 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getSsmPathPrefix } from '../../utils/ssm';
-import { getEnv } from '../../utils/env';
+import { envShortToFullName, getEnv } from '../../utils/env';
+import { getCdnInvalidatorUrl } from '../../utils/cdn';
+import { getSearchIndexFolder } from '../../utils/search-index';
 
 interface WorkerEnvConstructProps {
   jobsQueue: IQueue;
@@ -52,7 +54,7 @@ export class WorkerEnvConstruct extends Construct {
     const githubSecret = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/webhook/secret`);
 
     const npmBase64Auth = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/auth`);
-    const npmBase64Email = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/email`);
+    const npmEmail = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/email`);
 
     const gatsbyBaseUrl = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/base_url`);
     // doing this for the time being, but I think we don't need to necessarily retrieve this from ssm for feature branches, nor would we want to in that case
@@ -64,8 +66,11 @@ export class WorkerEnvConstruct extends Construct {
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
     const cdnClientID = StringParameter.valueFromLookup(this, `${ssmPrefix}/cdn/client/id`);
+    const cdnClientSecret = StringParameter.valueFromLookup(this, `${ssmPrefix}/cdn/client/secret`);
 
     this.environment = {
+      STAGE: env,
+      SNOOTY_ENV: envShortToFullName(env),
       GITHUB_SECRET: githubSecret,
       MONGO_ATLAS_USERNAME: dbUsername,
       MONGO_ATLAS_PASSWORD: dbPassword,
@@ -77,8 +82,28 @@ export class WorkerEnvConstruct extends Construct {
       FASTLY_DOCHUB_MAP: fastlyDochubMap,
       FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
       FASTLY_DOCHUB_TOKEN: fastlyDochubToken,
+      FASTLY_ATLAS_TOKEN: fastlyAtlasToken,
+      FASTLY_ATLAS_SERVICE_ID: fastlyAtlasServiceId,
+      FASTLY_OPS_MANAGER_TOKEN: fastlyOpsManagerToken,
+      FASTLY_OPS_MANAGER_SERVICE_ID: fastlyOpsManagerServiceId,
+      FASTLY_CLOUD_MANAGER_TOKEN: fastlyCloudManagerToken,
+      FASTLY_CLOUD_MANAGER_SERVICE_ID: fastlyCloudManagerServiceId,
       GITHUB_BOT_USERNAME: githubBotUsername,
-      NPM_BASE_64_AUTH: '',
+      GITHUB_BOT_PASSWORD: githubBotPW,
+      GATSBY_BASE_URL: gatsbyBaseUrl,
+      PREVIEW_BUILD_ENABLED: previewBuildEnabled,
+      NPM_BASE_64_AUTH: npmBase64Auth,
+      USER_ENTITLEMENT_COL_NAME: entitlementCollection,
+      CDN_CLIENT_ID: cdnClientID,
+      CDN_CLIENT_SECRET: cdnClientSecret,
+      NPM_EMAIL: npmEmail,
+      FASTLY_MAIN_TOKEN: fastlyMainToken,
+      FASTLY_MAIN_SERVICE_ID: fastlyMainServiceId,
+      REPO_BRANCHES_COLLECTION: repoBranchesCollection,
+      JOB_QUEUE_COL_NAME: jobCollection,
+      CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
+      SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
+      SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),
     };
   }
 }
