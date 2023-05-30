@@ -240,6 +240,11 @@ export abstract class JobHandler {
       this.currJob._id,
       `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
     );
+    if (resp.status != 'success') {
+      const error = new AutoBuilderError(resp.error, 'BuildError');
+      await this.logError(error);
+      throw error;
+    }
   }
 
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
@@ -267,7 +272,6 @@ export abstract class JobHandler {
       ['next-gen-html']: 'nextGenHTMLExe',
       ['oas-page-build']: 'nextGenStageExe',
     };
-    const responseTracker: CommandExecutorResponse[] = [];
 
     const prerequisiteCommands = this.currJob.buildCommands.slice(0, 3);
     await this._logger.save(this.currJob._id, `'(PREREQUISITE COMMANDS)'${prerequisiteCommands.join(' && ')}`);
@@ -278,7 +282,6 @@ export abstract class JobHandler {
     // call prerequisite commands
     const prerequisiteResp = await this._commandExecutor.execute(prerequisiteCommands);
     await this.loggingMessage(prerequisiteResp);
-    responseTracker.push(prerequisiteResp);
 
     for (const command of this.currJob.buildCommands.slice(3)) {
       // works for any make command with the following signature make <make-rule>
@@ -286,22 +289,10 @@ export abstract class JobHandler {
       if (stages[key]) {
         const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
         await this.loggingMessage(makeCommandsWithBenchmarksResponse);
-        responseTracker.push(makeCommandsWithBenchmarksResponse);
       } else {
         const makeCommandsResp = await this._commandExecutor.execute([command]);
         await this.loggingMessage(makeCommandsResp);
-        responseTracker.push(makeCommandsResp);
       }
-    }
-
-    const resp = responseTracker.find((_resp) => {
-      return _resp.status !== 'success';
-    });
-
-    if (resp) {
-      const error = new AutoBuilderError(resp.error, 'BuildError');
-      await this.logError(error);
-      throw error;
     }
   }
 
@@ -328,7 +319,7 @@ export abstract class JobHandler {
       if (insertionPoint !== -1) {
         this.currJob.buildCommands.splice(insertionPoint, 0, 'make next-gen-parse');
       }
-      console.log('job', this.currJob);
+
       if (this.currJob.useWithBenchmark) {
         this.exeBuildModified();
       } else {
