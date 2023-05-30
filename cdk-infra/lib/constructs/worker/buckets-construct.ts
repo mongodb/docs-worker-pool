@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { DocsBucketMap, docsBucketNames } from '../../utils/buckets';
+import { docsBucketNames } from '../../utils/buckets';
 import { BlockPublicAccess, Bucket, RoutingRule } from 'aws-cdk-lib/aws-s3';
 import { RemovalPolicy } from 'aws-cdk-lib';
 
@@ -19,7 +19,7 @@ export class WorkerBucketsConstruct extends Construct {
 
       if (bucketName === 'docs-mongodb-org') {
         // docs-mongodb-org has specific routing roles that the rest of the buckets do not have
-        websiteRoutingRules = [];
+        websiteRoutingRules = []; // TODO: Populate this array with correct routing rules for root bucket
       }
 
       const bucket = new Bucket(this, bucketName, {
