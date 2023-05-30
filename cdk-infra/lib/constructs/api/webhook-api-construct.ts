@@ -31,10 +31,8 @@ interface WebhookApiConstructProps {
 }
 
 export class WebhookApiConstruct extends Construct {
-  constructor(scope: Construct, id: string, props: WebhookApiConstructProps) {
+  constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, environment }: WebhookApiConstructProps) {
     super(scope, id);
-
-    const { jobsQueue, jobUpdatesQueue, environment } = props;
 
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: `${HANDLERS_PATH}/slack.ts`,
