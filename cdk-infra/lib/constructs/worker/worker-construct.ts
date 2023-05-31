@@ -1,13 +1,16 @@
 import { GatewayVpcEndpointAwsService, InterfaceVpcEndpointAwsService, Vpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { AssetImageProps, Cluster, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { IRole, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import path from 'path';
 
+interface WorkerConstructProps {
+  environment: Record<string, string>;
+}
 export class WorkerConstruct extends Construct {
   readonly ecsTaskRole: IRole;
   readonly taskDefinitionArn: string;
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, { environment }: WorkerConstructProps) {
     super(scope, id);
 
     const isEnhanced = !!this.node.tryGetContext('enhanced');
@@ -38,14 +41,16 @@ export class WorkerConstruct extends Construct {
       taskRole,
     });
 
-    const containerProps = isEnhanced
+    const containerProps: AssetImageProps | undefined = isEnhanced
       ? {
           file: 'Dockerfile.enhanced',
+          buildSecrets: {},
         }
       : undefined;
 
     taskDef.addContainer('workerContainer', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps), // path to the directory that contains the docker file
+      environment,
     });
 
     this.taskDefinitionArn = taskDef.taskDefinitionArn;

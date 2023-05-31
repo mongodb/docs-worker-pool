@@ -1,4 +1,5 @@
 import { Construct } from 'constructs';
+import { getCurrentBranch } from './git';
 
 const snootyEnvs = ['staging', 'production', 'dotcomstg', 'dotcomprd'] as const;
 const autoBuilderEnvs = ['stg', 'prd', 'dev', 'dotcomstg', 'dotcomprd'] as const;

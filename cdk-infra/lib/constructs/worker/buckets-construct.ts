@@ -125,10 +125,14 @@ export class WorkerBucketsConstruct extends Construct {
         ];
       }
 
-      const bucket = new Bucket(this, bucketName, {
+      const featureName = this.node.tryGetContext('featureName');
+
+      const stackBucketName = `${featureName}-${bucketName}-${env}`.toLowerCase();
+
+      const bucket = new Bucket(this, stackBucketName, {
         removalPolicy: RemovalPolicy.DESTROY,
         websiteRoutingRules,
-        bucketName: `${bucketName}-${env}`,
+        bucketName: stackBucketName,
         websiteIndexDocument: 'index.html',
         websiteErrorDocument: 'docs-qa/404/index.html',
         blockPublicAccess: new BlockPublicAccess({
