@@ -99,21 +99,7 @@ export class JobRepository extends BaseRepository {
     };
     const update = { $set: setValues };
     const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
-    const response = await this.findOneAndUpdate(
-      query,
-      update,
-      options,
-      `Mongo Timeout Error: Timed out while retrieving job`
-    );
-
-    if (!response) {
-      throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate unable to update job execution time');
-    } else if (response.value) {
-      const job: Job = response.value;
-      await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
-      return job;
-    }
-    return null;
+    await this.findOneAndUpdate(query, update, options, `Mongo Timeout Error: Timed out while retrieving job`);
   }
 
   async findOneAndUpdateJob(query): Promise<Job | null> {

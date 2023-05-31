@@ -265,16 +265,19 @@ export abstract class JobHandler {
 
   private async exeBuildModified(): Promise<void> {
     const stages = {
-      ['get-build-dependencies']: 'nextGenBuildExe',
-      ['next-gen-parse']: 'nextGenParserExe',
-      ['next-gen-html']: 'nextGenHTMLExe',
-      ['oas-page-build']: 'nextGenStageExe',
+      ['get-build-dependencies']: 'buildDepsExe',
+      ['next-gen-parse']: 'parseExe',
+      ['next-gen-html']: 'htmlExe',
+      ['oas-page-build']: 'oasPageBuildExe',
     };
 
-    const prerequisiteCommands = this.currJob.buildCommands.slice(0, 3);
+    // get the prerequisite commands which should be all commands up to `rm -f makefile`
+    const endOfPrerequisiteCommands = this.currJob.buildCommands.indexOf('rm -f makefile');
+    const index = endOfPrerequisiteCommands + 1;
+    const prerequisiteCommands = this.currJob.buildCommands.slice(0, index);
     await this._logger.save(this.currJob._id, `'(PREREQUISITE COMMANDS)'${prerequisiteCommands.join(' && ')}`);
 
-    const makeCommands = this.currJob.buildCommands.slice(3);
+    const makeCommands = this.currJob.buildCommands.slice(index);
     await this._logger.save(this.currJob._id, `'(MAKE COMMANDS)'${makeCommands.join(' && ')}`);
 
     // call prerequisite commands
