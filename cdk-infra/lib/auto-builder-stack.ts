@@ -1,18 +1,28 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AutoBuilderConstruct } from './constructs/auto-builder-construct';
+import { getCurrentBranch } from './utils/git';
 
 export class AutoBuilderStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const env: string | undefined = this.node.tryGetContext('env');
+    let stackName = 'auto-builder-stack';
 
-    if (!env)
-      throw new Error(
-        'ERROR! The context variable env must be defined. Please define it by providing the flag -c env=<env>'
-      );
+    // If we want to create a specific feature, we will use this name.
+    // NOTE: This value will take precedence over the feature branch name so that
+    // we can deploy and update the same stack for a specific feature between branches.
+    const customFeatureName = this.node.tryGetContext('featureName');
 
-    new AutoBuilderConstruct(this, `autobuilder-stack-${env}`);
+    // If this is a feature branch i.e., it's not master, use this name.
+    const isFeatureBranch = this.node.tryGetContext('isFeature');
+
+    if (customFeatureName) {
+      stackName += `-${customFeatureName}`;
+    } else if (isFeatureBranch) {
+      stackName += `-${getCurrentBranch()}`;
+    }
+
+    new AutoBuilderConstruct(this, stackName);
   }
 }
