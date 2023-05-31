@@ -93,7 +93,7 @@ export class JobRepository extends BaseRepository {
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status, 0, taskId), url, delay);
   }
 
-  async findOneAndUpdateExecutionTime(id: string, setValues: { [key: string]: number }): Promise<Job | null> {
+  async findOneAndUpdateExecutionTime(id: string, setValues: { [key: string]: number }): Promise<void> {
     const query = {
       _id: new objectId(id),
     };
