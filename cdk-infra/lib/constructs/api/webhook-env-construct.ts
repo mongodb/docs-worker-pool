@@ -1,8 +1,8 @@
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { getEnv } from '../../utils/env';
-import { getSsmPathPrefix } from '../../utils/ssm';
+import { getEnv } from '../../../utils/env';
+import { getSsmPathPrefix } from '../../../utils/ssm';
 
 interface WebhookEnvConstructProps {
   jobsQueue: IQueue;

@@ -1,7 +1,7 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AutoBuilderConstruct } from './constructs/auto-builder-construct';
-import { getCurrentBranch } from './utils/git';
+import { getCurrentBranch } from '../utils/git';
 
 export class AutoBuilderStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {

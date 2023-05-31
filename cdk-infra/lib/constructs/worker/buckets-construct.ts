@@ -1,9 +1,9 @@
 import { Construct } from 'constructs';
-import { docsBucketNames } from '../../utils/buckets';
 import { BlockPublicAccess, Bucket, RedirectProtocol, RoutingRule } from 'aws-cdk-lib/aws-s3';
 import { RemovalPolicy } from 'aws-cdk-lib';
-import { getEnv } from '../../utils/env';
-import { getHostUrl, getPrefixUrl } from '../../utils/url';
+import { docsBucketNames } from '../../../utils/buckets';
+import { getEnv } from '../../../utils/env';
+import { getHostUrl, getPrefixUrl } from '../../../utils/url';
 
 export class WorkerBucketsConstruct extends Construct {
   readonly buckets: Bucket[];

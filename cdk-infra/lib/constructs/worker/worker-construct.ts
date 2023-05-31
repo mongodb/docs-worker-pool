@@ -44,7 +44,6 @@ export class WorkerConstruct extends Construct {
     const containerProps: AssetImageProps | undefined = isEnhanced
       ? {
           file: 'Dockerfile.enhanced',
-          buildSecrets: {},
         }
       : undefined;
 

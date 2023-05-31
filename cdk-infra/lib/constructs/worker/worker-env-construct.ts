@@ -1,10 +1,10 @@
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { getSsmPathPrefix } from '../../utils/ssm';
-import { envShortToFullName, getEnv } from '../../utils/env';
-import { getCdnInvalidatorUrl } from '../../utils/cdn';
-import { getSearchIndexFolder } from '../../utils/search-index';
+import { getCdnInvalidatorUrl } from '../../../utils/cdn';
+import { getEnv, envShortToFullName } from '../../../utils/env';
+import { getSearchIndexFolder } from '../../../utils/search-index';
+import { getSsmPathPrefix } from '../../../utils/ssm';
 
 interface WorkerEnvConstructProps {
   jobsQueue: IQueue;
