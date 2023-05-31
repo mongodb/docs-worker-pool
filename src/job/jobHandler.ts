@@ -306,6 +306,7 @@ export abstract class JobHandler {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
+      // Using indexOf to handle between the two environments.
       const insertionPoint = this.currJob.buildCommands.indexOf('make next-gen-html');
       if (insertionPoint !== -1) {
         this.currJob.buildCommands.splice(insertionPoint, 0, 'make next-gen-parse');
