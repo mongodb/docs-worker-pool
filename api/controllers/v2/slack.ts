@@ -181,7 +181,7 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
       deployHelper(deployable, newPayload, jobTitle, jobUserName, jobUserEmail);
     }
 
-    aliases.forEach(async (alias: string) => {
+    aliases.forEach((alias: string) => {
       if (alias !== urlSlug) {
         newPayload.stable = false;
         newPayload.urlSlug = alias;

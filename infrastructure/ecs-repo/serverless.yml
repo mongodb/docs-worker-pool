@@ -17,6 +17,8 @@ custom:
     dev: worker-pool-deployment
     dotcomstg: worker-pool-deployment
     dotcomprd: worker-pool-deployment
+    legacydotcomstg: worker-pool-deployment
+    legacydotcomprd: worker-pool-deployment
 
 resources:
   Resources:

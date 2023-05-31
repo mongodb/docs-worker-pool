@@ -14,5 +14,6 @@ cdk.context.json
 # Build artifacts
 dist
 
+cdk.context.json
 .env
 .env.local
