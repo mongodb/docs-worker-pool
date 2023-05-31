@@ -126,7 +126,7 @@ export class JobRepository extends BaseRepository {
       `Mongo Timeout Error: Timed out while retrieving job`
     );
     if (!response) {
-      throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
+      this._logger.warn('JobRepository:getOneQueuedJobAndUpdate', 'retrieved Undefined job');
     } else if (response.value) {
       const job: Job = response.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);

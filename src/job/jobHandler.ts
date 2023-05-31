@@ -235,7 +235,6 @@ export abstract class JobHandler {
   }
 
   private async loggingMessage(resp: CommandExecutorResponse): Promise<void> {
-    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
     await this._logger.save(
       this.currJob._id,
       `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
@@ -293,20 +292,13 @@ export abstract class JobHandler {
         await this.loggingMessage(makeCommandsResp);
       }
     }
+    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
   }
 
   private async exeBuild(): Promise<void> {
     const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
+    this.loggingMessage(resp);
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
-    await this._logger.save(
-      this.currJob._id,
-      `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
-    );
-    if (resp.status != 'success') {
-      const error = new AutoBuilderError(resp.error, 'BuildError');
-      await this.logError(error);
-      throw error;
-    }
   }
 
   @throwIfJobInterupted()
