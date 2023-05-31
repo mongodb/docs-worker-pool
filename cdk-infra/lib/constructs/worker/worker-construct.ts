@@ -38,10 +38,14 @@ export class WorkerConstruct extends Construct {
       taskRole,
     });
 
+    const containerProps = isEnhanced
+      ? {
+          file: 'Dockerfile.enhanced',
+        }
+      : undefined;
+
     taskDef.addContainer('workerContainer', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
-        file: isEnhanced ? 'Dockerfile.enhanced' : undefined,
-      }), // path to the directory that contains the docker file
+      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps), // path to the directory that contains the docker file
     });
 
     this.taskDefinitionArn = taskDef.taskDefinitionArn;
