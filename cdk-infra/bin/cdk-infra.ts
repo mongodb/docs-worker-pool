@@ -2,8 +2,12 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { AutoBuilderStack } from '../lib/auto-builder-stack';
+import { getSsmPathPrefix, getWorkerSecureStrings } from '../utils/ssm';
 
 async function main() {
+  const ssmPrefix = getSsmPathPrefix('dev');
+  const secureStrings = await getWorkerSecureStrings(ssmPrefix);
+
   const app = new cdk.App();
   new AutoBuilderStack(app, 'AutoBuilderStack', {
     /* If you don't specify 'env', this stack will be environment-agnostic.
