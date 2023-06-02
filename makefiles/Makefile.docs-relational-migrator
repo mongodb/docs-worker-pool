@@ -18,4 +18,4 @@ include ~/shared.mk
 
 
 get-build-dependencies: 
-	$(info    No dependencies to fetch)
+	echo "Published branches information stored in Atlas collection"
