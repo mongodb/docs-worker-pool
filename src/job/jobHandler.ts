@@ -234,7 +234,7 @@ export abstract class JobHandler {
     }
   }
 
-  private async loggingMessage(resp: CommandExecutorResponse): Promise<void> {
+  private async logBuildDetails(resp: CommandExecutorResponse): Promise<void> {
     await this._logger.save(
       this.currJob._id,
       `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
@@ -259,7 +259,8 @@ export abstract class JobHandler {
       [`${stage}StartTime`]: start,
       [`${stage}EndTime`]: end,
     };
-    await this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
+
+    this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
     return resp;
   }
 
@@ -275,24 +276,26 @@ export abstract class JobHandler {
     const endOfPrerequisiteCommands = this.currJob.buildCommands.indexOf('rm -f makefile');
     const index = endOfPrerequisiteCommands + 1;
     const prerequisiteCommands = this.currJob.buildCommands.slice(0, index);
-    await this._logger.save(this.currJob._id, `'(PREREQUISITE COMMANDS)'${prerequisiteCommands.join(' && ')}`);
+    await this._logger.save(
+      this.currJob._id,
+      `${'(PREREQUISITE COMMANDS)'.padEnd(15)} ${prerequisiteCommands.join(' && ')}`
+    );
 
     const makeCommands = this.currJob.buildCommands.slice(index);
-    await this._logger.save(this.currJob._id, `'(MAKE COMMANDS)'${makeCommands.join(' && ')}`);
+    await this._logger.save(this.currJob._id, `${'(MAKE COMMANDS)'.padEnd(15)} ${makeCommands.join(' && ')}`);
 
     // call prerequisite commands
-    const prerequisiteResp = await this._commandExecutor.execute(prerequisiteCommands);
-    await this.loggingMessage(prerequisiteResp);
+    await this._commandExecutor.execute(prerequisiteCommands);
 
     for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>
       const key = command.split(' ')[1].trim();
       if (stages[key]) {
         const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
-        await this.loggingMessage(makeCommandsWithBenchmarksResponse);
+        await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
       } else {
         const makeCommandsResp = await this._commandExecutor.execute([command]);
-        await this.loggingMessage(makeCommandsResp);
+        await this.logBuildDetails(makeCommandsResp);
       }
     }
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
@@ -300,7 +303,7 @@ export abstract class JobHandler {
 
   private async exeBuild(): Promise<void> {
     const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
-    this.loggingMessage(resp);
+    this.logBuildDetails(resp);
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
   }
 
@@ -309,11 +312,6 @@ export abstract class JobHandler {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      // Using indexOf to handle between the two environments.
-      const insertionPoint = this.currJob.buildCommands.indexOf('make next-gen-html');
-      if (insertionPoint !== -1) {
-        this.currJob.buildCommands.splice(insertionPoint, 0, 'make next-gen-parse');
-      }
       if (this.currJob.useWithBenchmark) {
         await this.exeBuildModified();
       } else {
