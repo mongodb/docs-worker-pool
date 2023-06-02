@@ -18,4 +18,4 @@ include ~/shared.mk
 
 
 get-build-dependencies: 
-	@echo "No Dependencies to fetch
+	$(info    No dependencies to fetch)
