@@ -9,6 +9,10 @@ interface StaticAsset {
   key: string;
 }
 
+interface UpdatedAsset extends StaticAsset {
+  updated_at?: Date;
+}
+
 interface PageAst {
   [key: string]: any;
 }
@@ -17,11 +21,18 @@ export interface UpdatedPage {
   page_id: string;
   filename: string;
   ast: PageAst;
-  static_assets: StaticAsset[];
+  static_assets: UpdatedAsset[];
 
   created_at: Date;
   updated_at: Date;
   deleted: boolean;
+}
+
+interface PreviousPageMapping {
+  [key: string]: {
+    ast: PageAst;
+    static_assets: StaticAsset[];
+  };
 }
 
 const COLLECTION_NAME = 'documents';
@@ -38,7 +49,6 @@ const pagesFromZip = (zip: AdmZip) => {
 };
 
 /**
- *
  * Finds the page documents for a given Snooty project name + branch combination.
  * If this is the first build for the Snooty project name + branch, no documents
  * will be found.
@@ -56,6 +66,7 @@ const findPrevPageDocs = async (pageIdPrefix: string, collection: string) => {
     _id: 0,
     page_id: 1,
     ast: 1,
+    static_assets: 1,
   };
 
   try {
@@ -70,11 +81,14 @@ const findPrevPageDocs = async (pageIdPrefix: string, collection: string) => {
 
 const createPageAstMapping = async (docsCursor: FindCursor) => {
   // Create mapping for page id and its AST
-  const mapping: Record<string, object> = {};
+  const mapping: PreviousPageMapping = {};
   // Create set of all page ids. To be used for tracking unseen pages in the current build
   const pageIds = new Set<string>();
   for await (const doc of docsCursor) {
-    mapping[doc.page_id] = doc.ast;
+    mapping[doc.page_id] = {
+      ast: doc.ast,
+      static_assets: doc.static_assets,
+    };
     pageIds.add(doc.page_id);
   }
   return { mapping, pageIds };
@@ -83,29 +97,28 @@ const createPageAstMapping = async (docsCursor: FindCursor) => {
 class UpdatedPagesManager {
   currentPages: Document[];
   operations: AnyBulkWriteOperation[];
-  prevPageDocsMapping: Record<string, object>;
+  prevPageDocsMapping: PreviousPageMapping;
   prevPageIds: Set<string>;
+  updateTime: Date;
 
-  constructor(prevPageDocsMapping: Record<string, object>, prevPagesIds: Set<string>, pages: Document[]) {
+  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Document[]) {
     this.currentPages = pages;
     this.operations = [];
     this.prevPageDocsMapping = prevPageDocsMapping;
     this.prevPageIds = prevPagesIds;
 
     const updateTime = new Date();
-    this.checkForPageDiffs(updateTime);
-    this.markUnseenPagesAsDeleted(updateTime);
+    this.updateTime = updateTime;
+    this.checkForPageDiffs();
+    this.markUnseenPagesAsDeleted();
   }
 
   /**
-   *
    * Compares the ASTs of the current pages with the previous pages. New update
    * operations are added whenever a diff in the page ASTs is found. Page IDs are
    * removed from `prevPageIds` to signal that the previous page has been "seen"
-   *
-   * @param updateTime - the time to set updates to
    */
-  checkForPageDiffs(updateTime: Date) {
+  checkForPageDiffs() {
     this.currentPages.forEach((page) => {
       // Filter out rst (non-page) files
       if (!page.filename.endsWith('.txt')) {
@@ -114,10 +127,11 @@ class UpdatedPagesManager {
 
       const currentPageId = page.page_id;
       this.prevPageIds.delete(currentPageId);
+      const prevPageData = this.prevPageDocsMapping[currentPageId];
 
       // Update the document if page's current AST is different from previous build's.
       // New pages should always count as having a "different" AST
-      if (!isEqual(page.ast, this.prevPageDocsMapping[currentPageId])) {
+      if (!isEqual(page.ast, prevPageData?.ast)) {
         const operation = {
           updateOne: {
             filter: { page_id: currentPageId },
@@ -126,12 +140,12 @@ class UpdatedPagesManager {
                 page_id: currentPageId,
                 filename: page.filename,
                 ast: page.ast,
-                static_assets: page.static_assets,
-                updated_at: updateTime,
+                static_assets: this.findUpdatedAssets(page.static_assets, prevPageData?.static_assets),
+                updated_at: this.updateTime,
                 deleted: false,
               },
               $setOnInsert: {
-                created_at: updateTime,
+                created_at: this.updateTime,
               },
             },
             upsert: true,
@@ -143,12 +157,69 @@ class UpdatedPagesManager {
   }
 
   /**
+   * Identifies any changes in assets between the current page and its previous page.
+   * A new array of static assets with their last update time is returned.
    *
-   * Marks any pages from the previous build that were not used as "deleted"
+   * Because the new array serves more as a persistent history of updated assets,
+   * there is a chance that the new `static_assets` will have more elements than
+   * the current page's `static_assets` field.
    *
-   * @param updateTime - the time to set updates to
+   * @param currentPageAssets
+   * @param prevPageAssets
    */
-  markUnseenPagesAsDeleted(updateTime: Date) {
+  findUpdatedAssets(currentPageAssets: StaticAsset[], prevPageAssets?: UpdatedAsset[]) {
+    const updatedAssets: UpdatedAsset[] = [];
+    if (currentPageAssets && currentPageAssets.length === 0) {
+      return updatedAssets;
+    }
+
+    const unseenChecksums = new Set<string>();
+    const prevAssetMapping: Record<string, { key: string; updated_at: Date }> = {};
+    if (prevPageAssets) {
+      prevPageAssets.forEach((asset) => {
+        prevAssetMapping[asset.checksum] = {
+          key: asset.key,
+          updated_at: asset.updated_at ?? this.updateTime,
+        };
+        unseenChecksums.add(asset.checksum);
+      });
+    }
+
+    currentPageAssets.forEach(({ checksum, key }) => {
+      const prevAsset = prevAssetMapping[checksum];
+      // Edge case: asset checksum stays the same, but key/filename has changed
+      const isSame = prevAsset && prevAsset.key === key;
+      // Most common case: no change in asset; we keep the updated time the same
+      const timeOfUpdate = isSame ? prevAsset.updated_at : this.updateTime;
+      updatedAssets.push({
+        checksum,
+        key,
+        updated_at: timeOfUpdate,
+      });
+
+      unseenChecksums.delete(checksum);
+    });
+
+    // Attempt to keep data consistent by ensuring assets that are no longer on
+    // the page (i.e. removed from the page) are still in the page's history of
+    // static_assets. This is mostly for data consistency and observability.
+    // This is an edge case and should not happen frequently
+    unseenChecksums.forEach((checksum) => {
+      const { key, updated_at: updatedAt } = prevAssetMapping[checksum];
+      updatedAssets.push({
+        checksum,
+        key,
+        updated_at: updatedAt,
+      });
+    });
+
+    return updatedAssets;
+  }
+
+  /**
+   * Marks any pages from the previous build that were not used as "deleted"
+   */
+  markUnseenPagesAsDeleted() {
     this.prevPageIds.forEach((unseenPageId) => {
       const operation = {
         updateOne: {
@@ -156,7 +227,7 @@ class UpdatedPagesManager {
           update: {
             $set: {
               deleted: true,
-              updated_at: updateTime,
+              updated_at: this.updateTime,
             },
           },
         },
@@ -171,7 +242,6 @@ class UpdatedPagesManager {
 }
 
 /**
- *
  * Upserts pages in separate collection. Copies of a page are created by page_id.
  * Updated pages within the same Snooty project name + branch should only update
  * related page documents.
