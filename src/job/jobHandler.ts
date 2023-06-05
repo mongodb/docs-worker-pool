@@ -9,7 +9,6 @@ import { IFileSystemServices } from '../services/fileServices';
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from '../errors/errors';
 import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
-import { ObjectId } from 'mongodb';
 require('fs');
 
 export abstract class JobHandler {
@@ -256,27 +255,12 @@ export abstract class JobHandler {
       `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
     );
     const end = performance.now();
-    const id = this.currJob._id;
-    const query = {
-      _id: new ObjectId(id),
-    };
     const update = {
-      $set: {
-        [`${stage}StartTime`]: start,
-        [`${stage}EndTime`]: end,
-      },
+      [`${stage}StartTime`]: start,
+      [`${stage}EndTime`]: end,
     };
-    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
-    this._jobRepository
-      .findOneAndUpdateExecutionTime(
-        query,
-        update,
-        options,
-        `Mongo Timeout Error: Timed out while updating job with timestamps for ${this.currJob._id}`
-      )
-      .catch((error) => {
-        this._logger.save(this.currJob._id, error.message);
-      });
+
+    this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
     return resp;
   }
 
