@@ -260,7 +260,7 @@ export abstract class JobHandler {
       [`${stage}EndTime`]: end,
     };
 
-    await this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
+    this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
     return resp;
   }
 
