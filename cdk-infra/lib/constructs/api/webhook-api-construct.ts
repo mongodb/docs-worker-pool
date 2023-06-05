@@ -1,5 +1,6 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
@@ -73,6 +74,14 @@ export class WebhookApiConstruct extends Construct {
       bundling,
     });
 
+    const handleJobsLambda = new NodejsFunction(this, 'handleJobsLambda', {
+      entry: `${HANDLERS_PATH}/jobs.ts`,
+      runtime,
+      handler: 'HandleJobs',
+      environment,
+      bundling,
+    });
+
     // generic handler for the root endpoint
     const rootEndpointLambda = new Function(this, 'RootEndpointLambda', {
       code: Code.fromInline('exports.default = (event) => { console.log("hello, world!!"); }'),
@@ -131,5 +140,12 @@ export class WebhookApiConstruct extends Construct {
     jobUpdatesQueue.grantSendMessages(slackTriggerLambda);
     jobUpdatesQueue.grantSendMessages(githubTriggerLambda);
     jobUpdatesQueue.grantSendMessages(triggerLocalBuildLambda);
+
+    // grant permission to read from jobUpdatesQueue
+    jobUpdatesQueue.grantConsumeMessages(handleJobsLambda);
+
+    const handleJobsQueueSource = new SqsEventSource(jobUpdatesQueue);
+
+    handleJobsLambda.addEventSource(handleJobsQueueSource);
   }
 }

@@ -9,12 +9,13 @@ import { getSsmPathPrefix } from '../../../utils/ssm';
 interface WorkerEnvConstructProps {
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
+  secureStrings: Record<string, string>;
 }
 
 export class WorkerEnvConstruct extends Construct {
   readonly environment: Record<string, string>;
 
-  constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue }: WorkerEnvConstructProps) {
+  constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, secureStrings }: WorkerEnvConstructProps) {
     super(scope, id);
 
     const env = getEnv(this);
@@ -23,37 +24,9 @@ export class WorkerEnvConstruct extends Construct {
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
-    const dbPassword = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/password`);
-
-    const fastlyDochubToken = StringParameter.valueFromLookup(this, `${ssmPrefix}/fastly/docs/dochub/token`);
-    const fastlyDochubServiceId = StringParameter.valueFromLookup(this, `${ssmPrefix}/fastly/docs/dochub/service_id`);
-    const fastlyDochubMap = StringParameter.valueFromLookup(this, `${ssmPrefix}/fastly/dochub_map`);
-    const fastlyMainToken = StringParameter.valueFromLookup(this, `${ssmPrefix}/fastly/docs/main/token`);
-    const fastlyMainServiceId = StringParameter.valueFromLookup(
-      this,
-      `${ssmPrefix}/fastly/docs/cloudmanager/service_id`
-    );
-    const fastlyCloudManagerToken = StringParameter.valueFromLookup(
-      this,
-      `${ssmPrefix}/fastly/docs/cloudmanager/token`
-    );
-    const fastlyCloudManagerServiceId = StringParameter.valueFromLookup(
-      this,
-      `${ssmPrefix}/fastly/docs/cloudmanager/service_id`
-    );
-    const fastlyAtlasToken = StringParameter.valueFromLookup(this, `${ssmPrefix}/fastly/docs/atlas/token`);
-    const fastlyAtlasServiceId = StringParameter.valueFromLookup(this, `${ssmPrefix}/fastly/docs/atlas/service_id`);
-    const fastlyOpsManagerToken = StringParameter.valueFromLookup(this, `${ssmPrefix}/fastly/docs/opsmanager/token`);
-    const fastlyOpsManagerServiceId = StringParameter.valueFromLookup(
-      this,
-      `${ssmPrefix}/fastly/docs/opsmanager/service_id`
-    );
 
     const githubBotUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/bot/username`);
-    const githubBotPW = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/bot/password`);
-    const githubSecret = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/webhook/secret`);
 
-    const npmBase64Auth = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/auth`);
     const npmEmail = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/email`);
 
     const gatsbyBaseUrl = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/base_url`);
@@ -65,39 +38,23 @@ export class WorkerEnvConstruct extends Construct {
     );
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
-    const cdnClientID = StringParameter.valueFromLookup(this, `${ssmPrefix}/cdn/client/id`);
-    const cdnClientSecret = StringParameter.valueFromLookup(this, `${ssmPrefix}/cdn/client/secret`);
+
+    const dbPassword = secureStrings[`${ssmPrefix}/atlas/password`];
 
     this.environment = {
+      ...secureStrings,
       STAGE: env,
       SNOOTY_ENV: envShortToFullName(env),
-      GITHUB_SECRET: githubSecret,
       MONGO_ATLAS_USERNAME: dbUsername,
-      MONGO_ATLAS_PASSWORD: dbPassword,
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
-      FASTLY_DOCHUB_MAP: fastlyDochubMap,
-      FASTLY_DOCHUB_SERVICE_ID: fastlyDochubServiceId,
-      FASTLY_DOCHUB_TOKEN: fastlyDochubToken,
-      FASTLY_ATLAS_TOKEN: fastlyAtlasToken,
-      FASTLY_ATLAS_SERVICE_ID: fastlyAtlasServiceId,
-      FASTLY_OPS_MANAGER_TOKEN: fastlyOpsManagerToken,
-      FASTLY_OPS_MANAGER_SERVICE_ID: fastlyOpsManagerServiceId,
-      FASTLY_CLOUD_MANAGER_TOKEN: fastlyCloudManagerToken,
-      FASTLY_CLOUD_MANAGER_SERVICE_ID: fastlyCloudManagerServiceId,
       GITHUB_BOT_USERNAME: githubBotUsername,
-      GITHUB_BOT_PASSWORD: githubBotPW,
       GATSBY_BASE_URL: gatsbyBaseUrl,
       PREVIEW_BUILD_ENABLED: previewBuildEnabled,
-      NPM_BASE_64_AUTH: npmBase64Auth,
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
-      CDN_CLIENT_ID: cdnClientID,
-      CDN_CLIENT_SECRET: cdnClientSecret,
       NPM_EMAIL: npmEmail,
-      FASTLY_MAIN_TOKEN: fastlyMainToken,
-      FASTLY_MAIN_SERVICE_ID: fastlyMainServiceId,
       REPO_BRANCHES_COLLECTION: repoBranchesCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),

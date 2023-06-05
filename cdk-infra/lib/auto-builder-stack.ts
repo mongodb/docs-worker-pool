@@ -3,8 +3,16 @@ import { Construct } from 'constructs';
 import { AutoBuilderConstruct } from './constructs/auto-builder-construct';
 import { getCurrentBranch } from '../utils/git';
 
+interface AutoBuilderStackProps extends StackProps {
+  workerSecureStrings: Record<string, string>;
+  webhookSecureStrings: Record<string, string>;
+}
 export class AutoBuilderStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    { workerSecureStrings, webhookSecureStrings, ...props }: AutoBuilderStackProps
+  ) {
     super(scope, id, props);
 
     let stackName = 'auto-builder-stack';
@@ -23,6 +31,6 @@ export class AutoBuilderStack extends Stack {
       stackName += `-${getCurrentBranch()}`;
     }
 
-    new AutoBuilderConstruct(this, stackName);
+    new AutoBuilderConstruct(this, stackName, { workerSecureStrings, webhookSecureStrings });
   }
 }
