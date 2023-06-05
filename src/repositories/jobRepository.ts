@@ -93,13 +93,13 @@ export class JobRepository extends BaseRepository {
     await this._queueConnector.sendMessage(new JobQueueMessage(jobId, status, 0, taskId), url, delay);
   }
 
-  async findOneAndUpdateExecutionTime(id: string, setValues: { [key: string]: number }): Promise<void> {
-    const query = {
-      _id: new objectId(id),
-    };
-    const update = { $set: setValues };
-    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
-    this.findOneAndUpdate(query, update, options, `Mongo Timeout Error: Timed out while retrieving job`);
+  async findOneAndUpdateExecutionTime<Query, UpdateValues, Options>(
+    query: Query,
+    update: UpdateValues,
+    options: Options,
+    errorMsg: string
+  ): Promise<void> {
+    this.findOneAndUpdate(query, update, options, errorMsg);
   }
 
   async findOneAndUpdateJob(query): Promise<Job | null> {
