@@ -135,23 +135,24 @@ async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
   await ecs.stopZombieECSTask(taskId);
 }
 
-async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
-  try {
-    const tries = message.tries;
-    // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
-    if (tries < c.get('maxRetries')) {
-      const sqs = new SQSConnector(consoleLogger, c);
-      message['tries'] += 1;
-      let retryDelay = 10;
-      if (c.get('retryDelay')) {
-        retryDelay = c.get('retryDelay');
-      }
-      await sqs.sendMessage(message, url, retryDelay * tries);
-    }
-  } catch (err) {
-    consoleLogger.error(message['jobId'], err);
-  }
-}
+// async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
+//   try {
+//     const tries = message.tries;
+//     // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
+//     // ARM: I don't think we even do retries anymore
+//     if (tries < c.get('maxRetries')) {
+//       const sqs = new SQSConnector(consoleLogger, c);
+//       message['tries'] += 1;
+//       let retryDelay = 10;
+//       if (c.get('retryDelay')) {
+//         retryDelay = c.get('retryDelay');
+//       }
+//       await sqs.sendMessage(message, url, retryDelay * tries);
+//     }
+//   } catch (err) {
+//     consoleLogger.error(message['jobId'], err);
+//   }
+// }
 async function NotifyBuildSummary(jobId: string): Promise<any> {
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -162,7 +163,11 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
-  const fullDocument: Job = await jobRepository.getJobById(jobId);
+  const fullDocument = await jobRepository.getJobById(jobId);
+  if (!fullDocument) {
+    consoleLogger.error("Cannot find job entry in db", "")
+    return
+  }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
   const githubConnector = new GithubConnector(consoleLogger, c, githubToken);
@@ -232,12 +237,11 @@ async function prepSummaryMessage(
   failed = false
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls = [null, null];
+  let mms_urls = ['', ''];
   // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
   // so we need to extract both URLs
   if (repoName === 'mms-docs') {
     if (urls.length >= 2) {
-      // TODO: Type 'string[]' is not assignable to type 'null[]'.
       mms_urls = urls.slice(-2);
     }
   }
@@ -297,6 +301,10 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
+  if (!fullDocument) {
+    consoleLogger.error("Cannot find job in db.", "")
+    return
+  }
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -347,8 +355,12 @@ async function SubmitArchiveJob(jobId: string) {
     jobs: new JobRepository(db, c, consoleLogger),
     branches: new BranchRepository(db, c, consoleLogger),
   };
-  const job = await models.jobs.getJobById(jobId);
-  const repo = await models.branches.getRepo(job.payload.repoName);
+  const job = await models.jobs.getJobById(jobId)
+  if (!job) {
+    consoleLogger.error("Cannot find job in db", JSON.stringify({ jobId }))
+    return;
+  }
+  const repo = await models.branches.getRepo(job.payload.repoName)  
 
   /* NOTE
    * we don't archive landing for two reasons:
