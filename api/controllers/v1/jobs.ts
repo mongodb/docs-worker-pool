@@ -165,8 +165,8 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
   if (!fullDocument) {
-    consoleLogger.error("Cannot find job entry in db", "")
-    return
+    consoleLogger.error('Cannot find job entry in db', '');
+    return;
   }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
@@ -302,8 +302,8 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
   if (!fullDocument) {
-    consoleLogger.error("Cannot find job in db.", "")
-    return
+    consoleLogger.error('Cannot find job in db.', '');
+    return;
   }
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
@@ -355,12 +355,12 @@ async function SubmitArchiveJob(jobId: string) {
     jobs: new JobRepository(db, c, consoleLogger),
     branches: new BranchRepository(db, c, consoleLogger),
   };
-  const job = await models.jobs.getJobById(jobId)
+  const job = await models.jobs.getJobById(jobId);
   if (!job) {
-    consoleLogger.error("Cannot find job in db", JSON.stringify({ jobId }))
+    consoleLogger.error('Cannot find job in db', JSON.stringify({ jobId }));
     return;
   }
-  const repo = await models.branches.getRepo(job.payload.repoName)  
+  const repo = await models.branches.getRepo(job.payload.repoName);
 
   /* NOTE
    * we don't archive landing for two reasons:

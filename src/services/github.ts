@@ -1,17 +1,14 @@
-import * as c from 'config';
 import { Octokit } from 'octokit';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
 import { GithubCommentError } from '../errors/errors';
 import { Payload } from '../entities/job';
-import { ConsoleLogger } from '../services/logger';
 
 export interface IGithubConnector {
-  getOpenPRs(): Promise<any>;
   getParentPRs(payload: Payload): Promise<Array<number>>;
-  postComment(payload: Payload, pr: number, message: string): Promise<any>;
-  updateComment(payload: Payload, pr: number, message: string): Promise<any>;
-  getPullRequestCommentId(Payload: Payload, pr: number): Promise<any>;
+  postComment(payload: Payload, pr: number, message: string): Promise<201|undefined>;
+  updateComment(payload: Payload, pr: number, message: string): Promise<200|undefined>;
+  getPullRequestCommentId(Payload: Payload, pr: number): Promise<number|undefined>;
 }
 
 export class GithubConnector implements IGithubConnector {
@@ -27,20 +24,20 @@ export class GithubConnector implements IGithubConnector {
     });
   }
 
-  // We may not need this. Alt. could be used to choose which PR?
-  // If the latter, TODO: pass in relevant values rather than hardcoding, obvs.
-  async getOpenPRs(): Promise<any> {
-    const results = await this._octokit.request('GET /repos/{owner}/{repo}/pulls?state=open', {
-      owner: 'schmalliso',
-      repo: 'snooty',
-      headers: { 'X-Github-Api-Version': '2022-11-28' },
-    });
-    for (const pr of results['data']) {
-      console.log(pr['number']);
-      console.log(pr['user']['login']);
-    }
-    return results['data'];
-  }
+  // // We may not need this. Alt. could be used to choose which PR?
+  // // If the latter, TODO: pass in relevant values rather than hardcoding, obvs.
+  // async getOpenPRs(): Promise<any> {
+  //   const results = await this._octokit.request('GET /repos/{owner}/{repo}/pulls?state=open', {
+  //     owner: 'schmalliso',
+  //     repo: 'snooty',
+  //     headers: { 'X-Github-Api-Version': '2022-11-28' },
+  //   });
+  //   for (const pr of results['data']) {
+  //     console.log(pr['number']);
+  //     console.log(pr['user']['login']);
+  //   }
+  //   return results['data'];
+  // }
 
   // get PR(s) to which commit belongs
   // !! TODO in principle we should only care about PRs where the commit is the most recent commit
@@ -72,7 +69,7 @@ export class GithubConnector implements IGithubConnector {
   // Create new comment with relevant links
   // TODO: pass in owner, repo, issue number, message details
   // see api/controllers/v1/jobs.ts#L195 for summary message we send in Slack
-  async postComment(payload: Payload, pr: number, message: string): Promise<any> {
+  async postComment(payload: Payload, pr: number, message: string): Promise<201 | undefined> {
     try {
       await this._octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
         owner: 'schmalliso', //'schmalliso', NEED TO FIGURE OUT MONGODB OR 10GEN -- CAN DO FROM PR?
@@ -84,15 +81,17 @@ export class GithubConnector implements IGithubConnector {
           'X-GitHub-Api-Version': '2022-11-28',
         },
       });
+      return 201
     } catch (error) {
       this._logger.error(`Failed to post to Github`, error);
+      return
     }
   }
 
   // Given the comment ID of the comment posted by the docs-builder-bot user
   // as returned by getPullRequestCommentId, update the comment as needed
   // (i.e. with a new build log) by appending the link to the end.
-  async updateComment(payload: Payload, comment: number, message: string): Promise<any> {
+  async updateComment(payload: Payload, comment: number, message: string): Promise<200|undefined> {
     const resp = await this._octokit.request('GET /repos/{owner}/{repo}/issues/comments/{comment_id}', {
       owner: 'schmalliso',
       repo: 'docs-ecosystem',
@@ -109,14 +108,16 @@ export class GithubConnector implements IGithubConnector {
         comment_id: comment,
         body: newComment,
       });
+      return 200
     } catch (error) {
       console.log(error);
+      return
     }
   }
 
   // get the ID of the comment created by the docs-builder-bot user
   // if there is no docs-builder-bot comment, return null
-  async getPullRequestCommentId(payload: Payload, pr: number): Promise<any> {
+  async getPullRequestCommentId(payload: Payload, pr: number): Promise<number|undefined> {
     const comments = await this._octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
       owner: 'schmalliso',
       repo: payload.repoName,
@@ -144,7 +145,7 @@ export class GithubConnector implements IGithubConnector {
 //   source: 'github',
 //   action: 'push',
 //   repoName: 'docs-ecosystem',
-//   branchName: 'test1',rm 
+//   branchName: 'test1',rm
 //   isFork: true,
 //   private: false,
 //   isXlarge: true,
