@@ -8,7 +8,7 @@ import { SlackConnector } from '../../../src/services/slack';
 import { GithubConnector } from '../../../src/services/github';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
-import { Job, JobStatus, Payload } from '../../../src/entities/job';
+import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';

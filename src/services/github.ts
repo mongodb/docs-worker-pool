@@ -6,9 +6,9 @@ import { Payload } from '../entities/job';
 
 export interface IGithubConnector {
   getParentPRs(payload: Payload): Promise<Array<number>>;
-  postComment(payload: Payload, pr: number, message: string): Promise<201|undefined>;
-  updateComment(payload: Payload, pr: number, message: string): Promise<200|undefined>;
-  getPullRequestCommentId(Payload: Payload, pr: number): Promise<number|undefined>;
+  postComment(payload: Payload, pr: number, message: string): Promise<201 | undefined>;
+  updateComment(payload: Payload, pr: number, message: string): Promise<200 | undefined>;
+  getPullRequestCommentId(Payload: Payload, pr: number): Promise<number | undefined>;
 }
 
 export class GithubConnector implements IGithubConnector {
@@ -81,17 +81,17 @@ export class GithubConnector implements IGithubConnector {
           'X-GitHub-Api-Version': '2022-11-28',
         },
       });
-      return 201
+      return 201;
     } catch (error) {
       this._logger.error(`Failed to post to Github`, error);
-      return
+      return;
     }
   }
 
   // Given the comment ID of the comment posted by the docs-builder-bot user
   // as returned by getPullRequestCommentId, update the comment as needed
   // (i.e. with a new build log) by appending the link to the end.
-  async updateComment(payload: Payload, comment: number, message: string): Promise<200|undefined> {
+  async updateComment(payload: Payload, comment: number, message: string): Promise<200 | undefined> {
     const resp = await this._octokit.request('GET /repos/{owner}/{repo}/issues/comments/{comment_id}', {
       owner: 'schmalliso',
       repo: 'docs-ecosystem',
@@ -108,16 +108,16 @@ export class GithubConnector implements IGithubConnector {
         comment_id: comment,
         body: newComment,
       });
-      return 200
+      return 200;
     } catch (error) {
       console.log(error);
-      return
+      return;
     }
   }
 
   // get the ID of the comment created by the docs-builder-bot user
   // if there is no docs-builder-bot comment, return null
-  async getPullRequestCommentId(payload: Payload, pr: number): Promise<number|undefined> {
+  async getPullRequestCommentId(payload: Payload, pr: number): Promise<number | undefined> {
     const comments = await this._octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
       owner: 'schmalliso',
       repo: payload.repoName,
