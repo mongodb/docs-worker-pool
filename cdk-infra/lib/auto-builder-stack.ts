@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Stack, StackProps, Tags } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AutoBuilderConstruct } from './constructs/auto-builder-construct';
 import { getCurrentBranch } from '../utils/git';
@@ -31,6 +31,11 @@ export class AutoBuilderStack extends Stack {
       stackName += `-${getCurrentBranch()}`;
     }
 
-    new AutoBuilderConstruct(this, stackName, { workerSecureStrings, webhookSecureStrings });
+    const autoBuilderConstruct = new AutoBuilderConstruct(this, stackName, {
+      workerSecureStrings,
+      webhookSecureStrings,
+    });
+
+    Tags.of(autoBuilderConstruct).add('workerStack', stackName);
   }
 }
