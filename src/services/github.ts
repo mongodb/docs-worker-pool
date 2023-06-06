@@ -1,5 +1,6 @@
+import * as c from 'config';
 import { Octokit } from 'octokit';
-import { ILogger } from './logger';
+import { ConsoleLogger, ILogger } from './logger';
 import { IConfig } from 'config';
 import { GithubCommentError } from '../errors/errors';
 import { Payload } from '../entities/job';
@@ -138,20 +139,20 @@ export class GithubConnector implements IGithubConnector {
     return;
   }
 }
-// const consoleLogger = new ConsoleLogger();
 
+// const consoleLogger = new ConsoleLogger();
 // const testpayload: Payload = {
 //   jobType: 'githubPush',
 //   source: 'github',
 //   action: 'push',
-//   repoName: 'docs-ecosystem',
-//   branchName: 'test1',rm
+//   repoName: 'cloud-docs',
+//   branchName: 'test1',
 //   isFork: true,
 //   private: false,
 //   isXlarge: true,
 //   repoOwner: 'schmalliso',
-//   url: 'https://github.com/schmalliso/docs-ecosystem.git',
-//   newHead: '76850bd68337803368ce85904f6de0b4c9657b5e',
+//   url: 'https://github.com/schmalliso/cloud-docs.git',
+//   newHead: 'f345f5b97818e87867541e4211e030654d4a0291',
 //   patch: undefined,
 //   alias: null,
 //   manifestPrefix: undefined,
@@ -161,13 +162,15 @@ export class GithubConnector implements IGithubConnector {
 //   stable: undefined,
 //   isNextGen: true,
 //   regression: undefined,
-//   urlSlug: 'test1',
-//   prefix: 'drivers',
-//   project: 'drivers',
+//   urlSlug: 'testthingie',
+//   prefix: 'atlas',
+//   project: 'cloud-docs',
 //   includeInGlobalSearch: false,
 //   mutPrefix: undefined,
 //   repoBranches: null
 // }
+
+// const githubConnector = new GithubConnector(consoleLogger, c, 'YOUR_TOKEN_HERE')
 
 // console.log(1);
 // githubConnector.getParentPRs(testpayload).then(function(results){
