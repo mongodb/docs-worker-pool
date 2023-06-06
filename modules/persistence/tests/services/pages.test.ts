@@ -1,5 +1,5 @@
 import { Db, MongoClient } from 'mongodb';
-import { Page, UpdatedPage, _updatePages } from '../../src/services/pages';
+import { Page, UpdatedAsset, UpdatedPage, _updatePages } from '../../src/services/pages';
 import { closeDb, setMockDB } from '../utils';
 import { ObjectID } from 'bson';
 
@@ -174,7 +174,9 @@ describe('pages module', () => {
         const findQuery = { page_id: page.page_id };
         let res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
-        expect(res!.static_assets).toHaveLength(0);
+        if (res) {
+          expect(res.static_assets).toHaveLength(0);
+        }
 
         // Simulate update in page
         page.ast.foo = 'foobar';
@@ -182,7 +184,9 @@ describe('pages module', () => {
         res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
         // Should still be 0
-        expect(res!.static_assets).toHaveLength(0);
+        if (res) {
+          expect(res.static_assets).toHaveLength(0);
+        }
       });
 
       it('should add new assets', async () => {
@@ -201,9 +205,11 @@ describe('pages module', () => {
         const findQuery = { page_id: page.page_id };
         const res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
-        expect(res!.static_assets).toHaveLength(numStaticAssets);
-        expect(res!.static_assets[0].updated_at).toBeTruthy();
-        expect(res!.static_assets[1].updated_at).toBeTruthy();
+        if (res) {
+          expect(res.static_assets).toHaveLength(numStaticAssets);
+          expect(res.static_assets[0].updated_at).toBeTruthy();
+          expect(res.static_assets[1].updated_at).toBeTruthy();
+        }
       });
 
       it('should keep assets the same when no assets are changed', async () => {
@@ -215,7 +221,10 @@ describe('pages module', () => {
         const findQuery = { page_id: page.page_id };
         let res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
-        const prevStaticAssets = res!.static_assets;
+        let prevStaticAssets: UpdatedAsset[] = [];
+        if (res) {
+          prevStaticAssets = res.static_assets;
+        }
 
         // Simulate change in AST but not in static assets
         page.ast.foo = 'no change in assets';
@@ -224,7 +233,9 @@ describe('pages module', () => {
         // Check to make sure no changes in static assets
         res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
-        expect(res!.static_assets).toEqual(prevStaticAssets);
+        if (res && prevStaticAssets) {
+          expect(res.static_assets).toEqual(prevStaticAssets);
+        }
       });
 
       it('should mark updated assets when there is a change in existing asset', async () => {
@@ -238,8 +249,11 @@ describe('pages module', () => {
         const findQuery = { page_id: page.page_id };
         let res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
-        const originalAsset = res!.static_assets.find(({ key }) => key === originalKey);
-        expect(originalAsset).toBeTruthy();
+        let originalAsset: UpdatedAsset | undefined;
+        if (res) {
+          originalAsset = res.static_assets.find(({ key }) => key === originalKey);
+          expect(originalAsset).toBeTruthy();
+        }
 
         // Modify page with new AST; a change in static_assets implies a change in AST
         page.ast.foo = 'change in one asset';
@@ -250,12 +264,16 @@ describe('pages module', () => {
         // Make sure changed asset is different from original asset
         res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
-        expect(res!.static_assets).toHaveLength(numStaticAssets);
-        const updatedAsset = res!.static_assets.find(({ key }) => key === changedKey);
-        expect(updatedAsset).toBeTruthy();
-        expect(updatedAsset!.checksum).toEqual(originalAsset!.checksum);
-        if (updatedAsset?.updated_at && originalAsset?.updated_at) {
-          expect(updatedAsset.updated_at.getTime()).toBeGreaterThan(originalAsset.updated_at.getTime());
+        if (res) {
+          expect(res.static_assets).toHaveLength(numStaticAssets);
+          const updatedAsset = res.static_assets.find(({ key }) => key === changedKey);
+          expect(updatedAsset).toBeTruthy();
+          if (updatedAsset && originalAsset) {
+            expect(updatedAsset.checksum).toEqual(originalAsset.checksum);
+            if (updatedAsset.updated_at && originalAsset.updated_at) {
+              expect(updatedAsset.updated_at.getTime()).toBeGreaterThan(originalAsset.updated_at.getTime());
+            }
+          }
         }
       });
 
@@ -272,7 +290,9 @@ describe('pages module', () => {
         const findQuery = { page_id: page.page_id };
         const res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
-        expect(res!.static_assets).toHaveLength(0);
+        if (res) {
+          expect(res.static_assets).toHaveLength(0);
+        }
       });
     });
   });

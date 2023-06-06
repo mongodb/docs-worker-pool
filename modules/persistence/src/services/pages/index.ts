@@ -9,7 +9,7 @@ interface StaticAsset {
   key: string;
 }
 
-interface UpdatedAsset extends StaticAsset {
+export interface UpdatedAsset extends StaticAsset {
   updated_at?: Date;
 }
 
