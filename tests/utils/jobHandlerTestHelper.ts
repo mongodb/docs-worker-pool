@@ -15,6 +15,7 @@ import { IRepoConnector } from '../../src/services/repo';
 import { TestDataProvider } from '../data/data';
 import { getBuildJobDef, getManifestJobDef } from '../data/jobDef';
 
+type MockReturnValueOnce = { status: string; output: string; error: string | null };
 export class JobHandlerTestHelper {
   job: Job;
   config: IConfig;
@@ -59,12 +60,17 @@ export class JobHandlerTestHelper {
     );
     return this.jobHandler;
   }
-  setStageForDeploySuccess(isNextGen = true, prodDeploy = true): string[] {
+
+  setStageForDeploySuccess(isNextGen = true, prodDeploy = true, returnValue?: MockReturnValueOnce): string[] {
     this.job.payload.repoBranches = TestDataProvider.getPublishBranchesContent(this.job);
     this.setupForSuccess(isNextGen);
     const publishOutput = TestDataProvider.getPublishOutputWithPurgedUrls(prodDeploy);
-    this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'success', output: 'Great work', error: null });
-    this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'Failed', output: publishOutput[0], error: null });
+    if (returnValue) {
+      this.jobCommandExecutor.execute.mockReturnValueOnce(returnValue);
+    } else {
+      this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'success', output: 'Great work', error: null });
+      this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'Failed', output: publishOutput[0], error: null });
+    }
     return publishOutput[1]; //return urls
   }
 

@@ -234,21 +234,88 @@ export abstract class JobHandler {
     }
   }
 
+  private async logBuildDetails(resp: CommandExecutorResponse): Promise<void> {
+    await this._logger.save(
+      this.currJob._id,
+      `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
+    );
+    if (resp.status != 'success') {
+      const error = new AutoBuilderError(resp.error, 'BuildError');
+      await this.logError(error);
+      throw error;
+    }
+  }
+
+  // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
+  private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
+    const start = performance.now();
+    const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
+    await this._logger.save(
+      this.currJob._id,
+      `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
+    );
+    const end = performance.now();
+    const update = {
+      [`${stage}StartTime`]: start,
+      [`${stage}EndTime`]: end,
+    };
+
+    this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
+    return resp;
+  }
+
+  private async exeBuildModified(): Promise<void> {
+    const stages = {
+      ['get-build-dependencies']: 'buildDepsExe',
+      ['next-gen-parse']: 'parseExe',
+      ['next-gen-html']: 'htmlExe',
+      ['oas-page-build']: 'oasPageBuildExe',
+    };
+
+    // get the prerequisite commands which should be all commands up to `rm -f makefile`
+    const endOfPrerequisiteCommands = this.currJob.buildCommands.indexOf('rm -f makefile');
+    const index = endOfPrerequisiteCommands + 1;
+    const prerequisiteCommands = this.currJob.buildCommands.slice(0, index);
+    await this._logger.save(
+      this.currJob._id,
+      `${'(PREREQUISITE COMMANDS)'.padEnd(15)} ${prerequisiteCommands.join(' && ')}`
+    );
+
+    const makeCommands = this.currJob.buildCommands.slice(index);
+    await this._logger.save(this.currJob._id, `${'(MAKE COMMANDS)'.padEnd(15)} ${makeCommands.join(' && ')}`);
+
+    // call prerequisite commands
+    await this._commandExecutor.execute(prerequisiteCommands);
+
+    for (const command of makeCommands) {
+      // works for any make command with the following signature make <make-rule>
+      const key = command.split(' ')[1].trim();
+      if (stages[key]) {
+        const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
+        await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
+      } else {
+        const makeCommandsResp = await this._commandExecutor.execute([command]);
+        await this.logBuildDetails(makeCommandsResp);
+      }
+    }
+    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
+  }
+
+  private async exeBuild(): Promise<void> {
+    const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
+    this.logBuildDetails(resp);
+    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
+  }
+
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
-      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
-      await this._logger.save(
-        this.currJob._id,
-        `${'(BUILD)'.padEnd(15)}worker.sh run details:\n\n${resp.output}\n---\n${resp.error}`
-      );
-      if (resp.status != 'success') {
-        const error = new AutoBuilderError(resp.error, 'BuildError');
-        await this.logError(error);
-        throw error;
+      if (this.currJob.useWithBenchmark) {
+        await this.exeBuildModified();
+      } else {
+        await this.exeBuild();
       }
     } else {
       const error = new AutoBuilderError('No commands to execute', 'BuildError');
