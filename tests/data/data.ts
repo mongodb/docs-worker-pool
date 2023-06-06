@@ -144,6 +144,7 @@ export class TestDataProvider {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make get-build-dependencies',
+      'make next-gen-parse',
       'make next-gen-html',
       `make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);
@@ -160,6 +161,7 @@ export class TestDataProvider {
   static getExpectedStagingBuildNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
+      'make next-gen-parse',
       'make next-gen-html',
     ]);
     const project = job.payload.project === 'cloud-docs' ? job.payload.project : '';

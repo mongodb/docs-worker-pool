@@ -48,6 +48,7 @@ export type Payload = {
 
 export type Job = {
   _id: string;
+  useWithBenchmark?: boolean;
   payload: Payload;
   createdTime: Date;
   endTime: Date | null | undefined;
