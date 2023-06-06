@@ -17,12 +17,14 @@ interface PageAst {
   [key: string]: any;
 }
 
-export interface UpdatedPage {
+export interface Page {
   page_id: string;
   filename: string;
   ast: PageAst;
   static_assets: UpdatedAsset[];
+}
 
+export interface UpdatedPage extends Page {
   created_at: Date;
   updated_at: Date;
   deleted: boolean;
@@ -160,20 +162,18 @@ class UpdatedPagesManager {
    * Identifies any changes in assets between the current page and its previous page.
    * A new array of static assets with their last update time is returned.
    *
-   * Because the new array serves more as a persistent history of updated assets,
-   * there is a chance that the new `static_assets` will have more elements than
-   * the current page's `static_assets` field.
+   * Assets that are deleted between builds are not included since the Snooty Data API
+   * will not need to return it for now.
    *
    * @param currentPageAssets
    * @param prevPageAssets
    */
   findUpdatedAssets(currentPageAssets: StaticAsset[], prevPageAssets?: UpdatedAsset[]) {
     const updatedAssets: UpdatedAsset[] = [];
-    if (currentPageAssets && currentPageAssets.length === 0) {
+    if (currentPageAssets && currentPageAssets.length === 0 && prevPageAssets && prevPageAssets.length === 0) {
       return updatedAssets;
     }
 
-    const unseenChecksums = new Set<string>();
     const prevAssetMapping: Record<string, { key: string; updated_at: Date }> = {};
     if (prevPageAssets) {
       prevPageAssets.forEach((asset) => {
@@ -181,7 +181,6 @@ class UpdatedPagesManager {
           key: asset.key,
           updated_at: asset.updated_at ?? this.updateTime,
         };
-        unseenChecksums.add(asset.checksum);
       });
     }
 
@@ -195,21 +194,6 @@ class UpdatedPagesManager {
         checksum,
         key,
         updated_at: timeOfUpdate,
-      });
-
-      unseenChecksums.delete(checksum);
-    });
-
-    // Attempt to keep data consistent by ensuring assets that are no longer on
-    // the page (i.e. removed from the page) are still in the page's history of
-    // static_assets. This is mostly for data consistency and observability.
-    // This is an edge case and should not happen frequently
-    unseenChecksums.forEach((checksum) => {
-      const { key, updated_at: updatedAt } = prevAssetMapping[checksum];
-      updatedAssets.push({
-        checksum,
-        key,
-        updated_at: updatedAt,
       });
     });
 
