@@ -162,7 +162,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const githubToken = c.get<string>('githubSecret');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  // TODO: Make fullDocument be of type Job, validate existence
+
   const fullDocument = await jobRepository.getJobById(jobId);
   if (!fullDocument) {
     consoleLogger.error('Cannot find job entry in db', '');
@@ -175,13 +175,17 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
 
   // Github comment
   await githubConnector.getParentPRs(fullDocument.payload).then(function (results) {
-    for (const result of results) {
-      const commentid = githubConnector.getPullRequestCommentId(fullDocument.payload, result).then(function (id) {
+    for (const pr of results) {
+      githubConnector.getPullRequestCommentId(fullDocument.payload, pr).then(function (id) {
         console.log(`The comment ID is: ${id}`);
         if (id != undefined) {
-          githubConnector.updateComment(fullDocument.payload, id, '* next log link');
+          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), true).then(function (ghmessage) {
+            githubConnector.updateComment(fullDocument.payload, id, ghmessage);
+          });
         } else {
-          githubConnector.postComment(fullDocument.payload, result, 'This is a new comment ooh aah');
+          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), false).then(function (ghmessage) {
+            githubConnector.postComment(fullDocument.payload, pr, ghmessage);
+          });
         }
       });
     }
@@ -237,7 +241,7 @@ async function prepSummaryMessage(
   failed = false
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls = ['', ''];
+  let mms_urls = [null, null];
   // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
   // so we need to extract both URLs
   if (repoName === 'mms-docs') {
@@ -301,10 +305,10 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
-  if (!fullDocument) {
-    consoleLogger.error('Cannot find job in db.', '');
-    return;
-  }
+  // if (!fullDocument) {
+  //   consoleLogger.error('Cannot find job in db.', '');
+  //   return;
+  // }
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -356,10 +360,10 @@ async function SubmitArchiveJob(jobId: string) {
     branches: new BranchRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
-  if (!job) {
-    consoleLogger.error('Cannot find job in db', JSON.stringify({ jobId }));
-    return;
-  }
+  // if (!job) {
+  //   consoleLogger.error('Cannot find job in db', JSON.stringify({ jobId }));
+  //   return;
+  // }
   const repo = await models.branches.getRepo(job.payload.repoName);
 
   /* NOTE
