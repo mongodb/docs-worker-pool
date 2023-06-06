@@ -25,11 +25,13 @@ export class AutoBuilderConstruct extends Construct {
       secureStrings: workerSecureStrings,
     });
 
-    const { buckets } = new WorkerBucketsConstruct(this, 'workerBuckets');
     const { taskDefinitionArn, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
       environment: workerEnvironment,
-      queue: queues.jobsQueue,
+      ...queues,
     });
+
+    const { buckets } = new WorkerBucketsConstruct(this, 'workerBuckets');
+
     new WebhookApiConstruct(this, 'api', {
       ...queues,
       environment: { ...webhookEnvironment, TASK_DEFINITION_FAMILY: taskDefinitionArn },

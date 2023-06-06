@@ -12,7 +12,8 @@ export function getSsmPathPrefix(env: string): string {
 async function getSecureStrings(
   ssmPrefix: string,
   secureStrings: readonly string[],
-  paramToEnvMap: Map<string, string>
+  paramToEnvMap: Map<string, string>,
+  resourceName: string
 ) {
   const ssmClient = new SSMClient({ region: process.env.CDK_DEFAULT_REGION });
 
@@ -37,7 +38,7 @@ async function getSecureStrings(
 
       if (!envName) {
         console.error(
-          `ERROR! The param '${paramName}' does not having a mapping to an environment variable name. Please define this in the workerParamPathToEnvName map.`
+          `ERROR! The param '${paramName}' does not having a mapping to an environment variable name. Please define this in the ${resourceName} map.`
         );
         return;
       }
@@ -82,6 +83,7 @@ workerParamPathToEnvName.set('/fastly/docs/dochub/token', 'FASTLY_DOCHUB_TOKEN')
 workerParamPathToEnvName.set('/fastly/docs/dochub/service_id', 'FASTLY_DOCHUB_SERVICE_ID');
 workerParamPathToEnvName.set('/fastly/dochub_map', 'FASTLY_DOCHUB_MAP');
 workerParamPathToEnvName.set('/fastly/docs/main/token', 'FASTLY_MAIN_TOKEN');
+workerParamPathToEnvName.set('/fastly/docs/main/service_id', 'FASTLY_MAIN_SERVICE_ID');
 workerParamPathToEnvName.set('/fastly/docs/cloudmanager/token', 'FASTLY_CLOUD_MANAGER_TOKEN');
 workerParamPathToEnvName.set('/fastly/docs/cloudmanager/service_id', 'FASTLY_CLOUD_MANAGER_SERVICE_ID');
 workerParamPathToEnvName.set('/fastly/docs/atlas/token', 'FASTLY_ATLAS_TOKEN');
@@ -92,7 +94,7 @@ workerParamPathToEnvName.set('/cdn/client/id', 'CDN_CLIENT_ID');
 workerParamPathToEnvName.set('/cdn/client/secret', 'CDN_CLIENT_SECRET');
 
 export async function getWorkerSecureStrings(ssmPrefix: string): Promise<Record<string, string>> {
-  return getSecureStrings(ssmPrefix, workerSecureStrings, workerParamPathToEnvName);
+  return getSecureStrings(ssmPrefix, workerSecureStrings, workerParamPathToEnvName, 'workerParamPathToEnvName');
 }
 
 const webhookSecureStrings = [
@@ -104,6 +106,7 @@ const webhookSecureStrings = [
   '/cdn/client/id',
   '/cdn/client/secret',
   '/slack/webhook/secret',
+  '/slack/auth/token',
 ] as const;
 
 type WebhookSecureString = typeof webhookSecureStrings[number];
@@ -117,7 +120,9 @@ webhookParamPathToEnvName.set('/fastly/docs/dochub/service_id', 'FASTLY_DOCHUB_S
 webhookParamPathToEnvName.set('/fastly/dochub_map', 'FASTLY_DOCHUB_MAP');
 webhookParamPathToEnvName.set('/cdn/client/id', 'CDN_CLIENT_ID');
 webhookParamPathToEnvName.set('/cdn/client/secret', 'CDN_CLIENT_SECRET');
+webhookParamPathToEnvName.set('/slack/auth/token', 'SLACK_TOKEN');
+webhookParamPathToEnvName.set('/slack/webhook/secret', 'SLACK_SECRET');
 
 export async function getWebhookSecureStrings(ssmPrefix: string): Promise<Record<string, string>> {
-  return getSecureStrings(ssmPrefix, webhookSecureStrings, webhookParamPathToEnvName);
+  return getSecureStrings(ssmPrefix, webhookSecureStrings, webhookParamPathToEnvName, 'webhookParamPathToEnvName');
 }

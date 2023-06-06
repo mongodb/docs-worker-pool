@@ -8,7 +8,8 @@ import { getEnv } from '../utils/env';
 async function main() {
   const app = new cdk.App();
   const env = getEnv(app);
-  const ssmPrefix = getSsmPathPrefix('dev');
+
+  const ssmPrefix = getSsmPathPrefix(env);
 
   const workerSecureStrings = await getWorkerSecureStrings(ssmPrefix);
   const webhookSecureStrings = await getWebhookSecureStrings(ssmPrefix);
