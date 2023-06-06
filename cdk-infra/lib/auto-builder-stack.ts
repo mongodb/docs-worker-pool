@@ -1,7 +1,12 @@
-import { Stack, StackProps, Tags } from 'aws-cdk-lib';
+import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { AutoBuilderConstruct } from './constructs/auto-builder-construct';
-import { getCurrentBranch } from '../utils/git';
+
+import { WebhookApiConstruct } from './constructs/api/webhook-api-construct';
+import { WebhookEnvConstruct } from './constructs/api/webhook-env-construct';
+import { AutoBuilderQueuesConstruct } from './constructs/queue/queues-construct';
+import { WorkerBucketsConstruct } from './constructs/worker/buckets-construct';
+import { WorkerConstruct } from './constructs/worker/worker-construct';
+import { WorkerEnvConstruct } from './constructs/worker/worker-env-construct';
 
 interface AutoBuilderStackProps extends StackProps {
   workerSecureStrings: Record<string, string>;
@@ -15,27 +20,31 @@ export class AutoBuilderStack extends Stack {
   ) {
     super(scope, id, props);
 
-    let stackName = 'auto-builder-stack';
+    const queues = new AutoBuilderQueuesConstruct(this, 'queues');
 
-    // If we want to create a specific feature, we will use this name.
-    // NOTE: This value will take precedence over the feature branch name so that
-    // we can deploy and update the same stack for a specific feature between branches.
-    const customFeatureName = this.node.tryGetContext('featureName');
-
-    // If this is a feature branch i.e., it's not master, use this name.
-    const isFeatureBranch = this.node.tryGetContext('isFeature');
-
-    if (customFeatureName) {
-      stackName += `-${customFeatureName}`;
-    } else if (isFeatureBranch) {
-      stackName += `-${getCurrentBranch()}`;
-    }
-
-    const autoBuilderConstruct = new AutoBuilderConstruct(this, stackName, {
-      workerSecureStrings,
-      webhookSecureStrings,
+    const { environment: webhookEnvironment } = new WebhookEnvConstruct(this, 'ssmVars', {
+      ...queues,
+      secureStrings: webhookSecureStrings,
+    });
+    const { environment: workerEnvironment } = new WorkerEnvConstruct(this, 'workerSsmVars', {
+      ...queues,
+      secureStrings: workerSecureStrings,
     });
 
-    Tags.of(autoBuilderConstruct).add('workerStack', stackName);
+    const { taskDefinitionArn, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
+      environment: workerEnvironment,
+      ...queues,
+    });
+
+    const { buckets } = new WorkerBucketsConstruct(this, 'workerBuckets');
+
+    new WebhookApiConstruct(this, 'api', {
+      ...queues,
+      environment: { ...webhookEnvironment, TASK_DEFINITION_FAMILY: taskDefinitionArn },
+    });
+
+    buckets.forEach((bucket) => {
+      bucket.grantReadWrite(ecsTaskRole);
+    });
   }
 }
