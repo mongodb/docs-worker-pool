@@ -112,6 +112,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   try {
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+    jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
     consoleLogger.info(job.title, `Created Job ${jobId}`);
   } catch (err) {
     return {
