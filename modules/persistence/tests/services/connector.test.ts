@@ -147,5 +147,11 @@ describe('Connector module', () => {
         expect(e.message).toEqual('test error');
       }
     });
+
+    test('it skips bulkwrite if operations are empty', async () => {
+      mockBulkWrite.mockReset();
+      await bulkUpsertAll([], collection);
+      expect(mockBulkWrite).toBeCalledTimes(0);
+    });
   });
 });
