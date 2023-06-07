@@ -6,6 +6,7 @@ import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { JobStatus } from '../../../src/entities/job';
 
 function isUserEntitled(entitlementsObject: any): boolean {
   return (entitlementsObject?.repos?.length ?? 0) > 0;
@@ -99,6 +100,13 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
+
+    // we need to also notify the jobUpdatesQueue as well so that slack users get notified
+    await Promise.all(
+      deployable.map(async ({ jobId }) => {
+        await jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+      })
+    );
   } catch (err) {
     logger.error('deployRepo', err);
   }

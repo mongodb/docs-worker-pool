@@ -65,11 +65,6 @@ export class JobRepository extends BaseRepository {
     await Promise.all(
       Object.values(jobIds).map(async (jobId: string) => {
         await this._queueConnector.sendMessage(new JobQueueMessage(jobId, JobStatus.inQueue), url, 0);
-        await this._queueConnector.sendMessage(
-          new JobQueueMessage(jobId, JobStatus.inQueue),
-          c.get('jobUpdatesQueueUrl'),
-          0
-        );
         this._logger.info('insertBulkJobs', `inserted ${jobId}`);
       })
     );
