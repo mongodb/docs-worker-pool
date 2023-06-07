@@ -1,4 +1,3 @@
-import { isJobStatus } from '../../../entities/job';
 import { JobsQueuePayload } from '../job-types';
 
 /**
@@ -14,8 +13,8 @@ export function isJobQueuePayload(obj: unknown): obj is JobsQueuePayload {
 
   const unsafePayload = obj as JobsQueuePayload;
 
-  const { jobId, jobStatus } = unsafePayload;
+  const { jobId } = unsafePayload;
 
   // validate payload
-  return typeof jobId === 'string' && isJobStatus(jobStatus);
+  return typeof jobId === 'string';
 }

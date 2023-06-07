@@ -9,19 +9,6 @@ export enum JobStatus {
   timedOut = 'timedOut',
 }
 
-export function isJobStatus(str: string): str is JobStatus {
-  switch (str) {
-    case JobStatus.inQueue:
-    case JobStatus.inProgress:
-    case JobStatus.completed:
-    case JobStatus.failed:
-    case JobStatus.timedOut:
-      return true;
-    default:
-      return false;
-  }
-}
-
 // TODO: Formalize JobTypes
 // export enum JobType {
 //   githubPush = 'githubPush',
