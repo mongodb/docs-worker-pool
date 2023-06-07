@@ -6,7 +6,7 @@ My approach when recreating the current AWS infrastructure is to reference the C
 
 ## Testing
 
-To verify the CloudFormation is being generated successfully, you can use the `cdk synth` command to generate the CloudFormation. In the `/cdk-infra` directory, I execute the following command:
+To verify the CloudFormation is being generated successfully, you can use the `cdk synth` command to generate the CloudFormation. In the `/cdk-infra` directory, execute the following command:
 
 ```zsh
 npm run cdk synth -- -c enhanced=true -c featureName=enhancedApp > cdk.out/template.yaml
