@@ -109,8 +109,7 @@ class UpdatedPagesManager {
     this.prevPageDocsMapping = prevPageDocsMapping;
     this.prevPageIds = prevPagesIds;
 
-    const updateTime = new Date();
-    this.updateTime = updateTime;
+    this.updateTime = new Date();
     this.checkForPageDiffs();
     this.markUnseenPagesAsDeleted();
   }
