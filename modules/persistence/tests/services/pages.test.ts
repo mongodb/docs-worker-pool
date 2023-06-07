@@ -3,6 +3,10 @@ import { Page, UpdatedPage, _updatePages } from '../../src/services/pages';
 import { closeDb, setMockDB } from '../utils';
 import { ObjectID } from 'bson';
 
+// Ignore non-null assertion warnings for this file. Non-null assertions are most likely
+// to be used for responses that we guarantee are not null
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
+
 let connection: MongoClient;
 let mockDb: Db;
 

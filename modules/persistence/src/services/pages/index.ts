@@ -162,6 +162,12 @@ class UpdatedPagesManager {
    * Identifies any changes in assets between the current page and its previous page.
    * A new array of static assets with their last update time is returned.
    *
+   * The Snooty Data API will take into account an asset's `updated_at` field to
+   * compare with timestamps that it receives on requests for updated pages. When
+   * the API sends an updated page, an updated page's asset will only be sent if that asset's
+   * timestamp is greater than the timestamp sent in the request (denoting a change).
+   * Unchanged assets with older timestamps will not be sent.
+   *
    * Assets that are deleted between builds are not included since the Snooty Data API
    * will not need to return it for now.
    *
@@ -186,7 +192,8 @@ class UpdatedPagesManager {
 
     currentPageAssets.forEach(({ checksum, key }) => {
       const prevAsset = prevAssetMapping[checksum];
-      // Edge case: asset checksum stays the same, but key/filename has changed
+      // Edge case: check to ensure previous asset exists with the same checksum,
+      // but different key/filename. This can happen if an image is renamed
       const isSame = prevAsset && prevAsset.key === key;
       // Most common case: no change in asset; we keep the updated time the same
       const timeOfUpdate = isSame ? prevAsset.updated_at : this.updateTime;
