@@ -20,7 +20,8 @@ interface WorkerConstructProps {
 }
 export class WorkerConstruct extends Construct {
   readonly ecsTaskRole: IRole;
-  readonly taskDefinitionArn: string;
+  readonly clusterName: string;
+
   constructor(scope: Construct, id: string, { environment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
     super(scope, id);
 
@@ -105,7 +106,7 @@ export class WorkerConstruct extends Construct {
       minHealthyPercent: 100,
     });
 
-    this.taskDefinitionArn = taskDefinition.taskDefinitionArn;
+    this.clusterName = cluster.clusterName;
     this.ecsTaskRole = taskRole;
   }
 }

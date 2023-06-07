@@ -31,7 +31,7 @@ export class AutoBuilderStack extends Stack {
       secureStrings: workerSecureStrings,
     });
 
-    const { taskDefinitionArn, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
+    const { clusterName, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
       environment: workerEnvironment,
       ...queues,
     });
@@ -40,7 +40,7 @@ export class AutoBuilderStack extends Stack {
 
     new WebhookApiConstruct(this, 'api', {
       ...queues,
-      environment: { ...webhookEnvironment, TASK_DEFINITION_FAMILY: taskDefinitionArn },
+      environment: { ...webhookEnvironment, TASK_DEFINITION_FAMILY: clusterName },
     });
 
     buckets.forEach((bucket) => {
