@@ -89,8 +89,6 @@ export class WorkerConstruct extends Construct {
       executionRole,
     });
 
-    taskDefinition.addFirelensLogRouter;
-
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment,
