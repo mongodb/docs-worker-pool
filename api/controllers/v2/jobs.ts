@@ -65,13 +65,6 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
         switch (jobStatus) {
           case JobStatus[JobStatus.inQueue]:
             await NotifyBuildProgress(jobId);
-            // start the task , don't start the process before processing the notification
-            const ecsServices = new ECSContainer(c, consoleLogger);
-            const res = await ecsServices.execute(jobId);
-            if (res) {
-              await saveTaskId(jobId, res, consoleLogger);
-            }
-            consoleLogger.info(jobId, JSON.stringify(res));
             break;
           case JobStatus[JobStatus.inProgress]:
             await NotifyBuildProgress(jobId);
