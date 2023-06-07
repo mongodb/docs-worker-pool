@@ -72,6 +72,8 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
           case JobStatus[JobStatus.timedOut]:
             await NotifyBuildSummary(jobId);
             const taskId = body['taskId'];
+            // for the enhanced application, the taskId will never be defined
+            // as we are not saving it at this time
             if (taskId) {
               await stopECSTask(taskId, consoleLogger);
             }
