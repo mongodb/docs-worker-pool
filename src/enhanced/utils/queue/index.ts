@@ -20,7 +20,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     const receiveMessage: ReceiveMessageCommandInput = {
       QueueUrl: queueUrl,
       MaxNumberOfMessages: 1,
-      WaitTimeSeconds: 1,
+      WaitTimeSeconds: 4,
     };
 
     const res = await client.receiveMessage(receiveMessage);
