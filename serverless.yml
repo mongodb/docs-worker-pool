@@ -23,9 +23,6 @@ provider:
 package:
   patterns:
     api/config/**
-  exclude:
-    - node_modules/**
-    - venv/**
 custom:
   serverlessPluginTypescript:
     tsConfigFileLocation: '.api/tsconfig.build.json'
