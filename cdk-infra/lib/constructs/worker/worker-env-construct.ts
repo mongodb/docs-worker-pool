@@ -39,13 +39,13 @@ export class WorkerEnvConstruct extends Construct {
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
 
-    const dbPassword = secureStrings[`${ssmPrefix}/atlas/password`];
-
+    const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
     this.environment = {
       ...secureStrings,
       STAGE: env,
       SNOOTY_ENV: envShortToFullName(env),
       MONGO_ATLAS_USERNAME: dbUsername,
+      MONGO_ATLAS_HOST: dbHost,
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
       JOBS_QUEUE_URL: jobsQueue.queueUrl,

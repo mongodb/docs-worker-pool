@@ -28,7 +28,6 @@ let repoConnector: GitHubConnector;
 let jobHandlerFactory: JobHandlerFactory;
 let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
-
 let ssmConnector: ParameterStoreConnector;
 let ssoConnector: ISSOConnector;
 

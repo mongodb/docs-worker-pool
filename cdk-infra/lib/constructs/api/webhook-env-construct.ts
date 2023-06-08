@@ -22,7 +22,7 @@ export class WebhookEnvConstruct extends Construct {
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
 
-    const dbPassword = secureStrings[`${ssmPrefix}/atlas/password`];
+    const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
     this.environment = {
       ...secureStrings,
       MONGO_ATLAS_USERNAME: dbUsername,
