@@ -12,6 +12,7 @@ import { FileSystemServices } from '../../../services/fileServices';
 import { JobValidator } from '../../../job/jobValidator';
 import { RepoBranchesRepository } from '../../../repositories/repoBranchesRepository';
 import { ISSOConnector, OktaConnector } from '../../../services/sso';
+import { EnhancedJobHandlerFactory } from '../../job/enhancedJobManager';
 
 let db: mongodb.Db;
 let consoleLogger: ConsoleLogger;
@@ -51,7 +52,7 @@ export async function handleJob(jobId: string) {
   ssoConnector = new OktaConnector(c, consoleLogger);
   cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector, ssoConnector);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
-  jobHandlerFactory = new JobHandlerFactory();
+  jobHandlerFactory = new EnhancedJobHandlerFactory();
 
   jobManager = new JobManager(
     c,

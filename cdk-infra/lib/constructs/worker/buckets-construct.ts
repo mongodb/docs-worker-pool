@@ -94,6 +94,16 @@ export class WorkerBucketsConstruct extends Construct {
           },
           {
             condition: {
+              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.4`,
+            },
+            protocol: RedirectProtocol.HTTPS,
+            hostName,
+            replaceKey: {
+              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
+            },
+          },
+          {
+            condition: {
               keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.3`,
             },
             protocol: RedirectProtocol.HTTPS,
