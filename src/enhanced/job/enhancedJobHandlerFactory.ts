@@ -17,7 +17,7 @@ import {
   EnhancedRegressionJobHandler,
 } from './enhancedJobHandlers';
 
-export const enhancedJobHandlerMap = {
+const enhancedJobHandlerMap = {
   githubPush: EnhancedStagingJobHandler,
   manifestGeneration: EnhancedManifestJobHandler,
   productionDeploy: EnhancedProductionJobHandler,

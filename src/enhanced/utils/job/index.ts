@@ -12,7 +12,7 @@ import { FileSystemServices } from '../../../services/fileServices';
 import { JobValidator } from '../../../job/jobValidator';
 import { RepoBranchesRepository } from '../../../repositories/repoBranchesRepository';
 import { ISSOConnector, OktaConnector } from '../../../services/sso';
-import { EnhancedJobHandlerFactory } from '../../job/enhancedJobManager';
+import { EnhancedJobHandlerFactory } from '../../job/enhancedJobHandlerFactory';
 
 let db: mongodb.Db;
 let consoleLogger: ConsoleLogger;
