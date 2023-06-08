@@ -241,7 +241,7 @@ async function prepSummaryMessage(
   failed = false
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls = [null, null];
+  let mms_urls = ['', ''];
   // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
   // so we need to extract both URLs
   if (repoName === 'mms-docs') {
@@ -305,10 +305,10 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
-  // if (!fullDocument) {
-  //   consoleLogger.error('Cannot find job in db.', '');
-  //   return;
-  // }
+  if (!fullDocument) {
+    consoleLogger.error('Cannot find job in db.', '');
+    return;
+  }
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -360,10 +360,10 @@ async function SubmitArchiveJob(jobId: string) {
     branches: new BranchRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
-  // if (!job) {
-  //   consoleLogger.error('Cannot find job in db', JSON.stringify({ jobId }));
-  //   return;
-  // }
+  if (!job) {
+    consoleLogger.error('Cannot find job in db', JSON.stringify({ jobId }));
+    return;
+  }
   const repo = await models.branches.getRepo(job.payload.repoName);
 
   /* NOTE
