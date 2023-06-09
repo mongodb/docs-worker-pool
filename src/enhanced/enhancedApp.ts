@@ -6,6 +6,10 @@ async function app() {
   const { jobId } = await listenToJobQueue();
 
   await handleJob(jobId);
+
+  console.log('process completed');
+
+  process.exit(0);
 }
 
 app();
