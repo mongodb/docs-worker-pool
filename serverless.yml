@@ -129,16 +129,16 @@ functions:
       environment:
         <<: *webhook-env-core
 
-    v1DochubDeployRepo:
-      handler: api/controllers/v1/dochub.TriggerBuild
-      events:
-        - http:
-            path: /webhook/dochub/trigger/build
-            method: POST
-            cors: true
-            public: true
-      environment:
-        <<: *webhook-env-core
+    # v1DochubDeployRepo:
+    #   handler: api/controllers/v1/dochub.TriggerBuild
+    #   events:
+    #     - http:
+    #         path: /webhook/dochub/trigger/build
+    #         method: POST
+    #         cors: true
+    #         public: true
+    #   environment:
+    #     <<: *webhook-env-core
 
     v1UpsertEdgeDictionaryItem:
       handler: api/controllers/v1/dochub.UpsertEdgeDictionaryItem
