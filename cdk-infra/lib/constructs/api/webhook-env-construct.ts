@@ -14,6 +14,7 @@ export class WebhookEnvConstruct extends Construct {
 
   constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, secureStrings }: WebhookEnvConstructProps) {
     super(scope, id);
+    const isEnhanced = !!this.node.tryGetContext('enhanced');
 
     const env = getEnv(this);
     const ssmPrefix = getSsmPathPrefix(env);
@@ -34,6 +35,7 @@ export class WebhookEnvConstruct extends Construct {
       NODE_CONFIG_DIR: './config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
+      ENHANCED: `${isEnhanced}`,
     };
   }
 }

@@ -3,7 +3,6 @@ import {
   AssetImageProps,
   Cluster,
   ContainerImage,
-  CpuArchitecture,
   FargateService,
   FargateTaskDefinition,
   LogDrivers,
