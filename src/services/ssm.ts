@@ -1,4 +1,4 @@
-import { SSM } from 'aws-sdk';
+import { SSM } from '@aws-sdk/client-ssm';
 import { runInThisContext } from 'vm';
 
 export interface ISSMConnector {

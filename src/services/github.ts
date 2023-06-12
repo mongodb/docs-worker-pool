@@ -1,4 +1,3 @@
-import * as c from 'config';
 import { Octokit } from '@octokit/rest';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
