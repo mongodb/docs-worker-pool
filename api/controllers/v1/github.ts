@@ -47,6 +47,7 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
       url: githubEvent.repository.clone_url,
       newHead: githubEvent.after,
       urlSlug: urlSlug,
+      organization: githubEvent.repository.organization,
       prefix: prefix,
       project: project,
     },

@@ -48,7 +48,7 @@ export class GithubConnector implements IGithubConnector {
     }
     console.log(2);
     const results = await this._octokit.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
-      owner: 'schmalliso', // will need to determine if 10gen or mongodb
+      owner: payload.organization, // will need to determine if 10gen or mongodb
       repo: payload.repoName,
       commit_sha: payload.newHead,
       headers: {
@@ -67,15 +67,12 @@ export class GithubConnector implements IGithubConnector {
   }
 
   // Create new comment with relevant links
-  // TODO: pass in owner, repo, issue number, message details
-  // see api/controllers/v1/jobs.ts#L195 for summary message we send in Slack
   async postComment(payload: Payload, pr: number, message: string): Promise<201 | undefined> {
     try {
       await this._octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
-        owner: 'schmalliso', //'schmalliso', NEED TO FIGURE OUT MONGODB OR 10GEN -- CAN DO FROM PR?
+        owner: payload.organization, //'schmalliso', NEED TO FIGURE OUT MONGODB OR 10GEN -- CAN DO FROM PR?
         repo: payload.repoName, //'docs-poop',
         issue_number: pr, //1,
-        // todo: make the body actually correct and aesthetic
         body: `${message}`,
         headers: {
           'X-GitHub-Api-Version': '2022-11-28',
@@ -93,8 +90,8 @@ export class GithubConnector implements IGithubConnector {
   // (i.e. with a new build log) by appending the link to the end.
   async updateComment(payload: Payload, comment: number, message: string): Promise<200 | undefined> {
     const resp = await this._octokit.request('GET /repos/{owner}/{repo}/issues/comments/{comment_id}', {
-      owner: 'schmalliso',
-      repo: 'docs-ecosystem',
+      owner: payload.organization,
+      repo: payload.repoName,
       comment_id: comment,
     });
     console.log(resp);
@@ -103,8 +100,8 @@ export class GithubConnector implements IGithubConnector {
     const newComment = resp.data.body + `\n${message}`;
     try {
       await this._octokit.request('PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}', {
-        owner: 'schmalliso',
-        repo: 'docs-ecosystem',
+        owner: payload.organization,
+        repo: payload.repoName,
         comment_id: comment,
         body: newComment,
       });
@@ -116,10 +113,10 @@ export class GithubConnector implements IGithubConnector {
   }
 
   // get the ID of the comment created by the docs-builder-bot user
-  // if there is no docs-builder-bot comment, return null
+  // if there is no docs-builder-bot comment, return undefined
   async getPullRequestCommentId(payload: Payload, pr: number): Promise<number | undefined> {
     const comments = await this._octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
-      owner: 'schmalliso',
+      owner: payload.organization,
       repo: payload.repoName,
       issue_number: pr,
       headers: {
