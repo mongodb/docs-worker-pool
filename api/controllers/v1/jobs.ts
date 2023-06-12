@@ -5,6 +5,7 @@ import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitl
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
+import { GithubConnector } from '../../../src/services/github';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
 import { Job, JobStatus } from '../../../src/entities/job';
@@ -134,36 +135,63 @@ async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
   await ecs.stopZombieECSTask(taskId);
 }
 
-async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
-  try {
-    const tries = message.tries;
-    // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
-    if (tries < c.get('maxRetries')) {
-      const sqs = new SQSConnector(consoleLogger, c);
-      message['tries'] += 1;
-      let retryDelay = 10;
-      if (c.get('retryDelay')) {
-        retryDelay = c.get('retryDelay');
-      }
-      await sqs.sendMessage(message, url, retryDelay * tries);
-    }
-  } catch (err) {
-    consoleLogger.error(message['jobId'], err);
-  }
-}
+// async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
+//   try {
+//     const tries = message.tries;
+//     // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
+//     // ARM: I don't think we even do retries anymore
+//     if (tries < c.get('maxRetries')) {
+//       const sqs = new SQSConnector(consoleLogger, c);
+//       message['tries'] += 1;
+//       let retryDelay = 10;
+//       if (c.get('retryDelay')) {
+//         retryDelay = c.get('retryDelay');
+//       }
+//       await sqs.sendMessage(message, url, retryDelay * tries);
+//     }
+//   } catch (err) {
+//     consoleLogger.error(message['jobId'], err);
+//   }
+// }
 async function NotifyBuildSummary(jobId: string): Promise<any> {
   const consoleLogger = new ConsoleLogger();
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
   const env = c.get<string>('env');
+  const githubToken = c.get<string>('githubSecret');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  // TODO: Make fullDocument be of type Job, validate existence
+
   const fullDocument = await jobRepository.getJobById(jobId);
+  if (!fullDocument) {
+    consoleLogger.error('Cannot find job entry in db', '');
+    return;
+  }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
+  const githubConnector = new GithubConnector(consoleLogger, c, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
+
+  // Github comment
+  await githubConnector.getParentPRs(fullDocument.payload).then(function (results) {
+    for (const pr of results) {
+      githubConnector.getPullRequestCommentId(fullDocument.payload, pr).then(function (id) {
+        console.log(`The comment ID is: ${id}`);
+        if (id != undefined) {
+          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), true).then(function (ghmessage) {
+            githubConnector.updateComment(fullDocument.payload, id, ghmessage);
+          });
+        } else {
+          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), false).then(function (ghmessage) {
+            githubConnector.postComment(fullDocument.payload, pr, ghmessage);
+          });
+        }
+      });
+    }
+  });
+
+  // Slack notification
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
@@ -192,6 +220,18 @@ export const extractUrlFromMessage = (fullDocument): string[] => {
   return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
 };
 
+async function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = false): Promise<string> {
+  if (isUpdate) {
+    return `\n* job log: [${fullDocument.payload.newHead}|${jobUrl}]`;
+  }
+  const urls = extractUrlFromMessage(fullDocument);
+  let stagingUrl = '';
+  if (urls.length > 0) {
+    stagingUrl = urls[urls.length - 1];
+  }
+  return `✨ Staging URL: [${stagingUrl}|${stagingUrl}]\n\n#### 🪵 Logs\n\n* job log: [${fullDocument.payload.newHead}|${jobUrl}]`;
+}
+
 async function prepSummaryMessage(
   env: string,
   fullDocument: Job,
@@ -201,12 +241,11 @@ async function prepSummaryMessage(
   failed = false
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls = [null, null];
+  let mms_urls = ['', ''];
   // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
   // so we need to extract both URLs
   if (repoName === 'mms-docs') {
     if (urls.length >= 2) {
-      // TODO: Type 'string[]' is not assignable to type 'null[]'.
       mms_urls = urls.slice(-2);
     }
   }
@@ -266,6 +305,10 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
+  if (!fullDocument) {
+    consoleLogger.error('Cannot find job in db.', '');
+    return;
+  }
   const jobTitle = fullDocument.title;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -317,6 +360,10 @@ async function SubmitArchiveJob(jobId: string) {
     branches: new BranchRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
+  if (!job) {
+    consoleLogger.error('Cannot find job in db', JSON.stringify({ jobId }));
+    return;
+  }
   const repo = await models.branches.getRepo(job.payload.repoName);
 
   /* NOTE
