@@ -11,6 +11,7 @@ import { StagingJobHandler } from '../../job/stagingJobHandler';
  */
 async function setEnvironmentVariablesEnhanced(this: JobHandler) {
   const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this.currJob.payload.repoName);
+
   let env = this._config.get<string>('env');
   this.logger.info(
     this.currJob._id,

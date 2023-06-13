@@ -56,7 +56,7 @@ export class WorkerEnvConstruct extends Construct {
       PREVIEW_BUILD_ENABLED: previewBuildEnabled,
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       NPM_EMAIL: npmEmail,
-      REPO_BRANCHES_COLLECTION: repoBranchesCollection,
+      REPO_BRANCHES_COL_NAME: repoBranchesCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',

@@ -84,7 +84,7 @@ export class WorkerConstruct extends Construct {
 
     const taskDefLogGroup = new LogGroup(this, 'workerLogGroup');
     const taskDefinition = new FargateTaskDefinition(this, 'workerTaskDefinition', {
-      cpu: 2048,
+      cpu: 4096,
       memoryLimitMiB: 8192,
       taskRole,
       executionRole,
