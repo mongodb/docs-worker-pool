@@ -18,17 +18,18 @@ async function setEnvironmentVariablesEnhanced(this: JobHandler) {
     `setEnvironmentVariables for ${this.currJob.payload.repoName} env ${env} jobType ${this.currJob.payload.jobType}`
   );
   if (repo_info?.['bucket'] && repo_info?.['url']) {
-    const enhancedBucketName = 'enhancedApp-' + repo_info['bucket'][env]; // Hard coding this for now to simplify testing
+    const bucketName = 'enhancedApp-' + repo_info['bucket'][env];
+
     if (this.currJob.payload.regression) {
       env = 'regression';
       process.env.REGRESSION = 'true';
     }
-    process.env.BUCKET = enhancedBucketName;
+    process.env.BUCKET = bucketName;
     process.env.URL = repo_info['url'][env];
 
     // Writers are tying to stage it, so lets update the staging bucket.
     if (env == 'prd' && this.currJob.payload.jobType == 'githubPush') {
-      process.env.BUCKET = enhancedBucketName + '-staging';
+      process.env.BUCKET = bucketName + '-staging';
       process.env.URL = repo_info['url']['stg'];
     }
   }

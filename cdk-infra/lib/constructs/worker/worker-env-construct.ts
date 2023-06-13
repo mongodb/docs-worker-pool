@@ -61,7 +61,6 @@ export class WorkerEnvConstruct extends Construct {
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
       SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),
-      ENHANCED: `${isEnhanced}`,
     };
   }
 }
