@@ -15,7 +15,6 @@ export class RepoBranchesRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving repo information for ${repoName}`
     );
 
-    console.log('REPO DETAILS', repoDetails);
     if (repoDetails?.bucket && repoDetails?.url) {
       return repoDetails;
     } else {
