@@ -77,11 +77,9 @@ jobs:
           npm ci
           sls deploy --stage prd
           sls deploy --stage dotcomprd
-          sls deploy --stage legacydotcomprd
       - name: Deploy Lambdas
         run: |
           npm ci
           sls deploy --stage prd
           sls deploy --stage dotcomprd
-          sls deploy --stage legacydotcomprd
           sls prune -n 5
