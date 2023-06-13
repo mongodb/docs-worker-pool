@@ -4,6 +4,7 @@ import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
+import { GithubConnector } from '../../../src/services/github';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
@@ -157,13 +158,39 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   await client.connect();
   const db = client.db(c.get('dbName'));
   const env = c.get<string>('env');
+  const githubToken = c.get<string>('githubSecret');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
+  if (!fullDocument) {
+    consoleLogger.error('Cannot find job entry in db', '');
+    return;
+  }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
+  const githubConnector = new GithubConnector(consoleLogger, c, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
+
+  // Github comment
+  await githubConnector.getParentPRs(fullDocument.payload).then(function (results) {
+    for (const pr of results) {
+      githubConnector.getPullRequestCommentId(fullDocument.payload, pr).then(function (id) {
+        console.log(`The comment ID is: ${id}`);
+        if (id != undefined) {
+          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), true).then(function (ghmessage) {
+            githubConnector.updateComment(fullDocument.payload, id, ghmessage);
+          });
+        } else {
+          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), false).then(function (ghmessage) {
+            githubConnector.postComment(fullDocument.payload, pr, ghmessage);
+          });
+        }
+      });
+    }
+  });
+
+  // Slack notification
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
@@ -191,6 +218,18 @@ export const extractUrlFromMessage = (fullDocument): string[] => {
   const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
   return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
 };
+
+async function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = false): Promise<string> {
+  if (isUpdate) {
+    return `\n* job log: [${fullDocument.payload.newHead}|${jobUrl}]`;
+  }
+  const urls = extractUrlFromMessage(fullDocument);
+  let stagingUrl = '';
+  if (urls.length > 0) {
+    stagingUrl = urls[urls.length - 1];
+  }
+  return `✨ Staging URL: [${stagingUrl}|${stagingUrl}]\n\n#### 🪵 Logs\n\n* job log: [${fullDocument.payload.newHead}|${jobUrl}]`;
+}
 
 async function prepSummaryMessage(
   env: string,

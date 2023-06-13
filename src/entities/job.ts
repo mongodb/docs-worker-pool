@@ -44,6 +44,7 @@ export type Payload = {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
+  organization: string | null | undefined;
 };
 
 export type Job = {

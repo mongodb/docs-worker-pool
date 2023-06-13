@@ -28,6 +28,7 @@
     "@aws-sdk/client-ssm": "^3.54.1",
     "@babel/core": "^7.4.4",
     "@babel/polyfill": "^7.4.4",
+    "@octokit/rest": "^19.0.11",
     "@types/aws-lambda": "^8.10.92",
     "@types/config": "^0.0.39",
     "@types/tsscmp": "^1.0.0",
