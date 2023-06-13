@@ -20,6 +20,24 @@ DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
 get-build-dependencies:
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
 
+next-gen-parse:
+	# snooty parse -- separated from front-end to support index gen
+	if [ -n "${PATCH_ID}" ]; then \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	else \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
+		if [ $$? -eq 1 ]; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi \
+	fi
+
 next-gen-html:
 	# snooty parse and then build-front-end
 	snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
