@@ -12,6 +12,8 @@ async function main() {
 
   const ssmPrefix = getSsmPathPrefix(env);
 
+  // Constructors can't be async, so since I am doing this workaround for the secure strings,
+  // they need to be retrieved before we create the stack.
   const workerSecureStrings = await getWorkerSecureStrings(ssmPrefix);
   const webhookSecureStrings = await getWebhookSecureStrings(ssmPrefix);
 
@@ -20,10 +22,10 @@ async function main() {
   // If we want to create a specific feature, we will use this name.
   // NOTE: This value will take precedence over the feature branch name so that
   // we can deploy and update the same stack for a specific feature between branches.
-  const customFeatureName = app.node.tryGetContext('featureName');
+  const customFeatureName = app.node.tryGetContext('customFeatureName');
 
   // If this is a feature branch i.e., it's not master, use this name.
-  const isFeatureBranch = app.node.tryGetContext('isFeature');
+  const isFeatureBranch = app.node.tryGetContext('isFeatureBranch');
 
   if (customFeatureName) {
     stackName += `-${customFeatureName}`;
