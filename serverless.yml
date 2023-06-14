@@ -5,6 +5,8 @@ plugins:
   - serverless-plugin-typescript
   - serverless-prune-plugin
   - serverless-iam-roles-per-function
+  - serverless-plugin-common-excludes
+  - serverless-plugin-include-dependencies
 
 provider:
   name: aws
