@@ -19,8 +19,8 @@ export class WorkerEnvConstruct extends Construct {
     super(scope, id);
     const isEnhanced = !!this.node.tryGetContext('enhanced');
 
-    const env = getEnv(this);
-    const ssmPrefix = getSsmPathPrefix(env);
+    const env = getEnv();
+    const ssmPrefix = getSsmPathPrefix();
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);

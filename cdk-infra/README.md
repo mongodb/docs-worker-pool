@@ -2,14 +2,14 @@
 
 ## Tips
 
-My approach when recreating the current AWS infrastructure is to reference the CloudFormation templates and serverless.yml files. So, when going through my changes, it might help to also check these files as well.
+To verify the AWS CDK code adequately replicates the current AWS infrastructure, it is helpful to reference the CloudFormation templates that exist within the `infrastructure` directory, as well as understanding the `serverless.yml` files' contents.
 
 ## Testing
 
-To verify the CloudFormation is being generated successfully, you can use the `cdk synth` command to generate the CloudFormation. In the `/cdk-infra` directory, I execute the following command:
+To verify the CloudFormation is being generated successfully, you can use the `cdk synth` command to generate the CloudFormation. In the `/cdk-infra` directory, execute the following command:
 
 ```zsh
-npm run cdk synth -- -c enhanced=true -c featureName=enhancedApp > cdk.out/template.yaml
+npm run cdk synth -- -c enhanced=true -c customFeatureName=enhancedApp > cdk.out/template.yaml
 ```
 
 Make sure to update your `~/.aws/credentials` file. The `enhanced` context variable, if set to true, will use the `Dockerfile.enhanced` dockerfile instead of the standard one. The `featureName` context variable is used to provide a different name for a custom stack other than the branch name. In the future for feature branches, the context variable `isFeature` will be used to use the Git branch name and append that to the stack name.
