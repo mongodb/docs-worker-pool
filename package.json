@@ -76,6 +76,7 @@
     "mongodb-memory-server": "^7.4.1",
     "prettier": "^2.4.1",
     "regenerator-runtime": "^0.13.1",
+    "serverless-esbuild": "^1.45.1",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-plugin-typescript": "^2.1.0",
     "ts-jest": "^27.0.5",

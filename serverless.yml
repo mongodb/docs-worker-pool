@@ -5,6 +5,7 @@ plugins:
   - serverless-plugin-typescript
   - serverless-prune-plugin
   - serverless-iam-roles-per-function
+  - serverless-esbuild
 
 provider:
   name: aws
