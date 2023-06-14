@@ -1,6 +1,9 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { getEnv } from './env';
 
-export function getSsmPathPrefix(env: string): string {
+export function getSsmPathPrefix(): string {
+  const env = getEnv();
+
   return `/env/${env}/docs/worker_pool`;
 }
 

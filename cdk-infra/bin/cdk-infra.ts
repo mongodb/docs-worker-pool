@@ -3,35 +3,19 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { AutoBuilderStack } from '../lib/auto-builder-stack';
 import { getSsmPathPrefix, getWebhookSecureStrings, getWorkerSecureStrings } from '../utils/ssm';
-import { getEnv } from '../utils/env';
-import { getCurrentBranch } from '../utils/git';
+import { getFeatureName } from '../utils/env';
 
 async function main() {
   const app = new cdk.App();
-  const env = getEnv(app);
 
-  const ssmPrefix = getSsmPathPrefix(env);
+  const ssmPrefix = getSsmPathPrefix();
 
   // Constructors can't be async, so since I am doing this workaround for the secure strings,
   // they need to be retrieved before we create the stack.
   const workerSecureStrings = await getWorkerSecureStrings(ssmPrefix);
   const webhookSecureStrings = await getWebhookSecureStrings(ssmPrefix);
 
-  let stackName = 'auto-builder-stack';
-
-  // If we want to create a specific feature, we will use this name.
-  // NOTE: This value will take precedence over the feature branch name so that
-  // we can deploy and update the same stack for a specific feature between branches.
-  const customFeatureName = app.node.tryGetContext('customFeatureName');
-
-  // If this is a feature branch i.e., it's not master, use this name.
-  const isFeatureBranch = app.node.tryGetContext('isFeatureBranch');
-
-  if (customFeatureName) {
-    stackName += `-${customFeatureName}`;
-  } else if (isFeatureBranch) {
-    stackName += `-${getCurrentBranch()}`;
-  }
+  const stackName = `auto-builder-stack-${getFeatureName()}`;
 
   new AutoBuilderStack(app, stackName, {
     /* If you don't specify 'env', this stack will be environment-agnostic.

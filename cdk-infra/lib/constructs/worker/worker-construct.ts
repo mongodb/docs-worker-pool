@@ -12,6 +12,7 @@ import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
+import { isEnhanced } from '../../../utils/env';
 
 interface WorkerConstructProps {
   environment: Record<string, string>;
@@ -24,8 +25,6 @@ export class WorkerConstruct extends Construct {
 
   constructor(scope: Construct, id: string, { environment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
     super(scope, id);
-
-    const isEnhanced = !!this.node.tryGetContext('enhanced');
 
     const vpc = new Vpc(this, 'vpc', {
       gatewayEndpoints: {
@@ -75,7 +74,7 @@ export class WorkerConstruct extends Construct {
     executionRole.addToPolicy(executionRoleSsmPolicy);
 
     const containerProps: AssetImageProps = {
-      file: isEnhanced ? 'Dockerfile.enhanced' : undefined,
+      file: isEnhanced() ? 'Dockerfile.enhanced' : undefined,
       buildArgs: {
         NPM_BASE_64_AUTH: environment.NPM_BASE_64_AUTH,
         NPM_EMAIL: environment.NPM_EMAIL,

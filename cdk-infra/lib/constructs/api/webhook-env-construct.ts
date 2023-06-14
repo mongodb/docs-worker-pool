@@ -1,7 +1,6 @@
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { getEnv } from '../../../utils/env';
 import { getSsmPathPrefix } from '../../../utils/ssm';
 
 interface WebhookEnvConstructProps {
@@ -15,8 +14,7 @@ export class WebhookEnvConstruct extends Construct {
   constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, secureStrings }: WebhookEnvConstructProps) {
     super(scope, id);
 
-    const env = getEnv(this);
-    const ssmPrefix = getSsmPathPrefix(env);
+    const ssmPrefix = getSsmPathPrefix();
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);

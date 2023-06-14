@@ -18,8 +18,8 @@ export class WorkerEnvConstruct extends Construct {
   constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, secureStrings }: WorkerEnvConstructProps) {
     super(scope, id);
 
-    const env = getEnv(this);
-    const ssmPrefix = getSsmPathPrefix(env);
+    const env = getEnv();
+    const ssmPrefix = getSsmPathPrefix();
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);

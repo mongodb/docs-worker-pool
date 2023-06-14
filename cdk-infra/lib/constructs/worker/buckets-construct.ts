@@ -2,7 +2,7 @@ import { Construct } from 'constructs';
 import { BlockPublicAccess, Bucket, RedirectProtocol, RoutingRule } from 'aws-cdk-lib/aws-s3';
 import { RemovalPolicy } from 'aws-cdk-lib';
 import { docsBucketNames } from '../../../utils/buckets';
-import { getEnv } from '../../../utils/env';
+import { getEnv, getFeatureName } from '../../../utils/env';
 import { getHostUrl, getPrefixUrl } from '../../../utils/url';
 
 export class WorkerBucketsConstruct extends Construct {
@@ -10,7 +10,7 @@ export class WorkerBucketsConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const env = getEnv(this);
+    const env = getEnv();
 
     const buckets: Bucket[] = [];
 
@@ -125,7 +125,7 @@ export class WorkerBucketsConstruct extends Construct {
         ];
       }
 
-      const featureName = this.node.tryGetContext('featureName');
+      const featureName = getFeatureName();
 
       const stackBucketName = `${featureName}-${bucketName}-${env}`.toLowerCase();
 
