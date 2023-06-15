@@ -116,8 +116,9 @@ export class JobManager {
     try {
       this._jobHandler = null;
       if (job?.payload) {
+        const excludeRepoFromBenchmarks = ['mms-docs'].includes(job.payload.repoName);
         // Can easily rollback with commenting out this flag.
-        job.useWithBenchmark = true;
+        job.useWithBenchmark = !excludeRepoFromBenchmarks;
         await this.createHandlerAndExecute(job);
       } else {
         this._logger.info('JobManager', `No Jobs Found: ${new Date()}`);
