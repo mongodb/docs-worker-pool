@@ -73,7 +73,7 @@
     "jest-environment-node": "^27.1.0",
     "jest-mock-axios": "^4.4.0",
     "lint-staged": "^12.1.2",
-    "mongodb-memory-server": "^7.4.1",
+    "mongodb-memory-server": "^8.13.0",
     "prettier": "^2.4.1",
     "regenerator-runtime": "^0.13.1",
     "serverless-esbuild": "^1.45.1",
