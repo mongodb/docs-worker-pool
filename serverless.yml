@@ -2,12 +2,9 @@ service: docs-worker-pool-api
 variablesResolutionMode: 20210326
 
 plugins:
-  - serverless-plugin-typescript
   - serverless-prune-plugin
   - serverless-iam-roles-per-function
-  - serverless-plugin-common-excludes
-  - serverless-plugin-include-dependencies
-
+  - serverless-esbuild
 provider:
   name: aws
   runtime: nodejs18.x
@@ -27,8 +24,9 @@ package:
   patterns:
     api/config/**
 custom:
-  serverlessPluginTypescript:
-    tsConfigFileLocation: '.api/tsconfig.build.json'
+  esbuild:
+    plugins: './api/config/plugins.js'
+
   deploymentBucket:
     dev: worker-pool-deployment
     stg: worker-pool-deployment
