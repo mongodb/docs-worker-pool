@@ -2,7 +2,7 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getCdnInvalidatorUrl } from '../../../utils/cdn';
-import { getEnv, envShortToFullName } from '../../../utils/env';
+import { getEnv, envShortToFullName, getIsEnhanced } from '../../../utils/env';
 import { getSearchIndexFolder } from '../../../utils/search-index';
 import { getSsmPathPrefix } from '../../../utils/ssm';
 
@@ -17,7 +17,6 @@ export class WorkerEnvConstruct extends Construct {
 
   constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, secureStrings }: WorkerEnvConstructProps) {
     super(scope, id);
-    const isEnhanced = !!this.node.tryGetContext('enhanced');
 
     const env = getEnv();
     const ssmPrefix = getSsmPathPrefix();
@@ -61,6 +60,7 @@ export class WorkerEnvConstruct extends Construct {
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
       SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),
+      ENHANCED: `${getIsEnhanced()}`,
     };
   }
 }
