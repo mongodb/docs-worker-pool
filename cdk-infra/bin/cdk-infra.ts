@@ -3,10 +3,15 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { AutoBuilderStack } from '../lib/auto-builder-stack';
 import { getSsmPathPrefix, getWebhookSecureStrings, getWorkerSecureStrings } from '../utils/ssm';
-import { getFeatureName } from '../utils/env';
+import { getFeatureName, initContextVars } from '../utils/env';
 
 async function main() {
   const app = new cdk.App();
+
+  // calling this here so that we can call functions like getEnv and getSsmPathPrefix
+  // without having to pass in current construct. More intuitive for developers to look at.
+  // This will grab context variables that we pass in from the CLI and add it to a map.
+  initContextVars(app);
 
   const ssmPrefix = getSsmPathPrefix();
 
