@@ -82,7 +82,7 @@ jobs:
           sls deploy --stage legacydotcomstg
       - name: Deploy Lambdas
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           sls deploy --stage stg
           sls deploy --stage dotcomstg
           sls deploy --stage legacydotcomstg
