@@ -158,7 +158,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   await client.connect();
   const db = client.db(c.get('dbName'));
   const env = c.get<string>('env');
-  const githubToken = c.get<string>('githubSecret');
+  const githubToken = c.get<string>('githubBotPW');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
