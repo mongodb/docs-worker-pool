@@ -125,10 +125,8 @@ export class GithubConnector implements IGithubConnector {
     });
     console.log(comments);
     if (comments['data'].length > 0) {
-      console.log('Yes');
       for (const comment of comments['data']) {
-        // TODO: this to docs-builder-bot once that's a thing
-        if (comment.user && comment.user.login == 'schmalliso') {
+        if (comment.user && comment.user.login == 'docs-builder-bot') {
           return comment['id'];
         }
       }

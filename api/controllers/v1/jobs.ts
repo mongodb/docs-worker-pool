@@ -177,12 +177,13 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     for (const pr of results) {
       githubConnector.getPullRequestCommentId(fullDocument.payload, pr).then(function (id) {
         console.log(`The comment ID is: ${id}`);
+        const fullDashboardUrl = c.get<string>('dashboardUrl') + jobId;
         if (id != undefined) {
-          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), true).then(function (ghmessage) {
+          prepGithubComment(fullDocument, fullDashboardUrl, true).then(function (ghmessage) {
             githubConnector.updateComment(fullDocument.payload, id, ghmessage);
           });
         } else {
-          prepGithubComment(fullDocument, c.get<string>('dashboardUrl'), false).then(function (ghmessage) {
+          prepGithubComment(fullDocument, fullDashboardUrl, false).then(function (ghmessage) {
             githubConnector.postComment(fullDocument.payload, pr, ghmessage);
           });
         }
@@ -221,7 +222,7 @@ export const extractUrlFromMessage = (fullDocument): string[] => {
 
 async function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = false): Promise<string> {
   if (isUpdate) {
-    return `\n* job log: [${fullDocument.payload.newHead}|${jobUrl}]`;
+    return `\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
   }
   const urls = extractUrlFromMessage(fullDocument);
   let stagingUrl = '';
