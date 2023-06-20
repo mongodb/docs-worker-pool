@@ -40,7 +40,6 @@ function checkContextInit(): void {
   if (!areContextVarsInitialized) throw new Error('ERROR, initContextVars has not been called.');
 }
 
-<<<<<<< HEAD
 export function getIsEnhanced(): boolean {
   checkContextInit();
   const isEnhanced = contextVarsMap.get('enhanced');
@@ -52,12 +51,6 @@ export function getEnv(): AutoBuilderEnv {
   checkContextInit();
 
   const env = contextVarsMap.get('env');
-=======
-export function getEnv(): AutoBuilderEnv {
-  checkContextInit();
-
-  const env: string | undefined = contextVarsMap.get('env');
->>>>>>> master
 
   if (!env) return 'dev';
   if (!isAutoBuilderEnv(env)) throw new Error(`ERROR! ${env} is not a valid environment name`);
