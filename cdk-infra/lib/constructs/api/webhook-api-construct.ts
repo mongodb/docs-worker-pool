@@ -6,6 +6,7 @@ import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
+import { getFeatureName } from '../../../utils/env';
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
 
@@ -98,7 +99,9 @@ export class WebhookApiConstruct extends Construct {
       timeout,
     });
 
-    const restApi = new LambdaRestApi(this, 'webhookHandlers', {
+    const apiName = `webhookHandlers-${getFeatureName()}`;
+
+    const restApi = new LambdaRestApi(this, apiName, {
       handler: rootEndpointLambda,
       proxy: false,
     });
