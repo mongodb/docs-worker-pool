@@ -36,6 +36,7 @@ export async function handleJob(jobId: string) {
   const atlasURL = `mongodb+srv://${c.get('dbUsername')}:${c.get('dbPassword')}@${c.get(
     'dbHost'
   )}/?retryWrites=true&w=majority`;
+
   client = new mongodb.MongoClient(atlasURL);
   await client.connect();
   db = client.db(c.get('dbName'));
