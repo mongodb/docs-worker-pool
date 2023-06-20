@@ -228,7 +228,7 @@ async function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = f
   if (urls.length > 0) {
     stagingUrl = urls[urls.length - 1];
   }
-  return `✨ Staging URL: [${stagingUrl}|${stagingUrl}]\n\n#### 🪵 Logs\n\n* job log: [${fullDocument.payload.newHead}|${jobUrl}]`;
+  return `✨ Staging URL: [${stagingUrl}](${stagingUrl})\n\n#### 🪵 Logs\n\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
 }
 
 async function prepSummaryMessage(
