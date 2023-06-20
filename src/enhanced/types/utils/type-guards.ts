@@ -13,42 +13,8 @@ export function isJobQueuePayload(obj: unknown): obj is JobsQueuePayload {
 
   const unsafePayload = obj as JobsQueuePayload;
 
-  const {
-    jobType,
-    source,
-    action,
-    repoName,
-    branchName,
-    url,
-    isFork,
-    repoOwner,
-    stable,
-    primaryAlias,
-    project,
-    prefix,
-    urlSlug,
-    aliased,
-    newHead,
-    private: isPrivate,
-  } = unsafePayload;
+  const { jobId } = unsafePayload;
 
   // validate payload
-  return (
-    typeof jobType === 'string' &&
-    typeof source === 'string' &&
-    typeof action === 'string' &&
-    typeof repoName === 'string' &&
-    typeof branchName === 'string' &&
-    typeof url === 'string' &&
-    typeof isFork === 'boolean' &&
-    typeof repoOwner === 'string' &&
-    (typeof stable === 'undefined' || typeof stable === 'string') &&
-    (typeof primaryAlias === 'undefined' || typeof primaryAlias === 'boolean') &&
-    (typeof project === 'undefined' || typeof project === 'string') &&
-    (typeof prefix === 'undefined' || typeof prefix === 'string') &&
-    (typeof urlSlug === 'undefined' || typeof urlSlug === 'string') &&
-    (typeof aliased === 'undefined' || typeof aliased === 'boolean') &&
-    (typeof newHead === 'undefined' || typeof newHead === 'string') &&
-    (typeof isPrivate === 'undefined' || typeof isPrivate === 'string')
-  );
+  return typeof jobId === 'string';
 }

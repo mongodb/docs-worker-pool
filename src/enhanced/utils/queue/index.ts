@@ -13,6 +13,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
   const client = new SQS({ region });
 
+  console.log('Polling jobsQueue');
+
   // We want to loop indefinitely so that we continue to poll the queue.
   while (true) {
     const receiveMessage: ReceiveMessageCommandInput = {
@@ -24,6 +26,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     const res = await client.receiveMessage(receiveMessage);
 
     if (!res.Messages || res.Messages.length === 0) continue;
+
+    console.log('received valid message');
 
     const message = res.Messages[0];
 
