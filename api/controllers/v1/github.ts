@@ -68,7 +68,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
-  const sig = event.headers['X-Hub-Signature-256'];
+
   if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
