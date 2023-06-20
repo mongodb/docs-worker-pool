@@ -72,6 +72,11 @@ const workerSecureStrings = [
   '/fastly/docs/opsmanager/service_id',
   '/cdn/client/id',
   '/cdn/client/secret',
+<<<<<<< HEAD
+=======
+  '/aws/secret',
+  '/aws/key',
+>>>>>>> master
 ] as const;
 
 type WorkerSecureString = typeof workerSecureStrings[number];
@@ -95,6 +100,11 @@ workerParamPathToEnvName.set('/fastly/docs/opsmanager/token', 'FASTLY_OPS_MANAGE
 workerParamPathToEnvName.set('/fastly/docs/opsmanager/service_id', 'FASTLY_OPS_MANAGER_SERVICE_ID');
 workerParamPathToEnvName.set('/cdn/client/id', 'CDN_CLIENT_ID');
 workerParamPathToEnvName.set('/cdn/client/secret', 'CDN_CLIENT_SECRET');
+<<<<<<< HEAD
+=======
+workerParamPathToEnvName.set('/aws/secret', 'AWS_SECRET_ACCESS_KEY');
+workerParamPathToEnvName.set('/aws/key', 'AWS_ACCESS_KEY_ID');
+>>>>>>> master
 
 export async function getWorkerSecureStrings(ssmPrefix: string): Promise<Record<string, string>> {
   return getSecureStrings(ssmPrefix, workerSecureStrings, workerParamPathToEnvName, 'workerParamPathToEnvName');

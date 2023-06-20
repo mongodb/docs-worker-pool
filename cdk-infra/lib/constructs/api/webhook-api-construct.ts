@@ -36,8 +36,11 @@ export class WebhookApiConstruct extends Construct {
   constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, environment }: WebhookApiConstructProps) {
     super(scope, id);
 
+<<<<<<< HEAD
     const timeout = Duration.minutes(2);
 
+=======
+>>>>>>> master
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: `${HANDLERS_PATH}/slack.ts`,
       runtime,
@@ -89,6 +92,14 @@ export class WebhookApiConstruct extends Construct {
       environment,
       bundling,
       timeout,
+    });
+
+    const handleJobsLambda = new NodejsFunction(this, 'handleJobsLambda', {
+      entry: `${HANDLERS_PATH}/jobs.ts`,
+      runtime,
+      handler: 'HandleJobs',
+      environment,
+      bundling,
     });
 
     // generic handler for the root endpoint
