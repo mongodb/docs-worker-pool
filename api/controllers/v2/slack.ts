@@ -261,7 +261,6 @@ function createPayload(
     aliased,
     urlSlug,
     isFork: true,
-    private: repoOwner === '10gen',
     repoOwner,
     url: 'https://github.com/' + repoOwner + '/' + repoName,
     newHead,
