@@ -22,6 +22,7 @@ export class GithubConnector implements IGithubConnector {
     this._octokit = new Octokit({
       auth: githubToken,
     });
+    console.log('length', githubToken.length);
   }
 
   // // We may not need this. Alt. could be used to choose which PR?
