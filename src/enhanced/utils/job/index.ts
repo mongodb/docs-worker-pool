@@ -30,12 +30,13 @@ let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
 let ssmConnector: ParameterStoreConnector;
 let ssoConnector: ISSOConnector;
+let client: mongodb.MongoClient;
 
 export async function handleJob(jobId: string) {
   const atlasURL = `mongodb+srv://${c.get('dbUsername')}:${c.get('dbPassword')}@${c.get(
     'dbHost'
   )}/?retryWrites=true&w=majority`;
-  const client = new mongodb.MongoClient(atlasURL);
+  client = new mongodb.MongoClient(atlasURL);
   await client.connect();
   db = client.db(c.get('dbName'));
   consoleLogger = new ConsoleLogger();
@@ -71,4 +72,9 @@ export async function handleJob(jobId: string) {
   } catch (err) {
     consoleLogger.info('enhancedApp', err);
   }
+
+  // clean up
+  process.on('SIGTERM', () => {
+    client.close();
+  });
 }
