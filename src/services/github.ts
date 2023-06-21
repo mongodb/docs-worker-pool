@@ -89,14 +89,14 @@ export class GithubConnector implements IGithubConnector {
   async updateComment(payload: Payload, comment: number, message: string): Promise<200 | undefined> {
     console.log(payload);
     const resp = await this._octokit.request('GET /repos/{owner}/{repo}/issues/comments/{comment_id}', {
-      owner: payload.organization || 'mmeigs',
+      owner: payload.organization,
       repo: payload.repoName,
       comment_id: comment,
     });
     const newComment = resp.data.body + `\n${message}`;
     try {
       await this._octokit.request('PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}', {
-        owner: payload.organization || 'mmeigs',
+        owner: payload.organization,
         repo: payload.repoName,
         comment_id: comment,
         body: newComment,
