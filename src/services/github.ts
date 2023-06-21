@@ -48,7 +48,7 @@ export class GithubConnector implements IGithubConnector {
     }
     console.log(payload);
     const results = await this._octokit.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
-      owner: payload.organization, // will need to determine if 10gen or mongodb
+      owner: payload.repoOwner, // will need to determine if 10gen or mongodb
       repo: payload.repoName,
       commit_sha: payload.newHead,
       headers: {
@@ -68,7 +68,7 @@ export class GithubConnector implements IGithubConnector {
     try {
       console.log(payload);
       await this._octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
-        owner: payload.organization, //NEED TO FIGURE OUT MONGODB OR 10GEN -- CAN DO FROM PR?
+        owner: payload.repoOwner, //NEED TO FIGURE OUT MONGODB OR 10GEN -- CAN DO FROM PR?
         repo: payload.repoName,
         issue_number: pr,
         body: `${message}`,
@@ -89,14 +89,14 @@ export class GithubConnector implements IGithubConnector {
   async updateComment(payload: Payload, comment: number, message: string): Promise<200 | undefined> {
     console.log(payload);
     const resp = await this._octokit.request('GET /repos/{owner}/{repo}/issues/comments/{comment_id}', {
-      owner: payload.organization,
+      owner: payload.repoOwner, // 10gen mongodb
       repo: payload.repoName,
       comment_id: comment,
     });
     const newComment = resp.data.body + `\n${message}`;
     try {
       await this._octokit.request('PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}', {
-        owner: payload.organization,
+        owner: payload.repoOwner, // 10gen mongodb
         repo: payload.repoName,
         comment_id: comment,
         body: newComment,
@@ -111,9 +111,9 @@ export class GithubConnector implements IGithubConnector {
   // get the ID of the comment created by the docs-builder-bot user
   // if there is no docs-builder-bot comment, return undefined
   async getPullRequestCommentId(payload: Payload, pr: number): Promise<number | undefined> {
-    console.log(payload.organization);
+    console.log(payload);
     const comments = await this._octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
-      owner: payload.organization,
+      owner: payload.repoOwner, // 10gen mongodb
       repo: payload.repoName,
       issue_number: pr,
       headers: {
