@@ -46,33 +46,31 @@ export class GithubConnector implements IGithubConnector {
     if (!payload.newHead) {
       throw new GithubCommentError(`Cannot determine commit hash. This is probably a slack deploy job`);
     }
-    console.log(2);
+    console.log(payload);
     const results = await this._octokit.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
-      owner: payload.organization || 'mmeigs', // will need to determine if 10gen or mongodb
+      owner: payload.organization, // will need to determine if 10gen or mongodb
       repo: payload.repoName,
       commit_sha: payload.newHead,
       headers: {
         'X-GitHub-Api-Version': '2022-11-28',
       },
     });
-    console.log(6);
     if (results.data) {
       for (const d of results.data) {
         parentPRs.push(d.number);
       }
     }
-    console.log(7);
-    //console.log(parentPRs)
     return parentPRs;
   }
 
   // Create new comment with relevant links
   async postComment(payload: Payload, pr: number, message: string): Promise<201 | undefined> {
     try {
+      console.log(payload);
       await this._octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
-        owner: payload.organization || 'mmeigs', //'schmalliso', NEED TO FIGURE OUT MONGODB OR 10GEN -- CAN DO FROM PR?
-        repo: payload.repoName, //'docs-poop',
-        issue_number: pr, //1,
+        owner: payload.organization, //NEED TO FIGURE OUT MONGODB OR 10GEN -- CAN DO FROM PR?
+        repo: payload.repoName,
+        issue_number: pr,
         body: `${message}`,
         headers: {
           'X-GitHub-Api-Version': '2022-11-28',
@@ -89,14 +87,12 @@ export class GithubConnector implements IGithubConnector {
   // as returned by getPullRequestCommentId, update the comment as needed
   // (i.e. with a new build log) by appending the link to the end.
   async updateComment(payload: Payload, comment: number, message: string): Promise<200 | undefined> {
+    console.log(payload);
     const resp = await this._octokit.request('GET /repos/{owner}/{repo}/issues/comments/{comment_id}', {
       owner: payload.organization || 'mmeigs',
       repo: payload.repoName,
       comment_id: comment,
     });
-    console.log(resp);
-    const currentComment = resp.data.body;
-    console.log(currentComment);
     const newComment = resp.data.body + `\n${message}`;
     try {
       await this._octokit.request('PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}', {
@@ -115,15 +111,15 @@ export class GithubConnector implements IGithubConnector {
   // get the ID of the comment created by the docs-builder-bot user
   // if there is no docs-builder-bot comment, return undefined
   async getPullRequestCommentId(payload: Payload, pr: number): Promise<number | undefined> {
+    console.log(payload.organization);
     const comments = await this._octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
-      owner: payload.organization || 'mmeigs',
+      owner: payload.organization,
       repo: payload.repoName,
       issue_number: pr,
       headers: {
         'X-GitHub-Api-Version': '2022-11-28',
       },
     });
-    console.log(comments);
     if (comments['data'].length > 0) {
       for (const comment of comments['data']) {
         if (comment.user && comment.user.login == 'docs-builder-bot') {
@@ -134,53 +130,3 @@ export class GithubConnector implements IGithubConnector {
     return;
   }
 }
-
-// const consoleLogger = new ConsoleLogger();
-// const testpayload: Payload = {
-//   jobType: 'githubPush',
-//   source: 'github',
-//   action: 'push',
-//   repoName: 'cloud-docs',
-//   branchName: 'test1',
-//   isFork: true,
-//   private: false,
-//   isXlarge: true,
-//   repoOwner: 'schmalliso',
-//   url: 'https://github.com/mmeigs/cloud-docs.git',
-//   newHead: 'e88e0c32098aabcafc640ff6f56cf6f0ea4fda3d',
-//   patch: undefined,
-//   alias: null,
-//   manifestPrefix: undefined,
-//   pathPrefix: null,
-//   aliased: undefined,
-//   primaryAlias: undefined,
-//   stable: undefined,
-//   isNextGen: true,
-//   regression: undefined,
-//   urlSlug: 'testthingie',
-//   prefix: 'atlas',
-//   project: 'cloud-docs',
-//   includeInGlobalSearch: false,
-//   mutPrefix: undefined,
-//   repoBranches: null,
-//   organization: 'mmeigs'
-// }
-
-// const githubConnector = new GithubConnector(consoleLogger, c, 'SECRET')
-
-// console.log(1);
-// githubConnector.getParentPRs(testpayload).then(function(results){
-//   console.log(8);
-//   console.log(results)
-//   for (const result of results) {
-//     const commentid = githubConnector.getPullRequestCommentId(testpayload, result).then(function(id){
-//       console.log(`The comment ID is: ${id}`)
-//       if (id != undefined) {
-//         githubConnector.updateComment(testpayload, id, '* append this pleezz')
-//       } else {
-//         githubConnector.postComment(testpayload, result, "This is a new comment from MM during development")
-//       }
-
-//     })
-//     }
-//   })
