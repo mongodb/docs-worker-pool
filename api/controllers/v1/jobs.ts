@@ -129,7 +129,7 @@ async function saveTaskId(jobId: string, taskExecutionRes: any, consoleLogger: C
     const taskId = taskArn.split('/').pop();
     await jobRepository.addTaskIdToJob(jobId, taskId);
     client.close();
-  } catch (err) {   
+  } catch (err) {
     client.close();
     consoleLogger.error('saveTaskId', err);
   }
