@@ -168,16 +168,17 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
 export const mergeAssociatedToCs = async (metadata: Metadata) => {
   try {
     const { project, branch } = metadata;
-    const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
-
-    // Short circuit execution here if there's no umbrella product metadata found
-    if (!umbrellaMetadata) return;
     // Short circuit execution if the project branch is NOT in repo branches
     // If we want to embed with staging builds, then this needs to be turned off
     // or converted so that local metadata ToC is added to tocInsertions
     const isStagingBranch = !(await getRepoBranchesEntry(project, branch));
     if (isStagingBranch) return;
 
+    const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
+
+    // Short circuit execution here if there's no umbrella product metadata found
+    if (!umbrellaMetadata) return;
+   
     const umbrellaRepoBranchesEntry = await getRepoBranchesEntry(umbrellaMetadata.project, umbrellaMetadata.branch);
     if (!umbrellaRepoBranchesEntry)
       throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
