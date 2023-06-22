@@ -38,20 +38,19 @@ export class EnhancedJobHandlerFactory {
     repoBranchesRepo: RepoBranchesRepository
   ): JobHandler {
     const jt = job.payload?.jobType;
-    if (jt in enhancedJobHandlerMap) {
-      return new enhancedJobHandlerMap[jt](
-        job,
-        config,
-        jobRepository,
-        fileSystemServices,
-        commandExecutor,
-        cdnConnector,
-        repoConnector,
-        logger,
-        validator,
-        repoBranchesRepo
-      );
-    }
-    throw new InvalidJobError('Job type not supported');
+    if (!(jt in enhancedJobHandlerMap)) throw new InvalidJobError('Job type not supported');
+
+    return new enhancedJobHandlerMap[jt](
+      job,
+      config,
+      jobRepository,
+      fileSystemServices,
+      commandExecutor,
+      cdnConnector,
+      repoConnector,
+      logger,
+      validator,
+      repoBranchesRepo
+    );
   }
 }

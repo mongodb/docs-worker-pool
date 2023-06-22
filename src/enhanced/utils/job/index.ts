@@ -73,9 +73,8 @@ export async function handleJob(jobId: string) {
   } catch (err) {
     consoleLogger.info('enhancedApp', err);
   }
-
-  // clean up
-  process.on('SIGTERM', () => {
-    client.close();
-  });
 }
+// clean up
+process.on('SIGTERM', () => {
+  client.close();
+});
