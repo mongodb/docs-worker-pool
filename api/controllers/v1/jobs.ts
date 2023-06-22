@@ -23,12 +23,14 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
     consoleLogger.info(body.jobId, 'enqueuing Job');
     await sqs.sendMessage(new JobQueueMessage(body.jobId, JobStatus.inQueue), c.get('jobUpdatesQueueUrl'), 0);
     consoleLogger.info(body.jobId, 'Job Queued Job');
+    client.close();
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
       body: body.jobId,
     };
   } catch (err) {
+    client.close();
     consoleLogger.error('TriggerLocalBuild', err);
     return {
       statusCode: 500,
@@ -106,7 +108,9 @@ export const FailStuckJobs = async () => {
   try {
     const hours = 8;
     await jobRepository.failStuckJobs(hours);
+    client.close();
   } catch (err) {
+    client.close();
     consoleLogger.error('FailStuckJobs', err);
   }
 };
@@ -124,7 +128,9 @@ async function saveTaskId(jobId: string, taskExecutionRes: any, consoleLogger: C
     // Only interested in the actual task ID since the whole ARN might have sensitive information
     const taskId = taskArn.split('/').pop();
     await jobRepository.addTaskIdToJob(jobId, taskId);
-  } catch (err) {
+    client.close();
+  } catch (err) {   
+    client.close();
     consoleLogger.error('saveTaskId', err);
   }
 }
@@ -181,6 +187,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
+  client.close();
   return {
     statusCode: 200,
   };
@@ -284,6 +291,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
+  client.close();
   return {
     statusCode: 200,
   };
@@ -333,4 +341,5 @@ async function SubmitArchiveJob(jobId: string) {
     repo.prefix[environment]
   );
   consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
+  client.close();
 }
