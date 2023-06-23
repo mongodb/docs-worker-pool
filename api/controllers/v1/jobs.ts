@@ -19,24 +19,26 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
   const consoleLogger = new ConsoleLogger();
   const sqs = new SQSConnector(consoleLogger, c);
   const body = JSON.parse(event.body);
+  let resp = {};
   try {
     consoleLogger.info(body.jobId, 'enqueuing Job');
     await sqs.sendMessage(new JobQueueMessage(body.jobId, JobStatus.inQueue), c.get('jobUpdatesQueueUrl'), 0);
     consoleLogger.info(body.jobId, 'Job Queued Job');
-    await client.close();
-    return {
+    resp = {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
       body: body.jobId,
     };
   } catch (err) {
-    await client.close();
     consoleLogger.error('TriggerLocalBuild', err);
-    return {
+    resp = {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
       body: err,
     };
+  } finally {
+    await client.close();
+    return resp;
   }
 };
 
@@ -108,10 +110,10 @@ export const FailStuckJobs = async () => {
   try {
     const hours = 8;
     await jobRepository.failStuckJobs(hours);
-    await client.close();
   } catch (err) {
-    await client.close();
     consoleLogger.error('FailStuckJobs', err);
+  } finally {
+    await client.close();
   }
 };
 
@@ -128,10 +130,10 @@ async function saveTaskId(jobId: string, taskExecutionRes: any, consoleLogger: C
     // Only interested in the actual task ID since the whole ARN might have sensitive information
     const taskId = taskArn.split('/').pop();
     await jobRepository.addTaskIdToJob(jobId, taskId);
-    await client.close();
   } catch (err) {
-    await client.close();
     consoleLogger.error('saveTaskId', err);
+  } finally {
+    await client.close();
   }
 }
 
