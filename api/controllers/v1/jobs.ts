@@ -4,7 +4,7 @@ import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
-import { GithubConnector } from '../../../src/services/github';
+import { GithubCommenter } from '../../../src/services/github';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
@@ -169,22 +169,21 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
-  const githubConnector = new GithubConnector(consoleLogger, c, githubToken);
+  const githubCommenter = new GithubCommenter(consoleLogger, c, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
 
   // Github comment
-  await githubConnector.getParentPRs(fullDocument.payload).then(function (results) {
+  await githubCommenter.getParentPRs(fullDocument.payload).then(function (results) {
     for (const pr of results) {
-      githubConnector.getPullRequestCommentId(fullDocument.payload, pr).then(function (id) {
-        console.log(`The comment ID is: ${id}`);
-        const fullDashboardUrl = c.get<string>('dashboardUrl') + jobId;
+      githubCommenter.getPullRequestCommentId(fullDocument.payload, pr).then(function (id) {
+        const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
         if (id != undefined) {
-          prepGithubComment(fullDocument, fullDashboardUrl, true).then(function (ghmessage) {
-            githubConnector.updateComment(fullDocument.payload, id, ghmessage);
+          prepGithubComment(fullDocument, fullJobDashboardUrl, true).then(function (ghmessage) {
+            githubCommenter.updateComment(fullDocument.payload, id, ghmessage);
           });
         } else {
-          prepGithubComment(fullDocument, fullDashboardUrl, false).then(function (ghmessage) {
-            githubConnector.postComment(fullDocument.payload, pr, ghmessage);
+          prepGithubComment(fullDocument, fullJobDashboardUrl, false).then(function (ghmessage) {
+            githubCommenter.postComment(fullDocument.payload, pr, ghmessage);
           });
         }
       });
