@@ -52,7 +52,6 @@ export type EnhancedPayload = {
   repoName: string;
   branchName: string;
   isFork: boolean;
-  private: boolean;
   isXlarge?: boolean | null;
   repoOwner: string;
   url: string;
