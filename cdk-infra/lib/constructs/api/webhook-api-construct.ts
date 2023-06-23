@@ -1,3 +1,4 @@
+import { Duration } from 'aws-cdk-lib';
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
@@ -5,6 +6,7 @@ import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
+import { getFeatureName } from '../../../utils/env';
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
 
@@ -35,12 +37,15 @@ export class WebhookApiConstruct extends Construct {
   constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, environment }: WebhookApiConstructProps) {
     super(scope, id);
 
+    const timeout = Duration.minutes(2);
+
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: `${HANDLERS_PATH}/slack.ts`,
       runtime,
       handler: 'DeployRepo',
       environment,
       bundling,
+      timeout,
     });
 
     const slackDisplayRepoLambda = new NodejsFunction(this, 'slackDisplayRepoLambda', {
@@ -49,6 +54,7 @@ export class WebhookApiConstruct extends Construct {
       handler: 'DeployRepoDisplayRepoOptions',
       environment,
       bundling,
+      timeout,
     });
 
     const dochubTriggerUpsertLambda = new NodejsFunction(this, 'dochubTriggerUpsertLambda', {
@@ -56,6 +62,7 @@ export class WebhookApiConstruct extends Construct {
       runtime,
       handler: 'UpsertEdgeDictionaryItem',
       environment,
+      timeout,
     });
 
     const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
@@ -64,6 +71,7 @@ export class WebhookApiConstruct extends Construct {
       handler: 'TriggerBuild',
       bundling,
       environment,
+      timeout,
     });
 
     const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
@@ -72,6 +80,7 @@ export class WebhookApiConstruct extends Construct {
       handler: 'TriggerLocalBuild',
       environment,
       bundling,
+      timeout,
     });
 
     const handleJobsLambda = new NodejsFunction(this, 'handleJobsLambda', {
@@ -87,9 +96,12 @@ export class WebhookApiConstruct extends Construct {
       code: Code.fromInline('exports.default = (event) => { console.log("hello, world!!"); }'),
       runtime,
       handler: 'RootEndpointLambda',
+      timeout,
     });
 
-    const restApi = new LambdaRestApi(this, 'webhookHandlers', {
+    const apiName = `webhookHandlers-${getFeatureName()}`;
+
+    const restApi = new LambdaRestApi(this, apiName, {
       handler: rootEndpointLambda,
       proxy: false,
     });

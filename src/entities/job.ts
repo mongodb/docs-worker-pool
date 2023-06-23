@@ -45,6 +45,34 @@ export type Payload = {
   includeInGlobalSearch: boolean;
 };
 
+export type EnhancedPayload = {
+  jobType: string;
+  source: string;
+  action: string;
+  repoName: string;
+  branchName: string;
+  isFork: boolean;
+  isXlarge?: boolean | null;
+  repoOwner: string;
+  url: string;
+  newHead?: string | null;
+  patch?: string | null;
+  alias?: string | null;
+  manifestPrefix?: string;
+  pathPrefix?: string | null;
+  mutPrefix?: string | null;
+  aliased?: boolean | null;
+  primaryAlias?: string | null;
+  stable?: boolean | null;
+  isNextGen?: boolean | null;
+  repoBranches?: any;
+  regression?: boolean | null;
+  urlSlug?: string | null;
+  prefix: string;
+  project: string;
+  includeInGlobalSearch?: boolean;
+};
+
 export type Job = {
   _id: string;
   useWithBenchmark?: boolean;
@@ -69,4 +97,30 @@ export type Job = {
   comMessage: string[] | null | undefined;
   purgedUrls: string[] | null | undefined;
   shouldGenerateSearchManifest: boolean;
+};
+
+export type EnhancedJob = {
+  _id: string;
+  useWithBenchmark?: boolean;
+  payload: EnhancedPayload;
+  createdTime: Date;
+  endTime: Date | null | undefined;
+  error?: any;
+  logs: string[] | null | undefined;
+  priority: number | null | undefined;
+  result?: any;
+  startTime: Date | null;
+  status: JobStatus | null;
+  title: string;
+  user: string;
+  manifestPrefix?: string | null;
+  pathPrefix?: string | null;
+  mutPrefix?: string | null;
+  buildCommands?: string[];
+  deployCommands?: string[];
+  invalidationStatusURL?: string | null;
+  email: string | null; // probably can be removed
+  comMessage?: string[] | null;
+  purgedUrls?: string[] | null;
+  shouldGenerateSearchManifest?: boolean;
 };
