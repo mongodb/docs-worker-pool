@@ -35,7 +35,6 @@ export default {
     aliased: true,
     urlSlug: 'upcoming',
     isFork: true,
-    private: false,
     isXlarge: true,
     repoOwner: 'mongodb',
     url: 'https://github.com/mongodb/docs-java',

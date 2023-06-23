@@ -20,22 +20,26 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
   const consoleLogger = new ConsoleLogger();
   const sqs = new SQSConnector(consoleLogger, c);
   const body = JSON.parse(event.body);
+  let resp = {};
   try {
     consoleLogger.info(body.jobId, 'enqueuing Job');
     await sqs.sendMessage(new JobQueueMessage(body.jobId, JobStatus.inQueue), c.get('jobUpdatesQueueUrl'), 0);
     consoleLogger.info(body.jobId, 'Job Queued Job');
-    return {
+    resp = {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
       body: body.jobId,
     };
   } catch (err) {
     consoleLogger.error('TriggerLocalBuild', err);
-    return {
+    resp = {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
       body: err,
     };
+  } finally {
+    await client.close();
+    return resp;
   }
 };
 
@@ -109,6 +113,8 @@ export const FailStuckJobs = async () => {
     await jobRepository.failStuckJobs(hours);
   } catch (err) {
     consoleLogger.error('FailStuckJobs', err);
+  } finally {
+    await client.close();
   }
 };
 
@@ -127,6 +133,8 @@ async function saveTaskId(jobId: string, taskExecutionRes: any, consoleLogger: C
     await jobRepository.addTaskIdToJob(jobId, taskId);
   } catch (err) {
     consoleLogger.error('saveTaskId', err);
+  } finally {
+    await client.close();
   }
 }
 
@@ -208,6 +216,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
+  await client.close();
   return {
     statusCode: 200,
   };
@@ -323,6 +332,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
+  await client.close();
   return {
     statusCode: 200,
   };
@@ -372,4 +382,5 @@ async function SubmitArchiveJob(jobId: string) {
     repo.prefix[environment]
   );
   consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
+  await client.close();
 }

@@ -49,7 +49,6 @@ async function prepGithubPushPayload(githubEvent: any, branchRepository: BranchR
       repoName: githubEvent.repository.name,
       branchName: githubEvent.ref.split('/')[2],
       isFork: githubEvent.repository.fork,
-      private: githubEvent.repository.private,
       isXlarge: true,
       repoOwner: githubEvent.repository.owner.login,
       url: githubEvent.repository.clone_url,
@@ -69,7 +68,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const branchRepository = new BranchRepository(db, c, consoleLogger);
-  const sig = event.headers['X-Hub-Signature-256'];
+
   if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {

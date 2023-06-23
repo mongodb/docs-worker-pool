@@ -1,11 +1,12 @@
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
 
-const HANDLERS_PATH = path.join(__dirname, '/../../../api/controllers/v2');
+const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
 
 const bundling: BundlingOptions = {
   sourceMap: true,
@@ -24,17 +25,15 @@ const bundling: BundlingOptions = {
 
 const runtime = Runtime.NODEJS_18_X;
 
-interface AutoBuilderApiConstructProps {
+interface WebhookApiConstructProps {
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
   environment: Record<string, string>;
 }
 
-export class AutoBuilderApiConstruct extends Construct {
-  constructor(scope: Construct, id: string, props: AutoBuilderApiConstructProps) {
+export class WebhookApiConstruct extends Construct {
+  constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, environment }: WebhookApiConstructProps) {
     super(scope, id);
-
-    const { jobsQueue, jobUpdatesQueue, environment } = props;
 
     const slackTriggerLambda = new NodejsFunction(this, 'slackTriggerLambda', {
       entry: `${HANDLERS_PATH}/slack.ts`,
@@ -71,6 +70,14 @@ export class AutoBuilderApiConstruct extends Construct {
       entry: `${HANDLERS_PATH}/jobs.ts`,
       runtime,
       handler: 'TriggerLocalBuild',
+      environment,
+      bundling,
+    });
+
+    const handleJobsLambda = new NodejsFunction(this, 'handleJobsLambda', {
+      entry: `${HANDLERS_PATH}/jobs.ts`,
+      runtime,
+      handler: 'HandleJobs',
       environment,
       bundling,
     });
@@ -130,6 +137,15 @@ export class AutoBuilderApiConstruct extends Construct {
     jobsQueue.grantSendMessages(triggerLocalBuildLambda);
 
     // grant permission for lambdas to enqueue messages to the job updates queue
+    jobUpdatesQueue.grantSendMessages(slackTriggerLambda);
+    jobUpdatesQueue.grantSendMessages(githubTriggerLambda);
     jobUpdatesQueue.grantSendMessages(triggerLocalBuildLambda);
+
+    // grant permission to read from jobUpdatesQueue
+    jobUpdatesQueue.grantConsumeMessages(handleJobsLambda);
+
+    const handleJobsQueueSource = new SqsEventSource(jobUpdatesQueue);
+
+    handleJobsLambda.addEventSource(handleJobsQueueSource);
   }
 }
