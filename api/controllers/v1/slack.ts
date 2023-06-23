@@ -244,7 +244,6 @@ function createPayload(
     aliased,
     urlSlug,
     isFork: true,
-    private: repoOwner === '10gen',
     isXlarge: true,
     repoOwner,
     url: 'https://github.com/' + repoOwner + '/' + repoName,
