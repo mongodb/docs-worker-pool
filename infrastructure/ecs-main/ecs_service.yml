@@ -58,6 +58,8 @@ Resources:
               Value: ${self:custom.previewBuildEnabled}
             - Name: FEATURE_FLAG_UPDATE_PAGES
               Value: ${self:custom.featureFlagUpdatePages}
+            - Name: FEATURE_FLAG_SEARCH_UI
+              Value: ${self:custom.featureFlagSearchUI}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
