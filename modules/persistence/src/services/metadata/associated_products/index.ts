@@ -117,7 +117,7 @@ const shapeToCsCursor = async (
     if (repoBranchesEntry) {
       const { url, prefix } = prefixFromEnvironment(branches);
       const { urlSlug, urlAliases = [], gitBranchName, publishOriginalBranchName } = repoBranchesEntry;
-      const alias = urlSlug || urlAliases[0] || (publishOriginalBranchName && gitBranchName);
+      const alias = urlSlug || urlAliases?.[0] || (publishOriginalBranchName && gitBranchName);
       tocInsertions[project][branch] = {
         original: copyToCTree(metadata.toctree),
         urlified: copyToCTree(metadata.toctree, prefix, url, alias),
