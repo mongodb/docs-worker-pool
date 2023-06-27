@@ -14,7 +14,6 @@ import { RepoBranchesRepository } from '../../../repositories/repoBranchesReposi
 import { ISSOConnector, OktaConnector } from '../../../services/sso';
 import { EnhancedJobHandlerFactory } from '../../job/enhancedJobHandlerFactory';
 
-let db: mongodb.Db;
 let consoleLogger: ConsoleLogger;
 let fileSystemServices: FileSystemServices;
 let jobCommandExecutor: JobSpecificCommandExecutor;
@@ -30,16 +29,8 @@ let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
 let ssmConnector: ParameterStoreConnector;
 let ssoConnector: ISSOConnector;
-let client: mongodb.MongoClient;
 
-export async function handleJob(jobId: string) {
-  const atlasURL = `mongodb+srv://${c.get('dbUsername')}:${c.get('dbPassword')}@${c.get(
-    'dbHost'
-  )}/?retryWrites=true&w=majority`;
-
-  client = new mongodb.MongoClient(atlasURL);
-  await client.connect();
-  db = client.db(c.get('dbName'));
+export async function handleJob(jobId: string, db: mongodb.Db) {
   consoleLogger = new ConsoleLogger();
   fileSystemServices = new FileSystemServices();
   jobCommandExecutor = new JobSpecificCommandExecutor();
@@ -74,7 +65,3 @@ export async function handleJob(jobId: string) {
     consoleLogger.info('enhancedApp', err);
   }
 }
-// clean up
-process.on('SIGTERM', () => {
-  client.close();
-});

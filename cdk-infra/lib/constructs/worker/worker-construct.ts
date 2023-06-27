@@ -13,6 +13,7 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
 import { isEnhanced } from '../../../utils/env';
+import { Duration } from 'aws-cdk-lib';
 
 interface WorkerConstructProps {
   environment: Record<string, string>;
@@ -92,6 +93,7 @@ export class WorkerConstruct extends Construct {
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment,
+      stopTimeout: Duration.minutes(5),
       logging: LogDrivers.awsLogs({
         streamPrefix: 'autobuilderworker',
         logGroup: taskDefLogGroup,
