@@ -172,7 +172,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
   if (!fullDocument) {
-    consoleLogger.error('Cannot find job entry in db', '');
+    consoleLogger.error(jobId, ': Cannot find job entry in db');
     return;
   }
   const repoName = fullDocument.payload.repoName;
@@ -180,23 +180,24 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   const githubCommenter = new GithubCommenter(consoleLogger, c, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
 
-  // Github comment
-  await githubCommenter.getParentPRs(fullDocument.payload).then(function (results) {
-    for (const pr of results) {
-      githubCommenter.getPullRequestCommentId(fullDocument.payload, pr).then(function (id) {
-        const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
-        if (id != undefined) {
-          prepGithubComment(fullDocument, fullJobDashboardUrl, true).then(function (ghmessage) {
-            githubCommenter.updateComment(fullDocument.payload, id, ghmessage);
-          });
-        } else {
-          prepGithubComment(fullDocument, fullJobDashboardUrl, false).then(function (ghmessage) {
-            githubCommenter.postComment(fullDocument.payload, pr, ghmessage);
-          });
-        }
-      });
+  // Create/Update Github comment
+  try {
+    const parentPRs = await githubCommenter.getParentPRs(fullDocument.payload);
+    for (const pr of parentPRs) {
+      const prCommentId = await githubCommenter.getPullRequestCommentId(fullDocument.payload, pr);
+      const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
+
+      if (prCommentId !== undefined) {
+        const ghMessage = await prepGithubComment(fullDocument, fullJobDashboardUrl, true);
+        githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
+      } else {
+        const ghMessage = await prepGithubComment(fullDocument, fullJobDashboardUrl, false);
+        githubCommenter.postComment(fullDocument.payload, pr, ghMessage);
+      }
     }
-  });
+  } catch (err) {
+    consoleLogger.error(jobId, `: Failed to comment on GitHub: ${err}`);
+  }
 
   // Slack notification
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
@@ -228,7 +229,7 @@ export const extractUrlFromMessage = (fullDocument): string[] => {
   return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
 };
 
-async function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = false): Promise<string> {
+function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = false): string {
   if (isUpdate) {
     return `\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
   }

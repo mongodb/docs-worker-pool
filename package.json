@@ -63,7 +63,7 @@
     "axios-mock-adapter": "^1.20.0",
     "babel-jest": "^27.1.0",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "esbuild": "^0.18.3",
+    "esbuild": "^0.17.19",
     "eslint": "^8.3.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
@@ -82,7 +82,7 @@
     "serverless-plugin-include-dependencies": "^5.1.0",
     "serverless-plugin-typescript": "^2.1.0",
     "serverless-prune-plugin": "^2.0.2",
-    "ts-jest": "^27.0.5",
+    "ts-jest": "^27.0.7",
     "typescript": "^4.4.3"
   },
   "husky": {

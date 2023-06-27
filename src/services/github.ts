@@ -108,6 +108,5 @@ export class GithubCommenter implements IGithubCommenter {
         }
       }
     }
-    return;
   }
 }
