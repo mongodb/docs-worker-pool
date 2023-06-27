@@ -4,7 +4,6 @@ on:
       - "master"
       - "integration"
       - "close-lambda-mdb-clients"
-      - "DOP-3604-gh-comment"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
