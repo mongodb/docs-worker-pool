@@ -2,7 +2,7 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getCdnInvalidatorUrl } from '../../../utils/cdn';
-import { getEnv, envShortToFullName } from '../../../utils/env';
+import { getEnv, envShortToFullName, getIsEnhanced } from '../../../utils/env';
 import { getSearchIndexFolder } from '../../../utils/search-index';
 import { getSsmPathPrefix } from '../../../utils/ssm';
 
@@ -39,13 +39,13 @@ export class WorkerEnvConstruct extends Construct {
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
 
-    const dbPassword = secureStrings[`${ssmPrefix}/atlas/password`];
-
+    const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
     this.environment = {
       ...secureStrings,
       STAGE: env,
       SNOOTY_ENV: envShortToFullName(env),
       MONGO_ATLAS_USERNAME: dbUsername,
+      MONGO_ATLAS_HOST: dbHost,
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
@@ -55,11 +55,12 @@ export class WorkerEnvConstruct extends Construct {
       PREVIEW_BUILD_ENABLED: previewBuildEnabled,
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       NPM_EMAIL: npmEmail,
-      REPO_BRANCHES_COLLECTION: repoBranchesCollection,
+      REPO_BRANCHES_COL_NAME: repoBranchesCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
       SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),
+      ENHANCED: `${getIsEnhanced()}`,
     };
   }
 }
