@@ -4,7 +4,7 @@ WORKDIR /home/docsworker-xlarge
 COPY  config config/
 COPY package*.json ./
 COPY tsconfig*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 COPY . ./
 RUN npm run build
 
@@ -94,7 +94,7 @@ RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.co
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/package*.json ./
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/config config/
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/build ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 
 # Persistence module copy
 # Create directory and add permissions to allow node module installation
@@ -102,14 +102,14 @@ RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/persistence/package*.json ./modules/persistence/
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/persistence/dist ./modules/persistence/
 ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
-RUN cd ./modules/persistence/ && ls && npm install --legacy-peer-deps
+RUN cd ./modules/persistence/ && ls && npm install
 
 # OAS Page Builder module copy
 # Create directory and add permissions to allow node module installation
 RUN mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/oas-page-builder/package*.json ./modules/oas-page-builder/
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/oas-page-builder/dist ./modules/oas-page-builder/
-RUN cd ./modules/oas-page-builder/ && npm install --legacy-peer-deps
+RUN cd ./modules/oas-page-builder/ && npm install
 
 # Needed for OAS Page Builder module in shared.mk
 ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
