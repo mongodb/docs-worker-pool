@@ -1,5 +1,4 @@
 import { mockDeep, mockReset } from 'jest-mock-extended';
-import { IConfig } from 'config';
 import { Octokit } from '@octokit/rest';
 import { ILogger } from '../../../src/services/logger';
 import { GithubCommenter } from '../../../src/services/github';
@@ -10,18 +9,15 @@ jest.mock('@octokit/rest');
 const MockedOctokit = Octokit as jest.Mock<typeof Octokit>;
 
 let logger: ILogger;
-let config: IConfig;
 let githubCommenter: GithubCommenter;
 
 beforeEach(() => {
   logger = mockDeep<ILogger>();
-  config = mockDeep<IConfig>();
   githubCommenter = new GithubCommenter(logger, 'gitHubToken');
 });
 
 afterEach(() => {
   mockReset(logger);
-  mockReset(config);
   jest.clearAllMocks();
 });
 
