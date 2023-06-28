@@ -16,7 +16,7 @@ let githubCommenter: GithubCommenter;
 beforeEach(() => {
   logger = mockDeep<ILogger>();
   config = mockDeep<IConfig>();
-  githubCommenter = new GithubCommenter(logger, config, 'gitHubToken');
+  githubCommenter = new GithubCommenter(logger, 'gitHubToken');
 });
 
 afterEach(() => {

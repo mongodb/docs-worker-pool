@@ -177,7 +177,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
-  const githubCommenter = new GithubCommenter(consoleLogger, c, githubToken);
+  const githubCommenter = new GithubCommenter(consoleLogger, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
 
   // Create/Update Github comment
