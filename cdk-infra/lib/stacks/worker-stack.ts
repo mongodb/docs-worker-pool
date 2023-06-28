@@ -16,13 +16,13 @@ export class WorkerStack extends Stack {
   constructor(scope: Construct, id: string, { queues, workerSecureStrings, ...props }: WorkerStackProps) {
     super(scope, id, props);
 
-    const { environment: workerEnvironment } = new WorkerEnvConstruct(this, 'workerSsmVars', {
+    const { environment } = new WorkerEnvConstruct(this, 'workerSsmVars', {
       ...queues,
       secureStrings: workerSecureStrings,
     });
 
     const { clusterName, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
-      environment: workerEnvironment,
+      dockerEnvironment: environment,
       ...queues,
     });
     const { buckets } = new WorkerBucketsConstruct(this, 'workerBuckets');

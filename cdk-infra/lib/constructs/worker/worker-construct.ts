@@ -17,7 +17,7 @@ import { Duration } from 'aws-cdk-lib';
 // import { CfnWorkspace as CfnPrometheusWorkspace } from 'aws-cdk-lib/aws-aps';
 
 interface WorkerConstructProps {
-  environment: Record<string, string>;
+  dockerEnvironment: Record<string, string>;
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
 }
@@ -25,8 +25,10 @@ export class WorkerConstruct extends Construct {
   readonly ecsTaskRole: IRole;
   readonly clusterName: string;
 
-  constructor(scope: Construct, id: string, { environment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
+  constructor(scope: Construct, id: string, { dockerEnvironment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
     super(scope, id);
+
+    console.log(dockerEnvironment);
 
     const vpc = new Vpc(this, 'vpc', {
       gatewayEndpoints: {
@@ -78,8 +80,8 @@ export class WorkerConstruct extends Construct {
     const containerProps: AssetImageProps = {
       file: isEnhanced() ? 'Dockerfile.enhanced' : undefined,
       buildArgs: {
-        NPM_BASE_64_AUTH: environment.NPM_BASE_64_AUTH,
-        NPM_EMAIL: environment.NPM_EMAIL,
+        NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
+        NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
       },
     };
 
@@ -93,7 +95,7 @@ export class WorkerConstruct extends Construct {
     // const prometheusWorkspace = new CfnPrometheusWorkspace(this, 'prometheusWorkspace', {});
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
-      environment,
+      environment: dockerEnvironment,
       stopTimeout: Duration.seconds(90),
       logging: LogDrivers.awsLogs({
         streamPrefix: 'autobuilderworker',
