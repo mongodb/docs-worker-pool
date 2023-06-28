@@ -28,8 +28,6 @@ export class WorkerConstruct extends Construct {
   constructor(scope: Construct, id: string, { dockerEnvironment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
     super(scope, id);
 
-    console.log(dockerEnvironment);
-
     const vpc = new Vpc(this, 'vpc', {
       gatewayEndpoints: {
         S3: { service: GatewayVpcEndpointAwsService.S3 },
@@ -108,6 +106,7 @@ export class WorkerConstruct extends Construct {
       taskDefinition,
       desiredCount: 5,
       minHealthyPercent: 100,
+      maxHealthyPercent: 200,
     });
 
     this.clusterName = cluster.clusterName;
