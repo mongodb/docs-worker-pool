@@ -172,7 +172,7 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
   if (!fullDocument) {
-    consoleLogger.error(jobId, ': Cannot find job entry in db');
+    consoleLogger.error(jobId, 'Cannot find job entry in db');
     return;
   }
   const repoName = fullDocument.payload.repoName;
@@ -188,15 +188,15 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
       const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
 
       if (prCommentId !== undefined) {
-        const ghMessage = await prepGithubComment(fullDocument, fullJobDashboardUrl, true);
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true);
         githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
       } else {
-        const ghMessage = await prepGithubComment(fullDocument, fullJobDashboardUrl, false);
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, false);
         githubCommenter.postComment(fullDocument.payload, pr, ghMessage);
       }
     }
   } catch (err) {
-    consoleLogger.error(jobId, `: Failed to comment on GitHub: ${err}`);
+    consoleLogger.error(jobId, `Failed to comment on GitHub: ${err}`);
   }
 
   // Slack notification

@@ -1,6 +1,5 @@
 import { Octokit } from '@octokit/rest';
 import { ILogger } from './logger';
-import { IConfig } from 'config';
 import { GithubCommentError } from '../errors/errors';
 import { Payload } from '../entities/job';
 
@@ -13,12 +12,10 @@ export interface IGithubCommenter {
 
 export class GithubCommenter implements IGithubCommenter {
   private _logger: ILogger;
-  private _config: IConfig;
   private _octokit: Octokit;
 
-  constructor(logger: ILogger, config: IConfig, githubToken: string) {
+  constructor(logger: ILogger, githubToken: string) {
     this._logger = logger;
-    this._config = config;
     this._octokit = new Octokit({
       auth: githubToken,
     });
