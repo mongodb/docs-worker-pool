@@ -14,6 +14,7 @@ import { Construct } from 'constructs';
 import path from 'path';
 import { isEnhanced } from '../../../utils/env';
 import { Duration } from 'aws-cdk-lib';
+// import { CfnWorkspace as CfnPrometheusWorkspace } from 'aws-cdk-lib/aws-aps';
 
 interface WorkerConstructProps {
   environment: Record<string, string>;
@@ -89,11 +90,11 @@ export class WorkerConstruct extends Construct {
       taskRole,
       executionRole,
     });
-
+    // const prometheusWorkspace = new CfnPrometheusWorkspace(this, 'prometheusWorkspace', {});
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment,
-      stopTimeout: Duration.minutes(5),
+      stopTimeout: Duration.seconds(90),
       logging: LogDrivers.awsLogs({
         streamPrefix: 'autobuilderworker',
         logGroup: taskDefLogGroup,

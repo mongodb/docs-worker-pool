@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { AutoBuilderStack } from '../lib/auto-builder-stack';
+import { AutoBuilderStack } from '../lib/stacks/auto-builder-stack';
 
 describe('autobuilder stack tests', () => {
   it('The stack contains the expected number of resources', () => {

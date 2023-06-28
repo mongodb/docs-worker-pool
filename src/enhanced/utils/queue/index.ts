@@ -70,3 +70,10 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     return payload;
   }
 }
+
+export async function submitJobToQueue(jobId: string) {
+  const region = config.get<string>('aws_region');
+  const queueUrl = config.get<string>('jobsQueueUrl');
+
+  const client = new SQS({ region });
+}

@@ -1,12 +1,12 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-import { WebhookApiConstruct } from './constructs/api/webhook-api-construct';
-import { WebhookEnvConstruct } from './constructs/api/webhook-env-construct';
-import { AutoBuilderQueuesConstruct } from './constructs/queue/queues-construct';
-import { WorkerBucketsConstruct } from './constructs/worker/buckets-construct';
-import { WorkerConstruct } from './constructs/worker/worker-construct';
-import { WorkerEnvConstruct } from './constructs/worker/worker-env-construct';
+import { WebhookApiConstruct } from '../constructs/api/webhook-api-construct';
+import { WebhookEnvConstruct } from '../constructs/api/webhook-env-construct';
+import { AutoBuilderQueuesConstruct } from '../constructs/queue/queues-construct';
+import { WorkerBucketsConstruct } from '../constructs/worker/buckets-construct';
+import { WorkerConstruct } from '../constructs/worker/worker-construct';
+import { WorkerEnvConstruct } from '../constructs/worker/worker-env-construct';
 
 interface AutoBuilderStackProps extends StackProps {
   workerSecureStrings: Record<string, string>;
