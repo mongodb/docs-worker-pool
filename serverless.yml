@@ -2,10 +2,9 @@ service: docs-worker-pool-api
 variablesResolutionMode: 20210326
 
 plugins:
-  - serverless-plugin-typescript
   - serverless-prune-plugin
   - serverless-iam-roles-per-function
-
+  - serverless-esbuild
 provider:
   name: aws
   runtime: nodejs18.x
@@ -21,11 +20,13 @@ provider:
   deploymentPrefix: serverless
   region: us-east-2
 package:
+  individually: true
   patterns:
     api/config/**
 custom:
-  serverlessPluginTypescript:
-    tsConfigFileLocation: '.api/tsconfig.build.json'
+  esbuild:
+    plugins: './api/config/plugins.js'
+
   deploymentBucket:
     dev: worker-pool-deployment
     stg: worker-pool-deployment
@@ -61,6 +62,7 @@ custom:
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
+  githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
   slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
   JobsQueueName: autobuilder-jobs-queue-${self:provider.stage}
@@ -106,6 +108,7 @@ webhook-env-core: &webhook-env-core
   USER_ENTITLEMENT_COL_NAME: ${self:custom.entitlementCollection}
   JOB_QUEUE_COL_NAME: ${self:custom.jobCollection}
   GITHUB_SECRET: ${self:custom.githubSecret}
+  GITHUB_BOT_PASSWORD: ${self:custom.githubBotPW}
   REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
   SLACK_SECRET: ${self:custom.slackSecret}
   SLACK_TOKEN: ${self:custom.slackAuthToken}
