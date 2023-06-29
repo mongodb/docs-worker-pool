@@ -90,6 +90,19 @@ export class WorkerConstruct extends Construct {
       executionRole,
     });
 
+    const updateTaskProtectionPolicy = new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: ['ecs:UpdateTaskProtection'],
+      conditions: {
+        ArnEquals: {
+          'ecs:cluster': cluster.clusterArn,
+        },
+      },
+      resources: [taskDefinition.taskDefinitionArn],
+    });
+
+    taskRole.addToPolicy(updateTaskProtectionPolicy);
+
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment: dockerEnvironment,
