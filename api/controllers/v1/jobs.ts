@@ -189,10 +189,10 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
 
       if (prCommentId !== undefined) {
         const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true);
-        githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
+        await githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
       } else {
         const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, false);
-        githubCommenter.postComment(fullDocument.payload, pr, ghMessage);
+        await githubCommenter.postComment(fullDocument.payload, pr, ghMessage);
       }
     }
   } catch (err) {
