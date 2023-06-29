@@ -50,13 +50,15 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
       continue;
     }
 
-    // Protecting the task will prevent the task from being deleted when we do a deploy.
-    // This means that the job will not be lost, and will continue to process like normal.
     // Before we delete the message from the queue, we want to protect the task.
     // This is because if protect the task after we delete, we could end up with a condition
     // where the task is unprotected, and it deletes a message. This means that if we happen
     // to do a deploy in this state, we will delete the message from the queue AND end the task,
     // preventing the job from completing while also losing the request in the process.
+    // This means that the job request will never be processed.
+    // NOTE: Intentionally not catching here, as this throw should be handled by the method listening to the queue.
+    // We don't want to continue listening to the queue, as there is something wrong with the protect task mechanism.
+    // We can let the task end, as it is unsafe to let an unprotected task process a job.
     await protectTask();
 
     // We have the message body, now we can delete it from the queue.
