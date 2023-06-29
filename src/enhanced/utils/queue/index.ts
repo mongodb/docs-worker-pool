@@ -2,6 +2,7 @@ import { ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
 import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
+import { protectTask } from '../job';
 
 /**
  * This function listens to the job queue until a message is received.
@@ -31,22 +32,6 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     const message = res.Messages[0];
 
-    // We have the message body, now we can delete it from the queue.
-    try {
-      await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
-    } catch (e) {
-      // We want to keep the task alive because we do not want to process multiple jobs.
-      // This could lead to multiple tasks completing jobs, without new tasks being spun up.
-      console.error(
-        `ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
-          e,
-          null,
-          4
-        )}`
-      );
-      continue;
-    }
-
     if (!message.Body) {
       console.error(`ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`);
       continue;
@@ -65,15 +50,33 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
       continue;
     }
 
+    // Protecting the task will prevent the task from being deleted when we do a deploy.
+    // This means that the job will not be lost, and will continue to process like normal.
+    // Before we delete the message from the queue, we want to protect the task.
+    // This is because if protect the task after we delete, we could end up with a condition
+    // where the task is unprotected, and it deletes a message. This means that if we happen
+    // to do a deploy in this state, we will delete the message from the queue AND end the task,
+    // preventing the job from completing while also losing the request in the process.
+    await protectTask();
+
+    // We have the message body, now we can delete it from the queue.
+    try {
+      await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
+    } catch (e) {
+      // We want to keep the task alive because we do not want to process multiple jobs.
+      // This could lead to multiple tasks completing jobs, without new tasks being spun up.
+      console.error(
+        `ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
+          e,
+          null,
+          4
+        )}`
+      );
+      continue;
+    }
+
     // Great! we received a proper message from the queue. Return this object as we will no longer
     // want to poll for more messages.
     return payload;
   }
-}
-
-export async function submitJobToQueue(jobId: string) {
-  const region = config.get<string>('aws_region');
-  const queueUrl = config.get<string>('jobsQueueUrl');
-
-  const client = new SQS({ region });
 }
