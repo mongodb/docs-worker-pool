@@ -1,50 +1,57 @@
 import { handleJob } from './utils/job';
 import { listenToJobQueue } from './utils/queue';
-import mongodb from 'mongodb';
+import mongodb, { MongoClient } from 'mongodb';
 import c from 'config';
 
-let client: mongodb.MongoClient | undefined;
+let client: MongoClient | undefined;
 
 async function connectToDb(): Promise<mongodb.Db> {
   const atlasURL = `mongodb+srv://${c.get('dbUsername')}:${c.get('dbPassword')}@${c.get(
     'dbHost'
   )}/?retryWrites=true&w=majority`;
 
-  client = new mongodb.MongoClient(atlasURL);
+  console.log('[connectToDb]: Instantiating MongoDB client object');
+  client = new MongoClient(atlasURL);
+  console.log('[connectToDb]: Connecting to client');
   await client.connect();
   return client.db(c.get('dbName'));
 }
 
 async function cleanupJob(): Promise<never> {
   try {
-    console.log('Closing MongoDB client connection...');
+    console.log('[cleanupJob]: Closing MongoDB client connection...');
     await client?.close();
 
-    console.log('Successfully closed MongoDB client connection!');
+    console.log('[cleanupJob]: Successfully closed MongoDB client connection!');
   } catch (e) {
-    console.log('ERROR! Unsuccessfully closed MongoDB client connection', e);
+    console.log('[cleanupJob]: ERROR! Unsuccessfully closed MongoDB client connection', e);
     process.exitCode = 1;
   }
 
   process.exit();
 }
 
+async function handleJobAndCleanUp(jobId: string, db: mongodb.Db) {
+  try {
+    await handleJob(jobId, db);
+  } finally {
+    await cleanupJob();
+  }
+}
 async function app(): Promise<void> {
-  console.log('starting application');
+  console.log('[app]: starting application');
 
   try {
     const { jobId } = await listenToJobQueue();
     const db = await connectToDb();
 
-    await handleJob(jobId, db);
+    await handleJobAndCleanUp(jobId, db);
 
-    console.log('process completed');
+    console.log('[app]: process completed');
   } catch (e) {
-    console.error('ERROR! Job initialization failed', e);
+    console.error('[app]: ERROR! Job initialization failed', e);
     process.exitCode = 1;
   }
-
-  await cleanupJob();
 }
 
 app();

@@ -14,7 +14,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
   const client = new SQS({ region });
 
-  console.log('Polling jobsQueue');
+  console.log('[listenToJobQueue]: Polling jobsQueue');
 
   // We want to loop indefinitely so that we continue to poll the queue.
   while (true) {
@@ -28,12 +28,12 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     if (!res.Messages || res.Messages.length === 0) continue;
 
-    console.log('received valid message');
-
     const message = res.Messages[0];
 
     if (!message.Body) {
-      console.error(`ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`);
+      console.error(
+        `[listenToJobQueue]: ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`
+      );
       continue;
     }
 
@@ -43,12 +43,14 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     // This ensures that the `payload` object will be of type `JobQueuePayload` after the if statement.
     if (!isJobQueuePayload(payload)) {
       console.error(
-        `ERROR! Invalid payload data received from message ID: ${message.MessageId}. Payload received: ${JSON.stringify(
-          payload
-        )}`
+        `[listenToJobQueue]: ERROR! Invalid payload data received from message ID: ${
+          message.MessageId
+        }. Payload received: ${JSON.stringify(payload)}`
       );
       continue;
     }
+
+    console.log('[listenToJobQueue]: received valid message');
 
     // Before we delete the message from the queue, we want to protect the task.
     // This is because if protect the task after we delete, we could end up with a condition
@@ -61,6 +63,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     // We can let the task end, as it is unsafe to let an unprotected task process a job.
     await protectTask();
 
+    console.log('[listenToJobQueue]: Deleting message...');
+
     // We have the message body, now we can delete it from the queue.
     try {
       await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
@@ -68,7 +72,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
       // We want to keep the task alive because we do not want to process multiple jobs.
       // This could lead to multiple tasks completing jobs, without new tasks being spun up.
       console.error(
-        `ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
+        `[listenToJobQueue]: ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
           e,
           null,
           4
@@ -76,6 +80,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
       );
       continue;
     }
+
+    console.log('[listenToJobQueue]: Message successfully deleted from queue!');
 
     // Great! we received a proper message from the queue. Return this object as we will no longer
     // want to poll for more messages.

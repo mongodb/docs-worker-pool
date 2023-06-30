@@ -98,7 +98,7 @@ export class WorkerConstruct extends Construct {
           'ecs:cluster': cluster.clusterArn,
         },
       },
-      resources: [taskDefinition.taskDefinitionArn],
+      resources: ['*'],
     });
 
     taskRole.addToPolicy(updateTaskProtectionPolicy);
