@@ -13,7 +13,6 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
 import { isEnhanced } from '../../../utils/env';
-import { Duration } from 'aws-cdk-lib';
 
 interface WorkerConstructProps {
   dockerEnvironment: Record<string, string>;
