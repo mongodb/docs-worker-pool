@@ -30,6 +30,24 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     const message = res.Messages[0];
 
+    // We have the message body, now we can delete it from the queue.
+    try {
+      await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
+    } catch (e) {
+      // We want to keep the task alive because we do not want to process multiple jobs.
+      // This could lead to multiple tasks completing jobs, without new tasks being spun up.
+      console.error(
+        `[listenToJobQueue]: ERROR! Could not delete message. Preventing job from being processed, as this could lead this job being processed multiple times. Error Obj: ${JSON.stringify(
+          e,
+          null,
+          4
+        )}`
+      );
+      continue;
+    }
+
+    console.log('[listenToJobQueue]: Message successfully deleted from queue!');
+
     if (!message.Body) {
       console.error(
         `[listenToJobQueue]: ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`
@@ -64,24 +82,6 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     await protectTask();
 
     console.log('[listenToJobQueue]: Deleting message...');
-
-    // We have the message body, now we can delete it from the queue.
-    try {
-      await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
-    } catch (e) {
-      // We want to keep the task alive because we do not want to process multiple jobs.
-      // This could lead to multiple tasks completing jobs, without new tasks being spun up.
-      console.error(
-        `[listenToJobQueue]: ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
-          e,
-          null,
-          4
-        )}`
-      );
-      continue;
-    }
-
-    console.log('[listenToJobQueue]: Message successfully deleted from queue!');
 
     // Great! we received a proper message from the queue. Return this object as we will no longer
     // want to poll for more messages.
