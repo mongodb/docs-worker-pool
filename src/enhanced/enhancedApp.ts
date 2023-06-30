@@ -31,6 +31,12 @@ async function cleanupJob(): Promise<never> {
   process.exit();
 }
 
+/**
+ * Added this function as it appears that the finally block would be executed after
+ * the first promise resolves within the app function. Broke this out so that we only call the clean up after we handle the job.
+ * the `finally` block is always called after the try, even if an exception is thrown. If an exception is thrown, the cleanUp job is called,
+ * and the exception is then thrown after.
+ */
 async function handleJobAndCleanUp(jobId: string, db: mongodb.Db) {
   try {
     await handleJob(jobId, db);

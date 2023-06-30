@@ -10,8 +10,8 @@
     "test": "jest",
     "cdk": "cdk",
     "deploy:enhanced": "rm -rf cdk.out && cdk deploy -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never --all",
-    "deploy:enhanced:worker": "rm -rf cdk.out && cdk deploy auto-builder-stack-enhancedApp-worker -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never",
-    "deploy:enhanced:webhooks": "rm -rf cdk.out && cdk deploy auto-builder-stack-enhancedApp-webhooks -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never"
+    "deploy:enhanced:worker": "rm -rf cdk.out && cdk deploy auto-builder-stack-enhancedApp-worker -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never --exclusively",
+    "deploy:enhanced:webhooks": "rm -rf cdk.out && cdk deploy auto-builder-stack-enhancedApp-webhooks -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never --exclusively"
 
   },
   "devDependencies": {
