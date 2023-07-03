@@ -61,3 +61,7 @@ async function app(): Promise<void> {
 }
 
 app();
+
+process.on('SIGTERM', async () => {
+  await cleanupJob();
+});
