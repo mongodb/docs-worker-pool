@@ -4,6 +4,7 @@ import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
+import { GithubCommenter } from '../../../src/services/github';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
@@ -165,13 +166,40 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
   await client.connect();
   const db = client.db(c.get('dbName'));
   const env = c.get<string>('env');
+  const githubToken = c.get<string>('githubBotPW');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
+  if (!fullDocument) {
+    consoleLogger.error(jobId, 'Cannot find job entry in db');
+    return;
+  }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
+  const githubCommenter = new GithubCommenter(consoleLogger, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
+
+  // Create/Update Github comment
+  try {
+    const parentPRs = await githubCommenter.getParentPRs(fullDocument.payload);
+    for (const pr of parentPRs) {
+      const prCommentId = await githubCommenter.getPullRequestCommentId(fullDocument.payload, pr);
+      const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
+
+      if (prCommentId !== undefined) {
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true);
+        await githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
+      } else {
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, false);
+        await githubCommenter.postComment(fullDocument.payload, pr, ghMessage);
+      }
+    }
+  } catch (err) {
+    consoleLogger.error(jobId, `Failed to comment on GitHub: ${err}`);
+  }
+
+  // Slack notification
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
@@ -200,6 +228,18 @@ export const extractUrlFromMessage = (fullDocument): string[] => {
   const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
   return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
 };
+
+function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = false): string {
+  if (isUpdate) {
+    return `\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
+  }
+  const urls = extractUrlFromMessage(fullDocument);
+  let stagingUrl = '';
+  if (urls.length > 0) {
+    stagingUrl = urls[urls.length - 1];
+  }
+  return `✨ Staging URL: [${stagingUrl}](${stagingUrl})\n\n#### 🪵 Logs\n\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
+}
 
 async function prepSummaryMessage(
   env: string,
