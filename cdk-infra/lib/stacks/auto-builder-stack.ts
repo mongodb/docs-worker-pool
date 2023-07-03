@@ -32,7 +32,7 @@ export class AutoBuilderStack extends Stack {
     });
 
     const { clusterName, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
-      environment: workerEnvironment,
+      dockerEnvironment: workerEnvironment,
       ...queues,
     });
 
