@@ -1,0 +1,32 @@
+on:
+  push:
+    paths: ["src/**"]
+    branches:
+      - "master"
+      - "integration"
+      - 'DOP-3833'
+
+concurrency:
+  group: environment-stg-${{ github.ref }}
+  cancel-in-progress: true
+name: Deploy Staging ECS
+jobs:
+  deploy-stg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '18.x'
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: Deploy Enhanced Infrastructure
+        run: |
+          cd cdk-infra/
+          npm ci
+          npm enhanced:deploy:worker
+
