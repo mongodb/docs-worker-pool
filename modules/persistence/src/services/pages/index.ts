@@ -39,6 +39,7 @@ interface PreviousPageMapping {
 
 const COLLECTION_NAME = 'documents';
 const UPDATED_AST_COLL_NAME = 'updated_documents';
+const MONTH_MILLIS = 2419200;
 
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
@@ -130,6 +131,8 @@ class UpdatedPagesManager {
       this.prevPageIds.delete(currentPageId);
       const prevPageData = this.prevPageDocsMapping[currentPageId];
 
+      const ttl = new Date(this.updateTime.getTime() + MONTH_MILLIS);
+
       // Update the document if page's current AST is different from previous build's.
       // New pages should always count as having a "different" AST
       if (!isEqual(page.ast, prevPageData?.ast)) {
@@ -144,6 +147,7 @@ class UpdatedPagesManager {
                 static_assets: this.findUpdatedAssets(page.static_assets, prevPageData?.static_assets),
                 updated_at: this.updateTime,
                 deleted: false,
+                ttl,
               },
               $setOnInsert: {
                 created_at: this.updateTime,
