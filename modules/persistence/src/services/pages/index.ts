@@ -2,7 +2,7 @@ import AdmZip from 'adm-zip';
 import { deserialize } from 'bson';
 import isEqual from 'fast-deep-equal';
 import { AnyBulkWriteOperation, Document, FindCursor, ObjectId } from 'mongodb';
-import { DOTCOM_PRD_DB_NAME, bulkWrite, db, getDbName, insert } from '../connector';
+import { DOTCOM_PRD_DB_NAME, bulkWrite, createTtlIndex, db, getDbName, insert } from '../connector';
 
 interface StaticAsset {
   checksum: string;
@@ -264,6 +264,8 @@ const updatePages = async (pages: Document[], collection: string) => {
     console.time(diffsTimerLabel);
 
     const dbName = await getDbName();
+
+    if (dbName !== DOTCOM_PRD_DB_NAME) await createTtlIndex(collection);
 
     const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, dbName);
     const operations = updatedPagesManager.getOperations();
