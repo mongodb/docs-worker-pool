@@ -20,6 +20,8 @@ jest.mock('../../src/services/connector', () => {
     bulkWrite: jest.fn((operations, collection) => {
       return mockDb.collection(collection).bulkWrite(operations);
     }),
+    getDbName: jest.fn(() => Promise.resolve('snooty')),
+    createTtlIndex: jest.fn(() => Promise.resolve()),
   };
 });
 
