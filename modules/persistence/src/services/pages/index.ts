@@ -2,7 +2,7 @@ import AdmZip from 'adm-zip';
 import { deserialize } from 'bson';
 import isEqual from 'fast-deep-equal';
 import { AnyBulkWriteOperation, Document, FindCursor, ObjectId } from 'mongodb';
-import { bulkWrite, db, insert } from '../connector';
+import { DOTCOM_PRD_DB_NAME, bulkWrite, db, getDbName, insert } from '../connector';
 
 interface StaticAsset {
   checksum: string;
@@ -103,14 +103,14 @@ class UpdatedPagesManager {
   prevPageDocsMapping: PreviousPageMapping;
   prevPageIds: Set<string>;
   updateTime: Date;
-  collection: string;
+  dbName: string;
 
-  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Document[], collection) {
+  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Document[], dbName: string) {
     this.currentPages = pages;
     this.operations = [];
     this.prevPageDocsMapping = prevPageDocsMapping;
     this.prevPageIds = prevPagesIds;
-    this.collection = collection;
+    this.dbName = dbName;
 
     this.updateTime = new Date();
     this.checkForPageDiffs();
@@ -133,8 +133,7 @@ class UpdatedPagesManager {
       this.prevPageIds.delete(currentPageId);
       const prevPageData = this.prevPageDocsMapping[currentPageId];
 
-      const ttl =
-        this.collection !== 'snooty_dotcomprd' ? new Date(this.updateTime.getTime() + MONTH_MILLIS) : undefined;
+      const ttl = this.dbName !== DOTCOM_PRD_DB_NAME ? new Date(this.updateTime.getTime() + MONTH_MILLIS) : undefined;
 
       // Update the document if page's current AST is different from previous build's.
       // New pages should always count as having a "different" AST
@@ -263,7 +262,10 @@ const updatePages = async (pages: Document[], collection: string) => {
 
     const diffsTimerLabel = 'finding page differences';
     console.time(diffsTimerLabel);
-    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, collection);
+
+    const dbName = await getDbName();
+
+    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, dbName);
     const operations = updatedPagesManager.getOperations();
     console.timeEnd(diffsTimerLabel);
 

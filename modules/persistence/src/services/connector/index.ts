@@ -7,6 +7,8 @@ import * as mongodb from 'mongodb';
 import { ObjectId, Db, Document } from 'mongodb';
 import { db as poolDb } from './pool';
 
+export const DOTCOM_PRD_DB_NAME = 'snooty_dotcomprd';
+
 // We should only ever have one client active at a time.
 const atlasURL = `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority&maxPoolSize=20`;
 const client = new mongodb.MongoClient(atlasURL);
@@ -95,6 +97,19 @@ export const deleteDocuments = async (_ids: ObjectId[], collection: string) => {
     return res;
   } catch (error) {
     console.error(`Error at delete time for ${collection}: ${error}`);
+    throw error;
+  }
+};
+
+export const getDbName = async () => (await db()).databaseName;
+
+export const createTtlIndex = async (collection: string) => {
+  const createIndexSession = await db();
+
+  try {
+    await createIndexSession.collection(collection).createIndex('ttl');
+  } catch (error) {
+    console.error(`Error at creating TTL index for the ${collection} collection`, error);
     throw error;
   }
 };
