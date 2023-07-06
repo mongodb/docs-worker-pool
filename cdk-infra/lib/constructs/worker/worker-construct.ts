@@ -15,7 +15,7 @@ import path from 'path';
 import { isEnhanced } from '../../../utils/env';
 
 interface WorkerConstructProps {
-  environment: Record<string, string>;
+  dockerEnvironment: Record<string, string>;
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
 }
@@ -23,7 +23,7 @@ export class WorkerConstruct extends Construct {
   readonly ecsTaskRole: IRole;
   readonly clusterName: string;
 
-  constructor(scope: Construct, id: string, { environment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
+  constructor(scope: Construct, id: string, { dockerEnvironment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
     super(scope, id);
 
     const vpc = new Vpc(this, 'vpc', {
@@ -76,8 +76,8 @@ export class WorkerConstruct extends Construct {
     const containerProps: AssetImageProps = {
       file: isEnhanced() ? 'Dockerfile.enhanced' : undefined,
       buildArgs: {
-        NPM_BASE_64_AUTH: environment.NPM_BASE_64_AUTH,
-        NPM_EMAIL: environment.NPM_EMAIL,
+        NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
+        NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
       },
     };
 
@@ -89,9 +89,22 @@ export class WorkerConstruct extends Construct {
       executionRole,
     });
 
+    const updateTaskProtectionPolicy = new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: ['ecs:UpdateTaskProtection'],
+      conditions: {
+        ArnEquals: {
+          'ecs:cluster': cluster.clusterArn,
+        },
+      },
+      resources: ['*'],
+    });
+
+    taskRole.addToPolicy(updateTaskProtectionPolicy);
+
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
-      environment,
+      environment: dockerEnvironment,
       logging: LogDrivers.awsLogs({
         streamPrefix: 'autobuilderworker',
         logGroup: taskDefLogGroup,
@@ -103,6 +116,7 @@ export class WorkerConstruct extends Construct {
       taskDefinition,
       desiredCount: 5,
       minHealthyPercent: 100,
+      maxHealthyPercent: 200,
     });
 
     this.clusterName = cluster.clusterName;
