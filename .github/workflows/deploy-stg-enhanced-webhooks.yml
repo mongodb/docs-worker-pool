@@ -28,5 +28,5 @@ jobs:
         run: |
           cd cdk-infra/
           npm ci
-          npm enhanced:deploy:webhooks
+          npm deploy:enhanced:webhooks
 

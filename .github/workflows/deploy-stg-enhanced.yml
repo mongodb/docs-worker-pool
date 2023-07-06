@@ -21,5 +21,5 @@ jobs:
         run: |
           cd cdk-infra/
           npm ci
-          npm enhanced:deploy
+          npm deploy:enhanced
 
