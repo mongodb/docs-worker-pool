@@ -7,6 +7,7 @@ import { AutoBuilderQueuesConstruct } from '../constructs/queue/queues-construct
 import { WorkerBucketsConstruct } from '../constructs/worker/buckets-construct';
 import { WorkerConstruct } from '../constructs/worker/worker-construct';
 import { WorkerEnvConstruct } from '../constructs/worker/worker-env-construct';
+import { AutoBuilderVpcStack } from './auto-builder-vpc-stack';
 
 interface AutoBuilderStackProps extends StackProps {
   workerSecureStrings: Record<string, string>;
@@ -21,6 +22,7 @@ export class AutoBuilderStack extends Stack {
     super(scope, id, props);
 
     const queues = new AutoBuilderQueuesConstruct(this, 'queues');
+    const { vpc } = new AutoBuilderVpcStack(this, 'enhancedVpc');
 
     const { environment: webhookEnvironment } = new WebhookEnvConstruct(this, 'ssmVars', {
       ...queues,
@@ -33,6 +35,7 @@ export class AutoBuilderStack extends Stack {
 
     const { clusterName, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
       dockerEnvironment: workerEnvironment,
+      vpc,
       ...queues,
     });
 

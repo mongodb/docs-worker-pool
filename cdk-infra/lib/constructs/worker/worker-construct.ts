@@ -1,4 +1,4 @@
-import { GatewayVpcEndpointAwsService, InterfaceVpcEndpointAwsService, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { GatewayVpcEndpointAwsService, IVpc, InterfaceVpcEndpointAwsService, Vpc } from 'aws-cdk-lib/aws-ec2';
 import {
   AssetImageProps,
   Cluster,
@@ -18,27 +18,18 @@ interface WorkerConstructProps {
   dockerEnvironment: Record<string, string>;
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
+  vpc: IVpc;
 }
 export class WorkerConstruct extends Construct {
   readonly ecsTaskRole: IRole;
   readonly clusterName: string;
 
-  constructor(scope: Construct, id: string, { dockerEnvironment, jobsQueue, jobUpdatesQueue }: WorkerConstructProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    { dockerEnvironment, jobsQueue, jobUpdatesQueue, vpc }: WorkerConstructProps
+  ) {
     super(scope, id);
-
-    const vpc = new Vpc(this, 'vpc', {
-      gatewayEndpoints: {
-        S3: { service: GatewayVpcEndpointAwsService.S3 },
-      },
-    });
-
-    vpc.addInterfaceEndpoint('EcrDockerEndpoint', {
-      service: InterfaceVpcEndpointAwsService.ECR_DOCKER,
-    });
-
-    vpc.addInterfaceEndpoint('EcrApiEndpoint', {
-      service: InterfaceVpcEndpointAwsService.ECR,
-    });
 
     const cluster = new Cluster(this, 'cluster', {
       vpc,
