@@ -32,7 +32,7 @@ async function main() {
   // are isolated resources that are not interacting with other stacks.
   // To separate between different environments, we can look into specific accounts for each environment:
   // https://docs.aws.amazon.com/whitepapers/latest/organizing-your-aws-environment/organizing-your-aws-environment.html
-  const { vpc } = new AutoBuilderVpcStack(app, 'enhanced-vpc');
+  const { vpc } = new AutoBuilderVpcStack(app, 'enhanced-vpc', { env });
 
   const stackName = `auto-builder-stack-${getFeatureName()}`;
 
