@@ -79,6 +79,7 @@ export abstract class JobHandler {
     this._repoBranchesRepo = repoBranchesRepo;
   }
 
+  // called during build stage of
   abstract prepStageSpecificNextGenCommands(): void;
 
   private logErrorMessage(message: string): void {
@@ -389,6 +390,10 @@ export abstract class JobHandler {
   protected abstract deploy(): Promise<CommandExecutorResponse>;
 
   protected abstract prepDeployCommands(): void;
+
+  protected prepSearchDeploy(): void {
+    this._logger.info(this._currJob._id, 'Preparing search deploy');
+  }
 
   // TODO: Reduce state changes
   protected prepBuildCommands(): void {

@@ -12,7 +12,7 @@ import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { InvalidJobError } from '../errors/errors';
 
 // TODO: Move this to a generic util and out of this job file
-const joinUrlAndPrefix = (url, prefix) => {
+export const joinUrlAndPrefix = (url: string, prefix: string) => {
   const needsTrim = url.endsWith('/') && prefix.startsWith('/');
   const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
 

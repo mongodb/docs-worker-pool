@@ -10,6 +10,7 @@ import { IJobRepoLogger } from '../services/logger';
 import { IRepoConnector } from '../services/repo';
 import { JobHandler } from './jobHandler';
 import { IJobValidator } from './jobValidator';
+import { joinUrlAndPrefix } from './manifestJobHandler';
 
 export class ProductionJobHandler extends JobHandler {
   constructor(
@@ -60,6 +61,66 @@ export class ProductionJobHandler extends JobHandler {
         ] += ` MANIFEST_PREFIX=${manifestPrefix} GLOBAL_SEARCH_FLAG=${searchFlag}`;
       }
     }
+    // have to combine search deploy commands
+    // manifestJobHandler.prepDeployCommands
+
+    this.currJob.shouldGenerateSearchManifest = this.shouldGenerateSearchManifest();
+    if (this.currJob.shouldGenerateSearchManifest) {
+      this.prepSearchDeploy();
+    }
+  }
+
+  prepSearchDeploy(): void {
+    const b = this._config.get<string>('searchIndexBucket') ?? 'docs-search-indexes-test';
+    // /deploy -> send to /prd folder. /test-deploy -> send to /preprd folder
+    const env = this._config.get<string>('env');
+    // Note: mut-index automatically prepends 'search-indexes/' to the folder.
+    const f = this._config.get<string>('searchIndexFolder')?.[env] ?? 'fallback-folder';
+    this.logger.info(this.currJob._id, `Manifest attempt to upload to bucket: ${b}, folder: ${f}`);
+    // Due to the dual existence of prefixes, check for both for redundancy
+    const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;
+    const muP = this.currJob.mutPrefix ?? this.currJob.payload.mutPrefix;
+    const url = this.currJob.payload?.repoBranches?.url?.[env];
+    const jUaP = joinUrlAndPrefix;
+    const globalSearch = this.currJob.payload.stable ? '-g' : '';
+
+    // Rudimentary error logging
+    if (!b) {
+      this.logger.info(this.currJob._id, `searchIndexBucket not found`);
+    }
+    if (!f) {
+      this.logger.info(this.currJob._id, `searchIndexFolder not found`);
+    }
+
+    if (!url) {
+      this.logger.error(
+        this.currJob._id,
+        `repoBranches.url entry for this environment (${env}) not found for ${this.currJob._id}`
+      );
+      return;
+    }
+
+    if (!this.currJob.manifestPrefix) {
+      this.logger.error(this.currJob._id, `Manifest prefix not found for ${this.currJob._id}`);
+      return;
+    }
+    const searchCommands = [
+      '. /venv/bin/activate',
+      `cd repos/${this.currJob.payload.repoName}`,
+      'echo IGNORE: testing manifest generation deploy commands',
+      'ls -al',
+      // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2
+      `mut-index upload bundle.zip -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP || '')} ${globalSearch}`,
+    ];
+    for (const command of searchCommands) {
+      if (this.currJob.deployCommands.indexOf(command) === -1) {
+        this.currJob.deployCommands.push(command);
+      }
+    }
+    this.logger.info(
+      this.currJob._id,
+      `deploy commands: ${this.currJob.deployCommands.map((command) => command + '\n')}`
+    );
   }
 
   prepStageSpecificNextGenCommands(): void {
@@ -126,10 +187,6 @@ export class ProductionJobHandler extends JobHandler {
         await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}Deploy details:\n\n${resp.output}`);
       }
 
-      this.currJob.shouldGenerateSearchManifest = this.shouldGenerateSearchManifest();
-      if (this.currJob.shouldGenerateSearchManifest) {
-        this.queueManifestJob();
-      }
       return resp;
     } catch (errResult) {
       await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)}stdErr: ${errResult.stderr}`);
