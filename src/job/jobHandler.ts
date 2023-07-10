@@ -618,7 +618,7 @@ export abstract class JobHandler {
 
   protected async previewWebhook(): Promise<AxiosResponse> {
     const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
-    const gatsbySiteDataSource = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK;
+    const gatsbySiteDataSource = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_URL;
     const url = `${previewWebhookURL}/${gatsbySiteDataSource}`;
     const { data } = await axios.post(
       url,

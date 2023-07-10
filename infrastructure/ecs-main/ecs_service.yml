@@ -58,8 +58,10 @@ Resources:
               Value: ${self:custom.previewBuildEnabled}
             - Name: FEATURE_FLAG_UPDATE_PAGES
               Value: ${self:custom.featureFlagUpdatePages}
-            - Name: GATSBY_CLOUD_PREVIEW_WEBHOOK
-              Value: ${self:custom.gatsbyCloudPreviewWebhook}
+            - Name: GATSBY_CLOUD_PREVIEW_WEBHOOK_URL
+              Value: ${self:custom.gatsbyCloudPreviewWebhookURL}
+            - Name: GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED
+              Value: ${self:custom.gatsbyCloudPreviewWebhookFeature}
             - Name: GATSBY_TEST_SEARCH_UI
               Value: ${self:custom.featureFlagSearchUI}
             - Name: FASTLY_MAIN_TOKEN

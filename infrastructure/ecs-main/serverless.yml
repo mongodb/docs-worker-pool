@@ -116,7 +116,8 @@ custom:
   featureFlagUpdatePages: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/update_pages}
   featureFlagSearchUI: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/search_ui}
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
-  gatsbyCloudPreviewWebhook: ${ssm:/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source}
+  gatsbyCloudPreviewWebhookFeature: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_webhook_enable}
+  gatsbyCloudPreviewWebhookURL: ${ssm:/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
   fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
   fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}

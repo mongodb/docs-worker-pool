@@ -73,8 +73,8 @@ export class StagingJobHandler extends JobHandler {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));
       }
       // Invoke Gatsby Preview Webhook
-      const featureUpdatePagesEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
-      if (featureUpdatePagesEnabled) {
+      const featurePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED;
+      if (featurePreviewWebhookEnabled) {
         // TODO: We may want to send a response to slack or something to let us know
         // the outcome of the call
         this.previewWebhook();
