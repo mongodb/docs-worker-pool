@@ -1,3 +1,4 @@
+import axios, { AxiosResponse } from 'axios';
 import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -613,6 +614,24 @@ export abstract class JobHandler {
 
   public getLogger(): ILogger {
     return this._logger;
+  }
+
+  protected async previewWebhook(): Promise<AxiosResponse> {
+    const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
+    const gatsbySiteDataSource = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK;
+    const url = `${previewWebhookURL}/${gatsbySiteDataSource}`;
+    const { data } = await axios.post(
+      url,
+      {
+        project: this.currJob.payload.project,
+        branch: this.currJob.payload.branchName,
+      },
+      {
+        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty' },
+      }
+    );
+
+    return data;
   }
 }
 
