@@ -463,7 +463,17 @@ export abstract class JobHandler {
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
     if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
-      const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
+      // extract search deploy job to time and test
+      const searchCommandIdx = this.currJob.deployCommands.findIndex((c) => c.match(/^mut\-index/));
+      let deployCmdsNoSearch = this.currJob.deployCommands;
+      if (searchCommandIdx > -1) {
+        await this.callWithBenchmark(this.currJob.deployCommands[searchCommandIdx], 'search');
+        deployCmdsNoSearch = this.currJob.deployCommands
+          .slice(0, searchCommandIdx)
+          .concat(this.currJob.deployCommands.slice(searchCommandIdx + 1, this.currJob.deployCommands.length));
+      }
+
+      const resp = await this._commandExecutor.execute(deployCmdsNoSearch);
       if (resp?.error?.includes?.('ERROR')) {
         await this._logger.save(
           this.currJob._id,
