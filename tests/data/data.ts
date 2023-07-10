@@ -266,11 +266,6 @@ export class TestDataProvider {
     const ret = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       `make next-gen-deploy MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);
-    if (job.payload.manifestPrefix) {
-      // TODO: is job.payload.stableBranch supposed to be includeInGlobalSearch?
-      const stable = job.payload.stable ? '-g' : '';
-      ret[ret.length - 1] += ` MANIFEST_PREFIX=${job.payload.manifestPrefix} GLOBAL_SEARCH_FLAG=${stable}`;
-    }
     return ret;
   }
 
