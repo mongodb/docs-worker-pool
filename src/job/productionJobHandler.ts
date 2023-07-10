@@ -65,6 +65,10 @@ export class ProductionJobHandler extends JobHandler {
     // manifestJobHandler.prepDeployCommands
 
     this.currJob.shouldGenerateSearchManifest = this.shouldGenerateSearchManifest();
+    this.logger.save(
+      this.currJob._id,
+      `this.currJob.shouldGenerateSearchManifest ${this.currJob.shouldGenerateSearchManifest}`
+    );
     if (this.currJob.shouldGenerateSearchManifest) {
       this.prepSearchDeploy();
     }
@@ -76,7 +80,7 @@ export class ProductionJobHandler extends JobHandler {
     const env = this._config.get<string>('env');
     // Note: mut-index automatically prepends 'search-indexes/' to the folder.
     const f = this._config.get<string>('searchIndexFolder')?.[env] ?? 'fallback-folder';
-    this.logger.info(this.currJob._id, `Manifest attempt to upload to bucket: ${b}, folder: ${f}`);
+    this.logger.save(this.currJob._id, `Manifest attempt to upload to bucket: ${b}, folder: ${f}`);
     // Due to the dual existence of prefixes, check for both for redundancy
     const maP = this.currJob.manifestPrefix ?? this.currJob.payload.manifestPrefix;
     const muP = this.currJob.mutPrefix ?? this.currJob.payload.mutPrefix;
@@ -86,10 +90,10 @@ export class ProductionJobHandler extends JobHandler {
 
     // Rudimentary error logging
     if (!b) {
-      this.logger.info(this.currJob._id, `searchIndexBucket not found`);
+      this.logger.save(this.currJob._id, `searchIndexBucket not found`);
     }
     if (!f) {
-      this.logger.info(this.currJob._id, `searchIndexFolder not found`);
+      this.logger.save(this.currJob._id, `searchIndexFolder not found`);
     }
 
     if (!url) {
@@ -117,7 +121,7 @@ export class ProductionJobHandler extends JobHandler {
         this.currJob.deployCommands.push(command);
       }
     }
-    this.logger.info(
+    this.logger.save(
       this.currJob._id,
       `deploy commands: ${this.currJob.deployCommands.map((command) => command + '\n')}`
     );
