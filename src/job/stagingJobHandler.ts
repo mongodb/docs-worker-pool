@@ -72,6 +72,14 @@ export class StagingJobHandler extends JobHandler {
       if (resp?.output?.includes('Summary')) {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));
       }
+      // Invoke Gatsby Preview Webhook
+      const featureUpdatePagesEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
+      if (featureUpdatePagesEnabled) {
+        // TODO: We may want to send a response to slack or something to let us know
+        // the outcome of the call
+        this.previewWebhook();
+      }
+
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
       return resp;
