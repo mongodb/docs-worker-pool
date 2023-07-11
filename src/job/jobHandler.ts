@@ -616,11 +616,11 @@ export abstract class JobHandler {
     return this._logger;
   }
 
-  protected async previewWebhook(): Promise<AxiosResponse> {
+  protected async previewWebhook(): Promise<AxiosResponse<string>> {
     const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
     const gatsbySiteDataSource = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_URL;
     const url = `${previewWebhookURL}/${gatsbySiteDataSource}`;
-    const { data } = await axios.post(
+    return await axios.post(
       url,
       {
         project: this.currJob.payload.project,
@@ -630,8 +630,6 @@ export abstract class JobHandler {
         headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty' },
       }
     );
-
-    return data;
   }
 }
 
