@@ -6,6 +6,7 @@ import { APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
+import { GithubCommenter } from '../../../src/services/github';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { JobQueueMessage } from '../../../src/entities/queueMessage';
@@ -27,22 +28,26 @@ export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Pro
   const consoleLogger = new ConsoleLogger();
   const sqs = new SQSConnector(consoleLogger, c);
   const body = JSON.parse(event.body);
+  let resp = {};
   try {
     consoleLogger.info(body.jobId, 'enqueuing Job');
     await sqs.sendMessage(new JobQueueMessage(body.jobId, JobStatus.inQueue), c.get('jobUpdatesQueueUrl'), 0);
     consoleLogger.info(body.jobId, 'Job Queued Job');
-    return {
+    resp = {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
       body: body.jobId,
     };
   } catch (err) {
     consoleLogger.error('TriggerLocalBuild', err);
-    return {
+    resp = {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
       body: err,
     };
+  } finally {
+    await client.close();
+    return resp;
   }
 };
 
@@ -116,6 +121,8 @@ export const FailStuckJobs = async () => {
     await jobRepository.failStuckJobs(hours);
   } catch (err) {
     consoleLogger.error('FailStuckJobs', err);
+  } finally {
+    await client.close();
   }
 };
 
@@ -134,6 +141,8 @@ async function saveTaskId(jobId: string, taskExecutionRes: any, consoleLogger: C
     await jobRepository.addTaskIdToJob(jobId, taskId);
   } catch (err) {
     consoleLogger.error('saveTaskId', err);
+  } finally {
+    await client.close();
   }
 }
 
@@ -165,13 +174,40 @@ async function NotifyBuildSummary(jobId: string, mongoClient?: mongodb.MongoClie
   await client.connect();
   const db = client.db(c.get('dbName'));
   const env = c.get<string>('env');
+  const githubToken = c.get<string>('githubBotPW');
 
   const jobRepository = new JobRepository(db, c, consoleLogger);
   // TODO: Make fullDocument be of type Job, validate existence
   const fullDocument = await jobRepository.getJobById(jobId);
+  if (!fullDocument) {
+    consoleLogger.error(jobId, 'Cannot find job entry in db');
+    return;
+  }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
+  const githubCommenter = new GithubCommenter(consoleLogger, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
+
+  // Create/Update Github comment
+  try {
+    const parentPRs = await githubCommenter.getParentPRs(fullDocument.payload);
+    for (const pr of parentPRs) {
+      const prCommentId = await githubCommenter.getPullRequestCommentId(fullDocument.payload, pr);
+      const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
+
+      if (prCommentId !== undefined) {
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true);
+        await githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
+      } else {
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, false);
+        await githubCommenter.postComment(fullDocument.payload, pr, ghMessage);
+      }
+    }
+  } catch (err) {
+    consoleLogger.error(jobId, `Failed to comment on GitHub: ${err}`);
+  }
+
+  // Slack notification
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
@@ -189,6 +225,7 @@ async function NotifyBuildSummary(jobId: string, mongoClient?: mongodb.MongoClie
     ),
     entitlement['slack_user_id']
   );
+  await client.close();
   return {
     statusCode: 200,
   };
@@ -199,6 +236,18 @@ export const extractUrlFromMessage = (fullDocument): string[] => {
   const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
   return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
 };
+
+function prepGithubComment(fullDocument: Job, jobUrl: string, isUpdate = false): string {
+  if (isUpdate) {
+    return `\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
+  }
+  const urls = extractUrlFromMessage(fullDocument);
+  let stagingUrl = '';
+  if (urls.length > 0) {
+    stagingUrl = urls[urls.length - 1];
+  }
+  return `✨ Staging URL: [${stagingUrl}](${stagingUrl})\n\n#### 🪵 Logs\n\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
+}
 
 async function prepSummaryMessage(
   env: string,
@@ -292,6 +341,7 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
     ),
     entitlement['slack_user_id']
   );
+  await client.close();
   return {
     statusCode: 200,
   };
@@ -341,6 +391,7 @@ async function SubmitArchiveJob(jobId: string) {
     repo.prefix[environment]
   );
   consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
+  await client.close();
 }
 
 /**

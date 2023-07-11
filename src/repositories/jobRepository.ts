@@ -1,6 +1,6 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import type { Job } from '../entities/job';
+import type { EnhancedJob, Job } from '../entities/job';
 import { JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
@@ -41,7 +41,7 @@ export class JobRepository extends BaseRepository {
     return bRet;
   }
 
-  async insertJob(job: Omit<Job, '_id'>, url: string): Promise<string> {
+  async insertJob(job: Omit<Job | EnhancedJob, '_id'>, url: string): Promise<string> {
     const filterDoc = { payload: job.payload, status: { $in: ['inQueue', 'inProgress'] } };
     const updateDoc = {
       $setOnInsert: job,

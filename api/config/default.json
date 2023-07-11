@@ -9,6 +9,7 @@
   "dbUrl": "url",
   "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
   "githubSecret": "GITHUB_SECRET",
+  "githubBotPW": "GITHUB_BOT_PASSWORD",
   "slackSecret": "SLACK_SECRET",
   "slackAuthToken": "SLACK_TOKEN",
   "slackViewOpenUrl": "https://slack.com/api/views.open",

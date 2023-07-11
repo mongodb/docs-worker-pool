@@ -6,7 +6,7 @@ import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
-import { Job, JobStatus } from '../../../src/entities/job';
+import { EnhancedJob, JobStatus } from '../../../src/entities/job';
 import { PushEvent } from '@octokit/webhooks-types';
 
 // This function will validate your payload from GitHub
@@ -29,7 +29,7 @@ async function prepGithubPushPayload(
   githubEvent: PushEvent,
   branchRepository: BranchRepository,
   prefix: string
-): Promise<Omit<Job, '_id'>> {
+): Promise<Omit<EnhancedJob, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await branchRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
@@ -39,7 +39,7 @@ async function prepGithubPushPayload(
   return {
     title: githubEvent.repository.full_name,
     user: githubEvent.pusher.name,
-    email: githubEvent.pusher.email,
+    email: githubEvent.pusher.email ?? '',
     status: JobStatus.inQueue,
     createdTime: new Date(),
     startTime: null,
@@ -111,6 +111,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   try {
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+    jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
     consoleLogger.info(job.title, `Created Job ${jobId}`);
   } catch (err) {
     return {

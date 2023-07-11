@@ -70,3 +70,9 @@ export class JobNotFoundError extends AutoBuilderError {
     super(message, 'JobNotFound', errorCode, stack);
   }
 }
+
+export class GithubCommentError extends AutoBuilderError {
+  constructor(message: string, errorCode?: number, stack?: string) {
+    super(message, 'GithubCommentError', errorCode, stack);
+  }
+}

@@ -65,13 +65,6 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
         switch (jobStatus) {
           case JobStatus[JobStatus.inQueue]:
             await NotifyBuildProgress(jobId);
-            // start the task , don't start the process before processing the notification
-            const ecsServices = new ECSContainer(c, consoleLogger);
-            const res = await ecsServices.execute(jobId);
-            if (res) {
-              await saveTaskId(jobId, res, consoleLogger);
-            }
-            consoleLogger.info(jobId, JSON.stringify(res));
             break;
           case JobStatus[JobStatus.inProgress]:
             await NotifyBuildProgress(jobId);
@@ -79,6 +72,8 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
           case JobStatus[JobStatus.timedOut]:
             await NotifyBuildSummary(jobId);
             const taskId = body['taskId'];
+            // for the enhanced application, the taskId will never be defined
+            // as we are not saving it at this time
             if (taskId) {
               await stopECSTask(taskId, consoleLogger);
             }

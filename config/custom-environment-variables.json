@@ -22,6 +22,7 @@
   "gatsbyBaseUrl": "GATSBY_BASE_URL",
   "previewBuildEnabled": "PREVIEW_BUILD_ENABLED",
   "featureFlagUpdatePages": "FEATURE_FLAG_UPDATE_PAGES",
+  "featureFlagSearchUI": "GATSBY_TEST_SEARCH_UI",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "repo_dir": "repos",
   "jobId": "jobId",
