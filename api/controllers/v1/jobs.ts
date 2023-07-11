@@ -1,6 +1,8 @@
 import * as c from 'config';
+import crypto from 'crypto';
 import * as mongodb from 'mongodb';
 import { IConfig } from 'config';
+import { APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
@@ -11,6 +13,12 @@ import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
+
+// Although data in payload should always be present, it's not guaranteed from
+// external callers
+interface SnootyPayload {
+  jobId?: string;
+}
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -151,9 +159,9 @@ async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url
     consoleLogger.error(message['jobId'], err);
   }
 }
-async function NotifyBuildSummary(jobId: string): Promise<any> {
+async function NotifyBuildSummary(jobId: string, mongoClient?: mongodb.MongoClient): Promise<any> {
   const consoleLogger = new ConsoleLogger();
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  const client: mongodb.MongoClient = mongoClient ?? new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
   const env = c.get<string>('env');
@@ -333,4 +341,85 @@ async function SubmitArchiveJob(jobId: string) {
     repo.prefix[environment]
   );
   consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
+}
+
+/**
+ * Checks the signature payload as a rough validation that the request was made by
+ * the Snooty frontend.
+ * @param payload - stringified JSON payload
+ * @param signature - the Snooty signature included in the header
+ */
+function validateSnootyPayload(payload: string, signature: string) {
+  const secret = c.get<string>('snootySecret');
+  const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  return signature === expectedSignature;
+}
+
+/**
+ * Performs post-job operations such as notifications and db updates for job ID
+ * provided in its payload. This is typically expected to only be called by
+ * Snooty's Gatsby Cloud source plugin.
+ * @param event
+ * @returns
+ */
+export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> {
+  const consoleLogger = new ConsoleLogger();
+
+  if (!event.body) {
+    const err = 'SnootyBuildComplete does not have a body in event payload';
+    consoleLogger.error('SnootyBuildCompleteError', err);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+
+  const snootySignature = event.headers['X-Snooty-Signature'];
+  if (!snootySignature) {
+    const err = 'SnootyBuildComplete does not have a signature in event payload';
+    consoleLogger.error('SnootyBuildCompleteError', err);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+
+  if (!validateSnootyPayload(event.body, snootySignature)) {
+    const errMsg = 'Payload signature is incorrect';
+    consoleLogger.error('SnootyBuildCompleteError', errMsg);
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+
+  const payload: SnootyPayload = JSON.parse(event.body);
+  const { jobId } = payload;
+
+  if (!jobId) {
+    const errMsg = 'Payload missing job ID';
+    consoleLogger.error('SnootyBuildCompleteError', errMsg);
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get<string>('dbName'));
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+  await jobRepository.updateWithCompletionStatus(jobId, null, false);
+  await NotifyBuildSummary(jobId, client);
+  await client.close();
+
+  return {
+    statusCode: 202,
+    headers: { 'Content-Type': 'text/plain' },
+    body: `Snooty build ${jobId} completed`,
+  };
 }
