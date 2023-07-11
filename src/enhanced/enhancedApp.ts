@@ -1,7 +1,7 @@
-import { handleJob } from './utils/job';
-import { listenToJobQueue } from './utils/queue';
 import mongodb, { MongoClient } from 'mongodb';
 import c from 'config';
+import { handleJob } from './utils/job';
+import { listenToJobQueue } from './utils/queue';
 
 let client: MongoClient | undefined;
 
