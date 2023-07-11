@@ -403,6 +403,7 @@ async function SubmitArchiveJob(jobId: string) {
 function validateSnootyPayload(payload: string, signature: string) {
   const secret = c.get<string>('snootySecret');
   const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  console.log({ expectedSignature });
   return signature === expectedSignature;
 }
 
@@ -448,6 +449,8 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
   }
 
   const payload: SnootyPayload = JSON.parse(event.body);
+  console.log({ payload });
+  console.log({ event });
   const { jobId } = payload;
 
   if (!jobId) {
