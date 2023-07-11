@@ -21,8 +21,14 @@ export class JobRepository extends BaseRepository {
     this._queueConnector = new SQSConnector(logger, config);
   }
 
-  async updateWithCompletionStatus(id: string, result: any, shouldNotifySqs = true): Promise<boolean> {
-    const query = { _id: id };
+  async updateWithCompletionStatus(
+    id: string | mongodb.ObjectId,
+    result: any,
+    shouldNotifySqs = true
+  ): Promise<boolean> {
+    // Safely convert to object ID
+    const objectId = new mongodb.ObjectId(id);
+    const query = { _id: objectId };
     const update = {
       $set: {
         status: 'completed',
