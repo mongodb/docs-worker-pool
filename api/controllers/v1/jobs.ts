@@ -428,7 +428,9 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     };
   }
 
-  const snootySignature = event.headers['X-Snooty-Signature'];
+  // Keep lowercase in case header is automatically converted to lowercase
+  // The Snooty frontend should be mindful of using a lowercase header
+  const snootySignature = event.headers['x-snooty-signature'];
   if (!snootySignature) {
     const err = 'SnootyBuildComplete does not have a signature in event payload';
     consoleLogger.error('SnootyBuildCompleteError', err);
