@@ -75,9 +75,10 @@ export class StagingJobHandler extends JobHandler {
       // Invoke Gatsby Preview Webhook
       const featurePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED;
       if (featurePreviewWebhookEnabled) {
-        // TODO: We may want to send a response to slack or something to let us know
-        // the outcome of the call
-        this.previewWebhook();
+        // TODO: current using a rudimentary logging approach, should switch to
+        // something more robust once we are closer to going live.
+        const response = await this.previewWebhook();
+        await this.logger.save(this.currJob._id, `${'(POST Webhook Status'.padEnd(15)}${response.status}`);
       }
 
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
