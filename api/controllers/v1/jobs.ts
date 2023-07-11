@@ -21,6 +21,13 @@ interface SnootyPayload {
   jobId?: string;
 }
 
+// These options should only be defined if the build summary is being called after
+// a Gatsby Cloud job
+interface BuildSummaryOptions {
+  mongoClient?: mongodb.MongoClient;
+  previewUrl?: string;
+}
+
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -168,7 +175,8 @@ async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url
     consoleLogger.error(message['jobId'], err);
   }
 }
-async function NotifyBuildSummary(jobId: string, mongoClient?: mongodb.MongoClient): Promise<any> {
+
+async function NotifyBuildSummary(jobId: string, { mongoClient, previewUrl }: BuildSummaryOptions): Promise<any> {
   const consoleLogger = new ConsoleLogger();
   const client: mongodb.MongoClient = mongoClient ?? new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -195,6 +203,11 @@ async function NotifyBuildSummary(jobId: string, mongoClient?: mongodb.MongoClie
       const prCommentId = await githubCommenter.getPullRequestCommentId(fullDocument.payload, pr);
       const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
 
+      // We currently avoid posting the Gatsby Cloud preview url on GitHub to avoid
+      // potentially conflicting behavior with the S3 staging link with parallel
+      // frontend builds. This is in case the GC build finishing first causes the
+      // initial comment to be made with a nullish S3 url, while subsequent comment
+      // updates only append the list of build logs.
       if (prCommentId !== undefined) {
         const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true);
         await githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
@@ -221,7 +234,8 @@ async function NotifyBuildSummary(jobId: string, mongoClient?: mongodb.MongoClie
       repoName,
       c.get<string>('dashboardUrl'),
       jobId,
-      fullDocument.status == 'failed'
+      fullDocument.status == 'failed',
+      previewUrl
     ),
     entitlement['slack_user_id']
   );
@@ -255,22 +269,26 @@ async function prepSummaryMessage(
   repoName: string,
   jobUrl: string,
   jobId: string,
-  failed = false
+  failed = false,
+  previewUrl?: string
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls = [null, null];
+  let mms_urls: Array<string | null> = [null, null];
   // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
   // so we need to extract both URLs
   if (repoName === 'mms-docs') {
     if (urls.length >= 2) {
-      // TODO: Type 'string[]' is not assignable to type 'null[]'.
       mms_urls = urls.slice(-2);
     }
   }
+
   let url = '';
-  if (urls.length > 0) {
+  if (previewUrl) {
+    url = previewUrl;
+  } else if (urls.length > 0) {
     url = urls[urls.length - 1];
   }
+
   let msg = '';
   if (failed) {
     msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n Check logs for more errors!!\nSorry  :disappointed:! `;
@@ -470,7 +488,10 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
   const db = client.db(c.get<string>('dbName'));
   const jobRepository = new JobRepository(db, c, consoleLogger);
   await jobRepository.updateWithCompletionStatus(jobId, null, false);
-  await NotifyBuildSummary(jobId, client);
+  // Placeholder preview URL until we iron out the Gatsby Cloud site URLs.
+  // This would probably involve fetching the URLs in the db on a per project basis
+  const previewUrl = 'https://www.mongodb.com/docs/';
+  await NotifyBuildSummary(jobId, { mongoClient: client, previewUrl });
   await client.close();
 
   return {
