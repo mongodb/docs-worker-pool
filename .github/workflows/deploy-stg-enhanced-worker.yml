@@ -7,9 +7,9 @@ on:
       - 'DOP-3833'
 
 concurrency:
-  group: environment-stg-${{ github.ref }}
+  group: environment-stg-enhanced-worker-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Staging ECS
+name: Deploy Staging ECS Enhanced Worker
 jobs:
   deploy-stg:
     runs-on: ubuntu-latest

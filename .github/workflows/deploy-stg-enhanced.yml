@@ -1,8 +1,8 @@
 on: [workflow_dispatch]
 concurrency:
-  group: environment-stg-${{ github.ref }}
+  group: environment-stg-enhanced-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Staging ECS
+name: Deploy Staging ECS Enhanced
 jobs:
   deploy-stg:
     runs-on: ubuntu-latest
