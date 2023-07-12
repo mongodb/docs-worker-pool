@@ -8,34 +8,8 @@ import { ObjectId, Db, Document } from 'mongodb';
 import { db as poolDb } from './pool';
 
 // We should only ever have one client active at a time.
-// const atlasURL = `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority&maxPoolSize=20`;
-const atlasURL = `mongodb://127.0.0.1:27017`;
+const atlasURL = `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority&maxPoolSize=20`;
 const client = new mongodb.MongoClient(atlasURL);
-
-client.on('topologyOpening', (event) => {
-  console.log('topology opening');
-  console.log(event);
-});
-
-client.on('topologyClosed', (event) => {
-  console.log('topology closed');
-  console.log(event);
-});
-
-client.on('serverOpening', (event) => {
-  console.log('server opening');
-  console.log(event);
-});
-
-client.on('connectionPoolCreated', (event) => {
-  console.log('pool created');
-  console.log(event);
-});
-
-client.on('connectionPoolClosed', (event) => {
-  console.log('pool closed');
-  console.log(event);
-});
 
 export const teardown = async () => {
   await client.close();
