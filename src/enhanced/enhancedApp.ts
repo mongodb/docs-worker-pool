@@ -18,9 +18,14 @@ async function connectToDb(): Promise<mongodb.Db> {
 }
 
 async function cleanupJob(): Promise<never> {
+  if (!client) {
+    console.log('[cleanupJob]: The MongoDB client is not defined. Exiting.');
+    process.exit(1);
+  }
+
   try {
     console.log('[cleanupJob]: Closing MongoDB client connection...');
-    await client?.close();
+    await client.close();
 
     console.log('[cleanupJob]: Successfully closed MongoDB client connection!');
   } catch (e) {
