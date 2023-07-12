@@ -2,7 +2,7 @@ import * as c from 'config';
 import crypto from 'crypto';
 import * as mongodb from 'mongodb';
 import { IConfig } from 'config';
-import { APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
@@ -176,7 +176,8 @@ async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url
   }
 }
 
-async function NotifyBuildSummary(jobId: string, { mongoClient, previewUrl }: BuildSummaryOptions): Promise<any> {
+async function NotifyBuildSummary(jobId: string, options: BuildSummaryOptions = {}): Promise<any> {
+  const { mongoClient, previewUrl } = options;
   const consoleLogger = new ConsoleLogger();
   const client: mongodb.MongoClient = mongoClient ?? new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -425,13 +426,13 @@ function validateSnootyPayload(payload: string, signature: string) {
 }
 
 /**
- * Performs post-job operations such as notifications and db updates for job ID
+ * Performs post-build operations such as notifications and db updates for job ID
  * provided in its payload. This is typically expected to only be called by
  * Snooty's Gatsby Cloud source plugin.
  * @param event
  * @returns
  */
-export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> {
+export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
   const consoleLogger = new ConsoleLogger();
 
   if (!event.body) {
@@ -481,15 +482,26 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
   }
 
   const client = new mongodb.MongoClient(c.get('dbUrl'));
-  await client.connect();
-  const db = client.db(c.get<string>('dbName'));
-  const jobRepository = new JobRepository(db, c, consoleLogger);
-  await jobRepository.updateWithCompletionStatus(jobId, null, false);
-  // Placeholder preview URL until we iron out the Gatsby Cloud site URLs.
-  // This would probably involve fetching the URLs in the db on a per project basis
-  const previewUrl = 'https://www.mongodb.com/docs/';
-  await NotifyBuildSummary(jobId, { mongoClient: client, previewUrl });
-  await client.close();
+
+  try {
+    await client.connect();
+    const db = client.db(c.get<string>('dbName'));
+    const jobRepository = new JobRepository(db, c, consoleLogger);
+    await jobRepository.updateWithCompletionStatus(jobId, null, false);
+    // Placeholder preview URL until we iron out the Gatsby Cloud site URLs.
+    // This would probably involve fetching the URLs in the db on a per project basis
+    const previewUrl = 'https://www.mongodb.com/docs/';
+    await NotifyBuildSummary(jobId, { mongoClient: client, previewUrl });
+  } catch (e) {
+    consoleLogger.error('SnootyBuildCompleteError', e);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: e,
+    };
+  } finally {
+    await client.close();
+  }
 
   return {
     statusCode: 202,
