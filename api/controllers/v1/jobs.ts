@@ -421,7 +421,6 @@ async function SubmitArchiveJob(jobId: string) {
 function validateSnootyPayload(payload: string, signature: string) {
   const secret = c.get<string>('snootySecret');
   const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
-  console.log({ expectedSignature });
   return signature === expectedSignature;
 }
 
@@ -434,7 +433,6 @@ function validateSnootyPayload(payload: string, signature: string) {
  */
 export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> {
   const consoleLogger = new ConsoleLogger();
-  console.log({ event });
 
   if (!event.body) {
     const err = 'SnootyBuildComplete does not have a body in event payload';
@@ -470,7 +468,6 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
   }
 
   const payload: SnootyPayload = JSON.parse(event.body);
-  console.log({ payload });
   const { jobId } = payload;
 
   if (!jobId) {
