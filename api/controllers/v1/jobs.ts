@@ -434,13 +434,14 @@ function validateSnootyPayload(payload: string, signature: string) {
  */
 export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
   const consoleLogger = new ConsoleLogger();
+  const defaultHeaders = { 'Content-Type': 'text/plain' };
 
   if (!event.body) {
     const err = 'SnootyBuildComplete does not have a body in event payload';
     consoleLogger.error('SnootyBuildCompleteError', err);
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: defaultHeaders,
       body: err,
     };
   }
@@ -453,7 +454,7 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     consoleLogger.error('SnootyBuildCompleteError', err);
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: defaultHeaders,
       body: err,
     };
   }
@@ -463,20 +464,30 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     consoleLogger.error('SnootyBuildCompleteError', errMsg);
     return {
       statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: defaultHeaders,
       body: errMsg,
     };
   }
 
-  const payload: SnootyPayload = JSON.parse(event.body);
-  const { jobId } = payload;
+  let payload: SnootyPayload | undefined;
+  try {
+    payload = JSON.parse(event.body) as SnootyPayload;
+  } catch (e) {
+    const errMsg = 'Payload is not valid JSON';
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: errMsg,
+    };
+  }
 
+  const { jobId } = payload;
   if (!jobId) {
     const errMsg = 'Payload missing job ID';
     consoleLogger.error('SnootyBuildCompleteError', errMsg);
     return {
-      statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
+      statusCode: 400,
+      headers: defaultHeaders,
       body: errMsg,
     };
   }
@@ -495,8 +506,8 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
   } catch (e) {
     consoleLogger.error('SnootyBuildCompleteError', e);
     return {
-      statusCode: 400,
-      headers: { 'Content-Type': 'text/plain' },
+      statusCode: 500,
+      headers: defaultHeaders,
       body: e,
     };
   } finally {
@@ -504,8 +515,8 @@ export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
   }
 
   return {
-    statusCode: 202,
-    headers: { 'Content-Type': 'text/plain' },
+    statusCode: 200,
+    headers: defaultHeaders,
     body: `Snooty build ${jobId} completed`,
   };
 }

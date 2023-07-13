@@ -129,6 +129,6 @@ describe('Post-build webhook tests', () => {
     const res = await SnootyBuildComplete(
       createMockAPIGatewayEvent(payloadString, { 'x-snooty-signature': signature })
     );
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(400);
   });
 });

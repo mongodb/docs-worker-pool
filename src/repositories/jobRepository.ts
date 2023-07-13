@@ -42,7 +42,7 @@ export class JobRepository extends BaseRepository {
       `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`
     );
     if (bRet && shouldNotifySqs) {
-      await this.notify(id, c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
+      await this.notify(objectId.toString(), c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
     }
     return bRet;
   }
