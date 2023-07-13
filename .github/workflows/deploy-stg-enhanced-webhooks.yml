@@ -4,7 +4,6 @@ on:
     branches:
       - "master"
       - "integration"
-      - 'DOP-3833'
 
 concurrency:
   group: environment-stg-enhanced-webhooks-${{ github.ref }}
