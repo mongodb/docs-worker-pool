@@ -32,6 +32,7 @@ export class WebhookEnvConstruct extends Construct {
       NODE_CONFIG_DIR: './config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
+      NODE_OPTIONS: '--enable-source-maps',
     };
   }
 }
