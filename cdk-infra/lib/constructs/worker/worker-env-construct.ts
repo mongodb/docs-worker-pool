@@ -25,6 +25,16 @@ export class WorkerEnvConstruct extends Construct {
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
 
+    // adds the feature flag & POST URL
+    const gatsbyCloudPreviewWebhookFeature = StringParameter.valueFromLookup(
+      this,
+      `${ssmPrefix}/flag/preview_webhook_enable`
+    );
+    const gatsbyCloudPreviewWebhookURL = StringParameter.valueFromLookup(
+      this,
+      `/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source`
+    );
+
     const githubBotUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/bot/username`);
 
     const npmEmail = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/email`);
@@ -43,6 +53,8 @@ export class WorkerEnvConstruct extends Construct {
     this.environment = {
       ...secureStrings,
       STAGE: env,
+      GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED: gatsbyCloudPreviewWebhookFeature,
+      GATSBY_CLOUD_PREVIEW_WEBHOOK_URL: gatsbyCloudPreviewWebhookURL,
       SNOOTY_ENV: envShortToFullName(env),
       MONGO_ATLAS_USERNAME: dbUsername,
       MONGO_ATLAS_HOST: dbHost,
