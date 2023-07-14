@@ -1,6 +1,6 @@
 on:
   push:
-    paths: ["api/v2/**"]
+    paths: ["api/v2/**", "cdk-infra/lib/constructs/api"]
     branches:
       - "master"
       - "integration"

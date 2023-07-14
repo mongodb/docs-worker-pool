@@ -1,6 +1,6 @@
 on:
   push:
-    paths: ["src/**"]
+    paths: ["src/**", "cdk-infra/lib/constructs/worker"]
     branches:
       - "master"
       - "integration"
