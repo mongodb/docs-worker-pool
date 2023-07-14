@@ -21,8 +21,14 @@ export class JobRepository extends BaseRepository {
     this._queueConnector = new SQSConnector(logger, config);
   }
 
-  async updateWithCompletionStatus(id: string, result: any): Promise<boolean> {
-    const query = { _id: id };
+  async updateWithCompletionStatus(
+    id: string | mongodb.ObjectId,
+    result: any,
+    shouldNotifySqs = true
+  ): Promise<boolean> {
+    // Safely convert to object ID
+    const objectId = new mongodb.ObjectId(id);
+    const query = { _id: objectId };
     const update = {
       $set: {
         status: 'completed',
@@ -35,8 +41,8 @@ export class JobRepository extends BaseRepository {
       update,
       `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`
     );
-    if (bRet) {
-      await this.notify(id, c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
+    if (bRet && shouldNotifySqs) {
+      await this.notify(objectId.toString(), c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
     }
     return bRet;
   }

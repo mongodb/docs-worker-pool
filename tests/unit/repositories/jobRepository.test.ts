@@ -19,25 +19,25 @@ describe('Job Repository Tests', () => {
   describe('Job Repository updateWithCompletionStatus Tests', () => {
     test('Update with completion status throws DB Error as result is undefined', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
-        'Test_Job',
+        '64ad959b423952aeb9341fad',
         'completed',
         'All good',
         new Date()
       );
-      await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
+      await expect(jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good')).rejects.toThrow(
         `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
     });
 
     test('Update with completion status throws DB Error as result length < 1', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
-        'Test_Job',
+        '64ad959b423952aeb9341fad',
         'completed',
         'All good',
         new Date()
       );
       dbRepoHelper.collection.updateOne.mockReturnValue({ modifiedCount: -1 });
-      await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
+      await expect(jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good')).rejects.toThrow(
         `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
@@ -45,13 +45,13 @@ describe('Job Repository Tests', () => {
 
     test('Update with completion status fails as there is no modifiedCount in results', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
-        'Test_Job',
+        '64ad959b423952aeb9341fad',
         'completed',
         'All good',
         new Date()
       );
       dbRepoHelper.collection.updateOne.mockReturnValueOnce({ result: { sn: -1 } });
-      await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).rejects.toThrow(
+      await expect(jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good')).rejects.toThrow(
         `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
@@ -60,7 +60,7 @@ describe('Job Repository Tests', () => {
 
     test('Update with completion status succeeds', async () => {
       setupForUpdateOneSuccess();
-      await expect(jobRepo.updateWithCompletionStatus('Test_Job', 'All good')).resolves.toEqual(true);
+      await expect(jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good')).resolves.toEqual(true);
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
       expect(dbRepoHelper.logger.error).toBeCalledTimes(0);
     });
@@ -73,10 +73,10 @@ describe('Job Repository Tests', () => {
         });
       });
       try {
-        jobRepo.updateWithCompletionStatus('Test_Job', 'All good').catch((error) => {
+        jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good').catch((error) => {
           expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
           expect(error.message).toContain(
-            `Mongo Timeout Error: Timed out while updating success status for jobId: Test_Job`
+            `Mongo Timeout Error: Timed out while updating success status for jobId: 64ad959b423952aeb9341fad`
           );
         });
         jest.runAllTimers();
@@ -87,7 +87,7 @@ describe('Job Repository Tests', () => {
   describe('Job Repository updateWithFailureStatus Tests', () => {
     test('updateWithFailureStatus succeeds', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
-        'Test_Job',
+        '64ad959b423952aeb9341fad',
         'failed',
         'All good',
         new Date(),
@@ -95,7 +95,7 @@ describe('Job Repository Tests', () => {
         'wierd reason'
       );
       setupForUpdateOneSuccess();
-      await expect(jobRepo.updateWithErrorStatus('Test_Job', 'wierd reason')).resolves.toEqual(true);
+      await expect(jobRepo.updateWithErrorStatus('64ad959b423952aeb9341fad', 'wierd reason')).resolves.toEqual(true);
       expect(dbRepoHelper.collection.updateOne).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.updateOne).toBeCalledWith(testData.query, testData.update);
 
@@ -143,27 +143,29 @@ describe('Job Repository Tests', () => {
 
   describe('insertLogStatement Tests', () => {
     test('insertLogStatement succeeds', async () => {
-      const testData = TestDataProvider.getInsertLogStatementInfo('Test_Job', ['msg1', 'msg2']);
+      const testData = TestDataProvider.getInsertLogStatementInfo('64ad959b423952aeb9341fad', ['msg1', 'msg2']);
       setupForUpdateOneSuccess();
-      await expect(jobRepo.insertLogStatement('Test_Job', ['msg1', 'msg2'])).resolves.toEqual(true);
+      await expect(jobRepo.insertLogStatement('64ad959b423952aeb9341fad', ['msg1', 'msg2'])).resolves.toEqual(true);
       validateSuccessfulUpdate(testData);
     });
   });
 
   describe('insertNotificationMessages Tests', () => {
     test('insertNotificationMessages succeeds', async () => {
-      const testData = TestDataProvider.getInsertComMessageInfo('Test_Job', 'Successfully tested');
+      const testData = TestDataProvider.getInsertComMessageInfo('64ad959b423952aeb9341fad', 'Successfully tested');
       setupForUpdateOneSuccess();
-      await expect(jobRepo.insertNotificationMessages('Test_Job', 'Successfully tested')).resolves.toEqual(true);
+      await expect(
+        jobRepo.insertNotificationMessages('64ad959b423952aeb9341fad', 'Successfully tested')
+      ).resolves.toEqual(true);
       validateSuccessfulUpdate(testData);
     });
   });
 
   describe('insertPurgedUrls Tests', () => {
     test('insertPurgedUrls succeeds', async () => {
-      const testData = TestDataProvider.getInsertPurgedUrls('Test_Job', ['url1', 'url2']);
+      const testData = TestDataProvider.getInsertPurgedUrls('64ad959b423952aeb9341fad', ['url1', 'url2']);
       setupForUpdateOneSuccess();
-      await expect(jobRepo.insertPurgedUrls('Test_Job', ['url1', 'url2'])).resolves.toEqual(true);
+      await expect(jobRepo.insertPurgedUrls('64ad959b423952aeb9341fad', ['url1', 'url2'])).resolves.toEqual(true);
       validateSuccessfulUpdate(testData);
     });
   });
@@ -171,10 +173,13 @@ describe('Job Repository Tests', () => {
   // TODO: Fix failing test
   describe('resetJobStatus Tests', () => {
     test('resetJobStatus succeeds', async () => {
-      const testData = TestDataProvider.getJobResetInfo('Test_Job', 'reset job status for testing reasons ');
+      const testData = TestDataProvider.getJobResetInfo(
+        '64ad959b423952aeb9341fad',
+        'reset job status for testing reasons '
+      );
       setupForUpdateOneSuccess();
       await expect(
-        jobRepo.resetJobStatus('Test_Job', 'inQueue', 'reset job status for testing reasons ')
+        jobRepo.resetJobStatus('64ad959b423952aeb9341fad', 'inQueue', 'reset job status for testing reasons ')
       ).resolves.toEqual(true);
       validateSuccessfulUpdate(testData);
     });
