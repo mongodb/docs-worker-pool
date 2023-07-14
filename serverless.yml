@@ -65,6 +65,7 @@ custom:
   githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
   slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
+  snootySecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/snooty/webhook/secret}
   JobsQueueName: autobuilder-jobs-queue-${self:provider.stage}
   JobsDLQueueName: autobuilder-jobs-dlqueue-${self:provider.stage}
   JobUpdatesQueueName: autobuilder-job-updates-queue-${self:provider.stage}
@@ -112,6 +113,7 @@ webhook-env-core: &webhook-env-core
   REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
   SLACK_SECRET: ${self:custom.slackSecret}
   SLACK_TOKEN: ${self:custom.slackAuthToken}
+  SNOOTY_SECRET: ${self:custom.snootySecret}
   DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
   NODE_CONFIG_DIR: './api/config'
   TASK_DEFINITION_FAMILY: docs-worker-pool-${self:provider.stage}
@@ -258,6 +260,16 @@ functions:
       handler: api/controllers/v1/jobs.FailStuckJobs
       events:
         - schedule: rate(8 hours)
+      environment:
+        <<: *webhook-env-core
+
+    v1SnootyBuildComplete:
+      handler: api/controllers/v1/jobs.SnootyBuildComplete
+      events:
+        - http:
+            path: /webhook/snooty/trigger/complete
+            method: POST
+            cors: true
       environment:
         <<: *webhook-env-core
 
