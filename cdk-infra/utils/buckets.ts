@@ -23,7 +23,7 @@ interface CustomBucketProps {
   env: AutoBuilderEnv;
   bucketName: string;
 }
-export function createCustomBuckets({ scope, featureName, env, bucketName }: CustomBucketProps): Bucket {
+export function createCustomBucket({ scope, featureName, env, bucketName }: CustomBucketProps): Bucket {
   const stackBucketName = `${featureName}-${bucketName}-${env}`.toLowerCase();
   const websiteRoutingRules = bucketName === 'docs-mongodb-org' ? getMongoDocsBucketRoutingRules(env) : undefined;
 

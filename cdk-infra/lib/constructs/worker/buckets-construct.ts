@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
-import { docsBucketNames } from '../../../utils/buckets';
-import { getEnv, getFeatureName } from '../../../utils/env';
+import { createCustomBucket, docsBucketNames } from '../../../utils/buckets';
+import { getEnv, getFeatureName, getUseCustomBuckets } from '../../../utils/env';
 
 export class WorkerBucketsConstruct extends Construct {
   readonly buckets: IBucket[];
@@ -12,6 +12,11 @@ export class WorkerBucketsConstruct extends Construct {
 
     const buckets: IBucket[] = docsBucketNames.map((bucketName) => {
       const featureName = getFeatureName();
+      const useCustomBuckets = getUseCustomBuckets();
+
+      // If we want to use buckets that don't currently exist, we can call this method to create
+      // them for individual testing purposes
+      if (useCustomBuckets) return createCustomBucket({ scope: this, featureName, env, bucketName });
 
       const stackBucketName = `${featureName}-${bucketName}-${env}`.toLowerCase();
       const bucket = Bucket.fromBucketName(this, stackBucketName, `${bucketName}-${env}`);
