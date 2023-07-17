@@ -3,11 +3,17 @@ import { getCurrentBranch } from './git';
 
 const snootyEnvs = ['staging', 'production', 'dotcomstg', 'dotcomprd'] as const;
 const autoBuilderEnvs = ['stg', 'prd', 'dev', 'dotcomstg', 'dotcomprd'] as const;
-const autoBuilderContextVariables = ['enhanced', 'isFeatureBranch', 'customFeatureName', 'env'] as const;
+const autoBuilderContextVariables = [
+  'enhanced',
+  'isFeatureBranch',
+  'customFeatureName',
+  'env',
+  'useCustomBuckets',
+] as const;
 
-export type SnootyEnv = typeof snootyEnvs[number];
-export type AutoBuilderEnv = typeof autoBuilderEnvs[number];
-export type AutoBuilderContextVariable = typeof autoBuilderContextVariables[number];
+export type SnootyEnv = (typeof snootyEnvs)[number];
+export type AutoBuilderEnv = (typeof autoBuilderEnvs)[number];
+export type AutoBuilderContextVariable = (typeof autoBuilderContextVariables)[number];
 
 const isAutoBuilderEnv = (str: string): str is AutoBuilderEnv => autoBuilderEnvs.includes(str as AutoBuilderEnv);
 
@@ -45,6 +51,13 @@ export function getIsEnhanced(): boolean {
   const isEnhanced = contextVarsMap.get('enhanced');
 
   return isEnhanced === 'true';
+}
+
+export function getUseCustomBuckets(): boolean {
+  checkContextInit();
+  const useCustomBuckets = contextVarsMap.get('useCustomBuckets');
+
+  return useCustomBuckets === 'true';
 }
 
 export function getEnv(): AutoBuilderEnv {
