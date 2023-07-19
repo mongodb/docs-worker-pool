@@ -9,12 +9,13 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "deploy:enhanced": "cdk deploy -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never --all",
-    "deploy:enhanced:worker": "cdk deploy auto-builder-stack-enhancedApp-worker -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never --exclusively",
-    "deploy:enhanced:webhooks": "cdk deploy auto-builder-stack-enhancedApp-webhooks -c enhanced=true -c customFeatureName=enhancedApp -c env=dotcomstg --require-approval never --exclusively",
-    "deploy:feature": "cdk deploy -c enhanced=true -c env=dotcomstg --require-approval never --all",
-    "deploy:feature:worker": "cdk deploy  -c enhanced=true -c env=dotcomstg --require-approval never --exclusively",
-    "deploy:feature:webhooks": "cdk deploy -c enhanced=true -c env=dotcomstg --require-approval never --exclusively"
+    "deploy:enhanced": "cdk deploy -c enhanced=true -c customFeatureName=enhancedApp -c env=prd --require-approval never --all",
+    "deploy:enhanced:worker": "cdk deploy auto-builder-stack-enhancedApp-worker -c enhanced=true -c customFeatureName=enhancedApp -c env=prd --require-approval never --exclusively",
+    "deploy:enhanced:webhooks": "cdk deploy auto-builder-stack-enhancedApp-webhooks -c enhanced=true -c customFeatureName=enhancedApp -c env=prd --require-approval never --exclusively",
+    "deploy:enhanced:queues": "cdk deploy auto-builder-stack-enhancedApp-queues -c enhanced=true -c customFeatureName=enhancedApp -c env=prd --require-approval never --exclusively",
+    "deploy:feature": "cdk deploy -c enhanced=true -c env=prd --require-approval never --all",
+    "deploy:feature:worker": "cdk deploy  -c enhanced=true -c env=prd --require-approval never --exclusively",
+    "deploy:feature:webhooks": "cdk deploy -c enhanced=true -c env=prd --require-approval never --exclusively"
 
   },
   "devDependencies": {

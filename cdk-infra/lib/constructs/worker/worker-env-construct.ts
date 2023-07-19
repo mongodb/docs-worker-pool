@@ -75,6 +75,7 @@ export class WorkerEnvConstruct extends Construct {
       ENHANCED: `${getIsEnhanced()}`,
       USE_CUSTOM_BUCKETS: `${getUseCustomBuckets()}`,
       FEATURE_NAME: `${getFeatureName()}`,
+      GATSBY_TEST_SEARCH_UI: 'false',
     };
   }
 }

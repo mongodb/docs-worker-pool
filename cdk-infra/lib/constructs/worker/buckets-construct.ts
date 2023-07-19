@@ -18,8 +18,10 @@ export class WorkerBucketsConstruct extends Construct {
       // them for individual testing purposes
       if (useCustomBuckets) return createCustomBucket({ scope: this, featureName, env, bucketName });
 
-      const stackBucketName = `${featureName}-${bucketName}-${env}`.toLowerCase();
-      const bucket = Bucket.fromBucketName(this, stackBucketName, `${bucketName}-${env}`);
+      const bucketEnv = env === 'prd' ? 'prd-staging' : env;
+      const stackBucketName = `${featureName}-${bucketName}-${bucketEnv}`.toLowerCase();
+
+      const bucket = Bucket.fromBucketName(this, stackBucketName, `${bucketName}-${bucketEnv}`);
 
       return bucket;
     });
