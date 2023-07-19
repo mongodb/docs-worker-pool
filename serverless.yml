@@ -57,6 +57,7 @@ custom:
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
+  snootyDbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/snooty}
   dbhost: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/host}
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
