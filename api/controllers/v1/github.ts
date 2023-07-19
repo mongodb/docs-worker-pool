@@ -1,9 +1,14 @@
 import * as c from 'config';
 import * as crypto from 'crypto';
 import * as mongodb from 'mongodb';
+import { APIGatewayEvent } from 'aws-lambda';
+import { PullRequestEvent } from '@octokit/webhooks-types';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
+import { MetadataRepository } from '../../../src/repositories/metadataRepository';
+import { UpdatedDocsRepository } from '../../../src/repositories/updatedDocsRepository';
 
 // This function will validate your payload from GitHub
 // See docs at https://developer.github.com/webhooks/securing/#validating-payloads-from-github
@@ -107,5 +112,101 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
     body: 'Job Queued',
+  };
+};
+
+/**
+ * Deletes build artifacts for a given project + branch combination.
+ * @param event
+ */
+export const MarkBuildArtifactsForDeletion = async (event: APIGatewayEvent) => {
+  const consoleLogger = new ConsoleLogger();
+  const defaultHeaders = { 'Content-Type': 'text/plain' };
+
+  const ghEventType = event.headers['X-GitHub-Event'];
+  if (ghEventType !== 'pull_request') {
+    const errMsg = 'GitHub event type is not of type "pull_request"';
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+
+  if (!validateJsonWebhook(event, c.get<string>('githubDeletionSecret'))) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+
+  if (!event.body) {
+    const err = 'MarkBuildArtifactsForDeletion does not have a body in event payload';
+    consoleLogger.error('MarkBuildArtifactsForDeletion', err);
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: err,
+    };
+  }
+
+  let payload: PullRequestEvent | undefined;
+  try {
+    payload = JSON.parse(event.body) as PullRequestEvent;
+  } catch (e) {
+    const errMsg = 'Payload is not valid JSON';
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: errMsg,
+    };
+  }
+
+  const { action } = payload;
+  if (action !== 'closed') {
+    const errMsg = `Unexpected GitHub action: ${action}`;
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: errMsg,
+    };
+  }
+
+  const { repository, pull_request: pullRequest } = payload;
+  const branch = pullRequest.head.ref;
+
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+
+  try {
+    await client.connect();
+    const poolDb = client.db(c.get('dbName'));
+    const repoBranchesRepository = new RepoBranchesRepository(poolDb, c, consoleLogger);
+    const project = (await repoBranchesRepository.getProjectByRepoName(repository.name)) as string;
+
+    // Start marking build artifacts for deletion
+    const snootyDb = client.db(c.get('snootyDbName'));
+    const updatedDocsRepository = new UpdatedDocsRepository(snootyDb, c, consoleLogger);
+    const metadataRepository = new MetadataRepository(snootyDb, c, consoleLogger);
+    await Promise.all([
+      updatedDocsRepository.marksAstsForDeletion(project, branch),
+      metadataRepository.marksMetadataForDeletion(project, branch),
+    ]);
+  } catch (e) {
+    consoleLogger.error('SnootyBuildCompleteError', e);
+    return {
+      statusCode: 500,
+      headers: defaultHeaders,
+      body: e,
+    };
+  } finally {
+    await client.close();
+  }
+
+  return {
+    statusCode: 200,
+    headers: defaultHeaders,
+    body: 'Build data successfully marked for deletion',
   };
 };

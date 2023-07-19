@@ -8,6 +8,12 @@ export class RepoBranchesRepository extends BaseRepository {
     super(config, logger, 'RepoEntitlementsRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
+  async getProjectByRepoName(repoName: string) {
+    const query = { repoName };
+    const projection = { _id: 0, project: 1 };
+    return this.findOne(query, `Error while getting project by repo name ${repoName}`, { projection });
+  }
+
   async getRepoBranchesByRepoName(repoName: string): Promise<any> {
     const query = { repoName: repoName };
     const repoDetails = await this.findOne(
