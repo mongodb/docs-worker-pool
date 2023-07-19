@@ -1,6 +1,6 @@
 import { AutoBuilderEnv } from '../env';
 
-const dashboardUrls = {
+const dashboardUrls: Record<AutoBuilderEnv, string> = {
   stg: `https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=`,
   prd: `https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=`,
   dotcomstg: `https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=`,
