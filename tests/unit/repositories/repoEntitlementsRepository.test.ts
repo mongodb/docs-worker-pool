@@ -21,7 +21,7 @@ describe('Job Repository Tests', () => {
         status: 'failure',
       });
       expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
-      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);
+      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query, {});
     });
 
     test('getRepoEntitlementsByGithubUsername is successful', async () => {
@@ -36,7 +36,7 @@ describe('Job Repository Tests', () => {
         status: 'success',
       });
       expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
-      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);
+      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query, {});
     });
 
     test('Update with completion status timesout', async () => {
