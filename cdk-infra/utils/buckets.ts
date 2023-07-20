@@ -26,13 +26,14 @@ interface CustomBucketProps {
 export function createCustomBucket({ scope, featureName, env, bucketName }: CustomBucketProps): Bucket {
   const stackBucketName = `${featureName}-${bucketName}-${env}`.toLowerCase();
   const websiteRoutingRules = bucketName === 'docs-mongodb-org' ? getMongoDocsBucketRoutingRules(env) : undefined;
+  const prefixUrl = getPrefixUrl(env);
 
   const bucket = new Bucket(scope, stackBucketName, {
     removalPolicy: RemovalPolicy.DESTROY,
     websiteRoutingRules,
     bucketName: stackBucketName,
     websiteIndexDocument: 'index.html',
-    websiteErrorDocument: 'docs-qa/404/index.html',
+    websiteErrorDocument: `${prefixUrl}/404/index.html`,
     blockPublicAccess: new BlockPublicAccess({
       blockPublicAcls: false,
       blockPublicPolicy: false,
