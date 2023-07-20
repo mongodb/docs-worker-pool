@@ -3,8 +3,6 @@ on:
     branches:
       - "master"
       - "integration"
-      # TEMP-3818: Remove after testing
-      - "DOP-3818"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
