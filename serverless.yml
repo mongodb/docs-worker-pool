@@ -276,6 +276,16 @@ functions:
             cors: true
       environment:
         <<: *webhook-env-core
+    
+    v1GithubDeleteArtifacts:
+      handler: api/controllers/v1/github.MarkBuildArtifactsForDeletion
+      events:
+        - http:
+            path: /webhook/github/trigger/delete
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
 
 Outputs:
   JobsQueueURL:
