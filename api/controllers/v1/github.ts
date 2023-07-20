@@ -128,7 +128,7 @@ export const MarkBuildArtifactsForDeletion = async (event: APIGatewayEvent) => {
     const errMsg = 'GitHub event type is not of type "pull_request"';
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: defaultHeaders,
       body: errMsg,
     };
   }
@@ -137,7 +137,7 @@ export const MarkBuildArtifactsForDeletion = async (event: APIGatewayEvent) => {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
       statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: defaultHeaders,
       body: errMsg,
     };
   }
@@ -164,6 +164,8 @@ export const MarkBuildArtifactsForDeletion = async (event: APIGatewayEvent) => {
     };
   }
 
+  // Setting a webhook for PR events can have different actions: closed, opened, etc.
+  // The "closed" action should occur whenever a PR is closed, regardless of merge or not.
   const { action } = payload;
   if (action !== 'closed') {
     const errMsg = `Unexpected GitHub action: ${action}`;
@@ -194,7 +196,7 @@ export const MarkBuildArtifactsForDeletion = async (event: APIGatewayEvent) => {
       metadataRepository.marksMetadataForDeletion(project, branch),
     ]);
   } catch (e) {
-    consoleLogger.error('SnootyBuildCompleteError', e);
+    consoleLogger.error('MarkBuildArtifactsForDeletion', e);
     return {
       statusCode: 500,
       headers: defaultHeaders,
