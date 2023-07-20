@@ -26,7 +26,7 @@ export const metadataFromZip = async (zip: AdmZip, githubUser?: string) => {
     .filter((entry) => entry.entryName === 'site.bson')
     .map((entry) => deserialize(entry.getData()))[0] as Metadata;
   await verifyMetadata(metadata);
-  if (githubUser) metadata.github_username = githubUser;
+  metadata.github_username = githubUser || 'docs-builder-bot';
   return metadata;
 };
 
