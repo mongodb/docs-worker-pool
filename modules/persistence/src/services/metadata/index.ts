@@ -14,17 +14,19 @@ export interface Metadata {
   associated_products?: AssociatedProduct[];
   toctree: ToC;
   toctreeOrder: any[];
+  github_username?: string;
   [key: string]: any;
 }
 // Service responsible for memoization of metadata entries.
 // Any extraneous logic performed on metadata entries as part of upload should be added here
 // or within subfolders of this module
-export const metadataFromZip = async (zip: AdmZip) => {
+export const metadataFromZip = async (zip: AdmZip, githubUser?: string) => {
   const zipEntries = zip.getEntries();
   const metadata = zipEntries
     .filter((entry) => entry.entryName === 'site.bson')
     .map((entry) => deserialize(entry.getData()))[0] as Metadata;
   await verifyMetadata(metadata);
+  if (githubUser) metadata.github_username = githubUser;
   return metadata;
 };
 

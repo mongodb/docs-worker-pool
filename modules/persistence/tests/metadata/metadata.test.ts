@@ -51,6 +51,12 @@ describe('metadata module', () => {
       const metaFromZip = await _metadataFromZip(zip);
       expect(metaFromZip).toEqual(meta);
     });
+
+    it('should add github username to metadata', async () => {
+      const githubUser = 'gritty';
+      const metaFromZip = await _metadataFromZip(zip, githubUser);
+      expect(metaFromZip).toEqual({ ...meta, github_username: githubUser });
+    });
   });
 
   describe('insertMetadata', () => {

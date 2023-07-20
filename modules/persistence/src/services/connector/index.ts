@@ -38,14 +38,19 @@ export const db = async () => {
 };
 
 // all docs should be inserted with the buildId for the run.
-export const insert = async (docs: any[], collection: string, buildId: ObjectId) => {
+export const insert = async (docs: any[], collection: string, buildId: ObjectId, githubUser?: string) => {
   const timerLabel = `insert - ${collection}`;
   console.time(timerLabel);
   const insertSession = await db();
   try {
     return insertSession.collection(collection).insertMany(
-      docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })),
-      { ordered: false }
+      docs.map((d) => ({
+        ...d,
+        build_id: buildId,
+        created_at: buildId.getTimestamp(),
+        github_username: githubUser || undefined,
+      })),
+      { ordered: false, ignoreUndefined: true }
     );
   } catch (error) {
     console.error(`Error at insertion time for ${collection}: ${error}`);
