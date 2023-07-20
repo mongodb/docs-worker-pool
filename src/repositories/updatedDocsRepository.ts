@@ -8,7 +8,7 @@ import { ILogger } from '../services/logger';
  */
 export class UpdatedDocsRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'UpdatedDocsRepository', db.collection(config.get('updatedDocsCollection')));
+    super(config, logger, 'UpdatedDocsRepository', db.collection('updated_documents'));
   }
 
   /**
