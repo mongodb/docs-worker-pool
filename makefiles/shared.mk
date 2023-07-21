@@ -59,6 +59,7 @@ endif
 next-gen-html:
 	# persistence module - add bundle zip to Atlas documents
 	# ignore errors "-" flag
+	@echo "persistence build - GH_USER = ${GH_USER}, GH_USER_ARG = ${GH_USER_ARG}"
 	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
 	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
