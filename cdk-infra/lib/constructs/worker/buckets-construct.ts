@@ -19,9 +19,9 @@ export class WorkerBucketsConstruct extends Construct {
       if (useCustomBuckets) return createCustomBucket({ scope: this, featureName, env, bucketName });
 
       const bucketEnv = env === 'prd' ? 'prd-staging' : env;
-      const stackBucketName = `${featureName}-${bucketName}-${bucketEnv}`.toLowerCase();
+      const bucketConstructId = `${featureName}-${bucketName}-${bucketEnv}`.toLowerCase();
 
-      const bucket = Bucket.fromBucketName(this, stackBucketName, `${bucketName}-${bucketEnv}`);
+      const bucket = Bucket.fromBucketName(this, bucketConstructId, `${bucketName}-${bucketEnv}`);
 
       return bucket;
     });
