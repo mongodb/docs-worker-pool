@@ -14,6 +14,7 @@ import { JobRepository } from '../repositories/jobRepository';
 import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 
 export const jobHandlerMap = {
   githubPush: StagingJobHandler,
@@ -33,7 +34,8 @@ export class JobHandlerFactory {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ): JobHandler {
     const jt = job.payload?.jobType;
     if (jt in jobHandlerMap) {
@@ -47,7 +49,8 @@ export class JobHandlerFactory {
         repoConnector,
         logger,
         validator,
-        repoBranchesRepo
+        repoBranchesRepo,
+        repoEntitlementsRepo
       );
     }
     throw new InvalidJobError('Job type not supported');
@@ -67,6 +70,7 @@ export class JobManager {
   private _jobHandlerFactory: JobHandlerFactory;
   private _jobCommandExecutor: IJobCommandExecutor;
   private _repoBranchesRepo: RepoBranchesRepository;
+  private _repoEntitlementsRepo: RepoEntitlementsRepository;
 
   constructor(
     config: IConfig,
@@ -78,7 +82,8 @@ export class JobManager {
     repoConnector: IRepoConnector,
     fileSystemServices: IFileSystemServices,
     logger: IJobRepoLogger,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     this._jobRepository = jobRepository;
     this._cdnConnector = cdnConnector;
@@ -92,6 +97,7 @@ export class JobManager {
     this._jobHandlerFactory = jobHandlerFactory;
     this._jobCommandExecutor = jobCommandExecutor;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._repoEntitlementsRepo = repoEntitlementsRepo;
   }
 
   async start(): Promise<void> {
@@ -156,7 +162,8 @@ export class JobManager {
       this._repoConnector,
       this._logger,
       this._jobValidator,
-      this._repoBranchesRepo
+      this._repoBranchesRepo,
+      this._repoEntitlementsRepo
     );
 
     await this._jobValidator.throwIfJobInvalid(job);

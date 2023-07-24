@@ -10,6 +10,7 @@ import { IFileSystemServices } from '../services/fileServices';
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from '../errors/errors';
 import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 require('fs');
 
 export abstract class JobHandler {
@@ -54,6 +55,7 @@ export abstract class JobHandler {
   protected name: string;
 
   protected _repoBranchesRepo: RepoBranchesRepository;
+  protected _repoEntitlementsRepo: RepoEntitlementsRepository;
 
   constructor(
     job: Job,
@@ -65,7 +67,8 @@ export abstract class JobHandler {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     this._commandExecutor = commandExecutor;
     this._cdnConnector = cdnConnector;
@@ -78,6 +81,7 @@ export abstract class JobHandler {
     this._config = config;
     this._validator = validator;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._repoEntitlementsRepo = repoEntitlementsRepo;
   }
 
   abstract prepStageSpecificNextGenCommands(): void;
@@ -618,7 +622,14 @@ export abstract class JobHandler {
 
   protected async previewWebhook(): Promise<AxiosResponse<string>> {
     const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
-    const gatsbySiteDataSource = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_URL;
+    const githubUsername = this.currJob.user;
+    const gatsbySiteDataSource = await this._repoEntitlementsRepo.getGatsbyDataSourceByGithubUsername(githubUsername);
+    if (!gatsbySiteDataSource) {
+      const message = `User ${githubUsername} does not have a Gatsby Cloud data source.`;
+      this._logger.warn('Gatsby Cloud Preview Webhook', message);
+      throw new Error(message);
+    }
+
     const url = `${previewWebhookURL}/${gatsbySiteDataSource}`;
     return await axios.post(
       url,

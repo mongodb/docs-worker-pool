@@ -71,9 +71,13 @@ export abstract class BaseRepository {
     );
   }
 
-  protected async findOne(query: any, errorMsg: string): Promise<any> {
+  protected async findOne(query: any, errorMsg: string, options: mongodb.FindOptions = {}): Promise<any> {
     try {
-      return await this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.findOne(query), errorMsg);
+      return this.promiseTimeoutS(
+        this._config.get('MONGO_TIMEOUT_S'),
+        this._collection.findOne(query, options),
+        errorMsg
+      );
     } catch (error) {
       this._logger.error(`${this._repoName}:findOne`, `Failed to find (${JSON.stringify(query)}) error: ${error}`);
       throw error;

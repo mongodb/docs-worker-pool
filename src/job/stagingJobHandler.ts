@@ -9,6 +9,7 @@ import { IJobRepoLogger } from '../services/logger';
 import { IRepoConnector } from '../services/repo';
 import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
@@ -21,7 +22,8 @@ export class StagingJobHandler extends JobHandler {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
       job,
@@ -33,7 +35,8 @@ export class StagingJobHandler extends JobHandler {
       repoConnector,
       logger,
       validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoEntitlementsRepo
     );
     this.name = 'Staging';
   }
@@ -82,8 +85,15 @@ export class StagingJobHandler extends JobHandler {
       if (featurePreviewWebhookEnabled) {
         // TODO: current using a rudimentary logging approach, should switch to
         // something more robust once we are closer to going live.
-        const response = await this.previewWebhook();
-        await this.logger.save(this.currJob._id, `${'(POST Webhook Status)'.padEnd(15)}${response.status}`);
+        try {
+          const response = await this.previewWebhook();
+          await this.logger.save(this.currJob._id, `${'(POST Webhook Status)'.padEnd(15)}${response.status}`);
+        } catch (err) {
+          await this.logger.save(
+            this.currJob._id,
+            `${'(POST Webhook)'.padEnd(15)}Failed to POST to Gatsby Cloud webhook: ${err}`
+          );
+        }
       }
 
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);

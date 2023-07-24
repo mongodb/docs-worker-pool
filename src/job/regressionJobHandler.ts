@@ -2,6 +2,7 @@ import { IConfig } from 'config';
 import type { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../services/cdn';
 import { IJobCommandExecutor } from '../services/commandExecutor';
 import { IFileSystemServices } from '../services/fileServices';
@@ -21,7 +22,8 @@ export class RegressionJobHandler extends ProductionJobHandler {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
       job,
@@ -33,7 +35,8 @@ export class RegressionJobHandler extends ProductionJobHandler {
       repoConnector,
       logger,
       validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoEntitlementsRepo
     );
     this.name = 'Regression';
   }

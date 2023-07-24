@@ -56,7 +56,8 @@ export async function handleJob(jobId: string, db: mongodb.Db) {
     repoConnector,
     fileSystemServices,
     hybridJobLogger,
-    repoBranchesRepo
+    repoBranchesRepo,
+    repoEntitlementRepository
   );
 
   try {

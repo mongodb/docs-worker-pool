@@ -10,6 +10,7 @@ import { IRepoConnector } from '../services/repo';
 import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { InvalidJobError } from '../errors/errors';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 
 // TODO: Move this to a generic util and out of this job file
 const joinUrlAndPrefix = (url, prefix) => {
@@ -32,7 +33,8 @@ export class ManifestJobHandler extends JobHandler {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
       job,
@@ -44,7 +46,8 @@ export class ManifestJobHandler extends JobHandler {
       repoConnector,
       logger,
       validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoEntitlementsRepo
     );
     this.name = 'Manifest';
   }
