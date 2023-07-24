@@ -112,6 +112,7 @@ custom:
   npmBase64Auth: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/auth}
   npmEmail: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/email}
   gatsbyBaseUrl: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/base_url}
+  gatsbyCloudPreviewWebhookEnabled: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_webhook_enable}
   previewBuildEnabled: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_build/enabled}
   featureFlagUpdatePages: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/update_pages}
   featureFlagSearchUI: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/search_ui}

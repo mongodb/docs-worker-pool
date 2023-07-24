@@ -636,9 +636,10 @@ export abstract class JobHandler {
       {
         project: this.currJob.payload.project,
         branch: this.currJob.payload.branchName,
+        jobId: this.currJob._id,
       },
       {
-        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty' },
+        headers: { 'x-gatsby-cloud-data-source': 'new' },
       }
     );
   }

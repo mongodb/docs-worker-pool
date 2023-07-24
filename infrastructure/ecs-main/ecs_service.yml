@@ -54,6 +54,8 @@ Resources:
               Value: ${self:custom.npmEmail}
             - Name: GATSBY_BASE_URL
               Value: ${self:custom.gatsbyBaseUrl}
+            - NAME: GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED
+              Value: ${self:custom.gatsbyCloudPreviewWebhookEnabled}
             - Name: PREVIEW_BUILD_ENABLED
               Value: ${self:custom.previewBuildEnabled}
             - Name: FEATURE_FLAG_UPDATE_PAGES
