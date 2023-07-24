@@ -87,6 +87,13 @@ deploy: build/public ## Deploy to the production bucket
 
 	@echo "Hosted at ${URL}/index.html"
 
+# Set Github user to docs-builder-bot if empty
+ifeq ($(GH_USER),)
+GH_USER_ARG=docs-builder-bot
+else
+GH_USER_ARG=${GH_USER}
+endif
+
 next-gen-html: examples
 	# snooty parse and then build-front-end
 	@if [ ! -z "${PATCH_ID}" ]; then \
@@ -106,7 +113,7 @@ next-gen-html: examples
 	fi
 	# persistence module - add bundle zip to Atlas documents
 	# ignore errors "-" flag
-	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
+	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
 	rsync -az --exclude '.git' ${REPO_DIR}/../../snooty ${REPO_DIR} && \
 	cd snooty && \
 	echo "GATSBY_SITE=${PROJECT}" > .env.production && \
