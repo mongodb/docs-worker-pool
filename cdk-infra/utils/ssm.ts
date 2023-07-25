@@ -74,7 +74,7 @@ const workerSecureStrings = [
   '/cdn/client/secret',
 ] as const;
 
-type WorkerSecureString = typeof workerSecureStrings[number];
+type WorkerSecureString = (typeof workerSecureStrings)[number];
 
 const workerParamPathToEnvName = new Map<WorkerSecureString, string>();
 
@@ -110,9 +110,10 @@ const webhookSecureStrings = [
   '/cdn/client/secret',
   '/slack/webhook/secret',
   '/slack/auth/token',
+  '/snooty/webhook/secret',
 ] as const;
 
-type WebhookSecureString = typeof webhookSecureStrings[number];
+type WebhookSecureString = (typeof webhookSecureStrings)[number];
 
 const webhookParamPathToEnvName = new Map<WebhookSecureString, string>();
 
@@ -125,6 +126,7 @@ webhookParamPathToEnvName.set('/cdn/client/id', 'CDN_CLIENT_ID');
 webhookParamPathToEnvName.set('/cdn/client/secret', 'CDN_CLIENT_SECRET');
 webhookParamPathToEnvName.set('/slack/auth/token', 'SLACK_TOKEN');
 webhookParamPathToEnvName.set('/slack/webhook/secret', 'SLACK_SECRET');
+webhookParamPathToEnvName.set('/snooty/webhook/secret', 'SNOOTY_SECRET');
 
 export async function getWebhookSecureStrings(ssmPrefix: string): Promise<Record<string, string>> {
   return getSecureStrings(ssmPrefix, webhookSecureStrings, webhookParamPathToEnvName, 'webhookParamPathToEnvName');

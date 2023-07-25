@@ -5,6 +5,7 @@
   "dbPassword": "MONGO_ATLAS_PASSWORD",
   "dbHost": "MONGO_ATLAS_HOST",
   "dbName": "DB_NAME",
+  "snootyDbName": "SNOOTY_DB_NAME",
   "dbUrl": "MONGO_ATLAS_URL",
   "jobQueueCollection": "JOB_QUEUE_COL_NAME",
   "awsKey": "AWS_ACCESS_KEY_ID",

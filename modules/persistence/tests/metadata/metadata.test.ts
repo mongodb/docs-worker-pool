@@ -49,7 +49,13 @@ describe('metadata module', () => {
   describe('metadataFromZip', () => {
     it('should get metadata from site.bson', async () => {
       const metaFromZip = await _metadataFromZip(zip);
-      expect(metaFromZip).toEqual(meta);
+      expect(metaFromZip).toEqual({ ...meta, github_username: 'docs-builder-bot' });
+    });
+
+    it('should add github username to metadata', async () => {
+      const githubUser = 'gritty';
+      const metaFromZip = await _metadataFromZip(zip, githubUser);
+      expect(metaFromZip).toEqual({ ...meta, github_username: githubUser });
     });
   });
 

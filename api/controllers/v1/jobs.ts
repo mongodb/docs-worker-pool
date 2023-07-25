@@ -1,6 +1,8 @@
 import * as c from 'config';
+import crypto from 'crypto';
 import * as mongodb from 'mongodb';
 import { IConfig } from 'config';
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
@@ -12,6 +14,19 @@ import { Job, JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
+
+// Although data in payload should always be present, it's not guaranteed from
+// external callers
+interface SnootyPayload {
+  jobId?: string;
+}
+
+// These options should only be defined if the build summary is being called after
+// a Gatsby Cloud job
+interface BuildSummaryOptions {
+  mongoClient?: mongodb.MongoClient;
+  previewUrl?: string;
+}
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -160,9 +175,11 @@ async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url
     consoleLogger.error(message['jobId'], err);
   }
 }
-async function NotifyBuildSummary(jobId: string): Promise<any> {
+
+async function NotifyBuildSummary(jobId: string, options: BuildSummaryOptions = {}): Promise<any> {
+  const { mongoClient, previewUrl } = options;
   const consoleLogger = new ConsoleLogger();
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  const client: mongodb.MongoClient = mongoClient ?? new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
   const env = c.get<string>('env');
@@ -187,6 +204,11 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
       const prCommentId = await githubCommenter.getPullRequestCommentId(fullDocument.payload, pr);
       const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
 
+      // We currently avoid posting the Gatsby Cloud preview url on GitHub to avoid
+      // potentially conflicting behavior with the S3 staging link with parallel
+      // frontend builds. This is in case the GC build finishing first causes the
+      // initial comment to be made with a nullish S3 url, while subsequent comment
+      // updates only append the list of build logs.
       if (prCommentId !== undefined) {
         const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true);
         await githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
@@ -213,7 +235,8 @@ async function NotifyBuildSummary(jobId: string): Promise<any> {
       repoName,
       c.get<string>('dashboardUrl'),
       jobId,
-      fullDocument.status == 'failed'
+      fullDocument.status == 'failed',
+      previewUrl
     ),
     entitlement['slack_user_id']
   );
@@ -247,22 +270,26 @@ async function prepSummaryMessage(
   repoName: string,
   jobUrl: string,
   jobId: string,
-  failed = false
+  failed = false,
+  previewUrl?: string
 ): Promise<string> {
   const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls = [null, null];
+  let mms_urls: Array<string | null> = [null, null];
   // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
   // so we need to extract both URLs
   if (repoName === 'mms-docs') {
     if (urls.length >= 2) {
-      // TODO: Type 'string[]' is not assignable to type 'null[]'.
       mms_urls = urls.slice(-2);
     }
   }
+
   let url = '';
-  if (urls.length > 0) {
+  if (previewUrl) {
+    url = previewUrl;
+  } else if (urls.length > 0) {
     url = urls[urls.length - 1];
   }
+
   let msg = '';
   if (failed) {
     msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n Check logs for more errors!!\nSorry  :disappointed:! `;
@@ -384,4 +411,112 @@ async function SubmitArchiveJob(jobId: string) {
   );
   consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
   await client.close();
+}
+
+/**
+ * Checks the signature payload as a rough validation that the request was made by
+ * the Snooty frontend.
+ * @param payload - stringified JSON payload
+ * @param signature - the Snooty signature included in the header
+ */
+function validateSnootyPayload(payload: string, signature: string) {
+  const secret = c.get<string>('snootySecret');
+  const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  return signature === expectedSignature;
+}
+
+/**
+ * Performs post-build operations such as notifications and db updates for job ID
+ * provided in its payload. This is typically expected to only be called by
+ * Snooty's Gatsby Cloud source plugin.
+ * @param event
+ * @returns
+ */
+export async function SnootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
+  const consoleLogger = new ConsoleLogger();
+  const defaultHeaders = { 'Content-Type': 'text/plain' };
+
+  if (!event.body) {
+    const err = 'SnootyBuildComplete does not have a body in event payload';
+    consoleLogger.error('SnootyBuildCompleteError', err);
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: err,
+    };
+  }
+
+  // Keep lowercase in case header is automatically converted to lowercase
+  // The Snooty frontend should be mindful of using a lowercase header
+  const snootySignature = event.headers['x-snooty-signature'];
+  if (!snootySignature) {
+    const err = 'SnootyBuildComplete does not have a signature in event payload';
+    consoleLogger.error('SnootyBuildCompleteError', err);
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: err,
+    };
+  }
+
+  if (!validateSnootyPayload(event.body, snootySignature)) {
+    const errMsg = 'Payload signature is incorrect';
+    consoleLogger.error('SnootyBuildCompleteError', errMsg);
+    return {
+      statusCode: 401,
+      headers: defaultHeaders,
+      body: errMsg,
+    };
+  }
+
+  let payload: SnootyPayload | undefined;
+  try {
+    payload = JSON.parse(event.body) as SnootyPayload;
+  } catch (e) {
+    const errMsg = 'Payload is not valid JSON';
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: errMsg,
+    };
+  }
+
+  const { jobId } = payload;
+  if (!jobId) {
+    const errMsg = 'Payload missing job ID';
+    consoleLogger.error('SnootyBuildCompleteError', errMsg);
+    return {
+      statusCode: 400,
+      headers: defaultHeaders,
+      body: errMsg,
+    };
+  }
+
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+
+  try {
+    await client.connect();
+    const db = client.db(c.get<string>('dbName'));
+    const jobRepository = new JobRepository(db, c, consoleLogger);
+    await jobRepository.updateWithCompletionStatus(jobId, null, false);
+    // Placeholder preview URL until we iron out the Gatsby Cloud site URLs.
+    // This would probably involve fetching the URLs in the db on a per project basis
+    const previewUrl = 'https://www.mongodb.com/docs/';
+    await NotifyBuildSummary(jobId, { mongoClient: client, previewUrl });
+  } catch (e) {
+    consoleLogger.error('SnootyBuildCompleteError', e);
+    return {
+      statusCode: 500,
+      headers: defaultHeaders,
+      body: e,
+    };
+  } finally {
+    await client.close();
+  }
+
+  return {
+    statusCode: 200,
+    headers: defaultHeaders,
+    body: `Snooty build ${jobId} completed`,
+  };
 }

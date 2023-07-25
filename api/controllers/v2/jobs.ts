@@ -58,14 +58,13 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
   await Promise.all(
     messages.map(async (message: SQSRecord) => {
       const consoleLogger = new ConsoleLogger();
+      console.log('SQS RECORD: ', message);
       const body = JSON.parse(message.body);
       const jobId = body['jobId'];
       const jobStatus = body['jobStatus'];
+
       try {
         switch (jobStatus) {
-          case JobStatus[JobStatus.inQueue]:
-            await NotifyBuildProgress(jobId);
-            break;
           case JobStatus[JobStatus.inProgress]:
             await NotifyBuildProgress(jobId);
             break;

@@ -89,6 +89,7 @@ export class WebhookApiConstruct extends Construct {
       handler: 'HandleJobs',
       environment,
       bundling,
+      timeout,
     });
 
     // generic handler for the root endpoint

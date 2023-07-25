@@ -162,7 +162,7 @@ export class TestDataProvider {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make next-gen-parse',
-      'make next-gen-html',
+      `make next-gen-html GH_USER=${job.payload.repoOwner}`,
     ]);
     const project = job.payload.project === 'cloud-docs' ? job.payload.project : '';
     const branchName = /^[a-zA-Z0-9_\-\./]+$/.test(job.payload.branchName) ? job.payload.branchName : '';

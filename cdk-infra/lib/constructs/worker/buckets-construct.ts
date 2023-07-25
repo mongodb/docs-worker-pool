@@ -1,159 +1,29 @@
 import { Construct } from 'constructs';
-import { BlockPublicAccess, Bucket, RedirectProtocol, RoutingRule } from 'aws-cdk-lib/aws-s3';
-import { RemovalPolicy } from 'aws-cdk-lib';
-import { docsBucketNames } from '../../../utils/buckets';
-import { getEnv, getFeatureName } from '../../../utils/env';
-import { getHostUrl, getPrefixUrl } from '../../../utils/url';
+import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
+import { createCustomBucket, docsBucketNames } from '../../../utils/buckets';
+import { getEnv, getFeatureName, getUseCustomBuckets } from '../../../utils/env';
 
 export class WorkerBucketsConstruct extends Construct {
-  readonly buckets: Bucket[];
+  readonly buckets: IBucket[];
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
     const env = getEnv();
 
-    const buckets: Bucket[] = [];
-
-    docsBucketNames.forEach((bucketName) => {
-      let websiteRoutingRules: RoutingRule[] | undefined;
-
-      if (bucketName === 'docs-mongodb-org') {
-        const hostName = getHostUrl(env);
-        const prefixUrl = getPrefixUrl(env);
-        // docs-mongodb-org has specific routing roles that the rest of the buckets do not have
-        websiteRoutingRules = [
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/master`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/upcoming`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.3.0`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.3`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.2.1`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.2`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.2.0`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.2`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.7`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.6`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.5`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.4`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.3`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.2`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
-            },
-          },
-          {
-            condition: {
-              keyPrefixEquals: `${prefixUrl}/atlas/cli/v1.1.0`,
-            },
-            protocol: RedirectProtocol.HTTPS,
-            hostName,
-            replaceKey: {
-              prefixWithKey: `${prefixUrl}/atlas/cli/v1.1`,
-            },
-          },
-        ];
-      }
-
+    const buckets: IBucket[] = docsBucketNames.map((bucketName) => {
       const featureName = getFeatureName();
+      const useCustomBuckets = getUseCustomBuckets();
 
-      const stackBucketName = `${featureName}-${bucketName}-${env}`.toLowerCase();
+      // If we want to use buckets that don't currently exist, we can call this method to create
+      // them for individual testing purposes
+      if (useCustomBuckets) return createCustomBucket({ scope: this, featureName, env, bucketName });
 
-      const bucket = new Bucket(this, stackBucketName, {
-        removalPolicy: RemovalPolicy.DESTROY,
-        websiteRoutingRules,
-        bucketName: stackBucketName,
-        websiteIndexDocument: 'index.html',
-        websiteErrorDocument: 'docs-qa/404/index.html',
-        blockPublicAccess: new BlockPublicAccess({
-          blockPublicAcls: false,
-          blockPublicPolicy: false,
-          ignorePublicAcls: false,
-          restrictPublicBuckets: false,
-        }),
-      });
+      const bucketEnv = env === 'prd' ? 'prd-staging' : env;
+      const bucketConstructId = `${featureName}-${bucketName}-${bucketEnv}`.toLowerCase();
 
-      buckets.push(bucket);
+      const bucket = Bucket.fromBucketName(this, bucketConstructId, `${bucketName}-${bucketEnv}`);
+
+      return bucket;
     });
 
     this.buckets = buckets;
