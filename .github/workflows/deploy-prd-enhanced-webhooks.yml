@@ -7,7 +7,7 @@ on:
 concurrency:
   group: environment-prd-enhanced-webhooks-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Staging ECS Enhanced Webhooks
+name: Deploy Production ECS Enhanced Webhooks
 jobs:
   deploy-prd:
     runs-on: ubuntu-latest

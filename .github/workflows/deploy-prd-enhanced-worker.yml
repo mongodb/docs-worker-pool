@@ -7,7 +7,7 @@ on:
 concurrency:
   group: environment-prd-enhanced-worker-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Staging ECS Enhanced Worker
+name: Deploy Production ECS Enhanced Worker
 jobs:
   deploy-prd:
     runs-on: ubuntu-latest
