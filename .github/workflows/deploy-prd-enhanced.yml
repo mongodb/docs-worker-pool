@@ -2,7 +2,7 @@ on: [workflow_dispatch]
 concurrency:
   group: environment-prd-enhanced-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Staging ECS Enhanced
+name: Deploy Production ECS Enhanced
 jobs:
   deploy-prd:
     runs-on: ubuntu-latest
