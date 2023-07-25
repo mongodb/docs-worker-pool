@@ -1,16 +1,15 @@
 on:
   push:
     paths: ["api/v2/**", "cdk-infra/lib/constructs/api/**"]
-    branches:
-      - "master"
-      - "integration"
+    tags:
+      - 'v*'
 
 concurrency:
-  group: environment-stg-enhanced-webhooks-${{ github.ref }}
+  group: environment-prd-enhanced-webhooks-${{ github.ref }}
   cancel-in-progress: true
 name: Deploy Staging ECS Enhanced Webhooks
 jobs:
-  deploy-stg:
+  deploy-prd:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
