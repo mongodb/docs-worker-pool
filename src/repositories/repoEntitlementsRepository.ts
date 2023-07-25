@@ -59,7 +59,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       this._logger.error('Fetching Gatsby Cloud Data Source', `Could not find user: ${githubUsername}`);
       return null;
     }
-    return res.github_username;
+    return res.gatsby_data_source;
   }
 
   async getRepoEntitlementsBySlackUserId(slackUserId: string): Promise<any> {
