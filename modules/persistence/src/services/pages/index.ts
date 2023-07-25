@@ -43,11 +43,15 @@ const UPDATED_AST_COLL_NAME = 'updated_documents';
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
 // or within subfolders of this module
-const pagesFromZip = (zip: AdmZip) => {
+const pagesFromZip = (zip: AdmZip, githubUser?: string) => {
   const zipPages = zip.getEntries();
   return zipPages
     .filter((entry) => entry.entryName?.startsWith('documents/'))
-    .map((entry) => deserialize(entry.getData()));
+    .map((entry) => {
+      const document = deserialize(entry.getData());
+      document.github_username = githubUser || 'docs-builder-bot';
+      return document;
+    });
 };
 
 /**
@@ -144,6 +148,7 @@ class UpdatedPagesManager {
                 static_assets: this.findUpdatedAssets(page.static_assets, prevPageData?.static_assets),
                 updated_at: this.updateTime,
                 deleted: false,
+                github_username: page.github_username || 'docs-builder-bot',
               },
               $setOnInsert: {
                 created_at: this.updateTime,
@@ -278,9 +283,9 @@ const updatePages = async (pages: Document[], collection: string) => {
   }
 };
 
-export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip) => {
+export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githubUser?: string) => {
   try {
-    const pages = pagesFromZip(zip);
+    const pages = pagesFromZip(zip, githubUser);
     const ops: PromiseLike<any>[] = [insert(pages, COLLECTION_NAME, buildId)];
 
     const featureEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
