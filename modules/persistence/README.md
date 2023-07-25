@@ -22,12 +22,14 @@ Compiles the module using `tsc`. By default, compiles to the `./dist` directory.
 
 Runs the contents of the `./dist` directory.
 Requires usage of `-- -path` argument, eg `npm run start -- --path ./build/artifacts.zip`.
+An optional argument to specify the github user and link the build to the user will require usage of `--githubUser <github_username>`.
 Recommended command for running this module in higher than local environments.
 Requires parser output artifacts to be present in specified directory and zip file at `--path` value specified.
 
 ### `npm run dev`
 
 Cleans dist, compiles, and runs with arguments `-path ./build/artifacts.zip`.
+Optionally, add the usage of this argument to the command to link build to a desired github user `-- --githubUser <github_username>`.
 Requires parser output artifacts to be present in specified directory and zip file at `./build/artifacts.zip`.
 
 ## Available Arguments

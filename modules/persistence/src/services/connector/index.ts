@@ -44,7 +44,11 @@ export const insert = async (docs: any[], collection: string, buildId: ObjectId)
   const insertSession = await db();
   try {
     return insertSession.collection(collection).insertMany(
-      docs.map((d) => ({ ...d, build_id: buildId, created_at: buildId.getTimestamp() })),
+      docs.map((d) => ({
+        ...d,
+        build_id: buildId,
+        created_at: buildId.getTimestamp(),
+      })),
       { ordered: false }
     );
   } catch (error) {
