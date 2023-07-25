@@ -91,8 +91,17 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       body: errMsg,
     };
   }
-
-  const body = JSON.parse(event.body);
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch (e) {
+    console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
+    return {
+      statusCode: 502,
+      headers: { 'Content-Type': 'text/plain' },
+      body: ' ERROR! Could not parse event.body',
+    };
+  }
 
   if (body.deleted) {
     return {

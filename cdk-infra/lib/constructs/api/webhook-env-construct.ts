@@ -2,6 +2,8 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getSsmPathPrefix } from '../../../utils/ssm';
+import { getDashboardUrl } from '../../../utils/slack';
+import { getEnv } from '../../../utils/env';
 
 interface WebhookEnvConstructProps {
   jobsQueue: IQueue;
@@ -15,18 +17,23 @@ export class WebhookEnvConstruct extends Construct {
     super(scope, id);
 
     const ssmPrefix = getSsmPathPrefix();
+    const env = getEnv();
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
-
+    const entitlementCollection = StringParameter.valueFromLookup(
+      this,
+      `${ssmPrefix}/atlas/collections/user/entitlements`
+    );
     const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
     this.environment = {
       ...secureStrings,
       MONGO_ATLAS_USERNAME: dbUsername,
       MONGO_ATLAS_PASSWORD: dbPassword,
+      MONGO_ATLAS_HOST: dbHost,
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
       SNOOTY_DB_NAME: snootyDbName,
@@ -35,6 +42,8 @@ export class WebhookEnvConstruct extends Construct {
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
       NODE_OPTIONS: '--enable-source-maps',
+      USER_ENTITLEMENT_COL_NAME: entitlementCollection,
+      DASHBOARD_URL: getDashboardUrl(env, jobCollection),
     };
   }
 }

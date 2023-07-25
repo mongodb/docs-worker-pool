@@ -8,8 +8,25 @@ export class AutoBuilderQueuesConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const jobsQueue = new Queue(this, 'JobsQueue');
-    const jobUpdatesQueue = new Queue(this, 'JobUpdatesQueue');
+    const maxReceiveCount = 3;
+
+    const jobsQueueDlq = new Queue(this, 'jobsQueueDlq');
+
+    const jobsQueue = new Queue(this, 'JobsQueue', {
+      deadLetterQueue: {
+        queue: jobsQueueDlq,
+        maxReceiveCount,
+      },
+    });
+
+    const jobUpdatesQueueDlq = new Queue(this, 'jobUpdatesQueueDlq');
+
+    const jobUpdatesQueue = new Queue(this, 'JobUpdatesQueue', {
+      deadLetterQueue: {
+        queue: jobUpdatesQueueDlq,
+        maxReceiveCount,
+      },
+    });
 
     this.jobsQueue = jobsQueue;
     this.jobUpdatesQueue = jobUpdatesQueue;
