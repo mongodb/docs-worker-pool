@@ -18,7 +18,10 @@ async function setEnvironmentVariablesEnhanced(this: JobHandler) {
     `setEnvironmentVariables for ${this.currJob.payload.repoName} env ${env} jobType ${this.currJob.payload.jobType}`
   );
   if (repo_info?.['bucket'] && repo_info?.['url']) {
-    const bucketName = 'enhancedApp-' + repo_info['bucket'][env];
+    const bucketName =
+      process.env.USE_CUSTOM_BUCKETS === 'true'
+        ? process.env.FEATURE_NAME + repo_info['bucket'][env]
+        : repo_info['bucket'][env];
 
     if (this.currJob.payload.regression) {
       env = 'regression';

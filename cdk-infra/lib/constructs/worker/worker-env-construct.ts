@@ -2,7 +2,7 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getCdnInvalidatorUrl } from '../../../utils/cdn';
-import { getEnv, envShortToFullName, getIsEnhanced } from '../../../utils/env';
+import { getEnv, envShortToFullName, getIsEnhanced, getUseCustomBuckets, getFeatureName } from '../../../utils/env';
 import { getSearchIndexFolder } from '../../../utils/search-index';
 import { getSsmPathPrefix } from '../../../utils/ssm';
 
@@ -73,6 +73,9 @@ export class WorkerEnvConstruct extends Construct {
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
       SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),
       ENHANCED: `${getIsEnhanced()}`,
+      USE_CUSTOM_BUCKETS: `${getUseCustomBuckets()}`,
+      FEATURE_NAME: `${getFeatureName()}`,
+      GATSBY_TEST_SEARCH_UI: 'false',
     };
   }
 }
