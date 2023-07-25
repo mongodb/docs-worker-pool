@@ -173,7 +173,7 @@ describe('ProductionJobHandler Tests', () => {
     );
   });
 
-  test('Default production deploy does not kick off manifest generation', async () => {
+  test('Default production deploy does not kick off  manifest generation', async () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 

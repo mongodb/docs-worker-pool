@@ -1,3 +1,6 @@
+// TODO: remove manifest job handler
+// not run as a separate job, handled in productionJobHandler prepSearchDeploy
+
 import { JobHandler } from './jobHandler';
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
