@@ -23,9 +23,9 @@ get-project-name:
 	@echo ${PROJECT};
 
 
-ifndef CUSTOM_NEXT_GEN_DEPLOY
+ifndef CUSTOM_NEXT_GEN_DEPLOY # def'd for docs-mongodb-internal* and docs-404 only
 next-gen-deploy:
-	if [ -f config/redirects -a "${GIT_BRANCH}" = master ]; then mut-redirects config/redirects -o public/.htaccess; fi
+	if [ -f config/redirects ] && [ "${GIT_BRANCH}" = master -o "${GIT_BRANCH}" = main ]; then mut-redirects config/redirects -o public/.htaccess; fi
 	yes | mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
 	@echo "Hosted at ${URL}/${MUT_PREFIX}";
 endif
