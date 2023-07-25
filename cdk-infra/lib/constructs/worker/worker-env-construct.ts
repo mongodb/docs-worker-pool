@@ -22,6 +22,7 @@ export class WorkerEnvConstruct extends Construct {
     const ssmPrefix = getSsmPathPrefix();
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
+    const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
 
@@ -60,6 +61,7 @@ export class WorkerEnvConstruct extends Construct {
       MONGO_ATLAS_HOST: dbHost,
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
+      SNOOTY_DB_NAME: snootyDbName,
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
       GITHUB_BOT_USERNAME: githubBotUsername,
