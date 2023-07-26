@@ -2,7 +2,7 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getCdnInvalidatorUrl } from '../../../utils/cdn';
-import { getEnv, envShortToFullName, getIsEnhanced } from '../../../utils/env';
+import { getEnv, envShortToFullName, getIsEnhanced, getUseCustomBuckets, getFeatureName } from '../../../utils/env';
 import { getSearchIndexFolder } from '../../../utils/search-index';
 import { getSsmPathPrefix } from '../../../utils/ssm';
 
@@ -22,6 +22,7 @@ export class WorkerEnvConstruct extends Construct {
     const ssmPrefix = getSsmPathPrefix();
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
+    const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
 
@@ -60,6 +61,7 @@ export class WorkerEnvConstruct extends Construct {
       MONGO_ATLAS_HOST: dbHost,
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
+      SNOOTY_DB_NAME: snootyDbName,
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
       GITHUB_BOT_USERNAME: githubBotUsername,
@@ -73,6 +75,9 @@ export class WorkerEnvConstruct extends Construct {
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
       SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),
       ENHANCED: `${getIsEnhanced()}`,
+      USE_CUSTOM_BUCKETS: `${getUseCustomBuckets()}`,
+      FEATURE_NAME: `${getFeatureName()}`,
+      GATSBY_TEST_SEARCH_UI: 'false',
     };
   }
 }

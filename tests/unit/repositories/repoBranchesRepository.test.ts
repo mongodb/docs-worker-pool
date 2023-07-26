@@ -20,7 +20,7 @@ describe('Repo Branches Repository Tests', () => {
       const testData = TestDataProvider.getRepoBranchesByRepoName('test_repo');
       await expect(repoBranchesRepo.getRepoBranchesByRepoName('test_repo')).resolves.toEqual({ status: 'failure' });
       expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
-      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);
+      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query, {});
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {
@@ -30,7 +30,7 @@ describe('Repo Branches Repository Tests', () => {
       dbRepoHelper.collection.findOne.mockReturnValueOnce(TestDataProvider.getRepoBranchesData(job));
       await repoBranchesRepo.getRepoBranchesByRepoName('test_repo');
       expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
-      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query);
+      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query, {});
     });
 
     test('Update with completion status timesout', async () => {

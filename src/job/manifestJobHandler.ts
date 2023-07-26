@@ -1,3 +1,6 @@
+// TODO: remove manifest job handler
+// not run as a separate job, handled in productionJobHandler prepSearchDeploy
+
 import { JobHandler } from './jobHandler';
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
@@ -13,7 +16,7 @@ import { InvalidJobError } from '../errors/errors';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 
 // TODO: Move this to a generic util and out of this job file
-const joinUrlAndPrefix = (url, prefix) => {
+export const joinUrlAndPrefix = (url: string, prefix: string) => {
   const needsTrim = url.endsWith('/') && prefix.startsWith('/');
   const needsSlash = !url.endsWith('/') && !prefix.startsWith('/');
 
@@ -97,7 +100,7 @@ export class ManifestJobHandler extends JobHandler {
       `cd repos/${this.currJob.payload.repoName}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
-      `mut-index upload bundle.zip -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP)} ${globalSearch}`,
+      `mut-index upload bundle.zip -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP || '')} ${globalSearch}`,
     ];
   }
 

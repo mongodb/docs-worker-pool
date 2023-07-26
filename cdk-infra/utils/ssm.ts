@@ -74,7 +74,7 @@ const workerSecureStrings = [
   '/cdn/client/secret',
 ] as const;
 
-type WorkerSecureString = typeof workerSecureStrings[number];
+type WorkerSecureString = (typeof workerSecureStrings)[number];
 
 const workerParamPathToEnvName = new Map<WorkerSecureString, string>();
 
@@ -113,7 +113,7 @@ const webhookSecureStrings = [
   '/snooty/webhook/secret',
 ] as const;
 
-type WebhookSecureString = typeof webhookSecureStrings[number];
+type WebhookSecureString = (typeof webhookSecureStrings)[number];
 
 const webhookParamPathToEnvName = new Map<WebhookSecureString, string>();
 

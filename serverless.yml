@@ -57,11 +57,13 @@ custom:
   dbUsername: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/username}
   dbPassword: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/password}
   dbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/dbname}
+  snootyDbName: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/snooty}
   dbhost: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/host}
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
+  githubDeletionSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/deletionSecret}
   githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
   slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
@@ -106,9 +108,11 @@ webhook-env-core: &webhook-env-core
   MONGO_ATLAS_HOST: ${self:custom.dbhost}
   MONGO_ATLAS_URL: mongodb+srv://${self:custom.dbUsername}:${self:custom.dbPassword}@${self:custom.dbhost}/admin?retryWrites=true
   DB_NAME: ${self:custom.dbName}
+  SNOOTY_DB_NAME: ${self:custom.snootyDbName}
   USER_ENTITLEMENT_COL_NAME: ${self:custom.entitlementCollection}
   JOB_QUEUE_COL_NAME: ${self:custom.jobCollection}
   GITHUB_SECRET: ${self:custom.githubSecret}
+  GITHUB_DELETION_SECRET: ${self:custom.githubDeletionSecret}
   GITHUB_BOT_PASSWORD: ${self:custom.githubBotPW}
   REPO_BRANCHES_COL_NAME:  ${self:custom.repoBranchesCollection}
   SLACK_SECRET: ${self:custom.slackSecret}
@@ -268,6 +272,16 @@ functions:
       events:
         - http:
             path: /webhook/snooty/trigger/complete
+            method: POST
+            cors: true
+      environment:
+        <<: *webhook-env-core
+    
+    v1GithubDeleteArtifacts:
+      handler: api/controllers/v1/github.MarkBuildArtifactsForDeletion
+      events:
+        - http:
+            path: /webhook/github/trigger/delete
             method: POST
             cors: true
       environment:

@@ -132,6 +132,7 @@ export abstract class BaseRepository {
     }
     return true;
   }
+
   protected async findOneAndUpdate(query: any, update: any, options: any, errorMsg: string): Promise<any> {
     try {
       return await this.promiseTimeoutS(

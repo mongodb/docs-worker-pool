@@ -1,10 +1,15 @@
-on: [workflow_dispatch]
+on:
+  push:
+    paths: ["api/v2/**", "cdk-infra/lib/constructs/api/**"]
+    tags:
+      - 'v*'
+
 concurrency:
-  group: environment-stg-enhanced-${{ github.ref }}
+  group: environment-prd-enhanced-webhooks-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Staging ECS Enhanced
+name: Deploy Production ECS Enhanced Webhooks
 jobs:
-  deploy-stg:
+  deploy-prd:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,8 +24,7 @@ jobs:
           aws-region: us-east-2
       - name: Deploy Enhanced Infrastructure
         run: |
-          npm ci
           cd cdk-infra/
           npm ci
-          npm run deploy:enhanced
+          npm run deploy:enhanced:webhooks -- -c env=prd
 
