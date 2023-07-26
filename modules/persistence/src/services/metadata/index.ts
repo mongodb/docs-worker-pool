@@ -69,10 +69,12 @@ export const insertMetadata = async (buildId: ObjectId, metadata: Metadata) => {
 
 export const insertMergedMetadataEntries = async (buildId: ObjectId, metadata: Metadata) => {
   try {
-    const mergedMetadataEntries = await mergeAssociatedToCs(metadata);
-    return mergedMetadataEntries
-      ? await Promise.all(mergedMetadataEntries.map((m) => insert([m], COLLECTION_NAME, buildId)))
-      : [];
+    console.log(buildId, metadata);
+    throw new Error('OH NO THIS IS MATT SCREAMING YAY WE GOT THE ERROR');
+    // const mergedMetadataEntries = await mergeAssociatedToCs(metadata);
+    // return mergedMetadataEntries
+    //   ? await Promise.all(mergedMetadataEntries.map((m) => insert([m], COLLECTION_NAME, buildId)))
+    //   : [];
   } catch (error) {
     console.error(`Error during umbrella metadata update: ${error}`);
     throw error;
