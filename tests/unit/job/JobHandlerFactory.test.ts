@@ -14,6 +14,7 @@ import { StagingJobHandler } from '../../../src/job/stagingJobHandler';
 import { ManifestJobHandler } from '../../../src/job/manifestJobHandler';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { IJobValidator } from '../../../src/job/jobValidator';
+import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 
 describe('JobHandlerFactory Tests', () => {
   let job: Job;
@@ -27,6 +28,7 @@ describe('JobHandlerFactory Tests', () => {
   let jobHandlerFactory: JobHandlerFactory;
   let repoBranchesRepo: RepoBranchesRepository;
   let jobValidator: IJobValidator;
+  let repoEntitlementsRepository: RepoEntitlementsRepository;
 
   beforeEach(() => {
     job = mockDeep<Job>();
@@ -39,6 +41,7 @@ describe('JobHandlerFactory Tests', () => {
     logger = mockDeep<IJobRepoLogger>();
     jobHandlerFactory = new JobHandlerFactory();
     repoBranchesRepo = mockDeep<RepoBranchesRepository>();
+    repoEntitlementsRepository = mockDeep<RepoEntitlementsRepository>();
   });
 
   test('Construct Job Factory', () => {
@@ -58,7 +61,8 @@ describe('JobHandlerFactory Tests', () => {
         repoConnector,
         logger,
         jobValidator,
-        repoBranchesRepo
+        repoBranchesRepo,
+        repoEntitlementsRepository
       );
     }).toThrowError('Job type not supported');
   });
@@ -82,7 +86,8 @@ describe('JobHandlerFactory Tests', () => {
         repoConnector,
         logger,
         jobValidator,
-        repoBranchesRepo
+        repoBranchesRepo,
+        repoEntitlementsRepository
       );
       expect(handler).toBeInstanceOf(m[jt]);
     }
