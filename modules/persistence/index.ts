@@ -59,6 +59,9 @@ try {
   console.log(argv);
   app(argv['path'], argv['githubUser']);
 } catch (error) {
+  console.error('HEY WE ARE IN FINAL CATCH');
+  console.error('argv error ', argv);
+  console.log('argv ', argv);
   console.log('caught in terminal handling');
   // only exit with non zero error code if running with strict mode on
   if (['y', 'yes', 'true'].includes(argv['strict'].toLowerCase())) {
