@@ -654,7 +654,7 @@ export abstract class JobHandler {
         jobId: this.currJob._id,
       },
       {
-        headers: { 'x-gatsby-cloud-data-source': 'new' },
+        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
       }
     );
   }
