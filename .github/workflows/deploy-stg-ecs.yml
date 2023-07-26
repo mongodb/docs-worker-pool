@@ -3,6 +3,7 @@ on:
     branches:
       - "master"
       - "integration"
+      - "DOP-3722-persistent-fail"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
