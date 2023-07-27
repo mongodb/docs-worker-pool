@@ -69,17 +69,9 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             await NotifyBuildProgress(jobId);
             break;
           case JobStatus[JobStatus.timedOut]:
-            await NotifyBuildSummary(jobId);
-            const taskId = body['taskId'];
-            // for the enhanced application, the taskId will never be defined
-            // as we are not saving it at this time
-            if (taskId) {
-              await stopECSTask(taskId, consoleLogger);
-            }
-            break;
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
-            await Promise.all([NotifyBuildSummary(jobId), SubmitArchiveJob(jobId)]);
+            await NotifyBuildSummary(jobId);
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');
