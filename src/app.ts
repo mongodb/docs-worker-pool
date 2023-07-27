@@ -63,7 +63,8 @@ async function init(): Promise<void> {
     repoConnector,
     fileSystemServices,
     hybridJobLogger,
-    repoBranchesRepo
+    repoBranchesRepo,
+    repoEntitlementRepository
   );
   jobManager.start().catch((err) => {
     consoleLogger.error('App', `ERROR: ${err}`);

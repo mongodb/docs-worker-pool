@@ -64,7 +64,8 @@ async function init(): Promise<void> {
     repoConnector,
     fileSystemServices,
     hybridJobLogger,
-    repoBranchesRepo
+    repoBranchesRepo,
+    repoEntitlementRepository
   );
   try {
     await jobManager.startSpecificJob(c.get('jobId'));

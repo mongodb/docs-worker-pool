@@ -10,6 +10,7 @@ import { IFileSystemServices } from '../services/fileServices';
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from '../errors/errors';
 import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 require('fs');
 
 export abstract class JobHandler {
@@ -54,6 +55,7 @@ export abstract class JobHandler {
   protected name: string;
 
   protected _repoBranchesRepo: RepoBranchesRepository;
+  protected _repoEntitlementsRepo: RepoEntitlementsRepository;
 
   constructor(
     job: Job,
@@ -65,7 +67,8 @@ export abstract class JobHandler {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     this._commandExecutor = commandExecutor;
     this._cdnConnector = cdnConnector;
@@ -78,8 +81,10 @@ export abstract class JobHandler {
     this._config = config;
     this._validator = validator;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._repoEntitlementsRepo = repoEntitlementsRepo;
   }
 
+  // called during build stage of
   abstract prepStageSpecificNextGenCommands(): void;
 
   private logErrorMessage(message: string): void {
@@ -391,6 +396,10 @@ export abstract class JobHandler {
 
   protected abstract prepDeployCommands(): void;
 
+  protected prepSearchDeploy(): void {
+    this._logger.info(this._currJob._id, 'Preparing search deploy');
+  }
+
   // TODO: Reduce state changes
   protected prepBuildCommands(): void {
     this.currJob.buildCommands = [
@@ -459,7 +468,17 @@ export abstract class JobHandler {
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
     if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
-      const resp = await this._commandExecutor.execute(this.currJob.deployCommands);
+      // extract search deploy job to time and test
+      const searchCommandIdx = this.currJob.deployCommands.findIndex((c) => c.match(/^mut\-index/));
+      let deployCmdsNoSearch = this.currJob.deployCommands;
+      if (searchCommandIdx > -1) {
+        await this.callWithBenchmark(this.currJob.deployCommands[searchCommandIdx], 'search');
+        deployCmdsNoSearch = this.currJob.deployCommands
+          .slice(0, searchCommandIdx)
+          .concat(this.currJob.deployCommands.slice(searchCommandIdx + 1, this.currJob.deployCommands.length));
+      }
+
+      const resp = await this._commandExecutor.execute(deployCmdsNoSearch);
       if (resp?.error?.includes?.('ERROR')) {
         await this._logger.save(
           this.currJob._id,
@@ -618,16 +637,24 @@ export abstract class JobHandler {
 
   protected async previewWebhook(): Promise<AxiosResponse<string>> {
     const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
-    const gatsbySiteDataSource = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_URL;
-    const url = `${previewWebhookURL}/${gatsbySiteDataSource}`;
+    const githubUsername = this.currJob.user;
+    const gatsbySiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(githubUsername);
+    if (!gatsbySiteId) {
+      const message = `User ${githubUsername} does not have a Gatsby Cloud Site ID.`;
+      this._logger.warn('Gatsby Cloud Preview Webhook', message);
+      throw new Error(message);
+    }
+
+    const url = `${previewWebhookURL}/${gatsbySiteId}`;
     return await axios.post(
       url,
       {
         project: this.currJob.payload.project,
         branch: this.currJob.payload.branchName,
+        jobId: this.currJob._id,
       },
       {
-        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty' },
+        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
       }
     );
   }

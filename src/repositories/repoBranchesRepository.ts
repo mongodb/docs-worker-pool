@@ -5,7 +5,7 @@ import { IConfig } from 'config';
 
 export class RepoBranchesRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'RepoEntitlementsRepository', db.collection(config.get('repoBranchesCollection')));
+    super(config, logger, 'RepoBranchesRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
   async getProjectByRepoName(repoName: string) {

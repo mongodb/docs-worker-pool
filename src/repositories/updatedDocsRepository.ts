@@ -25,6 +25,7 @@ export class UpdatedDocsRepository extends BaseRepository {
     const update = {
       $set: {
         deleted: true,
+        updated_at: new Date(),
       },
     };
 
