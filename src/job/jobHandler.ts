@@ -638,14 +638,14 @@ export abstract class JobHandler {
   protected async previewWebhook(): Promise<AxiosResponse<string>> {
     const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
     const githubUsername = this.currJob.user;
-    const gatsbySiteDataSource = await this._repoEntitlementsRepo.getGatsbyDataSourceByGithubUsername(githubUsername);
-    if (!gatsbySiteDataSource) {
-      const message = `User ${githubUsername} does not have a Gatsby Cloud data source.`;
+    const gatsbySiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(githubUsername);
+    if (!gatsbySiteId) {
+      const message = `User ${githubUsername} does not have a Gatsby Cloud Site ID.`;
       this._logger.warn('Gatsby Cloud Preview Webhook', message);
       throw new Error(message);
     }
 
-    const url = `${previewWebhookURL}/${gatsbySiteDataSource}`;
+    const url = `${previewWebhookURL}/${gatsbySiteId}`;
     return await axios.post(
       url,
       {
