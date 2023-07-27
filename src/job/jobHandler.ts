@@ -10,6 +10,7 @@ import { IFileSystemServices } from '../services/fileServices';
 import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from '../errors/errors';
 import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 require('fs');
 
 export abstract class JobHandler {
@@ -54,6 +55,7 @@ export abstract class JobHandler {
   protected name: string;
 
   protected _repoBranchesRepo: RepoBranchesRepository;
+  protected _repoEntitlementsRepo: RepoEntitlementsRepository;
 
   constructor(
     job: Job,
@@ -65,7 +67,8 @@ export abstract class JobHandler {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     this._commandExecutor = commandExecutor;
     this._cdnConnector = cdnConnector;
@@ -78,6 +81,7 @@ export abstract class JobHandler {
     this._config = config;
     this._validator = validator;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._repoEntitlementsRepo = repoEntitlementsRepo;
   }
 
   // called during build stage of
@@ -633,16 +637,24 @@ export abstract class JobHandler {
 
   protected async previewWebhook(): Promise<AxiosResponse<string>> {
     const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
-    const gatsbySiteDataSource = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_URL;
-    const url = `${previewWebhookURL}/${gatsbySiteDataSource}`;
+    const githubUsername = this.currJob.user;
+    const gatsbySiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(githubUsername);
+    if (!gatsbySiteId) {
+      const message = `User ${githubUsername} does not have a Gatsby Cloud Site ID.`;
+      this._logger.warn('Gatsby Cloud Preview Webhook', message);
+      throw new Error(message);
+    }
+
+    const url = `${previewWebhookURL}/${gatsbySiteId}`;
     return await axios.post(
       url,
       {
         project: this.currJob.payload.project,
         branch: this.currJob.payload.branchName,
+        jobId: this.currJob._id,
       },
       {
-        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty' },
+        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
       }
     );
   }

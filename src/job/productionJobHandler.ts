@@ -3,6 +3,7 @@ import type { Job } from '../entities/job';
 import { InvalidJobError } from '../errors/errors';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../services/cdn';
 import { CommandExecutorResponse, IJobCommandExecutor } from '../services/commandExecutor';
 import { IFileSystemServices } from '../services/fileServices';
@@ -23,7 +24,8 @@ export class ProductionJobHandler extends JobHandler {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
       job,
@@ -35,7 +37,8 @@ export class ProductionJobHandler extends JobHandler {
       repoConnector,
       logger,
       validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoEntitlementsRepo
     );
     this.name = 'Production';
   }

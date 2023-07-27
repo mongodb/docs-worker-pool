@@ -47,6 +47,21 @@ export class RepoEntitlementsRepository extends BaseRepository {
     }
   }
 
+  async getGatsbySiteIdByGithubUsername(githubUsername: string) {
+    const query = { github_username: githubUsername };
+    const projection = { _id: 0, gatsby_site_id: 1 };
+    const res = await this.findOne(
+      query,
+      `Mongo Timeout Error: Timedout while retrieving entitlements for ${githubUsername}`,
+      { projection }
+    );
+    if (!res) {
+      this._logger.error('Fetching Gatsby Cloud Site ID', `Could not find user: ${githubUsername}`);
+      return null;
+    }
+    return res.gatsby_site_id;
+  }
+
   async getRepoEntitlementsBySlackUserId(slackUserId: string): Promise<any> {
     const query = { slack_user_id: slackUserId };
     const entitlementsObject = await this.findOne(
