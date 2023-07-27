@@ -12,6 +12,7 @@ import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
 import { APIGatewayEvent, APIGatewayProxyResult, SQSEvent, SQSRecord } from 'aws-lambda';
+import { notifyBuildSummary, snootyBuildComplete } from '../../handlers/jobs';
 
 export const TriggerLocalBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -69,7 +70,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             await NotifyBuildProgress(jobId);
             break;
           case JobStatus[JobStatus.timedOut]:
-            await NotifyBuildSummary(jobId);
+            await notifyBuildSummary(jobId);
             const taskId = body['taskId'];
             // for the enhanced application, the taskId will never be defined
             // as we are not saving it at this time
@@ -79,7 +80,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             break;
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
-            await Promise.all([NotifyBuildSummary(jobId), SubmitArchiveJob(jobId)]);
+            await Promise.all([notifyBuildSummary(jobId), SubmitArchiveJob(jobId)]);
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');
@@ -108,110 +109,9 @@ export const FailStuckJobs = async () => {
   }
 };
 
-async function saveTaskId(jobId: string, taskExecutionRes: any, consoleLogger: ConsoleLogger): Promise<void> {
-  const taskArn = taskExecutionRes?.tasks[0]?.taskArn;
-  if (!taskArn) return;
-
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
-  await client.connect();
-  const db = client.db(c.get('dbName'));
-  const jobRepository = new JobRepository(db, c, consoleLogger);
-
-  try {
-    // Only interested in the actual task ID since the whole ARN might have sensitive information
-    const taskId = taskArn.split('/').pop();
-    await jobRepository.addTaskIdToJob(jobId, taskId);
-  } catch (err) {
-    consoleLogger.error('saveTaskId', err);
-  }
-}
-
 async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
   const ecs = new ECSContainer(c, consoleLogger);
   await ecs.stopZombieECSTask(taskId);
-}
-
-async function NotifyBuildSummary(jobId: string): Promise<void> {
-  const consoleLogger = new ConsoleLogger();
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
-  await client.connect();
-  const db = client.db(c.get('dbName'));
-  const env = c.get<string>('env');
-
-  const jobRepository = new JobRepository(db, c, consoleLogger);
-  const fullDocument = await jobRepository.getJobById(jobId);
-
-  if (!fullDocument) {
-    consoleLogger.error(
-      `NotifyBuildSummary_${jobId}`,
-      `Notify build summary failed. Job does not exist for Job ID: ${jobId}`
-    );
-    return;
-  }
-
-  const repoName = fullDocument.payload.repoName;
-  const username = fullDocument.user;
-  const slackConnector = new SlackConnector(consoleLogger, c);
-  const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
-
-  if (!entitlement?.['slack_user_id']) {
-    consoleLogger.error(username, 'Entitlement failed');
-    return;
-  }
-
-  await slackConnector.sendMessage(
-    await prepSummaryMessage(
-      env,
-      fullDocument,
-      repoName,
-      c.get<string>('dashboardUrl'),
-      jobId,
-      fullDocument.status == 'failed'
-    ),
-    entitlement['slack_user_id']
-  );
-}
-
-export const extractUrlFromMessage = (fullDocument): string[] => {
-  const { logs } = fullDocument;
-  const urls = logs?.length > 0 ? logs.flatMap((log) => log.match(/\bhttps?:\/\/\S+/gi) || []) : [];
-  return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
-};
-
-async function prepSummaryMessage(
-  env: string,
-  fullDocument: Job,
-  repoName: string,
-  jobUrl: string,
-  jobId: string,
-  failed = false
-): Promise<string> {
-  const urls = extractUrlFromMessage(fullDocument);
-  let mms_urls: Array<string | null> = [null, null];
-  // mms-docs needs special handling as it builds two sites (cloudmanager & ops manager)
-  // so we need to extract both URLs
-  if (repoName === 'mms-docs') {
-    if (urls.length >= 2) {
-      mms_urls = urls.slice(-2);
-    }
-  }
-  let url = '';
-  if (urls.length > 0) {
-    url = urls[urls.length - 1];
-  }
-  let msg = '';
-  if (failed) {
-    msg = `Your Job <${jobUrl}${jobId}|Failed>! Please check the build log for any errors.\n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n Check logs for more errors!!\nSorry  :disappointed:! `;
-  } else {
-    if (repoName == 'mms-docs') {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- Commit: *${fullDocument.payload.newHead}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n*Urls*\n   *CM*: <${mms_urls[0]}|Cloud Manager> \n   *OPM*: <${mms_urls[1]}|OPS Manager>\n- InvalidationStatus: <${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
-    } else {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- Commit: *${fullDocument.payload.newHead}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n- Url: <${url}|${repoName}>\n- InvalidationStatus: <${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
-    }
-  }
-  // Remove instances of two or more periods
-  return msg.replace(/\.{2,}/g, '');
 }
 
 function prepProgressMessage(
@@ -336,3 +236,5 @@ async function SubmitArchiveJob(jobId: string) {
   );
   consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
 }
+
+export const SnootyBuildComplete = snootyBuildComplete;
