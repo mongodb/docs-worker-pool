@@ -101,7 +101,9 @@ export async function getWorkerSecureStrings(ssmPrefix: string): Promise<Record<
 }
 
 const webhookSecureStrings = [
+  '/github/bot/password',
   '/github/webhook/secret',
+  '/github/webhook/deletionSecret',
   '/atlas/password',
   '/fastly/docs/dochub/token',
   '/fastly/docs/dochub/service_id',
@@ -117,7 +119,9 @@ type WebhookSecureString = (typeof webhookSecureStrings)[number];
 
 const webhookParamPathToEnvName = new Map<WebhookSecureString, string>();
 
+webhookParamPathToEnvName.set('/github/bot/password', 'GITHUB_BOT_PASSWORD');
 webhookParamPathToEnvName.set('/github/webhook/secret', 'GITHUB_SECRET');
+webhookParamPathToEnvName.set('/github/webhook/deletionSecret', 'GITHUB_DELETION_SECRET');
 webhookParamPathToEnvName.set('/atlas/password', 'MONGO_ATLAS_PASSWORD');
 webhookParamPathToEnvName.set('/fastly/docs/dochub/token', 'FASTLY_DOCHUB_TOKEN');
 webhookParamPathToEnvName.set('/fastly/docs/dochub/service_id', 'FASTLY_DOCHUB_SERVICE_ID');
