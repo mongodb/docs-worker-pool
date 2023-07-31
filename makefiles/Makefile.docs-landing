@@ -50,10 +50,10 @@ next-gen-html:
 	# ignore errors "-" flag
 	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
 	if [ $$? -eq 1 ]; then \
-		echo "WE GOT A ONE FROM PERSISTENCE - landing"
+		@echo "WE GOT A ONE FROM PERSISTENCE - landing"
 		exit 1; \
 	else \
-		echo "WE GOT A ZERO or ${$$?} FROM PERSISTENCE - landing"
+		@echo "WE GOT A ZERO or ${$$?} FROM PERSISTENCE - landing"
 		exit 0; \
 	fi \
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
