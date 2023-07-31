@@ -1,4 +1,4 @@
-import { GatewayVpcEndpointAwsService, IVpc, InterfaceVpcEndpointAwsService, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import {
   AssetImageProps,
   Cluster,
@@ -12,7 +12,7 @@ import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
-import { isEnhanced } from '../../../utils/env';
+import { getEnv, isEnhanced } from '../../../utils/env';
 
 interface WorkerConstructProps {
   dockerEnvironment: Record<string, string>;
@@ -102,10 +102,12 @@ export class WorkerConstruct extends Construct {
       }),
     });
 
+    const env = getEnv();
+
     new FargateService(this, 'fargateService', {
       cluster,
       taskDefinition,
-      desiredCount: 5,
+      desiredCount: env === 'prd' ? 10 : 1,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
     });
