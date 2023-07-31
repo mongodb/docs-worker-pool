@@ -57,9 +57,7 @@ const app = async (path: string, githubUser: string) => {
 
 console.log(argv);
 app(argv['path'], argv['githubUser']).catch((error) => {
-  console.error('HEY WE ARE IN FINAL CATCH');
-  console.error('argv strict ', argv['strict']);
-  console.error('conditional result ', ['y', 'yes', 'true'].includes(argv['strict']));
+  console.error('Final catch: exiting with code 1');
   process.exit(1);
   // only exit with non zero error code if running with strict mode on
   if (['y', 'yes', 'true'].includes(argv['strict'].toLowerCase())) {
