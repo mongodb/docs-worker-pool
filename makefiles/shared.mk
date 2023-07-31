@@ -53,6 +53,11 @@ next-gen-html:
 	# persistence module - add bundle zip to Atlas documents
 	# ignore errors "-" flag
 	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
+	if [ $$? -eq 1 ]; then \
+		exit 1; \
+	else \
+		exit 0; \
+	fi \
 	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
