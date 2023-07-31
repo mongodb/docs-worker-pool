@@ -69,17 +69,9 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             await NotifyBuildProgress(jobId);
             break;
           case JobStatus[JobStatus.timedOut]:
-            await NotifyBuildSummary(jobId);
-            const taskId = body['taskId'];
-            // for the enhanced application, the taskId will never be defined
-            // as we are not saving it at this time
-            if (taskId) {
-              await stopECSTask(taskId, consoleLogger);
-            }
-            break;
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
-            await Promise.all([NotifyBuildSummary(jobId), SubmitArchiveJob(jobId)]);
+            await NotifyBuildSummary(jobId);
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');
@@ -280,59 +272,4 @@ async function NotifyBuildProgress(jobId: string): Promise<void> {
     ),
     entitlement['slack_user_id']
   );
-}
-
-function getMongoClient(config: IConfig): mongodb.MongoClient {
-  const url = `mongodb+srv://${config.get('dbUsername')}:${config.get('dbPassword')}@${config.get(
-    'dbHost'
-  )}/?retryWrites=true&w=majority`;
-  return new mongodb.MongoClient(url);
-}
-
-const STAGING_ENVS = ['stg', 'prd'];
-
-async function SubmitArchiveJob(jobId: string) {
-  const consoleLogger = new ConsoleLogger();
-  const environment: string = c.get('env');
-
-  if (STAGING_ENVS.includes(environment)) {
-    consoleLogger.info('Cancelling archive job for staging', JSON.stringify({ jobId }));
-    return;
-  }
-
-  const client = getMongoClient(c);
-
-  // TODO: this part should probably be its own function so that we can close the connection
-  await client.connect();
-  const db = client.db(c.get('dbName'));
-  const models = {
-    jobs: new JobRepository(db, c, consoleLogger),
-    branches: new BranchRepository(db, c, consoleLogger),
-  };
-  const job = await models.jobs.getJobById(jobId);
-
-  if (!job) {
-    consoleLogger.error(
-      `SubmitArchiveJob_${jobId}`,
-      `Submit archive job failed. Job does not exist for Job ID: ${jobId}`
-    );
-    return;
-  }
-
-  const repo = await models.branches.getRepo(job.payload.repoName);
-
-  /* NOTE
-   * we don't archive landing for two reasons:
-   * - we can't unless we add efs to batch for extra storage; or https://github.com/aws/containers-roadmap/issues/1383
-   * - other properties like realm are nested under s3
-   */
-  const archiveExclusions = ['docs-landing'];
-  if (archiveExclusions.includes(repo.repoName)) return;
-
-  const response = await new Batch(environment).submitArchiveJob(
-    repo.bucket[environment],
-    `docs-archive-${environment}-mongodb`,
-    repo.prefix[environment]
-  );
-  consoleLogger.info('submit archive job', JSON.stringify({ jobId: jobId, batchJobId: response.jobId }));
 }
