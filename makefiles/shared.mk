@@ -51,11 +51,12 @@ next-gen-parse:
 
 next-gen-html:
 	# persistence module - add bundle zip to Atlas documents
-	# ignore errors "-" flag
 	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
 	if [ $$? -eq 1 ]; then \
+		echo "WE GOT A ONE FROM PERSISTENCE"
 		exit 1; \
 	else \
+		echo "WE GOT A ZERO or ${$$?} FROM PERSISTENCE"
 		exit 0; \
 	fi \
 	# build-front-end after running parse commands
