@@ -299,10 +299,6 @@ export abstract class JobHandler {
       if (stages[key]) {
         const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
         await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
-        await this._logger.save(
-          this.currJob._id,
-          `EACH COMMAND: error: ${makeCommandsWithBenchmarksResponse.error}, status: ${makeCommandsWithBenchmarksResponse.status}`
-        );
       } else {
         const makeCommandsResp = await this._commandExecutor.execute([command]);
         await this.logBuildDetails(makeCommandsResp);

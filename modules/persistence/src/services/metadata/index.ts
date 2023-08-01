@@ -69,8 +69,7 @@ export const insertMetadata = async (buildId: ObjectId, metadata: Metadata) => {
 
 export const insertMergedMetadataEntries = async (buildId: ObjectId, metadata: Metadata) => {
   try {
-    console.log(buildId, metadata);
-    throw new Error('OH NO THIS IS MATT SCREAMING YAY WE GOT THE ERROR');
+    throw new Error('FAKE ERROR');
     // const mergedMetadataEntries = await mergeAssociatedToCs(metadata);
     // return mergedMetadataEntries
     //   ? await Promise.all(mergedMetadataEntries.map((m) => insert([m], COLLECTION_NAME, buildId)))
