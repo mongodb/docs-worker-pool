@@ -38,6 +38,13 @@ next-gen-parse:
 		fi \
 	fi
 
+# Set Github user to docs-builder-bot if empty
+ifeq ($(GH_USER),)
+GH_USER_ARG=docs-builder-bot
+else
+GH_USER_ARG=${GH_USER}
+endif
+
 next-gen-html:
 	# snooty parse and then build-front-end
 	snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
@@ -47,7 +54,7 @@ next-gen-html:
 		exit 0; \
 	fi
 	# persistence module - add bundle zip to Atlas documents
-	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH}
+	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
