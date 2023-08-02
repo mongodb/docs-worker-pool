@@ -1,8 +1,6 @@
 import * as c from 'config';
 import * as mongodb from 'mongodb';
-import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
-import { BranchRepository } from '../../../src/repositories/branchRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
@@ -10,9 +8,8 @@ import { JobQueueMessage } from '../../../src/entities/queueMessage';
 import { JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
-import { Batch } from '../../../src/services/batch';
 import { APIGatewayEvent, APIGatewayProxyResult, SQSEvent, SQSRecord } from 'aws-lambda';
-import { notifyBuildSummary, snootyBuildComplete } from '../../handlers/jobs';
+import { notifyBuildSummary } from '../../handlers/jobs';
 
 export const TriggerLocalBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
