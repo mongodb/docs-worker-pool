@@ -218,6 +218,8 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     };
   }
 
+  console.log('PAYLOAD ', payload);
+
   const { jobId } = payload;
   if (!jobId) {
     const errMsg = 'Payload missing job ID';
@@ -235,7 +237,8 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     await client.connect();
     const db = client.db(c.get<string>('dbName'));
     const jobRepository = new JobRepository(db, c, consoleLogger);
-    await jobRepository.updateWithCompletionStatus(jobId, null, false);
+    const returnValue = await jobRepository.updateWithCompletionStatus(jobId, null, false);
+    console.log('RETURN VALUE from update ', returnValue);
     // Placeholder preview URL until we iron out the Gatsby Cloud site URLs.
     // This would probably involve fetching the URLs in the db on a per project basis
     const previewUrl = 'https://www.mongodb.com/docs/';
