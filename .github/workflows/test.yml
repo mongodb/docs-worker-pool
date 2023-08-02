@@ -29,11 +29,14 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.autobuilder == 'true' }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
-        node-version: '14.x'
+        node-version: ${{ matrix.node-version }}
     - name: Install dependencies
       run: npm install --dev
     - name: Lint
