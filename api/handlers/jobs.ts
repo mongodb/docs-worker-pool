@@ -7,7 +7,7 @@ import { JobRepository } from '../../src/repositories/jobRepository';
 import { GithubCommenter } from '../../src/services/github';
 import { SlackConnector } from '../../src/services/slack';
 import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
-import { EnhancedJob, Job } from '../../src/entities/job';
+import { EnhancedJob, Job, Payload } from '../../src/entities/job';
 
 // Although data in payload should always be present, it's not guaranteed from
 // external callers
@@ -218,9 +218,6 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     };
   }
 
-  consoleLogger.info('PAYLOAD ', JSON.stringify(payload));
-  consoleLogger.info('PAYLOAD KEYS ', Object.keys(payload).join(', '));
-
   const { jobId } = payload;
   if (!jobId) {
     const errMsg = 'Payload missing job ID';
@@ -238,11 +235,8 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     await client.connect();
     const db = client.db(c.get<string>('dbName'));
     const jobRepository = new JobRepository(db, c, consoleLogger);
-    const returnValue = await jobRepository.updateWithCompletionStatus(jobId, null, false);
-    consoleLogger.info('RETURN VALUE from update ', JSON.stringify(returnValue));
-    // Placeholder preview URL until we iron out the Gatsby Cloud site URLs.
-    // This would probably involve fetching the URLs in the db on a per project basis
-    const previewUrl = 'https://www.mongodb.com/docs/';
+    const { payload } = await jobRepository.updateWithCompletionStatus(jobId, null, false);
+    const previewUrl = getPreviewUrl(payload);
     await notifyBuildSummary(jobId, { mongoClient: client, previewUrl });
   } catch (e) {
     consoleLogger.error('SnootyBuildCompleteError', e);
@@ -260,4 +254,16 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     headers: defaultHeaders,
     body: `Snooty build ${jobId} completed`,
   };
+}
+
+/**
+ * Assembles Gatsby Preview URL address for Job post-build
+ * @param payload
+ * @returns string
+ */
+function getPreviewUrl(payload: Payload): string {
+  if (!payload) return 'https://www.mongodb.com/docs/';
+  const { repoOwner, branchName, project } = payload;
+  const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();
+  return `https://preview-mongodb${githubUsernameNoHyphens}.gatsbyjs.io/${project}/${branchName}/index`;
 }
