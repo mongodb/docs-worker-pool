@@ -28,14 +28,22 @@ export const extractUrlFromMessage = (fullDocument): string[] => {
   return urls.map((url) => url.replace(/([^:]\/)\/+/g, '$1'));
 };
 
-function prepGithubComment(fullDocument: Job | EnhancedJob, jobUrl: string, isUpdate = false): string {
+function prepGithubComment(
+  fullDocument: Job | EnhancedJob,
+  jobUrl: string,
+  isUpdate = false,
+  previewUrl?: string
+): string {
   if (isUpdate) {
     return `\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
   }
-  const urls = extractUrlFromMessage(fullDocument);
   let stagingUrl = '';
-  if (urls.length > 0) {
-    stagingUrl = urls[urls.length - 1];
+  if (previewUrl) stagingUrl = previewUrl;
+  else {
+    const urls = extractUrlFromMessage(fullDocument);
+    if (urls.length > 0) {
+      stagingUrl = urls[urls.length - 1];
+    }
   }
   return `✨ Staging URL: [${stagingUrl}](${stagingUrl})\n\n#### 🪵 Logs\n\n* job log: [${fullDocument.payload.newHead}](${jobUrl})`;
 }
@@ -108,16 +116,11 @@ export async function notifyBuildSummary(jobId: string, options: BuildSummaryOpt
       const prCommentId = await githubCommenter.getPullRequestCommentId(fullDocument.payload, pr);
       const fullJobDashboardUrl = c.get<string>('dashboardUrl') + jobId;
 
-      // We currently avoid posting the Gatsby Cloud preview url on GitHub to avoid
-      // potentially conflicting behavior with the S3 staging link with parallel
-      // frontend builds. This is in case the GC build finishing first causes the
-      // initial comment to be made with a nullish S3 url, while subsequent comment
-      // updates only append the list of build logs.
       if (prCommentId !== undefined) {
-        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true);
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, true, previewUrl);
         await githubCommenter.updateComment(fullDocument.payload, prCommentId, ghMessage);
       } else {
-        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, false);
+        const ghMessage = prepGithubComment(fullDocument, fullJobDashboardUrl, false, previewUrl);
         await githubCommenter.postComment(fullDocument.payload, pr, ghMessage);
       }
     }
