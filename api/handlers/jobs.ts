@@ -239,7 +239,7 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     const db = client.db(c.get<string>('dbName'));
     const jobRepository = new JobRepository(db, c, consoleLogger);
     const { payload } = await jobRepository.updateWithCompletionStatus(jobId, null, false);
-    const previewUrl = getPreviewUrl(payload);
+    const previewUrl = getPreviewUrl();
     await notifyBuildSummary(jobId, { mongoClient: client, previewUrl });
   } catch (e) {
     consoleLogger.error('SnootyBuildCompleteError', e);
@@ -264,7 +264,7 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
  * @param payload
  * @returns string|undefined
  */
-function getPreviewUrl(payload: Payload): string | undefined {
+function getPreviewUrl(payload?: Payload): string | undefined {
   if (!payload) return;
   const { repoOwner, branchName, project } = payload;
   const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();

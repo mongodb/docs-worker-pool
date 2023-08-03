@@ -32,16 +32,16 @@ export class JobRepository extends BaseRepository {
         result,
       },
     };
-    const bRet = await this.findOneAndUpdate(
+    const updateResponse = await this.findOneAndUpdate(
       query,
       update,
       {},
       `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`
     );
-    if (bRet && shouldNotifySqs) {
+    if (shouldNotifySqs) {
       await this.notify(objectId.toString(), c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
     }
-    return bRet;
+    return updateResponse;
   }
 
   async insertJob(job: Omit<Job | EnhancedJob, '_id'>, url: string): Promise<string> {
@@ -118,9 +118,7 @@ export class JobRepository extends BaseRepository {
       options,
       `Mongo Timeout Error: Timed out while retrieving job`
     );
-    if (!response) {
-      throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
-    } else if (response.value) {
+    if (response.value) {
       const job: Job = response.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;

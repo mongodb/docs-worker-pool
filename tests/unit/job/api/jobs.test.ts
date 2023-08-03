@@ -5,6 +5,9 @@ import invalidURLFormatDoc from '../../../data/fullDoc';
 import { createSha256Signature } from '../../../utils/createSha256Signature';
 import { createMockAPIGatewayEvent } from '../../../utils/createMockAPIGatewayEvent';
 import { extractUrlFromMessage } from '../../../../api/handlers/jobs';
+import { getBuildJobDef } from '../../../data/jobDef';
+
+const mockJob = getBuildJobDef();
 
 jest.mock('config', () => ({
   get: () => 'SNOOTY_SECRET',
@@ -12,7 +15,9 @@ jest.mock('config', () => ({
 
 jest.mock('../../../../src/repositories/jobRepository', () => ({
   JobRepository: jest.fn().mockImplementation(() => ({
-    updateWithCompletionStatus: jest.fn(),
+    updateWithCompletionStatus: jest.fn(() => {
+      return { payload: mockJob };
+    }),
     getJobById: jest.fn(),
   })),
 }));
