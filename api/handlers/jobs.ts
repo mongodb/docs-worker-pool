@@ -262,10 +262,10 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
 /**
  * Assembles Gatsby Preview URL address for Job post-build
  * @param payload
- * @returns string
+ * @returns string|undefined
  */
-function getPreviewUrl(payload: Payload): string {
-  if (!payload) return 'https://www.mongodb.com/docs/';
+function getPreviewUrl(payload: Payload): string | undefined {
+  if (!payload) return;
   const { repoOwner, branchName, project } = payload;
   const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();
   return `https://preview-mongodb${githubUsernameNoHyphens}.gatsbyjs.io/${project}/${branchName}/index`;
