@@ -54,8 +54,19 @@ next-gen-html:
 		exit 0; \
 	fi
 	# persistence module - add bundle zip to Atlas documents
-	# ignore errors "-" flag
-	-node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
+	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
+	if [ $$? -eq 1 ]; then \
+		exit 1; \
+	else \
+		exit 0; \
+	fi \
+	if [ $$? -eq 1 ]; then \
+		@echo "WE GOT A ONE FROM PERSISTENCE - landing"
+		exit 1; \
+	else \
+		@echo "WE GOT A ZERO or ${$$?} FROM PERSISTENCE - landing"
+		exit 0; \
+	fi \
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
