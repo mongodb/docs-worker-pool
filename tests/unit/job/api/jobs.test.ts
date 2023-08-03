@@ -1,9 +1,10 @@
 import * as mongodb from 'mongodb';
-import { SnootyBuildComplete, extractUrlFromMessage } from '../../../../api/controllers/v1/jobs';
+import { SnootyBuildComplete } from '../../../../api/controllers/v1/jobs';
 import validURLFormatDoc from '../../../data/fullDoc';
 import invalidURLFormatDoc from '../../../data/fullDoc';
 import { createSha256Signature } from '../../../utils/createSha256Signature';
 import { createMockAPIGatewayEvent } from '../../../utils/createMockAPIGatewayEvent';
+import { extractUrlFromMessage } from '../../../../api/handlers/jobs';
 
 jest.mock('config', () => ({
   get: () => 'SNOOTY_SECRET',
