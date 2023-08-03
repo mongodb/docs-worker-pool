@@ -94,7 +94,7 @@ describe('Job Repository Tests', () => {
   describe('getOneQueuedJobAndUpdate Tests', () => {
     test('getOneQueuedJobAndUpdate returns undefined as response is undefined', async () => {
       await expect(jobRepo.getOneQueuedJobAndUpdate()).rejects.toThrow(
-        `Failed to update job ({\"status\":\"inQueue\",\"createdTime\":{\"$lte\":\"2021-05-03T04:00:00.000Z\"}}) for {\"$set\":{\"startTime\":\"2021-05-03T04:00:00.000Z\",\"status\":\"inProgress\"}}`
+        `Failed to update job ({\"status\":\"inQueue\",\"createdTime\":{\"$lte\":\"${new Date().toISOString()}\"}}) for {\"$set\":{\"startTime\":\"${new Date().toISOString()}\",\"status\":\"inProgress\"}}`
       );
     });
 
