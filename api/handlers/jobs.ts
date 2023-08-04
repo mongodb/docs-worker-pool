@@ -264,7 +264,8 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
  * @param payload
  * @returns string|undefined
  */
-function getPreviewUrl(payload?: Payload, env: string): string | undefined {
+function getPreviewUrl(payload: Payload | undefined, env: string): string | undefined {
+  console.log('PAYLOAD ', payload);
   if (!payload) return;
   const { repoOwner, branchName, project } = payload;
   const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();
