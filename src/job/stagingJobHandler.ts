@@ -82,9 +82,7 @@ export class StagingJobHandler extends JobHandler {
         this.currJob._id,
         `${'(GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED)'.padEnd(15)}${featurePreviewWebhookEnabled}`
       );
-      if (featurePreviewWebhookEnabled) {
-        // TODO: current using a rudimentary logging approach, should switch to
-        // something more robust once we are closer to going live.
+      if (featurePreviewWebhookEnabled?.toLowerCase() === 'true') {
         try {
           const response = await this.previewWebhook();
           await this.logger.save(this.currJob._id, `${'(POST Webhook Status)'.padEnd(15)}${response.status}`);
