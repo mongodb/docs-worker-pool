@@ -16,8 +16,9 @@ export class UpdatedDocsRepository extends BaseRepository {
    * handle page documents marked for deletion accordingly.
    * @param project
    * @param branch
+   * @param updateTime
    */
-  async marksAstsForDeletion(project: string, branch: string) {
+  async marksAstsForDeletion(project: string, branch: string, updateTime: Date) {
     const pageIdPrefix = `${project}/docsworker-xlarge/${branch}`;
     const query = {
       page_id: { $regex: new RegExp(`^${pageIdPrefix}/`) },
@@ -25,7 +26,7 @@ export class UpdatedDocsRepository extends BaseRepository {
     const update = {
       $set: {
         deleted: true,
-        updated_at: new Date(),
+        updated_at: updateTime,
       },
     };
 
