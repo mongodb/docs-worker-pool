@@ -73,7 +73,7 @@ export abstract class BaseRepository {
 
   protected async findOne(query: any, errorMsg: string, options: mongodb.FindOptions = {}): Promise<any> {
     try {
-      return this.promiseTimeoutS(
+      return await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.findOne(query, options),
         errorMsg
@@ -86,7 +86,11 @@ export abstract class BaseRepository {
 
   protected async find(query: any, errorMsg: string, options?: mongodb.FindOptions): Promise<mongodb.FindCursor> {
     try {
-      return this.promiseTimeoutS(this._config.get('MONGO_TIMEOUT_S'), this._collection.find(query, options), errorMsg);
+      return await this.promiseTimeoutS(
+        this._config.get('MONGO_TIMEOUT_S'),
+        this._collection.find(query, options),
+        errorMsg
+      );
     } catch (error) {
       this._logger.error(`${this._repoName}:find`, `Failed to find (${JSON.stringify(query)}) error: ${error}`);
       throw error;
