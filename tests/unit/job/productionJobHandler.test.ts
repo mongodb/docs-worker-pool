@@ -266,10 +266,11 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.setupForSuccess();
     mockReset(jobHandlerTestHelper.jobCommandExecutor);
-    jobHandlerTestHelper.jobCommandExecutor.execute.mockReturnValue({
-      status: 'failed',
-      error: 'Command Execution failed',
+
+    jobHandlerTestHelper.jobCommandExecutor.execute.mockImplementation(() => {
+      throw new Error('Command Execution failed');
     });
+
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(
       jobHandlerTestHelper.job._id,
