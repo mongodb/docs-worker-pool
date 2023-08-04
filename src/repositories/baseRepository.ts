@@ -139,11 +139,15 @@ export abstract class BaseRepository {
 
   protected async findOneAndUpdate(query: any, update: any, options: any, errorMsg: string): Promise<any> {
     try {
-      return await this.promiseTimeoutS(
+      const updateResponse = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.findOneAndUpdate(query, update, options),
         errorMsg
       );
+      if (!updateResponse) {
+        throw new DBError(`Failed to update job (${JSON.stringify(query)}) for ${JSON.stringify(update)}`);
+      }
+      return updateResponse;
     } catch (error) {
       this._logger.error(
         `${this._repoName}:findOneAndUpdate`,

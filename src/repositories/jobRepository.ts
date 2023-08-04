@@ -1,6 +1,6 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import type { EnhancedJob, Job } from '../entities/job';
+import type { EnhancedJob, Job, Payload } from '../entities/job';
 import { JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
@@ -25,7 +25,7 @@ export class JobRepository extends BaseRepository {
     id: string | mongodb.ObjectId,
     result: any,
     shouldNotifySqs = true
-  ): Promise<boolean> {
+  ): Promise<mongodb.Document> {
     // Safely convert to object ID
     const objectId = new mongodb.ObjectId(id);
     const query = { _id: objectId };
@@ -36,15 +36,16 @@ export class JobRepository extends BaseRepository {
         result,
       },
     };
-    const bRet = await this.updateOne(
+    const updateResponse = await this.findOneAndUpdate(
       query,
       update,
+      {},
       `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`
     );
-    if (bRet && shouldNotifySqs) {
+    if (shouldNotifySqs) {
       await this.notify(objectId.toString(), c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
     }
-    return bRet;
+    return updateResponse;
   }
 
   async insertJob(job: Omit<Job | EnhancedJob, '_id'>, url: string): Promise<string> {
@@ -121,9 +122,7 @@ export class JobRepository extends BaseRepository {
       options,
       `Mongo Timeout Error: Timed out while retrieving job`
     );
-    if (!response) {
-      throw new InvalidJobError('JobRepository:getOneQueuedJobAndUpdate retrieved Undefined job');
-    } else if (response.value) {
+    if (response.value) {
       const job: Job = response.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);
       return job;
