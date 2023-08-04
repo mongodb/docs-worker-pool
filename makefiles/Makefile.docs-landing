@@ -60,13 +60,6 @@ next-gen-html:
 	else \
 		exit 0; \
 	fi \
-	if [ $$? -eq 1 ]; then \
-		@echo "WE GOT A ONE FROM PERSISTENCE - landing"
-		exit 1; \
-	else \
-		@echo "WE GOT A ZERO or ${$$?} FROM PERSISTENCE - landing"
-		exit 0; \
-	fi \
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
