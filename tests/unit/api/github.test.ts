@@ -15,14 +15,14 @@ jest.mock('../../../src/repositories/repoBranchesRepository', () => ({
 // Mock MetadataRepository so that we can mock which data to return.
 jest.mock('../../../src/repositories/metadataRepository', () => ({
   MetadataRepository: jest.fn().mockImplementation(() => ({
-    marksMetadataForDeletion: jest.fn(),
+    markMetadataForDeletion: jest.fn(),
   })),
 }));
 
 // Mock UpdatedDocsRepository so that we can mock which data to return.
 jest.mock('../../../src/repositories/updatedDocsRepository', () => ({
   UpdatedDocsRepository: jest.fn().mockImplementation(() => ({
-    marksAstsForDeletion: jest.fn(),
+    markAstsForDeletion: jest.fn(),
   })),
 }));
 

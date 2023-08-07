@@ -100,9 +100,10 @@ export const markBuildArtifactsForDeletion = async (event: APIGatewayEvent) => {
     const snootyDb = client.db(c.get('snootyDbName'));
     const updatedDocsRepository = new UpdatedDocsRepository(snootyDb, c, consoleLogger);
     const metadataRepository = new MetadataRepository(snootyDb, c, consoleLogger);
+    const updateTime = new Date();
     await Promise.all([
-      updatedDocsRepository.marksAstsForDeletion(project, branch),
-      metadataRepository.marksMetadataForDeletion(project, branch),
+      updatedDocsRepository.markAstsForDeletion(project, branch, updateTime),
+      metadataRepository.markMetadataForDeletion(project, branch, updateTime),
     ]);
   } catch (e) {
     consoleLogger.error('MarkBuildArtifactsForDeletion', e);

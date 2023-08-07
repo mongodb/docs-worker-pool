@@ -16,12 +16,14 @@ export class MetadataRepository extends BaseRepository {
    * of the metadata should handle metadata marked for deletion accordingly.
    * @param project
    * @param branch
+   * @param updateTime
    */
-  async marksMetadataForDeletion(project: string, branch: string) {
+  async markMetadataForDeletion(project: string, branch: string, updateTime: Date) {
     const query = { project, branch };
     const update = {
       $set: {
         deleted: true,
+        updated_at: updateTime,
       },
     };
 
