@@ -24,7 +24,7 @@ export class JobRepository extends BaseRepository {
   async updateWithStatus(
     id: string | mongodb.ObjectId,
     result: any,
-    status,
+    status: JobStatus,
     shouldNotifySqs = true
   ): Promise<mongodb.Document> {
     // Safely convert to object ID
