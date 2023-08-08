@@ -7,12 +7,13 @@ import { JobRepository } from '../../src/repositories/jobRepository';
 import { GithubCommenter } from '../../src/services/github';
 import { SlackConnector } from '../../src/services/slack';
 import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
-import { EnhancedJob, Job, Payload } from '../../src/entities/job';
+import { EnhancedJob, Job, JobStatus, Payload } from '../../src/entities/job';
 
 // Although data in payload should always be present, it's not guaranteed from
 // external callers
 interface SnootyPayload {
   jobId?: string;
+  status?: string;
 }
 
 // These options should only be defined if the build summary is being called after
@@ -238,8 +239,8 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     await client.connect();
     const db = client.db(c.get<string>('dbName'));
     const jobRepository = new JobRepository(db, c, consoleLogger);
-    const { payload } = await jobRepository.updateWithCompletionStatus(jobId, null, false);
-    const previewUrl = getPreviewUrl(payload, c.get<string>('env'));
+    const updateResponse = await jobRepository.updateWithStatus(jobId, null, payload.status || JobStatus.failed, false);
+    const previewUrl = getPreviewUrl(updateResponse.payload, c.get<string>('env'));
     await notifyBuildSummary(jobId, { mongoClient: client, previewUrl });
   } catch (e) {
     consoleLogger.error('SnootyBuildCompleteError', e);

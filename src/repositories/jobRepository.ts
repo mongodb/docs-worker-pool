@@ -1,10 +1,10 @@
 import * as mongodb from 'mongodb';
 import { BaseRepository } from './baseRepository';
-import type { EnhancedJob, Job, Payload } from '../entities/job';
+import type { EnhancedJob, Job } from '../entities/job';
 import { JobStatus } from '../entities/job';
 import { ILogger } from '../services/logger';
 import c, { IConfig } from 'config';
-import { DBError, InvalidJobError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
+import { DBError, JobExistsAlreadyError, JobNotFoundError } from '../errors/errors';
 import { IQueueConnector, SQSConnector } from '../services/queue';
 import { JobQueueMessage } from '../entities/queueMessage';
 
@@ -21,9 +21,10 @@ export class JobRepository extends BaseRepository {
     this._queueConnector = new SQSConnector(logger, config);
   }
 
-  async updateWithCompletionStatus(
+  async updateWithStatus(
     id: string | mongodb.ObjectId,
     result: any,
+    status,
     shouldNotifySqs = true
   ): Promise<mongodb.Document> {
     // Safely convert to object ID
@@ -31,7 +32,7 @@ export class JobRepository extends BaseRepository {
     const query = { _id: objectId };
     const update = {
       $set: {
-        status: 'completed',
+        status,
         endTime: new Date(),
         result,
       },
@@ -40,7 +41,7 @@ export class JobRepository extends BaseRepository {
       query,
       update,
       {},
-      `Mongo Timeout Error: Timed out while updating success status for jobId: ${id}`
+      `Mongo Timeout Error: Timed out while updating job status to "${status}" for jobId: ${id}`
     );
     if (shouldNotifySqs) {
       await this.notify(objectId.toString(), c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);

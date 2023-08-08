@@ -3,7 +3,7 @@ import { getBuildJobDef, getBuildJobPlain } from '../../data/jobDef';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
 import { ObjectId } from 'mongodb';
-import { Job } from '../../../src/entities/job';
+import { Job, JobStatus } from '../../../src/entities/job';
 
 describe('Job Repository Tests', () => {
   let job: Job;
@@ -19,7 +19,7 @@ describe('Job Repository Tests', () => {
     expect(new JobRepository(dbRepoHelper.db, dbRepoHelper.config, dbRepoHelper.logger)).toBeDefined();
   });
 
-  describe('Job Repository updateWithCompletionStatus Tests', () => {
+  describe('Job Repository updateWithStatus Tests', () => {
     test('Update with completion status throws DB Error as result is undefined', async () => {
       const testData = TestDataProvider.getStatusUpdateQueryAndUpdateObject(
         '64ad959b423952aeb9341fad',
@@ -27,7 +27,9 @@ describe('Job Repository Tests', () => {
         'All good',
         new Date()
       );
-      await expect(jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good')).rejects.toThrow(
+      await expect(
+        jobRepo.updateWithStatus('64ad959b423952aeb9341fad', 'All good', JobStatus.completed)
+      ).rejects.toThrow(
         `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
     });
@@ -40,7 +42,9 @@ describe('Job Repository Tests', () => {
         new Date()
       );
       dbRepoHelper.collection.findOneAndUpdate.mockReturnValue(undefined);
-      await expect(jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good')).rejects.toThrow(
+      await expect(
+        jobRepo.updateWithStatus('64ad959b423952aeb9341fad', 'All good', JobStatus.completed)
+      ).rejects.toThrow(
         `Failed to update job (${JSON.stringify(testData.query)}) for ${JSON.stringify(testData.update)}`
       );
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
@@ -48,7 +52,9 @@ describe('Job Repository Tests', () => {
 
     test('Update with completion status succeeds', async () => {
       setupForFindOneAndUpdateSuccess();
-      await expect(jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good')).resolves.toEqual(job);
+      await expect(
+        jobRepo.updateWithStatus('64ad959b423952aeb9341fad', 'All good', JobStatus.completed)
+      ).resolves.toEqual(job);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
       expect(dbRepoHelper.logger.error).toBeCalledTimes(0);
     });
@@ -61,10 +67,10 @@ describe('Job Repository Tests', () => {
         });
       });
       try {
-        jobRepo.updateWithCompletionStatus('64ad959b423952aeb9341fad', 'All good').catch((error) => {
+        jobRepo.updateWithStatus('64ad959b423952aeb9341fad', 'All good', JobStatus.completed).catch((error) => {
           expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
           expect(error.message).toContain(
-            `Mongo Timeout Error: Timed out while updating success status for jobId: 64ad959b423952aeb9341fad`
+            `Mongo Timeout Error: Timed out while updating job status to "${JobStatus.completed}" for jobId: 64ad959b423952aeb9341fad`
           );
         });
         jest.runAllTimers();
