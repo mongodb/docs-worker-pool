@@ -235,8 +235,6 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
 
   const client = new MongoClient(c.get('dbUrl'));
 
-  consoleLogger.info('Matt Proof in webhook payload: ', JSON.stringify(payload));
-
   try {
     await client.connect();
     const db = client.db(c.get<string>('dbName'));
@@ -268,7 +266,6 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
  * @returns string|undefined
  */
 function getPreviewUrl(payload: Payload | undefined, env: string): string | undefined {
-  console.log('PAYLOAD ', payload);
   if (!payload) return;
   const { repoOwner, branchName, project } = payload;
   const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();

@@ -645,8 +645,6 @@ export abstract class JobHandler {
       throw new Error(message);
     }
 
-    this._logger.info('Matt Proof of real status ', this.currJob.status || 'n/a ?');
-
     const url = `${previewWebhookURL}/${gatsbySiteId}`;
     return await axios.post(
       url,
