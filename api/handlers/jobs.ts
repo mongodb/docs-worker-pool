@@ -13,7 +13,7 @@ import { EnhancedJob, Job, JobStatus, Payload } from '../../src/entities/job';
 // external callers
 interface SnootyPayload {
   jobId?: string;
-  status?: string;
+  status?: JobStatus;
 }
 
 // These options should only be defined if the build summary is being called after
@@ -234,6 +234,8 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
   }
 
   const client = new MongoClient(c.get('dbUrl'));
+
+  consoleLogger.info('Matt Proof in webhook payload: ', JSON.stringify(payload));
 
   try {
     await client.connect();
