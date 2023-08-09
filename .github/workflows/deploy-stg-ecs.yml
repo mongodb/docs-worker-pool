@@ -3,6 +3,7 @@ on:
     branches:
       - "master"
       - "integration"
+      - "DOP-3904-mark-status"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
