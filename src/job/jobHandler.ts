@@ -650,7 +650,7 @@ export abstract class JobHandler {
       url,
       {
         jobId: this.currJob._id,
-        status: JobStatus.failed,
+        status: this.currJob.status,
       },
       {
         headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
