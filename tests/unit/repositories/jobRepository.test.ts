@@ -200,7 +200,7 @@ describe('Job Repository Tests', () => {
   }
 
   function setupForFindOneAndUpdateSuccess() {
-    dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce(job);
+    dbRepoHelper.collection.findOneAndUpdate.mockReturnValueOnce({ value: job });
     jest.spyOn(jobRepo, 'notify').mockResolvedValueOnce(true);
     dbRepoHelper.config.get.calledWith('MONGO_TIMEOUT_S').mockReturnValueOnce(1);
   }
