@@ -1,10 +1,10 @@
 on: [workflow_dispatch]
 concurrency:
-  group: environment-prd-enhanced-${{ github.ref }}
+  group: environment-stg-enhanced-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Production ECS Enhanced
+name: Deploy Staging ECS Enhanced
 jobs:
-  deploy-prd:
+  deploy-stg:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,5 +22,6 @@ jobs:
           npm ci
           cd cdk-infra/
           npm ci
-          npm run deploy:enhanced -- -c env=prd -c customFeatureName=enhancedApp
+          npm run deploy:enhanced -- -c env=dotcomstg  -c customFeatureName=enhancedApp-dotcomstg
+          npm run deploy:enhanced -- -c env=stg  -c customFeatureName=enhancedApp-stg
 
