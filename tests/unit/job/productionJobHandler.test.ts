@@ -1,4 +1,5 @@
 import { mockReset } from 'jest-mock-extended';
+import { JobStatus } from '../../../src/entities/job';
 import { TestDataProvider } from '../../data/data';
 import { getBuildJobDef, getManifestJobDef } from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
@@ -318,11 +319,11 @@ describe('ProductionJobHandler Tests', () => {
           null,
           null
         );
-        expect(jobHandlerTestHelper.jobRepo.updateWithCompletionStatus).toBeCalledWith(jobHandlerTestHelper.job._id, [
-          '1.html',
-          '2.html',
-          '3.html',
-        ]);
+        expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledWith(
+          jobHandlerTestHelper.job._id,
+          ['1.html', '2.html', '3.html'],
+          JobStatus.completed
+        );
       });
     }
   );

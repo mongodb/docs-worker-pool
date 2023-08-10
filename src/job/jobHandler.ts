@@ -99,7 +99,7 @@ export abstract class JobHandler {
           null,
           null
         );
-        await this.jobRepository.updateWithCompletionStatus(this.currJob._id, files);
+        await this.jobRepository.updateWithStatus(this.currJob._id, files, JobStatus.completed);
       } else {
         if (publishResult.error) {
           await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);
@@ -649,9 +649,8 @@ export abstract class JobHandler {
     return await axios.post(
       url,
       {
-        project: this.currJob.payload.project,
-        branch: this.currJob.payload.branchName,
         jobId: this.currJob._id,
+        status: this.currJob.status,
       },
       {
         headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
