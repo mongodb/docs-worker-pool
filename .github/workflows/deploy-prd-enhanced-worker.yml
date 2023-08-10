@@ -1,6 +1,6 @@
 on:
   push:
-    paths: ["src/**", "cdk-infra/lib/constructs/worker/**"]
+    paths: ["src/**", "cdk-infra/lib/constructs/worker/**", "Dockerfile.enhanced", "cdk-infra/utils"]
     tags:
       - 'v*'
 
