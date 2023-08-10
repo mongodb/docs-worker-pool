@@ -1,6 +1,6 @@
 on:
   push:
-    paths: ["src/**", "cdk-infra/lib/constructs/worker/**"]
+    paths: ["src/**", "cdk-infra/lib/constructs/worker/**", "Dockerfile.enhanced", "modules/**"]
     branches:
       - 'master'
       - 'integration'
@@ -27,5 +27,6 @@ jobs:
         run: |
           cd cdk-infra/
           npm ci
-          npm run deploy:enhanced:worker -- -c env=dotcomstg
+          npm run deploy:enhanced:worker -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg
+          npm run deploy:enhanced:worker -- -c env=stg -c customFeatureName=enhancedApp-stg
 
