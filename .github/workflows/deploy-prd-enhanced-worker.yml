@@ -1,6 +1,5 @@
 on:
   push:
-    paths: ["src/**", "cdk-infra/lib/constructs/worker/**"]
     tags:
       - 'v*'
 
