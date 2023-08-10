@@ -22,5 +22,5 @@ jobs:
           npm ci
           cd cdk-infra/
           npm ci
-          npm run deploy:enhanced -- -c env=dotcomstg
+          npm run deploy:enhanced -- -c env=dotcomstg  -c customFeatureName=enhancedApp-dotcomstg
 
