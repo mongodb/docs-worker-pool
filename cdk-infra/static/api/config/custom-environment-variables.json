@@ -5,6 +5,7 @@
   "dbHost": "MONGO_ATLAS_HOST",
   "dbUsername": "MONGO_ATLAS_USERNAME",
   "dbPassword": "MONGO_ATLAS_PASSWORD",
+  "githubBotPW": "GITHUB_BOT_PASSWORD",
   "dbName": "DB_NAME",
   "snootyDbName": "SNOOTY_DB_NAME",
   "dbUrl": "MONGO_ATLAS_URL",
