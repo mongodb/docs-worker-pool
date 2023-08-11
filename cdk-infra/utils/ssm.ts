@@ -53,6 +53,9 @@ async function getSecureStrings(
   return secureStringsMap;
 }
 
+// This array contains the Parameter Store paths of the secure strings
+// we want to add to the worker environment. These are mapped
+// to their environment variable name in the workerParamPathToEnvName map.
 const workerSecureStrings = [
   '/npm/auth',
   '/github/webhook/secret',
@@ -100,6 +103,9 @@ export async function getWorkerSecureStrings(ssmPrefix: string): Promise<Record<
   return getSecureStrings(ssmPrefix, workerSecureStrings, workerParamPathToEnvName, 'workerParamPathToEnvName');
 }
 
+// This array contains the Parameter Store paths of the secure strings
+// we want to add to the webhooks environment. These are mapped
+// to their environment variable name in the webhookParamPathToEnvName map.
 const webhookSecureStrings = [
   '/github/bot/password',
   '/github/webhook/secret',

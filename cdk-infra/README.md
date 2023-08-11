@@ -2,6 +2,63 @@
 
 This project manages the deployment and creation of AWS infrastructure for the enhanced Autobuilder
 
+## Adding Environment Variables
+
+One area that will need to be actively maintained in the enhanced Autobuilder is configuring the environment variables. How the environment variables are set will be slightly different for the webhooks and the worker constructs. Also, they will be different depending on whether or not the environment variable is a secure string from the Parameter Store or not.
+
+### Adding Non-Secure Strings from Parameter Store
+
+The way to add non-secure strings for both can be done as follows:
+
+```ts
+const githubBotUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/bot/username`);
+
+this.environment = {
+  ...secureStrings,
+  GITHUB_BOT_USERNAME: githubBotUsername,
+};
+```
+
+First, we call the `valueFromLookup` method with the path of parameter.
+
+Second, we then add the parameter to the `this.environment` object with the key being the environment variable name.
+
+The `ssmPrefix` variable is defined by this function:
+
+```ts
+export function getSsmPathPrefix(): string {
+  const env = getEnv();
+
+  return `/env/${env}/docs/worker_pool`;
+}
+```
+
+This is a convenience method to ensure environment parity, and to not have to append `/docs/worker_pool` to every variable we want to retrieve.
+
+The files where these should be added are the [lib/constructs/worker/worker-env-construct.ts](lib/constructs/worker/worker-env-construct.ts) and [lib/constructs/api/webhook-env-construct.ts](lib/constructs/api/webhook-env-construct.ts) files.
+
+### Adding Secure Strings from Parameter Store
+
+To add a secure string from the Parameter Store, you will need to update the [utils/ssm.ts file](utils/ssm.ts). The updates need to be made in the `(worker | webhook)SecureStrings` array, and the `(worker | webhook)ParamPathToEnvName` map. The `(worker | webhook)SecureStrings` are the parameter paths in Parameter Store. They only need to contain the portion after `/env/${env}/docs/worker_pool/` since the `ssmPrefix` will append the rest to it.
+
+For example, if I want to add the GitHub Bot password environment variable `/env/${env}/docs/worker_pool/github/bot/password` for the webhooks, you would do the following:
+
+```ts
+const webhookSecureStrings = ['/github/bot/password'] as const;
+
+webhookParamPathToEnvName.set('/github/bot/password', 'GITHUB_BOT_PASSWORD');
+```
+
+The process is the same with the worker, but you will update `workerSecureStrings` and `workerParamPathToEnvName` instead.
+
+### Worker
+
+For the worker, any changes made in the `config/` directory JSON files will not need to be copied over anywhere for the CDK project. Since the worker is built using Docker, the updated `config/` JSON files will already be included.
+
+### Webhooks
+
+For the webhooks, any additions made in the `api/config` JSON files will need to be included in the `cdk-infra/static/api/config` directory as well.
+
 ## Tips
 
 To verify the AWS CDK code adequately replicates the current AWS infrastructure, it is helpful to reference the CloudFormation templates that exist within the `infrastructure` directory, as well as understanding the `serverless.yml` files' contents.
