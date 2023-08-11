@@ -39,7 +39,7 @@ The files where these should be added are the [lib/constructs/worker/worker-env-
 
 ### Adding Secure Strings from Parameter Store
 
-To add a secure string from the Parameter Store, you will need to update the [utils/ssm.ts file](utils/ssm.ts). The updates need to be made in the `(worker | webhook)SecureStrings` array, and the `(worker | webhook)ParamPathToEnvName` map. The `(worker | webhook)SecureStrings` are the parameter paths in Parameter Store. They only need to contain the portion after `/env/${env}/docs/worker_pool/` since the `ssmPrefix` will append the rest to it.
+To add a secure string from the Parameter Store, you will need to update the [utils/ssm.ts file](utils/ssm.ts). The updates need to be made in the `(worker | webhook)SecureStrings` array, and the `(worker | webhook)ParamPathToEnvName` map. The `(worker | webhook)SecureStrings` are the parameter paths in Parameter Store. They only need to contain the portion after `/env/${env}/docs/worker_pool` since the `ssmPrefix` will append the rest to it.
 
 For example, if I want to add the GitHub Bot password environment variable `/env/${env}/docs/worker_pool/github/bot/password` for the webhooks, you would do the following:
 
