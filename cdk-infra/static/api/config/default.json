@@ -8,6 +8,7 @@
   "dbName": "db_name",
   "snootyDbName": "snooty_db_name",
   "dbUrl": "url",
+  "githubBotPW": "GITHUB_BOT_PASSWORD",
   "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
   "githubSecret": "GITHUB_SECRET",
   "githubDeletionSecret": "GITHUB_DELETION_SECRET",
