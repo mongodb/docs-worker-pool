@@ -18,8 +18,8 @@ export class MetadataRepository extends BaseRepository {
    * @param branch
    * @param updateTime
    */
-  async markMetadataForDeletion(project: string, branch: string, updateTime: Date) {
-    const query = { project, branch };
+  async markMetadataForDeletion(project: string, branch: string, user: string, updateTime: Date) {
+    const query = { project, branch, github_username: user };
     const update = {
       $set: {
         deleted: true,
