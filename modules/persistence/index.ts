@@ -30,7 +30,7 @@ const missingPathMessage = 'No path specified in arguments - please specify a bu
 // Load command line args into a parameterized argv
 const argv: ModuleArgs = minimist(process.argv.slice(2));
 
-const app = async (path: string, githubUser?: string) => {
+const app = async (path: string, githubUser: string) => {
   try {
     if (!path) throw missingPathMessage;
     const user = githubUser || 'docs-builder-bot';
