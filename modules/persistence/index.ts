@@ -30,19 +30,16 @@ const missingPathMessage = 'No path specified in arguments - please specify a bu
 // Load command line args into a parameterized argv
 const argv: ModuleArgs = minimist(process.argv.slice(2));
 
-const app = async (path: string, githubUser: string) => {
+const app = async (path: string, githubUser?: string) => {
   try {
     if (!path) throw missingPathMessage;
+    const user = githubUser || 'docs-builder-bot';
     const zip = new AdmZip(path);
     // atomic buildId for all artifacts read by this module - fundamental assumption
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
-    const metadata = await metadataFromZip(zip, githubUser);
-    await Promise.all([
-      insertAndUpdatePages(buildId, zip, githubUser),
-      insertMetadata(buildId, metadata),
-      upsertAssets(zip),
-    ]);
+    const metadata = await metadataFromZip(zip, user);
+    await Promise.all([insertAndUpdatePages(buildId, zip, user), insertMetadata(buildId, metadata), upsertAssets(zip)]);
     await insertMergedMetadataEntries(buildId, metadata);
     // DOP-3447 clean up stale metadata
     await deleteStaleMetadata(metadata);

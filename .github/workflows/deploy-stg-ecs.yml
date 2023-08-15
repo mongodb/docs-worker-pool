@@ -3,6 +3,8 @@ on:
     branches:
       - "master"
       - "integration"
+      # TODO-3942: Remove temp branch before merging
+      - "DOP-3942"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
