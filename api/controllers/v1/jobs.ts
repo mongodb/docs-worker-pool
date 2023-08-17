@@ -2,7 +2,7 @@ import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
-import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
@@ -248,10 +248,10 @@ async function SubmitArchiveJob(jobId: string) {
   const db = client.db(c.get('dbName'));
   const models = {
     jobs: new JobRepository(db, c, consoleLogger),
-    branches: new BranchRepository(db, c, consoleLogger),
+    repoBranches: new RepoBranchesRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
-  const repo = await models.branches.getRepo(job.payload.repoName);
+  const repo = await models.repoBranches.getRepo(job.payload.repoName);
 
   /* NOTE
    * we don't archive landing for two reasons:

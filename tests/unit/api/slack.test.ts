@@ -1,5 +1,5 @@
 import { getDeployableJobs } from '../../../api/controllers/v1/slack';
-import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 
 const mockRepoInfo = {
   branches: [{}, {}],
@@ -33,9 +33,9 @@ const mockBranchObject = {
   },
 };
 
-// Mock BranchRepository so that we can mock which data to return.
-jest.mock('../../../src/repositories/branchRepository', () => ({
-  BranchRepository: jest.fn().mockImplementation(() => ({
+// Mock RepoBranchesRepository so that we can mock which data to return.
+jest.mock('../../../src/repositories/repoBranchesRepository', () => ({
+  RepoBranchesRepository: jest.fn().mockImplementation(() => ({
     getRepo: jest.fn().mockImplementation(() => mockRepoInfo),
     getRepoBranchAliases: jest
       .fn()
@@ -50,15 +50,15 @@ describe('Slack API Controller Tests', () => {
     email: 'test.user@mongodb.com',
     github_username: 'test.user',
   };
-  // We're mocking BranchRepository to avoid needing access to a database. We'll use mock data.
-  const mockBranchRepository = new BranchRepository(null, null, null);
+  // We're mocking RepoBranchesRepository to avoid needing access to a database. We'll use mock data.
+  const mockRepoBranchRepository = new RepoBranchesRepository(null, null, null);
 
   test('deployable jobs with the assigned urlSlug have primaryAlias set to true', async () => {
     const mockValues = {
       repo_option: [{ value: 'mongodb/docs/master' }],
     };
 
-    const deployable = await getDeployableJobs(mockValues, mockEntitlement, mockBranchRepository);
+    const deployable = await getDeployableJobs(mockValues, mockEntitlement, mockRepoBranchRepository);
 
     expect(deployable).toHaveLength(2);
     const jobsWithPrimaryAlias = deployable.filter((job) => job.payload.primaryAlias);
@@ -71,7 +71,7 @@ describe('Slack API Controller Tests', () => {
       repo_option: [{ value: 'mongodb/docs/v5.0' }],
     };
 
-    const deployable = await getDeployableJobs(mockValues, mockEntitlement, mockBranchRepository);
+    const deployable = await getDeployableJobs(mockValues, mockEntitlement, mockRepoBranchRepository);
 
     expect(deployable).toHaveLength(3);
     const jobsWithPrimaryAlias = deployable.filter((job) => job.payload.primaryAlias);
