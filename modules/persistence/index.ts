@@ -5,7 +5,7 @@ dotenv.config();
 import AdmZip from 'adm-zip';
 import minimist from 'minimist';
 import * as mongodb from 'mongodb';
-import { teardown as closeDBConnection } from './src/services/connector';
+import { db as snootyDb, pool as poolDb, teardown as closeDBConnection } from './src/services/connector';
 import { insertAndUpdatePages } from './src/services/pages';
 import {
   insertMetadata,
@@ -38,6 +38,9 @@ const app = async (path: string, githubUser: string) => {
     // that only one build will be used per run of this module.
     const buildId = new mongodb.ObjectId();
     const metadata = await metadataFromZip(zip, githubUser);
+    // initialize db connections to handle shared connections
+    await snootyDb();
+    await poolDb();
     await Promise.all([
       insertAndUpdatePages(buildId, zip, githubUser),
       insertMetadata(buildId, metadata),
