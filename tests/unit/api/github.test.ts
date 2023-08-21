@@ -36,6 +36,9 @@ describe('GitHub API Tests', () => {
     const successfulPayload = {
       action: 'closed',
       pull_request: {
+        user: {
+          login: 'test-user',
+        },
         head: {
           ref: 'test-webhook',
         },

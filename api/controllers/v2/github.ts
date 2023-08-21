@@ -5,19 +5,19 @@ import { PushEvent } from '@octokit/webhooks-types';
 
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
-import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { EnhancedJob, JobStatus } from '../../../src/entities/job';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
-  branchRepository: BranchRepository,
+  repoBranchesRepository: RepoBranchesRepository,
   prefix: string
 ): Promise<Omit<EnhancedJob, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
-  const branch_info = await branchRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
+  const branch_info = await repoBranchesRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
-  const repo_info = await branchRepository.getRepo(githubEvent.repository.name);
+  const repo_info = await repoBranchesRepository.getRepo(githubEvent.repository.name);
   const project = repo_info?.project ?? githubEvent.repository.name;
 
   return {
@@ -55,7 +55,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   const db = client.db(c.get('dbName'));
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  const branchRepository = new BranchRepository(db, c, consoleLogger);
+  const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
 
   if (!event.body) {
     const err = 'Trigger build does not have a body in event payload';
@@ -96,10 +96,10 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   }
 
   const env = c.get<string>('env');
-  const repoInfo = await branchRepository.getRepo(body.repository.name);
+  const repoInfo = await repoBranchesRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
 
-  const job = await prepGithubPushPayload(body, branchRepository, jobPrefix);
+  const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix);
 
   try {
     consoleLogger.info(job.title, 'Creating Job');

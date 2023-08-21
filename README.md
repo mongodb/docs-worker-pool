@@ -7,6 +7,8 @@ The Docs Worker Pool operates on ECS Fargate. The serverless framework and cloud
 infrastructure provisioning and management. Going forward, any new buckets should be specified in
 `infrastructure/ecs-main/buckets.yml`
 
+For specific documentation on the Enhanced Autobuilder, Please visit the [cdk-infra/README.md](cdk-infra/README.md) file.
+
 ## To Add new properties
 
 All our properties are managed in parameter store and pulled by serverless framework during deploy time and pushed into the Task environment as part of task definition.

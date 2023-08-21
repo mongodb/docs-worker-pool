@@ -18,10 +18,11 @@ export class UpdatedDocsRepository extends BaseRepository {
    * @param branch
    * @param updateTime
    */
-  async markAstsForDeletion(project: string, branch: string, updateTime: Date) {
+  async markAstsForDeletion(project: string, branch: string, user: string, updateTime: Date) {
     const pageIdPrefix = `${project}/docsworker-xlarge/${branch}`;
     const query = {
       page_id: { $regex: new RegExp(`^${pageIdPrefix}/`) },
+      github_username: user,
     };
     const update = {
       $set: {
