@@ -58,7 +58,8 @@ export class StagingJobHandler extends JobHandler {
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-parse';
-      this.currJob.buildCommands.push(`make next-gen-html GH_USER=${this.currJob.payload.repoOwner}`);
+      this.currJob.buildCommands.push(`make persistence-module GH_USER=${this.currJob.payload.repoOwner}`);
+      this.currJob.buildCommands.push('make next-gen-html');
       const project = this.currJob.payload.project === 'cloud-docs' ? this.currJob.payload.project : '';
       const branchName = /^[a-zA-Z0-9_\-\./]+$/.test(this.currJob.payload.branchName)
         ? this.currJob.payload.branchName
@@ -75,25 +76,6 @@ export class StagingJobHandler extends JobHandler {
       if (resp?.output?.includes('Summary')) {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));
       }
-      // Invoke Gatsby Preview Webhook
-      const featurePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED;
-      // Logging for Debugging purposes only will remove once we see the build working in Gatsby.
-      await this.logger.save(
-        this.currJob._id,
-        `${'(GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED)'.padEnd(15)}${featurePreviewWebhookEnabled}`
-      );
-      if (featurePreviewWebhookEnabled?.toLowerCase() === 'true') {
-        try {
-          const response = await this.previewWebhook();
-          await this.logger.save(this.currJob._id, `${'(POST Webhook Status)'.padEnd(15)}${response.status}`);
-        } catch (err) {
-          await this.logger.save(
-            this.currJob._id,
-            `${'(POST Webhook)'.padEnd(15)}Failed to POST to Gatsby Cloud webhook: ${err}`
-          );
-        }
-      }
-
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Staging push details:\n\n${summary}`);
       return resp;
