@@ -110,7 +110,9 @@ export async function notifyBuildSummary(jobId: string, options: BuildSummaryOpt
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
 
-  if (checkForGatsbyCloud) {
+  // Prevents the Autobuilder's usual build summary from being sent after content staging job
+  // if the user already has a Gatsby Cloud site. They should receive a separate build summary
+  if (checkForGatsbyCloud && fullDocument.payload.jobType === 'githubPush') {
     const userHasGatsbyCloudSite = await repoEntitlementRepository.getGatsbySiteIdByGithubUsername(username);
     if (userHasGatsbyCloudSite) {
       consoleLogger.info(jobId, `User ${username} has a Gatsby Cloud site. Build summary will not be sent right now.`);
