@@ -1,7 +1,7 @@
 import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
-import { BranchRepository } from '../../../src/repositories/branchRepository';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
@@ -25,11 +25,11 @@ function prepResponse(statusCode, contentType, body) {
   };
 }
 
-async function buildEntitledBranchList(entitlement: any, branchRepository: BranchRepository) {
+async function buildEntitledBranchList(entitlement: any, repoBranchesRepository: RepoBranchesRepository) {
   const entitledBranches: string[] = [];
   for (const repo of entitlement.repos) {
     const [repoOwner, repoName] = repo.split('/');
-    const branches = await branchRepository.getRepoBranches(repoName);
+    const branches = await repoBranchesRepository.getRepoBranches(repoName);
     for (const branch of branches) {
       let buildWithSnooty = true;
       if ('buildsWithSnooty' in branch) {
@@ -73,7 +73,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   await client.connect();
   const db = client.db(process.env.DB_NAME);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const branchRepository = new BranchRepository(db, c, consoleLogger);
+  const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
   if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
@@ -83,7 +83,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
       : 'User is not entitled!';
     return prepResponse(401, 'text/plain', response);
   }
-  const entitledBranches = await buildEntitledBranchList(entitlement, branchRepository);
+  const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id']);
   if (resp?.status == 200 && resp?.data) {
     return {
@@ -119,7 +119,7 @@ const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) 
 
 // For every repo/branch selected to be deployed, return an array of jobs with the payload data
 // needed for a successful build.
-export const getDeployableJobs = async (values, entitlement, branchRepository: BranchRepository) => {
+export const getDeployableJobs = async (values, entitlement, repoBranchesRepository: RepoBranchesRepository) => {
   const deployable = [];
 
   for (let i = 0; i < values.repo_option.length; i++) {
@@ -130,10 +130,10 @@ export const getDeployableJobs = async (values, entitlement, branchRepository: B
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement?.email ?? '';
 
-    const repoInfo = await branchRepository.getRepo(repoName);
+    const repoInfo = await repoBranchesRepository.getRepo(repoName);
     const non_versioned = repoInfo.branches.length === 1;
 
-    const branchObject = await branchRepository.getRepoBranchAliases(repoName, branchName);
+    const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName);
     if (!branchObject?.aliasObject) continue;
 
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool
@@ -219,7 +219,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
   await client.connect();
   const db = client.db(c.get('dbName'));
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-  const branchRepository = new BranchRepository(db, c, consoleLogger);
+  const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
   // This is coming in as urlencoded string, need to decode before parsing
@@ -234,7 +234,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
 
   const values = slackConnector.parseSelection(stateValues);
 
-  const deployable = await getDeployableJobs(values, entitlement, branchRepository);
+  const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository);
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
