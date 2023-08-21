@@ -15,7 +15,9 @@
     "deploy:enhanced:queues": "cdk deploy auto-builder-stack-enhancedApp-queues -c enhanced=true --require-approval never --exclusively",
     "deploy:feature": "cdk deploy -c enhanced=true --require-approval never --all",
     "deploy:feature:worker": "cdk deploy  -c enhanced=true --require-approval never --exclusively",
-    "deploy:feature:webhooks": "cdk deploy -c enhanced=true --require-approval never --exclusively"
+    "deploy:feature:webhooks": "cdk deploy -c enhanced=true --require-approval never --exclusively",
+    "deploy:feature:queues": "cdk deploy  -c enhanced=true --require-approval never --exclusively"
+
 
   },
   "devDependencies": {
