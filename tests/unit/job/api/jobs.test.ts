@@ -15,6 +15,7 @@ jest.mock('config', () => ({
 
 jest.mock('../../../../src/repositories/jobRepository', () => ({
   JobRepository: jest.fn().mockImplementation(() => ({
+    updateExecutionTime: jest.fn(),
     updateWithStatus: jest.fn(() => mockJob),
     getJobById: jest.fn(),
   })),
