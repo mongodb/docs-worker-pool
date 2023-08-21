@@ -57,13 +57,6 @@ GH_USER_ARG=${GH_USER}
 endif
 
 next-gen-html:
-	# persistence module - add bundle zip to Atlas documents
-	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
-	if [ $$? -eq 1 ]; then \
-		exit 1; \
-	else \
-		exit 0; \
-	fi \
 	# build-front-end after running parse commands
 	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
@@ -94,6 +87,15 @@ SITE_URL=${URL}/${PROJECT}/${USER}/${BRANCH_NAME}
 else
 SITE_URL=${URL}/${MUT_PREFIX}
 endif
+
+persistence-module:
+	# persistence module - add bundle zip to Atlas documents
+	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
+	if [ $$? -eq 1 ]; then \
+		exit 1; \
+	else \
+		exit 0; \
+	fi
 
 # Intended to be called by the autobuilder as a build command after frontend build, but before mut upload
 # Staging: https://github.com/mongodb/docs-worker-pool/blob/42bd36b1f52e49c646a79474c12d299f33d774cb/src/job/stagingJobHandler.ts#L57
