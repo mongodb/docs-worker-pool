@@ -6,7 +6,6 @@ let dbInstance: Db;
 export const db = async (client: MongoClient) => {
   if (!dbInstance) {
     try {
-      await client.connect();
       dbInstance = client.db(process.env.DB_NAME);
     } catch (error) {
       console.error(`Error at db client connection: ${error}`);
