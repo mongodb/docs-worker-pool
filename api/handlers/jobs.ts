@@ -281,5 +281,5 @@ function getPreviewUrl(payload: Payload | undefined, env: string): string | unde
   const { repoOwner, branchName, project } = payload;
   const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();
   const possibleStagingSuffix = env === 'stg' ? 'stg' : '';
-  return `https://preview-mongodb${githubUsernameNoHyphens}${possibleStagingSuffix}.gatsbyjs.io/${project}/${branchName}/index`;
+  return `https://preview-mongodb${githubUsernameNoHyphens}${possibleStagingSuffix}.gatsbyjs.io/${project}/${branchName}/`;
 }
