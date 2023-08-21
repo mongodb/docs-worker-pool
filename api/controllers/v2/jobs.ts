@@ -69,7 +69,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
           case JobStatus[JobStatus.timedOut]:
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
-            await notifyBuildSummary(jobId);
+            await notifyBuildSummary(jobId, { checkForGatsbyCloud: true });
             break;
           default:
             consoleLogger.error(jobId, 'Invalid status');

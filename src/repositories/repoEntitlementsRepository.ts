@@ -47,7 +47,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
     }
   }
 
-  async getGatsbySiteIdByGithubUsername(githubUsername: string) {
+  async getGatsbySiteIdByGithubUsername(githubUsername: string): Promise<string | null> {
     const query = { github_username: githubUsername };
     const projection = { _id: 0, gatsby_site_id: 1 };
     const res = await this.findOne(
