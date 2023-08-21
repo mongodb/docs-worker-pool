@@ -662,7 +662,6 @@ export abstract class JobHandler {
       }
 
       const url = `${previewWebhookURL}/${gatsbySiteId}`;
-      const callTime = new Date();
       const response = await axios.post(
         url,
         {
@@ -672,7 +671,7 @@ export abstract class JobHandler {
           headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
         }
       );
-      await this._jobRepository.updateExecutionTime(this.currJob._id, { gatsbyCloudStartTime: callTime });
+      await this._jobRepository.updateExecutionTime(this.currJob._id, { gatsbyCloudStartTime: new Date() });
       await this.logger.save(this.currJob._id, `${'(POST Webhook Status)'.padEnd(15)}${response.status}`);
     } catch (err) {
       await this.logger.save(
