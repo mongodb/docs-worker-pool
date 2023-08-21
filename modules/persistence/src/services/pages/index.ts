@@ -1,7 +1,7 @@
 import AdmZip from 'adm-zip';
 import { deserialize } from 'bson';
 import isEqual from 'fast-deep-equal';
-import { AnyBulkWriteOperation, Document, FindCursor, ObjectId } from 'mongodb';
+import { AnyBulkWriteOperation, FindCursor, ObjectId } from 'mongodb';
 import { bulkWrite, db, insert } from '../connector';
 
 interface StaticAsset {
@@ -22,6 +22,7 @@ export interface Page {
   filename: string;
   ast: PageAst;
   static_assets: UpdatedAsset[];
+  github_username: string;
 }
 
 export interface UpdatedPage extends Page {
@@ -43,12 +44,12 @@ const UPDATED_AST_COLL_NAME = 'updated_documents';
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
 // or within subfolders of this module
-const pagesFromZip = (zip: AdmZip, githubUser: string) => {
+const pagesFromZip = (zip: AdmZip, githubUser: string): Page[] => {
   const zipPages = zip.getEntries();
   return zipPages
     .filter((entry) => entry.entryName?.startsWith('documents/'))
     .map((entry) => {
-      const document = deserialize(entry.getData());
+      const document = deserialize(entry.getData()) as Page;
       document.github_username = githubUser;
       return document;
     });
@@ -102,19 +103,14 @@ const createPageAstMapping = async (docsCursor: FindCursor) => {
 };
 
 class UpdatedPagesManager {
-  currentPages: Document[];
+  currentPages: Page[];
   operations: AnyBulkWriteOperation[];
   prevPageDocsMapping: PreviousPageMapping;
   prevPageIds: Set<string>;
   updateTime: Date;
   githubUser: string;
 
-  constructor(
-    prevPageDocsMapping: PreviousPageMapping,
-    prevPagesIds: Set<string>,
-    pages: Document[],
-    githubUser: string
-  ) {
+  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Page[], githubUser: string) {
     this.currentPages = pages;
     this.operations = [];
     this.prevPageDocsMapping = prevPageDocsMapping;
@@ -251,7 +247,7 @@ class UpdatedPagesManager {
  * @param pages
  * @param collection
  */
-const updatePages = async (pages: Document[], collection: string, githubUser: string) => {
+const updatePages = async (pages: Page[], collection: string, githubUser: string) => {
   if (pages.length === 0) {
     return;
   }
