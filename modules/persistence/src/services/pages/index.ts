@@ -156,7 +156,6 @@ class UpdatedPagesManager {
                 static_assets: this.findUpdatedAssets(page.static_assets, prevPageData?.static_assets),
                 updated_at: this.updateTime,
                 deleted: false,
-                github_username: page.github_username,
               },
               $setOnInsert: {
                 created_at: this.updateTime,
