@@ -1,6 +1,6 @@
 import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
-import { getBuildJobDef } from '../../data/jobDef';
+import { getStagingJobDef } from '../../data/jobDef';
 
 describe('StagingJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
@@ -71,6 +71,7 @@ describe('StagingJobHandler Tests', () => {
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(
       TestDataProvider.getExpectedStagingBuildNextGenCommands(jobHandlerTestHelper.job)
     );
+    expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledTimes(1);
     expect(jobHandlerTestHelper.jobRepo.insertNotificationMessages).toBeCalledWith(
       jobHandlerTestHelper.job._id,
       'Summary: All good'
@@ -90,12 +91,18 @@ describe('StagingJobHandler Tests', () => {
     jobHandlerTestHelper.jobRepo.insertJob = jest.fn();
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
 
-    expect(jobHandlerTestHelper.job).toEqual(getBuildJobDef());
+    expect(jobHandlerTestHelper.job).toEqual(getStagingJobDef());
 
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();
 
     expect(queueManifestJobSpy).toBeCalledTimes(0);
     expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
+  });
+
+  test('Staging deploy with Gatsby Cloud site does not result in job completion', async () => {
+    jobHandlerTestHelper.setStageForDeploySuccess(true, false, undefined, { hasGatsbySiteId: true });
+    await jobHandlerTestHelper.jobHandler.execute();
+    expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledTimes(0);
   });
 });
