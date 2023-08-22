@@ -20,7 +20,7 @@ RUN cd ./modules/oas-page-builder \
     && npm run build
 
 # where repo work will happen
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as dependency-builder
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
 ARG SNOOTY_PARSER_VERSION=0.14.4
 ARG SNOOTY_FRONTEND_VERSION=0.14.12
@@ -114,6 +114,10 @@ RUN cd ./modules/oas-page-builder/ && npm ci --legacy-peer-deps
 # Needed for OAS Page Builder module in shared.mk
 ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
 ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
+
+FROM scratch
+COPY --from=dependency-builder / / 
+
 
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
