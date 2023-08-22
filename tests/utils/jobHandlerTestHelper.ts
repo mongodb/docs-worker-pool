@@ -94,7 +94,6 @@ export class JobHandlerTestHelper {
       this.jobCommandExecutor.execute.mockResolvedValue(returnValue);
     } else {
       this.jobCommandExecutor.execute.mockResolvedValue({ status: 'success', output: publishOutput[0], error: null });
-      // this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'Failed', output: publishOutput[0], error: null });
     }
     return publishOutput[1]; //return urls
   }
