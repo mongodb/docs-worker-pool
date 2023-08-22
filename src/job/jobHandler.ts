@@ -99,7 +99,20 @@ export abstract class JobHandler {
           null,
           null
         );
-        await this.jobRepository.updateWithStatus(this.currJob._id, files, JobStatus.completed);
+
+        // Prevent the Autobuilder's usual build completion from being sent after content staging job
+        // if the user already has a Gatsby Cloud site. Job should be marked as
+        // completed after the Gatsby Cloud build via the SnootyBuildComplete lambda.
+        const { _id: jobId, user } = this.currJob;
+        const gatsbyCloudSiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(user);
+        if (gatsbyCloudSiteId && this.currJob.payload.jobType === 'githubPush') {
+          this.logger.info(
+            jobId,
+            `User ${user} has a Gatsby Cloud site. The Autobuilder will not mark the build as completed right now.`
+          );
+        } else {
+          await this.jobRepository.updateWithStatus(jobId, files, JobStatus.completed);
+        }
       } else {
         if (publishResult.error) {
           await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);

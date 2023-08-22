@@ -19,7 +19,6 @@ interface SnootyPayload {
 // These options should only be defined if the build summary is being called after
 // a Gatsby Cloud job
 interface BuildSummaryOptions {
-  checkForGatsbyCloud?: boolean;
   mongoClient?: MongoClient;
   previewUrl?: string;
 }
@@ -91,7 +90,7 @@ async function prepSummaryMessage(
 }
 
 export async function notifyBuildSummary(jobId: string, options: BuildSummaryOptions = {}): Promise<any> {
-  const { checkForGatsbyCloud, mongoClient, previewUrl } = options;
+  const { mongoClient, previewUrl } = options;
   const consoleLogger = new ConsoleLogger();
   const client: MongoClient = mongoClient ?? new MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -108,17 +107,6 @@ export async function notifyBuildSummary(jobId: string, options: BuildSummaryOpt
   }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
-  const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
-
-  // Prevents the Autobuilder's usual build summary from being sent after content staging job
-  // if the user already has a Gatsby Cloud site. They should receive a separate build summary
-  if (checkForGatsbyCloud && fullDocument.payload.jobType === 'githubPush') {
-    const userHasGatsbyCloudSite = await repoEntitlementRepository.getGatsbySiteIdByGithubUsername(username);
-    if (userHasGatsbyCloudSite) {
-      consoleLogger.info(jobId, `User ${username} has a Gatsby Cloud site. Build summary will not be sent right now.`);
-      return;
-    }
-  }
 
   const githubCommenter = new GithubCommenter(consoleLogger, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
@@ -143,6 +131,7 @@ export async function notifyBuildSummary(jobId: string, options: BuildSummaryOpt
   }
 
   // Slack notification
+  const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);
   if (!entitlement?.['slack_user_id']) {
     consoleLogger.error(username, 'Entitlement failed');

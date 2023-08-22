@@ -86,7 +86,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
           case JobStatus[JobStatus.failed]:
           case JobStatus[JobStatus.completed]:
             queueUrl = c.get('jobUpdatesQueueUrl');
-            await notifyBuildSummary(jobId, { checkForGatsbyCloud: true });
+            await notifyBuildSummary(jobId);
             await SubmitArchiveJob(jobId);
             break;
           default:
