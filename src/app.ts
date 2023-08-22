@@ -32,6 +32,7 @@ let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
 let ssoConnector: ISSOConnector;
 
+// testing
 async function init(): Promise<void> {
   const atlasURL = `mongodb+srv://${c.get('dbUsername')}:${c.get('dbPassword')}@${c.get(
     'dbHost'
