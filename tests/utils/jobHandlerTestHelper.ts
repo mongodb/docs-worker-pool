@@ -7,6 +7,7 @@ import { StagingJobHandler } from '../../src/job/stagingJobHandler';
 import { ManifestJobHandler } from '../../src/job/manifestJobHandler';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
+import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../../src/services/cdn';
 import { IJobCommandExecutor } from '../../src/services/commandExecutor';
 import { IFileSystemServices } from '../../src/services/fileServices';
@@ -28,6 +29,7 @@ export class JobHandlerTestHelper {
   jobHandler: ProductionJobHandler | StagingJobHandler | ManifestJobHandler;
   jobValidator: IJobValidator;
   repoBranchesRepo: RepoBranchesRepository;
+  repoEntitlementsRepo: RepoEntitlementsRepository;
   lengthPrototype;
   handlerMapper = {
     prod: ProductionJobHandler,
@@ -46,6 +48,7 @@ export class JobHandlerTestHelper {
     this.logger = mockDeep<IJobRepoLogger>();
     this.jobValidator = mockDeep<IJobValidator>();
     this.repoBranchesRepo = mockDeep<RepoBranchesRepository>();
+    this.repoEntitlementsRepo = mockDeep<RepoEntitlementsRepository>();
     this.jobHandler = new this.handlerMapper[handlerName](
       this.job,
       this.config,
@@ -56,7 +59,8 @@ export class JobHandlerTestHelper {
       this.repoConnector,
       this.logger,
       this.jobValidator,
-      this.repoBranchesRepo
+      this.repoBranchesRepo,
+      this.repoEntitlementsRepo
     );
     return this.jobHandler;
   }
