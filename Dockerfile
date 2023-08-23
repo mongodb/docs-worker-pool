@@ -74,7 +74,8 @@ USER docsworker-xlarge
 WORKDIR ${WORK_DIRECTORY}
 
 # get shared.mk
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+# TODO-3951: Change back when done
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-3951-meta/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \

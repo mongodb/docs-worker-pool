@@ -46,6 +46,7 @@ const app = async (path: string, githubUser: string) => {
       insertMetadata(buildId, metadata),
       upsertAssets(zip),
     ]);
+    throw new Error('womp womp');
     await insertMergedMetadataEntries(buildId, metadata);
     // DOP-3447 clean up stale metadata
     await deleteStaleMetadata(metadata);
