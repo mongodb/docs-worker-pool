@@ -691,6 +691,7 @@ export abstract class JobHandler {
         this.currJob._id,
         `${'(POST Webhook)'.padEnd(15)}Failed to POST to Gatsby Cloud webhook: ${err}`
       );
+      throw err;
     }
   }
 }
