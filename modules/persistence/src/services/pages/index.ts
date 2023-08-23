@@ -1,7 +1,7 @@
 import AdmZip from 'adm-zip';
 import { deserialize } from 'bson';
 import isEqual from 'fast-deep-equal';
-import { AnyBulkWriteOperation, Document, FindCursor, ObjectId } from 'mongodb';
+import { AnyBulkWriteOperation, FindCursor, ObjectId } from 'mongodb';
 import { bulkWrite, db, insert } from '../connector';
 
 interface StaticAsset {
@@ -22,6 +22,7 @@ export interface Page {
   filename: string;
   ast: PageAst;
   static_assets: UpdatedAsset[];
+  github_username: string;
 }
 
 export interface UpdatedPage extends Page {
@@ -43,29 +44,30 @@ const UPDATED_AST_COLL_NAME = 'updated_documents';
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
 // or within subfolders of this module
-const pagesFromZip = (zip: AdmZip, githubUser?: string) => {
+const pagesFromZip = (zip: AdmZip, githubUser: string): Page[] => {
   const zipPages = zip.getEntries();
   return zipPages
     .filter((entry) => entry.entryName?.startsWith('documents/'))
     .map((entry) => {
-      const document = deserialize(entry.getData());
-      document.github_username = githubUser || 'docs-builder-bot';
+      const document = deserialize(entry.getData()) as Page;
+      document.github_username = githubUser;
       return document;
     });
 };
 
 /**
- * Finds the page documents for a given Snooty project name + branch combination.
- * If this is the first build for the Snooty project name + branch, no documents
+ * Finds the page documents for a given Snooty project + branch + user combination.
+ * If this is the first build for the Snooty project + branch + user, no documents
  * will be found.
  *
  * @param pageIdPrefix - Includes the Snooty project name, user (docsworker-xlarge), and branch
  * @param collection - The collection to perform the find query on
  */
-const findPrevPageDocs = async (pageIdPrefix: string, collection: string) => {
+const findPrevPageDocs = async (pageIdPrefix: string, collection: string, githubUser: string) => {
   const dbSession = await db();
   const findQuery = {
     page_id: { $regex: new RegExp(`^${pageIdPrefix}/`) },
+    github_username: githubUser,
     deleted: false,
   };
   const projection = {
@@ -101,17 +103,19 @@ const createPageAstMapping = async (docsCursor: FindCursor) => {
 };
 
 class UpdatedPagesManager {
-  currentPages: Document[];
+  currentPages: Page[];
   operations: AnyBulkWriteOperation[];
   prevPageDocsMapping: PreviousPageMapping;
   prevPageIds: Set<string>;
   updateTime: Date;
+  githubUser: string;
 
-  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Document[]) {
+  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Page[], githubUser: string) {
     this.currentPages = pages;
     this.operations = [];
     this.prevPageDocsMapping = prevPageDocsMapping;
     this.prevPageIds = prevPagesIds;
+    this.githubUser = githubUser;
 
     this.updateTime = new Date();
     this.checkForPageDiffs();
@@ -139,7 +143,7 @@ class UpdatedPagesManager {
       if (!isEqual(page.ast, prevPageData?.ast)) {
         const operation = {
           updateOne: {
-            filter: { page_id: currentPageId },
+            filter: { page_id: currentPageId, github_username: page.github_username },
             update: {
               $set: {
                 page_id: currentPageId,
@@ -148,7 +152,6 @@ class UpdatedPagesManager {
                 static_assets: this.findUpdatedAssets(page.static_assets, prevPageData?.static_assets),
                 updated_at: this.updateTime,
                 deleted: false,
-                github_username: page.github_username || 'docs-builder-bot',
               },
               $setOnInsert: {
                 created_at: this.updateTime,
@@ -218,7 +221,7 @@ class UpdatedPagesManager {
     this.prevPageIds.forEach((unseenPageId) => {
       const operation = {
         updateOne: {
-          filter: { page_id: unseenPageId },
+          filter: { page_id: unseenPageId, github_username: this.githubUser },
           update: {
             $set: {
               deleted: true,
@@ -244,7 +247,7 @@ class UpdatedPagesManager {
  * @param pages
  * @param collection
  */
-const updatePages = async (pages: Document[], collection: string) => {
+const updatePages = async (pages: Page[], collection: string, githubUser: string) => {
   if (pages.length === 0) {
     return;
   }
@@ -256,12 +259,12 @@ const updatePages = async (pages: Document[], collection: string) => {
     // Find all pages that share the same project name + branch. Expects page IDs
     // to include these two properties after parse
     const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
-    const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection);
+    const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection, githubUser);
     const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
 
     const diffsTimerLabel = 'finding page differences';
     console.time(diffsTimerLabel);
-    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages);
+    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, githubUser);
     const operations = updatedPagesManager.getOperations();
     console.timeEnd(diffsTimerLabel);
 
@@ -283,14 +286,14 @@ const updatePages = async (pages: Document[], collection: string) => {
   }
 };
 
-export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githubUser?: string) => {
+export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githubUser: string) => {
   try {
     const pages = pagesFromZip(zip, githubUser);
     const ops: PromiseLike<any>[] = [insert(pages, COLLECTION_NAME, buildId)];
 
     const featureEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
     if (featureEnabled && featureEnabled.toUpperCase() === 'TRUE') {
-      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME));
+      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME, githubUser));
     }
 
     return Promise.all(ops);
