@@ -25,24 +25,6 @@ export async function checkIfUserIsDocsCollaborator(username: string): Promise<b
   }
 }
 
-/**
- * Sample workflow API call: 
- * 
- * await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
-  owner: 'OWNER',
-  repo: 'REPO',
-  workflow_id: 'WORKFLOW_ID',
-  ref: 'topic-branch',
-  inputs: {
-    name: 'Mona the Octocat',
-    home: 'San Francisco, CA'
-  },
-  headers: {
-    'X-GitHub-Api-Version': '2022-11-28'
-  }
-})
- */
-
 export async function checkIfPrExistsForBranch(username: string, branch: string): Promise<boolean> {
   try {
     await client.request('GET /repos/{owner}/{repo}/pulls', {
@@ -62,5 +44,6 @@ export async function executeFeatureWorkflow(workflowId: string, branch: string)
     ...DEFAULT_OPTIONS,
     ref: branch,
     workflow_id: workflowId,
+    inputs: {},
   });
 }
