@@ -4,7 +4,6 @@ on:
       - master
     types:
       - closed
-      - converted_to_draft
 
 name: Cleanup Feature Branch
 jobs: 
