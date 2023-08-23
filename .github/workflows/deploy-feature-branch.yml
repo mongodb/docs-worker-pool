@@ -23,4 +23,4 @@ jobs:
           npm ci
           cd cdk-infra/
           npm ci
-          npm run deploy:feature -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.ref_name}}
+          npm run deploy:feature -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.base_ref}}
