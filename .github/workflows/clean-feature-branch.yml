@@ -7,7 +7,7 @@ on:
 
 name: Cleanup Feature Branch
 jobs: 
-  deploy:
+  destroy:
     runs-on: ubuntu-latest
     
     steps:
