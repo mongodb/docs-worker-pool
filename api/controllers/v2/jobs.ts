@@ -9,7 +9,7 @@ import { JobStatus } from '../../../src/entities/job';
 import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { APIGatewayEvent, APIGatewayProxyResult, SQSEvent, SQSRecord } from 'aws-lambda';
-import { notifyBuildSummary } from '../../handlers/jobs';
+import { notifyBuildSummary, snootyBuildComplete } from '../../handlers/jobs';
 
 export const TriggerLocalBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -170,3 +170,5 @@ async function NotifyBuildProgress(jobId: string): Promise<void> {
     entitlement['slack_user_id']
   );
 }
+
+export const SnootyBuildComplete = snootyBuildComplete;
