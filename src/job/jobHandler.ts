@@ -671,7 +671,7 @@ export abstract class JobHandler {
       if (!gatsbySiteId) {
         const message = `User ${githubUsername} does not have a Gatsby Cloud Site ID.`;
         this._logger.warn('Gatsby Cloud Preview Webhook', message);
-        throw new Error(message);
+        return;
       }
 
       const url = `${previewWebhookURL}/${gatsbySiteId}`;
