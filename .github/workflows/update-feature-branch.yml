@@ -40,6 +40,7 @@ jobs:
               - 'Dockerfile.enhanced'
               - 'modules/**'
       - name: Update Webhook Stack
+        if: steps.filter.outputs.webhooks == 'true' && github.event.pull_request.draft == false
         run: |
           npm ci
           cd cdk-infra/
@@ -48,6 +49,7 @@ jobs:
             auto-builder-stack-enhancedApp-dotcomstg-${{github.base_ref}}-webhook
   
       - name: Update Worker Stack
+        if: steps.filter.outputs.worker == 'true' && github.event.pull_request.draft == false
         run: |
           npm ci
           cd cdk-infra/
