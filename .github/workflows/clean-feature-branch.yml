@@ -1,12 +1,12 @@
 on:
   pull_request:
     branches:
-    - master
+      - master
     types:
-      - opened
-      - reopened
+      - closed
+      - converted_to_draft
 
-name: Deploy Feature Branch Infrastructure
+name: Cleanup Feature Branch
 jobs: 
   deploy:
     runs-on: ubuntu-latest
@@ -22,9 +22,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-      - name: Deploy Feature Branch Infrastructure
+      - name: Cleanup Feature Branch Infrastructure
         run: |
-          npm ci
           cd cdk-infra/
           npm ci
-          npm run deploy:feature -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.base_ref}}
+          npm run cdk destroy auto-builder-stack-enhancedApp-dotcomstg-${{github.base_ref}}-worker \
+            auto-builder-stack-enhancedApp-dotcomstg-${{github.base_ref}}-queues \
+            auto-builder-stack-enhancedApp-dotcomstg-${{github.base_ref}}-webhooks
