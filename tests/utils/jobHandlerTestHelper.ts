@@ -7,15 +7,20 @@ import { StagingJobHandler } from '../../src/job/stagingJobHandler';
 import { ManifestJobHandler } from '../../src/job/manifestJobHandler';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
+import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../../src/services/cdn';
 import { IJobCommandExecutor } from '../../src/services/commandExecutor';
 import { IFileSystemServices } from '../../src/services/fileServices';
 import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
 import { TestDataProvider } from '../data/data';
-import { getBuildJobDef, getManifestJobDef } from '../data/jobDef';
+import { getBuildJobDef, getManifestJobDef, getStagingJobDef } from '../data/jobDef';
 
 type MockReturnValueOnce = { status: string; output: string; error: string | null };
+type SetupOptions = {
+  hasGatsbySiteId?: boolean;
+};
+
 export class JobHandlerTestHelper {
   job: Job;
   config: IConfig;
@@ -28,6 +33,7 @@ export class JobHandlerTestHelper {
   jobHandler: ProductionJobHandler | StagingJobHandler | ManifestJobHandler;
   jobValidator: IJobValidator;
   repoBranchesRepo: RepoBranchesRepository;
+  repoEntitlementsRepo: RepoEntitlementsRepository;
   lengthPrototype;
   handlerMapper = {
     prod: ProductionJobHandler,
@@ -36,7 +42,13 @@ export class JobHandlerTestHelper {
   };
 
   init(handlerName: string): ProductionJobHandler | StagingJobHandler | ManifestJobHandler {
-    this.job = handlerName === 'manifest' ? getManifestJobDef() : getBuildJobDef();
+    if (handlerName === 'manifest') {
+      this.job = getManifestJobDef();
+    } else if (handlerName === 'staging') {
+      this.job = getStagingJobDef();
+    } else {
+      this.job = getBuildJobDef();
+    }
     this.config = mockDeep<IConfig>();
     this.jobRepo = mockDeep<JobRepository>();
     this.fileSystemServices = mockDeep<IFileSystemServices>();
@@ -46,6 +58,7 @@ export class JobHandlerTestHelper {
     this.logger = mockDeep<IJobRepoLogger>();
     this.jobValidator = mockDeep<IJobValidator>();
     this.repoBranchesRepo = mockDeep<RepoBranchesRepository>();
+    this.repoEntitlementsRepo = mockDeep<RepoEntitlementsRepository>();
     this.jobHandler = new this.handlerMapper[handlerName](
       this.job,
       this.config,
@@ -56,20 +69,31 @@ export class JobHandlerTestHelper {
       this.repoConnector,
       this.logger,
       this.jobValidator,
-      this.repoBranchesRepo
+      this.repoBranchesRepo,
+      this.repoEntitlementsRepo
     );
     return this.jobHandler;
   }
 
-  setStageForDeploySuccess(isNextGen = true, prodDeploy = true, returnValue?: MockReturnValueOnce): string[] {
+  setStageForDeploySuccess(
+    isNextGen = true,
+    prodDeploy = true,
+    returnValue?: MockReturnValueOnce,
+    setupOptions: SetupOptions = {}
+  ): string[] {
     this.job.payload.repoBranches = TestDataProvider.getPublishBranchesContent(this.job);
     this.setupForSuccess(isNextGen);
     const publishOutput = TestDataProvider.getPublishOutputWithPurgedUrls(prodDeploy);
+
+    const { hasGatsbySiteId } = setupOptions;
+    if (hasGatsbySiteId) {
+      this.repoEntitlementsRepo.getGatsbySiteIdByGithubUsername.mockResolvedValue('gatsby_site_id');
+    }
+
     if (returnValue) {
-      this.jobCommandExecutor.execute.mockReturnValueOnce(returnValue);
+      this.jobCommandExecutor.execute.mockResolvedValue(returnValue);
     } else {
-      this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'success', output: 'Great work', error: null });
-      this.jobCommandExecutor.execute.mockReturnValueOnce({ status: 'Failed', output: publishOutput[0], error: null });
+      this.jobCommandExecutor.execute.mockResolvedValue({ status: 'success', output: publishOutput[0], error: null });
     }
     return publishOutput[1]; //return urls
   }

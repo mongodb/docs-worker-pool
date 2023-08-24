@@ -107,6 +107,7 @@ export async function notifyBuildSummary(jobId: string, options: BuildSummaryOpt
   }
   const repoName = fullDocument.payload.repoName;
   const username = fullDocument.user;
+
   const githubCommenter = new GithubCommenter(consoleLogger, githubToken);
   const slackConnector = new SlackConnector(consoleLogger, c);
 
@@ -239,6 +240,7 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     await client.connect();
     const db = client.db(c.get<string>('dbName'));
     const jobRepository = new JobRepository(db, c, consoleLogger);
+    await jobRepository.updateExecutionTime(jobId, { gatsbyCloudEndTime: new Date() });
     const updateResponse = await jobRepository.updateWithStatus(jobId, null, payload.status || JobStatus.failed, false);
     const previewUrl = getPreviewUrl(updateResponse.payload, c.get<string>('env'));
     await notifyBuildSummary(jobId, { mongoClient: client, previewUrl });
@@ -270,5 +272,5 @@ function getPreviewUrl(payload: Payload | undefined, env: string): string | unde
   const { repoOwner, branchName, project } = payload;
   const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();
   const possibleStagingSuffix = env === 'stg' ? 'stg' : '';
-  return `https://preview-mongodb${githubUsernameNoHyphens}${possibleStagingSuffix}.gatsbyjs.io/${project}/${branchName}/index`;
+  return `https://preview-mongodb${githubUsernameNoHyphens}${possibleStagingSuffix}.gatsbyjs.io/${project}/${branchName}/`;
 }

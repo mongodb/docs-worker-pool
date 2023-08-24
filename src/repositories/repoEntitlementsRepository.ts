@@ -47,7 +47,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
     }
   }
 
-  async getGatsbySiteIdByGithubUsername(githubUsername: string) {
+  async getGatsbySiteIdByGithubUsername(githubUsername: string): Promise<string | undefined> {
     const query = { github_username: githubUsername };
     const projection = { _id: 0, gatsby_site_id: 1 };
     const res = await this.findOne(
@@ -57,7 +57,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
     );
     if (!res) {
       this._logger.error('Fetching Gatsby Cloud Site ID', `Could not find user: ${githubUsername}`);
-      return null;
+      return undefined;
     }
     return res.gatsby_site_id;
   }

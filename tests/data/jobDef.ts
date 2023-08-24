@@ -51,6 +51,47 @@ export const getBuildJobPlain = (): Job => ({
   } as Payload,
 });
 
+export const getStagingJobDef = (): Job => ({
+  _id: '5c5e0817ce099eaf874a9801',
+  title: 'GitHub Push: skerschb',
+  buildCommands: [],
+  comMessage: null,
+  createdTime: new Date('2022-04-20T17:10:09.432Z'),
+  deployCommands: [],
+  email: '32710906+skerschb@users.noreply.github.com',
+  endTime: new Date('2022-04-20T17:10:09.432Z'),
+  error: {},
+  invalidationStatusURL: 'test-status-url',
+  logs: [],
+  manifestPrefix: '',
+  mutPrefix: '',
+  pathPrefix: '',
+  priority: 1,
+  purgedUrls: null,
+  result: [],
+  shouldGenerateSearchManifest: true,
+  startTime: new Date('2022-04-20T17:10:09.432Z'),
+  status: JobStatus.completed,
+  user: 'skerschb',
+  payload: {
+    jobType: 'githubPush',
+    action: 'push',
+    branchName: 'DOCSP-666',
+    isFork: false,
+    manifestPrefix: undefined,
+    mutPrefix: undefined,
+    newHead: '38b805e9c7c4f1c364476682e93f9d24a87f470a',
+    pathPrefix: undefined,
+    prefix: 'compass',
+    project: 'testauth',
+    repoName: 'testauth',
+    repoOwner: 'skerschb',
+    source: 'github',
+    url: 'https://github.com/skerschb/testauth.git',
+    urlSlug: 'UsingAlias',
+  } as Payload,
+});
+
 // Represents a manifestJob at time of insert to queue
 export const getManifestJobDef = (): Omit<Job, '_id'> => ({
   buildCommands: [],

@@ -43,6 +43,7 @@ export class WorkerEnvConstruct extends Construct {
     const gatsbyBaseUrl = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/base_url`);
     // doing this for the time being, but I think we don't need to necessarily retrieve this from ssm for feature branches, nor would we want to in that case
     const previewBuildEnabled = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/preview_build/enabled`);
+    const featureFlagUpdatePages = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/update_pages`);
     const entitlementCollection = StringParameter.valueFromLookup(
       this,
       `${ssmPrefix}/atlas/collections/user/entitlements`
@@ -67,6 +68,7 @@ export class WorkerEnvConstruct extends Construct {
       GITHUB_BOT_USERNAME: githubBotUsername,
       GATSBY_BASE_URL: gatsbyBaseUrl,
       PREVIEW_BUILD_ENABLED: previewBuildEnabled,
+      FEATURE_FLAG_UPDATE_PAGES: featureFlagUpdatePages,
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       NPM_EMAIL: npmEmail,
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,

@@ -99,7 +99,20 @@ export abstract class JobHandler {
           null,
           null
         );
-        await this.jobRepository.updateWithStatus(this.currJob._id, files, JobStatus.completed);
+
+        // Prevent the Autobuilder's usual build completion from being sent after content staging job
+        // if the user already has a Gatsby Cloud site. Job should be marked as
+        // completed after the Gatsby Cloud build via the SnootyBuildComplete lambda.
+        const { _id: jobId, user } = this.currJob;
+        const gatsbyCloudSiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(user);
+        if (gatsbyCloudSiteId && this.currJob.payload.jobType === 'githubPush') {
+          this.logger.info(
+            jobId,
+            `User ${user} has a Gatsby Cloud site. The Autobuilder will not mark the build as completed right now.`
+          );
+        } else {
+          await this.jobRepository.updateWithStatus(jobId, files, JobStatus.completed);
+        }
       } else {
         if (publishResult.error) {
           await this.jobRepository.updateWithErrorStatus(this.currJob._id, publishResult.error);
@@ -266,7 +279,7 @@ export abstract class JobHandler {
       [`${stage}EndTime`]: end,
     };
 
-    this._jobRepository.findOneAndUpdateExecutionTime(this.currJob._id, update);
+    this._jobRepository.updateExecutionTime(this.currJob._id, update);
     return resp;
   }
 
@@ -274,6 +287,7 @@ export abstract class JobHandler {
     const stages = {
       ['get-build-dependencies']: 'buildDepsExe',
       ['next-gen-parse']: 'parseExe',
+      ['persistence-module']: 'persistenceExe',
       ['next-gen-html']: 'htmlExe',
       ['oas-page-build']: 'oasPageBuildExe',
     };
@@ -302,6 +316,12 @@ export abstract class JobHandler {
       } else {
         const makeCommandsResp = await this._commandExecutor.execute([command]);
         await this.logBuildDetails(makeCommandsResp);
+      }
+
+      // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+      const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+      if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+        await this.callGatsbyCloudWebhook();
       }
     }
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
@@ -635,27 +655,44 @@ export abstract class JobHandler {
     return this._logger;
   }
 
-  protected async previewWebhook(): Promise<AxiosResponse<string>> {
-    const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
-    const githubUsername = this.currJob.user;
-    const gatsbySiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(githubUsername);
-    if (!gatsbySiteId) {
-      const message = `User ${githubUsername} does not have a Gatsby Cloud Site ID.`;
-      this._logger.warn('Gatsby Cloud Preview Webhook', message);
-      throw new Error(message);
-    }
-
-    const url = `${previewWebhookURL}/${gatsbySiteId}`;
-    return await axios.post(
-      url,
-      {
-        jobId: this.currJob._id,
-        status: this.currJob.status,
-      },
-      {
-        headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
-      }
+  // Invokes Gatsby Cloud Preview Webhook
+  protected async callGatsbyCloudWebhook(): Promise<void> {
+    const featurePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED;
+    // Logging for Debugging purposes only will remove once we see the build working in Gatsby.
+    await this.logger.save(
+      this.currJob._id,
+      `${'(GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED)'.padEnd(15)}${featurePreviewWebhookEnabled}`
     );
+
+    try {
+      const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
+      const githubUsername = this.currJob.user;
+      const gatsbySiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(githubUsername);
+      if (!gatsbySiteId) {
+        const message = `User ${githubUsername} does not have a Gatsby Cloud Site ID.`;
+        this._logger.warn('Gatsby Cloud Preview Webhook', message);
+        return;
+      }
+
+      const url = `${previewWebhookURL}/${gatsbySiteId}`;
+      const response = await axios.post(
+        url,
+        {
+          jobId: this.currJob._id,
+        },
+        {
+          headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
+        }
+      );
+      await this._jobRepository.updateExecutionTime(this.currJob._id, { gatsbyCloudStartTime: new Date() });
+      await this.logger.save(this.currJob._id, `${'(POST Webhook Status)'.padEnd(15)}${response.status}`);
+    } catch (err) {
+      await this.logger.save(
+        this.currJob._id,
+        `${'(POST Webhook)'.padEnd(15)}Failed to POST to Gatsby Cloud webhook: ${err}`
+      );
+      throw err;
+    }
   }
 }
 
