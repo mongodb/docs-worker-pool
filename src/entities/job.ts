@@ -1,3 +1,5 @@
+import { Commit } from '@octokit/webhooks-types';
+
 // TODO: Cut down on null and undefined type definition allowances, with Optional
 // TODO: Remove duplicate defintions from Payload and Job, (e.g. prefixes)
 
@@ -43,6 +45,7 @@ export type Payload = {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
+  head_commit?: Commit;
 };
 
 export type EnhancedPayload = {
@@ -71,6 +74,7 @@ export type EnhancedPayload = {
   prefix: string;
   project: string;
   includeInGlobalSearch?: boolean;
+  head_commit?: Commit;
 };
 
 export type Job = {

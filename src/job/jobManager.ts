@@ -15,6 +15,7 @@ import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
+import { Commit } from '@octokit/webhooks-types';
 
 export const jobHandlerMap = {
   githubPush: StagingJobHandler,
@@ -118,6 +119,21 @@ export class JobManager {
     return this._shouldStop;
   }
 
+  private getProjectDirectory(path: string): string {
+    if (!path.includes('/')) {
+      console.warn('This file that was changed does not belong to any docset');
+      return '';
+    }
+    const projectDirectory = path.split('/')[0];
+    return projectDirectory;
+  }
+  private getMonorepoPaths(commit: Commit): string[] {
+    const commitChanges = commit.modified.concat(commit.added).concat(commit.removed);
+    const projects = commitChanges.map((path) => this.getProjectDirectory(path)).filter((dir) => !!dir); // !!dir filters out empty strings
+
+    return Array.from(new Set(projects));
+  }
+
   async workEx(job: Job): Promise<void> {
     try {
       this._jobHandler = null;
@@ -125,6 +141,12 @@ export class JobManager {
         const excludeRepoFromBenchmarks = ['mms-docs', 'docs-k8s-operator'].includes(job.payload.repoName);
         // Can easily rollback with commenting out this flag.
         job.useWithBenchmark = !excludeRepoFromBenchmarks;
+
+        if (job.payload.head_commit) {
+          // do stuff here to check which projects need to be built
+          this.getMonorepoPaths(job.payload.head_commit);
+        }
+
         await this.createHandlerAndExecute(job);
       } else {
         this._logger.info('JobManager', `No Jobs Found: ${new Date()}`);
