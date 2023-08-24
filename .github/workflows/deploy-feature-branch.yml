@@ -28,4 +28,5 @@ jobs:
           cd cdk-infra/
           npm ci
           npm run deploy:feature -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.head_ref}} --outputs-file outputs.json
-          cat outputs.json
+      - name: Display resource URLs
+        run: cat outputs.json
