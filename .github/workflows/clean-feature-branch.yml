@@ -5,7 +5,7 @@ on:
     types:
       - closed
 
-name: Cleanup Feature Branch Feature Branch Infrastructure
+name: Cleanup Feature Branch Infrastructure
 jobs: 
   destroy:
     runs-on: ubuntu-latest

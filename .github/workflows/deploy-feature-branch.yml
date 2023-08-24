@@ -6,7 +6,7 @@ on:
       - opened
       - reopened
 
-name: Deploy Feature Branch Infrastructure
+name: Initial  Feature Branch Deploy
 jobs: 
   deploy:
     runs-on: ubuntu-latest
