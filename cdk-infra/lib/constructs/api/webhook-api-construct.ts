@@ -133,6 +133,9 @@ export class WebhookApiConstruct extends Construct {
     const localEndpoint = webhookEndpoint.addResource('local');
     const snootyEndpoint = webhookEndpoint.addResource('snooty');
 
+    // Shared /githubEndpoint/trigger endpoint
+    const githubEndpointTrigger = githubEndpoint.addResource('trigger');
+
     const defaultCorsPreflightOptions: CorsOptions = {
       allowOrigins: Cors.ALL_ORIGINS,
     };
@@ -153,13 +156,11 @@ export class WebhookApiConstruct extends Construct {
       .addResource('upsert', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(dochubTriggerUpsertLambda));
 
-    githubEndpoint
-      .addResource('trigger')
+    githubEndpointTrigger
       .addResource('build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
-    githubEndpoint
-      .addResource('trigger')
+    githubEndpointTrigger
       .addResource('delete', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubDeleteArtifactsLambda));
 
