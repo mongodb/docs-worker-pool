@@ -74,6 +74,15 @@ export class WebhookApiConstruct extends Construct {
       timeout,
     });
 
+    const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
+      entry: `${HANDLERS_PATH}/github.ts`,
+      runtime,
+      handler: 'MarkBuildArtifactsForDeletion',
+      bundling,
+      environment,
+      timeout,
+    });
+
     const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
       entry: `${HANDLERS_PATH}/jobs.ts`,
       runtime,
@@ -87,6 +96,15 @@ export class WebhookApiConstruct extends Construct {
       entry: `${HANDLERS_PATH}/jobs.ts`,
       runtime,
       handler: 'HandleJobs',
+      environment,
+      bundling,
+      timeout,
+    });
+
+    const snootyBuildCompleteLambda = new NodejsFunction(this, 'snootyBuildCompleteLambda', {
+      entry: `${HANDLERS_PATH}/jobs.ts`,
+      runtime,
+      handler: 'SnootyBuildComplete',
       environment,
       bundling,
       timeout,
@@ -113,6 +131,7 @@ export class WebhookApiConstruct extends Construct {
     const dochubEndpoint = webhookEndpoint.addResource('dochub');
     const githubEndpoint = webhookEndpoint.addResource('githubEndpoint');
     const localEndpoint = webhookEndpoint.addResource('local');
+    const snootyEndpoint = webhookEndpoint.addResource('snooty');
 
     const defaultCorsPreflightOptions: CorsOptions = {
       allowOrigins: Cors.ALL_ORIGINS,
@@ -139,10 +158,20 @@ export class WebhookApiConstruct extends Construct {
       .addResource('build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
+    githubEndpoint
+      .addResource('trigger')
+      .addResource('delete', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(githubDeleteArtifactsLambda));
+
     localEndpoint
       .addResource('trigger')
       .addResource('build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(triggerLocalBuildLambda));
+
+    snootyEndpoint
+      .addResource('trigger')
+      .addResource('complete', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(snootyBuildCompleteLambda));
 
     // grant permission for lambdas to enqueue messages to the jobs queue
     jobsQueue.grantSendMessages(slackTriggerLambda);
