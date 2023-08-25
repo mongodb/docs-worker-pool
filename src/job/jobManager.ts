@@ -124,10 +124,14 @@ export class JobManager {
       console.warn('This file that was changed does not belong to any docset');
       return '';
     }
+    // Change this. Need to find source directory and work way up
+    // I think I'll also need to do work to query for the docset object and confirm that
+    // the source exists in the right spot
     const projectDirectory = path.split('/')[0];
     return projectDirectory;
   }
   private getMonorepoPaths(commit: Commit): string[] {
+    // Commits will be strings that look like drivers/node/source/index.rst for example
     const commitChanges = commit.modified.concat(commit.added).concat(commit.removed);
     const projects = commitChanges.map((path) => this.getProjectDirectory(path)).filter((dir) => !!dir); // !!dir filters out empty strings
 
