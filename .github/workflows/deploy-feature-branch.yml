@@ -29,4 +29,4 @@ jobs:
           npm ci
           npm run deploy:feature -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} --outputs-file outputs.json
       - name: Display resource URLs
-        run: cdk-infra/cat outputs.json
+        run: cat cdk-infra/outputs.json
