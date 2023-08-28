@@ -45,6 +45,7 @@ interface AtlasSpecUrlParams {
   apiKeyword: string;
   apiVersion?: string;
   resourceVersion?: string;
+  latestResourceVersion?: string;
 }
 
 const ensureSavedVersionDataMatches = (versions: VersionData, apiVersion?: string, resourceVersion?: string) => {
@@ -57,7 +58,12 @@ const ensureSavedVersionDataMatches = (versions: VersionData, apiVersion?: strin
   }
 };
 
-const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: AtlasSpecUrlParams) => {
+const getAtlasSpecUrl = async ({
+  apiKeyword,
+  apiVersion,
+  resourceVersion,
+  latestResourceVersion,
+}: AtlasSpecUrlParams) => {
   // Currently, the only expected API fetched programmatically is the Cloud Admin API,
   // but it's possible to have more in the future with varying processes.
   const keywords = ['cloud'];
@@ -66,7 +72,11 @@ const getAtlasSpecUrl = async ({ apiKeyword, apiVersion, resourceVersion }: Atla
   }
 
   const versionExtension = `${apiVersion ? `-v${apiVersion.split('.')[0]}` : ''}${
-    apiVersion && resourceVersion ? `-${resourceVersion}` : ''
+    apiVersion && resourceVersion
+      ? `-${resourceVersion}`
+      : apiVersion && latestResourceVersion && !resourceVersion
+      ? `-${latestResourceVersion}`
+      : ''
   }`;
 
   let oasFileURL;
@@ -168,6 +178,16 @@ async function getOASpec({
         const latestResourceVersion = resourceVersions.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[
           resourceVersions.length - 1
         ];
+
+        /* POC: build latest Resource Version spec if on base API Version that has multiple Resource Versions */
+        const { oasFileURL, successfulGitHash } = await getAtlasSpecUrl({
+          apiKeyword: source,
+          apiVersion,
+          resourceVersion,
+          latestResourceVersion,
+        });
+        spec = oasFileURL;
+        isSuccessfulBuild = successfulGitHash;
 
         versionOptions = {
           active: {
