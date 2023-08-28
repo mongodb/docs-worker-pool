@@ -4,6 +4,7 @@ import { JobHandler } from '../../job/jobHandler';
 import { IJobValidator } from '../../job/jobValidator';
 import { JobRepository } from '../../repositories/jobRepository';
 import { RepoBranchesRepository } from '../../repositories/repoBranchesRepository';
+import { RepoEntitlementsRepository } from '../../repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../../services/cdn';
 import { IJobCommandExecutor } from '../../services/commandExecutor';
 import { IFileSystemServices } from '../../services/fileServices';
@@ -35,7 +36,8 @@ export class EnhancedJobHandlerFactory {
     repoConnector: IRepoConnector,
     logger: IJobRepoLogger,
     validator: IJobValidator,
-    repoBranchesRepo: RepoBranchesRepository
+    repoBranchesRepo: RepoBranchesRepository,
+    repoEntitlementsRepo: RepoEntitlementsRepository
   ): JobHandler {
     const jt = job.payload?.jobType;
     if (!(jt in enhancedJobHandlerMap)) throw new InvalidJobError('Job type not supported');
@@ -50,7 +52,8 @@ export class EnhancedJobHandlerFactory {
       repoConnector,
       logger,
       validator,
-      repoBranchesRepo
+      repoBranchesRepo,
+      repoEntitlementsRepo
     );
   }
 }
