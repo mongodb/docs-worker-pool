@@ -21,6 +21,7 @@ export class WebhookEnvConstruct extends Construct {
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
+    const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
@@ -37,6 +38,7 @@ export class WebhookEnvConstruct extends Construct {
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
       SNOOTY_DB_NAME: snootyDbName,
+      REPO_BRANCHES_COL_NAME: repoBranchesCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       NODE_CONFIG_DIR: './config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
