@@ -25,12 +25,7 @@ export const getUpdatedFilePaths = (commit: Commit): string[] =>
   commit.modified.concat(commit.added).concat(commit.removed);
 
 export async function getProjectDirFromPath(path: string, commitInfo: GitCommitInfo): Promise<string> {
-  // Change this. Need to find source directory and work way up
-  // I think I'll also need to do work to query for the docset object and confirm that
-  // the source exists in the right spot
   const pathArray = path.split('/');
-
-  console.log(path);
 
   if (pathArray.length === 0) {
     console.warn('WARNING! Empty path found: ', path);
