@@ -1,20 +1,18 @@
+import { Commit } from '@octokit/webhooks-types';
 import { getOctokitClient } from '../../clients/githubClient';
 import { GitCommitInfo } from '../types/github-types';
 
-export const RST_EXTENSIONS = new Set(['.txt', '.rst']);
-
 async function checkForSnootyToml(path: string, commitInfo: GitCommitInfo): Promise<boolean> {
+  const { commitSha, ownerName, repoName } = commitInfo;
   const client = getOctokitClient();
 
   try {
-    const res = await client.request('GET /repos/{owner}/{repo}/contents/{path}', {
-      owner: 'mongodb', // TODO: Add repo info from GitHub push event
-      path,
-      repo: 'monorepo',
-      ref: '', // TODO: Provide commit from push event
+    await client.request('GET /repos/{owner}/{repo}/contents/{path}', {
+      owner: ownerName,
+      path: `${path}/snooty.toml`,
+      repo: repoName,
+      ref: commitSha,
     });
-
-    res.status;
 
     return true;
   } catch (error) {
@@ -22,6 +20,9 @@ async function checkForSnootyToml(path: string, commitInfo: GitCommitInfo): Prom
     return false;
   }
 }
+
+export const getUpdatedFilePaths = (commit: Commit): string[] =>
+  commit.modified.concat(commit.added).concat(commit.removed);
 
 export async function getProjectDirFromPath(path: string, commitInfo: GitCommitInfo): Promise<string> {
   // Change this. Need to find source directory and work way up
@@ -43,8 +44,19 @@ export async function getProjectDirFromPath(path: string, commitInfo: GitCommitI
    */
   if (changedFile === 'snooty.toml') return pathArray.join('/');
 
-  while (pathArray.length > 0) {}
+  while (pathArray.length > 0) {
+    const currPath = pathArray.join('/');
 
-  const projectDirectory = pathArray[0];
-  return projectDirectory;
+    const containsSnootyToml = await checkForSnootyToml(currPath, commitInfo);
+
+    // if the directory contains the snooty.toml file, we know that we are in the root of a project
+    // directory, so the path is returned.
+    if (containsSnootyToml) return currPath;
+
+    // if snooty.toml is not found, check parent directory
+    pathArray.pop();
+  }
+
+  console.warn(`WARNING! No snooty.toml found for the given path: ${path}`);
+  return '';
 }

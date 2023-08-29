@@ -9,9 +9,6 @@ interface FileUpdatePayload {
   updatedFilePaths: string[];
 }
 
-export const getUpdatedFilePaths = (commit: Commit): string[] =>
-  commit.modified.concat(commit.added).concat(commit.removed);
-
 export async function getMonorepoPaths(fileUpdates: FileUpdatePayload): Promise<string[]> {
   const { repoName, ownerName, commitSha, updatedFilePaths } = fileUpdates;
 
