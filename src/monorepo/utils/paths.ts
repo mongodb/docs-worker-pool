@@ -30,6 +30,8 @@ export async function getProjectDirFromPath(path: string, commitInfo: GitCommitI
   // the source exists in the right spot
   const pathArray = path.split('/');
 
+  console.log(path);
+
   if (pathArray.length === 0) {
     console.warn('WARNING! Empty path found: ', path);
     return '';

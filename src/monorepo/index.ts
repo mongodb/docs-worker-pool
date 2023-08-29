@@ -18,9 +18,7 @@ export async function getMonorepoPaths(fileUpdates: FileUpdatePayload): Promise<
     commitSha,
   };
 
-  const projects = await Promise.all(
-    updatedFilePaths.map((path) => getProjectDirFromPath(path, commitInfo)).filter((dir) => !!dir)
-  ); // !!dir filters out empty strings
-
-  return Array.from(new Set(projects));
+  const projects = await Promise.all(updatedFilePaths.map((path) => getProjectDirFromPath(path, commitInfo))); // !!dir filters out empty strings
+  // remove empty strings and remove duplicated values
+  return Array.from(new Set(projects.filter((dir) => !!dir)));
 }
