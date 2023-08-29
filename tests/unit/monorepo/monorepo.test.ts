@@ -18,15 +18,22 @@ beforeEach(() => {
 });
 
 interface MockOctokitResponseConfig {
-  failures: number;
-  shouldSucceed: boolean;
+  rejections: number;
+  shouldResolve: boolean;
 }
-function mockOctokitResponse({ failures, shouldSucceed }: MockOctokitResponseConfig) {
-  for (let i = 0; i < failures; i++) {
+
+/**
+ * Helper function to call mockRejectedValues multiple times. This is because
+ * we expect a rejected promise every time we check a path that does not have a snooty.toml file.
+ * We only ever need to resolve once per function call for it to succeed, so we can encode that as a
+ * boolean value as opposed to a number.
+ */
+function mockOctokitResponse({ rejections, shouldResolve }: MockOctokitResponseConfig) {
+  for (let i = 0; i < rejections; i++) {
     jest.spyOn(mockedOctokit, 'request').mockRejectedValueOnce(mockedRequestResult);
   }
 
-  if (shouldSucceed) jest.spyOn(mockedOctokit, 'request').mockResolvedValueOnce(mockedRequestResult);
+  if (shouldResolve) jest.spyOn(mockedOctokit, 'request').mockResolvedValueOnce(mockedRequestResult);
 }
 
 describe('Monorepo Path Parsing tests', () => {
@@ -48,7 +55,9 @@ describe('Monorepo Path Parsing tests', () => {
      * once as this should mimic responses from the GitHub API.
      */
 
-    mockOctokitResponse({ failures: 1, shouldSucceed: true });
+    // should reject at server-docs/source/datalake/source
+    // should resolve at server-docs/source/datalake
+    mockOctokitResponse({ rejections: 1, shouldResolve: true });
 
     const paths = await getMonorepoPaths({
       commitSha: '12345',
@@ -61,7 +70,7 @@ describe('Monorepo Path Parsing tests', () => {
   });
 
   it('Returns an empty array if there is no snooty.toml at in point in the file path', async () => {
-    mockOctokitResponse({ failures: 2, shouldSucceed: false });
+    mockOctokitResponse({ rejections: 2, shouldResolve: false });
 
     const paths = await getMonorepoPaths({
       commitSha: '12345',
@@ -79,8 +88,20 @@ describe('Monorepo Path Parsing tests', () => {
      * once as this should mimic responses from the GitHub API.
      */
 
-    mockOctokitResponse({ failures: 2, shouldSucceed: true });
-    mockOctokitResponse({ failures: 1, shouldSucceed: true });
+    // NOTE: Not sure why the order is reversed, but it seems that the
+    // server-docs/source/datalake/source/test/index.rst path is handled first.
+    // Must be some async testing funkiness
+
+    // these API responses correspond to the server-docs/source/datalake/source/test/index.rst
+    // should reject at server-docs/source/datalake/source/test
+    // should reject at server-docs/source/datalake/source
+    // should resolve at server-docs/source/datalake
+    mockOctokitResponse({ rejections: 2, shouldResolve: true });
+
+    // these API responses correspond to the server-docs/source/datalake/source/index.rst path
+    // should reject at server-docs/source/datalake/source
+    // should resolve at server-docs/source/datalake
+    mockOctokitResponse({ rejections: 1, shouldResolve: true });
 
     const paths = await getMonorepoPaths({
       commitSha: '12345',
@@ -93,5 +114,6 @@ describe('Monorepo Path Parsing tests', () => {
     });
 
     expect(paths).toContain('server-docs/source/datalake');
+    expect(paths.length).toEqual(1);
   });
 });
