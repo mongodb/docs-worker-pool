@@ -1,8 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import c from 'config';
 
-// we only really need one client, so caching this to
-// prevent making duplicates
 let client: Octokit;
 
 export function getOctokitClient(): Octokit {
