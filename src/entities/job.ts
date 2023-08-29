@@ -45,7 +45,6 @@ export type Payload = {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
-  head_commit?: Commit;
 };
 
 export type EnhancedPayload = {
@@ -74,7 +73,6 @@ export type EnhancedPayload = {
   prefix: string;
   project: string;
   includeInGlobalSearch?: boolean;
-  head_commit?: Commit;
 };
 
 export type Job = {
