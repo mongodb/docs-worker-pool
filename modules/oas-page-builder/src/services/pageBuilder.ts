@@ -179,7 +179,8 @@ async function getOASpec({
           resourceVersions.length - 1
         ];
 
-        /* POC: build latest Resource Version spec if on base API Version that has multiple Resource Versions */
+        /* Build the latest Resource Version spec if on a base API Version that has multiple Resource Versions
+         * Do not build the base API VERSION, since it may have out of order resources*/
         const { oasFileURL, successfulGitHash } = await getAtlasSpecUrl({
           apiKeyword: source,
           apiVersion,
