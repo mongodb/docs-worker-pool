@@ -1,5 +1,3 @@
-import { Commit } from '@octokit/webhooks-types';
-
 // TODO: Cut down on null and undefined type definition allowances, with Optional
 // TODO: Remove duplicate defintions from Payload and Job, (e.g. prefixes)
 
