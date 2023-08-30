@@ -25,6 +25,11 @@ export async function checkForSnootyToml(
 
 let snootyDirSet: Set<string>;
 
+/**
+ * Creates a `Set` of all `snooty.toml` paths within the monorepo.
+ * The function retrieves the monorepo's
+ * @returns
+ */
 export async function getSnootyDirSet({ commitSha, ownerName, repoName }: GitCommitInfo): Promise<Set<string>> {
   if (snootyDirSet) return snootyDirSet;
 
@@ -43,7 +48,7 @@ export async function getSnootyDirSet({ commitSha, ownerName, repoName }: GitCom
 
     // casting the result from `(string | undefined)[]` to `string[]` since the filter will ensure that the result
     // only includes treeNode.path values that are defined and include snooty.toml
-    // in the path.
+    // in the path i.e. we will not have `undefined` as a value in the resulting array.
     const snootyTomlDirs = data.tree
       .filter((treeNode) => !!treeNode.path?.includes('snooty.toml'))
       .map((treeNode) => treeNode.path) as string[];
@@ -62,7 +67,7 @@ export async function getSnootyDirSet({ commitSha, ownerName, repoName }: GitCom
 export const getUpdatedFilePaths = (commit: Commit): string[] =>
   commit.modified.concat(commit.added).concat(commit.removed);
 
-export async function getProjectDirFromPathSet(path: string, commitInfo: GitCommitInfo): Promise<string> {
+export function getProjectDirFromPathSet(path: string, snootyDirSet: Set<string>): string {
   const pathArray = path.split('/');
   if (pathArray.length === 0) {
     console.warn('WARNING! Empty path found: ', path);
@@ -77,8 +82,6 @@ export async function getProjectDirFromPathSet(path: string, commitInfo: GitComm
   const changedFile = pathArray.pop();
 
   if (changedFile === 'snooty.toml') return pathArray.join('/');
-
-  const snootyDirSet = await getSnootyDirSet(commitInfo);
 
   while (pathArray.length > 0) {
     const currDir = pathArray.join('/');

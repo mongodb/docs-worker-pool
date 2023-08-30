@@ -1,6 +1,13 @@
 import { GitCommitInfo } from '../types/github-types';
 import { checkForSnootyToml, getSnootyDirSet } from '../utils/paths';
 
+/**
+ * This function returns the project path for a given file change from a docs repository
+ * within the monorepo. This function supports nested projects.
+ * @param path An added/modified/removed file path from a commit e.g. server-docs/source/index.rst
+ * @param commitInfo Contains information
+ * @returns
+ */
 export async function getProjectDirFromPathSet(path: string, commitInfo: GitCommitInfo): Promise<string> {
   const pathArray = path.split('/');
   if (pathArray.length === 0) {

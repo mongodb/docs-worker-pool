@@ -1,5 +1,4 @@
-import { Commit } from '@octokit/webhooks-types';
-import { getProjectDirFromPath } from './utils/paths';
+import { getProjectDirFromPath, getProjectDirFromPathSet, getSnootyDirSet } from './utils/paths';
 import { GitCommitInfo } from './types/github-types';
 
 interface FileUpdatePayload {
@@ -18,7 +17,11 @@ export async function getMonorepoPaths(fileUpdates: FileUpdatePayload): Promise<
     commitSha,
   };
 
-  const projects = await Promise.all(updatedFilePaths.map((path) => getProjectDirFromPath(path, commitInfo))); // !!dir filters out empty strings
+  const snootyDirSet = await getSnootyDirSet(commitInfo);
+
+  const projects = await Promise.all(updatedFilePaths.map((path) => getProjectDirFromPath(path, commitInfo)));
+  // const projects = await Promise.all(updatedFilePaths.map((path) => getProjectDirFromPathSet(path, snootyDirSet)));
+
   // remove empty strings and remove duplicated values
   return Array.from(new Set(projects.filter((dir) => !!dir)));
 }
