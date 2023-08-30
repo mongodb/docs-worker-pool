@@ -2,27 +2,7 @@ import { Commit } from '@octokit/webhooks-types';
 import { getOctokitClient } from '../../clients/githubClient';
 import { GitCommitInfo } from '../types/github-types';
 
-const SNOOTY_TOML_FILENAME = 'snooty.toml';
-export async function checkForSnootyToml(
-  path: string,
-  { commitSha, ownerName, repoName }: GitCommitInfo
-): Promise<boolean> {
-  const client = getOctokitClient();
-
-  try {
-    await client.request('GET /repos/{owner}/{repo}/contents/{path}', {
-      owner: ownerName,
-      path: `${path}/${SNOOTY_TOML_FILENAME}`,
-      repo: repoName,
-      ref: commitSha,
-    });
-
-    return true;
-  } catch (error) {
-    console.warn(`Warning. Could not retrieve snooty.toml for the following path: ${path}`);
-    return false;
-  }
-}
+export const SNOOTY_TOML_FILENAME = 'snooty.toml';
 
 let snootyDirSet: Set<string>;
 

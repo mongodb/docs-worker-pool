@@ -1,6 +1,6 @@
 import { getSnootyDirSet } from './utils';
 import { GitCommitInfo } from './types/github-types';
-import { getProjectDirFromPathSet } from './services/get-paths';
+import { getProjectDirFromPath } from './services/get-paths';
 
 interface FileUpdatePayload {
   repoName: string;
@@ -21,7 +21,7 @@ export async function getMonorepoPaths(fileUpdates: FileUpdatePayload): Promise<
   const snootyDirSet = await getSnootyDirSet(commitInfo);
 
   // const projects = await Promise.all(updatedFilePaths.map((path) => getProjectDirFromPath(path, commitInfo)));
-  const projects = updatedFilePaths.map((path) => getProjectDirFromPathSet(path, snootyDirSet));
+  const projects = updatedFilePaths.map((path) => getProjectDirFromPath(path, snootyDirSet));
 
   // remove empty strings and remove duplicated values
   return Array.from(new Set(projects.filter((dir) => !!dir)));
