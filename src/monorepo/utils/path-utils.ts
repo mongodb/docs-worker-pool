@@ -1,8 +1,12 @@
 import { Commit } from '@octokit/webhooks-types';
 import { getOctokitClient } from '../../clients/githubClient';
 import { GitCommitInfo } from '../types/github-types';
+<<<<<<< HEAD:src/monorepo/utils/index.ts
 
 export const SNOOTY_TOML_FILENAME = 'snooty.toml';
+=======
+import { MONOREPO_NAME, SNOOTY_TOML_FILENAME } from './monorepo-constants';
+>>>>>>> 39df337c ([DOP-3911]: Clean up):src/monorepo/utils/path-utils.ts
 
 let snootyDirSet: Set<string>;
 
@@ -22,7 +26,7 @@ export async function getSnootyDirSet({ commitSha, ownerName, repoName }: GitCom
     // Unlike the contents API for repositories, the actual file content is not returned.
     const { data } = await client.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
       owner: ownerName,
-      repo: repoName,
+      repo: MONOREPO_NAME,
       tree_sha: commitSha,
       recursive: 'true',
     });

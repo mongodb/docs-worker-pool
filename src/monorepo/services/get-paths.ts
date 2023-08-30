@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { SNOOTY_TOML_FILENAME } from '../utils';
+=======
+import { SNOOTY_TOML_FILENAME } from '../utils/monorepo-constants';
+>>>>>>> 39df337c ([DOP-3911]: Clean up)
 
 /**
  * This function returns the project path for a given file change from a docs repository

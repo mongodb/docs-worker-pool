@@ -1,20 +1,28 @@
-import { getSnootyDirSet } from './utils';
+import { getSnootyDirSet } from './utils/path-utils';
 import { GitCommitInfo } from './types/github-types';
 import { getProjectDirFromPath } from './services/get-paths';
 
 interface FileUpdatePayload {
-  repoName: string;
   ownerName: string;
+  repoName: string;
   commitSha: string;
   updatedFilePaths: string[];
 }
 
-export async function getMonorepoPaths(fileUpdates: FileUpdatePayload): Promise<string[]> {
-  const { repoName, ownerName, commitSha, updatedFilePaths } = fileUpdates;
-
+/**
+ * Retr
+ * @param fileUpdates
+ * @returns
+ */
+export async function getMonorepoPaths({
+  repoName,
+  ownerName,
+  commitSha,
+  updatedFilePaths,
+}: FileUpdatePayload): Promise<string[]> {
   const commitInfo: GitCommitInfo = {
-    repoName,
     ownerName,
+    repoName,
     commitSha,
   };
 

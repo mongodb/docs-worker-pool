@@ -41,6 +41,7 @@
     "js-yaml": "^3.13.1",
     "mongodb": "^5.1.0",
     "simple-git": "^2.45.1",
+    "toml": "^3.0.0",
     "tsscmp": "^1.0.6",
     "validator": "^10.11.0"
   },
