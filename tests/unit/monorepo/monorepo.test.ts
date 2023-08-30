@@ -22,6 +22,20 @@ interface MockOctokitResponseConfig {
   shouldResolve: boolean;
 }
 
+function mockOctokitTreeResponse(filePaths: string[]) {
+  // Partial representation of the GitHub API response that we care about.
+  // The response contains a property `tree` which is an array of objects.
+  const mockedResponse = {
+    data: {
+      tree: filePaths.map((path) => ({ path })),
+    },
+  };
+
+  jest
+    .spyOn(mockedOctokit, 'request')
+    .mockResolvedValueOnce(mockedResponse as unknown as ReturnType<Octokit['request']>);
+}
+
 /**
  * Helper function to call mockRejectedValues multiple times. This is because
  * we expect a rejected promise every time we check a path that does not have a snooty.toml file.
@@ -55,9 +69,7 @@ describe('Monorepo Path Parsing tests', () => {
      * once as this should mimic responses from the GitHub API.
      */
 
-    // should reject at server-docs/source/datalake/source
-    // should resolve at server-docs/source/datalake
-    mockOctokitResponse({ rejections: 1, shouldResolve: true });
+    mockOctokitTreeResponse(['server-docs/source/datalake/snooty.toml', 'server-docs/snooty.toml']);
 
     const paths = await getMonorepoPaths({
       commitSha: '12345',

@@ -1,5 +1,5 @@
 import { GitCommitInfo } from '../types/github-types';
-import { checkForSnootyToml, getSnootyDirSet } from '../utils/paths';
+import { checkForSnootyToml } from '../utils';
 
 /**
  * This function returns the project path for a given file change from a docs repository
@@ -8,7 +8,7 @@ import { checkForSnootyToml, getSnootyDirSet } from '../utils/paths';
  * @param commitInfo Contains information
  * @returns
  */
-export async function getProjectDirFromPathSet(path: string, commitInfo: GitCommitInfo): Promise<string> {
+export function getProjectDirFromPathSet(path: string, snootyDirSet: Set<string>): string {
   const pathArray = path.split('/');
   if (pathArray.length === 0) {
     console.warn('WARNING! Empty path found: ', path);
@@ -23,8 +23,6 @@ export async function getProjectDirFromPathSet(path: string, commitInfo: GitComm
   const changedFile = pathArray.pop();
 
   if (changedFile === 'snooty.toml') return pathArray.join('/');
-
-  const snootyDirSet = await getSnootyDirSet(commitInfo);
 
   while (pathArray.length > 0) {
     const currDir = pathArray.join('/');
