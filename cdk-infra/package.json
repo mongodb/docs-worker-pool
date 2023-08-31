@@ -11,7 +11,7 @@
     "cdk": "cdk",
     "deploy:enhanced": "cdk deploy -c enhanced=true --require-approval never --all",
     "deploy:enhanced:worker": "cdk deploy auto-builder-stack-enhancedApp-worker -c enhanced=true  --require-approval never --exclusively",
-    "deploy:enhanced:webhooks": "cdk deploy auto-builder-stack-enhancedApp-webhooks -c enhanced=true--require-approval never --exclusively",
+    "deploy:enhanced:webhooks": "cdk deploy auto-builder-stack-enhancedApp-webhooks -c enhanced=true --require-approval never --exclusively",
     "deploy:enhanced:queues": "cdk deploy auto-builder-stack-enhancedApp-queues -c enhanced=true --require-approval never --exclusively",
     "deploy:feature": "cdk deploy -c enhanced=true --require-approval never --all",
     "deploy:feature:stack": "cdk deploy  -c enhanced=true --require-approval never --exclusively"
