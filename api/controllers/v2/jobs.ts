@@ -108,23 +108,13 @@ function prepProgressMessage(
   jobId: string,
   jobTitle: string,
   status: string,
-  errorReason: string,
-  jobType?: string
+  errorReason: string
 ): string {
   const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
   const env = c.get<string>('env');
-
   switch (status) {
     case 'inQueue':
-      // Encourage writers to update to new webhook on githubPush jobs
-      let inQueueMsg = msg;
-      if (jobType == 'githubPush') {
-        const webhookWikiUrl =
-          'https://wiki.corp.mongodb.com/display/DE/How-To%3A+Use+Snooty%27s+Autobuilder+to+Build+Your+Content';
-        const updatePlease = `:exclamation: You used the old webhook for this build. <${webhookWikiUrl}|Update to the new webhook> in your fork of this repo to save 90s per build.`;
-        inQueueMsg = updatePlease + '\n\n' + msg;
-      }
-      return inQueueMsg + 'has successfully been added to the ' + env + ' queue.';
+      return msg + 'has successfully been added to the ' + env + ' queue.';
     case 'inProgress':
       return msg + 'is now being processed.';
     case 'completed':
@@ -175,8 +165,7 @@ async function NotifyBuildProgress(jobId: string): Promise<void> {
       jobId,
       jobTitle,
       fullDocument.status as string,
-      fullDocument?.error?.reason || '',
-      fullDocument?.payload.jobType
+      fullDocument?.error?.reason || ''
     ),
     entitlement['slack_user_id']
   );
