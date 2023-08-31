@@ -9,6 +9,7 @@ import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRe
 import { EnhancedJob, JobStatus } from '../../../src/entities/job';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { getMonorepoPaths } from '../../../src/monorepo';
+import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
@@ -102,12 +103,13 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
   const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix);
 
-  if (process.env.MONOREPO_PATH_FEATURE === 'true') {
+  if (process.env.MONOREPO_PATH_FEATURE === 'true' && body.head_commit && body.repository.owner.name) {
     try {
       getMonorepoPaths({
         commitSha: body.head_commit.id,
         repoName: body.repository.name,
         ownerName: body.repository.owner.name,
+        updatedFilePaths: getUpdatedFilePaths(body.head_commit),
       });
     } catch (error) {
       console.warn('Warning, attempting to get repo paths caused an error', error);
