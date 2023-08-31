@@ -122,7 +122,7 @@ function prepProgressMessage(
         const webhookWikiUrl =
           'https://wiki.corp.mongodb.com/display/DE/How-To%3A+Use+Snooty%27s+Autobuilder+to+Build+Your+Content';
         const updatePlease = `:exclamation: You used the old webhook for this build. <${webhookWikiUrl}|Update to the new webhook> in your fork of this repo to save 90s per build.`;
-        inQueueMsg = updatePlease + '\n' + msg;
+        inQueueMsg = updatePlease + '\n\n' + msg;
       }
       return inQueueMsg + 'has successfully been added to the ' + env + ' queue.';
     case 'inProgress':
