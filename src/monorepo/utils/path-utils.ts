@@ -1,9 +1,7 @@
 import { Commit } from '@octokit/webhooks-types';
 import { getOctokitClient } from '../../clients/githubClient';
 import { GitCommitInfo } from '../types/github-types';
-import { MONOREPO_NAME, SNOOTY_TOML_FILENAME } from './monorepo-constants';
-
-let snootyDirSet: Set<string>;
+import { SNOOTY_TOML_FILENAME } from './monorepo-constants';
 
 /**
  * Creates a `Set` of all `snooty.toml` paths within the monorepo.
@@ -11,17 +9,16 @@ let snootyDirSet: Set<string>;
  * @returns
  */
 export async function getSnootyDirSet({ commitSha, ownerName, repoName }: GitCommitInfo): Promise<Set<string>> {
-  if (snootyDirSet) return snootyDirSet;
-
   try {
     const client = getOctokitClient();
 
     // getting the repository tree for a given commit SHA. This returns an object
-    // with the property `tree` that is a flat array of all files in the repository with the path.
+    // with the property `tree` that is a flat array of all files in the repository.
+    // The tree array contains objects that hold the file path.
     // Unlike the contents API for repositories, the actual file content is not returned.
     const { data } = await client.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
       owner: ownerName,
-      repo: MONOREPO_NAME,
+      repo: repoName,
       tree_sha: commitSha,
       recursive: 'true',
     });
@@ -38,7 +35,7 @@ export async function getSnootyDirSet({ commitSha, ownerName, repoName }: GitCom
         return path.slice(0, path.length - SNOOTY_TOML_FILENAME.length - 1);
       });
 
-    snootyDirSet = new Set(snootyTomlDirs);
+    const snootyDirSet = new Set(snootyTomlDirs);
 
     return snootyDirSet;
   } catch (error) {

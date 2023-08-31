@@ -13,7 +13,7 @@ export async function getProjectName({ repoOwner, snootyTomlPath }: GetProjectNa
     const { data } = await client.request('GET /repos/{owner}/{repo}/contents/{path}', {
       repo: MONOREPO_NAME,
       owner: repoOwner,
-      path: `${snootyTomlPath}/${MONOREPO_NAME}`,
+      path: `${snootyTomlPath}/${SNOOTY_TOML_FILENAME}`,
     });
 
     if (!data || !('content' in data))

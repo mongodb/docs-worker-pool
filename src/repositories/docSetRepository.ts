@@ -9,13 +9,18 @@ export class DocSetRepository extends BaseRepository {
   }
 
   async checkSnootyTomlPath(path: string, projectName: string) {
-    const query = { directories: { snooty_toml: path } };
-
+    const query = { project: projectName };
     try {
       const docSetObject = await this.findOne(
         query,
         `Mongo Timeout Error: Timedout while retrieving repos entry for ${path}`
       );
+
+      if (!docSetObject) {
+        console.warn(`WARNING: The docset does not exist for the following project: ${projectName} \n path: ${path}`);
+
+        return false;
+      }
 
       return !!docSetObject;
     } catch (error) {
