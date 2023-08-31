@@ -1,8 +1,9 @@
 const fs = require('fs');
+const path = require('path');
 
 module.exports = ({ github }) => {
   try {
-    const outputsFile = fs.readFileSync('cdk-infra/outputs.json').toString();
+    const outputsFile = fs.readFileSync(path.join(process.cwd(), 'cdk-infra/outputs.json')).toString();
     const outputs = JSON.parse(outputsFile);
     console.log('github', github);
     console.log(github.head_ref);
