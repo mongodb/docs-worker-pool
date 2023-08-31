@@ -37,3 +37,5 @@ jobs:
           result-encoding: string
       - name: Comment on PR
         run: gh pr comment ${{github.event.number}} --body "The URL for your feature branch webhook is ${{steps.webhook.outputs.result}}"
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
