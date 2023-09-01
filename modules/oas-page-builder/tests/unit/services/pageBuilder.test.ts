@@ -192,7 +192,7 @@ describe('pageBuilder', () => {
 
     await buildOpenAPIPages(testEntries, testOptions);
 
-    expect(mockExecute).toBeCalledTimes(testEntries.length * 2);
+    expect(mockExecute).toBeCalledTimes(4);
     // Local
     expect(mockExecute).toBeCalledWith(
       `${testOptions.repo}/source${testEntries[0][1].source}`,
@@ -201,12 +201,6 @@ describe('pageBuilder', () => {
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`)
     );
 
-    expect(mockExecute).toBeCalledWith(
-      `${testOptions.repo}/source${testEntries[0][1].source}`,
-      `${testOptions.output}/${testEntries[0][0]}/index.html`,
-      expectedDefaultBuildOptions,
-      getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`)
-    );
     // Url
     expect(mockExecute).toBeCalledWith(
       `${testEntries[1][1].source}`,
@@ -215,12 +209,6 @@ describe('pageBuilder', () => {
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[1][0]}`)
     );
 
-    expect(mockExecute).toBeCalledWith(
-      `${testEntries[1][1].source}`,
-      getExpectedOutputPath(testOptions.output, testEntries[1][0], API_VERSION),
-      expectedDefaultBuildOptions,
-      getExpectedVersionOptions(`${SITE_URL}/${testEntries[1][0]}`)
-    );
     // Atlas
     expect(mockExecute).toBeCalledWith(
       `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${RESOURCE_VERSION}.json`,
@@ -230,8 +218,8 @@ describe('pageBuilder', () => {
     );
 
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2.json`,
-      getExpectedOutputPath(testOptions.output, testEntries[2][0], API_VERSION),
+      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${RESOURCE_VERSION}.json`,
+      getExpectedOutputPath(testOptions.output, testEntries[2][0], API_VERSION, RESOURCE_VERSION),
       expectedAtlasBuildOptions,
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[2][0]}`)
     );
@@ -280,8 +268,8 @@ describe('pageBuilder', () => {
     );
 
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2.json`,
-      getExpectedOutputPath(testOptions.output, testEntries[0][0], API_VERSION),
+      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${LATEST_RESOURCE_VERSION}.json`,
+      getExpectedOutputPath(testOptions.output, testEntries[0][0], API_VERSION, LATEST_RESOURCE_VERSION),
       expectedAtlasBuildOptions,
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`, LATEST_RESOURCE_VERSION)
     );
