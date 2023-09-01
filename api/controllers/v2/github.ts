@@ -103,14 +103,18 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
   const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix);
 
-  if (process.env.MONOREPO_PATH_FEATURE === 'true' && body.head_commit && body.repository.owner.name) {
+  if (process.env.MONOREPO_PATH_FEATURE === 'true') {
     try {
-      getMonorepoPaths({
-        commitSha: body.head_commit.id,
-        repoName: body.repository.name,
-        ownerName: body.repository.owner.name,
-        updatedFilePaths: getUpdatedFilePaths(body.head_commit),
-      });
+      if (body.head_commit && body.repository.owner.name) {
+        const monorepoPaths = await getMonorepoPaths({
+          commitSha: body.head_commit.id,
+          repoName: body.repository.name,
+          ownerName: body.repository.owner.name,
+          updatedFilePaths: getUpdatedFilePaths(body.head_commit),
+        });
+
+        console.log('monorepoPaths: ', monorepoPaths);
+      }
     } catch (error) {
       console.warn('Warning, attempting to get repo paths caused an error', error);
     }
