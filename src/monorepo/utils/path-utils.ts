@@ -5,8 +5,7 @@ import { SNOOTY_TOML_FILENAME } from './monorepo-constants';
 
 /**
  * Creates a `Set` of all `snooty.toml` paths within the monorepo.
- * The function retrieves the monorepo's
- * @returns
+ * The function retrieves the monorepo's tree structure from GitHub.
  */
 export async function getSnootyDirSet({ commitSha, ownerName, repoName }: GitCommitInfo): Promise<Set<string>> {
   try {
