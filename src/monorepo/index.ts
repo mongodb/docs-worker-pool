@@ -35,7 +35,6 @@ export async function getMonorepoPaths({
 
   const snootyDirSet = await getSnootyDirSet(commitInfo);
 
-  // const projects = await Promise.all(updatedFilePaths.map((path) => getProjectDirFromPath(path, commitInfo)));
   const projects = updatedFilePaths.map((path) => getProjectDirFromPath(path, snootyDirSet));
 
   // remove empty strings and remove duplicated values

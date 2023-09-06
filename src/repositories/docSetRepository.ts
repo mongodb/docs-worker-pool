@@ -3,11 +3,22 @@ import { Db } from 'mongodb';
 import { ILogger } from '../services/logger';
 import { BaseRepository } from './baseRepository';
 
+const docSetCollectionName = process.env.DOCS_SET_COLLECTION_NAME || 'docset';
+
 export class DocSetRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'DocSetRepository', db.collection(config.get('docSetCollection')));
+    super(config, logger, 'DocSetRepository', db.collection(docSetCollectionName));
   }
 
+  /**
+   * Compares the project path from a monorepo push event, and compares it with
+   * what is configured in the docset entry in Atlas.
+   * @param path The project path where the snooty.toml file exists from the monorepo.
+   * This path will reflect the current project path from a given commit.
+   * @param projectName The project name for the docset entry.
+   * @returns A boolean representing whether or not the configured docset entry snooty_toml path
+   * matches the path found in GitHub.
+   */
   async checkSnootyTomlPath(path: string, projectName: string) {
     const query = { project: projectName };
     try {
@@ -22,9 +33,12 @@ export class DocSetRepository extends BaseRepository {
         return false;
       }
 
-      return !!docSetObject;
+      return docSetObject.directories.snooty_toml === path;
     } catch (error) {
-      console.warn(`WARNING: Snooty.toml path: ${path}, is not configured in the docsets collection. Please update.`);
+      console.warn(
+        `WARNING: Error occurred when retrieving project path for ${projectName}. The following path was provided: ${path}`,
+        error
+      );
       return false;
     }
   }

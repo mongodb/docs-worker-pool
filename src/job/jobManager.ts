@@ -15,7 +15,6 @@ import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
-import { Commit } from '@octokit/webhooks-types';
 
 export const jobHandlerMap = {
   githubPush: StagingJobHandler,

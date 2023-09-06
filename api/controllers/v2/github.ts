@@ -112,7 +112,6 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
           ownerName: body.repository.owner.name,
           updatedFilePaths: getUpdatedFilePaths(body.head_commit),
         });
-
         console.log('monorepoPaths: ', monorepoPaths);
       }
     } catch (error) {
