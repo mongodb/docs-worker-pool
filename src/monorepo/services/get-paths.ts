@@ -5,7 +5,7 @@ import { SNOOTY_TOML_FILENAME } from '../utils/monorepo-constants';
  * within the monorepo. This function supports nested projects.
  * @param path An added/modified/removed file path from a commit e.g. server-docs/source/index.rst
  * @param commitInfo Contains information
- * @returns
+ * @returns The closest file path that contains a snooty.toml, relative to the path parameter.
  */
 export function getProjectDirFromPath(path: string, snootyDirSet: Set<string>): string {
   const pathArray = path.split('/');
