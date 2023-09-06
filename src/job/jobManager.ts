@@ -122,9 +122,7 @@ export class JobManager {
     try {
       this._jobHandler = null;
       if (job?.payload) {
-        const excludeRepoFromBenchmarks = ['docs-php-library', 'mms-docs', 'docs-k8s-operator'].includes(
-          job.payload.repoName
-        );
+        const excludeRepoFromBenchmarks = ['mms-docs', 'docs-k8s-operator'].includes(job.payload.repoName);
         // Can easily rollback with commenting out this flag.
         job.useWithBenchmark = !excludeRepoFromBenchmarks;
         await this.createHandlerAndExecute(job);
