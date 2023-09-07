@@ -62,6 +62,8 @@ Resources:
               Value: ${self:custom.featureFlagUpdatePages}
             - Name: GATSBY_TEST_SEARCH_UI
               Value: ${self:custom.featureFlagSearchUI}
+            - Name: GATSBY_SHOW_CHATBOT
+              Value: ${self:custom.gatsbyUseChatbot}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID
