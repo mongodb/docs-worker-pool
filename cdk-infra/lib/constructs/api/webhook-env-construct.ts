@@ -19,6 +19,12 @@ export class WebhookEnvConstruct extends Construct {
     const ssmPrefix = getSsmPathPrefix();
     const env = getEnv();
 
+    // Create configurable feature flag that lives in parameter store.
+    const monorepoPathFeature = new StringParameter(this, 'monorepoPathFeature', {
+      parameterName: `${ssmPrefix}/monorepo/path_feature`,
+      stringValue: env === 'dotcomstg' || env === 'stg' ? 'true' : 'false',
+    });
+
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
@@ -47,6 +53,7 @@ export class WebhookEnvConstruct extends Construct {
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       DASHBOARD_URL: getDashboardUrl(env, jobCollection),
       STAGE: env,
+      MONOREPO_PATH_FEATURE: monorepoPathFeature.stringValue,
     };
   }
 }
