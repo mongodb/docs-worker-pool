@@ -62,7 +62,7 @@ describe('Monorepo Path Parsing tests', () => {
     expect(paths).toContain('server-docs/source/datalake');
   });
 
-  it('Returns an empty array if there is no snooty.toml at in point in the file path', async () => {
+  it('Returns an empty array if there is no snooty.toml at any point in the file path', async () => {
     mockOctokitTreeResponse(['server-docs/source/datalake/snooty.toml', 'server-docs/snooty.toml']);
 
     const paths = await getMonorepoPaths({
