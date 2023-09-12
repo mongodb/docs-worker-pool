@@ -369,6 +369,7 @@ export abstract class JobHandler {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
       PREVIEW_BUILD_ENABLED: this._config.get<string>('previewBuildEnabled'),
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),
+      GATSBY_SHOW_CHATBOT: this._config.get<string>('gatsbyUseChatbot'),
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {

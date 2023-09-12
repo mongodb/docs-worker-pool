@@ -36,6 +36,9 @@ export class WorkerEnvConstruct extends Construct {
       `/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source`
     );
 
+    // front end feature flag for chatbot UI
+    const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
+
     const githubBotUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/bot/username`);
 
     const npmEmail = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/email`);
@@ -80,6 +83,7 @@ export class WorkerEnvConstruct extends Construct {
       USE_CUSTOM_BUCKETS: `${getUseCustomBuckets()}`,
       FEATURE_NAME: `${getFeatureName()}`,
       GATSBY_TEST_SEARCH_UI: 'false',
+      GATSBY_SHOW_CHATBOT: gatsbyUseChatbot,
     };
   }
 }
