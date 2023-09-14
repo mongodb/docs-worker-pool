@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .ts",
     "test": "jest --coverage",
     "build": "tsc",
+    "build:enhanced": "esbuild index.ts --bundle --platform=node --outdir=./dist --allow-overwrite",
     "start": "node --unhandled-rejections=strict ./dist/index.js",
     "dev": "tsc && node --unhandled-rejections=strict ./dist/index.js --path ./build/artifacts.zip "
   },
@@ -26,6 +27,7 @@
     "bson": "^4.7.0",
     "config": "^3.3.7",
     "dotenv": "^16.0.2",
+    "esbuild": "0.19.3",
     "fast-deep-equal": "^3.1.3",
     "minimist": "^1.2.6",
     "mongodb": "^4.9.1",
