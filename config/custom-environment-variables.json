@@ -25,6 +25,7 @@
   "featureFlagUpdatePages": "FEATURE_FLAG_UPDATE_PAGES",
   "featureFlagSearchUI": "GATSBY_TEST_SEARCH_UI",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
+  "docsetsCollection": "DOCSETS_COL_NAME",
   "repo_dir": "repos",
   "jobId": "jobId",
   "jobsQueueUrl": "JOBS_QUEUE_URL",

@@ -3,10 +3,9 @@ import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
 
-// TODO: put env vars in for the right collection... db.collection(config.get('docsetsCollection'))
 export class DocsetsRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'DocsetsRepository', db.collection('docsets'));
+    super(config, logger, 'DocsetsRepository', db.collection(config.get('docsetsCollection')));
   }
 
   private getAggregationPipeline(
