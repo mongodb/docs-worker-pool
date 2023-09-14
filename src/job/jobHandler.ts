@@ -435,7 +435,7 @@ export abstract class JobHandler {
   }
 
   protected async setEnvironmentVariables(): Promise<void> {
-    const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName);
+    const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName);
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,
