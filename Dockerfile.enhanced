@@ -114,6 +114,7 @@ COPY --from=dependency-installer --chown=docsworker-xlarge /home/docsworker-xlar
 COPY --from=dependency-installer --chown=docsworker-xlarge /home/docsworker-xlarge/shared.mk ./
 
 COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/dist ./
+COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/config config/
 
 ENV PATH="${PATH}:/opt/snooty:/opt/mut:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
 
