@@ -73,6 +73,7 @@ RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.co
 # Build the Typescript app
 FROM node:18.16.0-alpine as ts-compiler
 WORKDIR /home/docsworker-xlarge
+
 COPY  config config/
 COPY package*.json ./
 COPY tsconfig*.json ./
@@ -93,10 +94,20 @@ RUN cd ./modules/oas-page-builder \
 
 FROM node:18.16.0-alpine
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
+WORKDIR ${WORK_DIRECTORY}
 
-COPY --from=dependency-installer --chown=docsworker-xlarge /home/docsworker-xlarge/snooty /opt/
-COPY --from=dependency-installer --chown=docsworker-xlarge /home/docsworker-xlarge/mut /opt/
+# setup user and root directory
+RUN adduser -D --home ${WORK_DIRECTORY} --shell /bin/sh docsworker-xlarge
+RUN chmod 755 -R ${WORK_DIRECTORY}
+RUN chown -Rv docsworker-xlarge ${WORK_DIRECTORY}
+USER docsworker-xlarge
+
+
+# the /opt/ dir contains snooty and mut
+COPY --from=dependency-installer --chown=docsworker-xlarge /opt/ /opt/
+# all of the dependencies we need for python 2 live here
 COPY --from=dependency-installer --chown=docsworker-xlarge /usr/ /usr/
+# giza lives here so we will need that
 COPY --from=dependency-installer --chown=docsworker-xlarge /venv/ /venv/
 
 COPY --from=dependency-installer --chown=docsworker-xlarge /home/docsworker-xlarge/redoc ./
