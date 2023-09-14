@@ -51,7 +51,7 @@ async function init(): Promise<void> {
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
   docsetsRepo = new DocsetsRepository(db, c, consoleLogger);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo, docsetsRepo);
   ssoConnector = new OktaConnector(c, consoleLogger);
   cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector, ssoConnector);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);

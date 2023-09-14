@@ -86,6 +86,8 @@ export abstract class BaseRepository {
 
   protected async find(query: any, errorMsg: string, options?: mongodb.FindOptions): Promise<mongodb.FindCursor> {
     try {
+      // console.log('COLLECTIONF IND ', this._collection)
+      console.log(this);
       return await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.find(query, options),
@@ -103,6 +105,8 @@ export abstract class BaseRepository {
     options: mongodb.AggregateOptions = {}
   ): Promise<any> {
     try {
+      console.log(this);
+      console.log('COLLECTION ', this._collection);
       return await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.aggregate(aggregationPipeline, options).toArray(),

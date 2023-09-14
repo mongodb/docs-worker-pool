@@ -1,36 +1,36 @@
-import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
 import { TestDataProvider } from '../../data/data';
 import { getBuildJobDef } from '../../data/jobDef';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
-describe('Repo Branches Repository Tests', () => {
-  let repoBranchesRepo: RepoBranchesRepository;
+describe('Docsets Repository Tests', () => {
+  let docsetsRepo: DocsetsRepository;
   let dbRepoHelper: DBRepositoryHelper;
   beforeEach(() => {
     dbRepoHelper = new DBRepositoryHelper();
-    repoBranchesRepo = dbRepoHelper.init('repoBranches', 'repoBranchesCollection', 'testColl');
+    docsetsRepo = dbRepoHelper.init('docsets', 'docsetsCollection', 'testColl');
   });
 
   test('Construct Repo Entitlement Repository', () => {
-    expect(new RepoBranchesRepository(dbRepoHelper.db, dbRepoHelper.config, dbRepoHelper.logger)).toBeDefined();
+    expect(new DocsetsRepository(dbRepoHelper.db, dbRepoHelper.config, dbRepoHelper.logger)).toBeDefined();
   });
 
-  describe('Repo Branches Repository getRepoBranchesByRepoName Tests', () => {
+  describe('Docsets Repository getRepoBranchesByRepoName Tests', () => {
     test('getRepoBranchesByRepoName returns failure as result is undefined', async () => {
       const testData = TestDataProvider.getRepoBranchesByRepoName('test_repo');
-      await expect(repoBranchesRepo.getRepoBranchesByRepoName('test_repo')).resolves.toEqual({ status: 'failure' });
-      expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
-      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query, {});
+      await expect(docsetsRepo.getRepoBranchesByRepoName('test_repo')).resolves.toEqual({ status: 'failure' });
+      expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
+      expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testData.query, {});
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {
       const job = getBuildJobDef();
       const testData = TestDataProvider.getRepoBranchesByRepoName('test_repo');
       job.payload.repoName = 'test_repo';
-      dbRepoHelper.collection.findOne.mockReturnValueOnce(TestDataProvider.getRepoBranchesData(job));
-      await repoBranchesRepo.getRepoBranchesByRepoName('test_repo');
-      expect(dbRepoHelper.collection.findOne).toBeCalledTimes(1);
-      expect(dbRepoHelper.collection.findOne).toBeCalledWith(testData.query, {});
+      dbRepoHelper.collection.aggregate.mockReturnValueOnce(TestDataProvider.getRepoBranchesData(job));
+      await docsetsRepo.getRepoBranchesByRepoName('test_repo');
+      expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
+      expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testData.query, {});
     });
 
     test('Update with completion status timesout', async () => {
@@ -40,7 +40,7 @@ describe('Repo Branches Repository Tests', () => {
           setTimeout(resolve, 5000, 'one');
         });
       });
-      repoBranchesRepo.getRepoBranchesByRepoName('test_repo').catch((error) => {
+      docsetsRepo.getRepoBranchesByRepoName('test_repo').catch((error) => {
         expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
         expect(error.message).toContain(
           `Mongo Timeout Error: Timedout while retrieving repo information for test_repo`

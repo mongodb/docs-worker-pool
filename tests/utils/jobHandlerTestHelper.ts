@@ -7,6 +7,7 @@ import { StagingJobHandler } from '../../src/job/stagingJobHandler';
 import { ManifestJobHandler } from '../../src/job/manifestJobHandler';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
 import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../../src/services/cdn';
 import { IJobCommandExecutor } from '../../src/services/commandExecutor';
@@ -15,7 +16,6 @@ import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
 import { TestDataProvider } from '../data/data';
 import { getBuildJobDef, getManifestJobDef, getStagingJobDef } from '../data/jobDef';
-import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
 
 type MockReturnValueOnce = { status: string; output: string; error: string | null };
 type SetupOptions = {

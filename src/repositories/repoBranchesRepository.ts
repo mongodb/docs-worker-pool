@@ -15,20 +15,6 @@ export class RepoBranchesRepository extends BaseRepository {
     return repo?.['branches'] ?? [];
   }
 
-  // async getRepoBranchesByRepoName(repoName: string): Promise<any> {
-  //   const query = { repoName: repoName };
-  //   const repoDetails = await this.findOne(
-  //     query,
-  //     `Mongo Timeout Error: Timedout while retrieving repo information for ${repoName}`
-  //   );
-
-  //   if (repoDetails?.bucket && repoDetails?.url) {
-  //     return repoDetails;
-  //   } else {
-  //     return { status: 'failure' };
-  //   }
-  // }
-
   async getRepoBranchAliases(repoName: string, branchName: string): Promise<any> {
     const returnObject = { status: 'failure' };
     const aliasArray = await this._collection

@@ -11,9 +11,9 @@ import * as mongodb from 'mongodb';
 import { FileSystemServices } from '../../../services/fileServices';
 import { JobValidator } from '../../../job/jobValidator';
 import { RepoBranchesRepository } from '../../../repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../../../repositories/docsetsRepository';
 import { ISSOConnector, OktaConnector } from '../../../services/sso';
 import { EnhancedJobHandlerFactory } from '../../job/enhancedJobHandlerFactory';
-import { DocsetsRepository } from '../../../repositories/docsetsRepository';
 
 let consoleLogger: ConsoleLogger;
 let fileSystemServices: FileSystemServices;
@@ -43,7 +43,7 @@ export async function handleJob(jobId: string, db: mongodb.Db) {
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
   docsetsRepo = new DocsetsRepository(db, c, consoleLogger);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo, docsetsRepo);
   ssoConnector = new OktaConnector(c, consoleLogger);
   cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector, ssoConnector);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);

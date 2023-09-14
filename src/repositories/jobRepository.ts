@@ -15,6 +15,7 @@ export class JobRepository extends BaseRepository {
   constructor(db: mongodb.Db, config: IConfig, logger: ILogger, collectionName: string | null = null) {
     let collection = db.collection(config.get('jobQueueCollection'));
     if (collectionName) {
+      console.log('collection name ', collectionName);
       collection = db.collection(collectionName);
     }
     super(config, logger, 'JobRepository', collection);
