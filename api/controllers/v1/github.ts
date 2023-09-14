@@ -4,12 +4,18 @@ import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
-async function prepGithubPushPayload(githubEvent: any, repoBranchesRepository: RepoBranchesRepository, prefix: string) {
+async function prepGithubPushPayload(
+  githubEvent: any,
+  repoBranchesRepository: RepoBranchesRepository,
+  docsetsRepository: DocsetsRepository,
+  prefix: string
+) {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
-  const repo_info = await repoBranchesRepository.getRepo(githubEvent.repository.name);
+  const repo_info = await docsetsRepository.getRepo(githubEvent.repository.name);
   const project = repo_info?.project ?? githubEvent.repository.name;
 
   return {
@@ -57,6 +63,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
+  const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
 
   if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
@@ -77,10 +84,10 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   }
 
   const env = c.get<string>('env');
-  const repoInfo = await repoBranchesRepository.getRepo(body.repository.name);
+  const repoInfo = await docsetsRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
   // TODO: Make job be of type Job
-  const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix);
+  const job = await prepGithubPushPayload(body, repoBranchesRepository, docsetsRepository, jobPrefix);
   try {
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));

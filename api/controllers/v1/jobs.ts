@@ -2,7 +2,6 @@ import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
-import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
@@ -12,6 +11,7 @@ import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
 import { notifyBuildSummary, snootyBuildComplete } from '../../handlers/jobs';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -248,7 +248,7 @@ async function SubmitArchiveJob(jobId: string) {
   const db = client.db(c.get('dbName'));
   const models = {
     jobs: new JobRepository(db, c, consoleLogger),
-    repoBranches: new RepoBranchesRepository(db, c, consoleLogger),
+    repoBranches: new DocsetsRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
   const repo = await models.repoBranches.getRepo(job.payload.repoName);

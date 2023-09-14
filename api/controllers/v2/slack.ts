@@ -14,6 +14,7 @@ import {
   isUserEntitled,
   prepResponse,
 } from '../../handlers/slack';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
 export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -79,7 +80,12 @@ const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) 
 
 // For every repo/branch selected to be deployed, return an array of jobs with the payload data
 // needed for a successful build.
-export const getDeployableJobs = async (values, entitlement, repoBranchesRepository: RepoBranchesRepository) => {
+export const getDeployableJobs = async (
+  values,
+  entitlement,
+  repoBranchesRepository: RepoBranchesRepository,
+  docsetsRepository: DocsetsRepository
+) => {
   const deployable = [];
 
   for (let i = 0; i < values.repo_option.length; i++) {
@@ -90,7 +96,7 @@ export const getDeployableJobs = async (values, entitlement, repoBranchesReposit
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement?.email ?? '';
 
-    const repoInfo = await repoBranchesRepository.getRepo(repoName);
+    const repoInfo = await docsetsRepository.getRepo(repoName);
     const non_versioned = repoInfo.branches.length === 1;
 
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName);
@@ -180,6 +186,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
   const db = client.db(c.get('dbName'));
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
+  const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
   // This is coming in as urlencoded string, need to decode before parsing
@@ -194,7 +201,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
 
   const values = slackConnector.parseSelection(stateValues);
 
-  const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository);
+  const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
