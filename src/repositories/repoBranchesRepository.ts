@@ -8,24 +8,6 @@ export class RepoBranchesRepository extends BaseRepository {
     super(config, logger, 'RepoBranchesRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
-  // TODO: delete???
-  async getConfiguredBranchesByGithubRepoName(repoName: string): Promise<any> {
-    const query = { repoName: repoName };
-    const reposObject = await this.findOne(
-      query,
-      `Mongo Timeout Error: Timedout while retrieving repos entry for ${repoName}`
-    );
-    if (reposObject?.branches) {
-      return {
-        branches: reposObject.branches,
-        repoName: reposObject.repoName,
-        status: 'success',
-      };
-    } else {
-      return { status: 'failure' };
-    }
-  }
-
   // TODO: change query
   async getProjectByRepoName(repoName: string) {
     const query = { repoName };
