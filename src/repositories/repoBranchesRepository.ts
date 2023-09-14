@@ -8,6 +8,7 @@ export class RepoBranchesRepository extends BaseRepository {
     super(config, logger, 'RepoBranchesRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
+  // TODO: delete???
   async getConfiguredBranchesByGithubRepoName(repoName: string): Promise<any> {
     const query = { repoName: repoName };
     const reposObject = await this.findOne(
@@ -25,6 +26,7 @@ export class RepoBranchesRepository extends BaseRepository {
     }
   }
 
+  // TODO: change query
   async getProjectByRepoName(repoName: string) {
     const query = { repoName };
     const projection = { _id: 0, project: 1 };
@@ -32,6 +34,7 @@ export class RepoBranchesRepository extends BaseRepository {
     return res.project;
   }
 
+  // TODO: change to full
   async getRepo(repoName: string): Promise<any> {
     const query = { repoName: repoName };
     const repo = await this.findOne(query, `Mongo Timeout Error: Timedout while retrieving branches for ${repoName}`);
@@ -46,6 +49,7 @@ export class RepoBranchesRepository extends BaseRepository {
     return repo?.['branches'] ?? [];
   }
 
+  // TODO: change to full
   async getRepoBranchesByRepoName(repoName: string): Promise<any> {
     const query = { repoName: repoName };
     const repoDetails = await this.findOne(

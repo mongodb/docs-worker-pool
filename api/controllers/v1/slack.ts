@@ -5,53 +5,13 @@ import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRe
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
-
-function isUserEntitled(entitlementsObject: any): boolean {
-  return (entitlementsObject?.repos?.length ?? 0) > 0;
-}
-
-function isRestrictedToDeploy(userId: string): boolean {
-  const { restrictedProdDeploy, entitledSlackUsers } = c.get<any>('prodDeploy');
-  return restrictedProdDeploy && !entitledSlackUsers.includes(userId);
-}
-
-function prepResponse(statusCode, contentType, body) {
-  return {
-    statusCode: statusCode,
-    headers: { 'Content-Type': contentType },
-    body: body,
-  };
-}
-
-async function buildEntitledBranchList(entitlement: any, repoBranchesRepository: RepoBranchesRepository) {
-  const entitledBranches: string[] = [];
-  for (const repo of entitlement.repos) {
-    const [repoOwner, repoName] = repo.split('/');
-    const branches = await repoBranchesRepository.getRepoBranches(repoName);
-    for (const branch of branches) {
-      let buildWithSnooty = true;
-      if ('buildsWithSnooty' in branch) {
-        buildWithSnooty = branch['buildsWithSnooty'];
-      }
-      if (buildWithSnooty) {
-        entitledBranches.push(`${repoOwner}/${repoName}/${branch['gitBranchName']}`);
-      }
-    }
-  }
-  return entitledBranches.sort();
-}
-
-function getQSString(qs: string) {
-  const key_val = {};
-  const arr = qs.split('&');
-  if (arr) {
-    arr.forEach((keyval) => {
-      const kvpair = keyval.split('=');
-      key_val[kvpair[0]] = kvpair[1];
-    });
-  }
-  return key_val;
-}
+import {
+  buildEntitledBranchList,
+  getQSString,
+  isRestrictedToDeploy,
+  isUserEntitled,
+  prepResponse,
+} from '../../handlers/slack';
 
 export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
