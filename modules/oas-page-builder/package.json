@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rm -rf ./dist/ && tsc",
+    "build:enhanced": "esbuild index.ts --bundle --platform=node --outdir=./dist --allow-overwrite",
     "format": "npm run prettier -- --check",
     "lint": "eslint --ext .ts .",
     "lint:fix": "npm run lint -- --fix",
@@ -34,6 +35,7 @@
     "bson": "^4.7.0",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
+    "esbuild": "0.19.3",
     "mongodb": "^4.11.0",
     "node-fetch": "^2.6.7"
   }

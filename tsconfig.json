@@ -5,6 +5,7 @@
     "target": "es6",
     "module": "commonjs",
     "strictNullChecks": true,
+    "isolatedModules": true,
     "esModuleInterop": true,
     "baseUrl": "./types",
     "sourceMap": true,
