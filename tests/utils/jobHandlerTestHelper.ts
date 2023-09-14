@@ -15,6 +15,7 @@ import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
 import { TestDataProvider } from '../data/data';
 import { getBuildJobDef, getManifestJobDef, getStagingJobDef } from '../data/jobDef';
+import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
 
 type MockReturnValueOnce = { status: string; output: string; error: string | null };
 type SetupOptions = {
@@ -33,6 +34,7 @@ export class JobHandlerTestHelper {
   jobHandler: ProductionJobHandler | StagingJobHandler | ManifestJobHandler;
   jobValidator: IJobValidator;
   repoBranchesRepo: RepoBranchesRepository;
+  docsetsRepo: DocsetsRepository;
   repoEntitlementsRepo: RepoEntitlementsRepository;
   lengthPrototype;
   handlerMapper = {
@@ -58,6 +60,7 @@ export class JobHandlerTestHelper {
     this.logger = mockDeep<IJobRepoLogger>();
     this.jobValidator = mockDeep<IJobValidator>();
     this.repoBranchesRepo = mockDeep<RepoBranchesRepository>();
+    this.docsetsRepo = mockDeep<DocsetsRepository>();
     this.repoEntitlementsRepo = mockDeep<RepoEntitlementsRepository>();
     this.jobHandler = new this.handlerMapper[handlerName](
       this.job,
@@ -70,6 +73,7 @@ export class JobHandlerTestHelper {
       this.logger,
       this.jobValidator,
       this.repoBranchesRepo,
+      this.docsetsRepo,
       this.repoEntitlementsRepo
     );
     return this.jobHandler;
