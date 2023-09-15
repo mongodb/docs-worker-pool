@@ -66,17 +66,6 @@ export class WorkerConstruct extends Construct {
 
     const containerProps: AssetImageProps = {
       file: isEnhanced() ? 'Dockerfile.enhanced' : undefined,
-      cacheFrom: [
-        {
-          type: 'gha',
-        },
-      ],
-      cacheTo: {
-        type: 'gha',
-        params: {
-          mode: 'max',
-        },
-      },
       buildArgs: {
         NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
         NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
