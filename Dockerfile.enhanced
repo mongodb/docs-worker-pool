@@ -71,7 +71,7 @@ RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releas
 # install redoc fork
 
 RUN curl -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/tags/@dop/redoc-cli@${REDOC_CLI_VERSION}.zip \
-    && unzip redoc.zip \
+    && unzip -d redoc/ redoc.zip \
     && cd redoc/ \
     && npm ci --prefix cli/ --omit=dev
 # RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
