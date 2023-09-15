@@ -51,7 +51,8 @@ export class DocsetsRepository extends BaseRepository {
   async getProjectByRepoName(repoName: string) {
     const projection = { project: 1 };
     const aggregationPipeline = this.getAggregationPipeline('repoName', repoName, projection);
-    const res = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
+    const cursor = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
+    const res = await cursor.toArray();
     if (!res.length) {
       const msg = `DocsetsRepository.getProjectByRepoName - Could not find project by repoName: ${repoName}`;
       this._logger.info(this._repoName, msg);
@@ -61,7 +62,8 @@ export class DocsetsRepository extends BaseRepository {
 
   async getRepo(repoName: string): Promise<any> {
     const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
-    const res = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
+    const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
+    const res = await cursor.toArray();
     if (!res.length) {
       const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName}`;
       this._logger.info(this._repoName, msg);
@@ -71,12 +73,13 @@ export class DocsetsRepository extends BaseRepository {
 
   async getRepoBranchesByRepoName(repoName: string): Promise<any> {
     const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
-    const res = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
-
-    if (res.length && res[0]?.bucket && res[0]?.url) {
-      return res[0];
-    } else {
-      return { status: 'failure' };
+    const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
+    if (cursor) {
+      const res = await cursor.toArray();
+      if (res.length && res[0]?.bucket && res[0]?.url) {
+        return res[0];
+      }
     }
+    return { status: 'failure' };
   }
 }

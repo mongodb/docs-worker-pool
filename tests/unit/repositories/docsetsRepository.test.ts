@@ -17,10 +17,10 @@ describe('Docsets Repository Tests', () => {
 
   describe('Docsets Repository getRepoBranchesByRepoName Tests', () => {
     test('getRepoBranchesByRepoName returns failure as result is undefined', async () => {
-      const testData = TestDataProvider.getRepoBranchesByRepoName('test_repo');
+      const testPipeline = TestDataProvider.getAggregationPipeline('repoName', 'test_repo');
       await expect(docsetsRepo.getRepoBranchesByRepoName('test_repo')).resolves.toEqual({ status: 'failure' });
       expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
-      expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testData.query, {});
+      expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testPipeline, {});
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {

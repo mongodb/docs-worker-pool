@@ -1,5 +1,5 @@
 import { IConfig } from 'config';
-import mongodb from 'mongodb';
+import mongodb, { AggregationCursor } from 'mongodb';
 import { DBError } from '../errors/errors';
 import { ILogger } from '../services/logger';
 
@@ -86,8 +86,6 @@ export abstract class BaseRepository {
 
   protected async find(query: any, errorMsg: string, options?: mongodb.FindOptions): Promise<mongodb.FindCursor> {
     try {
-      // console.log('COLLECTIONF IND ', this._collection)
-      console.log(this);
       return await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.find(query, options),
@@ -103,15 +101,14 @@ export abstract class BaseRepository {
     aggregationPipeline: any,
     errorMsg: string,
     options: mongodb.AggregateOptions = {}
-  ): Promise<any> {
+  ): Promise<AggregationCursor> {
     try {
-      console.log(this);
-      console.log('COLLECTION ', this._collection);
-      return await this.promiseTimeoutS(
+      const result = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
-        this._collection.aggregate(aggregationPipeline, options).toArray(),
+        this._collection.aggregate(aggregationPipeline, options),
         errorMsg
       );
+      return result;
     } catch (error) {
       this._logger.error(
         `${this._repoName}:findOne`,
