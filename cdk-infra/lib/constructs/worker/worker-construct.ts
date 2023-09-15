@@ -73,6 +73,9 @@ export class WorkerConstruct extends Construct {
       ],
       cacheTo: {
         type: 'gha',
+        params: {
+          mode: 'max',
+        },
       },
       buildArgs: {
         NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
