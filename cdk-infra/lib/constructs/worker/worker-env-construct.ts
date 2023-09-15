@@ -36,7 +36,7 @@ export class WorkerEnvConstruct extends Construct {
       `/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source`
     );
 
-    console.log('random-test');
+    console.log('random-test2');
 
     // front end feature flag for chatbot UI
     const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
