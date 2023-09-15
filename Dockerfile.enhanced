@@ -69,15 +69,10 @@ RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releas
     && unzip snooty-parser.zip
 
 # install redoc fork
-
-RUN curl -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/tags/@dop/redoc-cli@${REDOC_CLI_VERSION}.zip \
-    && unzip -d redoc/ redoc.zip \
+RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+    # Install dependencies for Redoc CLI
     && cd redoc/ \
     && npm ci --prefix cli/ --omit=dev
-# RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
-#     # Install dependencies for Redoc CLI
-#     && cd redoc/ \
-#     && npm ci --prefix cli/ --omit=dev
 
 # Build the Typescript app
 FROM node:18.16.0-alpine as ts-compiler
