@@ -110,6 +110,7 @@ export class WorkerConstruct extends Construct {
       desiredCount: env === 'prd' ? 10 : 1,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
+      enableExecuteCommand: true, // debugging help
     });
 
     this.clusterName = cluster.clusterName;
