@@ -62,6 +62,7 @@ custom:
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
+  docsetsCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/docsets}
   githubSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/secret}
   githubDeletionSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/webhook/deletionSecret}
   githubBotPW: ${ssm:/env/${self:provider.stage}/docs/worker_pool/github/bot/password}
