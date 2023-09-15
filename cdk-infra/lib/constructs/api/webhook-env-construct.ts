@@ -19,7 +19,7 @@ export class WebhookEnvConstruct extends Construct {
     const ssmPrefix = getSsmPathPrefix();
     const env = getEnv();
     const featureName = getFeatureName();
-
+    console.log('random_change');
     // Create configurable feature flag that lives in parameter store.
     const monorepoPathFeature = new StringParameter(this, 'monorepoPathFeature', {
       parameterName: `${ssmPrefix}/${featureName}/monorepo/path_feature`,
