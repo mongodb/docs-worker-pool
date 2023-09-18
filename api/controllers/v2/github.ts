@@ -9,6 +9,8 @@ import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRe
 import { EnhancedJob, JobStatus } from '../../../src/entities/job';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
+import { getMonorepoPaths } from '../../../src/monorepo';
+import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
@@ -78,9 +80,9 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       body: errMsg,
     };
   }
-  let body;
+  let body: PushEvent;
   try {
-    body = JSON.parse(event.body);
+    body = JSON.parse(event.body) as PushEvent;
   } catch (e) {
     console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
     return {
@@ -103,6 +105,22 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
 
   const job = await prepGithubPushPayload(body, repoBranchesRepository, docsetsRepository, jobPrefix);
+
+  if (process.env.MONOREPO_PATH_FEATURE === 'true') {
+    try {
+      if (body.head_commit && body.repository.owner.name) {
+        const monorepoPaths = await getMonorepoPaths({
+          commitSha: body.head_commit.id,
+          repoName: body.repository.name,
+          ownerName: body.repository.owner.name,
+          updatedFilePaths: getUpdatedFilePaths(body.head_commit),
+        });
+        console.log('monorepoPaths: ', monorepoPaths);
+      }
+    } catch (error) {
+      console.warn('Warning, attempting to get repo paths caused an error', error);
+    }
+  }
 
   try {
     consoleLogger.info(job.title, 'Creating Job');

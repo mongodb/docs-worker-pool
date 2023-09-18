@@ -109,7 +109,7 @@ export abstract class JobHandler {
         // completed after the Gatsby Cloud build via the SnootyBuildComplete lambda.
         const { _id: jobId, user } = this.currJob;
         const gatsbyCloudSiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(user);
-        if (gatsbyCloudSiteId && this.currJob.payload.jobType === 'githubPush') {
+        if (this.currJob.payload.isNextGen && gatsbyCloudSiteId && this.currJob.payload.jobType === 'githubPush') {
           this.logger.info(
             jobId,
             `User ${user} has a Gatsby Cloud site. The Autobuilder will not mark the build as completed right now.`
@@ -373,6 +373,7 @@ export abstract class JobHandler {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
       PREVIEW_BUILD_ENABLED: this._config.get<string>('previewBuildEnabled'),
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),
+      GATSBY_SHOW_CHATBOT: this._config.get<string>('gatsbyUseChatbot'),
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
