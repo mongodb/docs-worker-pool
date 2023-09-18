@@ -83,7 +83,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
   try {
     const db = await pool();
     const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch } });
-    const res = await db.collection('docsets').aggregate(aggregationPipeline).toArray();
+    const res = (await db.collection('docsets').aggregate(aggregationPipeline).toArray()) as ReposBranchesDocument[];
     res.forEach((doc: ReposBranchesDocument) => {
       // TODO: store in cache
       internals[doc['project']] = doc;
@@ -118,13 +118,16 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
       matchCondition['branches'] = { branches: { $elemMatch: { gitBranchName: branch } } };
     }
     const aggregationPipeline = getAggregationPipeline(matchCondition);
+    const res = (await db
+      .collection('docsets')
+      .aggregate(aggregationPipeline)
+      .toArray()) as unknown as ReposBranchesDocument[];
 
-    const res = (await db.collection('docsets').aggregate(aggregationPipeline)) as unknown as ReposBranchesDocument;
     // if not already set, set cache value for repo_branches
     if (!internals[project]) {
-      internals[project] = res;
+      internals[project] = res[0];
     }
-    return res;
+    return res[0];
   } catch (e) {
     console.error(`Error while getting repo branches entry: ${e}`);
     throw e;

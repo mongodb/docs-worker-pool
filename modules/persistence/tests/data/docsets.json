@@ -1,0 +1,61 @@
+[
+  {
+    "_id": "5fc999cm3f17b4e8917e9494",
+    "bucket": {
+      "regression": "docs-atlas-stg",
+      "dev": "docs-atlas-dev",
+      "stg": "docs-atlas-stg",
+      "prd": "docs-atlas-prd",
+      "dotcomstg": "docs-atlas-dotcomstg",
+      "dotcomprd": "docs-atlas-dotcomprd"
+    },
+    "url": {
+      "regression": "https://docs-atlas-integration.mongodb.com",
+      "dev": "https://docs-atlas-staging.mongodb.com",
+      "stg": "https://docs-atlas-staging.mongodb.com",
+      "prd": "https://docs.atlas.mongodb.com",
+      "dotcomprd": "http://mongodb.com/",
+      "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/"
+    },
+    "prefix": {
+      "stg": "",
+      "prd": "",
+      "dotcomstg": "docs/atlas",
+      "dotcomprd": "docs/atlas"
+    },
+    "project": "cloud-docs",
+    "search": {
+      "categoryName": "atlas",
+      "categoryTitle": "Atlas"
+    }
+  },
+  {
+    "_id": "6243aa3f0bae3635a59a1850",
+    "bucket": {
+      "regression": "docs-mongodb-org-stg",
+      "dev": "docs-mongodb-org-dev",
+      "stg": "docs-mongodb-org-stg",
+      "prd": "docs-mongodb-org-prd",
+      "dotcomstg": "docs-atlas-dotcomstg",
+      "dotcomprd": "docs-atlas-dotcomprd"
+    },
+    "url": {
+      "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+      "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "prd": "https://docs.mongodb.com",
+      "dotcomprd": "https://www.mongodb.com/",
+      "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/"
+    },
+    "prefix": {
+      "stg": "atlas/cli",
+      "prd": "atlas/cli",
+      "dotcomstg": "docs-qa/atlas/cli",
+      "dotcomprd": "docs/atlas/cli"
+    },
+    "project": "atlas-cli",
+    "search": {
+      "categoryTitle": "Atlas CLI"
+    }
+  }
+]
