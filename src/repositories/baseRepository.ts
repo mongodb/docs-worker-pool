@@ -1,5 +1,5 @@
 import { IConfig } from 'config';
-import mongodb, { AggregationCursor } from 'mongodb';
+import mongodb from 'mongodb';
 import { DBError } from '../errors/errors';
 import { ILogger } from '../services/logger';
 
@@ -101,7 +101,7 @@ export abstract class BaseRepository {
     aggregationPipeline: any,
     errorMsg: string,
     options: mongodb.AggregateOptions = {}
-  ): Promise<AggregationCursor> {
+  ): Promise<mongodb.AggregationCursor> {
     try {
       const result = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),

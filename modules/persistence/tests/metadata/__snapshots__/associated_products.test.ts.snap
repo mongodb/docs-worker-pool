@@ -1,6 +1,129 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`associated_products module getAllAssociatedRepoBranchesEntries should get all repo branches info for specified associated products 1`] = `undefined`;
+exports[`associated_products module getAllAssociatedRepoBranchesEntries should get all repo branches info for specified associated products 1`] = `
+Object {
+  "branches": Array [
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "master",
+      "id": "62e293ce8b1d857926ab4cd8",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "upcoming",
+        "v1.5",
+      ],
+      "urlSlug": "upcoming",
+      "versionSelectorLabel": "1.5 (upcoming)",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.4",
+      "id": "62e293ce8b1d857926ab4cd9",
+      "isStableBranch": true,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "stable",
+        "v1.4",
+      ],
+      "urlSlug": "stable",
+      "versionSelectorLabel": "1.4.0 (stable)",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.3",
+      "id": "6398fd2748e43bdf97398970",
+      "isStableBranch": false,
+      "publishOriginalBranchName": false,
+      "urlAliases": Array [
+        "v1.3",
+        "v1.3.0",
+      ],
+      "urlSlug": "v1.3",
+      "versionSelectorLabel": "1.3",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.2",
+      "id": "63769111dd1d7476362b4b3a",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "v1.2",
+        "v1.2.0",
+        "v1.2.1",
+      ],
+      "urlSlug": "v1.2",
+      "versionSelectorLabel": "1.2",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.1",
+      "id": "6376904fdd1d7476362b4b37",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "v1.1",
+        "v1.1.0",
+        "v1.1.2",
+        "v1.1.3",
+        "v1.1.4",
+        "v1.1.5",
+        "v1.1.6",
+        "v1.1.7",
+      ],
+      "urlSlug": "v1.1",
+      "versionSelectorLabel": "1.1",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.0",
+      "id": "62e293ce8b1d857926ab4cda",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        null,
+      ],
+      "urlSlug": "v1.0",
+      "versionSelectorLabel": "1.0",
+    },
+  ],
+  "bucket": Object {
+    "dev": "docs-mongodb-org-dev",
+    "dotcomprd": "docs-atlas-dotcomprd",
+    "dotcomstg": "docs-atlas-dotcomstg",
+    "prd": "docs-mongodb-org-prd",
+    "regression": "docs-mongodb-org-stg",
+    "stg": "docs-mongodb-org-stg",
+  },
+  "groups": null,
+  "prefix": Object {
+    "dotcomprd": "docs/atlas/cli",
+    "dotcomstg": "docs-qa/atlas/cli",
+    "prd": "atlas/cli",
+    "stg": "atlas/cli",
+  },
+  "project": "atlas-cli",
+  "repoName": "docs-atlas-cli",
+  "search": Object {
+    "categoryTitle": "Atlas CLI",
+  },
+  "url": Object {
+    "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+    "dotcomprd": "https://www.mongodb.com/",
+    "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/",
+    "prd": "https://docs.mongodb.com",
+    "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+    "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+  },
+}
+`;
 
 exports[`associated_products module getAssociatedProducts and shapeToCsCursor getAssociatedProducts returns an aggregation cursor for metadata, grouped by most recent build_id 1`] = `
 Object {
@@ -2640,7 +2763,130 @@ Array [
 ]
 `;
 
-exports[`associated_products module getRepoBranchesEntry should query repo branches for project and branch 1`] = `undefined`;
+exports[`associated_products module getRepoBranchesEntry should query repo branches for project and branch 1`] = `
+Object {
+  "branches": Array [
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "master",
+      "id": "62e293ce8b1d857926ab4cd8",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "upcoming",
+        "v1.5",
+      ],
+      "urlSlug": "upcoming",
+      "versionSelectorLabel": "1.5 (upcoming)",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.4",
+      "id": "62e293ce8b1d857926ab4cd9",
+      "isStableBranch": true,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "stable",
+        "v1.4",
+      ],
+      "urlSlug": "stable",
+      "versionSelectorLabel": "1.4.0 (stable)",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.3",
+      "id": "6398fd2748e43bdf97398970",
+      "isStableBranch": false,
+      "publishOriginalBranchName": false,
+      "urlAliases": Array [
+        "v1.3",
+        "v1.3.0",
+      ],
+      "urlSlug": "v1.3",
+      "versionSelectorLabel": "1.3",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.2",
+      "id": "63769111dd1d7476362b4b3a",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "v1.2",
+        "v1.2.0",
+        "v1.2.1",
+      ],
+      "urlSlug": "v1.2",
+      "versionSelectorLabel": "1.2",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.1",
+      "id": "6376904fdd1d7476362b4b37",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        "v1.1",
+        "v1.1.0",
+        "v1.1.2",
+        "v1.1.3",
+        "v1.1.4",
+        "v1.1.5",
+        "v1.1.6",
+        "v1.1.7",
+      ],
+      "urlSlug": "v1.1",
+      "versionSelectorLabel": "1.1",
+    },
+    Object {
+      "active": true,
+      "buildsWithSnooty": true,
+      "gitBranchName": "v1.0",
+      "id": "62e293ce8b1d857926ab4cda",
+      "isStableBranch": false,
+      "publishOriginalBranchName": true,
+      "urlAliases": Array [
+        null,
+      ],
+      "urlSlug": "v1.0",
+      "versionSelectorLabel": "1.0",
+    },
+  ],
+  "bucket": Object {
+    "dev": "docs-mongodb-org-dev",
+    "dotcomprd": "docs-atlas-dotcomprd",
+    "dotcomstg": "docs-atlas-dotcomstg",
+    "prd": "docs-mongodb-org-prd",
+    "regression": "docs-mongodb-org-stg",
+    "stg": "docs-mongodb-org-stg",
+  },
+  "groups": null,
+  "prefix": Object {
+    "dotcomprd": "docs/atlas/cli",
+    "dotcomstg": "docs-qa/atlas/cli",
+    "prd": "atlas/cli",
+    "stg": "atlas/cli",
+  },
+  "project": "atlas-cli",
+  "repoName": "docs-atlas-cli",
+  "search": Object {
+    "categoryTitle": "Atlas CLI",
+  },
+  "url": Object {
+    "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+    "dotcomprd": "https://www.mongodb.com/",
+    "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/",
+    "prd": "https://docs.mongodb.com",
+    "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+    "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+  },
+}
+`;
 
 exports[`associated_products module umbrellaMetadataEntry returns the most recent umbrella metadata for specified project in passed metadata 1`] = `
 Object {

@@ -27,7 +27,8 @@
     "search": {
       "categoryName": "atlas",
       "categoryTitle": "Atlas"
-    }
+    },
+    "repos": ["5fc999ce3f17b4e8917e0494"]
   },
   {
     "_id": "6243aa3f0bae3635a59a1850",
@@ -56,6 +57,7 @@
     "project": "atlas-cli",
     "search": {
       "categoryTitle": "Atlas CLI"
-    }
+    },
+    "repos": ["6243aa3f0aae3635a59a1150"]
   }
 ]
