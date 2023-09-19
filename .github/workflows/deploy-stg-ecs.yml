@@ -3,6 +3,7 @@ on:
     branches:
       - "master"
       - "integration"
+      - "DOP-4020-docsets"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
