@@ -3,9 +3,10 @@ import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
 
+const docSetCollectionName = process.env.DOCSETS_COL_NAME || 'docsets';
 export class DocsetsRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'DocsetsRepository', db.collection(config.get('docsetsCollection')));
+    super(config, logger, 'DocsetsRepository', db.collection(docSetCollectionName));
   }
 
   private getAggregationPipeline(
