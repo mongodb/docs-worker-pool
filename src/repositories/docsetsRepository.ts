@@ -3,10 +3,12 @@ import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
 
-const docSetCollectionName = process.env.DOCSETS_COL_NAME || 'docsets';
+const docsetsCollectionName = process.env.DOCSETS_COL_NAME || 'docsets';
 export class DocsetsRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'DocsetsRepository', db.collection(docSetCollectionName));
+    // super(config, logger, 'DocsetsRepository', db.collection(docsetsCollectionName));
+    super(config, logger, 'DocsetsRepository', db.collection(config.get('docsets')));
+    console.log(docsetsCollectionName);
   }
 
   private getAggregationPipeline(
@@ -74,6 +76,7 @@ export class DocsetsRepository extends BaseRepository {
 
   async getRepoBranchesByRepoName(repoName: string): Promise<any> {
     const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
+    console.log(this);
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
     if (cursor) {
       const res = await cursor.toArray();
