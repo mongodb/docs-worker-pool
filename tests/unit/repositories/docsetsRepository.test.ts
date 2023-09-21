@@ -17,6 +17,9 @@ describe('Docsets Repository Tests', () => {
   describe('Docsets Repository getRepoBranchesByRepoName Tests', () => {
     test('getRepoBranchesByRepoName returns failure as result is undefined', async () => {
       const testPipeline = TestDataProvider.getAggregationPipeline('repoName', 'test_repo');
+      dbRepoHelper.collection.aggregate.mockReturnValueOnce({
+        toArray: () => [],
+      });
       await expect(docsetsRepo.getRepoBranchesByRepoName('test_repo')).resolves.toEqual({ status: 'failure' });
       expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testPipeline, {});
