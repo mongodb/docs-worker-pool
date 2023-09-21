@@ -3,12 +3,21 @@ import fs from 'fs';
 import path from 'path';
 import { executeCliCommand } from './helpers';
 
-async function getPatchId(): Promise<string | undefined> {
-  if (!fs.existsSync(path.join(__dirname, 'myPatch.patch'))) return;
+const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 
-  const gitPatchId = await executeCliCommand('git', ['patch-id']);
+async function getPatchId(): Promise<string> {
+  const gitPatchId = await executeCliCommand<string>('git', ['patch-id']);
+
+  return gitPatchId;
 }
-
-export async function nextGenParse() {
-  getPatchId();
+async function getPatchClause() {
+  throw new Error('not implemented');
+}
+export async function nextGenParse(): Promise<void> {
+  const defaultParseArgs = [];
+  const isPatch = !fs.existsSync(path.join(__dirname, 'myPatch.patch'));
+  const commandArgs = isPatch ? [...defaultParseArgs, '--commit'] : defaultParseArgs;
+  if (!fs.existsSync(path.join(__dirname, 'myPatch.patch'))) {
+    await getPatchId();
+  }
 }
