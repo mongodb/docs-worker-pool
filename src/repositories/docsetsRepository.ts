@@ -14,6 +14,12 @@ export class DocsetsRepository extends BaseRepository {
     matchConditionValue: string,
     projection?: { [k: string]: number }
   ) {
+    const DEFAULT_PROJECTIONS = {
+      _id: 0,
+      repos: 0,
+      repo: 0,
+    };
+
     return [
       // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
       {
@@ -40,16 +46,12 @@ export class DocsetsRepository extends BaseRepository {
       },
       // Stage 5: Exclude fields
       {
-        $project: projection || {
-          _id: 0,
-          repos: 0,
-          repo: 0,
-        },
+        $project: projection || DEFAULT_PROJECTIONS,
       },
     ];
   }
 
-  async getProjectByRepoName(repoName: string) {
+  async getProjectByRepoName(repoName: string): Promise<any> {
     const projection = { project: 1 };
     const aggregationPipeline = this.getAggregationPipeline('repoName', repoName, projection);
     const cursor = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
@@ -58,7 +60,7 @@ export class DocsetsRepository extends BaseRepository {
       const msg = `DocsetsRepository.getProjectByRepoName - Could not find project by repoName: ${repoName}`;
       this._logger.info(this._repoName, msg);
     }
-    return res[0].project;
+    return res[0]?.project;
   }
 
   async getRepo(repoName: string): Promise<any> {
@@ -75,11 +77,9 @@ export class DocsetsRepository extends BaseRepository {
   async getRepoBranchesByRepoName(repoName: string): Promise<any> {
     const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
-    if (cursor) {
-      const res = await cursor.toArray();
-      if (res.length && res[0]?.bucket && res[0]?.url) {
-        return res[0];
-      }
+    const res = await cursor.toArray();
+    if (res.length && res[0]?.bucket && res[0]?.url) {
+      return res[0];
     }
     return { status: 'failure' };
   }

@@ -5,18 +5,18 @@ import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
+import { ReposBranchesDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
 
 async function prepGithubPushPayload(
   githubEvent: any,
   repoBranchesRepository: RepoBranchesRepository,
-  docsetsRepository: DocsetsRepository,
-  prefix: string
+  prefix: string,
+  repoInfo: ReposBranchesDocument
 ) {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
-  const repo_info = await docsetsRepository.getRepo(githubEvent.repository.name);
-  const project = repo_info?.project ?? githubEvent.repository.name;
+  const project = repoInfo?.project ?? githubEvent.repository.name;
 
   return {
     title: githubEvent.repository.full_name,
@@ -87,7 +87,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
   const repoInfo = await docsetsRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
   // TODO: Make job be of type Job
-  const job = await prepGithubPushPayload(body, repoBranchesRepository, docsetsRepository, jobPrefix);
+  const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
   try {
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
