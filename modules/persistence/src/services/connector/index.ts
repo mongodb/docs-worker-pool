@@ -38,7 +38,7 @@ export const db = async () => {
 };
 
 // all docs should be inserted with the buildId for the run.
-export const insert = async (docs: any[], collection: string, buildId: ObjectId, printTime: boolean = false) => {
+export const insert = async (docs: any[], collection: string, buildId: ObjectId, printTime = false) => {
   const timerLabel = `insert - ${collection}`;
   if (printTime) console.time(timerLabel);
   const insertSession = await db();
