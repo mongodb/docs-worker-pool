@@ -2,7 +2,7 @@
 # The solution is probably to switch to Ubuntu 22.04 at that point, which is supported until 2027.
 FROM node:14-bullseye-slim
 
-ARG MUT_VERSION=0.10.3
+ARG MUT_VERSION=0.10.6
 
 ENV PATH="${PATH}:/opt/mut"
 
