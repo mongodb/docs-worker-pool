@@ -90,7 +90,7 @@ endif
 
 persistence-module:
 	# persistence module - add bundle zip to Atlas documents
-	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG}
+	node --unhandled-rejections=strict ${PERSISTENCE_MODULE_PATH} --path ${BUNDLE_PATH} --githubUser ${GH_USER_ARG} --jobId ${JOB_ID}
 	if [ $$? -eq 1 ]; then \
 		exit 1; \
 	else \
