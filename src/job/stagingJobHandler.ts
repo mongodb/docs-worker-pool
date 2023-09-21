@@ -58,7 +58,9 @@ export class StagingJobHandler extends JobHandler {
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-parse';
-      this.currJob.buildCommands.push(`make persistence-module GH_USER=${this.currJob.payload.repoOwner}`);
+      this.currJob.buildCommands.push(
+        `make persistence-module GH_USER=${this.currJob.payload.repoOwner} JOB_ID=${this.currJob._id}`
+      );
       this.currJob.buildCommands.push('make next-gen-html');
       const project = this.currJob.payload.project === 'cloud-docs' ? this.currJob.payload.project : '';
       const branchName = /^[a-zA-Z0-9_\-\./]+$/.test(this.currJob.payload.branchName)
