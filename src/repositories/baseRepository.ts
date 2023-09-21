@@ -103,7 +103,6 @@ export abstract class BaseRepository {
     options: mongodb.AggregateOptions = {}
   ): Promise<mongodb.AggregationCursor> {
     try {
-      console.log(this._collection);
       const result = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.aggregate(aggregationPipeline, options),
