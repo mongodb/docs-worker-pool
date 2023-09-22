@@ -1,11 +1,22 @@
 import fs from 'fs';
 import path from 'path';
 import { executeCliCommand } from './helpers';
+import { promisify } from 'util';
 
+const openAsync = promisify(fs.open);
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 
 async function getPatchId(): Promise<string> {
-  const gitPatchId = await executeCliCommand<string>('git', ['patch-id']);
+  const fileId = await openAsync(path.join(__dirname, 'myPatch.patch'), 'r');
+  const { stdout: gitPatchId } = await executeCliCommand('git', ['patch-id'], {
+    stdio: [fileId, process.stdout, process.stderr],
+  });
+
+  fs.close(fileId, (err) => {
+    if (err) {
+      console.error('error when closing myPatch.patch', err);
+    }
+  });
 
   return gitPatchId;
 }

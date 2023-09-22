@@ -1,4 +1,11 @@
-import { spawn } from 'child_process';
+import {
+  SpawnOptions,
+  SpawnOptionsWithStdioTuple,
+  SpawnOptionsWithoutStdio,
+  StdioNull,
+  StdioPipe,
+  spawn,
+} from 'child_process';
 
 export class ExecuteCommandError extends Error {
   data: unknown;
@@ -7,15 +14,37 @@ export class ExecuteCommandError extends Error {
     this.data = data;
   }
 }
-export async function executeCliCommand<T = unknown>(command: string, args?: readonly string[]): Promise<T> {
-  const executedCommand = spawn(command, args);
+
+interface CliCommandResponse {
+  stdout: string;
+  stderr: string;
+}
+
+export async function executeCliCommand(
+  command: string,
+  args: readonly string[] = [],
+  options: SpawnOptions = {}
+): Promise<CliCommandResponse> {
+  const executedCommand = spawn(command, args, options);
   return new Promise((resolve, reject) => {
-    executedCommand.stdout.on('data', (data) => {
-      resolve(data as T);
+    const stdout: string[] = [];
+    const stderr: string[] = [];
+
+    executedCommand.stdout?.on('data', (data: Buffer) => {
+      stdout.push(data.toString());
     });
 
-    executedCommand.stderr.on('data', (data) => {
-      reject(new ExecuteCommandError('The command failed', data));
+    executedCommand.stderr?.on('data', (data: Buffer) => {
+      stderr.push(data.toString());
+    });
+
+    executedCommand.on('error', (err) => {
+      reject(new ExecuteCommandError('The command failed', err));
+    });
+
+    resolve({
+      stdout: stdout.join(),
+      stderr: stderr.join(),
     });
   });
 }
