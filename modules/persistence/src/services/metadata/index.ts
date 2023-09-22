@@ -60,7 +60,7 @@ const verifyMetadata = async (metadata: Metadata) => {
 
 export const insertMetadata = async (buildId: ObjectId, metadata: Metadata) => {
   try {
-    return insert([metadata], COLLECTION_NAME, buildId);
+    return insert([metadata], COLLECTION_NAME, buildId, true);
   } catch (error) {
     console.error(`Error at insertion time for ${COLLECTION_NAME}: ${error}`);
     throw error;
