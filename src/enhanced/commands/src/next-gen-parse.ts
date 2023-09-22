@@ -4,6 +4,7 @@ import { executeCliCommand } from './helpers';
 import { promisify } from 'util';
 
 const openAsync = promisify(fs.open);
+const existsAsync = promisify(fs.exists);
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 
 async function getPatchId(): Promise<string> {
@@ -28,8 +29,10 @@ async function snootyBuild() {
   throw new Error('not implemented');
 }
 
-export async function nextGenParse(): Promise<void> {
+export async function nextGenParse(repoName: string): Promise<void> {
+  const repoDir = path.join(__dirname, `repos/${repoName}`);
   const defaultParseArgs = [];
-  const isPatch = !fs.existsSync(path.join(__dirname, 'myPatch.patch'));
+  const isPatch = !(await existsAsync(path.join(repoDir, 'myPatch.patch')));
+
   const commandArgs = isPatch ? [...defaultParseArgs, '--commit'] : defaultParseArgs;
 }

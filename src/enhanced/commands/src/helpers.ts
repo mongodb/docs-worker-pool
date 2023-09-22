@@ -1,11 +1,4 @@
-import {
-  SpawnOptions,
-  SpawnOptionsWithStdioTuple,
-  SpawnOptionsWithoutStdio,
-  StdioNull,
-  StdioPipe,
-  spawn,
-} from 'child_process';
+import { SpawnOptions, spawn } from 'child_process';
 
 export class ExecuteCommandError extends Error {
   data: unknown;
@@ -25,10 +18,11 @@ export async function executeCliCommand(
   args: readonly string[] = [],
   options: SpawnOptions = {}
 ): Promise<CliCommandResponse> {
-  const executedCommand = spawn(command, args, options);
   return new Promise((resolve, reject) => {
     const stdout: string[] = [];
     const stderr: string[] = [];
+
+    const executedCommand = spawn(command, args, options);
 
     executedCommand.stdout?.on('data', (data: Buffer) => {
       stdout.push(data.toString());
@@ -42,9 +36,17 @@ export async function executeCliCommand(
       reject(new ExecuteCommandError('The command failed', err));
     });
 
-    resolve({
-      stdout: stdout.join(),
-      stderr: stderr.join(),
+    executedCommand.on('close', (exitCode) => {
+      if (exitCode !== 0) {
+        console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
+        console.error('Arguments provided: ', args);
+        console.error('Options provided: ', options);
+      }
+
+      resolve({
+        stdout: stdout.join(),
+        stderr: stderr.join(),
+      });
     });
   });
 }
