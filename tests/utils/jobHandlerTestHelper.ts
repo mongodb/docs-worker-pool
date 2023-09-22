@@ -7,6 +7,7 @@ import { StagingJobHandler } from '../../src/job/stagingJobHandler';
 import { ManifestJobHandler } from '../../src/job/manifestJobHandler';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
 import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { ICDNConnector } from '../../src/services/cdn';
 import { IJobCommandExecutor } from '../../src/services/commandExecutor';
@@ -33,6 +34,7 @@ export class JobHandlerTestHelper {
   jobHandler: ProductionJobHandler | StagingJobHandler | ManifestJobHandler;
   jobValidator: IJobValidator;
   repoBranchesRepo: RepoBranchesRepository;
+  docsetsRepo: DocsetsRepository;
   repoEntitlementsRepo: RepoEntitlementsRepository;
   lengthPrototype;
   handlerMapper = {
@@ -58,6 +60,7 @@ export class JobHandlerTestHelper {
     this.logger = mockDeep<IJobRepoLogger>();
     this.jobValidator = mockDeep<IJobValidator>();
     this.repoBranchesRepo = mockDeep<RepoBranchesRepository>();
+    this.docsetsRepo = mockDeep<DocsetsRepository>();
     this.repoEntitlementsRepo = mockDeep<RepoEntitlementsRepository>();
     this.jobHandler = new this.handlerMapper[handlerName](
       this.job,
@@ -70,6 +73,7 @@ export class JobHandlerTestHelper {
       this.logger,
       this.jobValidator,
       this.repoBranchesRepo,
+      this.docsetsRepo,
       this.repoEntitlementsRepo
     );
     return this.jobHandler;
@@ -148,6 +152,7 @@ export class JobHandlerTestHelper {
     this.config.get.calledWith('gatsbyBaseUrl').mockReturnValue('test');
     this.config.get.calledWith('previewBuildEnabled').mockReturnValue('false');
     this.config.get.calledWith('featureFlagSearchUI').mockReturnValue('false');
+    this.config.get.calledWith('gatsbyUseChatbot').mockReturnValue('false');
     this.repoConnector.checkCommits
       .calledWith(this.job)
       .mockReturnValue(TestDataProvider.getCommitCheckValidResponse(this.job));

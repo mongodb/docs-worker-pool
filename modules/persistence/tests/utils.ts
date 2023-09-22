@@ -7,6 +7,7 @@
 import { Db, MongoClient, ObjectId } from 'mongodb';
 import metadata from './data/metadata.json';
 import repoBranches from './data/repos_branches.json';
+import docsets from './data/docsets.json';
 
 /**
  * mocks a db with test data in ./data collection
@@ -23,6 +24,7 @@ export const setMockDB = async (dbName: string = new ObjectId().toString()): Pro
     const connection = await MongoClient.connect(process.env.MONGO_URL || 'test');
     const mockDb = connection.db(dbName);
     await mockDb.collection('repos_branches').insertMany(repoBranches as unknown[] as Document[]);
+    await mockDb.collection('docsets').insertMany(docsets as unknown[] as Document[]);
     await mockDb.collection('metadata').insertMany(metadata as unknown[] as Document[]);
     return [mockDb, connection];
   } catch (e) {

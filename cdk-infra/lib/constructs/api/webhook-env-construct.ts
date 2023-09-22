@@ -3,7 +3,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getSsmPathPrefix } from '../../../utils/ssm';
 import { getDashboardUrl } from '../../../utils/slack';
-import { getEnv } from '../../../utils/env';
+import { getEnv, getFeatureName } from '../../../utils/env';
 
 interface WebhookEnvConstructProps {
   jobsQueue: IQueue;
@@ -18,10 +18,18 @@ export class WebhookEnvConstruct extends Construct {
 
     const ssmPrefix = getSsmPathPrefix();
     const env = getEnv();
+    const featureName = getFeatureName();
+
+    // Create configurable feature flag that lives in parameter store.
+    const monorepoPathFeature = new StringParameter(this, 'monorepoPathFeature', {
+      parameterName: `${ssmPrefix}/${featureName}/monorepo/path_feature`,
+      stringValue: env === 'dotcomstg' || env === 'stg' ? 'true' : 'false',
+    });
 
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
+    const docsetsCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/docsets`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
@@ -39,6 +47,7 @@ export class WebhookEnvConstruct extends Construct {
       DB_NAME: dbName,
       SNOOTY_DB_NAME: snootyDbName,
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,
+      DOCSETS_COL_NAME: docsetsCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       NODE_CONFIG_DIR: './config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
@@ -47,6 +56,7 @@ export class WebhookEnvConstruct extends Construct {
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       DASHBOARD_URL: getDashboardUrl(env, jobCollection),
       STAGE: env,
+      MONOREPO_PATH_FEATURE: monorepoPathFeature.stringValue,
     };
   }
 }

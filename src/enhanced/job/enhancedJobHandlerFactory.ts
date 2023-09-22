@@ -17,6 +17,7 @@ import {
   EnhancedProductionJobHandler,
   EnhancedRegressionJobHandler,
 } from './enhancedJobHandlers';
+import { DocsetsRepository } from '../../repositories/docsetsRepository';
 
 const enhancedJobHandlerMap = {
   githubPush: EnhancedStagingJobHandler,
@@ -37,6 +38,7 @@ export class EnhancedJobHandlerFactory {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ): JobHandler {
     const jt = job.payload?.jobType;
@@ -53,6 +55,7 @@ export class EnhancedJobHandlerFactory {
       logger,
       validator,
       repoBranchesRepo,
+      docsetsRepo,
       repoEntitlementsRepo
     );
   }

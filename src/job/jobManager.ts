@@ -14,6 +14,7 @@ import { JobRepository } from '../repositories/jobRepository';
 import { IFileSystemServices } from '../services/fileServices';
 import { IConfig } from 'config';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 
 export const jobHandlerMap = {
@@ -35,6 +36,7 @@ export class JobHandlerFactory {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ): JobHandler {
     const jt = job.payload?.jobType;
@@ -50,6 +52,7 @@ export class JobHandlerFactory {
         logger,
         validator,
         repoBranchesRepo,
+        docsetsRepo,
         repoEntitlementsRepo
       );
     }
@@ -70,6 +73,7 @@ export class JobManager {
   private _jobHandlerFactory: JobHandlerFactory;
   private _jobCommandExecutor: IJobCommandExecutor;
   private _repoBranchesRepo: RepoBranchesRepository;
+  private _docsetsRepo: DocsetsRepository;
   private _repoEntitlementsRepo: RepoEntitlementsRepository;
 
   constructor(
@@ -83,6 +87,7 @@ export class JobManager {
     fileSystemServices: IFileSystemServices,
     logger: IJobRepoLogger,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     this._jobRepository = jobRepository;
@@ -97,6 +102,7 @@ export class JobManager {
     this._jobHandlerFactory = jobHandlerFactory;
     this._jobCommandExecutor = jobCommandExecutor;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._docsetsRepo = docsetsRepo;
     this._repoEntitlementsRepo = repoEntitlementsRepo;
   }
 
@@ -163,6 +169,7 @@ export class JobManager {
       this._logger,
       this._jobValidator,
       this._repoBranchesRepo,
+      this._docsetsRepo,
       this._repoEntitlementsRepo
     );
 

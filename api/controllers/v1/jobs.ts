@@ -2,7 +2,6 @@ import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { IConfig } from 'config';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
-import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
@@ -12,6 +11,7 @@ import { ECSContainer } from '../../../src/services/containerServices';
 import { SQSConnector } from '../../../src/services/queue';
 import { Batch } from '../../../src/services/batch';
 import { notifyBuildSummary, snootyBuildComplete } from '../../handlers/jobs';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
 export const TriggerLocalBuild = async (event: any = {}, context: any = {}): Promise<any> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -166,13 +166,22 @@ function prepProgressMessage(
   jobId: string,
   jobTitle: string,
   status: string,
-  errorReason: string
+  errorReason: string,
+  jobType?: string
 ): string {
   const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
   const env = c.get<string>('env');
   switch (status) {
     case 'inQueue':
-      return msg + 'has successfully been added to the ' + env + ' queue.';
+      // Encourage writers to update to new webhook on githubPush jobs
+      let inQueueMsg = msg;
+      if (jobType == 'githubPush') {
+        const webhookWikiUrl =
+          'https://wiki.corp.mongodb.com/display/DE/How-To%3A+Use+Snooty%27s+Autobuilder+to+Build+Your+Content';
+        const updatePlease = `:exclamation: You used the old webhook for this build. <${webhookWikiUrl}|Update to the new webhook> in your fork of this repo to save 90s per build.`;
+        inQueueMsg = updatePlease + '\n\n' + msg;
+      }
+      return inQueueMsg + 'has successfully been added to the ' + env + ' queue.';
     case 'inProgress':
       return msg + 'is now being processed.';
     case 'completed':
@@ -213,7 +222,8 @@ async function NotifyBuildProgress(jobId: string): Promise<any> {
       jobId,
       jobTitle,
       fullDocument.status as string,
-      fullDocument?.error?.reason || ''
+      fullDocument?.error?.reason || '',
+      fullDocument?.payload.jobType
     ),
     entitlement['slack_user_id']
   );
@@ -248,7 +258,7 @@ async function SubmitArchiveJob(jobId: string) {
   const db = client.db(c.get('dbName'));
   const models = {
     jobs: new JobRepository(db, c, consoleLogger),
-    repoBranches: new RepoBranchesRepository(db, c, consoleLogger),
+    repoBranches: new DocsetsRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
   const repo = await models.repoBranches.getRepo(job.payload.repoName);

@@ -6,12 +6,14 @@ import { JobValidator } from '../../../src/job/jobValidator';
 import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitlementsRepository';
 import { TestDataProvider } from '../../data/data';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
 let job: Job;
 let fileSystemServices: IFileSystemServices;
 let repoEntitlementRepository: RepoEntitlementsRepository;
 let jobValidator: JobValidator;
 let repoBranchesRepository: RepoBranchesRepository;
+let docsetsRepository: DocsetsRepository;
 
 beforeEach(() => {
   // Deep copy buildJobDef is necessary because we modify job
@@ -19,18 +21,27 @@ beforeEach(() => {
   fileSystemServices = mockDeep<IFileSystemServices>();
   repoEntitlementRepository = mockDeep<RepoEntitlementsRepository>();
   repoBranchesRepository = mockDeep<RepoBranchesRepository>();
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepository);
+  docsetsRepository = mockDeep<DocsetsRepository>();
+  jobValidator = new JobValidator(
+    fileSystemServices,
+    repoEntitlementRepository,
+    repoBranchesRepository,
+    docsetsRepository
+  );
 });
 
 afterEach(() => {
   mockReset(repoEntitlementRepository);
   mockReset(fileSystemServices);
-  mockReset(repoEntitlementRepository);
+  mockReset(repoBranchesRepository);
+  mockReset(docsetsRepository);
 });
 
 describe('JobValidator Tests', () => {
   test('Construct Job Factory', () => {
-    expect(new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepository)).toBeDefined();
+    expect(
+      new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepository, docsetsRepository)
+    ).toBeDefined();
   });
 
   test('invalid job type throws', async () => {

@@ -2,7 +2,6 @@
 
 exports[`associated_products module getAllAssociatedRepoBranchesEntries should get all repo branches info for specified associated products 1`] = `
 Object {
-  "_id": "6243aa3f0aae3635a59a1150",
   "branches": Array [
     Object {
       "active": true,
@@ -2766,7 +2765,6 @@ Array [
 
 exports[`associated_products module getRepoBranchesEntry should query repo branches for project and branch 1`] = `
 Object {
-  "_id": "6243aa3f0aae3635a59a1150",
   "branches": Array [
     Object {
       "active": true,

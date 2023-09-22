@@ -175,7 +175,7 @@ export class TestDataProvider {
   }
 
   static getEnvVarsWithPathPrefixWithFlags(job: Job): string {
-    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\n`;
+    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_SHOW_CHATBOT=false\n`;
   }
 
   static getPathPrefixCases(): Array<any> {
@@ -446,5 +446,45 @@ export class TestDataProvider {
       retVal.push(`git checkout ${newHead} .`);
     }
     return retVal;
+  }
+
+  static getAggregationPipeline(
+    matchConditionField: string,
+    matchConditionValue: string,
+    projection?: { [k: string]: number }
+  ) {
+    return [
+      // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
+      {
+        $unwind: '$repos',
+      },
+      // Stage 2: Lookup to join with the repos_branches collection
+      {
+        $lookup: {
+          from: 'repos_branches',
+          localField: 'repos',
+          foreignField: '_id',
+          as: 'repo',
+        },
+      },
+      // Stage 3: Match documents based on given field
+      {
+        $match: {
+          [`repo.${matchConditionField}`]: matchConditionValue,
+        },
+      },
+      // Stage 4: Merge/flatten repo into docset
+      {
+        $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ['$repo', 0] }, '$$ROOT'] } },
+      },
+      // Stage 5: Exclude fields
+      {
+        $project: projection || {
+          _id: 0,
+          repos: 0,
+          repo: 0,
+        },
+      },
+    ];
   }
 }
