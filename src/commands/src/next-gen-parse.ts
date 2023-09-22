@@ -11,7 +11,7 @@ async function getPatchId(repoDir: string): Promise<string> {
 
   const { stdout: gitPatchId } = await readFileAndExec('git', filePath, ['patch-id']);
 
-  return gitPatchId;
+  return gitPatchId.slice(0, 7);
 }
 
 export async function nextGenParse(repoName: string): Promise<void> {
