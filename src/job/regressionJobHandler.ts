@@ -1,5 +1,6 @@
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
@@ -23,6 +24,7 @@ export class RegressionJobHandler extends ProductionJobHandler {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
@@ -36,6 +38,7 @@ export class RegressionJobHandler extends ProductionJobHandler {
       logger,
       validator,
       repoBranchesRepo,
+      docsetsRepo,
       repoEntitlementsRepo
     );
     this.name = 'Regression';

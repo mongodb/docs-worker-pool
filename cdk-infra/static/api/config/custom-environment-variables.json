@@ -20,6 +20,7 @@
   "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
   "dashboardUrl": "DASHBOARD_URL",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
+  "docsetsCollection": "DOCSETS_COL_NAME",
   "taskDefinitionFamily": "TASK_DEFINITION_FAMILY",
   "jobsQueueUrl": "JOBS_QUEUE_URL",
   "jobUpdatesQueueUrl": "JOB_UPDATES_QUEUE_URL",

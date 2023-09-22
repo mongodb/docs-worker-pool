@@ -47,7 +47,9 @@ Resources:
             - Name: JOB_QUEUE_COL_NAME
               Value: ${self:custom.jobCollection}
             - Name: REPO_BRANCHES_COL_NAME
-              value:  ${self:custom.repoBranchesCollection}
+              Value: ${self:custom.repoBranchesCollection}
+            - Name: DOCSETS_COL_NAME
+              Value: ${self:custom.docsetsCollection}
             - Name: NPM_BASE_64_AUTH
               Value: ${self:custom.npmBase64Auth}
             - Name: NPM_EMAIL

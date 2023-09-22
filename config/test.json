@@ -12,7 +12,7 @@
   "githubBotPW": "q1w",
   "fastlyDochubMap": "devfslydochubmap",
   "entitlementCollection": "entitlements",
-  "reposBranchesCollection": "allison_repos_branches",
+  "docsetsCollection": "docsets",
   "MONGO_TIMEOUT_S": 1,
   "JOB_TIMEOUT_S": 10,
   "RETRY_TIMEOUT_MS": 10,

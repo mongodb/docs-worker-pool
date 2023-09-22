@@ -1,4 +1,5 @@
 import { getDeployableJobs } from '../../../api/controllers/v1/slack';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 
 const mockRepoInfo = {
@@ -36,10 +37,16 @@ const mockBranchObject = {
 // Mock RepoBranchesRepository so that we can mock which data to return.
 jest.mock('../../../src/repositories/repoBranchesRepository', () => ({
   RepoBranchesRepository: jest.fn().mockImplementation(() => ({
-    getRepo: jest.fn().mockImplementation(() => mockRepoInfo),
     getRepoBranchAliases: jest
       .fn()
       .mockImplementation((repoName, branchName) => mockBranchObject[repoName][branchName]),
+  })),
+}));
+
+// Mock DocsetsRepository so that we can mock which data to return.
+jest.mock('../../../src/repositories/docsetsRepository', () => ({
+  DocsetsRepository: jest.fn().mockImplementation(() => ({
+    getRepo: jest.fn().mockImplementation(() => mockRepoInfo),
   })),
 }));
 
@@ -50,15 +57,21 @@ describe('Slack API Controller Tests', () => {
     email: 'test.user@mongodb.com',
     github_username: 'test.user',
   };
-  // We're mocking RepoBranchesRepository to avoid needing access to a database. We'll use mock data.
+  // We're mocking RepoBranchesRepository and DocsetsRepository to avoid needing access to a database. We'll use mock data.
   const mockRepoBranchRepository = new RepoBranchesRepository(null, null, null);
+  const mockDocsetsRepository = new DocsetsRepository(null, null, null);
 
   test('deployable jobs with the assigned urlSlug have primaryAlias set to true', async () => {
     const mockValues = {
       repo_option: [{ value: 'mongodb/docs/master' }],
     };
 
-    const deployable = await getDeployableJobs(mockValues, mockEntitlement, mockRepoBranchRepository);
+    const deployable = await getDeployableJobs(
+      mockValues,
+      mockEntitlement,
+      mockRepoBranchRepository,
+      mockDocsetsRepository
+    );
 
     expect(deployable).toHaveLength(2);
     const jobsWithPrimaryAlias = deployable.filter((job) => job.payload.primaryAlias);
@@ -71,7 +84,12 @@ describe('Slack API Controller Tests', () => {
       repo_option: [{ value: 'mongodb/docs/v5.0' }],
     };
 
-    const deployable = await getDeployableJobs(mockValues, mockEntitlement, mockRepoBranchRepository);
+    const deployable = await getDeployableJobs(
+      mockValues,
+      mockEntitlement,
+      mockRepoBranchRepository,
+      mockDocsetsRepository
+    );
 
     expect(deployable).toHaveLength(3);
     const jobsWithPrimaryAlias = deployable.filter((job) => job.payload.primaryAlias);

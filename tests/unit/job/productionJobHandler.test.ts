@@ -1,7 +1,7 @@
 import { mockReset } from 'jest-mock-extended';
 import { JobStatus } from '../../../src/entities/job';
 import { TestDataProvider } from '../../data/data';
-import { getBuildJobDef, getManifestJobDef } from '../../data/jobDef';
+import { getBuildJobDef } from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
 describe('ProductionJobHandler Tests', () => {
