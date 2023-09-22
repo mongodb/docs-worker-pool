@@ -9,5 +9,5 @@ async function createEnvProdFile(repoDir: string) {
 }
 export async function nextGenHtml(repoName: string) {
   const repoDir = getRepoDir(repoName);
-  await createEnvProdFile(repoName);
+  await createEnvProdFile(repoDir);
 }
