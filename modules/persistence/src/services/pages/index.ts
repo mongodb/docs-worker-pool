@@ -236,6 +236,7 @@ class UpdatedPagesManager {
             $set: {
               deleted: true,
               updated_at: this.updateTime,
+              build_id: this.buildId,
             },
           },
         },
