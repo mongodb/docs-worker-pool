@@ -93,6 +93,7 @@ export class DocsetsRepository extends BaseRepository {
    * @returns A boolean representing whether or not the configured docset entry snooty_toml path
    * matches the path found in GitHub.
    */
+  // Warning: Directories field might be changing locations in schema. This method is unused and validity should be checked before usage.
   async checkSnootyTomlPath(path: string, projectName: string) {
     const query = { project: projectName };
     try {
