@@ -274,7 +274,7 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
 
     const diffsTimerLabel = 'finding page differences';
     console.time(diffsTimerLabel);
-    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, githubUser);
+    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, githubUser, buildId);
     const operations = updatedPagesManager.getOperations();
     console.timeEnd(diffsTimerLabel);
 
