@@ -1,6 +1,7 @@
 import { SpawnOptions, spawn } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
+import path from 'path';
 
 const openAsync = promisify(fs.open);
 const closeAsync = promisify(fs.close);
@@ -64,3 +65,5 @@ export async function readFileAndExec(command: string, filePath: string, args?: 
 
   return response;
 }
+
+export const getRepoDir = (repoName: string) => path.join(__dirname, `repos/${repoName}`);
