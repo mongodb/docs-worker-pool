@@ -1,4 +1,9 @@
 import { SpawnOptions, spawn } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs';
+
+const openAsync = promisify(fs.open);
+const closeAsync = promisify(fs.close);
 
 export class ExecuteCommandError extends Error {
   data: unknown;
@@ -49,4 +54,13 @@ export async function executeCliCommand(
       });
     });
   });
+}
+
+export async function readFileAndExec(command: string, filePath: string, args?: string[]): Promise<CliCommandResponse> {
+  const fileId = await openAsync(filePath, 'r');
+  const response = await executeCliCommand(command, args, { stdio: [fileId, process.stdout, process.stderr] });
+
+  await closeAsync(fileId);
+
+  return response;
 }
