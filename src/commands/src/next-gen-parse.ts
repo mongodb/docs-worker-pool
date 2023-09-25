@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { executeCliCommand, getRepoDir, readFileAndExec } from './helpers';
+import { executeCliCommand, getCommitHash, getRepoDir, readFileAndExec } from './helpers';
 import { promisify } from 'util';
 
 const existsAsync = promisify(fs.exists);
@@ -22,7 +22,10 @@ export async function nextGenParse(repoName: string): Promise<void> {
   const hasPatch = !(await existsAsync(path.join(repoDir, 'myPatch.patch')));
 
   if (hasPatch) {
-    const patchId = await getPatchId(repoDir);
+    const [patchId, commitHash] = await Promise.all([getPatchId(repoDir), getCommitHash()]);
+
+    commandArgs.push('--commit');
+    commandArgs.push(commitHash);
 
     commandArgs.push('--patch');
     commandArgs.push(patchId);

@@ -66,4 +66,11 @@ export async function readFileAndExec(command: string, filePath: string, args?: 
   return response;
 }
 
+export async function getCommitHash(): Promise<string> {
+  // git rev-parse --short HEAD
+  const response = await executeCliCommand('git', ['rev-parse', '--short', 'HEAD']);
+
+  return response.stdout;
+}
+
 export const getRepoDir = (repoName: string) => path.join(__dirname, `repos/${repoName}`);
