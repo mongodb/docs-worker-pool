@@ -93,6 +93,20 @@ export async function getPatchId(repoDir: string): Promise<string> {
   return gitPatchId.slice(0, 7);
 }
 
+export async function addProjectToEnv(project: string) {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createWriteStream(path.join(__dirname, 'snooty/.env.production'), { flags: 'a+' });
+
+    stream.write(project);
+    stream.close();
+    stream.on('error', (error) => {
+      console.log('Error when writing to file!', error);
+      reject(error);
+    });
+    stream.on('close', resolve);
+  });
+}
+
 export async function getCommitHash(): Promise<string> {
   // equivalent to git rev-parse --short HEAD
   const response = await executeCliCommand({ command: 'git', args: ['rev-parse', '--short', 'HEAD'] });
