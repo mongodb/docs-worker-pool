@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { executeCliCommand, getCommitHash, getRepoDir, readFileAndExec } from './helpers';
+import { executeCliCommand, getCommitHash, getRepoDir, readFileAndExec } from '../helpers';
 import { promisify } from 'util';
 
 const existsAsync = promisify(fs.exists);
