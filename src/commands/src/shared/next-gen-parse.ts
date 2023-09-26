@@ -1,9 +1,7 @@
-import fs from 'fs';
 import path from 'path';
-import { executeCliCommand, getCommitHash, getRepoDir, readFileAndExec } from '../helpers';
-import { promisify } from 'util';
 
-const existsAsync = promisify(fs.exists);
+import { checkIfPatched, executeCliCommand, getCommitHash, getRepoDir, readFileAndExec } from '../helpers';
+
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 
 async function getPatchId(repoDir: string): Promise<string> {
@@ -19,7 +17,7 @@ export async function nextGenParse(repoName: string): Promise<void> {
 
   const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`, RSTSPEC_FLAG];
 
-  const hasPatch = !(await existsAsync(path.join(repoDir, 'myPatch.patch')));
+  const hasPatch = await checkIfPatched(repoDir);
 
   if (hasPatch) {
     const [patchId, commitHash] = await Promise.all([getPatchId(repoDir), getCommitHash()]);

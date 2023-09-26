@@ -5,6 +5,7 @@ import path from 'path';
 
 const openAsync = promisify(fs.open);
 const closeAsync = promisify(fs.close);
+const existsAsync = promisify(fs.exists);
 
 export class ExecuteCommandError extends Error {
   data: unknown;
@@ -73,4 +74,5 @@ export async function getCommitHash(): Promise<string> {
   return response.stdout;
 }
 
+export const checkIfPatched = async (repoDir: string) => !(await existsAsync(path.join(repoDir, 'myPatch.patch')));
 export const getRepoDir = (repoName: string) => path.join(__dirname, `repos/${repoName}`);
