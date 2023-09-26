@@ -15,21 +15,31 @@ export class ExecuteCommandError extends Error {
   }
 }
 
+interface CliCommandParams {
+  command: string;
+  args?: readonly string[];
+  options?: SpawnOptions;
+  writeStream?: fs.WriteStream;
+}
+
 interface CliCommandResponse {
   stdout: string;
   stderr: string;
 }
 
-export async function executeCliCommand(
-  command: string,
-  args: readonly string[] = [],
-  options: SpawnOptions = {}
-): Promise<CliCommandResponse> {
+export async function executeCliCommand({
+  command,
+  args = [],
+  options = {},
+  writeStream,
+}: CliCommandParams): Promise<CliCommandResponse> {
   return new Promise((resolve, reject) => {
     const stdout: string[] = [];
     const stderr: string[] = [];
 
     const executedCommand = spawn(command, args, options);
+
+    if (writeStream) executedCommand.stdout?.pipe(writeStream);
 
     executedCommand.stdout?.on('data', (data: Buffer) => {
       stdout.push(data.toString());
@@ -58,9 +68,17 @@ export async function executeCliCommand(
   });
 }
 
+export async function executeAndWriteToFile() {
+  return null;
+}
+
 export async function readFileAndExec(command: string, filePath: string, args?: string[]): Promise<CliCommandResponse> {
   const fileId = await openAsync(filePath, 'r');
-  const response = await executeCliCommand(command, args, { stdio: [fileId, process.stdout, process.stderr] });
+  const response = await executeCliCommand({
+    command,
+    args,
+    options: { stdio: [fileId, process.stdout, process.stderr] },
+  });
 
   await closeAsync(fileId);
 
@@ -76,8 +94,8 @@ export async function getPatchId(repoDir: string): Promise<string> {
 }
 
 export async function getCommitHash(): Promise<string> {
-  // git rev-parse --short HEAD
-  const response = await executeCliCommand('git', ['rev-parse', '--short', 'HEAD']);
+  // equivalent to git rev-parse --short HEAD
+  const response = await executeCliCommand({ command: 'git', args: ['rev-parse', '--short', 'HEAD'] });
 
   return response.stdout;
 }
