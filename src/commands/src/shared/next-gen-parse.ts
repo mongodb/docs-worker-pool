@@ -1,16 +1,6 @@
-import path from 'path';
-
 import { checkIfPatched, executeCliCommand, getCommitHash, getRepoDir, readFileAndExec } from '../helpers';
 
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
-
-async function getPatchId(repoDir: string): Promise<string> {
-  const filePath = path.join(repoDir, 'myPatch.patch');
-
-  const { stdout: gitPatchId } = await readFileAndExec('git', filePath, ['patch-id']);
-
-  return gitPatchId.slice(0, 7);
-}
 
 export async function nextGenParse(repoName: string): Promise<void> {
   const repoDir = getRepoDir(repoName);

@@ -67,6 +67,14 @@ export async function readFileAndExec(command: string, filePath: string, args?: 
   return response;
 }
 
+export async function getPatchId(repoDir: string): Promise<string> {
+  const filePath = path.join(repoDir, 'myPatch.patch');
+
+  const { stdout: gitPatchId } = await readFileAndExec('git', filePath, ['patch-id']);
+
+  return gitPatchId.slice(0, 7);
+}
+
 export async function getCommitHash(): Promise<string> {
   // git rev-parse --short HEAD
   const response = await executeCliCommand('git', ['rev-parse', '--short', 'HEAD']);
@@ -76,3 +84,6 @@ export async function getCommitHash(): Promise<string> {
 
 export const checkIfPatched = async (repoDir: string) => !(await existsAsync(path.join(repoDir, 'myPatch.patch')));
 export const getRepoDir = (repoName: string) => path.join(__dirname, `repos/${repoName}`);
+
+export const RSTSPEC_FLAG =
+  '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
