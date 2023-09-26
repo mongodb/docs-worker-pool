@@ -4,6 +4,7 @@ import { Db, FindCursor, FindOptions } from 'mongodb';
 import { JobRepository } from '../../src/repositories/jobRepository';
 import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
 import { ILogger } from '../../src/services/logger';
 
 export class DBRepositoryHelper {
@@ -15,6 +16,7 @@ export class DBRepositoryHelper {
   find: (query: any, errorMsg: string, options?: FindOptions) => Promise<FindCursor>;
   findOne: (query: any, errorMsg: string) => Promise<any>;
   findOneAndUpdate: (query: any, update: any, options: any, errorMsg: string) => Promise<any>;
+  aggregate: (pipeline: any, errorMsg: string, options: any) => Promise<any>;
   collection: any;
   jobRepo: JobRepository;
 
@@ -22,6 +24,7 @@ export class DBRepositoryHelper {
     job: JobRepository,
     repo: RepoEntitlementsRepository,
     repoBranches: RepoBranchesRepository,
+    docsets: DocsetsRepository,
   };
 
   init(repoName, collectionConfigName, collectionName): any {
@@ -35,12 +38,14 @@ export class DBRepositoryHelper {
     this.find = jest.fn();
     this.findOne = jest.fn();
     this.findOneAndUpdate = jest.fn();
+    this.aggregate = jest.fn();
     this.collection = {
       updateOne: this.updateOne,
       updateMany: this.updateMany,
       find: this.find,
       findOne: this.findOne,
       findOneAndUpdate: this.findOneAndUpdate,
+      aggregate: this.aggregate,
     };
     this.config.get.calledWith(collectionConfigName).mockReturnValue(collectionName);
     this.db.collection.calledWith(collectionName).mockReturnValue(this.collection);

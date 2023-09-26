@@ -300,7 +300,7 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
 export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githubUser: string) => {
   try {
     const pages = pagesFromZip(zip, githubUser);
-    const ops: PromiseLike<any>[] = [insert(pages, COLLECTION_NAME, buildId)];
+    const ops: PromiseLike<any>[] = [insert(pages, COLLECTION_NAME, buildId, true)];
 
     const featureEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
     if (featureEnabled && featureEnabled.toUpperCase() === 'TRUE') {

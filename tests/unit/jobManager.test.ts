@@ -12,6 +12,8 @@ import { IJobRepoLogger } from '../../src/services/logger';
 import { IRepoConnector } from '../../src/services/repo';
 import { getBuildJobDef } from '../data/jobDef';
 import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
+import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
 
 describe('JobManager Tests', () => {
   let job: Job;
@@ -26,6 +28,8 @@ describe('JobManager Tests', () => {
   let jobManager: JobManager;
   let jobValidator: JobValidator;
   let repoBranchesRepo: RepoBranchesRepository;
+  let docsetsRepo: DocsetsRepository;
+  let repoEntitlementsRepo: RepoEntitlementsRepository;
 
   beforeEach(() => {
     jest.useFakeTimers('modern');
@@ -41,6 +45,8 @@ describe('JobManager Tests', () => {
     jobHandlerFactory = mockDeep<JobHandlerFactory>();
     jobValidator = mockDeep<JobValidator>();
     repoBranchesRepo = mockDeep<RepoBranchesRepository>();
+    docsetsRepo = mockDeep<DocsetsRepository>();
+    repoEntitlementsRepo = mockDeep<RepoEntitlementsRepository>();
     jobManager = new JobManager(
       config,
       jobValidator,
@@ -51,7 +57,9 @@ describe('JobManager Tests', () => {
       repoConnector,
       fileSystemServices,
       logger,
-      repoBranchesRepo
+      repoBranchesRepo,
+      docsetsRepo,
+      repoEntitlementsRepo
     );
   });
 

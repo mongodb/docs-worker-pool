@@ -10,6 +10,7 @@ import { IRepoConnector } from '../services/repo';
 import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
@@ -23,6 +24,7 @@ export class StagingJobHandler extends JobHandler {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
@@ -36,6 +38,7 @@ export class StagingJobHandler extends JobHandler {
       logger,
       validator,
       repoBranchesRepo,
+      docsetsRepo,
       repoEntitlementsRepo
     );
     this.name = 'Staging';

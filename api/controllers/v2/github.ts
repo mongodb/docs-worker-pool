@@ -8,19 +8,21 @@ import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { EnhancedJob, JobStatus } from '../../../src/entities/job';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
+import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { getMonorepoPaths } from '../../../src/monorepo';
 import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
+import { ReposBranchesDocument } from '../../../modules/persistence/src/services/metadata/associated_products';
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
   repoBranchesRepository: RepoBranchesRepository,
-  prefix: string
+  prefix: string,
+  repoInfo: ReposBranchesDocument
 ): Promise<Omit<EnhancedJob, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(githubEvent.repository.name, branch_name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
-  const repo_info = await repoBranchesRepository.getRepo(githubEvent.repository.name);
-  const project = repo_info?.project ?? githubEvent.repository.name;
+  const project = repoInfo?.project ?? githubEvent.repository.name;
 
   return {
     title: githubEvent.repository.full_name,
@@ -58,6 +60,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
+  const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
 
   if (!event.body) {
     const err = 'Trigger build does not have a body in event payload';
@@ -98,10 +101,10 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   }
 
   const env = c.get<string>('env');
-  const repoInfo = await repoBranchesRepository.getRepo(body.repository.name);
+  const repoInfo = await docsetsRepository.getRepo(body.repository.name);
   const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
 
-  const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix);
+  const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
 
   if (process.env.MONOREPO_PATH_FEATURE === 'true') {
     try {

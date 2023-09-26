@@ -16,6 +16,7 @@ export class TestDBManager {
     process.env.DB_NAME = 'jest';
     process.env.JOB_QUEUE_COL_NAME = 'queue';
     process.env.USER_ENTITLEMENT_COL_NAME = 'entitlements';
+    process.env.DOCSETS_COL_NAME = 'docsets';
   }
 
   async start() {
@@ -29,6 +30,7 @@ export class TestDBManager {
     this.db = this.client.db(process.env.DB_NAME);
     await this.db.createCollection(process.env.JOB_QUEUE_COL_NAME);
     await this.db.createCollection(process.env.USER_ENTITLEMENT_COL_NAME);
+    await this.db.createCollection(process.env.DOCSETS_COL_NAME);
   }
 
   async stop() {

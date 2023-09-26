@@ -14,6 +14,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { InvalidJobError } from '../errors/errors';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 
 // TODO: Move this to a generic util and out of this job file
 export const joinUrlAndPrefix = (url: string, prefix: string) => {
@@ -37,6 +38,7 @@ export class ManifestJobHandler extends JobHandler {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
@@ -50,6 +52,7 @@ export class ManifestJobHandler extends JobHandler {
       logger,
       validator,
       repoBranchesRepo,
+      docsetsRepo,
       repoEntitlementsRepo
     );
     this.name = 'Manifest';
