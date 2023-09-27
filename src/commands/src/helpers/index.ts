@@ -50,7 +50,9 @@ export async function executeCliCommand({
     });
 
     executedCommand.on('error', (err) => {
-      reject(new ExecuteCommandError('The command failed', err));
+      if (err) {
+        reject(new ExecuteCommandError('The command failed', err));
+      }
     });
 
     executedCommand.on('close', (exitCode) => {
@@ -58,6 +60,10 @@ export async function executeCliCommand({
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
+
+        if (stderr) {
+          console.error(stderr.join());
+        }
 
         reject(new ExecuteCommandError('The command failed', exitCode));
         return;
@@ -119,7 +125,7 @@ export async function getPatchId(repoDir: string): Promise<string> {
 
 export async function addProjectToEnv(project: string) {
   return new Promise((resolve, reject) => {
-    const stream = fs.createWriteStream(path.join(__dirname, 'snooty/.env.production'), { flags: 'a+' });
+    const stream = fs.createWriteStream(path.join(process.cwd(), 'snooty/.env.production'), { flags: 'a+' });
 
     stream.write(project);
     stream.close();
@@ -143,7 +149,7 @@ export async function getCommitHash(repoDir: string): Promise<string> {
 }
 
 export const checkIfPatched = async (repoDir: string) => !(await existsAsync(path.join(repoDir, 'myPatch.patch')));
-export const getRepoDir = (repoName: string) => path.join(__dirname, `repos/${repoName}`);
+export const getRepoDir = (repoName: string) => path.join(process.cwd(), `repos/${repoName}`);
 
 export const RSTSPEC_FLAG =
   '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';

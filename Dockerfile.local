@@ -1,55 +1,110 @@
-FROM autobuilder/base:latest
+FROM ubuntu:20.04
 ARG SNOOTY_PARSER_VERSION=0.14.9
 ARG SNOOTY_FRONTEND_VERSION=0.14.16
 ARG MUT_VERSION=0.10.7
 ARG REDOC_CLI_VERSION=1.2.2
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
+ARG WORK_DIRECTORY=/app
+ARG SNOOTY_PARSER_VERSION=0.14.9
+ARG SNOOTY_FRONTEND_VERSION=0.14.16
+ARG MUT_VERSION=0.10.7
+ARG REDOC_CLI_VERSION=1.2.2
+ARG NPM_BASE_64_AUTH
+ARG NPM_EMAIL
+ENV DEBIAN_FRONTEND=noninteractive
+
+# install legacy build environment for docs
+RUN apt-get -o Acquire::Check-Valid-Until=false update
+RUN apt-get -y install libpython2.7-dev python2.7 git rsync unzip curl
+RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+RUN python2.7 get-pip.py
+RUN pip install requests virtualenv virtualenvwrapper py-dateutil
+RUN python2.7 -m pip install python-dateutil
+RUN virtualenv /venv
+RUN /venv/bin/pip install --upgrade --force setuptools
+RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
+
+# helper libraries for docs builds
+RUN apt-get update && apt-get install -y vim git
+
+
+ENV PATH="${PATH}:/opt/snooty:/opt/mut:/app/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
+
+# get node 18
+# https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
+RUN apt-get install --yes curl
+RUN curl --location https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get install --yes nodejs
+RUN apt-get install --yes build-essential
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
 
+# install snooty parser
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ snooty-parser.zip
+
+# install mut
+RUN curl -L -o mut.zip https://github.com/mongodb/mut/releases/download/v${MUT_VERSION}/mut-v${MUT_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ mut.zip
+
+RUN curl  -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/tags/v${REDOC_CLI_VERSION}.zip \
+    && unzip redoc.zip \
+    && mv redoc-${REDOC_CLI_VERSION} redoc/ 
+
+# setup user and root directory
+RUN useradd -ms /bin/bash docsworker
+RUN chmod 755 -R /app
+RUN chown -Rv docsworker /app
+USER docsworker
+
+# install snooty frontend and docs-tools
+RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+    && cd snooty                                                                                   \
+    && npm ci --legacy-peer-deps --omit=dev                                                        
+
+RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 COPY modules/persistence/package*.json ./modules/persistence/
 RUN cd ./modules/persistence \
     && npm ci --legacy-peer-deps 
 
+RUN  mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
 COPY modules/oas-page-builder/package*.json ./modules/oas-page-builder/
 RUN cd ./modules/oas-page-builder \
     && npm ci --legacy-peer-deps 
 
 # install persistence module
-COPY modules/persistence/tsconfig*.json ./modules/persistence
-COPY modules/persistence/src ./modules/persistence/src/
-COPY modules/persistence/index.ts ./modules/persistence
+
+COPY --chown=docsworker modules/persistence/tsconfig*.json ./modules/persistence
+COPY --chown=docsworker modules/persistence/src ./modules/persistence/src/
+COPY --chown=docsworker modules/persistence/index.ts ./modules/persistence
 
 RUN cd ./modules/persistence \
     && npm run build
 
 # Build modules
 # OAS Page Builder
-COPY modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
-COPY modules/oas-page-builder/src ./modules/oas-page-builder/src/
-COPY modules/oas-page-builder/index.ts ./modules/oas-page-builder
+
+COPY --chown=docsworker modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
+COPY --chown=docsworker modules/oas-page-builder/src ./modules/oas-page-builder/src/
+COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-builder
 
 RUN cd ./modules/oas-page-builder \
     && npm run build
 
 # Root project build
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
 COPY tsconfig*.json ./
 COPY config config/
 COPY api api/
 COPY src src/
 
-RUN npm run build
+RUN npm run build:esbuild
 
-ENV PATH="${PATH}:/opt/snooty:/opt/mut"
-
-RUN mkdir repos/
-
-RUN git --version
+RUN mkdir repos && chmod 755 repos
 
 EXPOSE 3000
 
-CMD ["node", "build/entrypoints/localApp.js"]
+CMD ["node", "dist/entrypoints/localApp.js", "--enable-source-maps"]
