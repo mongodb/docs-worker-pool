@@ -1,0 +1,56 @@
+FROM node:18.16.0-alpine as ts-compiler
+ARG WORK_DIRECTORY=/home/docsworker-xlarge
+ARG SNOOTY_PARSER_VERSION=0.14.9
+ARG SNOOTY_FRONTEND_VERSION=0.14.16
+ARG MUT_VERSION=0.10.7
+ARG REDOC_CLI_VERSION=1.2.2
+ARG NPM_BASE_64_AUTH
+ARG NPM_EMAIL
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+
+RUN apk add curl
+
+# install snooty parser
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ snooty-parser.zip
+
+# install mut
+RUN curl -L -o mut.zip https://github.com/mongodb/mut/releases/download/v${MUT_VERSION}/mut-v${MUT_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ mut.zip
+
+# install snooty frontend and docs-tools
+RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+    && cd snooty                                                                                   \
+    && npm ci --legacy-peer-deps --omit=dev                                                        
+
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
+
+COPY tsconfig*.json ./
+COPY config config/
+COPY src src/
+COPY api api/
+
+COPY modules/persistence ./modules/persistence/
+COPY modules/oas-page-builder ./modules/oas-page-builder/
+
+RUN npm run build
+
+# install persistence module
+RUN cd ./modules/persistence \
+    && npm ci --legacy-peer-deps \
+    && npm run build
+
+# Build modules
+# OAS Page Builder
+RUN cd ./modules/oas-page-builder \
+    && npm ci --legacy-peer-deps \
+    && npm run build
+
+ENV PATH="${PATH}:/opt/snooty:/opt/mut"
+
+EXPOSE 3000
+
+CMD ["node", "entrypoints/localApp.js"]

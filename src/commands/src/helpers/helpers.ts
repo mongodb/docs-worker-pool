@@ -58,6 +58,9 @@ export async function executeCliCommand({
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
+
+        reject(new ExecuteCommandError('The command failed', exitCode));
+        return;
       }
 
       resolve({
@@ -68,11 +71,32 @@ export async function executeCliCommand({
   });
 }
 
-export async function executeAndWriteToFile() {
-  return null;
+export interface ExecuteIOCommandParams {
+  command: string;
+  filePath: string;
+  args?: string[];
 }
 
-export async function readFileAndExec(command: string, filePath: string, args?: string[]): Promise<CliCommandResponse> {
+/**
+ * This function is equivalent to a double redirect
+ * e.g. echo "Hello!" >> hello.txt
+ * @param param0
+ */
+export async function executeAndWriteToFile({ command, filePath, args }: ExecuteIOCommandParams) {
+  const writeStream = fs.createWriteStream(filePath, {
+    flags: 'a+',
+  });
+
+  const result = await executeCliCommand({ command, args, writeStream });
+
+  return result;
+}
+
+export async function readFileAndExec({
+  command,
+  filePath,
+  args,
+}: ExecuteIOCommandParams): Promise<CliCommandResponse> {
   const fileId = await openAsync(filePath, 'r');
   const response = await executeCliCommand({
     command,
@@ -88,7 +112,7 @@ export async function readFileAndExec(command: string, filePath: string, args?: 
 export async function getPatchId(repoDir: string): Promise<string> {
   const filePath = path.join(repoDir, 'myPatch.patch');
 
-  const { stdout: gitPatchId } = await readFileAndExec('git', filePath, ['patch-id']);
+  const { stdout: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
 
   return gitPatchId.slice(0, 7);
 }

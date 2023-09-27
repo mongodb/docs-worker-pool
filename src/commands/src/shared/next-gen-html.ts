@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { promisify } from 'util';
-import { getRepoDir } from '../helpers';
+import { getRepoDir } from '../helpers/helpers';
 
 const writeFileAsync = promisify(fs.writeFile);
 

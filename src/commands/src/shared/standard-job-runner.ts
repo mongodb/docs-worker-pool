@@ -1,4 +1,11 @@
-import { getRepoDir, checkIfPatched, getCommitHash, executeCliCommand, getPatchId, RSTSPEC_FLAG } from '../helpers';
+import {
+  getRepoDir,
+  checkIfPatched,
+  getCommitHash,
+  executeCliCommand,
+  getPatchId,
+  RSTSPEC_FLAG,
+} from '../helpers/helpers';
 
 export class StandardJobRunner {
   repoName: string;
