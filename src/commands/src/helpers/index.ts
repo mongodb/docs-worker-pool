@@ -131,9 +131,13 @@ export async function addProjectToEnv(project: string) {
   });
 }
 
-export async function getCommitHash(): Promise<string> {
+export async function getCommitHash(repoDir: string): Promise<string> {
   // equivalent to git rev-parse --short HEAD
-  const response = await executeCliCommand({ command: 'git', args: ['rev-parse', '--short', 'HEAD'] });
+  const response = await executeCliCommand({
+    command: 'git',
+    args: ['rev-parse', '--short', 'HEAD'],
+    options: { cwd: repoDir },
+  });
 
   return response.stdout;
 }

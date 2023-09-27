@@ -1,4 +1,4 @@
-import { checkIfPatched, executeCliCommand, getCommitHash, getPatchId, getRepoDir } from '../helpers/helpers';
+import { checkIfPatched, executeCliCommand, getCommitHash, getPatchId, getRepoDir } from '../helpers';
 
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 
@@ -10,7 +10,7 @@ export async function nextGenParse(repoName: string): Promise<void> {
   const hasPatch = await checkIfPatched(repoDir);
 
   if (hasPatch) {
-    const [patchId, commitHash] = await Promise.all([getPatchId(repoDir), getCommitHash()]);
+    const [patchId, commitHash] = await Promise.all([getPatchId(repoDir), getCommitHash(repoDir)]);
 
     commandArgs.push('--commit');
     commandArgs.push(commitHash);

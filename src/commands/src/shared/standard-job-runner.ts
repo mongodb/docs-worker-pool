@@ -1,11 +1,4 @@
-import {
-  getRepoDir,
-  checkIfPatched,
-  getCommitHash,
-  executeCliCommand,
-  getPatchId,
-  RSTSPEC_FLAG,
-} from '../helpers/helpers';
+import { getRepoDir, checkIfPatched, getCommitHash, executeCliCommand, getPatchId, RSTSPEC_FLAG } from '../helpers';
 
 export class StandardJobRunner {
   repoName: string;
@@ -25,7 +18,7 @@ export class StandardJobRunner {
     const hasPatch = await checkIfPatched(this.repoDir);
 
     if (hasPatch) {
-      const [patchId, commitHash] = await Promise.all([getPatchId(this.repoDir), getCommitHash()]);
+      const [patchId, commitHash] = await Promise.all([getPatchId(this.repoDir), getCommitHash(this.repoDir)]);
 
       commandArgs.push('--commit');
       commandArgs.push(commitHash);

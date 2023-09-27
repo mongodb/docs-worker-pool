@@ -1,0 +1,31 @@
+# Builds the base dependencies needed
+FROM node:18.16.0-alpine
+ARG SNOOTY_PARSER_VERSION=0.14.9
+ARG SNOOTY_FRONTEND_VERSION=0.14.16
+ARG MUT_VERSION=0.10.7
+ARG REDOC_CLI_VERSION=1.2.2
+ARG NPM_BASE_64_AUTH
+ARG NPM_EMAIL
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+
+RUN apk update && apk add --no-cache python3 make g++ curl git
+RUN apk add --update --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community --repository http://dl-3.alpinelinux.org/alpine/edge/main vips-dev
+
+# install snooty parser
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ snooty-parser.zip
+
+# install mut
+RUN curl -L -o mut.zip https://github.com/mongodb/mut/releases/download/v${MUT_VERSION}/mut-v${MUT_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ mut.zip
+
+RUN curl  -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/tags/v${REDOC_CLI_VERSION}.zip \
+    && unzip redoc.zip \
+    && mv redoc-${REDOC_CLI_VERSION} redoc/ 
+
+# install snooty frontend and docs-tools
+RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+    && cd snooty                                                                                   \
+    && npm ci --legacy-peer-deps --omit=dev                                                        
