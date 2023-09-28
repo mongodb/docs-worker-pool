@@ -109,13 +109,21 @@ class UpdatedPagesManager {
   prevPageIds: Set<string>;
   updateTime: Date;
   githubUser: string;
+  buildId: ObjectId;
 
-  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Page[], githubUser: string) {
+  constructor(
+    prevPageDocsMapping: PreviousPageMapping,
+    prevPagesIds: Set<string>,
+    pages: Page[],
+    githubUser: string,
+    buildId: ObjectId
+  ) {
     this.currentPages = pages;
     this.operations = [];
     this.prevPageDocsMapping = prevPageDocsMapping;
     this.prevPageIds = prevPagesIds;
     this.githubUser = githubUser;
+    this.buildId = buildId;
 
     this.updateTime = new Date();
     this.checkForPageDiffs();
@@ -152,6 +160,8 @@ class UpdatedPagesManager {
                 static_assets: this.findUpdatedAssets(page.static_assets, prevPageData?.static_assets),
                 updated_at: this.updateTime,
                 deleted: false,
+                // Track the last build ID to update the content
+                build_id: this.buildId,
               },
               $setOnInsert: {
                 created_at: this.updateTime,
@@ -226,6 +236,7 @@ class UpdatedPagesManager {
             $set: {
               deleted: true,
               updated_at: this.updateTime,
+              build_id: this.buildId,
             },
           },
         },
@@ -247,7 +258,7 @@ class UpdatedPagesManager {
  * @param pages
  * @param collection
  */
-const updatePages = async (pages: Page[], collection: string, githubUser: string) => {
+const updatePages = async (pages: Page[], collection: string, githubUser: string, buildId: ObjectId) => {
   if (pages.length === 0) {
     return;
   }
@@ -264,7 +275,7 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
 
     const diffsTimerLabel = 'finding page differences';
     console.time(diffsTimerLabel);
-    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, githubUser);
+    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, githubUser, buildId);
     const operations = updatedPagesManager.getOperations();
     console.timeEnd(diffsTimerLabel);
 
@@ -293,7 +304,7 @@ export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githu
 
     const featureEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
     if (featureEnabled && featureEnabled.toUpperCase() === 'TRUE') {
-      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME, githubUser));
+      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME, githubUser, buildId));
     }
 
     return Promise.all(ops);
