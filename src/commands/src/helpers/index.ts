@@ -22,7 +22,7 @@ interface CliCommandParams {
   writeStream?: fs.WriteStream;
 }
 
-interface CliCommandResponse {
+export interface CliCommandResponse {
   stdout: string;
   stderr: string;
 }
@@ -60,6 +60,10 @@ export async function executeCliCommand({
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
+
+        if (stdout) {
+          console.error(stdout.join());
+        }
 
         if (stderr) {
           console.error(stderr.join());
@@ -136,6 +140,16 @@ export async function addProjectToEnv(project: string) {
     stream.on('close', resolve);
   });
 }
+export async function getCommitBranch(repoDir: string): Promise<string> {
+  // equivalent to git rev-parse --short HEAD
+  const response = await executeCliCommand({
+    command: 'git',
+    args: ['rev-parse', '--abbrev-ref', 'HEAD'],
+    options: { cwd: repoDir },
+  });
+
+  return response.stdout;
+}
 
 export async function getCommitHash(repoDir: string): Promise<string> {
   // equivalent to git rev-parse --short HEAD
@@ -148,7 +162,7 @@ export async function getCommitHash(repoDir: string): Promise<string> {
   return response.stdout;
 }
 
-export const checkIfPatched = async (repoDir: string) => !(await existsAsync(path.join(repoDir, 'myPatch.patch')));
+export const checkIfPatched = async (repoDir: string) => !existsAsync(path.join(repoDir, 'myPatch.patch'));
 export const getRepoDir = (repoName: string) => path.join(process.cwd(), `repos/${repoName}`);
 
 export const RSTSPEC_FLAG =
