@@ -5,7 +5,7 @@ import { nextGenHtml } from '../commands/src/shared/next-gen-html';
 
 async function localApp() {
   const repoDir = path.join(process.cwd(), '/repos');
-  const repoName = 'docs-java';
+  const repoName = 'docs-landing';
 
   await executeCliCommand({
     command: 'git',
@@ -27,7 +27,8 @@ async function localApp() {
   console.log(nextGenHtmlRes.stdout);
 
   console.log('next-gen-html complete');
-  while (true) {}
+
+  console.log('Begin next-gen-stage...');
 }
 
 localApp();
