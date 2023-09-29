@@ -11,6 +11,8 @@ export async function oasPageBuild({ bundlePath, repoDir, siteUrl }: OasPageBuil
     command: 'node',
     args: [
       `${process.cwd()}/modules/oas-page-builder/dist/index.js`,
+      '--bundle',
+      bundlePath,
       '--output',
       `${repoDir}/public`,
       '--redoc',
@@ -19,4 +21,6 @@ export async function oasPageBuild({ bundlePath, repoDir, siteUrl }: OasPageBuil
       siteUrl,
     ],
   });
+
+  return stdout;
 }
