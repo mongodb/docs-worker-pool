@@ -37,7 +37,7 @@ export class WorkerEnvConstruct extends Construct {
     );
 
     // font-end feature flag for unified footer locale selector
-    const unifiedFooterLocale = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/hide_locale`);
+    const gatsbyHideUnifiedFooterLocale = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/hide_locale`);
 
     // front end feature flag for chatbot UI
     const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
@@ -89,7 +89,7 @@ export class WorkerEnvConstruct extends Construct {
       FEATURE_NAME: `${getFeatureName()}`,
       GATSBY_TEST_SEARCH_UI: 'false',
       GATSBY_SHOW_CHATBOT: gatsbyUseChatbot,
-      UNIFIED_FOOTER_LOCALE: unifiedFooterLocale,
+      GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: gatsbyHideUnifiedFooterLocale,
     };
   }
 }
