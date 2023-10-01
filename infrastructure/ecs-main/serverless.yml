@@ -118,6 +118,7 @@ custom:
   featureFlagSearchUI: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/search_ui}
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
   gatsbyUseChatbot: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/use_chatbot}
+  unifiedFooterLocale: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/hide_locale}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
   fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
   fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}

@@ -66,6 +66,8 @@ Resources:
               Value: ${self:custom.featureFlagSearchUI}
             - Name: GATSBY_SHOW_CHATBOT
               Value: ${self:custom.gatsbyUseChatbot}
+            - Name: UNIFIED_FOOTER_LOCALE
+              Value: ${self:custom.unifiedFooterLocale}
             - Name: FASTLY_MAIN_TOKEN
               Value: ${self:custom.fastlyMainToken}
             - Name: FASTLY_MAIN_SERVICE_ID

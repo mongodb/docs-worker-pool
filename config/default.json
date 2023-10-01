@@ -33,6 +33,7 @@
   "featureFlagUpdatePages": "false",
   "featureFlagSearchUI": "false",
   "gatsbyUseChatbot": "false",
+  "unifiedFooterLocale": "true",
   "parallel": {
     "enabled": true,
     "stg": {
