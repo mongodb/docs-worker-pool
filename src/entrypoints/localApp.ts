@@ -13,10 +13,11 @@ async function localApp() {
     options: { cwd: repoDir },
   });
 
+  console.log('Hello');
   console.log('Begin snooty build...');
   const snootyBuildRes = await nextGenParse(repoName);
 
-  console.log(snootyBuildRes.stderr);
+  console.log(snootyBuildRes.errorText);
 
   console.log('snooty build complete');
 
@@ -24,7 +25,7 @@ async function localApp() {
 
   const nextGenHtmlRes = await nextGenHtml(repoName);
 
-  console.log(nextGenHtmlRes.stdout);
+  console.log(nextGenHtmlRes.outputText);
 
   console.log('next-gen-html complete');
 

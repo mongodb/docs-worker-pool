@@ -2,6 +2,7 @@ import { SpawnOptions, spawn } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import { Writable } from 'stream';
 
 const openAsync = promisify(fs.open);
 const closeAsync = promisify(fs.close);
@@ -20,11 +21,12 @@ interface CliCommandParams {
   args?: readonly string[];
   options?: SpawnOptions;
   writeStream?: fs.WriteStream;
+  writeTarget?: Writable;
 }
 
 export interface CliCommandResponse {
-  stdout: string;
-  stderr: string;
+  outputText: string;
+  errorText: string;
 }
 
 export async function executeCliCommand({
@@ -32,21 +34,23 @@ export async function executeCliCommand({
   args = [],
   options = {},
   writeStream,
+  writeTarget,
 }: CliCommandParams): Promise<CliCommandResponse> {
   return new Promise((resolve, reject) => {
-    const stdout: string[] = [];
-    const stderr: string[] = [];
+    const outputText: string[] = [];
+    const errorText: string[] = [];
 
     const executedCommand = spawn(command, args, options);
 
     if (writeStream) executedCommand.stdout?.pipe(writeStream);
-
     executedCommand.stdout?.on('data', (data: Buffer) => {
-      stdout.push(data.toString());
+      outputText.push(data.toString());
+
+      if (writeTarget) writeTarget.write(data);
     });
 
     executedCommand.stderr?.on('data', (data: Buffer) => {
-      stderr.push(data.toString());
+      errorText.push(data.toString());
     });
 
     executedCommand.on('error', (err) => {
@@ -56,17 +60,18 @@ export async function executeCliCommand({
     });
 
     executedCommand.on('close', (exitCode) => {
+      if (writeTarget) writeTarget.end();
       if (exitCode !== 0) {
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
 
-        if (stdout) {
-          console.error(stdout.join());
+        if (outputText) {
+          console.error(outputText.join());
         }
 
-        if (stderr) {
-          console.error(stderr.join());
+        if (errorText) {
+          console.error(errorText.join());
         }
 
         reject(new ExecuteCommandError('The command failed', exitCode));
@@ -74,8 +79,8 @@ export async function executeCliCommand({
       }
 
       resolve({
-        stdout: stdout.join(),
-        stderr: stderr.join(),
+        outputText: outputText.join(),
+        errorText: errorText.join(),
       });
     });
   });
@@ -122,7 +127,7 @@ export async function readFileAndExec({
 export async function getPatchId(repoDir: string): Promise<string> {
   const filePath = path.join(repoDir, 'myPatch.patch');
 
-  const { stdout: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
+  const { outputText: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
 
   return gitPatchId.slice(0, 7);
 }
@@ -148,7 +153,7 @@ export async function getCommitBranch(repoDir: string): Promise<string> {
     options: { cwd: repoDir },
   });
 
-  return response.stdout;
+  return response.outputText;
 }
 
 export async function getCommitHash(repoDir: string): Promise<string> {
@@ -159,7 +164,7 @@ export async function getCommitHash(repoDir: string): Promise<string> {
     options: { cwd: repoDir },
   });
 
-  return response.stdout;
+  return response.outputText;
 }
 
 export const checkIfPatched = async (repoDir: string) => !existsAsync(path.join(repoDir, 'myPatch.patch'));

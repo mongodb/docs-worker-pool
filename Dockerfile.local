@@ -30,8 +30,6 @@ RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/
     && python3 -m poetry install \
     && make package \
     && mv dist/snooty /opt/
-# RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
-#     && unzip -d /opt/ snooty-parser.zip
 
 # install mut
 
@@ -68,7 +66,15 @@ COPY modules/oas-page-builder/package*.json ./modules/oas-page-builder/
 RUN cd ./modules/oas-page-builder \
     && npm ci --legacy-peer-deps 
 
-# install persistence module
+# Root project build
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
+COPY tsconfig*.json ./
+COPY config config/
+COPY api api/
+COPY src src/
+
+# Build persistence module
 
 COPY --chown=docsworker modules/persistence/tsconfig*.json ./modules/persistence
 COPY --chown=docsworker modules/persistence/src ./modules/persistence/src/
@@ -86,14 +92,6 @@ COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-bui
 
 RUN cd ./modules/oas-page-builder \
     && npm run build
-
-# Root project build
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
-COPY tsconfig*.json ./
-COPY config config/
-COPY api api/
-COPY src src/
 
 RUN npm run build:esbuild
 
