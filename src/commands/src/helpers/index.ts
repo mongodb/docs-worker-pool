@@ -28,13 +28,19 @@ export interface CliCommandResponse {
   outputText: string;
   errorText: string;
 }
+export async function executeAndPipeCommands(cmdFromParams: CliCommandParams, cmdToParams: CliCommandParams) {
+  const cmdFrom = spawn(cmdFromParams.command, cmdFromParams.args || [], cmdFromParams.options || {});
+  const cmdTo = spawn(cmdToParams.command, cmdToParams.args || [], cmdToParams.options || {});
 
+  cmdFrom.stdout?.on('data', (data) => {
+    cmdTo.stdin?.write(data);
+  });
+}
 export async function executeCliCommand({
   command,
   args = [],
   options = {},
   writeStream,
-  writeTarget,
 }: CliCommandParams): Promise<CliCommandResponse> {
   return new Promise((resolve, reject) => {
     const outputText: string[] = [];
@@ -45,8 +51,6 @@ export async function executeCliCommand({
     if (writeStream) executedCommand.stdout?.pipe(writeStream);
     executedCommand.stdout?.on('data', (data: Buffer) => {
       outputText.push(data.toString());
-
-      if (writeTarget) writeTarget.write(data);
     });
 
     executedCommand.stderr?.on('data', (data: Buffer) => {
@@ -60,7 +64,7 @@ export async function executeCliCommand({
     });
 
     executedCommand.on('close', (exitCode) => {
-      if (writeTarget) writeTarget.end();
+      if (writeStream) writeStream.end();
       if (exitCode !== 0) {
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);

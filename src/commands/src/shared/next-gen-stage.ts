@@ -23,7 +23,7 @@ export async function nextGenStage({ repoName, mutPrefix, projectName, bucketNam
     hostedAtUrl = `${url}/${commitHash}/${patchId}/${mutPrefix}/${process.env.USER}/${commitBranch}/`;
   }
 
-  const { stdout } = await executeCliCommand({ command: 'mut-publish', args: commandArgs });
-  const resultMessage = `${stdout}\n Hosted at ${hostedAtUrl}`;
+  const { outputText } = await executeCliCommand({ command: 'mut-publish', args: commandArgs });
+  const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}`;
   return resultMessage;
 }
