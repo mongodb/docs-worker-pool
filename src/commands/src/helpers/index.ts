@@ -29,7 +29,10 @@ export interface CliCommandResponse {
   errorText: string;
 }
 
-export async function executeAndPipeCommands(cmdFromParams: CliCommandParams, cmdToParams: CliCommandParams) {
+export async function executeAndPipeCommands(
+  cmdFromParams: CliCommandParams,
+  cmdToParams: CliCommandParams
+): Promise<CliCommandResponse> {
   return new Promise((resolve, reject) => {
     let hasRejected = false;
 
