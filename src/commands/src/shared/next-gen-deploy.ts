@@ -1,18 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
 import { executeAndPipeCommands, executeCliCommand } from '../helpers';
-
-const existsAsync = promisify(fs.exists);
 
 interface NextGenDeployParams {
   bucket: string;
   mutPrefix: string;
   gitBranch: string;
+  hasConfigRedirects: boolean;
 }
 
-export async function nextGenDeploy({ bucket, mutPrefix, gitBranch }: NextGenDeployParams) {
-  const hasConfigRedirects = await existsAsync(path.join(process.cwd(), 'config/redirects'));
+export async function nextGenDeploy({ bucket, mutPrefix, gitBranch, hasConfigRedirects }: NextGenDeployParams) {
+  // const hasConfigRedirects = await existsAsync(path.join(process.cwd(), 'config/redirects'));
 
   if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {
     // mut-redirects config/redirects -o public/.htaccess

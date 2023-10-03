@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { promisify } from 'util';
-import { executeCliCommand, getRepoDir } from '../helpers';
+import { executeCliCommand } from '../helpers';
 
 const writeFileAsync = promisify(fs.writeFile);
 
@@ -18,9 +18,7 @@ async function createEnvProdFile(repoDir: string, projectName: string) {
     throw e;
   }
 }
-export async function nextGenHtml(repoName: string) {
-  const repoDir = getRepoDir(repoName);
-
+export async function nextGenHtml(repoDir: string) {
   // might move this since technically next-gen-html doesn't create the file
   await createEnvProdFile(repoDir, 'java');
 

@@ -10,7 +10,7 @@ export async function persistenceModule({
   jobId,
   repoOwner = 'docs-builder-bot',
 }: PersistenceModuleParams) {
-  const { stdout } = await executeCliCommand({
+  const { outputText } = await executeCliCommand({
     command: 'node',
     args: [
       `${process.cwd()}/modules/persistence/dist/index.js`,
@@ -24,5 +24,5 @@ export async function persistenceModule({
     ],
   });
 
-  return stdout;
+  return outputText;
 }

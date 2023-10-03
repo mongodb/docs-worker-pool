@@ -1,16 +1,14 @@
 import { checkIfPatched, executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '../helpers';
 
 interface StageParams {
-  repoName: string;
+  repoDir: string;
   mutPrefix: string;
   projectName: string;
   bucketName: string;
   url: string;
 }
 
-export async function nextGenStage({ repoName, mutPrefix, projectName, bucketName, url }: StageParams) {
-  const repoDir = getRepoDir(repoName);
-
+export async function nextGenStage({ repoDir, mutPrefix, projectName, bucketName, url }: StageParams) {
   const [hasPatch, commitBranch] = await Promise.all([checkIfPatched(repoDir), getCommitBranch(repoDir)]);
 
   let hostedAtUrl = `${url}/${mutPrefix}/${process.env.USER}/${commitBranch}/`;

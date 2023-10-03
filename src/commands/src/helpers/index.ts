@@ -184,12 +184,15 @@ export async function readFileAndExec({
   return response;
 }
 
-export async function getPatchId(repoDir: string): Promise<string> {
+export async function getPatchId(repoDir: string): Promise<string | undefined> {
   const filePath = path.join(repoDir, 'myPatch.patch');
+  try {
+    const { outputText: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
 
-  const { outputText: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
-
-  return gitPatchId.slice(0, 7);
+    return gitPatchId.slice(0, 7);
+  } catch (err) {
+    console.warn('No patch ID found');
+  }
 }
 
 export async function addProjectToEnv(project: string) {

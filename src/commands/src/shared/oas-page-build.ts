@@ -7,7 +7,7 @@ interface OasPageBuildParams {
 }
 
 export async function oasPageBuild({ bundlePath, repoDir, siteUrl }: OasPageBuildParams) {
-  const { stdout } = await executeCliCommand({
+  const { outputText } = await executeCliCommand({
     command: 'node',
     args: [
       `${process.cwd()}/modules/oas-page-builder/dist/index.js`,
@@ -22,5 +22,5 @@ export async function oasPageBuild({ bundlePath, repoDir, siteUrl }: OasPageBuil
     ],
   });
 
-  return stdout;
+  return outputText;
 }
