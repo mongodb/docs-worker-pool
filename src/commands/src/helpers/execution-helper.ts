@@ -23,5 +23,6 @@ export async function getCliBuildDependencies(repoName: string) {
     patchId: deps[3] as string | undefined,
     hasRedirects: deps[4] as boolean,
     bundlePath: `${repoDir}/bundle.zip`,
+    repoDir,
   };
 }

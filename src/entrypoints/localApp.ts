@@ -1,11 +1,11 @@
-import path from 'path';
 import { executeCliCommand } from '../commands/src/helpers';
 import { nextGenParse } from '../commands/src/shared/next-gen-parse';
 import { nextGenHtml } from '../commands/src/shared/next-gen-html';
+import { getCliBuildDependencies } from '../commands/src/helpers/execution-helper';
 
 async function localApp() {
-  const repoDir = path.join(process.cwd(), '/repos');
   const repoName = 'docs-landing';
+  const { repoDir, commitHash, patchId } = await getCliBuildDependencies(repoName);
 
   await executeCliCommand({
     command: 'git',
@@ -15,7 +15,7 @@ async function localApp() {
 
   console.log('Hello');
   console.log('Begin snooty build...');
-  const snootyBuildRes = await nextGenParse(repoName);
+  const snootyBuildRes = await nextGenParse({ repoDir, commitHash, patchId });
 
   console.log(snootyBuildRes.errorText);
 
