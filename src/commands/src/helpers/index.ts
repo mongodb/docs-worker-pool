@@ -28,12 +28,31 @@ export interface CliCommandResponse {
   outputText: string;
   errorText: string;
 }
-export async function executeAndPipeCommands(cmdFromParams: CliCommandParams, cmdToParams: CliCommandParams) {
-  const cmdFrom = spawn(cmdFromParams.command, cmdFromParams.args || [], cmdFromParams.options || {});
-  const cmdTo = spawn(cmdToParams.command, cmdToParams.args || [], cmdToParams.options || {});
 
-  cmdFrom.stdout?.on('data', (data) => {
-    cmdTo.stdin?.write(data);
+export async function executeAndPipeCommands(cmdFromParams: CliCommandParams, cmdToParams: CliCommandParams) {
+  return new Promise((resolve, reject) => {
+    const cmdFrom = spawn(cmdFromParams.command, cmdFromParams.args || [], cmdFromParams.options || {});
+    const cmdTo = spawn(cmdToParams.command, cmdToParams.args || [], cmdToParams.options || {});
+
+    const outputText: string[] = [];
+
+    cmdFrom.stdout?.on('data', (data: Buffer) => {
+      cmdTo.stdin?.write(data);
+    });
+
+    cmdFrom.on('error', (err) => {
+      reject(new ExecuteCommandError('The first command failed', err));
+    });
+
+    cmdTo.stdout?.on('data', (data: Buffer) => {
+      outputText.push(data.toString());
+    });
+
+    cmdTo.on('error', (err) => {
+      reject(new ExecuteCommandError('The second command failed', err));
+    });
+
+    cmdTo.on('exit', (code) => {});
   });
 }
 export async function executeCliCommand({
@@ -58,13 +77,12 @@ export async function executeCliCommand({
     });
 
     executedCommand.on('error', (err) => {
-      if (err) {
-        reject(new ExecuteCommandError('The command failed', err));
-      }
+      reject(new ExecuteCommandError('The command failed', err));
     });
 
     executedCommand.on('close', (exitCode) => {
       if (writeStream) writeStream.end();
+
       if (exitCode !== 0) {
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
