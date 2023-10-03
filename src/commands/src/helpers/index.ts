@@ -31,10 +31,10 @@ export interface CliCommandResponse {
 
 export async function executeAndPipeCommands(cmdFromParams: CliCommandParams, cmdToParams: CliCommandParams) {
   return new Promise((resolve, reject) => {
+    let hasRejected = false;
+
     const cmdFrom = spawn(cmdFromParams.command, cmdFromParams.args || [], cmdFromParams.options || {});
     const cmdTo = spawn(cmdToParams.command, cmdToParams.args || [], cmdToParams.options || {});
-
-    const outputText: string[] = [];
 
     cmdFrom.stdout?.on('data', (data: Buffer) => {
       cmdTo.stdin?.write(data);
@@ -42,17 +42,52 @@ export async function executeAndPipeCommands(cmdFromParams: CliCommandParams, cm
 
     cmdFrom.on('error', (err) => {
       reject(new ExecuteCommandError('The first command failed', err));
+      hasRejected = true;
     });
+
+    const outputText: string[] = [];
+    const errorText: string[] = [];
 
     cmdTo.stdout?.on('data', (data: Buffer) => {
       outputText.push(data.toString());
+    });
+
+    cmdTo.stderr?.on('data', (data: Buffer) => {
+      errorText.push(data.toString());
     });
 
     cmdTo.on('error', (err) => {
       reject(new ExecuteCommandError('The second command failed', err));
     });
 
-    cmdTo.on('exit', (code) => {});
+    cmdTo.on('exit', (exitCode) => {
+      // previous command errored out, return so we don't
+      // accidentally resolve if the second command somehow still
+      // exits without error
+      if (hasRejected) return;
+
+      if (exitCode !== 0) {
+        console.error(`ERROR! The command ${cmdToParams.command} closed with an exit code other than 0: ${exitCode}.`);
+        console.error('Arguments provided: ', cmdToParams.args);
+        console.error('Options provided: ', cmdToParams.options);
+
+        if (outputText) {
+          console.error(outputText.join());
+        }
+
+        if (errorText) {
+          console.error(errorText.join());
+        }
+
+        reject(new ExecuteCommandError('The command failed', exitCode));
+        return;
+      }
+
+      resolve({
+        outputText: outputText.join(),
+        errorText: errorText.join(),
+      });
+    });
   });
 }
 export async function executeCliCommand({
