@@ -36,6 +36,9 @@ export class WorkerEnvConstruct extends Construct {
       `/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source`
     );
 
+    // font-end feature flag for unified footer locale selector
+    const gatsbyHideUnifiedFooterLocale = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/hide_locale`);
+
     // front end feature flag for chatbot UI
     const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
 
@@ -86,6 +89,7 @@ export class WorkerEnvConstruct extends Construct {
       FEATURE_NAME: `${getFeatureName()}`,
       GATSBY_TEST_SEARCH_UI: 'false',
       GATSBY_SHOW_CHATBOT: gatsbyUseChatbot,
+      GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: gatsbyHideUnifiedFooterLocale,
     };
   }
 }
