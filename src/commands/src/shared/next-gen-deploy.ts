@@ -1,21 +1,21 @@
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
-import { executeAndPipeCommands, executeCliCommand, getCommitBranch, getRepoDir } from '../helpers';
+import { executeAndPipeCommands, executeCliCommand } from '../helpers';
 
 const existsAsync = promisify(fs.exists);
 
-export async function nextGenDeploy({ repoName }) {
-  const repoDir = getRepoDir(repoName);
+interface NextGenDeployParams {
+  bucket: string;
+  mutPrefix: string;
+  gitBranch: string;
+}
 
-  const [hasConfigRedirects, gitBranch] = await Promise.all([
-    existsAsync(path.join(process.cwd(), 'config/redirects')),
-    getCommitBranch(repoDir),
-  ]);
+export async function nextGenDeploy({ bucket, mutPrefix, gitBranch }: NextGenDeployParams) {
+  const hasConfigRedirects = await existsAsync(path.join(process.cwd(), 'config/redirects'));
 
   if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {
     // mut-redirects config/redirects -o public/.htaccess
-
     await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
   }
 
