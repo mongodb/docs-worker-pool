@@ -1,6 +1,7 @@
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
 import { InvalidJobError } from '../errors/errors';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
@@ -25,6 +26,7 @@ export class ProductionJobHandler extends JobHandler {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
@@ -38,6 +40,7 @@ export class ProductionJobHandler extends JobHandler {
       logger,
       validator,
       repoBranchesRepo,
+      docsetsRepo,
       repoEntitlementsRepo
     );
     this.name = 'Production';
@@ -134,7 +137,7 @@ export class ProductionJobHandler extends JobHandler {
     if (this.currJob?.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
       this.currJob.buildCommands.push('make next-gen-parse');
-      this.currJob.buildCommands.push('make persistence-module');
+      this.currJob.buildCommands.push(`make persistence-module JOB_ID=${this.currJob._id}`);
       this.currJob.buildCommands.push('make next-gen-html');
       this.currJob.buildCommands.push(`make oas-page-build MUT_PREFIX=${this.currJob.payload.mutPrefix}`);
     }

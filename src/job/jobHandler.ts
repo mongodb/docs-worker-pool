@@ -11,6 +11,7 @@ import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from
 import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 require('fs');
 
 export abstract class JobHandler {
@@ -55,6 +56,7 @@ export abstract class JobHandler {
   protected name: string;
 
   protected _repoBranchesRepo: RepoBranchesRepository;
+  protected _docsetsRepo: DocsetsRepository;
   protected _repoEntitlementsRepo: RepoEntitlementsRepository;
 
   constructor(
@@ -68,6 +70,7 @@ export abstract class JobHandler {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     this._commandExecutor = commandExecutor;
@@ -81,6 +84,7 @@ export abstract class JobHandler {
     this._config = config;
     this._validator = validator;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._docsetsRepo = docsetsRepo;
     this._repoEntitlementsRepo = repoEntitlementsRepo;
   }
 
@@ -370,6 +374,7 @@ export abstract class JobHandler {
       PREVIEW_BUILD_ENABLED: this._config.get<string>('previewBuildEnabled'),
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),
       GATSBY_SHOW_CHATBOT: this._config.get<string>('gatsbyUseChatbot'),
+      GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: process.env.GATSBY_HIDE_UNIFIED_FOOTER_LOCALE || 'true',
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
@@ -432,7 +437,7 @@ export abstract class JobHandler {
   }
 
   protected async setEnvironmentVariables(): Promise<void> {
-    const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName);
+    const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName);
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,

@@ -12,6 +12,7 @@ import { FileSystemServices } from './services/fileServices';
 import { JobValidator } from './job/jobValidator';
 import { RepoBranchesRepository } from './repositories/repoBranchesRepository';
 import { ISSOConnector, OktaConnector } from './services/sso';
+import { DocsetsRepository } from './repositories/docsetsRepository';
 
 let db: mongodb.Db;
 let client: mongodb.MongoClient;
@@ -22,13 +23,13 @@ let githubCommandExecutor: GithubCommandExecutor;
 let jobRepository: JobRepository;
 let hybridJobLogger: HybridJobLogger;
 let repoEntitlementRepository: RepoEntitlementsRepository;
-let repoBranchesRepository: RepoBranchesRepository;
 let jobValidator: JobValidator;
 let cdnConnector: K8SCDNConnector;
 let repoConnector: GitHubConnector;
 let jobHandlerFactory: JobHandlerFactory;
 let jobManager: JobManager;
 let repoBranchesRepo: RepoBranchesRepository;
+let docsetsRepo: DocsetsRepository;
 
 let ssmConnector: ParameterStoreConnector;
 let ssoConnector: ISSOConnector;
@@ -49,7 +50,8 @@ async function init(): Promise<void> {
   ssmConnector = new ParameterStoreConnector();
   repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   repoBranchesRepo = new RepoBranchesRepository(db, c, consoleLogger);
-  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo);
+  docsetsRepo = new DocsetsRepository(db, c, consoleLogger);
+  jobValidator = new JobValidator(fileSystemServices, repoEntitlementRepository, repoBranchesRepo, docsetsRepo);
   ssoConnector = new OktaConnector(c, consoleLogger);
   cdnConnector = new K8SCDNConnector(c, consoleLogger, ssmConnector, ssoConnector);
   repoConnector = new GitHubConnector(githubCommandExecutor, c, fileSystemServices, hybridJobLogger);
@@ -65,6 +67,7 @@ async function init(): Promise<void> {
     fileSystemServices,
     hybridJobLogger,
     repoBranchesRepo,
+    docsetsRepo,
     repoEntitlementRepository
   );
   try {

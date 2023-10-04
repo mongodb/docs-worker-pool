@@ -4,6 +4,7 @@ import type { Job } from '../entities/job';
 import { IFileSystemServices } from '../services/fileServices';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 
 export interface IJobValidator {
   throwIfJobInvalid(job: Job): Promise<void>;
@@ -16,14 +17,17 @@ export class JobValidator implements IJobValidator {
   _fileSystemService: IFileSystemServices;
   _repoEntitlementRepository: RepoEntitlementsRepository;
   _repoBranchesRepository: RepoBranchesRepository;
+  _docsetsRepository: DocsetsRepository;
   constructor(
     fileSystemService: IFileSystemServices,
     repoEntitlementRepository: RepoEntitlementsRepository,
-    repoBranchesRepository: RepoBranchesRepository
+    repoBranchesRepository: RepoBranchesRepository,
+    docsetsRepository: DocsetsRepository
   ) {
     this._fileSystemService = fileSystemService;
     this._repoEntitlementRepository = repoEntitlementRepository;
     this._repoBranchesRepository = repoBranchesRepository;
+    this._docsetsRepository = docsetsRepository;
   }
 
   async throwIfUserNotEntitled(job: Job): Promise<void> {
@@ -34,7 +38,7 @@ export class JobValidator implements IJobValidator {
   }
 
   async throwIfBranchNotConfigured(job: Job): Promise<void> {
-    job.payload.repoBranches = await this._repoBranchesRepository.getRepoBranchesByRepoName(job.payload.repoName);
+    job.payload.repoBranches = await this._docsetsRepository.getRepoBranchesByRepoName(job.payload.repoName);
     if (!job.payload?.repoBranches) {
       throw new AuthorizationError(`repoBranches not found for ${job.payload.repoName}`);
     }

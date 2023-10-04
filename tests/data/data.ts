@@ -145,7 +145,7 @@ export class TestDataProvider {
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make get-build-dependencies',
       'make next-gen-parse',
-      'make persistence-module',
+      `make persistence-module JOB_ID=${job._id}`,
       'make next-gen-html',
       `make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);
@@ -163,7 +163,7 @@ export class TestDataProvider {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     const commands = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make next-gen-parse',
-      `make persistence-module GH_USER=${job.payload.repoOwner}`,
+      `make persistence-module GH_USER=${job.payload.repoOwner} JOB_ID=${job._id}`,
       `make next-gen-html`,
     ]);
     const project = job.payload.project === 'cloud-docs' ? job.payload.project : '';
@@ -175,7 +175,7 @@ export class TestDataProvider {
   }
 
   static getEnvVarsWithPathPrefixWithFlags(job: Job): string {
-    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_SHOW_CHATBOT=false\n`;
+    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_SHOW_CHATBOT=false\nGATSBY_HIDE_UNIFIED_FOOTER_LOCALE=true\n`;
   }
 
   static getPathPrefixCases(): Array<any> {
@@ -446,5 +446,45 @@ export class TestDataProvider {
       retVal.push(`git checkout ${newHead} .`);
     }
     return retVal;
+  }
+
+  static getAggregationPipeline(
+    matchConditionField: string,
+    matchConditionValue: string,
+    projection?: { [k: string]: number }
+  ) {
+    return [
+      // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
+      {
+        $unwind: '$repos',
+      },
+      // Stage 2: Lookup to join with the repos_branches collection
+      {
+        $lookup: {
+          from: 'repos_branches',
+          localField: 'repos',
+          foreignField: '_id',
+          as: 'repo',
+        },
+      },
+      // Stage 3: Match documents based on given field
+      {
+        $match: {
+          [`repo.${matchConditionField}`]: matchConditionValue,
+        },
+      },
+      // Stage 4: Merge/flatten repo into docset
+      {
+        $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ['$repo', 0] }, '$$ROOT'] } },
+      },
+      // Stage 5: Exclude fields
+      {
+        $project: projection || {
+          _id: 0,
+          repos: 0,
+          repo: 0,
+        },
+      },
+    ];
   }
 }

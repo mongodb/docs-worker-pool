@@ -10,7 +10,7 @@ import { StagingJobHandler } from '../../job/stagingJobHandler';
  * @param this reference to current object
  */
 async function setEnvironmentVariablesEnhanced(this: JobHandler) {
-  const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this.currJob.payload.repoName);
+  const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(this.currJob.payload.repoName);
 
   let env = this._config.get<string>('env');
   this.logger.info(

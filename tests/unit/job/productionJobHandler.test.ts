@@ -1,7 +1,7 @@
 import { mockReset } from 'jest-mock-extended';
 import { JobStatus } from '../../../src/entities/job';
 import { TestDataProvider } from '../../data/data';
-import { getBuildJobDef, getManifestJobDef } from '../../data/jobDef';
+import { getBuildJobDef } from '../../data/jobDef';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 
 describe('ProductionJobHandler Tests', () => {
@@ -247,7 +247,7 @@ describe('ProductionJobHandler Tests', () => {
 
     expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
       `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_SHOW_CHATBOT=false\n`,
+      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_SHOW_CHATBOT=false\nGATSBY_HIDE_UNIFIED_FOOTER_LOCALE=true\n`,
       { encoding: 'utf8', flag: 'w' }
     );
   });

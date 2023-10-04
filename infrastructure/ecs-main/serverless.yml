@@ -118,6 +118,7 @@ custom:
   featureFlagSearchUI: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/search_ui}
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
   gatsbyUseChatbot: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/use_chatbot}
+  gatsbyHideUnifiedFooterLocale: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/hide_locale}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
   fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
   fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}
@@ -138,6 +139,7 @@ custom:
   nodeIntgrBucketName: docs-node-intgr
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
+  docsetsCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/docsets}
   entitlementCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/user/entitlements}
   jobsQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsQueueURL}
   jobUpdatesQueueUrl: ${docs-worker-pool-api-${self:provider.stage}.JobsUpdateQueueURL}

@@ -36,6 +36,9 @@ export class WorkerEnvConstruct extends Construct {
       `/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source`
     );
 
+    // font-end feature flag for unified footer locale selector
+    const gatsbyHideUnifiedFooterLocale = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/hide_locale`);
+
     // front end feature flag for chatbot UI
     const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
 
@@ -52,6 +55,7 @@ export class WorkerEnvConstruct extends Construct {
       `${ssmPrefix}/atlas/collections/user/entitlements`
     );
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
+    const docsetsCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/docsets`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
 
     const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
@@ -75,6 +79,7 @@ export class WorkerEnvConstruct extends Construct {
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       NPM_EMAIL: npmEmail,
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,
+      DOCSETS_COL_NAME: docsetsCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
@@ -84,6 +89,7 @@ export class WorkerEnvConstruct extends Construct {
       FEATURE_NAME: `${getFeatureName()}`,
       GATSBY_TEST_SEARCH_UI: 'false',
       GATSBY_SHOW_CHATBOT: gatsbyUseChatbot,
+      GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: gatsbyHideUnifiedFooterLocale,
     };
   }
 }

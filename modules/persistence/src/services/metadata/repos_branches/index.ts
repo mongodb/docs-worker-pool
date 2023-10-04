@@ -27,6 +27,40 @@ export interface ReposBranchesDocument extends WithId<Document> {
 
 const internals: { [key: project]: ReposBranchesDocument } = {};
 
+const getAggregationPipeline = (matchCondition: any) => {
+  return [
+    // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
+    {
+      $unwind: '$repos',
+    },
+    // Stage 2: Lookup to join with the repos_branches collection
+    {
+      $lookup: {
+        from: 'repos_branches',
+        localField: 'repos',
+        foreignField: '_id',
+        as: 'repo',
+      },
+    },
+    // Stage 3: Merge/flatten repo into docset
+    {
+      $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ['$repo', 0] }, '$$ROOT'] } },
+    },
+    // Stage 4: Match documents based on given field(s)
+    {
+      $match: matchCondition,
+    },
+    // Stage 5: Exclude fields
+    {
+      $project: {
+        _id: 0,
+        repos: 0,
+        repo: 0,
+      },
+    },
+  ];
+};
+
 // Queries pool*.repos_branches for all entries for associated_products in a shared metadata entry
 export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) => {
   const { associated_products = [] } = metadata;
@@ -48,14 +82,14 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
 
   try {
     const db = await pool();
-    await db
-      .collection('repos_branches')
-      .find({ project: { $in: fetch } })
-      .forEach((doc: ReposBranchesDocument) => {
-        // TODO: store in cache
-        internals[doc['project']] = doc;
-        res.push(doc);
-      });
+    const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch } });
+    const cursor = db.collection('docsets').aggregate(aggregationPipeline);
+    const docsets = (await cursor.toArray()) as ReposBranchesDocument[];
+    docsets.forEach((doc: ReposBranchesDocument) => {
+      // TODO: store in cache
+      internals[doc['project']] = doc;
+      res.push(doc);
+    });
     return res;
   } catch (e) {
     console.error(`Error while getting associated repo branches: ${e}`);
@@ -80,20 +114,20 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
   // get from DB if not cached
   try {
     const db = await pool();
-    const query = {
-      project,
-    };
+    const matchCondition = { project };
     if (branch) {
-      query['branches'] = {
-        $elemMatch: { gitBranchName: branch },
-      };
+      matchCondition['branches'] = { $elemMatch: { gitBranchName: branch } };
     }
-    const res = (await db.collection('repos_branches').findOne(query)) as unknown as ReposBranchesDocument;
+    const aggregationPipeline = getAggregationPipeline(matchCondition);
+
+    const cursor = db.collection('docsets').aggregate(aggregationPipeline);
+    const res = (await cursor.toArray()) as unknown as ReposBranchesDocument[];
+
     // if not already set, set cache value for repo_branches
     if (!internals[project]) {
-      internals[project] = res;
+      internals[project] = res[0];
     }
-    return res;
+    return res[0];
   } catch (e) {
     console.error(`Error while getting repo branches entry: ${e}`);
     throw e;

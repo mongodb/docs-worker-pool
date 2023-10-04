@@ -18,6 +18,7 @@ import { upsertAssets } from './src/services/assets';
 interface ModuleArgs {
   path: string;
   githubUser: string;
+  jobId: string;
   strict: string;
   [props: string | number | symbol]: unknown;
 }
@@ -30,14 +31,17 @@ const missingPathMessage = 'No path specified in arguments - please specify a bu
 // Load command line args into a parameterized argv
 const argv: ModuleArgs = minimist(process.argv.slice(2));
 
-const app = async (path: string, githubUser: string) => {
+const app = async (path: string, githubUser: string, jobId: string) => {
   try {
     if (!path) throw missingPathMessage;
     const user = githubUser || 'docs-builder-bot';
     const zip = new AdmZip(path);
+
+    // Safely convert jobId in case of empty string
+    const autobuilderJobId = jobId || undefined;
     // atomic buildId for all artifacts read by this module - fundamental assumption
     // that only one build will be used per run of this module.
-    const buildId = new mongodb.ObjectId();
+    const buildId = new mongodb.ObjectId(autobuilderJobId);
     const metadata = await metadataFromZip(zip, user);
     // initialize db connections to handle shared connections
     await snootyDb();
@@ -55,7 +59,7 @@ const app = async (path: string, githubUser: string) => {
   }
 };
 
-app(argv['path'], argv['githubUser']).catch(() => {
+app(argv['path'], argv['githubUser'], argv['jobId']).catch(() => {
   console.error('Persistence Module Failure. Ending build.');
   process.exit(1);
 });
