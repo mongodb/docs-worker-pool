@@ -69,11 +69,6 @@ RUN cd ./modules/oas-page-builder \
 # Root project build
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
-COPY tsconfig*.json ./
-COPY config config/
-COPY api api/
-COPY src src/
-
 # Build persistence module
 
 COPY --chown=docsworker modules/persistence/tsconfig*.json ./modules/persistence
@@ -85,7 +80,6 @@ RUN cd ./modules/persistence \
 
 # Build modules
 # OAS Page Builder
-
 COPY --chown=docsworker modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
 COPY --chown=docsworker modules/oas-page-builder/src ./modules/oas-page-builder/src/
 COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-builder
@@ -93,10 +87,15 @@ COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-bui
 RUN cd ./modules/oas-page-builder \
     && npm run build
 
+COPY tsconfig*.json ./
+COPY config config/
+COPY api api/
+COPY src src/
+
 RUN npm run build:esbuild
 
 RUN mkdir repos && chmod 755 repos
 
 EXPOSE 3000
 
-CMD ["node", "dist/entrypoints/localApp.js"]
+CMD ["node", "--enable-source-maps", "dist/entrypoints/localApp.js"]

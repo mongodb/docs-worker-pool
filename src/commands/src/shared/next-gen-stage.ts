@@ -1,4 +1,11 @@
-import { checkIfPatched, executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '../helpers';
+import {
+  checkIfPatched,
+  executeAndWriteToFile,
+  executeCliCommand,
+  getCommitBranch,
+  getCommitHash,
+  getPatchId,
+} from '../helpers';
 
 interface StageParams {
   repoDir: string;
@@ -11,17 +18,26 @@ interface StageParams {
 export async function nextGenStage({ repoDir, mutPrefix, projectName, bucketName, url }: StageParams) {
   const [hasPatch, commitBranch] = await Promise.all([checkIfPatched(repoDir), getCommitBranch(repoDir)]);
 
-  let hostedAtUrl = `${url}/${mutPrefix}/${process.env.USER}/${commitBranch}/`;
+  let hostedAtUrl = `${url}/${mutPrefix}/docsworker/${commitBranch}/`;
+  let prefix = mutPrefix;
 
   const commandArgs = ['public', bucketName, '--stage'];
 
-  if (hasPatch && projectName !== mutPrefix) {
+  if (hasPatch && projectName === mutPrefix) {
     const [commitHash, patchId] = await Promise.all([getCommitHash(repoDir), getPatchId(repoDir)]);
-    commandArgs.push(`--prefix="${commitHash}/${patchId}/${mutPrefix}"`);
-    hostedAtUrl = `${url}/${commitHash}/${patchId}/${mutPrefix}/${process.env.USER}/${commitBranch}/`;
+    prefix = `${commitHash}/${patchId}/${mutPrefix}`;
+    hostedAtUrl = `${url}/${commitHash}/${patchId}/${mutPrefix}/docsworker/${commitBranch}/`;
   }
 
-  const { outputText } = await executeCliCommand({ command: 'mut-publish', args: commandArgs });
+  commandArgs.push(`--prefix="${prefix}"`);
+
+  const { outputText } = await executeCliCommand({
+    command: 'mut-publish',
+    args: commandArgs,
+    options: {
+      cwd: `${process.cwd()}/snooty`,
+    },
+  });
   const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}`;
   return resultMessage;
 }
