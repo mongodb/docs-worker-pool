@@ -31,13 +31,15 @@ export async function nextGenStage({ repoDir, mutPrefix, projectName, bucketName
 
   commandArgs.push(`--prefix="${prefix}"`);
 
-  const { outputText } = await executeCliCommand({
+  const { outputText, errorText } = await executeCliCommand({
     command: 'mut-publish',
     args: commandArgs,
     options: {
       cwd: `${process.cwd()}/snooty`,
     },
   });
+
+  console.log(errorText);
   const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}`;
   return resultMessage;
 }

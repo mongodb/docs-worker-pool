@@ -2,7 +2,7 @@ import { executeCliCommand } from '../helpers';
 
 interface PersistenceModuleParams {
   bundlePath: string;
-  jobId: string;
+  jobId?: string;
   repoOwner?: string;
 }
 export async function persistenceModule({
@@ -10,18 +10,23 @@ export async function persistenceModule({
   jobId,
   repoOwner = 'docs-builder-bot',
 }: PersistenceModuleParams) {
+  const args = [
+    `${process.cwd()}/modules/persistence/dist/index.js`,
+    '--unhandled-rejections=strict',
+    '--path',
+    bundlePath,
+    '--githubUser',
+    repoOwner,
+  ];
+
+  if (jobId) {
+    args.push('--jobId');
+    args.push(jobId);
+  }
+
   const { outputText } = await executeCliCommand({
     command: 'node',
-    args: [
-      `${process.cwd()}/modules/persistence/dist/index.js`,
-      '--unhandled-rejections=strict',
-      '--path',
-      bundlePath,
-      '--githubUser',
-      repoOwner,
-      '--jobId',
-      jobId,
-    ],
+    args,
   });
 
   return outputText;

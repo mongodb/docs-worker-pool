@@ -13,6 +13,8 @@ export async function oasPageBuild({ bundlePath, repoDir, siteUrl }: OasPageBuil
       `${process.cwd()}/modules/oas-page-builder/dist/index.js`,
       '--bundle',
       bundlePath,
+      '--repo',
+      repoDir,
       '--output',
       `${repoDir}/public`,
       '--redoc',
