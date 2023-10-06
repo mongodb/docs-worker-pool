@@ -40,7 +40,25 @@ export async function executeAndPipeCommands(
     const cmdTo = spawn(cmdToParams.command, cmdToParams.args || [], cmdToParams.options || {});
 
     cmdFrom.stdout?.on('data', (data: Buffer) => {
+      if (!cmdTo.stdin?.writable) {
+        cmdFrom.stdin?.end();
+        cmdFrom.kill();
+        return;
+      }
+
       cmdTo.stdin?.write(data);
+    });
+
+    cmdFrom.stdout?.on('error', (err) => {
+      console.log('error on cmdFrom out', err);
+    });
+
+    cmdTo.stdin?.on('finish', () => {
+      console.log('finished stdin');
+    });
+
+    cmdTo.stdin?.on('error', () => {
+      console.log('stdin done');
     });
 
     cmdFrom.on('error', (err) => {
@@ -75,11 +93,11 @@ export async function executeAndPipeCommands(
         console.error('Options provided: ', cmdToParams.options);
 
         if (outputText) {
-          console.error(outputText.join());
+          console.error('output', outputText.join());
         }
 
         if (errorText) {
-          console.error(errorText.join());
+          console.error('error', errorText.join());
         }
 
         reject(new ExecuteCommandError('The command failed', exitCode));

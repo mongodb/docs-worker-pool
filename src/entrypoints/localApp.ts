@@ -1,25 +1,24 @@
-import { executeCliCommand, getRepoDir } from '../commands/src/helpers';
 import { nextGenParse } from '../commands/src/shared/next-gen-parse';
 import { nextGenHtml } from '../commands/src/shared/next-gen-html';
 import { getCliBuildDependencies } from '../commands/src/helpers/execution-helper';
 import { nextGenStage } from '../commands/src/shared/next-gen-stage';
 import { oasPageBuild } from '../commands/src/shared/oas-page-build';
 import { persistenceModule } from '../commands/src/shared/persistence-module';
+import { nextGenDeploy } from '../commands/src/shared/next-gen-deploy';
 
 async function localApp() {
+  // TODO: Fetch this from repos_branches
   const repoName = 'docs-java';
   const projectName = 'java';
   const baseUrl = 'https://www.mongodb.com';
-  const repoDir = getRepoDir(repoName);
+  const bucket = 'docs-java-dotcomstg';
+  const mutPrefix = 'docs/drivers/java/sync';
 
-  // mocking out the clone aspect of a job
-  await executeCliCommand({
-    command: 'git',
-    args: ['clone', `https://github.com/mongodb/${repoName}`],
-    options: { cwd: `${process.cwd()}/repos` },
-  });
-
-  const { commitHash, patchId, bundlePath } = await getCliBuildDependencies(repoDir, projectName, baseUrl);
+  const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await getCliBuildDependencies(
+    repoName,
+    projectName,
+    baseUrl
+  );
 
   console.log('Hello');
 
@@ -43,7 +42,6 @@ async function localApp() {
   console.log('next-gen-html complete');
 
   console.log('Begin oas-page-build...');
-  const mutPrefix = 'docs';
   const siteUrl = mutPrefix ? `${baseUrl}/${mutPrefix}` : `${baseUrl}`;
   const oasPageBuildRes = await oasPageBuild({ repoDir, bundlePath, siteUrl });
   console.log('oas-page-build compelte');
@@ -52,16 +50,27 @@ async function localApp() {
   console.log('Begin next-gen-stage...');
 
   const resultMessage = await nextGenStage({
+    patchId,
+    commitBranch,
     repoDir,
     projectName,
-    bucketName: 'docs-mongodb-org-stg',
+    bucket,
     url: baseUrl,
     mutPrefix,
   });
   console.log(resultMessage);
-  console.log('Begin next-gen-stage complete');
+  console.log('next-gen-stage complete');
 
-  console.log('Begin next-gen-deploy');
+  console.log('Begin next-gen-deploy...');
+  const deployRes = await nextGenDeploy({
+    bucket,
+    hasConfigRedirects: hasRedirects,
+    gitBranch: commitBranch,
+    mutPrefix,
+    url: baseUrl,
+  });
+  console.log(deployRes);
+  console.log('next-gen-deploy complete');
 }
 
 localApp();

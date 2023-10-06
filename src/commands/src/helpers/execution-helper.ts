@@ -1,11 +1,18 @@
 import path from 'path';
 import fs from 'fs';
-import { checkIfPatched, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
+import { executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
 import { promisify } from 'util';
 
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
+async function cloneRepo(repoName: string) {
+  await executeCliCommand({
+    command: 'git',
+    args: ['clone', `https://github.com/mongodb/${repoName}`],
+    options: { cwd: `${process.cwd()}/repos` },
+  });
+}
 async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: string, prefix = '') {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
 
@@ -26,9 +33,12 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-export async function getCliBuildDependencies(repoDir: string, projectName: string, baseUrl: string) {
+export async function getCliBuildDependencies(repoName: string, projectName: string, baseUrl: string) {
+  await cloneRepo(repoName);
+
+  const repoDir = getRepoDir(repoName);
+
   const commandPromises = [
-    checkIfPatched(repoDir),
     getCommitHash(repoDir),
     getCommitBranch(repoDir),
     getPatchId(repoDir),
@@ -38,11 +48,11 @@ export async function getCliBuildDependencies(repoDir: string, projectName: stri
 
   const deps = await Promise.all(commandPromises);
   return {
-    hasPatch: deps[0] as string,
-    commitHash: deps[1] as string,
-    commitBranch: deps[2] as string,
-    patchId: deps[3] as string | undefined,
-    hasRedirects: deps[4] as boolean,
+    commitHash: deps[0] as string,
+    commitBranch: deps[1] as string,
+    patchId: deps[2] as string | undefined,
+    hasRedirects: deps[3] as boolean,
     bundlePath: `${repoDir}/bundle.zip`,
+    repoDir,
   };
 }
