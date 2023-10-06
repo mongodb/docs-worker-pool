@@ -60,7 +60,8 @@ async function localApp() {
   });
   console.log(resultMessage);
   console.log('Begin next-gen-stage complete');
-  console.log(process.env);
+
+  console.log('Begin next-gen-deploy');
 }
 
 localApp();
