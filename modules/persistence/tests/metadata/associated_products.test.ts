@@ -50,7 +50,7 @@ describe('associated_products module', () => {
       expect(res.branches.length).toBeGreaterThan(1);
     });
 
-    it('should leave a warning when more than one docset was found', async () => {
+    it('should leave a warning when more than one deployable repo was found', async () => {
       let msg = '';
       const mockedWarn = jest.spyOn(global.console, 'warn').mockImplementationOnce((e) => {
         msg = e;
