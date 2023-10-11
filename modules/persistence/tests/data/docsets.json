@@ -59,5 +59,35 @@
       "categoryTitle": "Atlas CLI"
     },
     "repos": ["6243aa3f0aae3635a59a1150"]
+  },
+  {
+    "_id": "6500937d24fcc731b4735cff",
+    "project": "docs",
+    "bucket": {
+      "regression": "docs-mongodb-org-stg",
+      "dev": "docs-mongodb-org-dev",
+      "stg": "docs-mongodb-org-stg",
+      "prd": "docs-mongodb-org-prd",
+      "dotcomstg": "docs-mongodb-org-dotcomstg",
+      "dotcomprd": "docs-mongodb-org-dotcomprd"
+    },
+    "directories": {
+      "snooty_toml": "/docs"
+    },
+    "prefix": {
+      "stg": "",
+      "prd": "",
+      "dotcomstg": "docs-qa",
+      "dotcomprd": "docs"
+    },
+    "repos": ["5fac1ce373a72fca02ec90c5", "614b9f5b8d181382ca755ade"],
+    "url": {
+      "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+      "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "prd": "https://docs.mongodb.com",
+      "dotcomprd": "http://mongodb.com/",
+      "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/"
+    }
   }
 ]

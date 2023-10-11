@@ -22,6 +22,7 @@ export interface ReposBranchesDocument extends WithId<Document> {
   branches: BranchEntry[];
   url: EnvKeyedObject;
   prefix: EnvKeyedObject;
+  prodDeployable: boolean;
   [key: string]: any;
 }
 
@@ -114,7 +115,7 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
   // get from DB if not cached
   try {
     const db = await pool();
-    const matchCondition = { 
+    const matchCondition = {
       project,
       // We want the repo branches of the single deployable repo for a docset
       prodDeployable: true,

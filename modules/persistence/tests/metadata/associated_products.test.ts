@@ -41,6 +41,14 @@ describe('associated_products module', () => {
       const resBranch = await _getRepoBranchesEntry(project, branch);
       expect(resBranch).toMatchSnapshot();
     });
+
+    it('should return the repo branches for the docs deployable repo of the docset', async () => {
+      const res = await _getRepoBranchesEntry('docs');
+      expect(res).toMatchSnapshot();
+      expect(res.prodDeployable).toBeTruthy();
+      // Non-deployable repo example should have only 1 branch
+      expect(res.branches.length).toBeGreaterThan(1);
+    });
   });
 
   describe('getAllAssociatedRepoBranchesEntries', () => {
