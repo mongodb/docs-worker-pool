@@ -89,5 +89,35 @@
       "dotcomprd": "http://mongodb.com/",
       "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/"
     }
+  },
+  {
+    "_id": "6500937d24fcc731b4735d00",
+    "project": "multiple-deployables",
+    "bucket": {
+      "regression": "docs-mongodb-org-stg",
+      "dev": "docs-mongodb-org-dev",
+      "stg": "docs-mongodb-org-stg",
+      "prd": "docs-mongodb-org-prd",
+      "dotcomstg": "docs-mongodb-org-dotcomstg",
+      "dotcomprd": "docs-mongodb-org-dotcomprd"
+    },
+    "directories": {
+      "snooty_toml": "/docs"
+    },
+    "prefix": {
+      "stg": "",
+      "prd": "",
+      "dotcomstg": "docs-qa",
+      "dotcomprd": "docs"
+    },
+    "repos": ["6526fe0d17c4f50e837e419f", "6526fe0d17c4f50e837e420f"],
+    "url": {
+      "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+      "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "prd": "https://docs.mongodb.com",
+      "dotcomprd": "http://mongodb.com/",
+      "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/"
+    }
   }
 ]

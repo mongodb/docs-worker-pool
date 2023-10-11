@@ -415,5 +415,107 @@
     "directories": {
       "snooty_toml": "/docs"
     }
+  },
+  {
+    "_id": "6526fe0d17c4f50e837e419f",
+    "repoName": "docs-multiple-deployables-1",
+    "branches": [
+      {
+        "name": "v5.0",
+        "publishOriginalBranchName": true,
+        "active": true,
+        "aliases": [
+          "stable"
+        ],
+        "gitBranchName": "v5.0",
+        "isStableBranch": false,
+        "urlAliases": [
+          "stable"
+        ],
+        "urlSlug": "stable",
+        "versionSelectorLabel": "v5.0",
+        "buildsWithSnooty": true,
+        "id": "634991b6246409bf0cc5116b"
+      }
+    ],
+    "bucket": {
+      "regression": "docs-mongodb-org-stg",
+      "dev": "docs-mongodb-org-dev",
+      "stg": "docs-mongodb-org-stg",
+      "prd": "docs-mongodb-org-prd",
+      "dotcomstg": "docs-mongodb-org-dotcomstg",
+      "dotcomprd": "docs-mongodb-org-dotcomprd"
+    },
+    "url": {
+      "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+      "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "prd": "https://docs.mongodb.com",
+      "dotcomprd": "http://mongodb.com/",
+      "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/"
+    },
+    "prefix": {
+      "stg": "",
+      "prd": "",
+      "dotcomstg": "docs-qa",
+      "dotcomprd": "docs"
+    },
+    "project": "multiple-deployables",
+    "internalOnly": false,
+    "prodDeployable": true,
+    "directories": {
+      "snooty_toml": "/docs-multiple-deployables-1"
+    }
+  },
+  {
+    "_id": "6526fe0d17c4f50e837e420f",
+    "repoName": "docs-multiple-deployables-2",
+    "branches": [
+      {
+        "name": "v5.0",
+        "publishOriginalBranchName": true,
+        "active": true,
+        "aliases": [
+          "stable"
+        ],
+        "gitBranchName": "v5.0",
+        "isStableBranch": false,
+        "urlAliases": [
+          "stable"
+        ],
+        "urlSlug": "stable",
+        "versionSelectorLabel": "v5.0",
+        "buildsWithSnooty": true,
+        "id": "634991b6246409bf0cc5116c"
+      }
+    ],
+    "bucket": {
+      "regression": "docs-mongodb-org-stg",
+      "dev": "docs-mongodb-org-dev",
+      "stg": "docs-mongodb-org-stg",
+      "prd": "docs-mongodb-org-prd",
+      "dotcomstg": "docs-mongodb-org-dotcomstg",
+      "dotcomprd": "docs-mongodb-org-dotcomprd"
+    },
+    "url": {
+      "regression": "https://docs-mongodbcom-integration.corp.mongodb.com",
+      "dev": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "stg": "https://docs-mongodborg-staging.corp.mongodb.com",
+      "prd": "https://docs.mongodb.com",
+      "dotcomprd": "http://mongodb.com/",
+      "dotcomstg": "https://mongodbcom-cdn.website.staging.corp.mongodb.com/"
+    },
+    "prefix": {
+      "stg": "",
+      "prd": "",
+      "dotcomstg": "docs-qa",
+      "dotcomprd": "docs"
+    },
+    "project": "multiple-deployables",
+    "internalOnly": false,
+    "prodDeployable": true,
+    "directories": {
+      "snooty_toml": "/docs-multiple-deployables-2"
+    }
   }
 ]
