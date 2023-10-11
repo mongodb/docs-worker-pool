@@ -1,6 +1,6 @@
 import { nextGenParse } from '../commands/src/shared/next-gen-parse';
 import { nextGenHtml } from '../commands/src/shared/next-gen-html';
-import { getCliBuildDependencies } from '../commands/src/helpers/execution-helper';
+import { getCliBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 import { nextGenStage } from '../commands/src/shared/next-gen-stage';
 import { oasPageBuild } from '../commands/src/shared/oas-page-build';
 import { persistenceModule } from '../commands/src/shared/persistence-module';
@@ -19,8 +19,6 @@ async function localApp() {
     projectName,
     baseUrl
   );
-
-  console.log('Hello');
 
   console.log('Begin snooty build...');
   const snootyBuildRes = await nextGenParse({ repoDir, commitHash, patchId });

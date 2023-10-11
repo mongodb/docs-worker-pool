@@ -34,10 +34,13 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
 }
 
 export async function getCliBuildDependencies(repoName: string, projectName: string, baseUrl: string) {
+  // before we get build dependencies, we need to clone
+  // the repo
   await cloneRepo(repoName);
 
   const repoDir = getRepoDir(repoName);
 
+  // doing these in parallel
   const commandPromises = [
     getCommitHash(repoDir),
     getCommitBranch(repoDir),
@@ -46,12 +49,13 @@ export async function getCliBuildDependencies(repoName: string, projectName: str
     createEnvProdFile(repoDir, projectName, baseUrl),
   ];
 
-  const deps = await Promise.all(commandPromises);
+  const dependencies = await Promise.all(commandPromises);
+
   return {
-    commitHash: deps[0] as string,
-    commitBranch: deps[1] as string,
-    patchId: deps[2] as string | undefined,
-    hasRedirects: deps[3] as boolean,
+    commitHash: dependencies[0] as string,
+    commitBranch: dependencies[1] as string,
+    patchId: dependencies[2] as string | undefined,
+    hasRedirects: dependencies[3] as boolean,
     bundlePath: `${repoDir}/bundle.zip`,
     repoDir,
   };

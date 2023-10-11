@@ -9,14 +9,12 @@ interface NextGenDeployParams {
 }
 
 export async function nextGenDeploy({ bucket, mutPrefix, gitBranch, hasConfigRedirects, url }: NextGenDeployParams) {
-  // const hasConfigRedirects = await existsAsync(path.join(process.cwd(), 'config/redirects'));
-
   if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {
-    // mut-redirects config/redirects -o public/.htaccess
+    // equivalent to: mut-redirects config/redirects -o public/.htaccess
     await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
   }
 
-  // yes | mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
+  // equivalent to: yes | mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
   const { outputText } = await executeAndPipeCommands(
     { command: 'yes' },
     {

@@ -111,6 +111,20 @@ export async function executeAndPipeCommands(
     });
   });
 }
+
+/**
+ * A promisified way to execute CLI commands. This approach uses spawn instead of exec, which
+ * is a safer way of executing CLI commands. Also, spawn allows us to stream output in real-time.
+ * @param {string} command: The CLI command we want to execute
+ * @param {string[] | undefined} args: Arguments we want to provide to the command
+ * @param {SpawnOptions | undefined} options: Options to configure the spawn process
+ * @param {fs.WriteStream | undefined} writeStream: A writable stream object to pipe output to.
+ * For example, we can mimic ls >> directory.txt by creating a WriteStream object to write to
+ * directory.txt, and then provide the WriteStream so that we can pipe the output from the ls
+ * command to the WriteStream.
+ * @returns {Promise<CliCommandResponse>} An object containing the CLI output from stdout and stderr.
+ * stdout is the outputText property, and stderr is the errorText property.
+ */
 export async function executeCliCommand({
   command,
   args = [],
