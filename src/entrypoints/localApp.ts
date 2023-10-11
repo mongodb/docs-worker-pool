@@ -1,6 +1,6 @@
 import { nextGenParse } from '../commands/src/shared/next-gen-parse';
 import { nextGenHtml } from '../commands/src/shared/next-gen-html';
-import { getCliBuildDependencies } from '../commands/src/helpers/dependency-helpers';
+import { prepareBuildAndGetDependencies } from '../commands/src/helpers/dependency-helpers';
 import { nextGenStage } from '../commands/src/shared/next-gen-stage';
 import { oasPageBuild } from '../commands/src/shared/oas-page-build';
 import { persistenceModule } from '../commands/src/shared/persistence-module';
@@ -14,7 +14,7 @@ async function localApp() {
   const bucket = 'docs-java-dotcomstg';
   const mutPrefix = 'docs/drivers/java/sync';
 
-  const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await getCliBuildDependencies(
+  const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await prepareBuildAndGetDependencies(
     repoName,
     projectName,
     baseUrl

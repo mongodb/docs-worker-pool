@@ -33,9 +33,8 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-export async function getCliBuildDependencies(repoName: string, projectName: string, baseUrl: string) {
-  // before we get build dependencies, we need to clone
-  // the repo
+export async function prepareBuildAndGetDependencies(repoName: string, projectName: string, baseUrl: string) {
+  // before we get build dependencies, we need to clone the repo
   await cloneRepo(repoName);
 
   const repoDir = getRepoDir(repoName);

@@ -8,6 +8,10 @@ const openAsync = promisify(fs.open);
 const closeAsync = promisify(fs.close);
 const existsAsync = promisify(fs.exists);
 
+const EPIPE_CODE = 'EPIPE';
+const EPIPE_ERRNO = -32;
+const EPIPE_SYSCALL = 'write';
+
 export class ExecuteCommandError extends Error {
   data: unknown;
   constructor(message: string, data: unknown) {
@@ -29,6 +33,17 @@ export interface CliCommandResponse {
   errorText: string;
 }
 
+interface StdinError {
+  errno: number;
+  code: string;
+  syscall: string;
+}
+/**
+ * Method to replicate piping output from one command to another e.g. `yes | mut-publish public`
+ * @param {CliCommandParams} cmdFromParams The command we want to pipe output from to another command
+ * @param {CliCommandParams} cmdToParams The command that receives input from another command
+ * @returns {CliCommandResponse} The `CliCommandResponse` from the cmdTo command
+ */
 export async function executeAndPipeCommands(
   cmdFromParams: CliCommandParams,
   cmdToParams: CliCommandParams
@@ -40,29 +55,41 @@ export async function executeAndPipeCommands(
     const cmdTo = spawn(cmdToParams.command, cmdToParams.args || [], cmdToParams.options || {});
 
     cmdFrom.stdout?.on('data', (data: Buffer) => {
+      // For some commands, the command that is being written to
+      // will end before the first command finishes. In some cases,
+      // we do want this to happen. For example, the cli command `yes` will
+      // infinitely output yes to the terminal as a way of automatically responding
+      // to prompts from the subsequent command. Once the second command completes,
+      // we don't want `yes` to continue to run, so we kill the command.
       if (!cmdTo.stdin?.writable) {
-        cmdFrom.stdin?.end();
         cmdFrom.kill();
         return;
       }
 
+      // this is where we pipe data from the first command to the second command.
       cmdTo.stdin?.write(data);
+    });
+
+    cmdTo.stdin?.on('error', (err: StdinError) => {
+      // the error event for the cmdTo stdin gets called whenever it closes prematurely,
+      // but this is expected in certain situations e.g. when using the `yes` command.
+      // If this condition is met, we know that this expected, and ignore it otherwise we throw.
+      // If we don't check, we get an unhandled error exception.
+      if (err.code === EPIPE_CODE && err.syscall === EPIPE_SYSCALL && err.errno === EPIPE_ERRNO) {
+        console.log('stdin done');
+        return;
+      }
+
+      reject(new ExecuteCommandError('The first command stdin (cmdTo) failed', err));
+      hasRejected = true;
     });
 
     cmdFrom.stdout?.on('error', (err) => {
       console.log('error on cmdFrom out', err);
     });
 
-    cmdTo.stdin?.on('finish', () => {
-      console.log('finished stdin');
-    });
-
-    cmdTo.stdin?.on('error', () => {
-      console.log('stdin done');
-    });
-
     cmdFrom.on('error', (err) => {
-      reject(new ExecuteCommandError('The first command failed', err));
+      reject(new ExecuteCommandError('The first command (cmdTo) failed', err));
       hasRejected = true;
     });
 
@@ -100,7 +127,7 @@ export async function executeAndPipeCommands(
           console.error('error', errorText.join());
         }
 
-        reject(new ExecuteCommandError('The command failed', exitCode));
+        reject(new ExecuteCommandError('The command failed', { exitCode, outputText, errorText }));
         return;
       }
 
@@ -114,16 +141,16 @@ export async function executeAndPipeCommands(
 
 /**
  * A promisified way to execute CLI commands. This approach uses spawn instead of exec, which
- * is a safer way of executing CLI commands. Also, spawn allows us to stream output in real-time.
- * @param {string} command: The CLI command we want to execute
- * @param {string[] | undefined} args: Arguments we want to provide to the command
- * @param {SpawnOptions | undefined} options: Options to configure the spawn process
- * @param {fs.WriteStream | undefined} writeStream: A writable stream object to pipe output to.
- * For example, we can mimic ls >> directory.txt by creating a WriteStream object to write to
- * directory.txt, and then provide the WriteStream so that we can pipe the output from the ls
- * command to the WriteStream.
- * @returns {Promise<CliCommandResponse>} An object containing the CLI output from stdout and stderr.
- * stdout is the outputText property, and stderr is the errorText property.
+ * is a safer way of executing CLI commands. Also, spawn allows us to stream input and output in real-time.
+ * @param {string} command The CLI command we want to execute
+ * @param {string[] | undefined} args Arguments we want to provide to the command
+ * @param {SpawnOptions | undefined} options Options to configure the spawn function
+ * @param {fs.WriteStream | undefined} writeStream A writable stream object to pipe output to.
+ * For example, we can `mimic ls >> directory.txt` by creating a `WriteStream` object to write to
+ * `directory.txt`, and then provide the `WriteStream` so that we can pipe the output from the `ls`
+ * command to the `WriteStream`.
+ * @returns {Promise<CliCommandResponse>} An object containing the CLI output from `stdout` and `stderr`.
+ * stdout is the `outputText` property, and `stderr` is the `errorText` property.
  */
 export async function executeCliCommand({
   command,
@@ -228,7 +255,7 @@ export async function getPatchId(repoDir: string): Promise<string | undefined> {
 }
 
 export async function getCommitBranch(repoDir: string): Promise<string> {
-  // equivalent to git rev-parse --short HEAD
+  // equivalent to git rev-parse --abbrev-ref HEAD
   const response = await executeCliCommand({
     command: 'git',
     args: ['rev-parse', '--abbrev-ref', 'HEAD'],
