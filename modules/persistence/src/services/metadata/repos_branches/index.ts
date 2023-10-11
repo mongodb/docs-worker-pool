@@ -83,7 +83,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
 
   try {
     const db = await pool();
-    const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch } });
+    const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch }, prodDeployable: true });
     const cursor = db.collection('docsets').aggregate(aggregationPipeline);
     const docsets = (await cursor.toArray()) as ReposBranchesDocument[];
     docsets.forEach((doc: ReposBranchesDocument) => {
