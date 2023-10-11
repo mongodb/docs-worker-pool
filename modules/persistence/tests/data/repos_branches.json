@@ -43,7 +43,8 @@
     "search": {
       "categoryName": "atlas",
       "categoryTitle": "Atlas"
-    }
+    },
+    "prodDeployable": true
   },
   {
     "_id": "6243aa3f0aae3635a59a1150",
@@ -142,6 +143,7 @@
     "search": {
       "categoryTitle": "Atlas CLI"
     },
-    "groups": null
+    "groups": null,
+    "prodDeployable": true
   }
 ]

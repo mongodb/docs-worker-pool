@@ -114,7 +114,11 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
   // get from DB if not cached
   try {
     const db = await pool();
-    const matchCondition = { project };
+    const matchCondition = { 
+      project,
+      // We want the repo branches of the single deployable repo for a docset
+      prodDeployable: true,
+    };
     if (branch) {
       matchCondition['branches'] = { $elemMatch: { gitBranchName: branch } };
     }

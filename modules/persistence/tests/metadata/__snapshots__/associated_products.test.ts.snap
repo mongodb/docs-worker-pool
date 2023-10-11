@@ -109,6 +109,7 @@ Object {
     "prd": "atlas/cli",
     "stg": "atlas/cli",
   },
+  "prodDeployable": true,
   "project": "atlas-cli",
   "repoName": "docs-atlas-cli",
   "search": Object {
@@ -2872,6 +2873,7 @@ Object {
     "prd": "atlas/cli",
     "stg": "atlas/cli",
   },
+  "prodDeployable": true,
   "project": "atlas-cli",
   "repoName": "docs-atlas-cli",
   "search": Object {
