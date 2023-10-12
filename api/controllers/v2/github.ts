@@ -53,7 +53,7 @@ async function prepGithubPushPayload(
   };
 }
 
-export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
@@ -142,3 +142,5 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 };
 
 export const MarkBuildArtifactsForDeletion = markBuildArtifactsForDeletion;
+
+module.exports = { TriggerBuild };
