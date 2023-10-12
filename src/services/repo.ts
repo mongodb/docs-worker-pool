@@ -56,12 +56,18 @@ export class GitHubConnector implements IRepoConnector {
 
   async cloneRepo(job: Job, targetPath: string): Promise<any> {
     try {
+      await this._jobRepoLogger.save(
+        job._id,
+        'IN CLONE REPO ' + this.getBasePath(job) + '/' + job.payload.repoOwner + '/' + job.payload.repoName
+      );
+      await this._jobRepoLogger.save(job._id, 'NOW local ' + `${targetPath}/${job.payload.repoName}`);
       await git.clone(
         this.getBasePath(job) + '/' + job.payload.repoOwner + '/' + job.payload.repoName,
         `${targetPath}/${job.payload.repoName}`
       );
       await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);
     } catch (errResult) {
+      await this._jobRepoLogger.save(job._id, `Git clone fail, ${JSON.stringify(errResult)}`);
       await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
     }
