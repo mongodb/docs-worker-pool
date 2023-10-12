@@ -236,6 +236,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
+      this._logger.info(this.currJob._id, `prepNextGenBuild.... MMM`);
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
       // TODO: Look into moving the generation of manifestPrefix into the manifestJobHandler,
@@ -250,6 +251,7 @@ export abstract class JobHandler {
       this.constructEnvVars();
       this.currJob.payload.isNextGen = true;
       if (this._currJob.payload.jobType === 'productionDeploy') {
+        this._logger.info(this.currJob._id, `throwifnotpublishable.... MMM`);
         this._validator.throwIfNotPublishable(this._currJob);
       }
     } else {

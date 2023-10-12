@@ -32,7 +32,13 @@ export class JobValidator implements IJobValidator {
 
   async throwIfUserNotEntitled(job: Job): Promise<void> {
     const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
-    if (!entitlementsObject?.repos?.includes(`${job.payload.repoOwner}/${job.payload.repoName}`)) {
+    // TODO: Ensure that the user is entitled for this specific monorepo project
+    if (
+      job.payload.repoName === 'docs-monorepo' &&
+      entitlementsObject?.repos?.some((r) => r.match(/10gen\/docs-monorepo\//g))
+    ) {
+      return;
+    } else if (!entitlementsObject?.repos?.includes(`${job.payload.repoOwner}/${job.payload.repoName}`)) {
       throw new AuthorizationError(`${job.user} is not entitled for repo ${job.payload.repoName}`);
     }
   }
