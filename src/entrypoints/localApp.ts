@@ -1,10 +1,12 @@
-import { nextGenParse } from '../commands/src/shared/next-gen-parse';
-import { nextGenHtml } from '../commands/src/shared/next-gen-html';
-import { prepareBuildAndGetDependencies } from '../commands/src/helpers/dependency-helpers';
-import { nextGenStage } from '../commands/src/shared/next-gen-stage';
-import { oasPageBuild } from '../commands/src/shared/oas-page-build';
-import { persistenceModule } from '../commands/src/shared/persistence-module';
-import { nextGenDeploy } from '../commands/src/shared/next-gen-deploy';
+import {
+  nextGenDeploy,
+  nextGenHtml,
+  nextGenParse,
+  nextGenStage,
+  oasPageBuild,
+  persistenceModule,
+  prepareBuildAndGetDependencies,
+} from '../commands';
 
 async function localApp() {
   // TODO: Fetch this from repos_branches
