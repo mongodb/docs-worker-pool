@@ -208,14 +208,25 @@ export abstract class JobHandler {
         this.currJob._id,
         `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`
       );
-      await this._fileSystemServices.saveUrlAsFile(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
-        `repos/${this.currJob.payload.repoName}/Makefile`,
-        {
-          encoding: 'utf8',
-          flag: 'w',
-        }
-      );
+      if (this.currJob.payload.repoName === 'docs-monorepo') {
+        await this._fileSystemServices.saveUrlAsFile(
+          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.project}`,
+          `repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}/Makefile`,
+          {
+            encoding: 'utf8',
+            flag: 'w',
+          }
+        );
+      } else {
+        await this._fileSystemServices.saveUrlAsFile(
+          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
+          `repos/${this.currJob.payload.repoName}/Makefile`,
+          {
+            encoding: 'utf8',
+            flag: 'w',
+          }
+        );
+      }
     } catch (error) {
       await this.logError(error);
       throw error;
@@ -236,7 +247,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
     if (this.isbuildNextGen()) {
-      this._logger.info(this.currJob._id, `prepNextGenBuild.... MMM`);
+      this._logger.save(this.currJob._id, `prepNextGenBuild.... MMM`);
       await this._validator.throwIfBranchNotConfigured(this.currJob);
       await this.constructPrefix();
       // TODO: Look into moving the generation of manifestPrefix into the manifestJobHandler,
@@ -251,7 +262,7 @@ export abstract class JobHandler {
       this.constructEnvVars();
       this.currJob.payload.isNextGen = true;
       if (this._currJob.payload.jobType === 'productionDeploy') {
-        this._logger.info(this.currJob._id, `throwifnotpublishable.... MMM`);
+        this._logger.save(this.currJob._id, `throwifnotpublishable.... MMM`);
         this._validator.throwIfNotPublishable(this._currJob);
       }
     } else {
@@ -430,12 +441,24 @@ export abstract class JobHandler {
 
   // TODO: Reduce state changes
   protected prepBuildCommands(): void {
-    this.currJob.buildCommands = [
-      `. /venv/bin/activate`,
-      `cd repos/${this.currJob.payload.repoName}`,
-      `rm -f makefile`,
-      `make html`,
-    ];
+    if (this.currJob.payload.repoName === 'docs-monorepo') {
+      // TODO: Only works for projects that align with the repo "name"
+      this._logger.save(this.currJob._id, 'IN PREP, using cloud-docs');
+      this.currJob.buildCommands = [
+        `. /venv/bin/activate`,
+        `cd repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}`,
+        `rm -f makefile`,
+        `make html`,
+      ];
+    } else {
+      this._logger.save(this.currJob._id, 'Not using cloud-docs in prep');
+      this.currJob.buildCommands = [
+        `. /venv/bin/activate`,
+        `cd repos/${this.currJob.payload.repoName}`,
+        `rm -f makefile`,
+        `make html`,
+      ];
+    }
   }
 
   protected async setEnvironmentVariables(): Promise<void> {
@@ -488,10 +511,13 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Prepared Next Gen build');
     await this._repoConnector.applyPatch(this.currJob);
     this._logger.info(this._currJob._id, 'Patch Applied');
+    this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
     this._logger.info(this._currJob._id, 'Downloaded Makefile');
+    this._logger.save(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
     this._logger.info(this._currJob._id, 'Prepared Environment variables');
+    this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
   }
 
