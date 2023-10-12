@@ -1,6 +1,13 @@
 import { Duration } from 'aws-cdk-lib';
 import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
-import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import {
+  AdotLambdaExecWrapper,
+  AdotLambdaLayerJavaScriptSdkVersion,
+  AdotLayerVersion,
+  Code,
+  Function,
+  Runtime,
+} from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
@@ -72,6 +79,10 @@ export class WebhookApiConstruct extends Construct {
       bundling,
       environment,
       timeout,
+      adotInstrumentation: {
+        execWrapper: AdotLambdaExecWrapper.REGULAR_HANDLER,
+        layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.V1_7_0),
+      },
     });
 
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
