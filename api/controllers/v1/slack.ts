@@ -72,20 +72,31 @@ export const getDeployableJobs = async (
   const deployable = [];
 
   for (let i = 0; i < values.repo_option.length; i++) {
-    // e.g. mongodb/docs-realm/master => (site/repo/branch)
-    const [repoOwner, repoName, branchName] = values.repo_option[i].value.split('/');
+    let repoOwner: string, repoName: string, branchName: string, monorepoDir: string | undefined;
+    const splitValues = values.repo_option[i].value.split('/');
+
+    if (splitValues.length === 3) {
+      // e.g. mongodb/docs-realm/master => (owner/repo/branch)
+      [repoOwner, repoName, branchName] = splitValues;
+    } else if (splitValues.length === 4) {
+      // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
+      [repoOwner, repoName, monorepoDir, branchName] = splitValues;
+    } else {
+      throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
+    }
+
     const hashOption = values?.hash_option ?? null;
     const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement?.email ?? '';
 
-    const repoInfo = await docsetsRepository.getRepo(repoName);
+    const repoInfo = await docsetsRepository.getRepo(repoName, monorepoDir);
     const non_versioned = repoInfo.branches.length === 1;
 
-    const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName);
+    const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     if (!branchObject?.aliasObject) continue;
 
-    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool
+    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; // bool
     let aliases = branchObject.aliasObject.urlAliases; // array or null
     let urlSlug = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey

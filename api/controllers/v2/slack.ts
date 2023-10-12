@@ -99,7 +99,7 @@ export const getDeployableJobs = async (
     const repoInfo = await docsetsRepository.getRepo(repoName);
     const non_versioned = repoInfo.branches.length === 1;
 
-    const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName);
+    const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     if (!branchObject?.aliasObject) continue;
 
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool

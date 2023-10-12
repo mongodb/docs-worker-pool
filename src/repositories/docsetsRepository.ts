@@ -9,16 +9,18 @@ export class DocsetsRepository extends BaseRepository {
     super(config, logger, 'DocsetsRepository', db.collection(docsetsCollectionName));
   }
 
-  private getAggregationPipeline(
-    matchConditionField: string,
-    matchConditionValue: string,
-    projection?: { [k: string]: number }
-  ) {
+  private getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
     const DEFAULT_PROJECTIONS = {
       _id: 0,
       repos: 0,
       repo: 0,
     };
+
+    // Add prefix 'repo' to each field in matchConditions
+    const formattedMatchConditions = Object.entries(matchConditions).reduce((acc, [key, val]) => {
+      acc[`repo.${key}`] = val;
+      return acc;
+    }, {});
 
     return [
       // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
@@ -36,9 +38,7 @@ export class DocsetsRepository extends BaseRepository {
       },
       // Stage 3: Match documents based on given field
       {
-        $match: {
-          [`repo.${matchConditionField}`]: matchConditionValue,
-        },
+        $match: formattedMatchConditions,
       },
       // Stage 4: Merge/flatten repo into docset
       {
@@ -53,7 +53,7 @@ export class DocsetsRepository extends BaseRepository {
 
   async getProjectByRepoName(repoName: string): Promise<any> {
     const projection = { project: 1 };
-    const aggregationPipeline = this.getAggregationPipeline('repoName', repoName, projection);
+    const aggregationPipeline = this.getAggregationPipeline({ repoName }, projection);
     const cursor = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
@@ -63,19 +63,23 @@ export class DocsetsRepository extends BaseRepository {
     return res[0]?.project;
   }
 
-  async getRepo(repoName: string): Promise<any> {
-    const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
+  async getRepo(repoName: string, monorepoDir?: string): Promise<any> {
+    const matchConditions = { repoName };
+    if (monorepoDir) matchConditions['directories.snooty_toml'] = `/${monorepoDir}`;
+
+    const aggregationPipeline = this.getAggregationPipeline(matchConditions);
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
       const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName}`;
       this._logger.info(this._repoName, msg);
+    } else if (res.length > 1 && repoName === 'docs-monorepo') {
     }
-    return res[0];
+    return res?.[0];
   }
 
   async getRepoBranchesByRepoName(repoName: string): Promise<any> {
-    const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
+    const aggregationPipeline = this.getAggregationPipeline({ repoName });
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (res.length && res[0]?.bucket && res[0]?.url) {
