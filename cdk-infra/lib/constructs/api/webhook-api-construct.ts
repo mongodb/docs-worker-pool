@@ -80,7 +80,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       timeout,
       adotInstrumentation: {
-        execWrapper: AdotLambdaExecWrapper.REGULAR_HANDLER,
+        execWrapper: AdotLambdaExecWrapper.PROXY_HANDLER,
         layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.V1_7_0),
       },
     });
