@@ -7,6 +7,7 @@ import {
   Code,
   Function,
   Runtime,
+  Tracing,
 } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -79,9 +80,10 @@ export class WebhookApiConstruct extends Construct {
       bundling,
       environment,
       timeout,
+      tracing: Tracing.ACTIVE,
       adotInstrumentation: {
         execWrapper: AdotLambdaExecWrapper.REGULAR_HANDLER,
-        layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.V1_7_0),
+        layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.LATEST),
       },
     });
 
