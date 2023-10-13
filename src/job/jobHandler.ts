@@ -136,6 +136,7 @@ export abstract class JobHandler {
 
   private cleanup(): void {
     this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}`);
+    this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}/cloud-docs`);
   }
 
   @throwIfJobInterupted()
@@ -235,7 +236,10 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   public isbuildNextGen(): boolean {
-    const workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
+    let workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
+    if (this.currJob.payload.repoName === 'docs-monorepo')
+      workerPath = `repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}/worker.sh`;
+    // const workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
     if (this._fileSystemServices.rootFileExists(workerPath)) {
       const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
       const workerLines = workerContents.split(/\r?\n/);
@@ -393,7 +397,10 @@ export abstract class JobHandler {
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
       if (envValue) envVars += `${envName}=${envValue}\n`;
     }
-    this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, {
+    let fileToWriteTo = `repos/${this.currJob.payload.repoName}/.env.production`;
+    if (this.currJob.payload.repoName === 'docs-monorepo')
+      fileToWriteTo = `repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}/.env.production`;
+    this._fileSystemServices.writeToFile(fileToWriteTo, envVars, {
       encoding: 'utf8',
       flag: 'w',
     });
