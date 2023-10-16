@@ -84,6 +84,10 @@ export class WebhookApiConstruct extends Construct {
       currentVersionOptions: {
         provisionedConcurrentExecutions: 5,
       },
+      adotInstrumentation: {
+        execWrapper: AdotLambdaExecWrapper.REGULAR_HANDLER,
+        layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.LATEST),
+      },
     });
 
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
