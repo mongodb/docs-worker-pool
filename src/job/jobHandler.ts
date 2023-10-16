@@ -137,6 +137,7 @@ export abstract class JobHandler {
   private cleanup(): void {
     this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}`);
     this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}/cloud-docs`);
+    this._fileSystemServices.removeDirectory(`repos/cloud-docs`);
   }
 
   @throwIfJobInterupted()
@@ -212,7 +213,7 @@ export abstract class JobHandler {
       if (this.currJob.payload.repoName === 'docs-monorepo') {
         await this._fileSystemServices.saveUrlAsFile(
           `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.project}`,
-          `repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}/Makefile`,
+          `repos/${this.currJob.payload.project}/Makefile`,
           {
             encoding: 'utf8',
             flag: 'w',
@@ -238,7 +239,7 @@ export abstract class JobHandler {
   public isbuildNextGen(): boolean {
     let workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
     if (this.currJob.payload.repoName === 'docs-monorepo')
-      workerPath = `repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}/worker.sh`;
+      workerPath = `repos/${this.currJob.payload.project}/worker.sh`;
     // const workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
     if (this._fileSystemServices.rootFileExists(workerPath)) {
       const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
@@ -289,7 +290,11 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
+    const pathToRepo =
+      this.currJob.payload.repoName === 'docs-monorepo' ? `repos/cloud-docs` : `repos/${this.currJob.payload.repoName}`;
+    const resp = await this._commandExecutor.execute([command], pathToRepo);
+    // const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
+
     await this._logger.save(
       this.currJob._id,
       `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
@@ -399,7 +404,7 @@ export abstract class JobHandler {
     }
     let fileToWriteTo = `repos/${this.currJob.payload.repoName}/.env.production`;
     if (this.currJob.payload.repoName === 'docs-monorepo')
-      fileToWriteTo = `repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}/.env.production`;
+      fileToWriteTo = `repos/${this.currJob.payload.project}/.env.production`;
     this._fileSystemServices.writeToFile(fileToWriteTo, envVars, {
       encoding: 'utf8',
       flag: 'w',
@@ -453,7 +458,7 @@ export abstract class JobHandler {
       this._logger.save(this.currJob._id, 'IN PREP, using cloud-docs');
       this.currJob.buildCommands = [
         `. /venv/bin/activate`,
-        `cd repos/${this.currJob.payload.repoName}/${this.currJob.payload.project}`,
+        `cd repos/${this.currJob.payload.project}`,
         `rm -f makefile`,
         `make html`,
       ];
