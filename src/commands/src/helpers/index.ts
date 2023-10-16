@@ -278,6 +278,3 @@ export async function getCommitHash(repoDir: string): Promise<string> {
 
 export const checkIfPatched = async (repoDir: string) => !existsAsync(path.join(repoDir, 'myPatch.patch'));
 export const getRepoDir = (repoName: string) => path.join(process.cwd(), `repos/${repoName}`);
-
-export const RSTSPEC_FLAG =
-  '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';

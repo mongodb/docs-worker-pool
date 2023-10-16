@@ -19,8 +19,7 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   try {
     await writeFileAsync(
       prodFileName,
-      `GATSBY_BASE_URL=docs.mongodb.com
-      GATSBY_SITE=${projectName}
+      `GATSBY_SITE=${projectName}
       GATSBY_MANIFEST_PATH=${repoDir}/bundle.zip
       GATSBY_PARSER_USER=${process.env.USER}
       GATSBY_BASE_URL=${baseUrl}
