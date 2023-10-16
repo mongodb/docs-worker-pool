@@ -61,10 +61,13 @@ export class GitHubConnector implements IRepoConnector {
         job._id,
         'IN CLONE REPO ' + this.getBasePath(job) + '/' + job.payload.repoOwner + '/' + job.payload.repoName
       );
-      await this._jobRepoLogger.save(job._id, 'NOW local ' + `${targetPath}/${job.payload.repoName}`);
+      let localPath = `${targetPath}/${job.payload.repoName}`;
+      if (job.payload.repoName === 'docs-monorepo') localPath = `${targetPath}/${job.payload.project}`;
+      await this._jobRepoLogger.save(job._id, 'NOW local ' + localPath);
       await git.clone(
         this.getBasePath(job) + '/' + job.payload.repoOwner + '/' + job.payload.repoName,
-        `${targetPath}/${job.payload.repoName}`
+        // `${targetPath}/${job.payload.repoName}`
+        localPath
       );
       await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);
     } catch (errResult) {
