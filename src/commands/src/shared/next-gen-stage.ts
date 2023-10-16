@@ -8,16 +8,17 @@ interface StageParams {
   url: string;
   patchId?: string;
   commitBranch: string;
+  commitHash: string;
 }
 
 export async function nextGenStage({
-  repoDir,
   mutPrefix,
   projectName,
   bucket,
   url,
   patchId,
   commitBranch,
+  commitHash,
 }: StageParams) {
   let hostedAtUrl = `${url}/${mutPrefix}/docsworker/${commitBranch}/`;
   let prefix = mutPrefix;
@@ -25,7 +26,6 @@ export async function nextGenStage({
   const commandArgs = ['public', bucket, '--stage'];
 
   if (patchId && projectName === mutPrefix) {
-    const [commitHash, patchId] = await Promise.all([getCommitHash(repoDir), getPatchId(repoDir)]);
     prefix = `${commitHash}/${patchId}/${mutPrefix}`;
     hostedAtUrl = `${url}/${commitHash}/${patchId}/${mutPrefix}/docsworker/${commitBranch}/`;
   }

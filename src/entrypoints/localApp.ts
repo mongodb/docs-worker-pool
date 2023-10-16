@@ -57,6 +57,7 @@ async function localApp() {
     bucket,
     url: baseUrl,
     mutPrefix,
+    commitHash,
   });
   console.log(resultMessage);
   console.log('next-gen-stage complete');
