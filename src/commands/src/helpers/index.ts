@@ -214,7 +214,6 @@ export interface ExecuteIOCommandParams {
 /**
  * This function is equivalent to a double redirect
  * e.g. echo "Hello!" >> hello.txt
- * @param param0
  */
 export async function executeAndWriteToFile({ command, filePath, args }: ExecuteIOCommandParams) {
   const writeStream = fs.createWriteStream(filePath, {
