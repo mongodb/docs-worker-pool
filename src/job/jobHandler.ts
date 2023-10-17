@@ -207,7 +207,7 @@ export abstract class JobHandler {
     try {
       if (this.currJob.payload.repoName === 'docs-monorepo') {
         await this._fileSystemServices.saveUrlAsFile(
-          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.monorepoDir}`,
+          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/monorepo-pub-branches/makefiles/Makefile.${this.currJob.payload.monorepoDir}`,
           `repos/${getDirectory(this.currJob)}/Makefile`,
           {
             encoding: 'utf8',
