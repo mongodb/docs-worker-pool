@@ -20,7 +20,9 @@ describe('Docsets Repository Tests', () => {
       dbRepoHelper.collection.aggregate.mockReturnValueOnce({
         toArray: () => [],
       });
-      await expect(docsetsRepo.getRepoBranchesByRepoName('test_repo')).resolves.toEqual({ status: 'failure' });
+      await expect(docsetsRepo.getRepoBranchesByRepoName('test_repo', 'project')).resolves.toEqual({
+        status: 'failure',
+      });
       expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testPipeline, {});
     });
@@ -33,7 +35,7 @@ describe('Docsets Repository Tests', () => {
           url: {},
         }),
       });
-      await docsetsRepo.getRepoBranchesByRepoName('test_repo');
+      await docsetsRepo.getRepoBranchesByRepoName('test_repo', 'project');
       expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testPipeline, {});
     });
@@ -45,7 +47,7 @@ describe('Docsets Repository Tests', () => {
           setTimeout(resolve, 5000, [[]]);
         });
       });
-      docsetsRepo.getRepoBranchesByRepoName('test_repo').catch((error) => {
+      docsetsRepo.getRepoBranchesByRepoName('test_repo', 'project').catch((error) => {
         expect(dbRepoHelper.logger.error).toBeCalledTimes(1);
         expect(error.message).toContain(`Error while fetching repo by repo name test_repo`);
       });
