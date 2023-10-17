@@ -38,4 +38,4 @@ help:
 
 
 get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/cloud-docs.yaml > ${REPO_DIR}/published-branches.yaml
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/monorepo-pub-branches/publishedbranches/docs-monorepo/cloud-docs.yaml > ${REPO_DIR}/published-branches.yaml
