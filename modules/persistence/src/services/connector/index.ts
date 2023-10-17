@@ -47,7 +47,7 @@ export const insert = async (docs: any[], collection: string, buildId: ObjectId,
       docs.map((d) => ({
         ...d,
         build_id: buildId,
-        created_at: buildId.getTimestamp(),
+        created_at: new Date(),
       })),
       { ordered: false }
     );
