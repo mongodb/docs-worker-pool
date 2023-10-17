@@ -1,5 +1,6 @@
 import { executeCliCommand } from '../helpers';
 
+const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
   repoDir: string;
   mutPrefix: string;
@@ -20,14 +21,14 @@ export async function nextGenStage({
   commitBranch,
   commitHash,
 }: StageParams) {
-  let hostedAtUrl = `${url}/${mutPrefix}/docsworker/${commitBranch}/`;
+  let hostedAtUrl = `${url}/${mutPrefix}/${DOCS_WORKER_USER}/${commitBranch}/`;
   let prefix = mutPrefix;
 
   const commandArgs = ['public', bucket, '--stage'];
 
   if (patchId && projectName === mutPrefix) {
     prefix = `${commitHash}/${patchId}/${mutPrefix}`;
-    hostedAtUrl = `${url}/${commitHash}/${patchId}/${mutPrefix}/docsworker/${commitBranch}/`;
+    hostedAtUrl = `${url}/${commitHash}/${patchId}/${mutPrefix}/${DOCS_WORKER_USER}/${commitBranch}/`;
   }
 
   commandArgs.push(`--prefix="${prefix}"`);
