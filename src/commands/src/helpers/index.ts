@@ -120,11 +120,11 @@ export async function executeAndPipeCommands(
         console.error('Options provided: ', cmdToParams.options);
 
         if (outputText) {
-          console.error('output', outputText.join());
+          console.error('output', outputText.join(''));
         }
 
         if (errorText) {
-          console.error('error', errorText.join());
+          console.error('error', errorText.join(''));
         }
 
         reject(new ExecuteCommandError('The command failed', { exitCode, outputText, errorText }));
@@ -132,8 +132,8 @@ export async function executeAndPipeCommands(
       }
 
       resolve({
-        outputText: outputText.join(),
-        errorText: errorText.join(),
+        outputText: outputText.join(''),
+        errorText: errorText.join(''),
       });
     });
   });
@@ -186,11 +186,11 @@ export async function executeCliCommand({
         console.error('Options provided: ', options);
 
         if (outputText) {
-          console.error(outputText.join());
+          console.error(outputText.join(''));
         }
 
         if (errorText) {
-          console.error(errorText.join());
+          console.error(errorText.join(''));
         }
 
         reject(new ExecuteCommandError('The command failed', exitCode));
@@ -198,8 +198,8 @@ export async function executeCliCommand({
       }
 
       resolve({
-        outputText: outputText.join(),
-        errorText: errorText.join(),
+        outputText: outputText.join(''),
+        errorText: errorText.join(''),
       });
     });
   });
