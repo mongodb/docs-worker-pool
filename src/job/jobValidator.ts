@@ -44,6 +44,7 @@ export class JobValidator implements IJobValidator {
   }
 
   async throwIfBranchNotConfigured(job: Job): Promise<void> {
+    // TODO: fix this getRepoBranchesByRepoName
     job.payload.repoBranches = await this._docsetsRepository.getRepoBranchesByRepoName(job.payload.repoName);
     if (!job.payload?.repoBranches) {
       throw new AuthorizationError(`repoBranches not found for ${job.payload.repoName}`);

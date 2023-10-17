@@ -93,6 +93,7 @@ export const getDeployableJobs = async (
     const repoInfo = await docsetsRepository.getRepo(repoName, monorepoDir);
     const non_versioned = repoInfo.branches.length === 1;
 
+    // TODO: change this??
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     if (!branchObject?.aliasObject) continue;
 
@@ -117,7 +118,8 @@ export const getDeployableJobs = async (
       urlSlug,
       false,
       false,
-      false
+      false,
+      monorepoDir
     );
 
     newPayload.stable = !!isStableBranch;
@@ -209,7 +211,8 @@ function createPayload(
   urlSlug,
   aliased = false,
   primaryAlias = false,
-  stable = false
+  stable = false,
+  monorepoDir?: string
 ) {
   return {
     jobType,
@@ -228,6 +231,7 @@ function createPayload(
     newHead,
     primaryAlias,
     stable,
+    monorepoDir,
   };
 }
 

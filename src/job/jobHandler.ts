@@ -98,7 +98,7 @@ export abstract class JobHandler {
     if (publishResult) {
       if (publishResult?.status === 'success') {
         const files = this._fileSystemServices.getFilesInDirectory(
-          `./${this.currJob.payload.repoName}/build/public`,
+          `./${getDirectory(this.currJob)}/build/public`,
           '',
           null,
           null
@@ -135,9 +135,7 @@ export abstract class JobHandler {
   }
 
   private cleanup(): void {
-    this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}`);
-    this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}/cloud-docs`);
-    this._fileSystemServices.removeDirectory(`repos/cloud-docs`);
+    this._fileSystemServices.removeDirectory(`repos/${getDirectory(this.currJob)}`);
   }
 
   @throwIfJobInterupted()
@@ -170,6 +168,7 @@ export abstract class JobHandler {
     // if commit hash is provided, use that
     if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Regression Test Child Process') {
       try {
+        // TODO: check this
         const resp = await this._repoConnector.checkCommits(this._currJob);
         // The response output MUST contain the branchName, or else we did not find the commit
         if (!resp?.output?.includes(`* ${this.currJob.payload.branchName}`)) {
@@ -206,14 +205,10 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async downloadMakeFile(): Promise<void> {
     try {
-      this._logger.info(
-        this.currJob._id,
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`
-      );
       if (this.currJob.payload.repoName === 'docs-monorepo') {
         await this._fileSystemServices.saveUrlAsFile(
-          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.project}`,
-          `repos/${this.currJob.payload.project}/cloud-docs/Makefile`,
+          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.monorepoDir}`,
+          `repos/${getDirectory(this.currJob)}/Makefile`,
           {
             encoding: 'utf8',
             flag: 'w',
@@ -237,10 +232,7 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   public isbuildNextGen(): boolean {
-    let workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
-    if (this.currJob.payload.repoName === 'docs-monorepo')
-      workerPath = `repos/${this.currJob.payload.project}/cloud-docs/worker.sh`;
-    // const workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
+    const workerPath = `repos/${getDirectory(this.currJob)}/worker.sh`;
     if (this._fileSystemServices.rootFileExists(workerPath)) {
       const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
       const workerLines = workerContents.split(/\r?\n/);
@@ -290,16 +282,12 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const pathToRepo =
-      this.currJob.payload.repoName === 'docs-monorepo'
-        ? `repos/cloud-docs/cloud-docs`
-        : `repos/${this.currJob.payload.repoName}`;
+    const pathToRepo = getDirectory(this.currJob);
     const resp = await this._commandExecutor.execute([command], pathToRepo);
-    // const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
 
     await this._logger.save(
       this.currJob._id,
-      `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
+      `${'(COMMAND)'.padEnd(15)} ${command} run details in ${getDirectory(this.currJob)}`
     );
     const end = performance.now();
     const update = {
@@ -404,9 +392,7 @@ export abstract class JobHandler {
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
       if (envValue) envVars += `${envName}=${envValue}\n`;
     }
-    let fileToWriteTo = `repos/${this.currJob.payload.repoName}/.env.production`;
-    if (this.currJob.payload.repoName === 'docs-monorepo')
-      fileToWriteTo = `repos/${this.currJob.payload.project}/cloud-docs/.env.production`;
+    const fileToWriteTo = `repos/${getDirectory(this.currJob)}/.env.production`;
     this._fileSystemServices.writeToFile(fileToWriteTo, envVars, {
       encoding: 'utf8',
       flag: 'w',
@@ -455,32 +441,23 @@ export abstract class JobHandler {
 
   // TODO: Reduce state changes
   protected prepBuildCommands(): void {
-    if (this.currJob.payload.repoName === 'docs-monorepo') {
-      // TODO: Only works for projects that align with the repo "name"
-      this._logger.save(this.currJob._id, 'IN PREP, using cloud-docs');
-      this.currJob.buildCommands = [
-        `. /venv/bin/activate`,
-        `cd repos/${this.currJob.payload.project}/cloud-docs`,
-        `rm -f makefile`,
-        `make html`,
-      ];
-    } else {
-      this._logger.save(this.currJob._id, 'Not using cloud-docs in prep');
-      this.currJob.buildCommands = [
-        `. /venv/bin/activate`,
-        `cd repos/${this.currJob.payload.repoName}`,
-        `rm -f makefile`,
-        `make html`,
-      ];
-    }
+    this.currJob.buildCommands = [
+      `. /venv/bin/activate`,
+      `cd repos/${getDirectory(this.currJob)}`,
+      `rm -f makefile`,
+      `make html`,
+    ];
   }
 
   protected async setEnvironmentVariables(): Promise<void> {
-    const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName);
+    const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(
+      this._currJob.payload.repoName,
+      this._currJob.payload.project
+    );
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,
-      `setEnvironmentVariables for ${this._currJob.payload.repoName} env ${env} jobType ${this._currJob.payload.jobType}`
+      `setEnvironmentVariables for ${getDirectory(this._currJob)} env ${env} jobType ${this._currJob.payload.jobType}`
     );
     if (repo_info?.['bucket'] && repo_info?.['url']) {
       if (this._currJob.payload.regression) {
@@ -605,7 +582,8 @@ export abstract class JobHandler {
   // TODO: Give 'shouldGenerateSearchManifest' boolean to users' control
   shouldGenerateSearchManifest(): boolean {
     const doNotSearchProperties = ['docs-landing', 'docs-404', 'docs-meta'];
-    if (doNotSearchProperties.includes(this.currJob.payload.repoName)) {
+    const localDirectory = getDirectory(this.currJob);
+    if (doNotSearchProperties.some((property) => localDirectory.includes(property))) {
       return false;
     }
     // Ensures that we only build a manifest for aliased properties if the job
@@ -777,4 +755,11 @@ function throwIfJobInterupted() {
     }
     return descriptor;
   };
+}
+
+export function getDirectory(job: Job) {
+  const { payload } = job;
+  let directory = payload.repoName;
+  if (payload.repoName === 'docs-monorepo' && !!payload.monorepoDir) directory += `/${payload.monorepoDir}`;
+  return directory;
 }

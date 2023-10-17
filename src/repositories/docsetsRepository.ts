@@ -78,14 +78,17 @@ export class DocsetsRepository extends BaseRepository {
     return res?.[0];
   }
 
-  async getRepoBranchesByRepoName(repoName: string, monorepoDir?: string): Promise<any> {
-    const matchConditions = { repoName };
-    if (monorepoDir) matchConditions['directories.snooty_toml'] = `/${monorepoDir}`;
+  async getRepoBranchesByRepoName(repoName: string, project: string): Promise<any> {
+    const matchConditions = { repoName, project };
     // TODO: Find a real way of dealing with this
-    if (repoName === 'docs-monorepo') matchConditions['project'] = 'cloud-docs';
+    // if (monorepoDir) matchConditions['directories.snooty_toml'] = `/${monorepoDir}`;
+    // if (repoName === 'docs-monorepo') matchConditions['project'] = 'cloud-docs';
 
     const aggregationPipeline = this.getAggregationPipeline(matchConditions);
-    const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
+    const cursor = await this.aggregate(
+      aggregationPipeline,
+      `Error while fetching repo by repo name ${repoName} and project ${project}`
+    );
     const res = await cursor.toArray();
     if (res.length && res[0]?.bucket && res[0]?.url) {
       return res[0];
