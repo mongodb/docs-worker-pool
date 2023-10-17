@@ -1,7 +1,7 @@
 // TODO: remove manifest job handler
 // not run as a separate job, handled in productionJobHandler prepSearchDeploy
 
-import { JobHandler } from './jobHandler';
+import { getDirectory, JobHandler } from './jobHandler';
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
@@ -100,7 +100,7 @@ export class ManifestJobHandler extends JobHandler {
     // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
-      `cd repos/${this.currJob.payload.repoName}`,
+      `cd repos/${getDirectory(this.currJob)}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
       `mut-index upload bundle.zip -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP || '')} ${globalSearch}`,
