@@ -33,7 +33,7 @@ export async function nextGenStage({
 
   commandArgs.push(`--prefix="${prefix}"`);
 
-  const { outputText, errorText } = await executeCliCommand({
+  const { outputText } = await executeCliCommand({
     command: 'mut-publish',
     args: commandArgs,
     options: {
@@ -41,7 +41,6 @@ export async function nextGenStage({
     },
   });
 
-  console.log(errorText);
   const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}`;
   return resultMessage;
 }
