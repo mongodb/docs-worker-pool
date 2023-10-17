@@ -1,4 +1,4 @@
-import { executeCliCommand, getCommitHash, getPatchId } from '../helpers';
+import { executeCliCommand } from '../helpers';
 
 interface StageParams {
   repoDir: string;
