@@ -186,7 +186,7 @@ export async function executeCliCommand({
         console.error('Options provided: ', options);
 
         if (outputText) {
-          console.error(outputText.join(''));
+          console.log(outputText.join(''));
         }
 
         if (errorText) {
