@@ -282,13 +282,10 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const pathToRepo = getDirectory(this.currJob);
+    const pathToRepo = `repos/${getDirectory(this.currJob)}`;
     const resp = await this._commandExecutor.execute([command], pathToRepo);
 
-    await this._logger.save(
-      this.currJob._id,
-      `${'(COMMAND)'.padEnd(15)} ${command} run details in ${getDirectory(this.currJob)}`
-    );
+    await this._logger.save(this.currJob._id, `${'(COMMAND)'.padEnd(15)} ${command} run details in ${pathToRepo}`);
     const end = performance.now();
     const update = {
       [`${stage}StartTime`]: start,
