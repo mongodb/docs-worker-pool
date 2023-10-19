@@ -73,7 +73,7 @@ export async function executeAndPipeCommands(
     cmdTo.stdin?.on('error', (err: StdinError) => {
       // the error event for the cmdTo stdin gets called whenever it closes prematurely,
       // but this is expected in certain situations e.g. when using the `yes` command.
-      // If this condition is met, we know that this expected, and ignore it otherwise we throw.
+      // If this condition is met, we know that this expected and ignore it otherwise we throw.
       // If we don't check, we get an unhandled error exception.
       if (err.code === EPIPE_CODE && err.syscall === EPIPE_SYSCALL && err.errno === EPIPE_ERRNO) {
         console.log('stdin done');
@@ -119,11 +119,11 @@ export async function executeAndPipeCommands(
         console.error('Arguments provided: ', cmdToParams.args);
         console.error('Options provided: ', cmdToParams.options);
 
-        if (outputText) {
-          console.error('output', outputText.join(''));
+        if (outputText.length) {
+          console.log('output', outputText.join(''));
         }
 
-        if (errorText) {
+        if (errorText.length) {
           console.error('error', errorText.join(''));
         }
 
@@ -185,11 +185,11 @@ export async function executeCliCommand({
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
 
-        if (outputText) {
+        if (outputText.length) {
           console.log(outputText.join(''));
         }
 
-        if (errorText) {
+        if (errorText.length) {
           console.error(errorText.join(''));
         }
 
