@@ -47,14 +47,19 @@ export async function prepareBuildAndGetDependencies(repoName: string, projectNa
     createEnvProdFile(repoDir, projectName, baseUrl),
   ];
 
-  const dependencies = await Promise.all(commandPromises);
+  try {
+    const dependencies = await Promise.all(commandPromises);
 
-  return {
-    commitHash: dependencies[0] as string,
-    commitBranch: dependencies[1] as string,
-    patchId: dependencies[2] as string | undefined,
-    hasRedirects: dependencies[3] as boolean,
-    bundlePath: `${repoDir}/bundle.zip`,
-    repoDir,
-  };
+    return {
+      commitHash: dependencies[0] as string,
+      commitBranch: dependencies[1] as string,
+      patchId: dependencies[2] as string | undefined,
+      hasRedirects: dependencies[3] as boolean,
+      bundlePath: `${repoDir}/bundle.zip`,
+      repoDir,
+    };
+  } catch (error) {
+    console.error('ERROR! Could not get build dependencies');
+    throw error;
+  }
 }
