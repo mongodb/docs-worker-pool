@@ -44,7 +44,8 @@
       "categoryName": "atlas",
       "categoryTitle": "Atlas"
     },
-    "prodDeployable": true
+    "prodDeployable": true,
+    "internalOnly": false
   },
   {
     "_id": "6243aa3f0aae3635a59a1150",
@@ -144,7 +145,8 @@
       "categoryTitle": "Atlas CLI"
     },
     "groups": null,
-    "prodDeployable": true
+    "prodDeployable": true,
+    "internalOnly": false
   },
   {
     "_id": "5fac1ce373a72fca02ec90c5",

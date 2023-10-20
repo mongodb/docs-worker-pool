@@ -22,7 +22,7 @@ export interface ReposBranchesDocument extends WithId<Document> {
   branches: BranchEntry[];
   url: EnvKeyedObject;
   prefix: EnvKeyedObject;
-  prodDeployable: boolean;
+  internalOnly: boolean;
   [key: string]: any;
 }
 
@@ -83,7 +83,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
 
   try {
     const db = await pool();
-    const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch }, prodDeployable: true });
+    const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch }, internalOnly: false });
     const cursor = db.collection('docsets').aggregate(aggregationPipeline);
     const docsets = (await cursor.toArray()) as ReposBranchesDocument[];
     docsets.forEach((doc: ReposBranchesDocument) => {
@@ -118,7 +118,7 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
     const matchCondition = {
       project,
       // We want the repo branches of the single deployable repo for a docset
-      prodDeployable: true,
+      internalOnly: false,
     };
     if (branch) {
       matchCondition['branches'] = { $elemMatch: { gitBranchName: branch } };

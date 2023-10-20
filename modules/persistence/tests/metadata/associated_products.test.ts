@@ -45,7 +45,7 @@ describe('associated_products module', () => {
     it('should return the repo branches for the docs deployable repo of the docset', async () => {
       const res = await _getRepoBranchesEntry('docs');
       expect(res).toMatchSnapshot();
-      expect(res.prodDeployable).toBeTruthy();
+      expect(res.internalOnly).toBeFalsy();
       // Non-deployable repo example should have only 1 branch
       expect(res.branches.length).toBeGreaterThan(1);
     });
@@ -59,7 +59,7 @@ describe('associated_products module', () => {
       const res = await _getRepoBranchesEntry('multiple-deployables');
       expect(console.warn).toBeCalledTimes(1);
       expect(msg.includes(expectedFirstRepoName)).toBeTruthy();
-      expect(res.prodDeployable).toBeTruthy();
+      expect(res.internalOnly).toBeFalsy();
       expect(res.repoName).toEqual(expectedFirstRepoName);
       mockedWarn.mockReset();
     });

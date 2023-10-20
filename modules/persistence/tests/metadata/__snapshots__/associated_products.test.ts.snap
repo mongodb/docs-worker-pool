@@ -103,6 +103,7 @@ Object {
     "stg": "docs-mongodb-org-stg",
   },
   "groups": null,
+  "internalOnly": false,
   "prefix": Object {
     "dotcomprd": "docs/atlas/cli",
     "dotcomstg": "docs-qa/atlas/cli",
@@ -2867,6 +2868,7 @@ Object {
     "stg": "docs-mongodb-org-stg",
   },
   "groups": null,
+  "internalOnly": false,
   "prefix": Object {
     "dotcomprd": "docs/atlas/cli",
     "dotcomstg": "docs-qa/atlas/cli",
