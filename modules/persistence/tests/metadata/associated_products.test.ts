@@ -41,6 +41,28 @@ describe('associated_products module', () => {
       const resBranch = await _getRepoBranchesEntry(project, branch);
       expect(resBranch).toMatchSnapshot();
     });
+
+    it('should return the repo branches for the docs deployable repo of the docset', async () => {
+      const res = await _getRepoBranchesEntry('docs');
+      expect(res).toMatchSnapshot();
+      expect(res.internalOnly).toBeFalsy();
+      // Non-deployable repo example should have only 1 branch
+      expect(res.branches.length).toBeGreaterThan(1);
+    });
+
+    it('should leave a warning when more than one deployable repo was found', async () => {
+      let msg = '';
+      const mockedWarn = jest.spyOn(global.console, 'warn').mockImplementationOnce((e) => {
+        msg = e;
+      });
+      const expectedFirstRepoName = 'docs-multiple-deployables-1';
+      const res = await _getRepoBranchesEntry('multiple-deployables');
+      expect(console.warn).toBeCalledTimes(1);
+      expect(msg.includes(expectedFirstRepoName)).toBeTruthy();
+      expect(res.internalOnly).toBeFalsy();
+      expect(res.repoName).toEqual(expectedFirstRepoName);
+      mockedWarn.mockReset();
+    });
   });
 
   describe('getAllAssociatedRepoBranchesEntries', () => {

@@ -22,6 +22,7 @@ export interface ReposBranchesDocument extends WithId<Document> {
   branches: BranchEntry[];
   url: EnvKeyedObject;
   prefix: EnvKeyedObject;
+  internalOnly: boolean;
   [key: string]: any;
 }
 
@@ -82,7 +83,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
 
   try {
     const db = await pool();
-    const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch } });
+    const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch }, internalOnly: false });
     const cursor = db.collection('docsets').aggregate(aggregationPipeline);
     const docsets = (await cursor.toArray()) as ReposBranchesDocument[];
     docsets.forEach((doc: ReposBranchesDocument) => {
@@ -114,7 +115,11 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
   // get from DB if not cached
   try {
     const db = await pool();
-    const matchCondition = { project };
+    const matchCondition = {
+      project,
+      // We want the repo branches of the single deployable repo for a docset
+      internalOnly: false,
+    };
     if (branch) {
       matchCondition['branches'] = { $elemMatch: { gitBranchName: branch } };
     }
@@ -122,12 +127,19 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
 
     const cursor = db.collection('docsets').aggregate(aggregationPipeline);
     const res = (await cursor.toArray()) as unknown as ReposBranchesDocument[];
+    const returnedEntry = res[0];
+
+    if (res.length > 1) {
+      console.warn(
+        `Expected 1 deployable repo for docset with project "${project}", but found ${res.length} instead. Defaulting to first found: "${returnedEntry.repoName}".`
+      );
+    }
 
     // if not already set, set cache value for repo_branches
     if (!internals[project]) {
-      internals[project] = res[0];
+      internals[project] = returnedEntry;
     }
-    return res[0];
+    return returnedEntry;
   } catch (e) {
     console.error(`Error while getting repo branches entry: ${e}`);
     throw e;
