@@ -2,6 +2,7 @@ import mongodb, { MongoClient } from 'mongodb';
 import c from 'config';
 import { handleJob } from './utils/job';
 import { listenToJobQueue } from './utils/queue';
+import { nodeSDKBuilder } from '../otel';
 
 let client: MongoClient | undefined;
 
@@ -49,6 +50,9 @@ async function handleJobAndCleanUp(jobId: string, db: mongodb.Db) {
     await cleanupJob();
   }
 }
+
+const sdk = nodeSDKBuilder();
+
 async function app(): Promise<void> {
   console.log('[app]: starting application');
 
@@ -69,4 +73,10 @@ app();
 
 process.on('SIGTERM', async () => {
   await cleanupJob();
+
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing and Metrics terminated'))
+    .catch((error) => console.log('Error terminating tracing and metrics', error))
+    .finally(() => process.exit(0));
 });
