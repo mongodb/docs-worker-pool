@@ -31,6 +31,7 @@ export function nodeSDKBuilder() {
     spanProcessor,
   });
 
+  console.log('Starting OpenTelemetry server');
   sdk.start();
 
   return sdk;
