@@ -107,7 +107,6 @@ export class WorkerConstruct extends Construct {
 
     taskDefinition.addContainer('otelSidecar', {
       image: ContainerImage.fromRegistry('amazon/aws-otel-collector'),
-      command: ['--config=/etc/ecs/ecs-default-config.yaml'],
     });
 
     taskDefinition.addContainer('workerImage', {
