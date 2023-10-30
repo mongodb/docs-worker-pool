@@ -42,7 +42,6 @@ export class GitHubConnector implements IRepoConnector {
 
   async applyPatch(job: Job): Promise<any> {
     if (job.payload.patch) {
-      // TODO: what is this???
       try {
         this._fileSystemService.writeToFile(`repos/${job.payload.repoName}/myPatch.patch`, job.payload.patch, {
           encoding: 'utf8',
@@ -64,7 +63,6 @@ export class GitHubConnector implements IRepoConnector {
       );
       await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}Finished git clone`);
     } catch (errResult) {
-      await this._jobRepoLogger.save(job._id, `Git clone fail, ${JSON.stringify(errResult)}`);
       await this._jobRepoLogger.save(job._id, `${'(GIT)'.padEnd(15)}stdErr: ${errResult.stderr}`);
       throw errResult;
     }

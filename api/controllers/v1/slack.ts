@@ -93,7 +93,6 @@ export const getDeployableJobs = async (
     const repoInfo = await docsetsRepository.getRepo(repoName, monorepoDir);
     const non_versioned = repoInfo.branches.length === 1;
 
-    // TODO: change this??
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     if (!branchObject?.aliasObject) continue;
 

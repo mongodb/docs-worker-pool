@@ -483,28 +483,20 @@ export abstract class JobHandler {
   protected async build(): Promise<boolean> {
     this.cleanup();
     await this.cloneRepo(this._config.get<string>('repo_dir'));
-    this._logger.info(this._currJob._id, 'Cloned Repo');
     this._logger.save(this._currJob._id, 'Cloned Repo');
     await this.commitCheck();
-    this._logger.info(this._currJob._id, 'Checked Commit');
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
-    this._logger.info(this._currJob._id, 'Pulled Repo');
     this._logger.save(this._currJob._id, 'Pulled Repo');
     this.prepBuildCommands();
-    this._logger.info(this._currJob._id, 'Prepared Build commands');
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
-    this._logger.info(this._currJob._id, 'Prepared Next Gen build');
     this._logger.save(this._currJob._id, 'Prepared Next Gen build');
     await this._repoConnector.applyPatch(this.currJob);
-    this._logger.info(this._currJob._id, 'Patch Applied');
     this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
-    this._logger.info(this._currJob._id, 'Downloaded Makefile');
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
-    this._logger.info(this._currJob._id, 'Prepared Environment variables');
     this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
   }
