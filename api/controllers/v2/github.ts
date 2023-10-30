@@ -12,6 +12,7 @@ import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { getMonorepoPaths } from '../../../src/monorepo';
 import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
 import { ReposBranchesDocument } from '../../../modules/persistence/src/services/metadata/associated_products';
+import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
@@ -106,7 +107,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
   const env = c.get<string>('env');
 
-  if (process.env.MONOREPO_PATH_FEATURE === 'true' && body.repository.name === 'docs-monorepo') {
+  if (process.env.MONOREPO_PATH_FEATURE === 'true' && body.repository.name === MONOREPO_NAME) {
     let monorepoPaths: string[] = [];
     try {
       if (body.head_commit && body.repository.owner.name) {

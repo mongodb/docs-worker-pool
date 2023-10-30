@@ -12,6 +12,7 @@ import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 require('fs');
 
 export abstract class JobHandler {
@@ -205,25 +206,18 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async downloadMakeFile(): Promise<void> {
     try {
-      if (this.currJob.payload.repoName === 'docs-monorepo') {
-        await this._fileSystemServices.saveUrlAsFile(
-          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/monorepo-pub-branches/makefiles/Makefile.${this.currJob.payload.monorepoDir}`,
-          `repos/${getDirectory(this.currJob)}/Makefile`,
-          {
-            encoding: 'utf8',
-            flag: 'w',
-          }
-        );
-      } else {
-        await this._fileSystemServices.saveUrlAsFile(
-          `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
-          `repos/${this.currJob.payload.repoName}/Makefile`,
-          {
-            encoding: 'utf8',
-            flag: 'w',
-          }
-        );
-      }
+      const makefileFileName =
+        this.currJob.payload.repoName === MONOREPO_NAME
+          ? this.currJob.payload.monorepoDir
+          : this.currJob.payload.repoName;
+      await this._fileSystemServices.saveUrlAsFile(
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${makefileFileName}`,
+        `repos/${getDirectory(this.currJob)}/Makefile`,
+        {
+          encoding: 'utf8',
+          flag: 'w',
+        }
+      );
     } catch (error) {
       await this.logError(error);
       throw error;
@@ -749,6 +743,6 @@ function throwIfJobInterupted() {
 export function getDirectory(job: Job) {
   const { payload } = job;
   let directory = payload.repoName;
-  if (payload.repoName === 'docs-monorepo' && !!payload.monorepoDir) directory += `/${payload.monorepoDir}`;
+  if (payload.repoName === MONOREPO_NAME && !!payload.monorepoDir) directory += `/${payload.monorepoDir}`;
   return directory;
 }

@@ -2,6 +2,7 @@ import { Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 
 const docsetsCollectionName = process.env.DOCSETS_COL_NAME || 'docsets';
 export class DocsetsRepository extends BaseRepository {
@@ -73,7 +74,7 @@ export class DocsetsRepository extends BaseRepository {
     if (!res.length) {
       const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName}`;
       this._logger.info(this._repoName, msg);
-    } else if (res.length > 1 && repoName === 'docs-monorepo') {
+    } else if (res.length > 1 && repoName === MONOREPO_NAME) {
     }
     return res?.[0];
   }
