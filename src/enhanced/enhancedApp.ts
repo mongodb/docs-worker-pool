@@ -51,8 +51,6 @@ async function handleJobAndCleanUp(jobId: string, db: mongodb.Db) {
   }
 }
 
-const sdk = nodeSDKBuilder();
-
 async function app(): Promise<void> {
   console.log('[app]: starting application');
 
@@ -75,8 +73,6 @@ process.on('SIGTERM', async () => {
   await cleanupJob();
 
   try {
-    await sdk.shutdown();
-    console.log('Tracing and Metrics terminated');
   } catch (error) {
     console.log('Error terminating tracing and metrics', error);
   } finally {

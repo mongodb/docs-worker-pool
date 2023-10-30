@@ -34,5 +34,10 @@ export function nodeSDKBuilder() {
   console.log('Starting OpenTelemetry server');
   sdk.start();
 
-  return sdk;
+  process.on('SIGTERM', async () => {
+    await sdk.shutdown();
+    console.log('Tracing and Metrics terminated');
+  });
 }
+
+nodeSDKBuilder();
