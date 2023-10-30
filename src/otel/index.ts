@@ -23,6 +23,7 @@ export function nodeSDKBuilder() {
       new HttpInstrumentation(),
       new AwsInstrumentation({
         suppressInternalInstrumentation: true,
+        sqsExtractContextPropagationFromPayload: true,
       }),
     ],
     idGenerator: new AWSXRayIdGenerator(),
