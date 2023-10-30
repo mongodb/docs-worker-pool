@@ -117,4 +117,4 @@ ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
 
 RUN mkdir repos && chmod 755 repos
 EXPOSE 3000
-CMD ["node", '--require', 'otel/index.js' , "enhanced/enhancedApp.js"]
+CMD ["node", "--require", "otel/index.js" , "enhanced/enhancedApp.js"]
