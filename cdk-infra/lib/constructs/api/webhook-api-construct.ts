@@ -73,10 +73,14 @@ export class WebhookApiConstruct extends Construct {
       environment,
       timeout,
     });
-
-    const otelLayer = LayerVersion.fromLayerVersionArn(
+    const otelCollectorLayer = LayerVersion.fromLayerVersionArn(
       this,
-      'otelLambdaLayer',
+      'otelCollectorLayer',
+      'arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-amd64-0_2_0:1'
+    );
+    const otelInstrumentationLayer = LayerVersion.fromLayerVersionArn(
+      this,
+      'otelInstrumentationLayer',
       'arn:aws:lambda:us-east-2:184161586896:layer:opentelemetry-nodejs-0_2_0:1'
     );
 
@@ -85,13 +89,17 @@ export class WebhookApiConstruct extends Construct {
       runtime,
       handler: 'TriggerBuild',
       bundling,
-      environment: { ...environment, AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler' },
+      environment: {
+        ...environment,
+        AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
+        OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yaml',
+      },
       timeout,
       tracing: Tracing.ACTIVE,
       currentVersionOptions: {
         provisionedConcurrentExecutions: 5,
       },
-      layers: [otelLayer],
+      layers: [otelInstrumentationLayer, otelCollectorLayer],
     });
 
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
