@@ -45,6 +45,14 @@ else
 GH_USER_ARG=${GH_USER}
 endif
 
+ifneq (,$(findstring docs-monorepo,$(REPO_DIR)))
+    # Found
+		PATH_TO_SNOOTY=${REPO_DIR}/../../../snooty
+else
+    # Not found
+		PATH_TO_SNOOTY=${REPO_DIR}/../../snooty
+endif
+
 next-gen-html:
 	# snooty parse and then build-front-end
 	snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
