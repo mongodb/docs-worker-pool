@@ -105,6 +105,11 @@ export class WorkerConstruct extends Construct {
     taskRole.addToPolicy(xrayTracingPolicy);
     taskRole.addToPolicy(updateTaskProtectionPolicy);
 
+    taskDefinition.addContainer('otelSidecar', {
+      image: ContainerImage.fromRegistry('amazon/aws-otel-collector'),
+      command: ['--config=/etc/ecs/ecs-default-config.yaml'],
+    });
+
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment: dockerEnvironment,
