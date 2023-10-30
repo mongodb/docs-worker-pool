@@ -80,6 +80,17 @@ export class WorkerConstruct extends Construct {
       executionRole,
     });
 
+    const xrayTracingPolicy = new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: [
+        'xray:PutTraceSegments',
+        'xray:PutTelemetryRecords',
+        'xray:GetSamplingRules',
+        'xray:GetSamplingTargets',
+        'xray:GetSamplingStatisticSummaries',
+      ],
+      resources: ['*'],
+    });
     const updateTaskProtectionPolicy = new PolicyStatement({
       effect: Effect.ALLOW,
       actions: ['ecs:UpdateTaskProtection'],
@@ -91,6 +102,7 @@ export class WorkerConstruct extends Construct {
       resources: ['*'],
     });
 
+    taskRole.addToPolicy(xrayTracingPolicy);
     taskRole.addToPolicy(updateTaskProtectionPolicy);
 
     taskDefinition.addContainer('workerImage', {
