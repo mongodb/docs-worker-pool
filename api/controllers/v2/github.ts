@@ -106,7 +106,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
   const env = c.get<string>('env');
 
-  if (process.env.MONOREPO_PATH_FEATURE === 'true') {
+  if (process.env.MONOREPO_PATH_FEATURE === 'true' && body.repository.name === 'docs-monorepo') {
     let monorepoPaths: string[] = [];
     try {
       if (body.head_commit && body.repository.owner.name) {
