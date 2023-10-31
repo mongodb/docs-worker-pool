@@ -21,7 +21,7 @@ service:
       exporters: [awsxray]
     metrics:
       receivers: [otlp]
-      exporters: [debug]
+      exporters: [prometheusremotewrite]
   telemetry:
     metrics:
       address: localhost:8888
