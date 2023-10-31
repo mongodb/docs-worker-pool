@@ -79,6 +79,7 @@ export class WebhookApiConstruct extends Construct {
       handler: 'TriggerBuild',
       bundling,
       environment,
+      memorySize: 1024,
       timeout,
       tracing: Tracing.ACTIVE,
       currentVersionOptions: {
@@ -86,7 +87,7 @@ export class WebhookApiConstruct extends Construct {
       },
       adotInstrumentation: {
         execWrapper: AdotLambdaExecWrapper.REGULAR_HANDLER,
-        layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.V1_16_0),
+        layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.LATEST),
       },
     });
 
