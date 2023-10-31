@@ -6,7 +6,6 @@ import {
   AdotLayerVersion,
   Code,
   Function,
-  LayerVersion,
   Runtime,
   Tracing,
 } from 'aws-cdk-lib/aws-lambda';
@@ -73,34 +72,22 @@ export class WebhookApiConstruct extends Construct {
       environment,
       timeout,
     });
-    const otelCollectorLayer = LayerVersion.fromLayerVersionArn(
-      this,
-      'otelCollectorLayer',
-      'arn:aws:lambda:us-east-2:184161586896:layer:opentelemetry-collector-amd64-0_2_0:1'
-    );
-    const otelInstrumentationLayer = LayerVersion.fromLayerVersionArn(
-      this,
-      'otelInstrumentationLayer',
-      'arn:aws:lambda:us-east-2:184161586896:layer:opentelemetry-nodejs-0_2_0:1'
-    );
 
     const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
       entry: `${HANDLERS_PATH}/github.ts`,
       runtime,
       handler: 'TriggerBuild',
       bundling,
-      environment: {
-        ...environment,
-        AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
-        // OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/config/collector.yaml',
-        // OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318/',
-      },
+      environment,
       timeout,
       tracing: Tracing.ACTIVE,
       currentVersionOptions: {
         provisionedConcurrentExecutions: 5,
       },
-      layers: [otelInstrumentationLayer, otelCollectorLayer],
+      adotInstrumentation: {
+        execWrapper: AdotLambdaExecWrapper.REGULAR_HANDLER,
+        layerVersion: AdotLayerVersion.fromJavaScriptSdkLayerVersion(AdotLambdaLayerJavaScriptSdkVersion.LATEST),
+      },
     });
 
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
