@@ -6,6 +6,7 @@ import {
   FargateService,
   FargateTaskDefinition,
   LogDrivers,
+  Protocol,
 } from 'aws-cdk-lib/aws-ecs';
 import { Effect, IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
@@ -80,6 +81,17 @@ export class WorkerConstruct extends Construct {
       executionRole,
     });
 
+    const xrayTracingPolicy = new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: [
+        'xray:PutTraceSegments',
+        'xray:PutTelemetryRecords',
+        'xray:GetSamplingRules',
+        'xray:GetSamplingTargets',
+        'xray:GetSamplingStatisticSummaries',
+      ],
+      resources: ['*'],
+    });
     const updateTaskProtectionPolicy = new PolicyStatement({
       effect: Effect.ALLOW,
       actions: ['ecs:UpdateTaskProtection'],
@@ -91,16 +103,32 @@ export class WorkerConstruct extends Construct {
       resources: ['*'],
     });
 
+    taskRole.addToPolicy(xrayTracingPolicy);
     taskRole.addToPolicy(updateTaskProtectionPolicy);
 
-    taskDefinition.addContainer('workerImage', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
-      environment: dockerEnvironment,
-      logging: LogDrivers.awsLogs({
-        streamPrefix: 'autobuilderworker',
-        logGroup: taskDefLogGroup,
-      }),
+    const sideCar = taskDefinition.addContainer('xraySidecar', {
+      image: ContainerImage.fromRegistry('amazon/aws-xray-daemon'),
+      portMappings: [
+        {
+          hostPort: 0,
+          protocol: Protocol.UDP,
+          containerPort: 2000,
+        },
+      ],
     });
+
+    taskDefinition
+      .addContainer('workerImage', {
+        image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
+        environment: dockerEnvironment,
+        logging: LogDrivers.awsLogs({
+          streamPrefix: 'autobuilderworker',
+          logGroup: taskDefLogGroup,
+        }),
+      })
+      .addContainerDependencies({
+        container: sideCar,
+      });
 
     const env = getEnv();
 

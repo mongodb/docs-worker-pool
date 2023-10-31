@@ -2,7 +2,7 @@ import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { PushEvent } from '@octokit/webhooks-types';
-
+import AWSXRay from 'aws-xray-sdk-core';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
@@ -12,6 +12,9 @@ import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { getMonorepoPaths } from '../../../src/monorepo';
 import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
 import { ReposBranchesDocument } from '../../../modules/persistence/src/services/metadata/associated_products';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+AWSXRay.captureAWS(require('aws-sdk'));
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
