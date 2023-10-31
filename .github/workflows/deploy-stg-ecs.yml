@@ -3,6 +3,7 @@ on:
     branches:
       - "master"
       - "integration"
+      - "DOP-4079-slack-monorepo"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
