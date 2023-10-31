@@ -169,7 +169,6 @@ export abstract class JobHandler {
     // if commit hash is provided, use that
     if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Regression Test Child Process') {
       try {
-        // TODO: check this
         const resp = await this._repoConnector.checkCommits(this._currJob);
         // The response output MUST contain the branchName, or else we did not find the commit
         if (!resp?.output?.includes(`* ${this.currJob.payload.branchName}`)) {
