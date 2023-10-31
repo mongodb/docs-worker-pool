@@ -64,9 +64,9 @@ export class DocsetsRepository extends BaseRepository {
     return res[0]?.project;
   }
 
-  async getRepo(repoName: string, monorepoDir?: string): Promise<any> {
+  async getRepo(repoName: string, directory?: string): Promise<any> {
     const matchConditions = { repoName };
-    if (monorepoDir) matchConditions['directories.snooty_toml'] = `/${monorepoDir}`;
+    if (directory) matchConditions['directories.snooty_toml'] = `/${directory}`;
 
     const aggregationPipeline = this.getAggregationPipeline(matchConditions);
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);

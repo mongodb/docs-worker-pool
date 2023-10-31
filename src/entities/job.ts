@@ -43,7 +43,7 @@ export type Payload = {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
-  monorepoDir?: string;
+  directory?: string;
 };
 
 export type EnhancedPayload = {

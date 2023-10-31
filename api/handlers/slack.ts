@@ -21,8 +21,8 @@ export function prepResponse(statusCode, contentType, body) {
 export async function buildEntitledBranchList(entitlement: any, repoBranchesRepository: RepoBranchesRepository) {
   const entitledBranches: string[] = [];
   for (const repo of entitlement.repos) {
-    const [repoOwner, repoName, monorepoDirPath] = repo.split('/');
-    const branches = await repoBranchesRepository.getRepoBranches(repoName, monorepoDirPath);
+    const [repoOwner, repoName, directoryPath] = repo.split('/');
+    const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
     for (const branch of branches) {
       let buildWithSnooty = true;
       if ('buildsWithSnooty' in branch) {
@@ -30,7 +30,7 @@ export async function buildEntitledBranchList(entitlement: any, repoBranchesRepo
       }
       if (buildWithSnooty) {
         entitledBranches.push(
-          `${repoOwner}/${repoName}${monorepoDirPath ? '/' + monorepoDirPath : ''}/${branch['gitBranchName']}`
+          `${repoOwner}/${repoName}${directoryPath ? '/' + directoryPath : ''}/${branch['gitBranchName']}`
         );
       }
     }

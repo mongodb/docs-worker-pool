@@ -89,7 +89,7 @@ export const getDeployableJobs = async (
   const deployable = [];
 
   for (let i = 0; i < values.repo_option.length; i++) {
-    let repoOwner: string, repoName: string, branchName: string, monorepoDir: string | undefined;
+    let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
     const splitValues = values.repo_option[i].value.split('/');
 
     if (splitValues.length === 3) {
@@ -97,7 +97,7 @@ export const getDeployableJobs = async (
       [repoOwner, repoName, branchName] = splitValues;
     } else if (splitValues.length === 4) {
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
-      [repoOwner, repoName, monorepoDir, branchName] = splitValues;
+      [repoOwner, repoName, directory, branchName] = splitValues;
     } else {
       throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
     }
@@ -107,7 +107,7 @@ export const getDeployableJobs = async (
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement?.email ?? '';
 
-    const repoInfo = await docsetsRepository.getRepo(repoName, monorepoDir);
+    const repoInfo = await docsetsRepository.getRepo(repoName, directory);
     const non_versioned = repoInfo.branches.length === 1;
 
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
@@ -135,7 +135,7 @@ export const getDeployableJobs = async (
       false,
       false,
       false,
-      monorepoDir
+      directory
     );
 
     newPayload.stable = !!isStableBranch;
@@ -236,7 +236,7 @@ function createPayload(
   aliased = false,
   primaryAlias = false,
   stable = false,
-  monorepoDir?: string
+  directory?: string
 ) {
   return {
     jobType,
@@ -254,7 +254,7 @@ function createPayload(
     newHead,
     primaryAlias,
     stable,
-    monorepoDir,
+    directory,
   };
 }
 

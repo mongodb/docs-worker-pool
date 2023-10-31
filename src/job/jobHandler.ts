@@ -207,7 +207,7 @@ export abstract class JobHandler {
     try {
       const makefileFileName =
         this.currJob.payload.repoName === MONOREPO_NAME
-          ? this.currJob.payload.monorepoDir
+          ? this.currJob.payload.directory
           : this.currJob.payload.repoName;
       await this._fileSystemServices.saveUrlAsFile(
         `https://raw.githubusercontent.com/mongodb/docs-worker-pool/monorepo-pub-branches/makefiles/Makefile.${makefileFileName}`,
@@ -740,6 +740,6 @@ function throwIfJobInterupted() {
 export function getDirectory(job: Job) {
   const { payload } = job;
   let directory = payload.repoName;
-  if (payload.repoName === MONOREPO_NAME && !!payload.monorepoDir) directory += `/${payload.monorepoDir}`;
+  if (payload.repoName === MONOREPO_NAME && !!payload.directory) directory += `/${payload.directory}`;
   return directory;
 }

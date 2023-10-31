@@ -8,13 +8,13 @@ export class RepoBranchesRepository extends BaseRepository {
     super(config, logger, 'RepoBranchesRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
-  async getRepoBranches(repoName: string, monorepoDirPath?: string): Promise<any> {
+  async getRepoBranches(repoName: string, directoryPath?: string): Promise<any> {
     const query = { repoName: repoName };
-    if (monorepoDirPath) query['directories.snooty_toml'] = `/${monorepoDirPath}`;
+    if (directoryPath) query['directories.snooty_toml'] = `/${directoryPath}`;
     const repo = await this.findOne(
       query,
       `Mongo Timeout Error: Timedout while retrieving branches for ${repoName}${
-        monorepoDirPath ? `/${monorepoDirPath}` : ''
+        directoryPath ? `/${directoryPath}` : ''
       }`
     );
     // if user has specific entitlements
