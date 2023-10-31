@@ -22,6 +22,7 @@
   "gatsbyBaseUrl": "GATSBY_BASE_URL",
   "previewBuildEnabled": "PREVIEW_BUILD_ENABLED",
   "featureFlagUpdatePages": "FEATURE_FLAG_UPDATE_PAGES",
+  "featureFlagMonorepoPath": "FEATURE_FLAG_MONOREPO_PATH",
   "featureFlagSearchUI": "GATSBY_TEST_SEARCH_UI",
   "gatsbyUseChatbot": "GATSBY_SHOW_CHATBOT",
   "gatsbyHideUnifiedFooterLocale": "GATSBY_HIDE_UNIFIED_FOOTER_LOCALE",
