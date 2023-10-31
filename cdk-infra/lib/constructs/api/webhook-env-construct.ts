@@ -21,7 +21,7 @@ export class WebhookEnvConstruct extends Construct {
     const featureName = getFeatureName();
 
     // Create configurable feature flag that lives in parameter store.
-    const monorepoPathFeature = new StringParameter(this, 'monorepoPathFeature', {
+    const featureFlagMonorepoPath = new StringParameter(this, 'monorepoPathFeature', {
       parameterName: `${ssmPrefix}/${featureName}/monorepo/path_feature`,
       stringValue: env === 'dotcomstg' || env === 'stg' ? 'true' : 'false',
     });
@@ -56,7 +56,7 @@ export class WebhookEnvConstruct extends Construct {
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       DASHBOARD_URL: getDashboardUrl(env, jobCollection),
       STAGE: env,
-      FEATURE_FLAG_MONOREPO_PATH: monorepoPathFeature.stringValue,
+      FEATURE_FLAG_MONOREPO_PATH: featureFlagMonorepoPath.stringValue,
     };
   }
 }
