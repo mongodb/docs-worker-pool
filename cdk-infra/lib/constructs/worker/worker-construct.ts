@@ -6,6 +6,7 @@ import {
   FargateService,
   FargateTaskDefinition,
   LogDrivers,
+  Protocol,
 } from 'aws-cdk-lib/aws-ecs';
 import { Effect, IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
@@ -105,19 +106,40 @@ export class WorkerConstruct extends Construct {
     taskRole.addToPolicy(xrayTracingPolicy);
     taskRole.addToPolicy(updateTaskProtectionPolicy);
 
-    taskDefinition.addContainer('otelSidecar', {
+    const sideCar = taskDefinition.addContainer('otelSidecar', {
       image: ContainerImage.fromRegistry('amazon/aws-otel-collector'),
       command: ['--config=/etc/ecs/ecs-default-config.yaml'],
+      portMappings: [
+        {
+          hostPort: 2000,
+          protocol: Protocol.UDP,
+          containerPort: 2000,
+        },
+        {
+          hostPort: 4317,
+          protocol: Protocol.TCP,
+          containerPort: 4317,
+        },
+        {
+          hostPort: 8125,
+          protocol: Protocol.UDP,
+          containerPort: 8125,
+        },
+      ],
     });
 
-    taskDefinition.addContainer('workerImage', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
-      environment: dockerEnvironment,
-      logging: LogDrivers.awsLogs({
-        streamPrefix: 'autobuilderworker',
-        logGroup: taskDefLogGroup,
-      }),
-    });
+    taskDefinition
+      .addContainer('workerImage', {
+        image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
+        environment: dockerEnvironment,
+        logging: LogDrivers.awsLogs({
+          streamPrefix: 'autobuilderworker',
+          logGroup: taskDefLogGroup,
+        }),
+      })
+      .addContainerDependencies({
+        container: sideCar,
+      });
 
     const env = getEnv();
 
