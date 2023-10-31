@@ -107,7 +107,18 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
   const env = c.get<string>('env');
 
-  if (process.env.MONOREPO_PATH_FEATURE === 'true' && body.repository.name === MONOREPO_NAME) {
+  async function createAndInsertJob(path?: string) {
+    const repoInfo = await docsetsRepository.getRepo(body.repository.name, path);
+    const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
+
+    consoleLogger.info(job.title, 'Creating Job');
+    const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+    jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+    consoleLogger.info(job.title, `Created Job ${jobId}`);
+  }
+
+  if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && body.repository.name === MONOREPO_NAME) {
     let monorepoPaths: string[] = [];
     try {
       if (body.head_commit && body.repository.owner.name) {
@@ -129,15 +140,8 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       /* For now, we will ignore nested monorepo projects until necessary */
       if (path.split('/').length > 1) continue;
 
-      const repoInfo = await docsetsRepository.getRepo(body.repository.name, `/${path}`);
-      const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-      const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
-
       try {
-        consoleLogger.info(job.title, 'Creating Job');
-        const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
-        jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
-        consoleLogger.info(job.title, `Created Job ${jobId}`);
+        createAndInsertJob(`/${path}`);
       } catch (err) {
         return {
           statusCode: 500,
@@ -150,20 +154,12 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Job Queued',
+      body: 'Jobs Queued',
     };
   }
 
-  const repoInfo = await docsetsRepository.getRepo(body.repository.name);
-  const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-
-  const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
-
   try {
-    consoleLogger.info(job.title, 'Creating Job');
-    const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
-    jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
-    consoleLogger.info(job.title, `Created Job ${jobId}`);
+    createAndInsertJob();
   } catch (err) {
     return {
       statusCode: 500,

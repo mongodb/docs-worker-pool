@@ -5,6 +5,7 @@ import { IFileSystemServices } from '../services/fileServices';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 
 export interface IJobValidator {
   throwIfJobInvalid(job: Job): Promise<void>;
@@ -34,7 +35,7 @@ export class JobValidator implements IJobValidator {
     const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
     // TODO: Ensure that the user is entitled for this specific monorepo project
     if (
-      job.payload.repoName === 'docs-monorepo' &&
+      job.payload.repoName === MONOREPO_NAME &&
       entitlementsObject?.repos?.some((r) => r.match(/10gen\/docs-monorepo\//g))
     ) {
       return;

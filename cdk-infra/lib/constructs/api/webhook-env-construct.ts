@@ -56,7 +56,7 @@ export class WebhookEnvConstruct extends Construct {
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       DASHBOARD_URL: getDashboardUrl(env, jobCollection),
       STAGE: env,
-      MONOREPO_PATH_FEATURE: monorepoPathFeature.stringValue,
+      FEATURE_FLAG_MONOREPO_PATH: monorepoPathFeature.stringValue,
     };
   }
 }
