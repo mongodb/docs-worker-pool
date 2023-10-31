@@ -141,7 +141,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       if (path.split('/').length > 1) continue;
 
       try {
-        createAndInsertJob(`/${path}`);
+        await createAndInsertJob(`/${path}`);
       } catch (err) {
         return {
           statusCode: 500,
@@ -159,7 +159,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   }
 
   try {
-    createAndInsertJob();
+    await createAndInsertJob();
   } catch (err) {
     return {
       statusCode: 500,
