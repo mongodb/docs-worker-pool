@@ -82,7 +82,10 @@ export const getDeployableJobs = async (
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
       [repoOwner, repoName, monorepoDir, branchName] = splitValues;
     } else {
-      throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
+      throw Error(
+        'Selected entitlement value is configured incorrectly. Check user entitlements!' +
+          ` ${process.env.FEATURE_FLAG_MONOREPO_PATH}`
+      );
     }
 
     const hashOption = values?.hash_option ?? null;
