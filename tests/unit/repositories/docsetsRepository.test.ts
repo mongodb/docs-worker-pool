@@ -16,11 +16,11 @@ describe('Docsets Repository Tests', () => {
 
   describe('Docsets Repository getRepoBranchesByRepoName Tests', () => {
     test('getRepoBranchesByRepoName returns failure as result is undefined', async () => {
-      const testPipeline = TestDataProvider.getAggregationPipeline('repoName', 'test_repo');
+      const testPipeline = TestDataProvider.getAggregationPipeline({ repoName: 'test_repo', project: 'test_project' });
       dbRepoHelper.collection.aggregate.mockReturnValueOnce({
         toArray: () => [],
       });
-      await expect(docsetsRepo.getRepoBranchesByRepoName('test_repo', 'project')).resolves.toEqual({
+      await expect(docsetsRepo.getRepoBranchesByRepoName('test_repo', 'test_project')).resolves.toEqual({
         status: 'failure',
       });
       expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
@@ -28,14 +28,14 @@ describe('Docsets Repository Tests', () => {
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {
-      const testPipeline = TestDataProvider.getAggregationPipeline('repoName', 'test_repo');
+      const testPipeline = TestDataProvider.getAggregationPipeline({ repoName: 'test_repo', project: 'test_project' });
       dbRepoHelper.collection.aggregate.mockReturnValueOnce({
         toArray: () => ({
           bucket: {},
           url: {},
         }),
       });
-      await docsetsRepo.getRepoBranchesByRepoName('test_repo', 'project');
+      await docsetsRepo.getRepoBranchesByRepoName('test_repo', 'test_project');
       expect(dbRepoHelper.collection.aggregate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.aggregate).toBeCalledWith(testPipeline, {});
     });

@@ -448,11 +448,13 @@ export class TestDataProvider {
     return retVal;
   }
 
-  static getAggregationPipeline(
-    matchConditionField: string,
-    matchConditionValue: string,
-    projection?: { [k: string]: number }
-  ) {
+  static getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
+    // Add prefix 'repo' to each field in matchConditions
+    const formattedMatchConditions = Object.entries(matchConditions).reduce((acc, [key, val]) => {
+      acc[`repo.${key}`] = val;
+      return acc;
+    }, {});
+
     return [
       // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
       {
@@ -469,9 +471,7 @@ export class TestDataProvider {
       },
       // Stage 3: Match documents based on given field
       {
-        $match: {
-          [`repo.${matchConditionField}`]: matchConditionValue,
-        },
+        $match: formattedMatchConditions,
       },
       // Stage 4: Merge/flatten repo into docset
       {

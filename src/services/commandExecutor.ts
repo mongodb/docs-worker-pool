@@ -100,11 +100,7 @@ export class GithubCommandExecutor extends ShellCommandExecutor implements IGith
     branchName: string,
     newHead: string | null | undefined = null
   ): Promise<CommandExecutorResponse> {
-    const pullRepoCommands = [
-      `cd repos/${repoDirName}/cloud-docs`,
-      `git checkout ${branchName}`,
-      `git pull origin ${branchName}`,
-    ];
+    const pullRepoCommands = [`cd repos/${repoDirName}`, `git checkout ${branchName}`, `git pull origin ${branchName}`];
     if (newHead) {
       pullRepoCommands.push(`git checkout ${newHead} .`);
     }
