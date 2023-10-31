@@ -76,7 +76,7 @@ export class WebhookApiConstruct extends Construct {
     const otelCollectorLayer = LayerVersion.fromLayerVersionArn(
       this,
       'otelCollectorLayer',
-      'arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-amd64-0_2_0:1'
+      'arn:aws:lambda:us-east-2:184161586896:layer:opentelemetry-collector-amd64-0_2_0:1'
     );
     const otelInstrumentationLayer = LayerVersion.fromLayerVersionArn(
       this,
