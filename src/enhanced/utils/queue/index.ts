@@ -30,6 +30,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     const message = res.Messages[0];
 
+    console.log(message);
+
     // Before we delete the message from the queue, we want to protect the task.
     // This is because if protect the task after we delete, we could end up with a condition
     // where the task is unprotected, and it deletes a message. This means that if we happen

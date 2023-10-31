@@ -22,7 +22,6 @@ export function nodeSDKBuilder() {
     instrumentations: [
       new HttpInstrumentation(),
       new AwsInstrumentation({
-        suppressInternalInstrumentation: true,
         sqsExtractContextPropagationFromPayload: true,
       }),
     ],
