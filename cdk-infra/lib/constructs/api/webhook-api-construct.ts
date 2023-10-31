@@ -92,8 +92,8 @@ export class WebhookApiConstruct extends Construct {
       environment: {
         ...environment,
         AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
-        OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/config/collector.yaml',
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318/',
+        // OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/config/collector.yaml',
+        // OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318/',
       },
       timeout,
       tracing: Tracing.ACTIVE,
