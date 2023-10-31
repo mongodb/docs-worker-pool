@@ -74,7 +74,6 @@ export class DocsetsRepository extends BaseRepository {
     if (!res.length) {
       const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName}`;
       this._logger.info(this._repoName, msg);
-    } else if (res.length > 1 && repoName === MONOREPO_NAME) {
     }
     return res?.[0];
   }

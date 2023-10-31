@@ -13,7 +13,9 @@ export class RepoBranchesRepository extends BaseRepository {
     if (monorepoDirPath) query['directories.snooty_toml'] = `/${monorepoDirPath}`;
     const repo = await this.findOne(
       query,
-      `Mongo Timeout Error: Timedout while retrieving branches for ${repoName}${monorepoDirPath ? monorepoDirPath : ''}`
+      `Mongo Timeout Error: Timedout while retrieving branches for ${repoName}${
+        monorepoDirPath ? `/${monorepoDirPath}` : ''
+      }`
     );
     // if user has specific entitlements
     return repo?.['branches'] ?? [];
