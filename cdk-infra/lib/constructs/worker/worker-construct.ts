@@ -115,7 +115,6 @@ export class WorkerConstruct extends Construct {
         },
       ],
     });
-
     taskDefinition
       .addContainer('workerImage', {
         image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
