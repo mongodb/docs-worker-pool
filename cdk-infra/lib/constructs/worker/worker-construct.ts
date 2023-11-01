@@ -110,7 +110,6 @@ export class WorkerConstruct extends Construct {
       image: ContainerImage.fromRegistry('amazon/aws-xray-daemon'),
       portMappings: [
         {
-          hostPort: 0,
           protocol: Protocol.UDP,
           containerPort: 2000,
         },
