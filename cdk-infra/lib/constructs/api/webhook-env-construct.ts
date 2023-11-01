@@ -3,7 +3,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getSsmPathPrefix } from '../../../utils/ssm';
 import { getDashboardUrl } from '../../../utils/slack';
-import { getEnv, getFeatureName } from '../../../utils/env';
+import { getEnv } from '../../../utils/env';
 
 interface WebhookEnvConstructProps {
   jobsQueue: IQueue;
@@ -18,14 +18,8 @@ export class WebhookEnvConstruct extends Construct {
 
     const ssmPrefix = getSsmPathPrefix();
     const env = getEnv();
-    const featureName = getFeatureName();
 
-    // Create configurable feature flag that lives in parameter store.
-    const featureFlagMonorepoPath = new StringParameter(this, 'monorepoPathFeature', {
-      parameterName: `${ssmPrefix}/${featureName}/monorepo/path_feature`,
-      stringValue: env === 'dotcomstg' || env === 'stg' ? 'true' : 'false',
-    });
-
+    const featureFlagMonorepoPath = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/monorepo_path`);
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);

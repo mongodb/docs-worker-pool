@@ -452,43 +452,4 @@ export class TestDataProvider {
   static getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
     return DocsetsRepository.getAggregationPipeline(matchConditions, projection);
   }
-  //   static getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
-  //     // Add prefix 'repo' to each field in matchConditions
-  //     const formattedMatchConditions = Object.entries(matchConditions).reduce((acc, [key, val]) => {
-  //       acc[`repo.${key}`] = val;
-  //       return acc;
-  //     }, {});
-
-  //     return [
-  //       // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
-  //       {
-  //         $unwind: '$repos',
-  //       },
-  //       // Stage 2: Lookup to join with the repos_branches collection
-  //       {
-  //         $lookup: {
-  //           from: 'repos_branches',
-  //           localField: 'repos',
-  //           foreignField: '_id',
-  //           as: 'repo',
-  //         },
-  //       },
-  //       // Stage 3: Match documents based on given field
-  //       {
-  //         $match: formattedMatchConditions,
-  //       },
-  //       // Stage 4: Merge/flatten repo into docset
-  //       {
-  //         $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ['$repo', 0] }, '$$ROOT'] } },
-  //       },
-  //       // Stage 5: Exclude fields
-  //       {
-  //         $project: projection || {
-  //           _id: 0,
-  //           repos: 0,
-  //           repo: 0,
-  //         },
-  //       },
-  //     ];
-  //   }
 }
