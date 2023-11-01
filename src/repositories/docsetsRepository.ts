@@ -2,7 +2,6 @@ import { Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
-import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 
 const docsetsCollectionName = process.env.DOCSETS_COL_NAME || 'docsets';
 export class DocsetsRepository extends BaseRepository {
@@ -10,7 +9,7 @@ export class DocsetsRepository extends BaseRepository {
     super(config, logger, 'DocsetsRepository', db.collection(docsetsCollectionName));
   }
 
-  private getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
+  static getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
     const DEFAULT_PROJECTIONS = {
       _id: 0,
       repos: 0,
@@ -54,7 +53,7 @@ export class DocsetsRepository extends BaseRepository {
 
   async getProjectByRepoName(repoName: string): Promise<any> {
     const projection = { project: 1 };
-    const aggregationPipeline = this.getAggregationPipeline({ repoName }, projection);
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline({ repoName }, projection);
     const cursor = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
@@ -68,7 +67,7 @@ export class DocsetsRepository extends BaseRepository {
     const matchConditions = { repoName };
     if (directory) matchConditions['directories.snooty_toml'] = `/${directory}`;
 
-    const aggregationPipeline = this.getAggregationPipeline(matchConditions);
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline(matchConditions);
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
@@ -81,7 +80,7 @@ export class DocsetsRepository extends BaseRepository {
   async getRepoBranchesByRepoName(repoName: string, project: string): Promise<any> {
     const matchConditions = { repoName, project };
 
-    const aggregationPipeline = this.getAggregationPipeline(matchConditions);
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline(matchConditions);
     const cursor = await this.aggregate(
       aggregationPipeline,
       `Error while fetching repo by repo name ${repoName} and project ${project}`

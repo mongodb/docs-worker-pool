@@ -95,7 +95,7 @@ export const getDeployableJobs = async (
     if (splitValues.length === 3) {
       // e.g. mongodb/docs-realm/master => (owner/repo/branch)
       [repoOwner, repoName, branchName] = splitValues;
-    } else if (splitValues.length === 4) {
+    } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
       [repoOwner, repoName, directory, branchName] = splitValues;
     } else {

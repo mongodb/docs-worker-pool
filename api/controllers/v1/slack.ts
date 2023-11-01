@@ -96,6 +96,7 @@ export const getDeployableJobs = async (
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     if (!branchObject?.aliasObject) continue;
 
+    // TODO: Create strong typing for these rather than comments
     const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; // bool
     let aliases = branchObject.aliasObject.urlAliases; // array or null
     let urlSlug = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
