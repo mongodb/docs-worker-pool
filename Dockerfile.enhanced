@@ -50,8 +50,10 @@ ENV PATH="${PATH}:/opt/snooty:/opt/mut:/home/docsworker-xlarge/.local/bin:/usr/l
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
 RUN apt-get install --yes curl
-RUN curl --location https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install --yes nodejs
+RUN apt-get update && sudo apt-get install -y ca-certificates curl gnupg
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+RUN sudo apt-get update && sudo apt-get install nodejs -y
 RUN apt-get install --yes build-essential
 
 # use npm 8.*
