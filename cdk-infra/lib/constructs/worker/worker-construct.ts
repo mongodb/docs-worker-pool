@@ -2,6 +2,7 @@ import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import {
   AssetImageProps,
   Cluster,
+  ContainerDependencyCondition,
   ContainerImage,
   FargateService,
   FargateTaskDefinition,
@@ -115,18 +116,19 @@ export class WorkerConstruct extends Construct {
         },
       ],
     });
-    taskDefinition
-      .addContainer('workerImage', {
-        image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
-        environment: dockerEnvironment,
-        logging: LogDrivers.awsLogs({
-          streamPrefix: 'autobuilderworker',
-          logGroup: taskDefLogGroup,
-        }),
-      })
-      .addContainerDependencies({
-        container: sideCar,
-      });
+    const workerTaskDefContainer = taskDefinition.addContainer('workerImage', {
+      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
+      environment: { ...dockerEnvironment, AWS_XRAY_DAEMON_ADDRESS: 'xraySidecar:2000' },
+      logging: LogDrivers.awsLogs({
+        streamPrefix: 'autobuilderworker',
+        logGroup: taskDefLogGroup,
+      }),
+    });
+
+    workerTaskDefContainer.addContainerDependencies({
+      container: sideCar,
+      condition: ContainerDependencyCondition.START,
+    });
 
     const env = getEnv();
 
