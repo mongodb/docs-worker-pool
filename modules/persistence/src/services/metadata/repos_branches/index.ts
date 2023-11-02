@@ -98,7 +98,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
   }
 };
 
-// Queries pool*.repos_branches for any entries for the given project and branch from a metadata entry.
+// Queries pool*.docsets for any entries for the given project and branch from a metadata entry.
 export const getRepoBranchesEntry = async (project: project, branch = ''): Promise<ReposBranchesDocument> => {
   const cachedDoc = internals[project];
   // return cached repo doc if exists
