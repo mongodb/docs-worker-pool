@@ -31,7 +31,6 @@
   "gatsbyBaseUrl": "GATSBY_BASE_URL",
   "previewBuildEnabled": "false",
   "featureFlagUpdatePages": "false",
-  "featureFlagMonorepoPath": "false",
   "featureFlagSearchUI": "false",
   "gatsbyUseChatbot": "false",
   "parallel": {

@@ -448,8 +448,4 @@ export class TestDataProvider {
     }
     return retVal;
   }
-
-  static getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
-    return DocsetsRepository.getAggregationPipeline(matchConditions, projection);
-  }
 }

@@ -2,6 +2,7 @@ import { Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
+import { MatchCondition, Projection } from '../monorepo/types/aggregation-types';
 
 const docsetsCollectionName = process.env.DOCSETS_COL_NAME || 'docsets';
 export class DocsetsRepository extends BaseRepository {
@@ -9,7 +10,7 @@ export class DocsetsRepository extends BaseRepository {
     super(config, logger, 'DocsetsRepository', db.collection(docsetsCollectionName));
   }
 
-  static getAggregationPipeline(matchConditions: { [k: string]: string }, projection?: { [k: string]: number }) {
+  static getAggregationPipeline(matchConditions: MatchCondition, projection?: Projection) {
     const DEFAULT_PROJECTIONS = {
       _id: 0,
       repos: 0,

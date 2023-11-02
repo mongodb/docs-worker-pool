@@ -1,5 +1,4 @@
 import { DBRepositoryHelper } from '../../utils/repositoryHelper';
-import { TestDataProvider } from '../../data/data';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
 describe('Docsets Repository Tests', () => {
@@ -16,7 +15,7 @@ describe('Docsets Repository Tests', () => {
 
   describe('Docsets Repository getRepoBranchesByRepoName Tests', () => {
     test('getRepoBranchesByRepoName returns failure as result is undefined', async () => {
-      const testPipeline = TestDataProvider.getAggregationPipeline({ repoName: 'test_repo', project: 'test_project' });
+      const testPipeline = DocsetsRepository.getAggregationPipeline({ repoName: 'test_repo', project: 'test_project' });
       dbRepoHelper.collection.aggregate.mockReturnValueOnce({
         toArray: () => [],
       });
@@ -28,7 +27,7 @@ describe('Docsets Repository Tests', () => {
     });
 
     test('getRepoBranchesByRepoName is successfull', async () => {
-      const testPipeline = TestDataProvider.getAggregationPipeline({ repoName: 'test_repo', project: 'test_project' });
+      const testPipeline = DocsetsRepository.getAggregationPipeline({ repoName: 'test_repo', project: 'test_project' });
       dbRepoHelper.collection.aggregate.mockReturnValueOnce({
         toArray: () => ({
           bucket: {},
