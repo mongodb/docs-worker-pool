@@ -135,7 +135,7 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
       );
     }
 
-    // if not already set, set cache value for repo_branches
+    // if not already set, set cache value for docsets
     if (!internals[project]) {
       internals[project] = returnedEntry;
     }
