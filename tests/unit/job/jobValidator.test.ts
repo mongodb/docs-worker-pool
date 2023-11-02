@@ -64,7 +64,7 @@ describe('JobValidator Tests', () => {
       .calledWith(job.user)
       .mockReturnValue({ status: 'failure' });
     await expect(jobValidator.throwIfUserNotEntitled(job)).rejects.toThrow(
-      `${job.user} is not entitled for repo ${job.payload.repoName}`
+      `${job.user} is not entitled for repo ${job.payload.repoOwner}/${job.payload.repoName}`
     );
     expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
   });
@@ -72,7 +72,7 @@ describe('JobValidator Tests', () => {
   test('Throw If User Not Entitled Fails because undefined return value', async () => {
     repoEntitlementRepository.getRepoEntitlementsByGithubUsername.calledWith(job.user).mockReturnValue(undefined);
     await expect(jobValidator.throwIfUserNotEntitled(job)).rejects.toThrow(
-      `${job.user} is not entitled for repo ${job.payload.repoName}`
+      `${job.user} is not entitled for repo ${job.payload.repoOwner}/${job.payload.repoName}`
     );
     expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
   });
@@ -82,7 +82,7 @@ describe('JobValidator Tests', () => {
       .calledWith(job.user)
       .mockReturnValue({ status: 'success', repos: [`someotherepo`], github_username: job.user });
     await expect(jobValidator.throwIfUserNotEntitled(job)).rejects.toThrow(
-      `${job.user} is not entitled for repo ${job.payload.repoName}`
+      `${job.user} is not entitled for repo ${job.payload.repoOwner}/${job.payload.repoName}`
     );
     expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
   });

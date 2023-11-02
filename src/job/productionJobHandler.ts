@@ -10,7 +10,7 @@ import { CommandExecutorResponse, IJobCommandExecutor } from '../services/comman
 import { IFileSystemServices } from '../services/fileServices';
 import { IJobRepoLogger } from '../services/logger';
 import { IRepoConnector } from '../services/repo';
-import { JobHandler } from './jobHandler';
+import { getDirectory, JobHandler } from './jobHandler';
 import { IJobValidator } from './jobValidator';
 import { joinUrlAndPrefix } from './manifestJobHandler';
 
@@ -49,7 +49,7 @@ export class ProductionJobHandler extends JobHandler {
     // TODO: Can we simplify the chain of logic here?
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
-      `cd repos/${this.currJob.payload.repoName}`,
+      `cd repos/${getDirectory(this.currJob)}`,
       'make publish && make deploy',
     ];
 
@@ -116,7 +116,7 @@ export class ProductionJobHandler extends JobHandler {
     }
     const searchCommands = [
       '. /venv/bin/activate',
-      `cd repos/${this.currJob.payload.repoName}`,
+      `cd repos/${getDirectory(this.currJob)}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
       // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2

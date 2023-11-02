@@ -261,7 +261,7 @@ async function SubmitArchiveJob(jobId: string) {
     repoBranches: new DocsetsRepository(db, c, consoleLogger),
   };
   const job = await models.jobs.getJobById(jobId);
-  const repo = await models.repoBranches.getRepo(job.payload.repoName);
+  const repo = await models.repoBranches.getRepo(job.payload.repoName, job?.payload.directory);
 
   /* NOTE
    * we don't archive landing for two reasons:

@@ -2,6 +2,7 @@ import { Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
+import { MatchCondition, Projection } from '../monorepo/types/aggregation-types';
 
 const docsetsCollectionName = process.env.DOCSETS_COL_NAME || 'docsets';
 export class DocsetsRepository extends BaseRepository {
@@ -9,16 +10,18 @@ export class DocsetsRepository extends BaseRepository {
     super(config, logger, 'DocsetsRepository', db.collection(docsetsCollectionName));
   }
 
-  private getAggregationPipeline(
-    matchConditionField: string,
-    matchConditionValue: string,
-    projection?: { [k: string]: number }
-  ) {
+  static getAggregationPipeline(matchConditions: MatchCondition, projection?: Projection) {
     const DEFAULT_PROJECTIONS = {
       _id: 0,
       repos: 0,
       repo: 0,
     };
+
+    // Add prefix 'repo' to each field in matchConditions
+    const formattedMatchConditions = Object.entries(matchConditions).reduce((acc, [key, val]) => {
+      acc[`repo.${key}`] = val;
+      return acc;
+    }, {});
 
     return [
       // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
@@ -36,9 +39,7 @@ export class DocsetsRepository extends BaseRepository {
       },
       // Stage 3: Match documents based on given field
       {
-        $match: {
-          [`repo.${matchConditionField}`]: matchConditionValue,
-        },
+        $match: formattedMatchConditions,
       },
       // Stage 4: Merge/flatten repo into docset
       {
@@ -53,7 +54,7 @@ export class DocsetsRepository extends BaseRepository {
 
   async getProjectByRepoName(repoName: string): Promise<any> {
     const projection = { project: 1 };
-    const aggregationPipeline = this.getAggregationPipeline('repoName', repoName, projection);
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline({ repoName }, projection);
     const cursor = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
@@ -63,20 +64,28 @@ export class DocsetsRepository extends BaseRepository {
     return res[0]?.project;
   }
 
-  async getRepo(repoName: string): Promise<any> {
-    const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
+  async getRepo(repoName: string, directory?: string): Promise<any> {
+    const matchConditions = { repoName };
+    if (directory) matchConditions['directories.snooty_toml'] = `/${directory}`;
+
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline(matchConditions);
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
       const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName}`;
       this._logger.info(this._repoName, msg);
     }
-    return res[0];
+    return res?.[0];
   }
 
-  async getRepoBranchesByRepoName(repoName: string): Promise<any> {
-    const aggregationPipeline = this.getAggregationPipeline('repoName', repoName);
-    const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
+  async getRepoBranchesByRepoName(repoName: string, project: string): Promise<any> {
+    const matchConditions = { repoName, project };
+
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline(matchConditions);
+    const cursor = await this.aggregate(
+      aggregationPipeline,
+      `Error while fetching repo by repo name ${repoName} and project ${project}`
+    );
     const res = await cursor.toArray();
     if (res.length && res[0]?.bucket && res[0]?.url) {
       return res[0];

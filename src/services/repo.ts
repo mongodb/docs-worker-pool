@@ -5,6 +5,7 @@ import { IConfig } from 'config';
 import { InvalidJobError } from '../errors/errors';
 import { IFileSystemServices } from './fileServices';
 import simpleGit, { SimpleGit } from 'simple-git';
+import { getDirectory } from '../job/jobHandler';
 const git: SimpleGit = simpleGit();
 
 export interface IRepoConnector {

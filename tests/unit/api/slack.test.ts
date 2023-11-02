@@ -39,7 +39,7 @@ jest.mock('../../../src/repositories/repoBranchesRepository', () => ({
   RepoBranchesRepository: jest.fn().mockImplementation(() => ({
     getRepoBranchAliases: jest
       .fn()
-      .mockImplementation((repoName, branchName) => mockBranchObject[repoName][branchName]),
+      .mockImplementation((repoName, branchName, project) => mockBranchObject[repoName][branchName]),
   })),
 }));
 

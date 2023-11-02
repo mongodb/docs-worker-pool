@@ -1,4 +1,4 @@
-import { JobHandler } from './jobHandler';
+import { getDirectory, JobHandler } from './jobHandler';
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
@@ -46,7 +46,7 @@ export class StagingJobHandler extends JobHandler {
 
   prepDeployCommands(): void {
     // TODO: Can we make this more readable?
-    this.currJob.deployCommands = ['. /venv/bin/activate', `cd repos/${this.currJob.payload.repoName}`, 'make stage'];
+    this.currJob.deployCommands = ['. /venv/bin/activate', `cd repos/${getDirectory(this.currJob)}`, 'make stage'];
     if (this.currJob.payload.isNextGen) {
       if (this.currJob.payload.pathPrefix) {
         this.currJob.deployCommands[
