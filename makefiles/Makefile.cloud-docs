@@ -37,11 +37,11 @@ help:
 	@echo '  ARGS         - Arguments to pass to mut-publish'
 
 ifneq (,$(findstring docs-monorepo,$(REPO_DIR)))
-    # Found
-		RELATIVE_PATH_OF_PUB_BRANCHES=docs-monorepo/cloud-docs
+	# Found
+	RELATIVE_PATH_OF_PUB_BRANCHES=docs-monorepo/cloud-docs
 else
-    # Not found
-		RELATIVE_PATH_OF_PUB_BRANCHES=cloud-docs
+	# Not found
+	RELATIVE_PATH_OF_PUB_BRANCHES=cloud-docs
 endif
 
 get-build-dependencies:
