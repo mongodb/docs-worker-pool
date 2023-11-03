@@ -56,9 +56,17 @@ else
 GH_USER_ARG=${GH_USER}
 endif
 
+ifneq (,$(findstring docs-monorepo,$(REPO_DIR)))
+    # Found
+		PATH_TO_SNOOTY=${REPO_DIR}/../../../snooty
+else
+    # Not found
+		PATH_TO_SNOOTY=${REPO_DIR}/../../snooty
+endif
+
 next-gen-html:
 	# build-front-end after running parse commands
-	rsync -az --exclude '.git' "${REPO_DIR}/../../snooty" "${REPO_DIR}"
+	rsync -az --exclude '.git' "${PATH_TO_SNOOTY}" "${REPO_DIR}"
 	cp ${REPO_DIR}/.env.production ${REPO_DIR}/snooty;
 	cd snooty; \
 	echo "GATSBY_SITE=${PROJECT}" >> .env.production; \

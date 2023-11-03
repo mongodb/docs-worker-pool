@@ -36,6 +36,13 @@ help:
 	@echo 'Variables'
 	@echo '  ARGS         - Arguments to pass to mut-publish'
 
+ifneq (,$(findstring docs-monorepo,$(REPO_DIR)))
+	# Found
+	RELATIVE_PATH_OF_PUB_BRANCHES=docs-monorepo/cloud-docs
+else
+	# Not found
+	RELATIVE_PATH_OF_PUB_BRANCHES=cloud-docs
+endif
 
 get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/cloud-docs.yaml > ${REPO_DIR}/published-branches.yaml
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/{RELATIVE_PATH_OF_PUB_BRANCHES}.yaml > ${REPO_DIR}/published-branches.yaml
