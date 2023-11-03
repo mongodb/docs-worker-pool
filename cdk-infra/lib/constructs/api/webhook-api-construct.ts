@@ -73,6 +73,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       timeout,
       tracing: Tracing.ACTIVE,
+      memorySize: 1024,
     });
 
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
