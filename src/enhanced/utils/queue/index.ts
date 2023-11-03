@@ -1,18 +1,18 @@
 import { ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
+import AWSXRay from 'aws-xray-sdk-core';
 import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
 import { protectTask } from '../job';
+
+const client = AWSXRay.captureAWSv3Client(new SQS({ region: 'us-east-2' }));
 
 /**
  * This function listens to the job queue until a message is received.
  * @returns {Promise<JobsQueuePayload>} the promise for the payload object after a message has been received
  */
 export async function listenToJobQueue(): Promise<JobsQueuePayload> {
-  const region = config.get<string>('aws_region');
   const queueUrl = config.get<string>('jobsQueueUrl');
-
-  const client = new SQS({ region });
 
   console.log('[listenToJobQueue]: Polling jobsQueue');
 
