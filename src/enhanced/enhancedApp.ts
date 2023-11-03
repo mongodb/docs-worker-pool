@@ -1,7 +1,13 @@
+import AWSXRay from 'aws-xray-sdk';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+AWSXRay.captureHTTPsGlobal(require('http'));
+
 import mongodb, { MongoClient } from 'mongodb';
 import c from 'config';
+
 import { handleJob } from './utils/job';
 import { listenToJobQueue } from './utils/queue';
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
 
 let client: MongoClient | undefined;
 
