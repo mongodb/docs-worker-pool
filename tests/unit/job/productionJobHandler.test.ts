@@ -120,7 +120,7 @@ describe('ProductionJobHandler Tests', () => {
   test('Execute throws error when Downloading makefile repo should update status', async () => {
     jobHandlerTestHelper.fileSystemServices.saveUrlAsFile
       .calledWith(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/monorepo-pub-branches/makefiles/Makefile.${jobHandlerTestHelper.job.payload.repoName}`
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${jobHandlerTestHelper.job.payload.repoName}`
       )
       .mockImplementation(() => {
         throw new Error('Error while Downloading makefile');
