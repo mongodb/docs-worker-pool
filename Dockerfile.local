@@ -98,4 +98,4 @@ RUN mkdir repos && chmod 755 repos
 
 EXPOSE 3000
 
-CMD ["node", "--enable-source-maps", "dist/entrypoints/localApp.js"]
+CMD ["node", "--inspect-brk=0.0.0.0", "--enable-source-maps", "dist/entrypoints/localApp.js"]
