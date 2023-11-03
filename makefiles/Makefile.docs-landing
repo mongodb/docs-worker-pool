@@ -18,7 +18,7 @@ DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
 
 
 get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/monorepo-pub-branches/publishedbranches/docs-monorepo/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-monorepo/docs-landing.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-parse:
 	# snooty parse -- separated from front-end to support index gen
