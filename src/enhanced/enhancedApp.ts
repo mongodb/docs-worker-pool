@@ -70,7 +70,10 @@ async function app(): Promise<void> {
   }
 }
 
-app();
+AWSXRay.captureAsyncFunc('send', (subsegment) => {
+  app();
+  subsegment?.close();
+});
 
 process.on('SIGTERM', async () => {
   await cleanupJob();
