@@ -16,9 +16,19 @@ include ~/shared.mk
 DOCS_TOOLS_THEME=docs-tools/themes/mongodb/static
 
 
+ifneq (,$(findstring docs-monorepo,$(REPO_DIR)))
+    # Found
+		PATH_TO_SNOOTY=${REPO_DIR}/../../../snooty
+		RELATIVE_PATH_OF_PUB_BRANCHES=docs-monorepo/docs-landing
+else
+    # Not found
+		PATH_TO_SNOOTY=${REPO_DIR}/../../snooty
+		RELATIVE_PATH_OF_PUB_BRANCHES=docs-landing
+endif
+
 
 get-build-dependencies:
-	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/{REPO_DIR}.yaml > ${REPO_DIR}/published-branches.yaml
+	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/{RELATIVE_PATH_OF_PUB_BRANCHES}.yaml > ${REPO_DIR}/published-branches.yaml
 
 next-gen-parse:
 	# snooty parse -- separated from front-end to support index gen
@@ -43,14 +53,6 @@ ifeq ($(GH_USER),)
 GH_USER_ARG=docs-builder-bot
 else
 GH_USER_ARG=${GH_USER}
-endif
-
-ifneq (,$(findstring docs-monorepo,$(REPO_DIR)))
-    # Found
-		PATH_TO_SNOOTY=${REPO_DIR}/../../../snooty
-else
-    # Not found
-		PATH_TO_SNOOTY=${REPO_DIR}/../../snooty
 endif
 
 next-gen-html:
