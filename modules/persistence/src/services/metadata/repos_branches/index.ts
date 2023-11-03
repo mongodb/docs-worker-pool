@@ -16,17 +16,23 @@ export interface BranchEntry {
   [key: string]: any;
 }
 
+export interface DocsetsDocument extends WithId<Document> {
+  url: EnvKeyedObject;
+  prefix: EnvKeyedObject;
+  bucket: EnvKeyedObject;
+}
+
 export interface ReposBranchesDocument extends WithId<Document> {
   repoName: string;
   project: string;
   branches: BranchEntry[];
-  url: EnvKeyedObject;
-  prefix: EnvKeyedObject;
   internalOnly: boolean;
   [key: string]: any;
 }
 
-const internals: { [key: project]: ReposBranchesDocument } = {};
+export type ReposBranchesDocsetsDocument = ReposBranchesDocument & DocsetsDocument;
+
+const internals: { [key: project]: ReposBranchesDocsetsDocument } = {};
 
 const getAggregationPipeline = (matchCondition: any) => {
   return [
@@ -67,7 +73,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
   const { associated_products = [] } = metadata;
   if (!associated_products.length) return [];
 
-  const res: ReposBranchesDocument[] = [],
+  const res: ReposBranchesDocsetsDocument[] = [],
     fetch: project[] = [];
   associated_products.forEach((ap) => {
     if (internals[ap.name]) {
@@ -85,8 +91,8 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
     const db = await pool();
     const aggregationPipeline = getAggregationPipeline({ project: { $in: fetch }, internalOnly: false });
     const cursor = db.collection('docsets').aggregate(aggregationPipeline);
-    const docsets = (await cursor.toArray()) as ReposBranchesDocument[];
-    docsets.forEach((doc: ReposBranchesDocument) => {
+    const docsets = (await cursor.toArray()) as DocsetsDocument[];
+    docsets.forEach((doc: ReposBranchesDocsetsDocument) => {
       // TODO: store in cache
       internals[doc['project']] = doc;
       res.push(doc);
@@ -98,7 +104,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
   }
 };
 
-// Queries pool*.docsets for any entries for the given project and branch from a metadata entry.
+// Queries pool*.repos_branches and pool*. for any entries for the given project and branch from a metadata entry.
 export const getRepoBranchesEntry = async (project: project, branch = ''): Promise<ReposBranchesDocument> => {
   const cachedDoc = internals[project];
   // return cached repo doc if exists
@@ -126,7 +132,7 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
     const aggregationPipeline = getAggregationPipeline(matchCondition);
 
     const cursor = db.collection('docsets').aggregate(aggregationPipeline);
-    const res = (await cursor.toArray()) as unknown as ReposBranchesDocument[];
+    const res = (await cursor.toArray()) as unknown as ReposBranchesDocsetsDocument[];
     const returnedEntry = res[0];
 
     if (res.length > 1) {
