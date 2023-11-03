@@ -1,7 +1,13 @@
 import { AggregationCursor } from 'mongodb';
 import { Metadata } from '..';
 import { db } from '../../connector';
-import { getAllAssociatedRepoBranchesEntries, getRepoBranchesEntry } from '../repos_branches';
+import {
+  ReposBranchesDocsetsDocument,
+  ReposBranchesDocument,
+  DocsetsDocument,
+  getAllAssociatedRepoBranchesEntries,
+  getRepoBranchesEntry,
+} from '../repos_branches';
 import { ToCInsertions, TocOrderInsertions, traverseAndMerge, copyToCTree, project } from '../ToC';
 import { prefixFromEnvironment } from '../ToC/utils/prefixFromEnvironment';
 
@@ -33,16 +39,7 @@ export interface BranchEntry {
   [key: string]: any;
 }
 
-export interface ReposBranchesDocument {
-  repoName: string;
-  project: string;
-  branches: BranchEntry[];
-  url: EnvKeyedObject;
-  prefix: EnvKeyedObject;
-  [key: string]: any;
-}
-
-const mapRepoBranches = (repoBranches: ReposBranchesDocument[]) =>
+const mapRepoBranches = (repoBranches: ReposBranchesDocsetsDocument[]) =>
   Object.fromEntries(
     repoBranches.map((entry) => {
       const { url, prefix } = entry;
@@ -94,7 +91,7 @@ const umbrellaMetadataEntry = async (project: string): Promise<Metadata> => {
 // Convert our cursor from the associated metadata aggregation query into a series of ToC objects and their parent metadata entries
 const shapeToCsCursor = async (
   tocCursor: AggregationCursor,
-  repoBranchesMap: { [k: string]: ReposBranchesDocument }
+  repoBranchesMap: { [k: string]: ReposBranchesDocsetsDocument }
 ): Promise<{
   tocInsertions: ToCInsertions;
   tocOrderInsertions: TocOrderInsertions;
@@ -192,7 +189,7 @@ export const mergeAssociatedToCs = async (metadata: Metadata) => {
     );
 
     // We need to have copies of the main umbrella product's ToC here, to handle multiple metadata entry support
-    const umbrellaPrefixes = prefixFromEnvironment(umbrellaRepoBranchesEntry as any as ReposBranchesDocument);
+    const umbrellaPrefixes = prefixFromEnvironment(umbrellaRepoBranchesEntry as any as DocsetsDocument);
     const umbrellaToCs = {
       original: copyToCTree(umbrellaMetadata.toctree),
       urlified: copyToCTree(umbrellaMetadata.toctree, umbrellaPrefixes.prefix, umbrellaPrefixes.url),

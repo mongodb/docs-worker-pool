@@ -5,13 +5,13 @@ import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
-import { ReposBranchesDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
+import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
 
 async function prepGithubPushPayload(
   githubEvent: any,
   repoBranchesRepository: RepoBranchesRepository,
   prefix: string,
-  repoInfo: ReposBranchesDocument
+  repoInfo: ReposBranchesDocsetsDocument
 ) {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(
