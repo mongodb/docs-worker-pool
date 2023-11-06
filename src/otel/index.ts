@@ -3,19 +3,19 @@ import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray';
 
 import { detectResourcesSync } from '@opentelemetry/resources';
 import { awsEcsDetector } from '@opentelemetry/resource-detector-aws';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+
+import { ConsoleSpanExporter, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray';
+import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 
 export function nodeSDKBuilder() {
   const resource = detectResourcesSync({
     detectors: [awsEcsDetector],
   });
 
-  const traceExporter = new OTLPTraceExporter();
-  const spanProcessor = new SimpleSpanProcessor(traceExporter);
+  console.log('RESOURCES: ', resource.attributes);
 
   const sdk = new NodeSDK({
     textMapPropagator: new AWSXRayPropagator(),
@@ -27,12 +27,19 @@ export function nodeSDKBuilder() {
     ],
     idGenerator: new AWSXRayIdGenerator(),
     resource,
-    traceExporter,
-    spanProcessor,
+    traceExporter: new ConsoleSpanExporter(),
   });
 
   console.log('Starting OpenTelemetry server');
   sdk.start();
+
+  const provider = new WebTracerProvider({ resource });
+
+  const exporter = new ConsoleSpanExporter();
+  const spanProcessor = new BatchSpanProcessor(exporter);
+
+  provider.addSpanProcessor(spanProcessor);
+  provider.register();
 
   process.on('SIGTERM', async () => {
     await sdk.shutdown();
