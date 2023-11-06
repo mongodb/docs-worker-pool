@@ -2,6 +2,7 @@ import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import {
   AssetImageProps,
   Cluster,
+  ContainerDependencyCondition,
   ContainerImage,
   FargateService,
   FargateTaskDefinition,
@@ -139,6 +140,7 @@ export class WorkerConstruct extends Construct {
       })
       .addContainerDependencies({
         container: sideCar,
+        condition: ContainerDependencyCondition.START,
       });
 
     const env = getEnv();
