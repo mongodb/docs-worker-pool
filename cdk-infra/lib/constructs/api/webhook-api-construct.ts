@@ -1,5 +1,12 @@
 import { Duration } from 'aws-cdk-lib';
-import { Cors, CorsOptions, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import {
+  AccessLogFormat,
+  Cors,
+  CorsOptions,
+  LambdaIntegration,
+  LambdaRestApi,
+  LogGroupLogDestination,
+} from 'aws-cdk-lib/aws-apigateway';
 import { Code, Function, Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { BundlingOptions, NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -7,6 +14,7 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
 import { getFeatureName } from '../../../utils/env';
+import { LogGroup } from 'aws-cdk-lib/aws-logs';
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
 
@@ -122,13 +130,18 @@ export class WebhookApiConstruct extends Construct {
 
     const apiName = `webhookHandlers-${getFeatureName()}`;
 
+    const prdLogGroup = new LogGroup(this, 'PrdLogs');
+
     const restApi = new LambdaRestApi(this, apiName, {
       handler: rootEndpointLambda,
       proxy: false,
       deployOptions: {
+        accessLogDestination: new LogGroupLogDestination(prdLogGroup),
+        accessLogFormat: AccessLogFormat.jsonWithStandardFields(),
         dataTraceEnabled: true,
         tracingEnabled: true,
       },
+      cloudWatchRole: true,
     });
 
     const webhookEndpoint = restApi.root.addResource('webhook');
@@ -136,6 +149,7 @@ export class WebhookApiConstruct extends Construct {
     const slackEndpoint = webhookEndpoint.addResource('slack');
     const dochubEndpoint = webhookEndpoint.addResource('dochub');
     const githubEndpoint = webhookEndpoint.addResource('githubEndpoint');
+
     const localEndpoint = webhookEndpoint.addResource('local');
     const snootyEndpoint = webhookEndpoint.addResource('snooty');
 
