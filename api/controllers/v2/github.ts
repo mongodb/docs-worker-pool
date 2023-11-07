@@ -87,6 +87,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   }
   let body: PushEvent;
   try {
+    console.log(event.body);
     body = JSON.parse(event.body) as PushEvent;
   } catch (e) {
     console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
