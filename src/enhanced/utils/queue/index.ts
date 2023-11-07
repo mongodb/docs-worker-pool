@@ -1,8 +1,11 @@
 import { ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
 import config from 'config';
+import { trace, Span } from '@opentelemetry/api';
 import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
 import { protectTask } from '../job';
+
+const tracer = trace.getTracer('idk');
 
 /**
  * This function listens to the job queue until a message is received.
@@ -14,79 +17,80 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
   const client = new SQS({ region });
 
-  console.log('[listenToJobQueue]: Polling jobsQueue');
+  return tracer.startActiveSpan('readMessage', async (span: Span) => {
+    console.log('[listenToJobQueue]: Polling jobsQueue');
+    // We want to loop indefinitely so that we continue to poll the queue.
+    while (true) {
+      const receiveMessage: ReceiveMessageCommandInput = {
+        QueueUrl: queueUrl,
+        MaxNumberOfMessages: 1,
+        WaitTimeSeconds: 4,
+      };
 
-  // We want to loop indefinitely so that we continue to poll the queue.
-  while (true) {
-    const receiveMessage: ReceiveMessageCommandInput = {
-      QueueUrl: queueUrl,
-      MaxNumberOfMessages: 1,
-      WaitTimeSeconds: 4,
-    };
+      const res = await client.receiveMessage(receiveMessage);
 
-    const res = await client.receiveMessage(receiveMessage);
+      if (!res.Messages || res.Messages.length === 0) continue;
 
-    if (!res.Messages || res.Messages.length === 0) continue;
+      const message = res.Messages[0];
 
-    const message = res.Messages[0];
+      console.log(message);
 
-    console.log(message);
+      // Before we delete the message from the queue, we want to protect the task.
+      // This is because if protect the task after we delete, we could end up with a condition
+      // where the task is unprotected, and it deletes a message. This means that if we happen
+      // to do a deploy in this state, we will delete the message from the queue AND end the task,
+      // preventing the job from completing while also losing the request in the process.
+      // This means that the job request will never be processed.
+      // NOTE: Intentionally not catching here, as this throw should be handled by the method listening to the queue.
+      // We don't want to continue listening to the queue, as there is something wrong with the protect task mechanism.
+      // We can let the task end, as it is unsafe to let an unprotected task process a job.
+      await protectTask();
 
-    // Before we delete the message from the queue, we want to protect the task.
-    // This is because if protect the task after we delete, we could end up with a condition
-    // where the task is unprotected, and it deletes a message. This means that if we happen
-    // to do a deploy in this state, we will delete the message from the queue AND end the task,
-    // preventing the job from completing while also losing the request in the process.
-    // This means that the job request will never be processed.
-    // NOTE: Intentionally not catching here, as this throw should be handled by the method listening to the queue.
-    // We don't want to continue listening to the queue, as there is something wrong with the protect task mechanism.
-    // We can let the task end, as it is unsafe to let an unprotected task process a job.
-    await protectTask();
+      console.log('[listenToJobQueue]: Deleting message...');
 
-    console.log('[listenToJobQueue]: Deleting message...');
+      // We have validated the message, now we can delete it.
+      try {
+        await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
+      } catch (e) {
+        // We want to keep the task alive because we do not want to process multiple jobs.
+        // This could lead to multiple tasks completing jobs, without new tasks being spun up.
+        console.error(
+          `[listenToJobQueue]: ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
+            e,
+            null,
+            4
+          )}`
+        );
+        continue;
+      }
 
-    // We have validated the message, now we can delete it.
-    try {
-      await client.deleteMessage({ QueueUrl: queueUrl, ReceiptHandle: message.ReceiptHandle });
-    } catch (e) {
-      // We want to keep the task alive because we do not want to process multiple jobs.
-      // This could lead to multiple tasks completing jobs, without new tasks being spun up.
-      console.error(
-        `[listenToJobQueue]: ERROR! Could not delete message. Preventing job from being processed, as this could lead to multiple jobs being processed. Error Obj: ${JSON.stringify(
-          e,
-          null,
-          4
-        )}`
-      );
-      continue;
+      console.log('[listenToJobQueue]: Message successfully deleted from queue!');
+
+      if (!message.Body) {
+        console.error(
+          `[listenToJobQueue]: ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`
+        );
+        continue;
+      }
+
+      const payload = JSON.parse(message.Body);
+
+      // Use type guard here to validate payload we have received from the queue.
+      // This ensures that the `payload` object will be of type `JobQueuePayload` after the if statement.
+      if (!isJobQueuePayload(payload)) {
+        console.error(
+          `[listenToJobQueue]: ERROR! Invalid payload data received from message ID: ${
+            message.MessageId
+          }. Payload received: ${JSON.stringify(payload)}`
+        );
+        continue;
+      }
+
+      console.log('[listenToJobQueue]: received valid message');
+
+      // Great! we received a proper message from the queue. Return this object as we will no longer
+      // want to poll for more messages.
+      return payload;
     }
-
-    console.log('[listenToJobQueue]: Message successfully deleted from queue!');
-
-    if (!message.Body) {
-      console.error(
-        `[listenToJobQueue]: ERROR! Received message from queue without body. Message ID is: ${message.MessageId}`
-      );
-      continue;
-    }
-
-    const payload = JSON.parse(message.Body);
-
-    // Use type guard here to validate payload we have received from the queue.
-    // This ensures that the `payload` object will be of type `JobQueuePayload` after the if statement.
-    if (!isJobQueuePayload(payload)) {
-      console.error(
-        `[listenToJobQueue]: ERROR! Invalid payload data received from message ID: ${
-          message.MessageId
-        }. Payload received: ${JSON.stringify(payload)}`
-      );
-      continue;
-    }
-
-    console.log('[listenToJobQueue]: received valid message');
-
-    // Great! we received a proper message from the queue. Return this object as we will no longer
-    // want to poll for more messages.
-    return payload;
-  }
+  });
 }

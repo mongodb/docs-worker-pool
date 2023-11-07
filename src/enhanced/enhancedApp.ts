@@ -2,7 +2,6 @@ import mongodb, { MongoClient } from 'mongodb';
 import c from 'config';
 import { handleJob } from './utils/job';
 import { listenToJobQueue } from './utils/queue';
-import { nodeSDKBuilder } from '../otel';
 
 let client: MongoClient | undefined;
 

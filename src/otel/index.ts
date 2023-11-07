@@ -5,8 +5,6 @@ import { detectResourcesSync } from '@opentelemetry/resources';
 import { awsEcsDetector } from '@opentelemetry/resource-detector-aws';
 
 import { ConsoleSpanExporter, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray';
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 
@@ -19,12 +17,6 @@ export function nodeSDKBuilder() {
 
   const sdk = new NodeSDK({
     textMapPropagator: new AWSXRayPropagator(),
-    instrumentations: [
-      new HttpInstrumentation(),
-      new AwsInstrumentation({
-        sqsExtractContextPropagationFromPayload: true,
-      }),
-    ],
     idGenerator: new AWSXRayIdGenerator(),
     resource,
     traceExporter: new ConsoleSpanExporter(),
