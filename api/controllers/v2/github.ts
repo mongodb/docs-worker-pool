@@ -24,7 +24,7 @@ async function prepGithubPushPayload(
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(
     githubEvent.repository.name,
     branch_name,
-    repoInfo.project
+    repoInfo?.project
   );
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
   const project = repoInfo?.project ?? githubEvent.repository.name;
