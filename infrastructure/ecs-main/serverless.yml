@@ -115,6 +115,7 @@ custom:
   gatsbyCloudPreviewWebhookEnabled: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_webhook_enable}
   previewBuildEnabled: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/preview_build/enabled}
   featureFlagUpdatePages: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/update_pages}
+  featureFlagMonorepoPath: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/monorepo_path}
   featureFlagSearchUI: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/search_ui}
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
   gatsbyUseChatbot: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/use_chatbot}

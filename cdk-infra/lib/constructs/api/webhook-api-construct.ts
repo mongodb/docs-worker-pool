@@ -140,6 +140,7 @@ export class WebhookApiConstruct extends Construct {
     const restApi = new LambdaRestApi(this, apiName, {
       handler: rootEndpointLambda,
       proxy: false,
+      cloudWatchRole: true,
     });
 
     const webhookEndpoint = restApi.root.addResource('webhook');

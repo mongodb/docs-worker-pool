@@ -1,6 +1,7 @@
 import type { Job } from '../../src/entities/job';
 import { CommandExecutorResponse } from '../../src/services/commandExecutor';
 import { getBuildJobDef } from '../data/jobDef';
+import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
 
 export class TestDataProvider {
   static getJobPropertiesValidateTestCases(): Array<any> {
@@ -446,45 +447,5 @@ export class TestDataProvider {
       retVal.push(`git checkout ${newHead} .`);
     }
     return retVal;
-  }
-
-  static getAggregationPipeline(
-    matchConditionField: string,
-    matchConditionValue: string,
-    projection?: { [k: string]: number }
-  ) {
-    return [
-      // Stage 1: Unwind the repos array to create multiple documents for each referenced repo
-      {
-        $unwind: '$repos',
-      },
-      // Stage 2: Lookup to join with the repos_branches collection
-      {
-        $lookup: {
-          from: 'repos_branches',
-          localField: 'repos',
-          foreignField: '_id',
-          as: 'repo',
-        },
-      },
-      // Stage 3: Match documents based on given field
-      {
-        $match: {
-          [`repo.${matchConditionField}`]: matchConditionValue,
-        },
-      },
-      // Stage 4: Merge/flatten repo into docset
-      {
-        $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ['$repo', 0] }, '$$ROOT'] } },
-      },
-      // Stage 5: Exclude fields
-      {
-        $project: projection || {
-          _id: 0,
-          repos: 0,
-          repo: 0,
-        },
-      },
-    ];
   }
 }

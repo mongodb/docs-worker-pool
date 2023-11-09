@@ -69,6 +69,7 @@ custom:
   slackSecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/webhook/secret}
   slackAuthToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/slack/auth/token}
   snootySecret: ${ssm:/env/${self:provider.stage}/docs/worker_pool/snooty/webhook/secret}
+  featureFlagMonorepoPath: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/monorepo_path}
   JobsQueueName: autobuilder-jobs-queue-${self:provider.stage}
   JobsDLQueueName: autobuilder-jobs-dlqueue-${self:provider.stage}
   JobUpdatesQueueName: autobuilder-job-updates-queue-${self:provider.stage}
@@ -120,6 +121,7 @@ webhook-env-core: &webhook-env-core
   SLACK_SECRET: ${self:custom.slackSecret}
   SLACK_TOKEN: ${self:custom.slackAuthToken}
   SNOOTY_SECRET: ${self:custom.snootySecret}
+  FEATURE_FLAG_MONOREPO_PATH: ${self:custom.featureFlagMonorepoPath}
   DASHBOARD_URL: ${self:custom.dashboardUrl.${self:provider.stage}}
   NODE_CONFIG_DIR: './api/config'
   TASK_DEFINITION_FAMILY: docs-worker-pool-${self:provider.stage}

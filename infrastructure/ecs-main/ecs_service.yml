@@ -62,6 +62,8 @@ Resources:
               Value: ${self:custom.previewBuildEnabled}
             - Name: FEATURE_FLAG_UPDATE_PAGES
               Value: ${self:custom.featureFlagUpdatePages}
+            - Name: FEATURE_FLAG_MONOREPO_PATH
+              Value: ${self:custom.featureFlagMonorepoPath}
             - Name: GATSBY_TEST_SEARCH_UI
               Value: ${self:custom.featureFlagSearchUI}
             - Name: GATSBY_SHOW_CHATBOT

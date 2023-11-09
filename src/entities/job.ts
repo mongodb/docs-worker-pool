@@ -43,6 +43,7 @@ export type Payload = {
   prefix: string;
   project: string;
   includeInGlobalSearch: boolean;
+  directory?: string;
 };
 
 export type EnhancedPayload = {
