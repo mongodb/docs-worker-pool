@@ -95,11 +95,12 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
       const client = dgram.createSocket('udp4');
 
-      client.send(JSON.stringify(newSegment), 2000, '127.0.0.1', (err) => {
+      client.send(JSON.stringify(newSegment), 2000, '127.0.0.1', (err, bytes) => {
         if (err) {
           console.error('Error occurred when sending udp message to xray daemon', err);
         }
 
+        console.log(bytes);
         client.close();
       });
     } else {

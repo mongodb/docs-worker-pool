@@ -1,6 +1,5 @@
 import AWSXRay from 'aws-xray-sdk';
 
-
 import mongodb, { MongoClient } from 'mongodb';
 import c from 'config';
 
@@ -70,10 +69,7 @@ async function app(): Promise<void> {
   }
 }
 
-AWSXRay.captureAsyncFunc('send', (subsegment) => {
-  app();
-  subsegment?.close();
-});
+app();
 
 process.on('SIGTERM', async () => {
   await cleanupJob();
