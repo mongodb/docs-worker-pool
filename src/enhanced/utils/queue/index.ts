@@ -93,16 +93,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
         end_time: Date.now(),
       };
 
-      const client = dgram.createSocket('udp4');
-
-      client.send(JSON.stringify(newSegment), 2000, '127.0.0.1', (err, bytes) => {
-        if (err) {
-          console.error('Error occurred when sending udp message to xray daemon', err);
-        }
-
-        console.log(bytes);
-        client.close();
-      });
+      sendUdpMessage(newSegment);
     } else {
       console.log('no trace id found');
     }
@@ -124,4 +115,21 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     // want to poll for more messages.
     return payload;
   }
+}
+
+async function sendUdpMessage(obj: unknown) {
+  const client = dgram.createSocket('udp4');
+
+  console.log('obj', obj);
+
+  client.send(JSON.stringify(obj), 2000, '127.0.0.1', (err, bytes) => {
+    if (err) {
+      console.error('Error occurred when sending udp message to xray daemon', err);
+    }
+
+    console.log(bytes);
+
+    Promise.resolve(bytes);
+    client.close();
+  });
 }
