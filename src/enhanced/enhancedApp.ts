@@ -1,5 +1,5 @@
 import AWSXRay from 'aws-xray-sdk';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 
 import mongodb, { MongoClient } from 'mongodb';
 import c from 'config';

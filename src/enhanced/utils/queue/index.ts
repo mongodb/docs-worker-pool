@@ -1,5 +1,7 @@
 import { ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
+import crypto from 'crypto';
 import config from 'config';
+import dgram from 'dgram';
 import AWSXRay from 'aws-xray-sdk-core';
 import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
@@ -71,6 +73,38 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     }
 
     const payload = JSON.parse(message.Body);
+
+    const { xrayTraceId } = payload;
+
+    if (xrayTraceId) {
+      console.log('Xray trace id: ', xrayTraceId);
+      const startTime = Date.now();
+      const traceId = xrayTraceId.split(';')[0];
+      const parentSegment = xrayTraceId.split(';')[1].split('=')[1];
+      const segmentId = crypto.randomBytes(16).toString('hex');
+
+      const newSegment = {
+        name: 'Autobuilder',
+        id: segmentId,
+        trace_id: traceId,
+        parent_id: parentSegment,
+        type: 'subsegment',
+        start_time: startTime,
+        end_time: Date.now(),
+      };
+
+      const client = dgram.createSocket('udp4');
+
+      client.send(JSON.stringify(newSegment), 2000, '127.0.0.1', (err) => {
+        if (err) {
+          console.error('Error occurred when sending udp message to xray daemon', err);
+        }
+
+        client.close();
+      });
+    } else {
+      console.log('no trace id found');
+    }
 
     // Use type guard here to validate payload we have received from the queue.
     // This ensures that the `payload` object will be of type `JobQueuePayload` after the if statement.
