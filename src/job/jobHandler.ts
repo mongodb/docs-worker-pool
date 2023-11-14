@@ -13,6 +13,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
+import { nextGenParse } from '../commands';
 require('fs');
 
 export abstract class JobHandler {
@@ -314,12 +315,25 @@ export abstract class JobHandler {
     for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>
       const key = command.split(' ')[1].trim();
-      if (stages[key]) {
-        const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
-        await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
+      this._logger.save(this.currJob._id, `command: ${command}`);
+      if (command === 'next-gen-parse') {
+        this._logger.save(this.currJob._id, `in parse command!!! `);
+        const snootyParseRes = await nextGenParse({
+          repoDir: `repos/${getDirectory(this.currJob)}`,
+          commitHash: this.currJob.payload.newHead ?? '',
+        });
+        this._logger.save(
+          this.currJob._id,
+          `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"`
+        );
       } else {
-        const makeCommandsResp = await this._commandExecutor.execute([command]);
-        await this.logBuildDetails(makeCommandsResp);
+        if (stages[key]) {
+          const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
+          await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
+        } else {
+          const makeCommandsResp = await this._commandExecutor.execute([command]);
+          await this.logBuildDetails(makeCommandsResp);
+        }
       }
 
       // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds

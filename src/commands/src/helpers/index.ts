@@ -271,9 +271,11 @@ export async function getCommitHash(repoDir: string): Promise<string> {
     args: ['rev-parse', '--short', 'HEAD'],
     options: { cwd: repoDir },
   });
+  console.log('commit hash ', response);
 
   return response.outputText;
 }
 
 export const checkIfPatched = async (repoDir: string) => !existsAsync(path.join(repoDir, 'myPatch.patch'));
-export const getRepoDir = (repoName: string) => path.join(process.cwd(), `repos/${repoName}`);
+export const getRepoDir = (repoName: string, directory?: string) =>
+  path.join(process.cwd(), `/repos/${repoName}${directory ? `/${directory}` : ''}`);

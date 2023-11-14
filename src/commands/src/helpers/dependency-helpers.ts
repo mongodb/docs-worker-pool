@@ -7,20 +7,24 @@ const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
 async function cloneRepo(repoName: string) {
+  const botName = process.env.GITHUB_BOT_USERNAME;
+  const botPassword = process.env.GITHUB_BOT_PASSWORD;
   await executeCliCommand({
     command: 'git',
-    args: ['clone', `https://github.com/mongodb/${repoName}`],
+    args: ['clone', `https://${botName}:${botPassword}@github.com/10gen/${repoName}`],
     options: { cwd: `${process.cwd()}/repos` },
   });
 }
 async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: string, prefix = '') {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
+  const prodDirName = repoDir;
+  // const prodSnootyFileName = `${prodDirName}snooty/.env.production`;
 
   try {
     await writeFileAsync(
       prodFileName,
       `GATSBY_SITE=${projectName}
-      GATSBY_MANIFEST_PATH=${repoDir}/bundle.zip
+      GATSBY_MANIFEST_PATH=${prodDirName}/bundle.zip
       GATSBY_PARSER_USER=${process.env.USER}
       GATSBY_BASE_URL=${baseUrl}
       PATH_PREFIX=${prefix}`,
@@ -32,11 +36,18 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-export async function prepareBuildAndGetDependencies(repoName: string, projectName: string, baseUrl: string) {
+export async function prepareBuildAndGetDependencies(
+  repoName: string,
+  projectName: string,
+  baseUrl: string,
+  directory?: string
+) {
+  console.log('cwd: ', process.cwd());
   // before we get build dependencies, we need to clone the repo
   await cloneRepo(repoName);
 
-  const repoDir = getRepoDir(repoName);
+  const repoDir = getRepoDir(repoName, directory);
+  // const repoDir = `repos/${repoName}`;
 
   // doing these in parallel
   const commandPromises = [
@@ -49,6 +60,7 @@ export async function prepareBuildAndGetDependencies(repoName: string, projectNa
 
   try {
     const dependencies = await Promise.all(commandPromises);
+    console.log('dependencies ', dependencies);
 
     return {
       commitHash: dependencies[0] as string,

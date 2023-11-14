@@ -14,7 +14,7 @@ export async function nextGenDeploy({ bucket, mutPrefix, gitBranch, hasConfigRed
     await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
   }
 
-  // equivalent to: yes | mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
+  // equivalent to: yes | mut-publish public ${BUCKET} --prefix=${MUT_PREFIX} --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
   const { outputText } = await executeAndPipeCommands(
     { command: 'yes' },
     {

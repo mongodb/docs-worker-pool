@@ -4,13 +4,13 @@ const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty
 
 interface NextGenParseParams {
   repoDir: string;
-  commitHash: string;
+  commitHash?: string;
   patchId?: string;
 }
 export async function nextGenParse({ repoDir, patchId, commitHash }: NextGenParseParams): Promise<CliCommandResponse> {
   const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`, RSTSPEC_FLAG];
 
-  if (patchId) {
+  if (patchId && commitHash) {
     commandArgs.push('--commit');
     commandArgs.push(commitHash);
 
