@@ -81,7 +81,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
       const startTime = Date.now();
       const traceId = xrayTraceId.split(';')[0].split('=')[1];
       const parentSegment = xrayTraceId.split(';')[1].split('=')[1];
-      const segmentId = crypto.randomBytes(16).toString('hex');
+      const segmentId = crypto.randomBytes(8).toString('hex');
 
       const newSegment = {
         name: 'Autobuilder',
