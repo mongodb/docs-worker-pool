@@ -78,7 +78,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     if (xrayTraceId) {
       console.log('Xray trace id: ', xrayTraceId);
-      const startTime = Date.now();
+      const startTime = (Date.now() / 1000).toFixed(3);
       const traceId = xrayTraceId.split(';')[0].split('=')[1];
       const parentSegment = xrayTraceId.split(';')[1].split('=')[1];
       const segmentId = crypto.randomBytes(8).toString('hex');
@@ -88,9 +88,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
         id: segmentId,
         trace_id: traceId,
         parent_id: parentSegment,
-        type: 'subsegment',
         start_time: startTime,
-        end_time: Date.now(),
+        end_time: (Date.now() / 1000).toFixed(3),
       };
 
       sendUdpMessage(newSegment);
