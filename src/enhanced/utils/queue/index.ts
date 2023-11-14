@@ -79,7 +79,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     if (xrayTraceId) {
       console.log('Xray trace id: ', xrayTraceId);
       const startTime = Date.now();
-      const traceId = xrayTraceId.split(';')[0];
+      const traceId = xrayTraceId.split(';')[0].split('=')[1];
       const parentSegment = xrayTraceId.split(';')[1].split('=')[1];
       const segmentId = crypto.randomBytes(16).toString('hex');
 
