@@ -109,6 +109,9 @@ export class WorkerConstruct extends Construct {
 
     const sideCar = taskDefinition.addContainer('xraySidecar', {
       image: ContainerImage.fromRegistry('amazon/aws-xray-daemon'),
+      logging: LogDrivers.awsLogs({
+        streamPrefix: 'xraysidecarvroom',
+      }),
       portMappings: [
         {
           protocol: Protocol.UDP,
