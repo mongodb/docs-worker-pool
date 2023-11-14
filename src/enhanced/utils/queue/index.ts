@@ -88,8 +88,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
         id: segmentId,
         trace_id: traceId,
         parent_id: parentSegment,
-        start_time: startTime,
-        end_time: (Date.now() / 1000).toFixed(3),
+        start_time: Number(startTime),
+        end_time: Number((Date.now() / 1000).toFixed(3)),
       };
 
       sendUdpMessage(newSegment);
