@@ -3,7 +3,6 @@ import { SQS, SendMessageRequest } from '@aws-sdk/client-sqs';
 import AWSXRay from 'aws-xray-sdk-core';
 import { IConfig } from 'config';
 import { JobQueueMessage } from '../entities/queueMessage';
-
 const client = AWSXRay.captureAWSv3Client(new SQS({ region: 'us-east-2' }));
 export interface IQueueConnector {
   sendMessage(payload: JobQueueMessage, url: string, delay: number): Promise<void>;

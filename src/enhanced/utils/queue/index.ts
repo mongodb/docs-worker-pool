@@ -32,6 +32,8 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     const message = res.Messages[0];
 
+    console.log('RES!!!!', res);
+
     console.log('[listenToJobQueue]: Message found', message);
 
     // Before we delete the message from the queue, we want to protect the task.
