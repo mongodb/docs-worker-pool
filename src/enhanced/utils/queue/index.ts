@@ -122,7 +122,7 @@ async function sendUdpMessage(obj: unknown) {
 
   console.log('obj', obj);
 
-  client.send(JSON.stringify(obj), 2000, '127.0.0.1', (err, bytes) => {
+  client.send(`{"format": "json", "version": 1}\n${JSON.stringify(obj)}`, 2000, '127.0.0.1', (err, bytes) => {
     if (err) {
       console.error('Error occurred when sending udp message to xray daemon', err);
     }
