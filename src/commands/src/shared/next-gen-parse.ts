@@ -8,12 +8,14 @@ interface NextGenParseParams {
   commitHash?: string;
   patchId?: string;
   logger: IJobRepoLogger;
+  id: string;
 }
 export async function nextGenParse({
   repoDir,
   patchId,
   commitHash,
   logger,
+  id,
 }: NextGenParseParams): Promise<CliCommandResponse> {
   const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`, RSTSPEC_FLAG];
 
@@ -25,7 +27,7 @@ export async function nextGenParse({
     commandArgs.push(patchId);
   }
 
-  logger.save(repoDir, `COMMAND for parse: ${commandArgs.join(' ')}`);
+  logger.save(id, `COMMAND for parse: ${commandArgs.join(' ')}`);
 
   return executeCliCommand({ command: 'snooty', args: commandArgs });
 }

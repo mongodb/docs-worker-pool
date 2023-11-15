@@ -318,11 +318,14 @@ export abstract class JobHandler {
       this._logger.save(this.currJob._id, `command: ${command}`);
       if (key === 'next-gen-parse') {
         this._logger.save(this.currJob._id, `in parse command!!! `);
+        this._logger.save(this.currJob._id, `repoDir: "repos/${getDirectory(this.currJob)}" `);
+        this._logger.save(this.currJob._id, `commitHash: ${this.currJob.payload.newHead ?? ''}`);
         try {
           const snootyParseRes = await nextGenParse({
             repoDir: `repos/${getDirectory(this.currJob)}`,
             commitHash: this.currJob.payload.newHead ?? '',
             logger: this._logger,
+            id: this.currJob._id,
           });
           this._logger.save(
             this.currJob._id,
