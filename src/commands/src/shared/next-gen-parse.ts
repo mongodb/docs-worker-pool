@@ -17,15 +17,17 @@ export async function nextGenParse({
   logger,
   id,
 }: NextGenParseParams): Promise<CliCommandResponse> {
-  const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`, RSTSPEC_FLAG];
+  const commandArgs = ['build', `"${repoDir}"`, '--output', `"${repoDir}/bundle.zip"`];
 
   if (patchId && commitHash) {
     commandArgs.push('--commit');
-    commandArgs.push(commitHash);
+    commandArgs.push(`"${commitHash}"`);
 
     commandArgs.push('--patch');
     commandArgs.push(patchId);
   }
+
+  commandArgs.push(RSTSPEC_FLAG);
 
   logger.save(id, `COMMAND for parse: ${commandArgs.join(' ')}`);
 
