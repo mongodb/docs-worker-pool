@@ -7,7 +7,7 @@ import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
 import { protectTask } from '../job';
 
-const client = AWSXRay.captureAWSv3Client(new SQS({ region: 'us-east-2' }));
+const client = new SQS({ region: 'us-east-2' });
 
 /**
  * This function listens to the job queue until a message is received.
