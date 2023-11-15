@@ -2,7 +2,7 @@ import { ReceiveMessageCommandInput, SQS } from '@aws-sdk/client-sqs';
 import crypto from 'crypto';
 import config from 'config';
 import dgram from 'dgram';
-import AWSXRay from 'aws-xray-sdk-core';
+
 import { JobsQueuePayload } from '../../types/job-types';
 import { isJobQueuePayload } from '../../types/utils/type-guards';
 import { protectTask } from '../job';
@@ -13,7 +13,7 @@ const client = new SQS({ region: 'us-east-2' });
  * This function listens to the job queue until a message is received.
  * @returns {Promise<JobsQueuePayload>} the promise for the payload object after a message has been received
  */
-export async function listenToJobQueue(): Promise<{ payload: JobsQueuePayload; segment: AWSXRay.Segment | undefined }> {
+export async function listenToJobQueue(): Promise<JobsQueuePayload> {
   const queueUrl = config.get<string>('jobsQueueUrl');
 
   console.log('[listenToJobQueue]: Polling jobsQueue');
@@ -80,26 +80,22 @@ export async function listenToJobQueue(): Promise<{ payload: JobsQueuePayload; s
     console.log('MessageHeaderAttributes', message.Attributes, message.MessageAttributes);
 
     const xrayTraceId = message.Attributes?.['AWSTraceHeader'];
-    let segment: AWSXRay.Segment | undefined;
     if (xrayTraceId) {
       console.log('Xray trace id: ', xrayTraceId);
-      // const startTime = (Date.now() / 1000).toFixed(3);
+      const startTime = (Date.now() / 1000).toFixed(3);
       const traceId = xrayTraceId.split(';')[0].split('=')[1];
       const parentSegmentId = xrayTraceId.split(';')[1].split('=')[1];
-      // const segmentId = crypto.randomBytes(8).toString('hex');
+      const segmentId = crypto.randomBytes(8).toString('hex');
 
-      // const newSegment = {
-      //   name: 'Autobuilder',
-      //   id: segmentId,
-      //   trace_id: traceId,
-      //   parent_id: parentSegmentId,
-      //   start_time: Number(startTime),
-      //   in_progress: true,
-      // };
-      // sendUdpMessage(newSegment);
-
-      segment = new AWSXRay.Segment('Autobuilder', traceId, parentSegmentId);
-      AWSXRay.setSegment(segment);
+      const newSegment = {
+        name: 'Autobuilder',
+        id: segmentId,
+        trace_id: traceId,
+        parent_id: parentSegmentId,
+        start_time: Number(startTime),
+        in_progress: true,
+      };
+      sendUdpMessage(newSegment);
     } else {
       console.log('no trace id found');
     }
@@ -119,11 +115,11 @@ export async function listenToJobQueue(): Promise<{ payload: JobsQueuePayload; s
 
     // Great! we received a proper message from the queue. Return this object as we will no longer
     // want to poll for more messages.
-    return { payload, segment };
+    return { payload };
   }
 }
 
-async function sendUdpMessage(obj: unknown) {
+export async function sendUdpMessage(obj: unknown) {
   const client = dgram.createSocket('udp4');
 
   console.log('obj', obj);

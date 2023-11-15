@@ -6,7 +6,6 @@ import c from 'config';
 import { handleJob } from './utils/job';
 import { listenToJobQueue } from './utils/queue';
 AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
-const xrayNamespace = AWSXRay.getNamespace();
 
 let client: MongoClient | undefined;
 
@@ -59,25 +58,18 @@ async function app(): Promise<void> {
   console.log('[app]: starting application');
 
   try {
-    const {
-      payload: { jobId },
-      segment,
-    } = await listenToJobQueue();
+    const { jobId } = await listenToJobQueue();
     const db = await connectToDb();
 
     await handleJobAndCleanUp(jobId, db);
 
     console.log('[app]: process completed');
-    segment?.close();
   } catch (e) {
     console.error('[app]: ERROR! Job initialization failed', e);
     process.exitCode = 1;
   }
 }
-
-xrayNamespace.runPromise(async () => {
-  await app();
-});
+app();
 
 process.on('SIGTERM', async () => {
   await cleanupJob();
