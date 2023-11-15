@@ -322,6 +322,7 @@ export abstract class JobHandler {
           const snootyParseRes = await nextGenParse({
             repoDir: `repos/${getDirectory(this.currJob)}`,
             commitHash: this.currJob.payload.newHead ?? '',
+            logger: this._logger,
           });
           this._logger.save(
             this.currJob._id,
