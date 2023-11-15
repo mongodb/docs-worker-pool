@@ -324,12 +324,12 @@ export abstract class JobHandler {
         });
         this._logger.save(
           this.currJob._id,
-          `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"`
+          `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"\n\n\n`
         );
-      } else if (key === 'next-gen-html') {
-        this._logger.save(this.currJob._id, `IN next gen html`);
-        const result = await nextGenHtml(this.currJob.payload.repoName, this._logger);
-        this._logger.save(this.currJob._id, `next gen html result ${result}`);
+        // } else if (key === 'next-gen-html') {
+        //   this._logger.save(this.currJob._id, `IN next gen html`);
+        //   const result = await nextGenHtml(this.currJob.payload.repoName, this._logger);
+        //   this._logger.save(this.currJob._id, `next gen html result ${result}`);
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
