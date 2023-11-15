@@ -17,11 +17,11 @@ export async function nextGenParse({
   logger,
   id,
 }: NextGenParseParams): Promise<CliCommandResponse> {
-  const commandArgs = ['build', `"${repoDir}"`, '--output', `"${repoDir}/bundle.zip"`];
+  const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`];
 
   if (patchId && commitHash) {
     commandArgs.push('--commit');
-    commandArgs.push(`"${commitHash}"`);
+    commandArgs.push(commitHash);
 
     commandArgs.push('--patch');
     commandArgs.push(patchId);
