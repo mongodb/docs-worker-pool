@@ -13,7 +13,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
-import { nextGenParse } from '../commands';
+import { nextGenHtml, nextGenParse } from '../commands';
 require('fs');
 
 export abstract class JobHandler {
@@ -326,6 +326,10 @@ export abstract class JobHandler {
           this.currJob._id,
           `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"`
         );
+      } else if (command === 'next-gen-html') {
+        this._logger.save(this.currJob._id, `IN next gen html`);
+        const result = await nextGenHtml(this.currJob.payload.repoName, this._logger);
+        this._logger.save(this.currJob._id, `next gen html result ${result}`);
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
