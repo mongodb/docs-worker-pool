@@ -79,7 +79,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     console.log('MessageHeaderAttributes', message.Attributes, message.MessageAttributes);
 
-    const { xrayTraceId } = payload;
+    const xrayTraceId = message.Attributes?.['AWSTraceHeader'];
 
     if (xrayTraceId) {
       console.log('Xray trace id: ', xrayTraceId);
