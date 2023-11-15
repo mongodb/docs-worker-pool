@@ -316,7 +316,7 @@ export abstract class JobHandler {
       // works for any make command with the following signature make <make-rule>
       const key = command.split(' ')[1].trim();
       this._logger.save(this.currJob._id, `command: ${command}`);
-      if (command === 'next-gen-parse') {
+      if (key === 'next-gen-parse') {
         this._logger.save(this.currJob._id, `in parse command!!! `);
         const snootyParseRes = await nextGenParse({
           repoDir: `repos/${getDirectory(this.currJob)}`,
@@ -326,7 +326,7 @@ export abstract class JobHandler {
           this.currJob._id,
           `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"`
         );
-      } else if (command === 'next-gen-html') {
+      } else if (key === 'next-gen-html') {
         this._logger.save(this.currJob._id, `IN next gen html`);
         const result = await nextGenHtml(this.currJob.payload.repoName, this._logger);
         this._logger.save(this.currJob._id, `next gen html result ${result}`);
