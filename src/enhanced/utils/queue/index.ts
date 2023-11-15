@@ -23,6 +23,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     const receiveMessage: ReceiveMessageCommandInput = {
       QueueUrl: queueUrl,
       MaxNumberOfMessages: 1,
+      AttributeNames: ['AWSTraceHeader'],
       WaitTimeSeconds: 4,
     };
 
