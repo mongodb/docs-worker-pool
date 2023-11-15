@@ -53,9 +53,9 @@ async function localApp() {
   console.log('repoDir ', repoDir);
 
   console.log('Begin snooty build...');
-  const snootyBuildRes = await nextGenParse({ repoDir, commitHash, patchId });
+  // const snootyBuildRes = await nextGenParse({ repoDir, commitHash, patchId });
 
-  console.log(snootyBuildRes.errorText);
+  // console.log(snootyBuildRes.errorText);
 
   console.log('snooty build complete');
 
