@@ -13,7 +13,7 @@ const client = AWSXRay.captureAWSv3Client(new SQS({ region: 'us-east-2' }));
  * This function listens to the job queue until a message is received.
  * @returns {Promise<JobsQueuePayload>} the promise for the payload object after a message has been received
  */
-export async function listenToJobQueue(): Promise<JobsQueuePayload> {
+export async function listenToJobQueue(): Promise<{ payload: JobsQueuePayload; segment: AWSXRay.Segment | undefined }> {
   const queueUrl = config.get<string>('jobsQueueUrl');
 
   console.log('[listenToJobQueue]: Polling jobsQueue');
@@ -80,24 +80,26 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     console.log('MessageHeaderAttributes', message.Attributes, message.MessageAttributes);
 
     const xrayTraceId = message.Attributes?.['AWSTraceHeader'];
-
+    let segment: AWSXRay.Segment | undefined;
     if (xrayTraceId) {
       console.log('Xray trace id: ', xrayTraceId);
-      const startTime = (Date.now() / 1000).toFixed(3);
+      // const startTime = (Date.now() / 1000).toFixed(3);
       const traceId = xrayTraceId.split(';')[0].split('=')[1];
-      const parentSegment = xrayTraceId.split(';')[1].split('=')[1];
-      const segmentId = crypto.randomBytes(8).toString('hex');
+      const parentSegmentId = xrayTraceId.split(';')[1].split('=')[1];
+      // const segmentId = crypto.randomBytes(8).toString('hex');
 
-      const newSegment = {
-        name: 'Autobuilder',
-        id: segmentId,
-        trace_id: traceId,
-        parent_id: parentSegment,
-        start_time: Number(startTime),
-        end_time: Number((Date.now() / 1000).toFixed(3)),
-      };
+      // const newSegment = {
+      //   name: 'Autobuilder',
+      //   id: segmentId,
+      //   trace_id: traceId,
+      //   parent_id: parentSegmentId,
+      //   start_time: Number(startTime),
+      //   in_progress: true,
+      // };
+      // sendUdpMessage(newSegment);
 
-      sendUdpMessage(newSegment);
+      segment = new AWSXRay.Segment('Autobuilder', traceId, parentSegmentId);
+      AWSXRay.setSegment(segment);
     } else {
       console.log('no trace id found');
     }
@@ -117,7 +119,7 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
 
     // Great! we received a proper message from the queue. Return this object as we will no longer
     // want to poll for more messages.
-    return payload;
+    return { payload, segment };
   }
 }
 
