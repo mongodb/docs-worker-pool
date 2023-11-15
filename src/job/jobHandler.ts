@@ -318,14 +318,19 @@ export abstract class JobHandler {
       this._logger.save(this.currJob._id, `command: ${command}`);
       if (key === 'next-gen-parse') {
         this._logger.save(this.currJob._id, `in parse command!!! `);
-        const snootyParseRes = await nextGenParse({
-          repoDir: `repos/${getDirectory(this.currJob)}`,
-          commitHash: this.currJob.payload.newHead ?? '',
-        });
-        this._logger.save(
-          this.currJob._id,
-          `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"\n\n\n`
-        );
+        try {
+          const snootyParseRes = await nextGenParse({
+            repoDir: `repos/${getDirectory(this.currJob)}`,
+            commitHash: this.currJob.payload.newHead ?? '',
+          });
+          this._logger.save(
+            this.currJob._id,
+            `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"\n\n\n`
+          );
+        } catch (err) {
+          this._logger.save(this.currJob._id, `ERROR`);
+          this._logger.save(this.currJob._id, `ERROR: ${err}`);
+        }
         // } else if (key === 'next-gen-html') {
         //   this._logger.save(this.currJob._id, `IN next gen html`);
         //   const result = await nextGenHtml(this.currJob.payload.repoName, this._logger);
