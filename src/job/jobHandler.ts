@@ -1,3 +1,4 @@
+import path from 'path';
 import axios, { AxiosResponse } from 'axios';
 import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
@@ -319,11 +320,13 @@ export abstract class JobHandler {
       if (key === 'next-gen-parse') {
         this._logger.save(this.currJob._id, `in parse command!!! `);
         this._logger.save(this.currJob._id, `repoDir: "repos/${getDirectory(this.currJob)}" `);
-        this._logger.save(this.currJob._id, `commitHash: ${this.currJob.payload.newHead ?? ''}`);
         this._logger.save(this.currJob._id, `process.cwd!! : ${process.cwd()}`);
+        const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(this.currJob)}`);
+
+        this._logger.save(this.currJob._id, `repoDir now : ${repoDir}`);
         try {
           const snootyParseRes = await nextGenParse({
-            repoDir: `repos/${getDirectory(this.currJob)}`,
+            repoDir,
             commitHash: this.currJob.payload.newHead ?? '',
             logger: this._logger,
             id: this.currJob._id,
