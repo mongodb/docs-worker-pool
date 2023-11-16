@@ -4,7 +4,7 @@ import * as mongodb from 'mongodb';
 import { APIGatewayEvent } from 'aws-lambda';
 import { PullRequestEvent } from '@octokit/webhooks-types';
 import { ConsoleLogger } from '../../src/services/logger';
-import { RepoBranchesRepository } from '../../src/repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../../src/repositories/docsetsRepository';
 import { UpdatedDocsRepository } from '../../src/repositories/updatedDocsRepository';
 import { MetadataRepository } from '../../src/repositories/metadataRepository';
 
@@ -94,8 +94,8 @@ export const markBuildArtifactsForDeletion = async (event: APIGatewayEvent) => {
   try {
     await client.connect();
     const poolDb = client.db(c.get('dbName'));
-    const repoBranchesRepository = new RepoBranchesRepository(poolDb, c, consoleLogger);
-    const project = (await repoBranchesRepository.getProjectByRepoName(repository.name)) as string;
+    const docsetsRepository = new DocsetsRepository(poolDb, c, consoleLogger);
+    const project = (await docsetsRepository.getProjectByRepoName(repository.name)) as string;
 
     // Start marking build artifacts for deletion
     const snootyDb = client.db(c.get('snootyDbName'));

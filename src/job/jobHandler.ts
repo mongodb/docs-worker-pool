@@ -11,6 +11,8 @@ import { AutoBuilderError, InvalidJobError, JobStoppedError, PublishError } from
 import { IConfig } from 'config';
 import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 require('fs');
 
 export abstract class JobHandler {
@@ -55,6 +57,7 @@ export abstract class JobHandler {
   protected name: string;
 
   protected _repoBranchesRepo: RepoBranchesRepository;
+  protected _docsetsRepo: DocsetsRepository;
   protected _repoEntitlementsRepo: RepoEntitlementsRepository;
 
   constructor(
@@ -68,6 +71,7 @@ export abstract class JobHandler {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     this._commandExecutor = commandExecutor;
@@ -81,6 +85,7 @@ export abstract class JobHandler {
     this._config = config;
     this._validator = validator;
     this._repoBranchesRepo = repoBranchesRepo;
+    this._docsetsRepo = docsetsRepo;
     this._repoEntitlementsRepo = repoEntitlementsRepo;
   }
 
@@ -94,7 +99,7 @@ export abstract class JobHandler {
     if (publishResult) {
       if (publishResult?.status === 'success') {
         const files = this._fileSystemServices.getFilesInDirectory(
-          `./${this.currJob.payload.repoName}/build/public`,
+          `./${getDirectory(this.currJob)}/build/public`,
           '',
           null,
           null
@@ -131,7 +136,7 @@ export abstract class JobHandler {
   }
 
   private cleanup(): void {
-    this._fileSystemServices.removeDirectory(`repos/${this.currJob.payload.repoName}`);
+    this._fileSystemServices.removeDirectory(`repos/${getDirectory(this.currJob)}`);
   }
 
   @throwIfJobInterupted()
@@ -200,13 +205,13 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async downloadMakeFile(): Promise<void> {
     try {
-      this._logger.info(
-        this.currJob._id,
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`
-      );
+      const makefileFileName =
+        this.currJob.payload.repoName === MONOREPO_NAME
+          ? this.currJob.payload.directory
+          : this.currJob.payload.repoName;
       await this._fileSystemServices.saveUrlAsFile(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${this.currJob.payload.repoName}`,
-        `repos/${this.currJob.payload.repoName}/Makefile`,
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${makefileFileName}`,
+        `repos/${getDirectory(this.currJob)}/Makefile`,
         {
           encoding: 'utf8',
           flag: 'w',
@@ -220,7 +225,7 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   public isbuildNextGen(): boolean {
-    const workerPath = `repos/${this.currJob.payload.repoName}/worker.sh`;
+    const workerPath = `repos/${getDirectory(this.currJob)}/worker.sh`;
     if (this._fileSystemServices.rootFileExists(workerPath)) {
       const workerContents = this._fileSystemServices.readFileAsUtf8(workerPath);
       const workerLines = workerContents.split(/\r?\n/);
@@ -268,11 +273,10 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
-    const resp = await this._commandExecutor.execute([command], `repos/${this.currJob.payload.repoName}`);
-    await this._logger.save(
-      this.currJob._id,
-      `${'(COMMAND)'.padEnd(15)} ${command} run details in ${this.currJob.payload.repoName}`
-    );
+    const pathToRepo = `repos/${getDirectory(this.currJob)}`;
+    const resp = await this._commandExecutor.execute([command], pathToRepo);
+
+    await this._logger.save(this.currJob._id, `${'(COMMAND)'.padEnd(15)} ${command} run details in ${pathToRepo}`);
     const end = performance.now();
     const update = {
       [`${stage}StartTime`]: start,
@@ -369,12 +373,15 @@ export abstract class JobHandler {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
       PREVIEW_BUILD_ENABLED: this._config.get<string>('previewBuildEnabled'),
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),
+      GATSBY_SHOW_CHATBOT: this._config.get<string>('gatsbyUseChatbot'),
+      GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: this._config.get<string>('gatsbyHideUnifiedFooterLocale'),
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
       if (envValue) envVars += `${envName}=${envValue}\n`;
     }
-    this._fileSystemServices.writeToFile(`repos/${this.currJob.payload.repoName}/.env.production`, envVars, {
+    const fileToWriteTo = `repos/${getDirectory(this.currJob)}/.env.production`;
+    this._fileSystemServices.writeToFile(fileToWriteTo, envVars, {
       encoding: 'utf8',
       flag: 'w',
     });
@@ -424,18 +431,21 @@ export abstract class JobHandler {
   protected prepBuildCommands(): void {
     this.currJob.buildCommands = [
       `. /venv/bin/activate`,
-      `cd repos/${this.currJob.payload.repoName}`,
+      `cd repos/${getDirectory(this.currJob)}`,
       `rm -f makefile`,
       `make html`,
     ];
   }
 
   protected async setEnvironmentVariables(): Promise<void> {
-    const repo_info = await this._repoBranchesRepo.getRepoBranchesByRepoName(this._currJob.payload.repoName);
+    const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(
+      this._currJob.payload.repoName,
+      this._currJob.payload.project
+    );
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,
-      `setEnvironmentVariables for ${this._currJob.payload.repoName} env ${env} jobType ${this._currJob.payload.jobType}`
+      `setEnvironmentVariables for ${getDirectory(this._currJob)} env ${env} jobType ${this._currJob.payload.jobType}`
     );
     if (repo_info?.['bucket'] && repo_info?.['url']) {
       if (this._currJob.payload.regression) {
@@ -464,21 +474,21 @@ export abstract class JobHandler {
   protected async build(): Promise<boolean> {
     this.cleanup();
     await this.cloneRepo(this._config.get<string>('repo_dir'));
-    this._logger.info(this._currJob._id, 'Cloned Repo');
+    this._logger.save(this._currJob._id, 'Cloned Repo');
     await this.commitCheck();
-    this._logger.info(this._currJob._id, 'Checked Commit');
+    this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
-    this._logger.info(this._currJob._id, 'Pulled Repo');
+    this._logger.save(this._currJob._id, 'Pulled Repo');
     this.prepBuildCommands();
-    this._logger.info(this._currJob._id, 'Prepared Build commands');
+    this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
-    this._logger.info(this._currJob._id, 'Prepared Next Gen build');
+    this._logger.save(this._currJob._id, 'Prepared Next Gen build');
     await this._repoConnector.applyPatch(this.currJob);
-    this._logger.info(this._currJob._id, 'Patch Applied');
+    this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
-    this._logger.info(this._currJob._id, 'Downloaded Makefile');
+    this._logger.save(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
-    this._logger.info(this._currJob._id, 'Prepared Environment variables');
+    this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
   }
 
@@ -552,7 +562,8 @@ export abstract class JobHandler {
   // TODO: Give 'shouldGenerateSearchManifest' boolean to users' control
   shouldGenerateSearchManifest(): boolean {
     const doNotSearchProperties = ['docs-landing', 'docs-404', 'docs-meta'];
-    if (doNotSearchProperties.includes(this.currJob.payload.repoName)) {
+    const localDirectory = getDirectory(this.currJob);
+    if (doNotSearchProperties.some((property) => localDirectory.includes(property))) {
       return false;
     }
     // Ensures that we only build a manifest for aliased properties if the job
@@ -724,4 +735,11 @@ function throwIfJobInterupted() {
     }
     return descriptor;
   };
+}
+
+export function getDirectory(job: Job) {
+  const { payload } = job;
+  let directory = payload.repoName;
+  if (payload.repoName === MONOREPO_NAME && !!payload.directory) directory += `/${payload.directory}`;
+  return directory;
 }

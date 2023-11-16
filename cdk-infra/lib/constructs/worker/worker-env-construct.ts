@@ -36,6 +36,12 @@ export class WorkerEnvConstruct extends Construct {
       `/docs/worker_pool/preview_webhook/snooty_gatsby_cloud_test/data_source`
     );
 
+    // font-end feature flag for unified footer locale selector
+    const gatsbyHideUnifiedFooterLocale = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/hide_locale`);
+
+    // front end feature flag for chatbot UI
+    const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
+
     const githubBotUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/bot/username`);
 
     const npmEmail = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/email`);
@@ -44,11 +50,14 @@ export class WorkerEnvConstruct extends Construct {
     // doing this for the time being, but I think we don't need to necessarily retrieve this from ssm for feature branches, nor would we want to in that case
     const previewBuildEnabled = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/preview_build/enabled`);
     const featureFlagUpdatePages = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/update_pages`);
+    const featureFlagMonorepoPath = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/monorepo_path`);
+
     const entitlementCollection = StringParameter.valueFromLookup(
       this,
       `${ssmPrefix}/atlas/collections/user/entitlements`
     );
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
+    const docsetsCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/docsets`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
 
     const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
@@ -69,9 +78,11 @@ export class WorkerEnvConstruct extends Construct {
       GATSBY_BASE_URL: gatsbyBaseUrl,
       PREVIEW_BUILD_ENABLED: previewBuildEnabled,
       FEATURE_FLAG_UPDATE_PAGES: featureFlagUpdatePages,
+      FEATURE_FLAG_MONOREPO_PATH: featureFlagMonorepoPath,
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       NPM_EMAIL: npmEmail,
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,
+      DOCSETS_COL_NAME: docsetsCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
@@ -80,6 +91,8 @@ export class WorkerEnvConstruct extends Construct {
       USE_CUSTOM_BUCKETS: `${getUseCustomBuckets()}`,
       FEATURE_NAME: `${getFeatureName()}`,
       GATSBY_TEST_SEARCH_UI: 'false',
+      GATSBY_SHOW_CHATBOT: gatsbyUseChatbot,
+      GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: gatsbyHideUnifiedFooterLocale,
     };
   }
 }

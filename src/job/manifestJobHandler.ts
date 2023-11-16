@@ -1,7 +1,7 @@
 // TODO: remove manifest job handler
 // not run as a separate job, handled in productionJobHandler prepSearchDeploy
 
-import { JobHandler } from './jobHandler';
+import { getDirectory, JobHandler } from './jobHandler';
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
@@ -14,6 +14,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { InvalidJobError } from '../errors/errors';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
 
 // TODO: Move this to a generic util and out of this job file
 export const joinUrlAndPrefix = (url: string, prefix: string) => {
@@ -37,6 +38,7 @@ export class ManifestJobHandler extends JobHandler {
     logger: IJobRepoLogger,
     validator: IJobValidator,
     repoBranchesRepo: RepoBranchesRepository,
+    docsetsRepo: DocsetsRepository,
     repoEntitlementsRepo: RepoEntitlementsRepository
   ) {
     super(
@@ -50,6 +52,7 @@ export class ManifestJobHandler extends JobHandler {
       logger,
       validator,
       repoBranchesRepo,
+      docsetsRepo,
       repoEntitlementsRepo
     );
     this.name = 'Manifest';
@@ -97,7 +100,7 @@ export class ManifestJobHandler extends JobHandler {
     // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
-      `cd repos/${this.currJob.payload.repoName}`,
+      `cd repos/${getDirectory(this.currJob)}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
       `mut-index upload bundle.zip -b ${b} -o ${f}/${maP}.json -u ${jUaP(url, muP || '')} ${globalSearch}`,

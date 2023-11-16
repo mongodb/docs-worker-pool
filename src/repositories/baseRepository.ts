@@ -97,6 +97,27 @@ export abstract class BaseRepository {
     }
   }
 
+  protected async aggregate(
+    aggregationPipeline: any,
+    errorMsg: string,
+    options: mongodb.AggregateOptions = {}
+  ): Promise<mongodb.AggregationCursor> {
+    try {
+      const result = await this.promiseTimeoutS(
+        this._config.get('MONGO_TIMEOUT_S'),
+        this._collection.aggregate(aggregationPipeline, options),
+        errorMsg
+      );
+      return result;
+    } catch (error) {
+      this._logger.error(
+        `${this._repoName}:findOne`,
+        `Failed to query with aggregation pipeline (${JSON.stringify(aggregationPipeline)})\nerror: ${error}`
+      );
+      throw error;
+    }
+  }
+
   protected async updateMany(query: any, update: any, errorMsg: string): Promise<boolean> {
     try {
       const updateResult = await this.promiseTimeoutS(

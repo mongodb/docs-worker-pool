@@ -82,7 +82,13 @@ async function prepSummaryMessage(
     if (repoName == 'mms-docs') {
       msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- Commit: *${fullDocument.payload.newHead}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n*Urls*\n   *CM*: <${mms_urls[0]}|Cloud Manager> \n   *OPM*: <${mms_urls[1]}|OPS Manager>\n- InvalidationStatus: <${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
     } else {
-      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo: *${repoName}*\n- Branch: *${fullDocument.payload.branchName}*\n- Commit: *${fullDocument.payload.newHead}*\n- urlSlug: *${fullDocument.payload.urlSlug}*\n- Env: *${env}*\n- Url: <${url}|${repoName}>\n- InvalidationStatus: <${fullDocument.invalidationStatusURL}|Status> \nEnjoy  :smile:!`;
+      msg = `Your Job <${jobUrl}${jobId}|Completed>! \n- Repo: *${repoName}${
+        fullDocument.payload.directory ? `/${fullDocument.payload.directory}` : ``
+      }*\n- Branch: *${fullDocument.payload.branchName}*\n- Commit: *${fullDocument.payload.newHead}*\n- urlSlug: *${
+        fullDocument.payload.urlSlug
+      }*\n- Env: *${env}*\n- Url: <${url}|${fullDocument.payload.directory ?? repoName}>\n- InvalidationStatus: <${
+        fullDocument.invalidationStatusURL
+      }|Status> \nEnjoy  :smile:!`;
     }
   }
   // Remove instances of two or more periods

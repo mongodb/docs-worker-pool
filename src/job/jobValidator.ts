@@ -4,6 +4,8 @@ import type { Job } from '../entities/job';
 import { IFileSystemServices } from '../services/fileServices';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
+import { DocsetsRepository } from '../repositories/docsetsRepository';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 
 export interface IJobValidator {
   throwIfJobInvalid(job: Job): Promise<void>;
@@ -16,25 +18,34 @@ export class JobValidator implements IJobValidator {
   _fileSystemService: IFileSystemServices;
   _repoEntitlementRepository: RepoEntitlementsRepository;
   _repoBranchesRepository: RepoBranchesRepository;
+  _docsetsRepository: DocsetsRepository;
   constructor(
     fileSystemService: IFileSystemServices,
     repoEntitlementRepository: RepoEntitlementsRepository,
-    repoBranchesRepository: RepoBranchesRepository
+    repoBranchesRepository: RepoBranchesRepository,
+    docsetsRepository: DocsetsRepository
   ) {
     this._fileSystemService = fileSystemService;
     this._repoEntitlementRepository = repoEntitlementRepository;
     this._repoBranchesRepository = repoBranchesRepository;
+    this._docsetsRepository = docsetsRepository;
   }
 
   async throwIfUserNotEntitled(job: Job): Promise<void> {
     const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
-    if (!entitlementsObject?.repos?.includes(`${job.payload.repoOwner}/${job.payload.repoName}`)) {
-      throw new AuthorizationError(`${job.user} is not entitled for repo ${job.payload.repoName}`);
+    const entitlementToFind = `${job.payload.repoOwner}/${job.payload.repoName}${
+      job.payload.repoName === MONOREPO_NAME ? `/${job.payload.directory}` : ``
+    }`;
+    if (!entitlementsObject?.repos?.includes(entitlementToFind)) {
+      throw new AuthorizationError(`${job.user} is not entitled for repo ${entitlementToFind}`);
     }
   }
 
   async throwIfBranchNotConfigured(job: Job): Promise<void> {
-    job.payload.repoBranches = await this._repoBranchesRepository.getRepoBranchesByRepoName(job.payload.repoName);
+    job.payload.repoBranches = await this._docsetsRepository.getRepoBranchesByRepoName(
+      job.payload.repoName,
+      job.payload.project
+    );
     if (!job.payload?.repoBranches) {
       throw new AuthorizationError(`repoBranches not found for ${job.payload.repoName}`);
     }

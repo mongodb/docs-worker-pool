@@ -19,9 +19,11 @@ export class WebhookEnvConstruct extends Construct {
     const ssmPrefix = getSsmPathPrefix();
     const env = getEnv();
 
+    const featureFlagMonorepoPath = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/monorepo_path`);
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
+    const docsetsCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/docsets`);
     const dbUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/username`);
     const dbHost = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/host`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
@@ -39,6 +41,7 @@ export class WebhookEnvConstruct extends Construct {
       DB_NAME: dbName,
       SNOOTY_DB_NAME: snootyDbName,
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,
+      DOCSETS_COL_NAME: docsetsCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
       NODE_CONFIG_DIR: './config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
@@ -47,6 +50,7 @@ export class WebhookEnvConstruct extends Construct {
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       DASHBOARD_URL: getDashboardUrl(env, jobCollection),
       STAGE: env,
+      FEATURE_FLAG_MONOREPO_PATH: featureFlagMonorepoPath.stringValue,
     };
   }
 }

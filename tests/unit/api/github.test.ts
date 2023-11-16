@@ -5,9 +5,9 @@ import { createMockAPIGatewayEvent } from '../../utils/createMockAPIGatewayEvent
 
 const DELETION_SECRET = 'GH_DELETION_SECRET';
 
-// Mock RepoBranchesRepository so that we can mock which data to return.
-jest.mock('../../../src/repositories/repoBranchesRepository', () => ({
-  RepoBranchesRepository: jest.fn().mockImplementation(() => ({
+// Mock DocsetsRepository so that we can mock which data to return.
+jest.mock('../../../src/repositories/docsetsRepository', () => ({
+  DocsetsRepository: jest.fn().mockImplementation(() => ({
     getProjectByRepoName: jest.fn().mockImplementation((repoName) => repoName),
   })),
 }));
