@@ -9,18 +9,21 @@ import { normalizeUrl } from '../utils/normalizeUrl';
 
 const env = process.env.SNOOTY_ENV ?? '';
 
+console.log(env);
+
 const OAS_FILE_SERVER =
   env === 'dotcomprd'
     ? 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/'
-    : 'http://mongodb-mms-build-server.s3.amazonaws.com/openapi/';
+    : 'https://mongodb-mms-build-server.s3.amazonaws.com/openapi/';
 
 const GIT_HASH_URL =
-  env === 'dotcomprd' ? 'https://cloud.mongodb.com/version' : ' https://cloud-dev.mongodb.com/version';
+  env === 'dotcomprd' ? 'https://cloud.mongodb.com/version' : 'https://cloud-dev.mongodb.com/version';
 
 const fetchTextData = async (url: string, errMsg: string) => {
   const res = await fetch(url);
   if (!res.ok) {
     // Error should be caught when creating pages.
+    console.log(url, res.text());
     throw new Error(`${errMsg}; ${res.statusText}`);
   }
   return res.text();

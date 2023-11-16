@@ -95,7 +95,7 @@ describe('pageBuilder', () => {
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0]),
       expectedAtlasBuildOptions,
       undefined
@@ -139,7 +139,7 @@ describe('pageBuilder', () => {
     );
     // Atlas
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v1.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], API_VERSION),
       expectedAtlasBuildOptions,
       undefined
@@ -211,14 +211,14 @@ describe('pageBuilder', () => {
 
     // Atlas
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${RESOURCE_VERSION}.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${RESOURCE_VERSION}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], API_VERSION, RESOURCE_VERSION),
       expectedAtlasBuildOptions,
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[2][0]}`)
     );
 
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${RESOURCE_VERSION}.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${RESOURCE_VERSION}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[2][0], API_VERSION, RESOURCE_VERSION),
       expectedAtlasBuildOptions,
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[2][0]}`)
@@ -254,21 +254,21 @@ describe('pageBuilder', () => {
     await buildOpenAPIPages(testEntries, testOptions);
 
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${OLDEST_RESOURCE_VERSION}.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${OLDEST_RESOURCE_VERSION}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[0][0], API_VERSION, OLDEST_RESOURCE_VERSION),
       expectedAtlasBuildOptions,
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`, OLDEST_RESOURCE_VERSION)
     );
 
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${LATEST_RESOURCE_VERSION}.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${LATEST_RESOURCE_VERSION}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[0][0], API_VERSION, LATEST_RESOURCE_VERSION),
       expectedAtlasBuildOptions,
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`, LATEST_RESOURCE_VERSION)
     );
 
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${LATEST_RESOURCE_VERSION}.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${MOCKED_GIT_HASH}-v2-${LATEST_RESOURCE_VERSION}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[0][0], API_VERSION, LATEST_RESOURCE_VERSION),
       expectedAtlasBuildOptions,
       getExpectedVersionOptions(`${SITE_URL}/${testEntries[0][0]}`, LATEST_RESOURCE_VERSION)
@@ -283,7 +283,7 @@ describe('pageBuilder', () => {
 
     await buildOpenAPIPages(testEntries, testOptions);
     expect(mockExecute).toBeCalledWith(
-      `https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/${LAST_SAVED_GIT_HASH}.json`,
+      `https://mongodb-mms-build-server.s3.amazonaws.com/openapi/${LAST_SAVED_GIT_HASH}.json`,
       getExpectedOutputPath(testOptions.output, testEntries[0][0]),
       expectedAtlasBuildOptions,
       undefined
