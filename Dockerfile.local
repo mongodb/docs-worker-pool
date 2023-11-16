@@ -46,10 +46,10 @@ RUN curl  -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/ta
 ENV PATH="${PATH}:/opt/snooty:/opt/mut:/app/.local/bin"
 
 # setup user and root directory
-RUN useradd -ms /bin/bash docsworker
+RUN useradd -ms /bin/bash docsworker-xlarge
 RUN chmod 755 -R /app
-RUN chown -Rv docsworker /app
-USER docsworker
+RUN chown -Rv docsworker-xlarge /app
+USER docsworker-xlarge
 
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
@@ -71,18 +71,18 @@ COPY package*.json ./
 RUN npm ci --legacy-peer-deps
 # Build persistence module
 
-COPY --chown=docsworker modules/persistence/tsconfig*.json ./modules/persistence
-COPY --chown=docsworker modules/persistence/src ./modules/persistence/src/
-COPY --chown=docsworker modules/persistence/index.ts ./modules/persistence
+COPY --chown=docsworker-xlarge modules/persistence/tsconfig*.json ./modules/persistence
+COPY --chown=docsworker-xlarge modules/persistence/src ./modules/persistence/src/
+COPY --chown=docsworker-xlarge modules/persistence/index.ts ./modules/persistence
 
 RUN cd ./modules/persistence \
     && npm run build
 
 # Build modules
 # OAS Page Builder
-COPY --chown=docsworker modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
-COPY --chown=docsworker modules/oas-page-builder/src ./modules/oas-page-builder/src/
-COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-builder
+COPY --chown=docsworker-xlarge modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
+COPY --chown=docsworker-xlarge modules/oas-page-builder/src ./modules/oas-page-builder/src/
+COPY --chown=docsworker-xlarge modules/oas-page-builder/index.ts ./modules/oas-page-builder
 
 RUN cd ./modules/oas-page-builder \
     && npm run build

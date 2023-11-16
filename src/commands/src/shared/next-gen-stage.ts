@@ -1,6 +1,6 @@
 import { executeCliCommand } from '../helpers';
 
-const DOCS_WORKER_USER = 'docsworker';
+const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
   repoDir: string;
   mutPrefix: string;

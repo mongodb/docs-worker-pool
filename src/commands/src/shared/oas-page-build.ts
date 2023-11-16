@@ -3,9 +3,6 @@ import { IJobRepoLogger } from '../../../services/logger';
 import { executeCliCommand, getRepoDir } from '../helpers';
 
 interface OasPageBuildParams {
-  // bundlePath: string;
-  // repoDir: string;
-  // siteUrl: string;
   job: Job;
   baseUrl: string;
   logger: IJobRepoLogger;
@@ -14,7 +11,7 @@ interface OasPageBuildParams {
 export async function oasPageBuild({ job, baseUrl, logger }: OasPageBuildParams) {
   const siteUrl = job.payload.mutPrefix
     ? `${baseUrl}/${job.payload.mutPrefix}`
-    : `${baseUrl}/${job.payload.project}/docsworker/${job.payload.branchName}`;
+    : `${baseUrl}/${job.payload.project}/docsworker-xlarge/${job.payload.branchName}`;
   console.log('siteUrl: ', siteUrl);
   logger.save(job._id, `Is there a mutprefix?? : ${job.payload.mutPrefix}`);
   logger.save(job._id, `SITE URL: ${siteUrl}`);
