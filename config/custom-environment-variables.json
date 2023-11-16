@@ -25,6 +25,7 @@
   "featureFlagSearchUI": "GATSBY_TEST_SEARCH_UI",
   "gatsbyUseChatbot": "GATSBY_SHOW_CHATBOT",
   "gatsbyHideUnifiedFooterLocale": "GATSBY_HIDE_UNIFIED_FOOTER_LOCALE",
+  "gatsbyManifestURL": "GATSBY_MARIAN_URL",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "docsetsCollection": "DOCSETS_COL_NAME",
   "repo_dir": "repos",
