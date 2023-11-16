@@ -3,7 +3,10 @@ SNOOTY_ENV = $(shell printenv SNOOTY_ENV)
 REGRESSION = $(shell printenv REGRESSION)
 BUCKET = $(shell printenv BUCKET)
 URL = $(shell printenv URL)
-IS_PROD ?= ''
+
+# Defaults to an empty string if NO_CACHING is not provided as an arg.
+# If no value is provided for NO_CACHING, then we do want to use the cache when parsing.
+NO_CACHING ?= '' 
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
 PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
@@ -34,14 +37,14 @@ ifndef PUSHLESS_DEPLOY_SHARED_DISABLED
 next-gen-parse:
 	# snooty parse -- separated from front-end to support index gen
 	if [ -n "${PATCH_ID}" ]; then \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG} ${NO_CACHING}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
 			exit 0; \
 		fi \
 	else \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG} ${NO_CACHING}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
