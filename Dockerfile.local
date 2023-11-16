@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:20.04
+FROM arm64v8/ubuntu:20.04 as initial
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ARG SNOOTY_PARSER_VERSION=0.15.0
@@ -56,19 +56,12 @@ RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongod
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        
 
+FROM initial as persistence
+
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 COPY modules/persistence/package*.json ./modules/persistence/
 RUN cd ./modules/persistence \
     && npm ci --legacy-peer-deps 
-
-RUN  mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
-COPY modules/oas-page-builder/package*.json ./modules/oas-page-builder/
-RUN cd ./modules/oas-page-builder \
-    && npm ci --legacy-peer-deps 
-
-# Root project build
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
 # Build persistence module
 
 COPY --chown=docsworker modules/persistence/tsconfig*.json ./modules/persistence
@@ -78,6 +71,12 @@ COPY --chown=docsworker modules/persistence/index.ts ./modules/persistence
 RUN cd ./modules/persistence \
     && npm run build
 
+FROM initial as oas
+
+RUN  mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
+COPY modules/oas-page-builder/package*.json ./modules/oas-page-builder/
+RUN cd ./modules/oas-page-builder \
+    && npm ci --legacy-peer-deps 
 # Build modules
 # OAS Page Builder
 COPY --chown=docsworker modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
@@ -87,6 +86,15 @@ COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-bui
 RUN cd ./modules/oas-page-builder \
     && npm run build
 
+
+
+FROM oas as root
+
+# Root project build
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
+
+
 COPY tsconfig*.json ./
 COPY config config/
 COPY api api/
@@ -94,7 +102,10 @@ COPY src src/
 
 RUN npm run build:esbuild
 
+RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 RUN mkdir repos && chmod 755 repos
+
+COPY --from=persistence --chown=docsworker modules/persistence ./modules/persistence/
 
 EXPOSE 3000
 
