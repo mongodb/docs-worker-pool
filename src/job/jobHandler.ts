@@ -14,7 +14,8 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
-import { nextGenHtml, nextGenParse } from '../commands';
+import { nextGenHtml, nextGenParse, oasPageBuild } from '../commands';
+import { getRepoDir } from '../commands/src/helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -339,10 +340,14 @@ export abstract class JobHandler {
           this._logger.save(this.currJob._id, `ERROR`);
           this._logger.save(this.currJob._id, `ERROR: ${err}`);
         }
-        // } else if (key === 'next-gen-html') {
-        //   this._logger.save(this.currJob._id, `IN next gen html`);
-        //   const result = await nextGenHtml(this.currJob.payload.repoName, this._logger);
-        //   this._logger.save(this.currJob._id, `next gen html result ${result}`);
+      } else if (key === 'oas-page-build') {
+        this._logger.save(this.currJob._id, `IN oas page build`);
+        const result = await oasPageBuild({
+          job: this.currJob,
+          baseUrl: 'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
+          logger: this._logger,
+        });
+        this._logger.save(this.currJob._id, `oas page build result... ${result}`);
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
