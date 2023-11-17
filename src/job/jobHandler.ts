@@ -330,7 +330,7 @@ export abstract class JobHandler {
     const preppedLogger = (message: string) => {
       thisLogger.save(thisJob._id, message);
     };
-    const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(this.currJob)}`);
+    // const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(this.currJob)}`);
 
     for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>

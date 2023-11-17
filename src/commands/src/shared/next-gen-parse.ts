@@ -14,7 +14,7 @@ export async function nextGenParse({ job, preppedLogger }: NextGenParseParams): 
   const commitHash = job.payload.newHead;
   const patchId = job.payload.patch;
 
-  const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`];
+  const commandArgs = ['build', `"${repoDir}"`, '--output', `"${repoDir}/bundle.zip"`];
 
   if (patchId && commitHash) {
     commandArgs.push('--commit');
