@@ -9,7 +9,7 @@ interface NextGenParseParams {
   job: Job;
   preppedLogger: (message: string) => void;
 }
-export async function nextGenParse({ job, preppedLogger }: NextGenParseParams): Promise<CliCommandResponse> {
+export async function nextGenParse({ job, preppedLogger }: NextGenParseParams): Promise<any> {
   const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(job)}`);
   const commitHash = job.payload.newHead;
   const patchId = job.payload.patch;
