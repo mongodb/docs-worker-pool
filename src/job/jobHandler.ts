@@ -303,7 +303,7 @@ export abstract class JobHandler {
       [K: string]: ({ job, preppedLogger }: { job: Job; preppedLogger: (message: string) => void }) => any;
     } = {
       // ['get-build-dependencies']: 'buildDepsExe',
-      // ['next-gen-parse']: nextGenParse,
+      ['next-gen-parse']: nextGenParse,
       ['persistence-module']: persistenceModule,
       // ['next-gen-html']: 'htmlExe',
       ['oas-page-build']: oasPageBuild,
