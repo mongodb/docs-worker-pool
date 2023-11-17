@@ -1,23 +1,24 @@
 import { Job } from '../../../entities/job';
-import { IJobRepoLogger } from '../../../services/logger';
 import { executeCliCommand, getRepoDir } from '../helpers';
 
 interface OasPageBuildParams {
   job: Job;
-  baseUrl: string;
-  logger: IJobRepoLogger;
+  preppedLogger: (message: string) => void;
 }
 
-export async function oasPageBuild({ job, baseUrl, logger }: OasPageBuildParams) {
+export async function oasPageBuild({ job, preppedLogger }: OasPageBuildParams) {
+  // TODO: replace with a process to get this url??
+  const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
+
   const siteUrl = job.payload.mutPrefix
     ? `${baseUrl}/${job.payload.mutPrefix}`
     : `${baseUrl}/${job.payload.project}/docsworker-xlarge/${job.payload.branchName}`;
   console.log('siteUrl: ', siteUrl);
-  logger.save(job._id, `Is there a mutprefix?? : ${job.payload.mutPrefix}`);
-  logger.save(job._id, `SITE URL: ${siteUrl}`);
+  preppedLogger(`Is there a mutprefix?? : ${job.payload.mutPrefix}`);
+  preppedLogger(`SITE URL: ${siteUrl}`);
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   const bundlePath = `${repoDir}/bundle.zip`;
-  logger.save(job._id, `BUNDLE PATH ? : ${bundlePath}`);
+  preppedLogger(`BUNDLE PATH ? : ${bundlePath}`);
 
   try {
     const { outputText } = await executeCliCommand({
@@ -37,11 +38,11 @@ export async function oasPageBuild({ job, baseUrl, logger }: OasPageBuildParams)
       ],
     });
 
-    logger.save(job._id, `OAS page builder output text? : ${outputText}`);
+    preppedLogger(`OAS page builder output text? : ${outputText}`);
 
     return outputText;
   } catch (error) {
-    logger.save(job._id, `Caught error from OAS page builder cli!: ${error}\n\n`);
+    preppedLogger(`Caught error from OAS page builder cli!: ${error}\n\n`);
 
     return '';
   }

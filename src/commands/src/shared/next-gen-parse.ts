@@ -1,22 +1,19 @@
-import { IJobRepoLogger } from '../../../services/logger';
+import path from 'path';
+import { Job } from '../../../entities/job';
+import { getDirectory } from '../../../job/jobHandler';
 import { CliCommandResponse, executeCliCommand } from '../helpers';
 
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 
 interface NextGenParseParams {
-  repoDir: string;
-  commitHash?: string;
-  patchId?: string;
-  logger: IJobRepoLogger;
-  id: string;
+  job: Job;
+  preppedLogger: (message: string) => void;
 }
-export async function nextGenParse({
-  repoDir,
-  patchId,
-  commitHash,
-  logger,
-  id,
-}: NextGenParseParams): Promise<CliCommandResponse> {
+export async function nextGenParse({ job, preppedLogger }: NextGenParseParams): Promise<CliCommandResponse> {
+  const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(job)}`);
+  const commitHash = job.payload.newHead;
+  const patchId = job.payload.patch;
+
   const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`];
 
   if (patchId && commitHash) {
@@ -29,7 +26,7 @@ export async function nextGenParse({
 
   commandArgs.push(RSTSPEC_FLAG);
 
-  logger.save(id, `COMMAND for parse: ${commandArgs.join(' ')}`);
+  preppedLogger(`COMMAND for parse: ${commandArgs.join(' ')}`);
 
   return executeCliCommand({ command: 'snooty', args: commandArgs });
 }
