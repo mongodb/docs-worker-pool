@@ -200,7 +200,12 @@ export async function executeCliCommand({
           console.error(errorText.join(''));
         }
 
-        reject(new ExecuteCommandError('The command failed', exitCode));
+        reject(
+          new ExecuteCommandError(
+            `The command failed.\n${errorText.join('')}\n${outputText.join('')}\nError Code: ${exitCode}`,
+            exitCode
+          )
+        );
         return;
       }
 

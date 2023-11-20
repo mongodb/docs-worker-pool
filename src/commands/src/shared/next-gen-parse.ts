@@ -14,7 +14,7 @@ export async function nextGenParse({ job, preppedLogger }: NextGenParseParams): 
   const commitHash = job.payload.newHead;
   const patchId = job.payload.patch;
 
-  const commandArgs = ['build', `"${repoDir}"`, '--output', `"${repoDir}/bundle.zip"`];
+  const commandArgs = ['build', `${repoDir}`, '--output', `${repoDir}/bundle.zip`];
 
   if (patchId && commitHash) {
     commandArgs.push('--commit');
@@ -29,7 +29,7 @@ export async function nextGenParse({ job, preppedLogger }: NextGenParseParams): 
   preppedLogger(`COMMAND for parse: ${commandArgs.join(' ')}`);
 
   try {
-    await executeCliCommand({ command: 'snooty', args: commandArgs, logger: preppedLogger });
+    return await executeCliCommand({ command: 'snooty', args: commandArgs, logger: preppedLogger });
   } catch (error) {
     preppedLogger(`ERROR: ${error}\n\n`);
   }

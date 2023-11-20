@@ -7,7 +7,7 @@ import {
   persistenceModule,
   prepareBuildAndGetDependencies,
 } from '../commands';
-import { Payload } from '../entities/job';
+import { Job, Payload } from '../entities/job';
 
 const fakePayload: Payload = {
   repoName: 'cloud-docs',
@@ -16,7 +16,7 @@ const fakePayload: Payload = {
   jobType: '',
   source: '',
   action: '',
-  branchName: 'mmeigs-build', // mm-build??
+  branchName: 'master',
   isFork: false,
   repoOwner: '10gen',
   url: 'https://github.com/10gen/cloud-docs', // ???
@@ -25,6 +25,36 @@ const fakePayload: Payload = {
   includeInGlobalSearch: true,
 } as Payload;
 // Bucket??
+
+const fakeJob: Job = {
+  _id: '082u3roinswdf988888888',
+  useWithBenchmark: true,
+  payload: fakePayload,
+  createdTime: new Date(),
+  startTime: new Date(),
+  title: '10gen/cloud-docs',
+  user: 'mmeigs',
+  mutPrefix: 'docs-qa/atlas/mmeigs-build',
+  buildCommands: [],
+  deployCommands: [],
+  email: 'matt.meigs@mongodb.com',
+  shouldGenerateSearchManifest: false,
+  endTime: undefined,
+  error: undefined,
+  comMessage: undefined,
+  logs: undefined,
+  priority: undefined,
+  result: undefined,
+  status: null,
+  manifestPrefix: undefined,
+  pathPrefix: undefined,
+  invalidationStatusURL: undefined,
+  purgedUrls: undefined,
+};
+
+const preppedLogger = (message: string) => {
+  console.log('hey');
+};
 
 async function localApp() {
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
@@ -53,57 +83,51 @@ async function localApp() {
   console.log('repoDir ', repoDir);
 
   console.log('Begin snooty build...');
-  // const snootyBuildRes = await nextGenParse({ repoDir, commitHash, patchId });
+  const snootyBuildRes = await nextGenParse({ job: fakeJob, preppedLogger });
 
-  // console.log(snootyBuildRes.errorText);
+  console.log(snootyBuildRes.errorText);
 
   console.log('snooty build complete');
 
   console.log('Begin persistence-module');
-  // const persistenceModuleRes = await persistenceModule({ bundlePath });
-  // console.log(persistenceModuleRes);
+  const persistenceModuleRes = await persistenceModule({ job: fakeJob, preppedLogger });
+  console.log(persistenceModuleRes);
   console.log('persistence-module complete');
 
   console.log('Begin next-gen-html...');
 
-  // const nextGenHtmlRes = await nextGenHtml();
-  // console.log(nextGenHtmlRes.outputText);
+  const nextGenHtmlRes = await nextGenHtml(repoName);
+  console.log(nextGenHtmlRes.outputText);
 
   console.log('next-gen-html complete');
 
   console.log('Begin oas-page-build...');
   const siteUrl = mutPrefix ? `${baseUrl}/${mutPrefix}` : `${baseUrl}`;
   console.log('siteUrl: ', siteUrl);
-  // const oasPageBuildRes = await oasPageBuild({ repoDir, bundlePath, siteUrl });
+  const oasPageBuildRes = await oasPageBuild({ job: fakeJob, preppedLogger });
   console.log('oas-page-build compelte');
 
-  // console.log(oasPageBuildRes);
+  console.log(oasPageBuildRes);
   console.log('Begin next-gen-stage...');
 
-  // const {resultMessage, commands} = await nextGenStage({
-  //   patchId,
-  //   commitBranch,
-  //   repoDir,
-  //   projectName: project,
-  //   bucket,
-  //   url: baseUrl,
-  //   mutPrefix: mutPrefix || '',
-  //   commitHash,
-  // });
-  // console.log(resultMessage);
+  const { resultMessage, commands } = await nextGenStage({
+    job: fakeJob,
+    preppedLogger,
+  });
+  console.log(resultMessage);
   console.log('next-gen-stage complete');
 
   console.log('Begin next-gen-deploy...');
-  // const deployRes = await nextGenDeploy({
-  //   bucket,
-  //   hasConfigRedirects: hasRedirects,
-  //   gitBranch: commitBranch,
-  //   mutPrefix: mutPrefix || '',
-  //   url: baseUrl,
-  // });
-  // console.log(deployRes);
+  const deployRes = await nextGenDeploy({
+    bucket,
+    hasConfigRedirects: hasRedirects,
+    gitBranch: commitBranch,
+    mutPrefix: mutPrefix || '',
+    url: baseUrl,
+  });
+  console.log(deployRes);
   console.log('next-gen-deploy complete');
-  // console.log('commands: ', commands)
+  console.log('commands: ', commands);
   console.log('bundle Path: ', bundlePath);
 }
 

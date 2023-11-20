@@ -19,10 +19,10 @@ export async function persistenceModule({ job, preppedLogger }: PersistenceModul
     githubUser,
   ];
 
-  if (job._id) {
-    args.push('--jobId');
-    args.push(job._id);
-  }
+  // if (job._id) {
+  //   args.push('--jobId');
+  //   args.push(job._id);
+  // }
 
   preppedLogger(`persistence args: ${args}`);
 

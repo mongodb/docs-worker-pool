@@ -3,29 +3,11 @@ import { executeCliCommand } from '../helpers';
 
 const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
-  repoDir: string;
-  mutPrefix: string;
-  projectName: string;
-  bucket: string;
-  url: string;
-  patchId?: string;
-  commitBranch: string;
-  commitHash: string;
   job: Job;
   preppedLogger: (message: string) => void;
 }
 
-export async function nextGenStage({
-  job,
-  preppedLogger,
-}: // mutPrefix,
-// projectName,
-// bucket,
-// url,
-// patchId,
-// commitBranch,
-// commitHash,
-StageParams) {
+export async function nextGenStage({ job, preppedLogger }: StageParams) {
   // TODO: replace with a process to get this url??
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
   // TODO: replace with process to access bucket
