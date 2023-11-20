@@ -303,7 +303,7 @@ export abstract class JobHandler {
       [K: string]: ({ job, preppedLogger }: { job: Job; preppedLogger: (message: string) => void }) => any;
     } = {
       // ['get-build-dependencies']: 'buildDepsExe',
-      ['next-gen-parse']: nextGenParse,
+      // ['next-gen-parse']: nextGenParse,
       ['persistence-module']: persistenceModule,
       // ['next-gen-html']: 'htmlExe',
       ['oas-page-build']: oasPageBuild,
@@ -330,7 +330,6 @@ export abstract class JobHandler {
     const preppedLogger = (message: string) => {
       thisLogger.save(thisJob._id, message);
     };
-    // const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(this.currJob)}`);
 
     for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>
@@ -339,34 +338,6 @@ export abstract class JobHandler {
       if (commandMap[key]) {
         this._logger.save(this.currJob._id, `running from commandMap: ${key}`);
         await commandMap[key]({ job: this.currJob, preppedLogger });
-        // }
-        // if (key === 'next-gen-parse') {
-        //   // this._logger.save(this.currJob._id, `in parse command!!! `);
-        //   // this._logger.save(this.currJob._id, `repoDir: "repos/${getDirectory(this.currJob)}" `);
-        //   // this._logger.save(this.currJob._id, `process.cwd!! : ${process.cwd()}`);
-        //   // const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(this.currJob)}`);
-
-        //   this._logger.save(this.currJob._id, `repoDir now : ${repoDir}`);
-        //   try {
-        //     const snootyParseRes = await nextGenParse({
-        //       job: this.currJob,
-        //       preppedLogger,
-        //     });
-        //     this._logger.save(
-        //       this.currJob._id,
-        //       `nextGenParse response: "${snootyParseRes.outputText}" - or error: "${snootyParseRes.errorText}"\n\n\n`
-        //     );
-        //   } catch (err) {
-        //     this._logger.save(this.currJob._id, `ERROR`);
-        //     this._logger.save(this.currJob._id, `ERROR: ${err}`);
-        //   }
-        // } else if (key === 'oas-page-build') {
-        //   this._logger.save(this.currJob._id, `IN oas page build`);
-        //   const result = await oasPageBuild({
-        //     job: this.currJob,
-        //     preppedLogger,
-        //   });
-        //   this._logger.save(this.currJob._id, `oas page build result... ${result}`);
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
