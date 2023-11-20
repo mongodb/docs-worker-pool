@@ -7,8 +7,15 @@ import { findLastSavedVersionData, saveSuccessfulBuildVersionData } from './data
 import { VersionData } from './models/OASFile';
 import { normalizeUrl } from '../utils/normalizeUrl';
 
-const OAS_FILE_SERVER = 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/';
-const GIT_HASH_URL = 'https://cloud.mongodb.com/version';
+const env = process.env.SNOOTY_ENV ?? '';
+
+const OAS_FILE_SERVER =
+  env === 'dotcomprd'
+    ? 'https://mongodb-mms-prod-build-server.s3.amazonaws.com/openapi/'
+    : 'https://mongodb-mms-build-server.s3.amazonaws.com/openapi/';
+
+const GIT_HASH_URL =
+  env === 'dotcomprd' ? 'https://cloud.mongodb.com/version' : 'https://cloud-dev.mongodb.com/version';
 
 const fetchTextData = async (url: string, errMsg: string) => {
   const res = await fetch(url);
@@ -274,7 +281,7 @@ export const buildOpenAPIPages = async (
     if (totalSuccess && sourceType == 'atlas') {
       try {
         const gitHash = await fetchGitHash();
-        const versions = await fetchVersionData(gitHash);
+        const versions = await fetchVersionData(gitHash, OAS_FILE_SERVER);
         await saveSuccessfulBuildVersionData(source, gitHash, versions);
       } catch (e) {
         console.error(e);
