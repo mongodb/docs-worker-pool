@@ -37,7 +37,7 @@ Make sure the module has been built/compiled with an existing `./dist/index.js` 
 Run the following to run the module:
 
 ```
-npm run start -- --bundle <path> --output <path> --redoc <path> --repo <path>
+npm run start -- --bundle <path> --output <path> --redoc <path> --repo <path> --site-url <path>
 ```
 
 All of the options above are required for the module to run properly. Run
@@ -49,7 +49,7 @@ The following example shows what the command would be like if ran through the
 autobuilder. If running locally, update the paths according to your local setup.
 
 ```
-npm run start -- --bundle /home/docsworker-xlarge/repos/cloud-docs/bundle.zip --output /home/docsworker-xlarge/repos/cloud-docs/public/ --redoc /home/docsworker-xlarge/redoc/cli/index.js --repo /home/docsworker-xlarge/repos/cloud-docs/
+npm run start -- --bundle /home/docsworker-xlarge/repos/cloud-docs/bundle.zip --output /home/docsworker-xlarge/repos/cloud-docs/public/ --redoc /home/docsworker-xlarge/redoc/cli/index.js --repo /home/docsworker-xlarge/repos/cloud-docs/ --site-url "https://www.mongodb.com/docs/atlas/"
 ```
 
 ### (Required) Options
@@ -60,6 +60,7 @@ npm run start -- --bundle /home/docsworker-xlarge/repos/cloud-docs/bundle.zip --
 | output | Path to the directory that the OpenAPI content pages should be built to. Typically, this would be the same output `public/` directory of a Snooty frontend build.                      |
 | redoc  | Path to the local installation of Redoc CLI to use. This should point to the team's [fork of Redoc](https://github.com/mongodb-forks/redoc), with the target being a compiled JS file. |
 | repo   | Path to the parsed docs repo's directory. This is to ensure that OpenAPI content pages using local OAS files can be properly sourced and passed down as an argument to Redoc CLI.      |
+| site-url | URL to the docs repo's docs site. |
 
 ## Usage in Production
 
