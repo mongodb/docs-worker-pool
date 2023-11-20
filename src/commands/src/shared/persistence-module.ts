@@ -11,7 +11,7 @@ export async function persistenceModule({ job, preppedLogger }: PersistenceModul
   const bundlePath = `${repoDir}/bundle.zip`;
 
   const args = [
-    `${process.cwd()}/modules/persistence/dist/index.js`,
+    `${process.cwd()}/modules/persistence/index.js`,
     '--unhandled-rejections=strict',
     '--path',
     bundlePath,
