@@ -26,6 +26,7 @@ interface CliCommandParams {
   options?: SpawnOptions;
   writeStream?: fs.WriteStream;
   writeTarget?: Writable;
+  logger?: (message: string) => void;
 }
 
 export interface CliCommandResponse {
@@ -157,6 +158,7 @@ export async function executeCliCommand({
   args = [],
   options = {},
   writeStream,
+  logger,
 }: CliCommandParams): Promise<CliCommandResponse> {
   return new Promise((resolve, reject) => {
     const outputText: string[] = [];
@@ -181,6 +183,11 @@ export async function executeCliCommand({
       if (writeStream) writeStream.end();
 
       if (exitCode !== 0) {
+        if (logger) {
+          logger(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
+          logger('Arguments provided: ' + args);
+          logger('Options provided: ' + options);
+        }
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);

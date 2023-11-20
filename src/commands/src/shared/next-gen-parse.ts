@@ -29,7 +29,7 @@ export async function nextGenParse({ job, preppedLogger }: NextGenParseParams): 
   preppedLogger(`COMMAND for parse: ${commandArgs.join(' ')}`);
 
   try {
-    await executeCliCommand({ command: 'snooty', args: commandArgs });
+    await executeCliCommand({ command: 'snooty', args: commandArgs, logger: preppedLogger });
   } catch (error) {
     preppedLogger(`ERROR: ${error}\n\n`);
   }
