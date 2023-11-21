@@ -34,7 +34,7 @@ COPY --chown=builduser:builduser tsconfig*.json ./
 COPY --chown=builduser:builduser . ./
 
 USER builduser
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/DOP-4097-mk/makefiles/shared.mk -o shared.mk
 RUN npm install
 RUN npm run build
 
