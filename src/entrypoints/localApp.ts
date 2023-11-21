@@ -10,16 +10,18 @@ import {
 
 async function localApp() {
   // TODO: Fetch this from repos_branches
-  const repoName = 'docs-java';
-  const projectName = 'java';
+  const repoName = 'cloud-docs';
+  const projectName = 'cloud-docs';
   const baseUrl = 'https://www.mongodb.com';
-  const bucket = 'docs-java-dotcomstg';
-  const mutPrefix = 'docs/drivers/java/sync';
+  const bucket = 'docs-atlas-dotcomstg';
+  const mutPrefix = 'docs-qa/atlas';
+  const repoOwner = 'mmeigs';
 
   const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await prepareBuildAndGetDependencies(
     repoName,
     projectName,
-    baseUrl
+    baseUrl,
+    repoOwner
   );
 
   console.log('Begin snooty build...');

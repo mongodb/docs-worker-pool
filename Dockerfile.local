@@ -86,9 +86,9 @@ COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-bui
 RUN cd ./modules/oas-page-builder \
     && npm run build
 
-
-
 FROM oas as root
+
+COPY --from=persistence --chown=docsworker app/modules/persistence/ ./modules/persistence
 
 # Root project build
 COPY package*.json ./
@@ -104,8 +104,6 @@ RUN npm run build:esbuild
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 RUN mkdir repos && chmod 755 repos
-
-COPY --from=persistence --chown=docsworker modules/persistence ./modules/persistence/
 
 EXPOSE 3000
 

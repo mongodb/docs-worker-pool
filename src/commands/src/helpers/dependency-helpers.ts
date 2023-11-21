@@ -6,10 +6,17 @@ import { promisify } from 'util';
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
-async function cloneRepo(repoName: string) {
+async function cloneRepo(repoName: string, repoOwner: string) {
+  if (!process.env.GITHUB_BOT_USERNAME || !process.env.GITHUB_BOT_PASSWORD) {
+    throw new Error('ERROR! GitHub credentials are not configured');
+  }
+
+  const githubUsername = process.env.GITHUB_BOT_USERNAME;
+  const githubPassword = process.env.GITHUB_BOT_PASSWORD;
+
   await executeCliCommand({
     command: 'git',
-    args: ['clone', `https://github.com/mongodb/${repoName}`],
+    args: ['clone', `${githubUsername}:${githubPassword}@github.com/${repoOwner}/${repoName}`],
     options: { cwd: `${process.cwd()}/repos` },
   });
 }
@@ -32,9 +39,14 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-export async function prepareBuildAndGetDependencies(repoName: string, projectName: string, baseUrl: string) {
+export async function prepareBuildAndGetDependencies(
+  repoName: string,
+  projectName: string,
+  baseUrl: string,
+  repoOwner: string
+) {
   // before we get build dependencies, we need to clone the repo
-  await cloneRepo(repoName);
+  await cloneRepo(repoName, repoOwner);
 
   const repoDir = getRepoDir(repoName);
 
