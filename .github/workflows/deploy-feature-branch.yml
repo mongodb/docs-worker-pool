@@ -5,6 +5,7 @@ on:
     types:
       - opened
       - reopened
+      - edited
 name: Initial Feature Branch Deploy
 jobs: 
   deploy:
