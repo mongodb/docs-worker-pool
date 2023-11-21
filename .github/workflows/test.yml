@@ -34,7 +34,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '18.x'
-    - uses: mongodb/docs-worker-actions@main
+    - uses: mongodb/docs-worker-actions/comment-pr@main
     - name: Install dependencies
       run: npm install --dev
     - name: Lint
