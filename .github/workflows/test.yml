@@ -34,10 +34,9 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '18.x'
-    - uses: mongodb/docs-worker-actions/comment-pr@DOP-4003
-    # - name: Install dependencies
-    #   run: npm install --dev
-    # - name: Lint
-    #   run: npm run lint && npm run format
-    # - name: Test
-    #   run: npm test
+    - name: Install dependencies
+      run: npm install --dev
+    - name: Lint
+      run: npm run lint && npm run format
+    - name: Test
+      run: npm test

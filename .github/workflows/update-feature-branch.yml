@@ -24,7 +24,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-
+      - uses: mongodb/docs-worker-actions/comment-pr@DOP-4003
       - uses: actions/checkout@v2
       - uses: dorny/paths-filter@v2
         id: filter
