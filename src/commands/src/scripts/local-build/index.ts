@@ -1,8 +1,11 @@
+import mongodb from 'mongodb';
+
 import { getOctokitClient } from '../../../../clients/githubClient';
 import { CliCommandResponse, executeCliCommand } from '../../helpers';
 import { getArgs } from './utils/get-args';
+import { handleJobAndCleanUp } from '../../../../enhanced/enhancedApp';
 
-const getDockerBuild = (npmAuth: string) =>
+const buildDockerImage = (npmAuth: string) =>
   executeCliCommand({
     command: 'docker',
     args: [
@@ -20,13 +23,24 @@ const getDockerBuild = (npmAuth: string) =>
     ],
   });
 
+function dockerRunContainer() {
+  const args = ['run', '-p', '9229:9229', '--rm', '-v', '~/.aws:/home/docsworker/.aws'];
+
+  // TODO: Add environment variables
+
+  args.push('autobuilder/local:latest');
+  executeCliCommand({
+    command: 'docker',
+    args,
+  });
+}
 async function main() {
   const npmAuth = 'TODO';
-  const client = getOctokitClient();
+  const octokitClient = getOctokitClient();
 
-  const { repoName, repoOwner, branchName, rebuild } = getArgs();
+  const { repoName, repoOwner, branchName } = getArgs();
 
-  const commitPromise = client.request('GET /repos/{owner}/{repo}/commits/{ref}', {
+  const commitPromise = octokitClient.request('GET /repos/{owner}/{repo}/commits/{ref}', {
     owner: repoOwner,
     repo: repoName,
     ref: branchName,
@@ -35,13 +49,31 @@ async function main() {
     },
   });
 
-  const promises: [typeof commitPromise, Promise<CliCommandResponse> | undefined] = [commitPromise, undefined];
-  if (rebuild) {
-    const buildPromise = getDockerBuild(npmAuth);
-    promises[1] = buildPromise;
-  }
+  const buildPromise = buildDockerImage(npmAuth);
 
-  const [commit] = await Promise.all(promises);
+  const DB_URL = 'TODO: Construct this from parameter store values';
+  const DB_NAME = 'pool_test';
+  const QUEUE_COLLECTION_NAME = 'queue';
+
+  const dbClient = new mongodb.MongoClient(DB_URL);
+
+  const promises: [typeof commitPromise, Promise<mongodb.MongoClient>, Promise<CliCommandResponse>] = [
+    commitPromise,
+    dbClient.connect(),
+    buildPromise,
+  ];
+
+  const [commit, connectedDbClient] = await Promise.all(promises);
+
+  const db = connectedDbClient.db(DB_NAME);
+
+  const collection = db.collection(QUEUE_COLLECTION_NAME);
+
+  // TODO: Make commit.data into job shape
+  const job = commit.data;
+  const { insertedId: jobId } = await collection.insertOne(job);
+
+  await handleJobAndCleanUp(jobId.toString(), db);
 }
 
 main();

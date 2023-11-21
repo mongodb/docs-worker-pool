@@ -11,7 +11,6 @@ export function getArgs() {
 
   // optional
   const branchNameIdx = process.argv.findIndex((str) => str === '--branch-name' || str === '-b');
-  const rebuildIdx = process.argv.findIndex((str) => str === '--rebuild' || str === '-r');
 
   if (repoOwnerIdx === -1)
     throw new Error(
@@ -41,6 +40,5 @@ export function getArgs() {
     repoOwner,
     repoName,
     branchName,
-    rebuild: rebuildIdx !== -1,
   };
 }
