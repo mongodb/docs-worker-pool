@@ -145,7 +145,7 @@ export class TestDataProvider {
     const genericCommands = TestDataProvider.getCommonBuildCommands(job);
     return Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       'make get-build-dependencies',
-      'make next-gen-parse',
+      'make next-gen-parse NO_CACHING=--no-caching',
       `make persistence-module JOB_ID=${job._id}`,
       'make next-gen-html',
       `make oas-page-build MUT_PREFIX=${job.payload.mutPrefix}`,
