@@ -26,10 +26,12 @@ const getDbName = () => {
   switch (env) {
     // Autobuilder's prd env
     case 'production':
+      return 'snooty_prod';
     case 'dotcomprd':
       return 'snooty_dotcomprd';
     // Autobuilder's pre-prd env
     case 'staging':
+      return 'snooty_stage';
     case 'dotcomstg':
       return 'snooty_dotcomstg';
     default:
