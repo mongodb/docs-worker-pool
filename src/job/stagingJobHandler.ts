@@ -61,7 +61,7 @@ export class StagingJobHandler extends JobHandler {
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob.buildCommands) {
       // TODO: Remove no-caching after done testing
-      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-parse NO_CACHING=--no-caching';
+      this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-parse';
       this.currJob.buildCommands.push(
         `make persistence-module GH_USER=${this.currJob.payload.repoOwner} JOB_ID=${this.currJob._id}`
       );
