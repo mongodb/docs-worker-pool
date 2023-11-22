@@ -350,14 +350,14 @@ export abstract class JobHandler {
       } else if (key === 'next-gen-html') {
         this._logger.save(this.currJob._id, `running nextGenHtml!`);
         await nextGenHtml(preppedLogger);
-        // } else if (key === 'get-build-dependencies') {
-        //   this._logger.save(this.currJob._id, `running getBuildStuff!!`);
-        //   await prepareBuildAndGetDependencies(
-        //     this.currJob.payload.repoName,
-        //     thisJob.payload.project,
-        //     baseUrl,
-        //     preppedLogger
-        //   );
+      } else if (key === 'get-build-dependencies') {
+        this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
+        await prepareBuildAndGetDependencies(
+          this.currJob.payload.repoName,
+          thisJob.payload.project,
+          baseUrl,
+          preppedLogger
+        );
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
@@ -533,8 +533,8 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
-    await this.setEnvironmentVariables();
-    this._logger.save(this._currJob._id, 'Prepared Environment variables');
+    // await this.setEnvironmentVariables();
+    // this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
   }
 
