@@ -24,9 +24,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-      - uses: mongodb/docs-worker-actions/comment-pr@DOP-4003
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/checkout@v2
       - uses: dorny/paths-filter@v2
         id: filter
@@ -48,8 +46,10 @@ jobs:
           cd cdk-infra/
           npm ci
           npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
-            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
-  
+            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks --outputs-file outputs.json
+      - uses: mongodb/docs-worker-actions/comment-pr@DOP-4003
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Update Worker Stack
         if: steps.filter.outputs.worker == 'true'
         run: |
