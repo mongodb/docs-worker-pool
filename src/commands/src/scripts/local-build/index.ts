@@ -23,7 +23,7 @@ const buildDockerImage = async (npmAuth: string) =>
     ],
   });
 
-async function dockerRunContainer(env: Record<string, string>) {
+async function runDockerContainer(env: Record<string, string>) {
   const args = ['run', '-p', '9229:9229', '--rm', '-v', '~/.aws:/home/docsworker/.aws'];
 
   for (const envName in env) {
@@ -37,6 +37,7 @@ async function dockerRunContainer(env: Record<string, string>) {
     args,
   });
 }
+
 async function main() {
   const env = await getWorkerEnv('stg');
 
@@ -78,7 +79,7 @@ async function main() {
   const job = commit.data;
   const { insertedId: jobId } = await collection.insertOne(job);
 
-  await dockerRunContainer({ ...env, JOB_ID: jobId.toString() });
+  await runDockerContainer({ ...env, JOB_ID: jobId.toString() });
 }
 
 main();
