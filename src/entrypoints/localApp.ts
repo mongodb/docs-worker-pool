@@ -77,6 +77,7 @@ async function localApp() {
     repoName,
     project,
     baseUrl,
+    preppedLogger,
     directory
   );
 

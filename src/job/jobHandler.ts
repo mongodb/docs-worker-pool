@@ -350,7 +350,12 @@ export abstract class JobHandler {
         await nextGenHtml();
       } else if (key === 'get-build-dependencies') {
         this._logger.save(this.currJob._id, `running getBuildStuff!!`);
-        await prepareBuildAndGetDependencies(this.currJob.payload.repoName, thisJob.payload.project, baseUrl);
+        await prepareBuildAndGetDependencies(
+          this.currJob.payload.repoName,
+          thisJob.payload.project,
+          baseUrl,
+          preppedLogger
+        );
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);

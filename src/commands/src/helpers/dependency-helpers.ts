@@ -15,10 +15,19 @@ async function cloneRepo(repoName: string) {
     options: { cwd: `${process.cwd()}/repos` },
   });
 }
-async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: string, prefix = '') {
+async function createEnvProdFile(
+  repoDir: string,
+  projectName: string,
+  baseUrl: string,
+  logger: (message: string) => void,
+  prefix = ''
+) {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
   const prodDirName = repoDir;
   // const prodSnootyFileName = `${prodDirName}snooty/.env.production`;
+
+  logger(`PRODFILENAME ${prodFileName}`);
+  logger(`PRODDIRNAME: ${prodDirName}`);
 
   try {
     await writeFileAsync(
@@ -40,11 +49,12 @@ export async function prepareBuildAndGetDependencies(
   repoName: string,
   projectName: string,
   baseUrl: string,
+  preppedLogger: (message: string) => void,
   directory?: string
 ) {
-  console.log('cwd: ', process.cwd());
   // before we get build dependencies, we need to clone the repo
-  await cloneRepo(repoName);
+  // await cloneRepo(repoName);
+  preppedLogger(`in Prepared build and get deps!!`);
 
   const repoDir = getRepoDir(repoName, directory);
   // const repoDir = `repos/${repoName}`;
@@ -55,12 +65,12 @@ export async function prepareBuildAndGetDependencies(
     getCommitBranch(repoDir),
     getPatchId(repoDir),
     existsAsync(path.join(process.cwd(), 'config/redirects')),
-    createEnvProdFile(repoDir, projectName, baseUrl),
+    createEnvProdFile(repoDir, projectName, baseUrl, preppedLogger),
   ];
 
   try {
     const dependencies = await Promise.all(commandPromises);
-    console.log('dependencies ', dependencies);
+    preppedLogger('dependencies ' + dependencies);
 
     return {
       commitHash: dependencies[0] as string,
@@ -72,6 +82,7 @@ export async function prepareBuildAndGetDependencies(
     };
   } catch (error) {
     console.error('ERROR! Could not get build dependencies');
+    preppedLogger(`error, could not get build deps`);
     throw error;
   }
 }
