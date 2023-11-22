@@ -14,7 +14,13 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
-import { nextGenHtml, nextGenParse, oasPageBuild, persistenceModule } from '../commands';
+import {
+  nextGenHtml,
+  nextGenParse,
+  oasPageBuild,
+  persistenceModule,
+  prepareBuildAndGetDependencies,
+} from '../commands';
 import { getRepoDir } from '../commands/src/helpers';
 require('fs');
 
@@ -330,6 +336,7 @@ export abstract class JobHandler {
     const preppedLogger = (message: string) => {
       thisLogger.save(thisJob._id, message);
     };
+    const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com'; // ?????
 
     for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>
@@ -338,6 +345,12 @@ export abstract class JobHandler {
       if (commandMap[key]) {
         this._logger.save(this.currJob._id, `running from commandMap: ${key}`);
         await commandMap[key]({ job: this.currJob, preppedLogger });
+      } else if (key === 'next-gen-html') {
+        this._logger.save(this.currJob._id, `running nextGenHtml!`);
+        await nextGenHtml();
+      } else if (key === 'get-build-dependencies') {
+        this._logger.save(this.currJob._id, `running getBuildStuff!!`);
+        await prepareBuildAndGetDependencies(this.currJob.payload.repoName, thisJob.payload.project, baseUrl);
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);

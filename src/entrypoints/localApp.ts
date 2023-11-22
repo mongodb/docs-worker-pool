@@ -96,7 +96,7 @@ async function localApp() {
 
   console.log('Begin next-gen-html...');
 
-  const nextGenHtmlRes = await nextGenHtml(repoName);
+  const nextGenHtmlRes = await nextGenHtml();
   console.log(nextGenHtmlRes.outputText);
 
   console.log('next-gen-html complete');

@@ -2,7 +2,7 @@ import path from 'path';
 import { IJobRepoLogger } from '../../../services/logger';
 import { executeCliCommand } from '../helpers';
 
-export async function nextGenHtml(repoName: string) {
+export async function nextGenHtml() {
   // let cwd = path.join(`${process.cwd()}`, `../../../snooty`);
   // if (repoName === 'docs-monorepo') {
   //   cwd = path.join(`${process.cwd()}`, `../../snooty`);
