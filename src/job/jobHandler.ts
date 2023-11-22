@@ -15,8 +15,10 @@ import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepo
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import {
+  nextGenDeploy,
   nextGenHtml,
   nextGenParse,
+  nextGenStage,
   oasPageBuild,
   persistenceModule,
   prepareBuildAndGetDependencies,
@@ -348,14 +350,14 @@ export abstract class JobHandler {
       } else if (key === 'next-gen-html') {
         this._logger.save(this.currJob._id, `running nextGenHtml!`);
         await nextGenHtml(preppedLogger);
-      } else if (key === 'get-build-dependencies') {
-        this._logger.save(this.currJob._id, `running getBuildStuff!!`);
-        await prepareBuildAndGetDependencies(
-          this.currJob.payload.repoName,
-          thisJob.payload.project,
-          baseUrl,
-          preppedLogger
-        );
+        // } else if (key === 'get-build-dependencies') {
+        //   this._logger.save(this.currJob._id, `running getBuildStuff!!`);
+        //   await prepareBuildAndGetDependencies(
+        //     this.currJob.payload.repoName,
+        //     thisJob.payload.project,
+        //     baseUrl,
+        //     preppedLogger
+        //   );
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
@@ -588,7 +590,20 @@ export abstract class JobHandler {
     );
     try {
       await this.build();
-      const resp = await this.deploy();
+      // const resp = await this.deploy();
+      // const bucket = 'docs-atlas-dotcomstg';
+      // const resp = await nextGenDeploy({ bucket, mutPrefix: this._currJob.mutPrefix, gitBranch: this._currJob.payload.branchName, hasConfigRedirects: false, url:  })
+
+      await nextGenStage({
+        job: this._currJob,
+        preppedLogger: (message: string) => this._logger.save(this._currJob._id, message),
+      });
+      const resp = {
+        // TODO:
+        status: 'success',
+        output: '',
+        error: '',
+      };
       await this.update(resp);
       this.cleanup();
     } catch (error) {
