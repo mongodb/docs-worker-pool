@@ -1,7 +1,7 @@
 import mongodb from 'mongodb';
 
 import { getOctokitClient } from '../../../../clients/githubClient';
-import { CliCommandResponse, executeCliCommand } from '../../helpers';
+import { executeCliCommand } from '../../helpers';
 import { getArgs } from './utils/get-args';
 import { getWorkerEnv } from './utils/get-env-vars';
 
@@ -41,7 +41,6 @@ async function runDockerContainer(env: Record<string, string>) {
 async function main() {
   const env = await getWorkerEnv('stg');
 
-  const npmAuth = env.NPM_BASE_64_AUTH;
   const octokitClient = getOctokitClient();
 
   const { repoName, repoOwner, branchName } = getArgs();
@@ -55,31 +54,19 @@ async function main() {
     },
   });
 
-  const buildPromise = buildDockerImage(npmAuth);
+  const buildPromise = buildDockerImage(env.NPM_BASE_64_AUTH);
+  const dbClient = new mongodb.MongoClient(env.DB_URL);
 
-  const DB_URL = 'TODO: Construct this from parameter store values';
-  const DB_NAME = 'pool_test';
-  const QUEUE_COLLECTION_NAME = 'queue';
+  const [commit, connectedDbClient] = await Promise.all([commitPromise, dbClient.connect(), buildPromise]);
 
-  const dbClient = new mongodb.MongoClient(DB_URL);
-
-  const promises: [typeof commitPromise, Promise<mongodb.MongoClient>, Promise<CliCommandResponse>] = [
-    commitPromise,
-    dbClient.connect(),
-    buildPromise,
-  ];
-
-  const [commit, connectedDbClient] = await Promise.all(promises);
-
-  const db = connectedDbClient.db(DB_NAME);
-
-  const collection = db.collection(QUEUE_COLLECTION_NAME);
+  const db = connectedDbClient.db(env.DB_NAME);
+  const collection = db.collection(env.QUEUE_COLLECTION_NAME);
 
   // TODO: Make commit.data into job shape
   const job = commit.data;
   const { insertedId: jobId } = await collection.insertOne(job);
 
-  await runDockerContainer({ ...env, JOB_ID: jobId.toString() });
+  await runDockerContainer({ ...env, jobId: jobId.toString() });
 }
 
 main();

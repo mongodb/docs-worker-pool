@@ -42,49 +42,47 @@ const workerParamStrings = [
 ] as const;
 
 type WorkerParamString = (typeof workerParamStrings)[number];
-const workerParamPathToEnvName = new Map<WorkerParamString, string>();
-
-workerParamPathToEnvName.set('/npm/auth', 'NPM_BASE_64_AUTH');
-workerParamPathToEnvName.set('/github/webhook/secret', 'GITHUB_SECRET');
-workerParamPathToEnvName.set('/github/bot/password', 'GITHUB_BOT_PASSWORD');
-workerParamPathToEnvName.set('/atlas/password', 'MONGO_ATLAS_PASSWORD');
-workerParamPathToEnvName.set('/fastly/docs/dochub/token', 'FASTLY_DOCHUB_TOKEN');
-workerParamPathToEnvName.set('/fastly/docs/dochub/service_id', 'FASTLY_DOCHUB_SERVICE_ID');
-workerParamPathToEnvName.set('/fastly/dochub_map', 'FASTLY_DOCHUB_MAP');
-workerParamPathToEnvName.set('/fastly/docs/main/token', 'FASTLY_MAIN_TOKEN');
-workerParamPathToEnvName.set('/fastly/docs/main/service_id', 'FASTLY_MAIN_SERVICE_ID');
-workerParamPathToEnvName.set('/fastly/docs/cloudmanager/token', 'FASTLY_CLOUD_MANAGER_TOKEN');
-workerParamPathToEnvName.set('/fastly/docs/cloudmanager/service_id', 'FASTLY_CLOUD_MANAGER_SERVICE_ID');
-workerParamPathToEnvName.set('/fastly/docs/atlas/token', 'FASTLY_ATLAS_TOKEN');
-workerParamPathToEnvName.set('/fastly/docs/atlas/service_id', 'FASTLY_ATLAS_SERVICE_ID');
-workerParamPathToEnvName.set('/fastly/docs/opsmanager/token', 'FASTLY_OPS_MANAGER_TOKEN');
-workerParamPathToEnvName.set('/fastly/docs/opsmanager/service_id', 'FASTLY_OPS_MANAGER_SERVICE_ID');
-workerParamPathToEnvName.set('/cdn/client/id', 'CDN_CLIENT_ID');
-workerParamPathToEnvName.set('/cdn/client/secret', 'CDN_CLIENT_SECRET');
-workerParamPathToEnvName.set('/atlas/collections/docsets', 'DOCSETS_COL_NAME');
-workerParamPathToEnvName.set('/atlas/dbname', 'DB_NAME');
-workerParamPathToEnvName.set('/atlas/collections/snooty', 'SNOOTY_DB_NAME');
-workerParamPathToEnvName.set('/atlas/username', 'MONGO_ATLAS_USERNAME');
-workerParamPathToEnvName.set('/atlas/host', 'MONGO_ATLAS_HOST');
-// TODO: Figure out what to do about jobUpdatesQueueUrl
-workerParamPathToEnvName.set('/github/bot/username', 'GITHUB_BOT_USERNAME');
-workerParamPathToEnvName.set('/frontend/base_url', 'GATSBY_BASE_URL');
-workerParamPathToEnvName.set('/flag/preview_build/enabled', 'PREVIEW_BUILD_ENABLED');
-workerParamPathToEnvName.set('/flag/update_pages', 'FEATURE_FLAG_UPDATE_PAGES');
-
-// change these
-workerParamPathToEnvName.set('/flag/monorepo_path', 'FEATURE_FLAG_MONOREPO_PATH');
-workerParamPathToEnvName.set('/atlas/collections/user/entitlements', 'USER_ENTITLEMENT_COL_NAME');
-workerParamPathToEnvName.set('/npm/email', 'NPM_EMAIL');
-workerParamPathToEnvName.set('/atlas/collections/repo', 'REPO_BRANCHES_COL_NAME');
-workerParamPathToEnvName.set('/atlas/collections/docsets', 'DOCSETS_COL_NAME');
-workerParamPathToEnvName.set('/flag/use_chatbot', 'GATSBY_SHOW_CHATBOT');
-workerParamPathToEnvName.set('/flag/hide_locale', 'GATSBY_HIDE_UNIFIED_FOOTER_LOCALE');
+const workerParamPathToEnvName: Record<WorkerParamString, string> = {
+  '/npm/auth': 'NPM_BASE_64_AUTH',
+  '/github/webhook/secret': 'GITHUB_SECRET',
+  '/github/bot/password': 'GITHUB_BOT_PASSWORD',
+  '/atlas/password': 'MONGO_ATLAS_PASSWORD',
+  '/fastly/docs/dochub/token': 'FASTLY_DOCHUB_TOKEN',
+  '/fastly/docs/dochub/service_id': 'FASTLY_DOCHUB_SERVICE_ID',
+  '/fastly/dochub_map': 'FASTLY_DOCHUB_MAP',
+  '/fastly/docs/main/token': 'FASTLY_MAIN_TOKEN',
+  '/fastly/docs/main/service_id': 'FASTLY_MAIN_SERVICE_ID',
+  '/fastly/docs/cloudmanager/token': 'FASTLY_CLOUD_MANAGER_TOKEN',
+  '/fastly/docs/cloudmanager/service_id': 'FASTLY_CLOUD_MANAGER_SERVICE_ID',
+  '/fastly/docs/atlas/token': 'FASTLY_ATLAS_TOKEN',
+  '/fastly/docs/atlas/service_id': 'FASTLY_ATLAS_SERVICE_ID',
+  '/fastly/docs/opsmanager/token': 'FASTLY_OPS_MANAGER_TOKEN',
+  '/fastly/docs/opsmanager/service_id': 'FASTLY_OPS_MANAGER_SERVICE_ID',
+  '/cdn/client/id': 'CDN_CLIENT_ID',
+  '/cdn/client/secret': 'CDN_CLIENT_SECRET',
+  '/atlas/collections/docsets': 'DOCSETS_COL_NAME',
+  '/atlas/dbname': 'DB_NAME',
+  '/atlas/collections/snooty': 'SNOOTY_DB_NAME',
+  '/atlas/username': 'MONGO_ATLAS_USERNAME',
+  '/atlas/host': 'MONGO_ATLAS_HOST',
+  '/github/bot/username': 'GITHUB_BOT_USERNAME',
+  '/frontend/base_url': 'GATSBY_BASE_URL',
+  '/flag/preview_build/enabled': 'PREVIEW_BUILD_ENABLED',
+  '/flag/update_pages': 'FEATURE_FLAG_UPDATE_PAGES',
+  '/flag/monorepo_path': 'FEATURE_FLAG_MONOREPO_PATH',
+  '/atlas/collections/user/entitlements': 'USER_ENTITLEMENT_COL_NAME',
+  '/npm/email': 'NPM_EMAIL',
+  '/atlas/collections/repo': 'REPO_BRANCHES_COL_NAME',
+  '/flag/use_chatbot': 'GATSBY_SHOW_CHATBOT',
+  '/flag/hide_locale': 'GATSBY_HIDE_UNIFIED_FOOTER_LOCALE',
+  '/atlas/collections/job/queue': 'JOB_QUEUE_COL_NAME',
+  '/flag/preview_webhook_enable': 'GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED',
+};
 
 async function getSecureStrings(
   ssmPrefix: string,
   params: readonly string[],
-  paramToEnvMap: Map<string, string>,
+  paramToEnvMap: Record<string, string>,
   resourceName: string
 ): Promise<Record<string, string>> {
   const ssmClient = new SSMClient({ region: 'us-east-2' });
@@ -106,7 +104,7 @@ async function getSecureStrings(
         return;
       }
 
-      const envName = paramToEnvMap.get(paramName);
+      const envName = paramToEnvMap[paramName];
 
       if (!envName) {
         console.error(
@@ -158,6 +156,8 @@ export async function getWorkerEnv(env: AutoBuilderEnv): Promise<Record<string, 
     workerParamPathToEnvName,
     'workerParamPathToEnvName'
   );
+
+  // TODO: Add JOB_UPDATES_QUEUE_URL. Can retrieve with https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cloudformation/command/DescribeStacksCommand/
 
   return {
     ...envRecord,
