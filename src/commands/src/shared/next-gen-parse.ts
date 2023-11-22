@@ -23,6 +23,8 @@ export async function nextGenParse({
     commandArgs.push(patchId);
   }
 
+  // Not currently used in production builds, adding functionality
+  // now so that it is available when it is.
   if (isProd) {
     commandArgs.push('--no-caching');
   }
