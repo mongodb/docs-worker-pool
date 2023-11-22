@@ -347,7 +347,7 @@ export abstract class JobHandler {
         await commandMap[key]({ job: this.currJob, preppedLogger });
       } else if (key === 'next-gen-html') {
         this._logger.save(this.currJob._id, `running nextGenHtml!`);
-        await nextGenHtml();
+        await nextGenHtml(preppedLogger);
       } else if (key === 'get-build-dependencies') {
         this._logger.save(this.currJob._id, `running getBuildStuff!!`);
         await prepareBuildAndGetDependencies(
