@@ -111,11 +111,11 @@ async function localApp() {
   console.log(oasPageBuildRes);
   console.log('Begin next-gen-stage...');
 
-  const { resultMessage, commands } = await nextGenStage({
-    job: fakeJob,
-    preppedLogger,
-  });
-  console.log(resultMessage);
+  // const { resultMessage, commands } = await nextGenStage({
+  //   job: fakeJob,
+  //   preppedLogger,
+  // });
+  // console.log(resultMessage);
   console.log('next-gen-stage complete');
 
   console.log('Begin next-gen-deploy...');
@@ -129,7 +129,7 @@ async function localApp() {
   });
   console.log(deployRes);
   console.log('next-gen-deploy complete');
-  console.log('commands: ', commands);
+  // console.log('commands: ', commands);
   console.log('bundle Path: ', bundlePath);
 }
 
