@@ -1,3 +1,5 @@
+import path from 'path';
+import fs from 'fs';
 import { getDirectory, JobHandler } from './jobHandler';
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
@@ -12,7 +14,7 @@ import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
-import { nextGenStage } from '../commands';
+import { nextGenDeploy, nextGenStage } from '../commands';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
@@ -88,9 +90,21 @@ export class StagingJobHandler extends JobHandler {
       } else {
         // TODO: this should be normal deployGeneric
         this.logger.save(this.currJob._id, `ITS fake monorepo, let's stage!! All the world's a stage.`);
+        const hasConfigRedirects = await fs.exists(path.join(process.cwd(), 'config/redirects'), () =>
+          console.log('exists')
+        );
         resp = await nextGenStage({
           job: this.currJob,
           preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
+        });
+        this.logger.save(this.currJob._id, `Now to deploy `);
+        await nextGenDeploy({
+          bucket: 'docs-atlas-dotcomstg',
+          gitBranch: this.currJob.payload.branchName,
+          mutPrefix: this.currJob.mutPrefix || '',
+          hasConfigRedirects: !!hasConfigRedirects,
+          preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
+          url: 'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
         });
         // resp = await this.deployGeneric();
       }
