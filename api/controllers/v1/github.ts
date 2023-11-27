@@ -77,6 +77,16 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
       body: errMsg,
     };
   }
+  if (!event.body) {
+    const err = 'Trigger build does not have a body in event payload';
+    consoleLogger.error('TriggerBuildError', err);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+
   const body = JSON.parse(event.body);
 
   if (body.deleted) {

@@ -44,7 +44,7 @@ export async function nextGenDeploy({
     );
     preppedLogger(`${outputText}\n Hosted at ${url}/${mutPrefix}`);
     return {
-      status: 'success',
+      status: 'inProgress',
       output: outputText,
       error: '',
     };

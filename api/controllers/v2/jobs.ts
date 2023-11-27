@@ -72,7 +72,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             await notifyBuildSummary(jobId);
             break;
           default:
-            consoleLogger.error(jobId, 'Invalid status');
+            consoleLogger.error(jobId, `Invalid status: ${jobStatus}`);
             break;
         }
       } catch (err) {
