@@ -90,9 +90,7 @@ export class StagingJobHandler extends JobHandler {
       } else {
         // TODO: this should be normal deployGeneric
         this.logger.save(this.currJob._id, `ITS fake monorepo, let's stage!! All the world's a stage.`);
-        const hasConfigRedirects = await fs.exists(path.join(process.cwd(), 'config/redirects'), () =>
-          console.log('exists')
-        );
+        const hasConfigRedirects = fs.existsSync(path.join(process.cwd(), 'config/redirects'));
         resp = await nextGenStage({
           job: this.currJob,
           preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
@@ -102,7 +100,7 @@ export class StagingJobHandler extends JobHandler {
           bucket: 'docs-atlas-dotcomstg',
           gitBranch: this.currJob.payload.branchName,
           mutPrefix: this.currJob.mutPrefix || '',
-          hasConfigRedirects: !!hasConfigRedirects,
+          hasConfigRedirects: hasConfigRedirects,
           preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
           url: 'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
         });
