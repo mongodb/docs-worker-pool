@@ -154,6 +154,7 @@ export class JobHandlerTestHelper {
     this.config.get.calledWith('featureFlagSearchUI').mockReturnValue('false');
     this.config.get.calledWith('gatsbyUseChatbot').mockReturnValue('false');
     this.config.get.calledWith('gatsbyHideUnifiedFooterLocale').mockReturnValue('true');
+    this.config.get.calledWith('gatsbyManifestURL').mockReturnValue('test-url');
     this.repoConnector.checkCommits
       .calledWith(this.job)
       .mockReturnValue(TestDataProvider.getCommitCheckValidResponse(this.job));
