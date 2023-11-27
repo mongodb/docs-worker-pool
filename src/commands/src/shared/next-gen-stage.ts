@@ -30,20 +30,33 @@ export async function nextGenStage({ job, preppedLogger }: StageParams) {
 
   preppedLogger(`MUT PUBLISH command args: ${commandArgs}`);
 
-  const { outputText } = await executeCliCommand({
-    command: 'mut-publish',
-    args: commandArgs,
-    options: {
-      cwd: `${process.cwd()}/snooty`,
-    },
-  });
+  try {
+    const { outputText } = await executeCliCommand({
+      command: 'mut-publish',
+      args: commandArgs,
+      options: {
+        cwd: `${process.cwd()}/snooty`,
+      },
+    });
 
-  const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
-  preppedLogger(`OUTPUT of mut publish: ${resultMessage}`);
+    const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
+    preppedLogger(`OUTPUT of mut publish: ${resultMessage}`);
 
-  return {
-    resultMessage,
-    commands: commandArgs,
-  };
-  // return resultMessage;
+    // return {
+    //   resultMessage,
+    //   commands: commandArgs,
+    // };
+    return {
+      status: 'success',
+      output: '', // TODO: better values
+      error: '',
+    };
+  } catch (error) {
+    preppedLogger(`Failed in nextGenStage.`);
+    return {
+      status: 'failure', // Is this correct??
+      output: '', // TODO: better values
+      error: '',
+    };
+  }
 }

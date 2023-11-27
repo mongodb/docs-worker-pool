@@ -125,6 +125,7 @@ async function localApp() {
     gitBranch: commitBranch,
     mutPrefix: mutPrefix || '',
     url: baseUrl,
+    preppedLogger,
   });
   console.log(deployRes);
   console.log('next-gen-deploy complete');

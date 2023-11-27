@@ -11,6 +11,8 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
+import { nextGenStage } from '../commands';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
@@ -76,7 +78,16 @@ export class StagingJobHandler extends JobHandler {
   }
   async deploy(): Promise<CommandExecutorResponse> {
     try {
-      const resp = await this.deployGeneric();
+      let resp: CommandExecutorResponse;
+      if (this.currJob.payload.repoName === MONOREPO_NAME) {
+        this.logger.save(this.currJob._id, `ITS MONOREPO, let's stage!! All the world's a stage.`);
+        resp = await nextGenStage({
+          job: this.currJob,
+          preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
+        });
+      } else {
+        resp = await this.deployGeneric();
+      }
       const summary = '';
       if (resp?.output?.includes('Summary')) {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));

@@ -15,7 +15,6 @@ import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepo
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import {
-  nextGenDeploy,
   nextGenHtml,
   nextGenParse,
   nextGenStage,
@@ -23,7 +22,6 @@ import {
   persistenceModule,
   prepareBuildAndGetDependencies,
 } from '../commands';
-import { getRepoDir } from '../commands/src/helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -300,7 +298,7 @@ export abstract class JobHandler {
 
   private async exeBuildModified(): Promise<void> {
     const stages = {
-      ['get-build-dependencies']: 'buildDepsExe',
+      ['get-build-dependencies']: 'buildDepsExe', // ??
       ['next-gen-parse']: 'parseExe',
       ['persistence-module']: 'persistenceExe',
       ['next-gen-html']: 'htmlExe',
@@ -351,13 +349,13 @@ export abstract class JobHandler {
         this._logger.save(this.currJob._id, `running nextGenHtml!`);
         await nextGenHtml(preppedLogger);
       } else if (key === 'get-build-dependencies') {
-        this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
-        await prepareBuildAndGetDependencies(
-          this.currJob.payload.repoName,
-          thisJob.payload.project,
-          baseUrl,
-          preppedLogger
-        );
+        // this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
+        // await prepareBuildAndGetDependencies(
+        //   this.currJob.payload.repoName,
+        //   thisJob.payload.project,
+        //   baseUrl,
+        //   preppedLogger
+        // );
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
@@ -533,6 +531,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
+    this._logger.save(this._currJob._id, `payload's project: ${this._currJob.payload.project}`);
     this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
     await prepareBuildAndGetDependencies(
       this.currJob.payload.repoName,
