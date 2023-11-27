@@ -87,6 +87,8 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
     };
   }
 
+  throw new Error(`event body? => ${JSON.stringify(event.body)}`);
+
   const body = JSON.parse(event.body);
 
   if (body.deleted) {
