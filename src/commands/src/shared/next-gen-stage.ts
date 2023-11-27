@@ -47,7 +47,7 @@ export async function nextGenStage({ job, preppedLogger }: StageParams) {
     //   commands: commandArgs,
     // };
     return {
-      status: 'success',
+      status: 'inProgress',
       output: '', // TODO: better values
       error: '',
     };
