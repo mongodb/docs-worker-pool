@@ -69,7 +69,7 @@ Resources:
             - Name: GATSBY_SHOW_CHATBOT
               Value: ${self:custom.gatsbyUseChatbot}
             - Name: GATSBY_MARIAN_URL
-              Value: ${self:custom.gatsbyMarianUrl}
+              Value: ${self:custom.gatsbyMarianURL}
             - Name: GATSBY_HIDE_UNIFIED_FOOTER_LOCALE
               Value: ${self:custom.gatsbyHideUnifiedFooterLocale}
             - Name: FASTLY_MAIN_TOKEN
