@@ -328,6 +328,7 @@ export abstract class JobHandler {
 
     // call prerequisite commands
     await this._commandExecutor.execute(prerequisiteCommands);
+    await this._logger.save(this.currJob._id, `${'DONE with prereqs!!'.padEnd(15)}`);
 
     // create constants for command inputs
     const thisLogger = this._logger;
@@ -354,32 +355,32 @@ export abstract class JobHandler {
     await nextGenHtml(preppedLogger);
     this._logger.save(this._currJob._id, 'NextGenHtml Finished');
 
-    for (const command of makeCommands) {
-      // works for any make command with the following signature make <make-rule>
-      const key = command.split(' ')[1].trim();
-      this._logger.save(this.currJob._id, `command: ${command}`);
-      if (commandMap[key]) {
-        this._logger.save(this.currJob._id, `running from commandMap: ${key}`);
-        await commandMap[key]({ job: this.currJob, preppedLogger });
-      } else if (key === 'next-gen-html') {
-        this._logger.save(this.currJob._id, `running nextGenHtml!`);
-        await nextGenHtml(preppedLogger);
-      } else {
-        if (stages[key]) {
-          const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
-          await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
-        } else {
-          const makeCommandsResp = await this._commandExecutor.execute([command]);
-          await this.logBuildDetails(makeCommandsResp);
-        }
-      }
+    // for (const command of makeCommands) {
+    //   // works for any make command with the following signature make <make-rule>
+    //   const key = command.split(' ')[1].trim();
+    //   this._logger.save(this.currJob._id, `command: ${command}`);
+    //   if (commandMap[key]) {
+    //     this._logger.save(this.currJob._id, `running from commandMap: ${key}`);
+    //     await commandMap[key]({ job: this.currJob, preppedLogger });
+    //   } else if (key === 'next-gen-html') {
+    //     this._logger.save(this.currJob._id, `running nextGenHtml!`);
+    //     await nextGenHtml(preppedLogger);
+    //   } else {
+    //     if (stages[key]) {
+    //       const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
+    //       await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
+    //     } else {
+    //       const makeCommandsResp = await this._commandExecutor.execute([command]);
+    //       await this.logBuildDetails(makeCommandsResp);
+    //     }
+    //   }
 
-      // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
-      const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
-      if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
-        await this.callGatsbyCloudWebhook();
-      }
-    }
+    //   // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+    //   const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+    //   if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+    //     await this.callGatsbyCloudWebhook();
+    //   }
+    // }
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
   }
 
