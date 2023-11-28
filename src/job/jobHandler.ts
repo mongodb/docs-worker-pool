@@ -336,7 +336,6 @@ export abstract class JobHandler {
     const preppedLogger = (message: string) => {
       thisLogger.save(thisJob._id, message);
     };
-    const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com'; // ?????
 
     // TODO: add conditionals
     // TODO: add benchmarks
