@@ -308,7 +308,6 @@ export abstract class JobHandler {
     const commandMap: {
       [K: string]: ({ job, preppedLogger }: { job: Job; preppedLogger: (message: string) => void }) => any;
     } = {
-      // ['get-build-dependencies']: 'buildDepsExe',
       ['next-gen-parse']: nextGenParse,
       ['persistence-module']: persistenceModule,
       // ['next-gen-html']: 'htmlExe',
@@ -383,19 +382,19 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
-    if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
-      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
-      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      if (this.currJob.useWithBenchmark) {
-        await this.exeBuildModified();
-      } else {
-        await this.exeBuild();
-      }
+    // if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
+    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
+    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
+    if (this.currJob.useWithBenchmark) {
+      await this.exeBuildModified();
     } else {
-      const error = new AutoBuilderError('No commands to execute', 'BuildError');
-      await this.logError(error);
-      throw error;
+      await this.exeBuild();
     }
+    // } else {
+    //   const error = new AutoBuilderError('No commands to execute', 'BuildError');
+    //   await this.logError(error);
+    //   throw error;
+    // }
     return true;
   }
 
@@ -523,14 +522,14 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
-    this.prepBuildCommands();
-    this._logger.save(this._currJob._id, 'Prepared Build commands');
-    await this.prepNextGenBuild();
-    this._logger.save(this._currJob._id, 'Prepared Next Gen build');
+    // this.prepBuildCommands();
+    // this._logger.save(this._currJob._id, 'Prepared Build commands');
+    // await this.prepNextGenBuild();
+    // this._logger.save(this._currJob._id, 'Prepared Next Gen build');
     await this._repoConnector.applyPatch(this.currJob);
     this._logger.save(this._currJob._id, 'Patch Applied');
-    await this.downloadMakeFile();
-    this._logger.save(this._currJob._id, 'Downloaded Makefile');
+    // await this.downloadMakeFile();
+    // this._logger.save(this._currJob._id, 'Downloaded Makefile');
     this._logger.save(this._currJob._id, `payload's project: ${this._currJob.payload.project}`);
     this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
     await prepareBuildAndGetDependencies(
