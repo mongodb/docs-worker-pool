@@ -120,7 +120,7 @@ custom:
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
   gatsbyUseChatbot: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/use_chatbot}
   gatsbyHideUnifiedFooterLocale: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/hide_locale}
-  gatsbyManifestURL: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/marian_url}
+  gatsbyMarianURL: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/marian_url}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
   fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
   fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}
