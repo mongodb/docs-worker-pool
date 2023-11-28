@@ -337,6 +337,23 @@ export abstract class JobHandler {
     };
     const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com'; // ?????
 
+    // TODO: add conditionals
+    // TODO: add benchmarks
+    await nextGenParse({ job: this._currJob, preppedLogger });
+    this._logger.save(this._currJob._id, 'Repo Parsing Completed');
+    await persistenceModule({ job: this._currJob, preppedLogger });
+    this._logger.save(this._currJob._id, 'Persistence Module Complete');
+    // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+    const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+    if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      await this.callGatsbyCloudWebhook();
+    }
+    this._logger.save(this._currJob._id, 'Gatsby Webhook Called');
+    await oasPageBuild({ job: this._currJob, preppedLogger });
+    this._logger.save(this._currJob._id, 'OAS Page Build Complete');
+    await nextGenHtml(preppedLogger);
+    this._logger.save(this._currJob._id, 'NextGenHtml Finished');
+
     for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>
       const key = command.split(' ')[1].trim();
@@ -347,14 +364,6 @@ export abstract class JobHandler {
       } else if (key === 'next-gen-html') {
         this._logger.save(this.currJob._id, `running nextGenHtml!`);
         await nextGenHtml(preppedLogger);
-      } else if (key === 'get-build-dependencies') {
-        // this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
-        // await prepareBuildAndGetDependencies(
-        //   this.currJob.payload.repoName,
-        //   thisJob.payload.project,
-        //   baseUrl,
-        //   preppedLogger
-        // );
       } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
