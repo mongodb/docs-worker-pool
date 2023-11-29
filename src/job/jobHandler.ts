@@ -351,7 +351,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Gatsby Webhook Called');
     await oasPageBuild({ job: this._currJob, preppedLogger });
     this._logger.save(this._currJob._id, 'OAS Page Build Complete');
-    await nextGenHtml(preppedLogger);
+    await nextGenHtml({ job: this._currJob, preppedLogger });
     this._logger.save(this._currJob._id, 'NextGenHtml Finished');
 
     // for (const command of makeCommands) {

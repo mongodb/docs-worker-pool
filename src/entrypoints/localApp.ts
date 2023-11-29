@@ -97,7 +97,7 @@ async function localApp() {
 
   console.log('Begin next-gen-html...');
 
-  const nextGenHtmlRes = await nextGenHtml(preppedLogger);
+  const nextGenHtmlRes = await nextGenHtml({ job: fakeJob, preppedLogger });
   console.log(nextGenHtmlRes.outputText);
 
   console.log('next-gen-html complete');
