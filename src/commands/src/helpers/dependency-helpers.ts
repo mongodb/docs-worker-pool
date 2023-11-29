@@ -23,6 +23,7 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
       GATSBY_MANIFEST_PATH=${repoDir}/bundle.zip
       GATSBY_PARSER_USER=${process.env.USER}
       GATSBY_BASE_URL=${baseUrl}
+      GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}
       PATH_PREFIX=${prefix}`,
       'utf8'
     );
