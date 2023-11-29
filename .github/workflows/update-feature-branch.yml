@@ -31,7 +31,8 @@ jobs:
         with:
           filters: |
             webhooks:
-              - 'api/v2/**'
+              - 'api/controllers/v2/**'
+              - 'api/handlers/**'
               - 'cdk-infra/lib/constructs/api/**'
               - 'cdk-infra/utils/**'
             worker:
