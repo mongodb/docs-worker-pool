@@ -10,13 +10,15 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   const firstResult = await executeCliCommand({
     command: 'cp',
     args: [`${repoDir}/.env.production`, `${repoDir}/snooty`],
+    logger: preppedLogger,
   });
   preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
 
   preppedLogger(`Now cd into snooty`);
   const secondResult = await executeCliCommand({
     command: 'cd',
-    args: [`snooty`],
+    args: [`${repoDir}/snooty`],
+    logger: preppedLogger,
   });
   preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
 
@@ -26,6 +28,7 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
     command: 'npm',
     args: ['run', 'build'],
     options: { cwd: `${process.cwd()}/snooty` },
+    logger: preppedLogger,
   });
 
   preppedLogger(`Result of html: ${result.outputText}\n ${result.errorText}`);
@@ -34,6 +37,7 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   const lastResult = await executeCliCommand({
     command: 'cp',
     args: [`-r`, `${repoDir}/snooty/public`, `${repoDir}`],
+    logger: preppedLogger,
   });
   preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
 

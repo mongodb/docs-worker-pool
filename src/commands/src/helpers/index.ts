@@ -176,6 +176,7 @@ export async function executeCliCommand({
     });
 
     executedCommand.on('error', (err) => {
+      if (logger) logger(`error in cli command: ${err}`);
       reject(new ExecuteCommandError('The command failed', err));
     });
 
