@@ -532,6 +532,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
+    this.currJob.buildCommands = [];
     // this.prepBuildCommands();
     // this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
