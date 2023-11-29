@@ -12,6 +12,7 @@ export async function nextGenDeploy({ mutPrefix, gitBranch, hasConfigRedirects, 
     if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {
       // equivalent to: mut-redirects config/redirects -o public/.htaccess
       await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
+      preppedLogger(`COMMAND: mut-redirects config/redirects -o public/.htaccess`);
     }
 
     const bucket = process.env.BUCKET;
@@ -33,6 +34,8 @@ export async function nextGenDeploy({ mutPrefix, gitBranch, hasConfigRedirects, 
       };
     }
 
+    preppedLogger(`URL: ${url}\nBUCKET: ${bucket}\n`);
+
     // equivalent to: yes | mut-publish public ${BUCKET} --prefix=${MUT_PREFIX} --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
     const { outputText } = await executeAndPipeCommands(
       { command: 'yes' },
@@ -51,6 +54,9 @@ export async function nextGenDeploy({ mutPrefix, gitBranch, hasConfigRedirects, 
           cwd: `${process.cwd()}/snooty`,
         },
       }
+    );
+    preppedLogger(
+      `COMMAND: yes | mut-publish public ${bucket} --prefix=${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories ${process.cwd()}/snooty`
     );
     preppedLogger(`${outputText}\n Hosted at ${url}/${mutPrefix}`);
     return {
