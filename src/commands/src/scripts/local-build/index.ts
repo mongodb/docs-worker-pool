@@ -64,6 +64,7 @@ async function main() {
 
   // TODO: Make commit.data into job shape
   const job = commit.data;
+
   const { insertedId: jobId } = await collection.insertOne(job);
 
   await runDockerContainer({ ...env, jobId: jobId.toString() });

@@ -158,7 +158,6 @@ export async function getWorkerEnv(env: AutoBuilderEnv): Promise<Record<string, 
   );
 
   // TODO: Add JOB_UPDATES_QUEUE_URL. Can retrieve with https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cloudformation/command/DescribeStacksCommand/
-
   return {
     ...envRecord,
     SNOOTY_ENV: envShortToFullName(env),
