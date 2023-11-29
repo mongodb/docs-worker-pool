@@ -533,14 +533,14 @@ export abstract class JobHandler {
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
     this.currJob.buildCommands = [];
-    // this.prepBuildCommands();
-    // this._logger.save(this._currJob._id, 'Prepared Build commands');
+    this.prepBuildCommands();
+    this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
     this._logger.save(this._currJob._id, 'Prepared Next Gen build');
     await this._repoConnector.applyPatch(this.currJob);
     this._logger.save(this._currJob._id, 'Patch Applied');
-    // await this.downloadMakeFile();
-    // this._logger.save(this._currJob._id, 'Downloaded Makefile');
+    await this.downloadMakeFile();
+    this._logger.save(this._currJob._id, 'Downloaded Makefile');
     this._logger.save(this._currJob._id, `payload's project: ${this._currJob.payload.project}`);
     this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
     await prepareBuildAndGetDependencies(
@@ -560,6 +560,7 @@ export abstract class JobHandler {
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
     if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
+      await this._logger.save(this.currJob._id, `deploy commands: ${this.currJob.deployCommands.join(' ')}`);
       // extract search deploy job to time and test
       const searchCommandIdx = this.currJob.deployCommands.findIndex((c) => c.match(/^mut\-index/));
       let deployCmdsNoSearch = this.currJob.deployCommands;
