@@ -32,9 +32,9 @@ export function getArgs() {
   if (process.argv[branchNameIdx + 1].startsWith('-'))
     throw new Error(`Please provide a valid branch name value. Value provided: ${process.argv[branchNameIdx + 1]}`);
 
-  const repoOwner = process.argv[repoOwnerIdx];
-  const repoName = process.argv[repoNameIdx];
-  const branchName = branchNameIdx !== -1 ? process.argv[branchNameIdx] : 'master';
+  const repoOwner = process.argv[repoOwnerIdx + 1];
+  const repoName = process.argv[repoNameIdx + 1];
+  const branchName = branchNameIdx !== -1 ? process.argv[branchNameIdx + 1] : 'master';
 
   return {
     repoOwner,

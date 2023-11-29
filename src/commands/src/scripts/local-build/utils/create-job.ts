@@ -1,7 +1,5 @@
-import { RestEndpointMethodTypes } from '@octokit/rest';
-import { JobStatus } from '../../../../../entities/job';
-
-type CommitGetResponse = RestEndpointMethodTypes['git']['getCommit']['response']['data'];
+import { EnhancedJob, JobStatus } from '../../../../../entities/job';
+import { CommitGetResponse } from './types';
 
 interface Props {
   branchName: string;
@@ -10,12 +8,11 @@ interface Props {
   commit: CommitGetResponse;
 }
 
-export function prepGithubPushPayload({ branchName, repoName, repoOwner, commit }: Props) {
-  const { name, email } = commit.author;
+export function createLocalJob({ branchName, repoName, repoOwner, commit }: Props): Omit<EnhancedJob, '_id'> {
   return {
     title: `${repoOwner}/${repoName}`,
-    user: name,
-    email: email ?? '',
+    user: commit.author?.name ?? '',
+    email: commit.author?.email ?? '',
     status: JobStatus.inQueue,
     createdTime: new Date(),
     startTime: null,

@@ -151,7 +151,7 @@ function getCdnInvalidatorUrl(env: AutoBuilderEnv): string {
 
 export async function getWorkerEnv(env: AutoBuilderEnv): Promise<Record<string, string>> {
   const envRecord = await getSecureStrings(
-    env,
+    `/env/${env}/docs/worker_pool`,
     workerParamStrings,
     workerParamPathToEnvName,
     'workerParamPathToEnvName'
@@ -164,6 +164,8 @@ export async function getWorkerEnv(env: AutoBuilderEnv): Promise<Record<string, 
     SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
     CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
     MONGO_ATLAS_URL: `mongodb+srv://${envRecord.MONGO_ATLAS_USERNAME}:${envRecord.MONGO_ATLAS_PASSWORD}@${envRecord.MONGO_ATLAS_HOST}/admin?retryWrites=true`,
-    JOB_UPDATES_QUEUE_URL: 'TODO: Add this',
+    STAGE: env,
+    JOB_UPDATES_QUEUE_URL:
+      'https://sqs.us-east-2.amazonaws.com/216656347858/auto-builder-stack-enhancedApp-stg-DO-queuesJobUpdatesQueue60725415-lcqd4XXlmSJp', // temp hardcode
   };
 }
