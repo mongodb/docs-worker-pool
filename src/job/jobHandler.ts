@@ -297,22 +297,22 @@ export abstract class JobHandler {
   }
 
   private async exeBuildModified(): Promise<void> {
-    const stages = {
-      ['get-build-dependencies']: 'buildDepsExe', // ??
-      ['next-gen-parse']: 'parseExe',
-      ['persistence-module']: 'persistenceExe',
-      ['next-gen-html']: 'htmlExe',
-      ['oas-page-build']: 'oasPageBuildExe',
-    };
+    // const stages = {
+    //   ['get-build-dependencies']: 'buildDepsExe', // ??
+    //   ['next-gen-parse']: 'parseExe',
+    //   ['persistence-module']: 'persistenceExe',
+    //   ['next-gen-html']: 'htmlExe',
+    //   ['oas-page-build']: 'oasPageBuildExe',
+    // };
 
-    const commandMap: {
-      [K: string]: ({ job, preppedLogger }: { job: Job; preppedLogger: (message: string) => void }) => any;
-    } = {
-      ['next-gen-parse']: nextGenParse,
-      ['persistence-module']: persistenceModule,
-      // ['next-gen-html']: 'htmlExe',
-      ['oas-page-build']: oasPageBuild,
-    };
+    // const commandMap: {
+    //   [K: string]: ({ job, preppedLogger }: { job: Job; preppedLogger: (message: string) => void }) => any;
+    // } = {
+    //   ['next-gen-parse']: nextGenParse,
+    //   ['persistence-module']: persistenceModule,
+    //   // ['next-gen-html']: 'htmlExe',
+    //   ['oas-page-build']: oasPageBuild,
+    // };
 
     // get the prerequisite commands which should be all commands up to `rm -f makefile`
     const endOfPrerequisiteCommands = this.currJob.buildCommands.indexOf('rm -f makefile');
