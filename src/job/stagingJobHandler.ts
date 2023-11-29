@@ -97,12 +97,10 @@ export class StagingJobHandler extends JobHandler {
         });
         this.logger.save(this.currJob._id, `Now to deploy `);
         await nextGenDeploy({
-          // bucket: 'docs-atlas-dotcomstg',
           gitBranch: this.currJob.payload.branchName,
           mutPrefix: this.currJob.mutPrefix || '',
           hasConfigRedirects: hasConfigRedirects,
           preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-          // url: 'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
         });
         // resp = await this.deployGeneric();
       }

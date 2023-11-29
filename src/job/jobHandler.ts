@@ -534,8 +534,8 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Pulled Repo');
     // this.prepBuildCommands();
     // this._logger.save(this._currJob._id, 'Prepared Build commands');
-    // await this.prepNextGenBuild();
-    // this._logger.save(this._currJob._id, 'Prepared Next Gen build');
+    await this.prepNextGenBuild();
+    this._logger.save(this._currJob._id, 'Prepared Next Gen build');
     await this._repoConnector.applyPatch(this.currJob);
     this._logger.save(this._currJob._id, 'Patch Applied');
     // await this.downloadMakeFile();

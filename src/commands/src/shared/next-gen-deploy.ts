@@ -1,22 +1,13 @@
 import { executeAndPipeCommands, executeCliCommand } from '../helpers';
 
 interface NextGenDeployParams {
-  // bucket: string;
   mutPrefix: string;
   gitBranch: string;
   hasConfigRedirects: boolean;
-  // url: string;
   preppedLogger: (message: string) => void;
 }
 
-export async function nextGenDeploy({
-  // bucket,
-  mutPrefix,
-  gitBranch,
-  hasConfigRedirects,
-  // url,
-  preppedLogger,
-}: NextGenDeployParams) {
+export async function nextGenDeploy({ mutPrefix, gitBranch, hasConfigRedirects, preppedLogger }: NextGenDeployParams) {
   try {
     if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {
       // equivalent to: mut-redirects config/redirects -o public/.htaccess

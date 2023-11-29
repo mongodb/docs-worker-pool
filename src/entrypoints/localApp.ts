@@ -53,7 +53,7 @@ const fakeJob: Job = {
 };
 
 const preppedLogger = (message: string) => {
-  console.log('hey');
+  console.log(message);
 };
 
 async function localApp() {
@@ -111,25 +111,21 @@ async function localApp() {
   console.log(oasPageBuildRes);
   console.log('Begin next-gen-stage...');
 
-  // const { resultMessage, commands } = await nextGenStage({
-  //   job: fakeJob,
-  //   preppedLogger,
-  // });
-  // console.log(resultMessage);
+  await nextGenStage({
+    job: fakeJob,
+    preppedLogger,
+  });
   console.log('next-gen-stage complete');
 
   console.log('Begin next-gen-deploy...');
   const deployRes = await nextGenDeploy({
-    // bucket,
     hasConfigRedirects: hasRedirects,
     gitBranch: commitBranch,
     mutPrefix: mutPrefix || '',
-    // url: baseUrl,
     preppedLogger,
   });
   console.log(deployRes);
   console.log('next-gen-deploy complete');
-  // console.log('commands: ', commands);
   console.log('bundle Path: ', bundlePath);
 }
 
