@@ -120,11 +120,11 @@ async function localApp() {
 
   console.log('Begin next-gen-deploy...');
   const deployRes = await nextGenDeploy({
-    bucket,
+    // bucket,
     hasConfigRedirects: hasRedirects,
     gitBranch: commitBranch,
     mutPrefix: mutPrefix || '',
-    url: baseUrl,
+    // url: baseUrl,
     preppedLogger,
   });
   console.log(deployRes);

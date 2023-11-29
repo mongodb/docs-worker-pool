@@ -606,19 +606,6 @@ export abstract class JobHandler {
     try {
       await this.build();
       const resp = await this.deploy();
-      // const bucket = 'docs-atlas-dotcomstg';
-      // const resp = await nextGenDeploy({ bucket, mutPrefix: this._currJob.mutPrefix, gitBranch: this._currJob.payload.branchName, hasConfigRedirects: false, url:  })
-
-      // await nextGenStage({
-      //   job: this._currJob,
-      //   preppedLogger: (message: string) => this._logger.save(this._currJob._id, message),
-      // });
-      // const resp = {
-      //   // TODO:
-      //   status: 'success',
-      //   output: '',
-      //   error: '',
-      // };
       await this.update(resp);
       this.cleanup();
     } catch (error) {
