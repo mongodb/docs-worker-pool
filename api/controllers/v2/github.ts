@@ -11,14 +11,14 @@ import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handle
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { getMonorepoPaths } from '../../../src/monorepo';
 import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
-import { ReposBranchesDocument } from '../../../modules/persistence/src/services/metadata/associated_products';
+import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
   repoBranchesRepository: RepoBranchesRepository,
   prefix: string,
-  repoInfo: ReposBranchesDocument
+  repoInfo: ReposBranchesDocsetsDocument
 ): Promise<Omit<EnhancedJob, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(

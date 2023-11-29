@@ -210,7 +210,7 @@ export abstract class JobHandler {
           ? this.currJob.payload.directory
           : this.currJob.payload.repoName;
       await this._fileSystemServices.saveUrlAsFile(
-        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/monorepo-pub-branches/makefiles/Makefile.${makefileFileName}`,
+        `https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/Makefile.${makefileFileName}`,
         `repos/${getDirectory(this.currJob)}/Makefile`,
         {
           encoding: 'utf8',
@@ -375,6 +375,7 @@ export abstract class JobHandler {
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),
       GATSBY_SHOW_CHATBOT: this._config.get<string>('gatsbyUseChatbot'),
       GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: this._config.get<string>('gatsbyHideUnifiedFooterLocale'),
+      GATSBY_MARIAN_URL: this._config.get<string>('gatsbyMarianURL'),
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
