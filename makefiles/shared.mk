@@ -44,6 +44,7 @@ next-gen-parse:
 			exit 0; \
 		fi \
 	else \
+		echo "${REPO_DIR}" \
 		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG} ${NO_CACHING}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
