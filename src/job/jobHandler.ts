@@ -548,8 +548,8 @@ export abstract class JobHandler {
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
       (message: string) => this._logger.save(this._currJob._id, message)
     );
-    // await this.setEnvironmentVariables();
-    // this._logger.save(this._currJob._id, 'Prepared Environment variables');
+    await this.setEnvironmentVariables();
+    this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
   }
 

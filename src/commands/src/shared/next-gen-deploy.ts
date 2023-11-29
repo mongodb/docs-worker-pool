@@ -1,26 +1,45 @@
 import { executeAndPipeCommands, executeCliCommand } from '../helpers';
 
 interface NextGenDeployParams {
-  bucket: string;
+  // bucket: string;
   mutPrefix: string;
   gitBranch: string;
   hasConfigRedirects: boolean;
-  url: string;
+  // url: string;
   preppedLogger: (message: string) => void;
 }
 
 export async function nextGenDeploy({
-  bucket,
+  // bucket,
   mutPrefix,
   gitBranch,
   hasConfigRedirects,
-  url,
+  // url,
   preppedLogger,
 }: NextGenDeployParams) {
   try {
     if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {
       // equivalent to: mut-redirects config/redirects -o public/.htaccess
       await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
+    }
+
+    const bucket = process.env.BUCKET;
+    const url = process.env.URL;
+    if (!bucket) {
+      preppedLogger(`nextGenDeploy has failed. Variable for S3 bucket address was undefined.`);
+      return {
+        status: 'failure',
+        output: 'Failed in nextGenDeploy: No value present for S3 bucket',
+        error: 'No value present for S3 bucket.',
+      };
+    }
+    if (!url) {
+      preppedLogger(`nextGenDeploy has failed. Variable for URL address was undefined.`);
+      return {
+        status: 'failure',
+        output: 'Failed in nextGenDeploy: No value present for target url.',
+        error: 'No value present for URL.',
+      };
     }
 
     // equivalent to: yes | mut-publish public ${BUCKET} --prefix=${MUT_PREFIX} --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
