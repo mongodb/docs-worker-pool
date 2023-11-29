@@ -1,6 +1,6 @@
 import path from 'path';
-import { IJobRepoLogger } from '../../../services/logger';
-import { executeCliCommand, getRepoDir } from '../helpers';
+// import { IJobRepoLogger } from '../../../services/logger';
+import { executeCliCommand } from '../helpers';
 import { Job } from '../../../entities/job';
 
 export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLogger: (msg: string) => void }) {

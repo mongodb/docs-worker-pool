@@ -22,7 +22,7 @@ async function createEnvProdFile(
   logger: (message: string) => void,
   prefix = ''
 ) {
-  const prodFileName = `${repoDir}snooty/.env.production`;
+  const prodFileName = `${repoDir}/snooty/.env.production`;
   const prodDirName = repoDir;
   // const prodSnootyFileName = `${prodDirName}snooty/.env.production`;
 
