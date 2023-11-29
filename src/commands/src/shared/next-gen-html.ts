@@ -17,6 +17,12 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
     args: [`${repoDir}/.env.production`, `${repoDir}/snooty`],
   });
 
+  preppedLogger(`Now cd into snooty`);
+  await executeCliCommand({
+    command: 'cd',
+    args: [`snooty`],
+  });
+
   preppedLogger(`nextGenHtml cwd: npm run build ${process.cwd()}/snooty`);
 
   const result = await executeCliCommand({
