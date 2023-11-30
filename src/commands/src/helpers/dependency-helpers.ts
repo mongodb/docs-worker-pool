@@ -33,11 +33,36 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-export async function prepareBuildAndGetDependencies(repoName: string, projectName: string, baseUrl: string) {
+//TODO: define buildDependencies type
+async function downloadBuildDependencies(buildDependencies, repoDir: string) {
+  console.log('STARTING DOWNLOADING BUILD DEPENDENCIES');
+  console.log('buildDependencies:', buildDependencies);
+  const buildDir = buildDependencies.buildDirectory ?? repoDir;
+  console.log('buildDirectory', buildDir);
+  const dependencies = buildDependencies.dependencies;
+  dependencies.map((dependency) => {
+    console.log(`CURLING ${dependency.url} to ${buildDir}/${dependency.filename}`);
+    executeCliCommand({
+      command: 'curl',
+      args: [dependency.url, '-o', `${buildDir}/${dependency.filename}`],
+    });
+    console.log(`DONE CURLING ${dependency.url}`);
+  });
+  console.log('FINISHED DOWNLOADING BUILD DEPENDENCIES');
+}
+
+export async function prepareBuildAndGetDependencies(
+  repoName: string,
+  projectName: string,
+  baseUrl: string,
+  buildDependencies
+) {
   // before we get build dependencies, we need to clone the repo
   await cloneRepo(repoName);
 
   const repoDir = getRepoDir(repoName);
+
+  downloadBuildDependencies(buildDependencies, repoDir);
 
   // doing these in parallel
   const commandPromises = [
