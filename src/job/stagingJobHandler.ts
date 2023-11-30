@@ -82,11 +82,12 @@ export class StagingJobHandler extends JobHandler {
     try {
       let resp: CommandExecutorResponse;
       if (this.currJob.payload.repoName === MONOREPO_NAME) {
-        this.logger.save(this.currJob._id, `ITS MONOREPO, let's stage!! All the world's a stage.`);
-        resp = await nextGenStage({
-          job: this.currJob,
-          preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-        });
+        // this.logger.save(this.currJob._id, `ITS MONOREPO, let's stage!! All the world's a stage.`);
+        // resp = await nextGenStage({
+        //   job: this.currJob,
+        //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
+        // });
+        resp = await this.deployGeneric();
       } else {
         // TODO: this should be normal deployGeneric
         // this.logger.save(this.currJob._id, `ITS fake monorepo, let's stage!! All the world's a stage.`);
