@@ -13,7 +13,7 @@
       "localRoot": "${workspaceFolder}",
       "remoteRoot": "/home/docsworker-xlarge",
       "autoAttachChildProcesses": false,
-      "protocol": "inspector"    
+      "protocol": "inspector"
     }
   ]
 }
