@@ -1,46 +1,62 @@
+import { Job } from '../../../entities/job';
 import { executeCliCommand } from '../helpers';
 
 const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
-  repoDir: string;
-  mutPrefix: string;
-  projectName: string;
-  bucket: string;
-  url: string;
-  patchId?: string;
-  commitBranch: string;
-  commitHash: string;
+  job: Job;
+  preppedLogger: (message: string) => void;
 }
 
-export async function nextGenStage({
-  mutPrefix,
-  projectName,
-  bucket,
-  url,
-  patchId,
-  commitBranch,
-  commitHash,
-}: StageParams) {
-  let hostedAtUrl = `${url}/${mutPrefix}/${DOCS_WORKER_USER}/${commitBranch}/`;
-  let prefix = mutPrefix;
+export async function nextGenStage({ job, preppedLogger }: StageParams) {
+  // TODO: replace with a process to get this url??
+  const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
+  // TODO: replace with process to access bucket
+  const bucket = 'docs-atlas-dotcomstg';
+  const { mutPrefix, branchName, patch, project, newHead } = job.payload;
+
+  // TODO: Figure out correct hostedAtUrl
+  let hostedAtUrl = `${baseUrl}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;
+  // TODO: Look further into all possible needs for prefix...
+  let prefix = mutPrefix || project;
 
   const commandArgs = ['public', bucket, '--stage'];
 
-  if (patchId && projectName === mutPrefix) {
-    prefix = `${commitHash}/${patchId}/${mutPrefix}`;
-    hostedAtUrl = `${url}/${commitHash}/${patchId}/${mutPrefix}/${DOCS_WORKER_USER}/${commitBranch}/`;
+  if (patch && newHead && project === mutPrefix) {
+    prefix = `${newHead}/${patch}/${mutPrefix}`;
+    hostedAtUrl = `${baseUrl}/${newHead}/${patch}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;
   }
 
-  commandArgs.push(`--prefix="${prefix}"`);
+  commandArgs.push(`--prefix=${prefix}`);
 
-  const { outputText } = await executeCliCommand({
-    command: 'mut-publish',
-    args: commandArgs,
-    options: {
-      cwd: `${process.cwd()}/snooty`,
-    },
-  });
+  preppedLogger(`MUT PUBLISH command args: ${commandArgs}`);
 
-  const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}`;
-  return resultMessage;
+  try {
+    const { outputText } = await executeCliCommand({
+      command: 'mut-publish',
+      args: commandArgs,
+      options: {
+        cwd: `${process.cwd()}/snooty`,
+      },
+    });
+
+    const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
+    preppedLogger(`OUTPUT of mut publish: ${resultMessage}`);
+
+    // return {
+    //   resultMessage,
+    //   commands: commandArgs,
+    // };
+    return {
+      status: 'inProgress',
+      output: '', // TODO: better values
+      error: '',
+    };
+  } catch (error) {
+    preppedLogger(`Failed in nextGenStage.`);
+    return {
+      status: 'failure', // Is this correct??
+      output: '', // TODO: better values
+      error: '',
+    };
+  }
 }

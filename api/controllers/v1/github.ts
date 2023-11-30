@@ -6,6 +6,7 @@ import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRe
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
+import { PushEvent } from '@octokit/webhooks-types';
 
 async function prepGithubPushPayload(
   githubEvent: any,
@@ -77,7 +78,27 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
       body: errMsg,
     };
   }
-  const body = JSON.parse(event.body);
+  if (!event.body) {
+    const err = 'Trigger build does not have a body in event payload';
+    consoleLogger.error('TriggerBuildError', err);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+
+  let body: PushEvent;
+  try {
+    body = JSON.parse(event.body) as PushEvent;
+  } catch (e) {
+    console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
+    return {
+      statusCode: 502,
+      headers: { 'Content-Type': 'text/plain' },
+      body: ' ERROR! Could not parse event.body',
+    };
+  }
 
   if (body.deleted) {
     return {

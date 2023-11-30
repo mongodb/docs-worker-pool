@@ -136,7 +136,7 @@ export class ProductionJobHandler extends JobHandler {
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob?.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make get-build-dependencies';
-      this.currJob.buildCommands.push('make next-gen-parse');
+      this.currJob.buildCommands.push('make next-gen-parse NO_CACHING=--no-caching');
       this.currJob.buildCommands.push(`make persistence-module JOB_ID=${this.currJob._id}`);
       this.currJob.buildCommands.push('make next-gen-html');
       this.currJob.buildCommands.push(`make oas-page-build MUT_PREFIX=${this.currJob.payload.mutPrefix}`);
@@ -189,6 +189,7 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   async deploy(): Promise<CommandExecutorResponse> {
+    this.logger.save(this.currJob._id, `ITS MONOREPO, but in prodJobHandler?!! All the world's sadly not a stage.`);
     const resp = await this.deployGeneric();
     try {
       if (resp?.output) {

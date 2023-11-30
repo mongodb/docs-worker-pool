@@ -64,6 +64,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
       try {
         switch (jobStatus) {
           case JobStatus[JobStatus.inProgress]:
+          case JobStatus[JobStatus.inQueue]:
             await NotifyBuildProgress(jobId);
             break;
           case JobStatus[JobStatus.timedOut]:
@@ -72,7 +73,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             await notifyBuildSummary(jobId);
             break;
           default:
-            consoleLogger.error(jobId, 'Invalid status');
+            consoleLogger.error(jobId, `Invalid status: ${jobStatus}`);
             break;
         }
       } catch (err) {

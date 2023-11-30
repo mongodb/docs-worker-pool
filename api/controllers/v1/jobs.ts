@@ -90,7 +90,7 @@ export const HandleJobs = async (event: any = {}): Promise<any> => {
             await SubmitArchiveJob(jobId);
             break;
           default:
-            consoleLogger.error(jobId, 'Invalid status');
+            consoleLogger.error(jobId, `Invalid status: ${jobStatus}`);
             break;
         }
       } catch (err) {

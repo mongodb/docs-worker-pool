@@ -26,6 +26,7 @@ interface CliCommandParams {
   options?: SpawnOptions;
   writeStream?: fs.WriteStream;
   writeTarget?: Writable;
+  logger?: (message: string) => void;
 }
 
 export interface CliCommandResponse {
@@ -157,6 +158,7 @@ export async function executeCliCommand({
   args = [],
   options = {},
   writeStream,
+  logger,
 }: CliCommandParams): Promise<CliCommandResponse> {
   return new Promise((resolve, reject) => {
     const outputText: string[] = [];
@@ -174,6 +176,7 @@ export async function executeCliCommand({
     });
 
     executedCommand.on('error', (err) => {
+      if (logger) logger(`error in cli command: ${err}`);
       reject(new ExecuteCommandError('The command failed', err));
     });
 
@@ -181,6 +184,11 @@ export async function executeCliCommand({
       if (writeStream) writeStream.end();
 
       if (exitCode !== 0) {
+        if (logger) {
+          logger(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
+          logger('Arguments provided: ' + args);
+          logger('Options provided: ' + options);
+        }
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
@@ -193,7 +201,12 @@ export async function executeCliCommand({
           console.error(errorText.join(''));
         }
 
-        reject(new ExecuteCommandError('The command failed', exitCode));
+        reject(
+          new ExecuteCommandError(
+            `The command failed.\n${errorText.join('')}\n${outputText.join('')}\nError Code: ${exitCode}`,
+            exitCode
+          )
+        );
         return;
       }
 
@@ -242,38 +255,51 @@ export async function readFileAndExec({
   return response;
 }
 
-export async function getPatchId(repoDir: string): Promise<string | undefined> {
+export async function getPatchId(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
   const filePath = path.join(repoDir, 'myPatch.patch');
   try {
     const { outputText: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
 
     return gitPatchId.slice(0, 7);
   } catch (err) {
-    console.warn('No patch ID found');
+    console.warn('No patch ID found: ', +filePath);
+    logger('No patch ID found: ' + filePath + ' ' + err);
   }
 }
 
-export async function getCommitBranch(repoDir: string): Promise<string> {
-  // equivalent to git rev-parse --abbrev-ref HEAD
-  const response = await executeCliCommand({
-    command: 'git',
-    args: ['rev-parse', '--abbrev-ref', 'HEAD'],
-    options: { cwd: repoDir },
-  });
+export async function getCommitBranch(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+  try {
+    // equivalent to git rev-parse --abbrev-ref HEAD
+    const response = await executeCliCommand({
+      command: 'git',
+      args: ['rev-parse', '--abbrev-ref', 'HEAD'],
+      options: { cwd: repoDir },
+    });
 
-  return response.outputText;
+    return response.outputText;
+  } catch (err) {
+    logger(`commit branch fail: ${err}`);
+    throw Error;
+  }
 }
 
-export async function getCommitHash(repoDir: string): Promise<string> {
-  // equivalent to git rev-parse --short HEAD
-  const response = await executeCliCommand({
-    command: 'git',
-    args: ['rev-parse', '--short', 'HEAD'],
-    options: { cwd: repoDir },
-  });
+export async function getCommitHash(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+  try {
+    // equivalent to git rev-parse --short HEAD
+    const response = await executeCliCommand({
+      command: 'git',
+      args: ['rev-parse', '--short', 'HEAD'],
+      options: { cwd: repoDir },
+    });
+    console.log('commit hash ', response);
 
-  return response.outputText;
+    return response.outputText;
+  } catch (err) {
+    logger(`commit hash fail: ${err}`);
+    throw Error;
+  }
 }
 
 export const checkIfPatched = async (repoDir: string) => !existsAsync(path.join(repoDir, 'myPatch.patch'));
-export const getRepoDir = (repoName: string) => path.join(process.cwd(), `repos/${repoName}`);
+export const getRepoDir = (repoName: string, directory?: string) =>
+  path.join(process.cwd(), `/repos/${repoName}${directory ? `/${directory}` : ''}`);
