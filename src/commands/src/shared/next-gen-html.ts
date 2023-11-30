@@ -7,21 +7,23 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   // const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   // const reposDir = path.join(process.cwd(), `/repos`);
 
-  preppedLogger(`Now running first cp command: cp ${process.cwd()}/.env.production ${process.cwd()}/snooty`);
-  const firstResult = await executeCliCommand({
-    command: 'cp',
-    args: [`${process.cwd()}/.env.production`, `${process.cwd()}/snooty`],
-    logger: preppedLogger,
-  });
-  preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
+  // preppedLogger(`Now running first cp command: cp ${process.cwd()}/.env.production ${process.cwd()}/snooty`);
+  // const firstResult = await executeCliCommand({
+  //   command: 'cp',
+  //   args: [`${process.cwd()}/.env.production`, `${process.cwd()}/snooty`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
 
-  preppedLogger(`Now cd into snooty`);
-  const secondResult = await executeCliCommand({
-    command: 'cd',
-    args: [`${process.cwd()}/snooty`],
-    logger: preppedLogger,
-  });
-  preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
+  // preppedLogger(`Now cd into snooty`);
+  // const secondResult = await executeCliCommand({
+  //   command: 'cd',
+  //   args: [`${process.cwd()}/snooty`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
+
+  preppedLogger(`Here is the JOB!!! : ${job}`);
 
   preppedLogger(`nextGenHtml cwd: npm run build ${process.cwd()}/snooty`);
 
@@ -34,13 +36,13 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
 
   preppedLogger(`Result of html: ${result.outputText}\n ${result.errorText}`);
 
-  preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${process.cwd()}`);
-  const lastResult = await executeCliCommand({
-    command: 'cp',
-    args: [`-r`, `${process.cwd()}/snooty/public`, `${process.cwd()}`],
-    logger: preppedLogger,
-  });
-  preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
+  // preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${process.cwd()}`);
+  // const lastResult = await executeCliCommand({
+  //   command: 'cp',
+  //   args: [`-r`, `${process.cwd()}/snooty/public`, `${process.cwd()}`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
 
   return result;
 }

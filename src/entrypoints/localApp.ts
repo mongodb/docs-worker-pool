@@ -60,7 +60,7 @@ async function localApp() {
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
   const bucket = 'docs-atlas-dotcomstg';
 
-  const { repoName, project, mutPrefix, directory } = fakePayload;
+  const { repoOwner, repoName, project, mutPrefix, directory } = fakePayload;
 
   // const repoName = 'docs-java';
   // const project = 'java';
@@ -74,6 +74,7 @@ async function localApp() {
   // const mutPrefix = 'docs-qa/atlas'
 
   const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await prepareBuildAndGetDependencies(
+    repoOwner,
     repoName,
     project,
     baseUrl,
@@ -114,6 +115,8 @@ async function localApp() {
   await nextGenStage({
     job: fakeJob,
     preppedLogger,
+    bucket,
+    url: baseUrl,
   });
   console.log('next-gen-stage complete');
 

@@ -168,10 +168,12 @@ export async function executeCliCommand({
 
     if (writeStream) executedCommand.stdout?.pipe(writeStream);
     executedCommand.stdout?.on('data', (data: Buffer) => {
+      console.log(data.toString());
       outputText.push(data.toString());
     });
 
     executedCommand.stderr?.on('data', (data: Buffer) => {
+      console.log(data.toString());
       errorText.push(data.toString());
     });
 

@@ -5,13 +5,15 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Docker: Attach to Autobuilder",
       "type": "node",
-      "request": "launch",
-      "name": "Launch Program",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/modules/oas-page-builder/tests/unit/services/pageBuilder.test.ts",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/build/**/*.js"]
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/home/docsworker-xlarge",
+      "autoAttachChildProcesses": false,
+      "protocol": "inspector"    
     }
   ]
 }

@@ -6,12 +6,12 @@ import { promisify } from 'util';
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
-async function cloneRepo(repoName: string) {
+async function cloneRepo(repoOwner: string, repoName: string) {
   const botName = process.env.GITHUB_BOT_USERNAME;
   const botPassword = process.env.GITHUB_BOT_PASSWORD;
   await executeCliCommand({
     command: 'git',
-    args: ['clone', `https://${botName}:${botPassword}@github.com/10gen/${repoName}`],
+    args: ['clone', `https://${botName}:${botPassword}@github.com/${repoOwner}/${repoName}`],
     options: { cwd: `${process.cwd()}/repos` },
   });
 }
@@ -48,6 +48,7 @@ async function createEnvProdFile(
 }
 
 export async function prepareBuildAndGetDependencies(
+  repoOwner: string,
   repoName: string,
   projectName: string,
   baseUrl: string,
@@ -55,7 +56,7 @@ export async function prepareBuildAndGetDependencies(
   directory?: string
 ) {
   // before we get build dependencies, we need to clone the repo
-  // await cloneRepo(repoName);
+  await cloneRepo(repoOwner, repoName);
   preppedLogger(`in Prepared build and get deps!!`);
 
   const repoDir = getRepoDir(repoName, directory);

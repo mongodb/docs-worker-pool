@@ -5,25 +5,28 @@ const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
   job: Job;
   preppedLogger: (message: string) => void;
+  bucket: string;
+  url: string;
 }
 
-export async function nextGenStage({ job, preppedLogger }: StageParams) {
+export async function nextGenStage({ job, preppedLogger, bucket, url }: StageParams) {
   // TODO: replace with a process to get this url??
-  const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
+  // const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
   // TODO: replace with process to access bucket
-  const bucket = 'docs-atlas-dotcomstg';
+  // const bucket = 'docs-atlas-dotcomstg';
+  // const bucket = job.payload.
   const { mutPrefix, branchName, patch, project, newHead } = job.payload;
 
-  // TODO: Figure out correct hostedAtUrl
-  let hostedAtUrl = `${baseUrl}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;
-  // TODO: Look further into all possible needs for prefix...
   let prefix = mutPrefix || project;
+  // TODO: Figure out correct hostedAtUrl
+  let hostedAtUrl = `${url}/${prefix}/${DOCS_WORKER_USER}/${branchName}/`;
+  // TODO: Look further into all possible needs for prefix...
 
   const commandArgs = ['public', bucket, '--stage'];
 
   if (patch && newHead && project === mutPrefix) {
     prefix = `${newHead}/${patch}/${mutPrefix}`;
-    hostedAtUrl = `${baseUrl}/${newHead}/${patch}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;
+    hostedAtUrl = `${url}/${newHead}/${patch}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;
   }
 
   commandArgs.push(`--prefix=${prefix}`);

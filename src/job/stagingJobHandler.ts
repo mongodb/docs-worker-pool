@@ -70,10 +70,11 @@ export class StagingJobHandler extends JobHandler {
     }
   }
 
-  async build() {
+  async build(): Promise<boolean> {
     const preppedLogger = (msg: string) => this.logger.save(this.currJob._id, msg);
 
     await prepareBuildAndGetDependencies(
+      this.currJob.payload.repoOwner,
       this.currJob.payload.repoName,
       this.currJob.payload.project,
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
@@ -94,6 +95,7 @@ export class StagingJobHandler extends JobHandler {
     this.logger.save(this.currJob._id, 'OAS Page Build Complete');
     await nextGenHtml({ job: this.currJob, preppedLogger });
     this.logger.save(this.currJob._id, 'NextGenHtml Finished');
+
     return true;
   }
 
@@ -115,14 +117,13 @@ export class StagingJobHandler extends JobHandler {
   }
   async deploy(): Promise<CommandExecutorResponse> {
     try {
-      let resp: CommandExecutorResponse;
       if (this.currJob.payload.repoName === MONOREPO_NAME) {
         // this.logger.save(this.currJob._id, `ITS MONOREPO, let's stage!! All the world's a stage.`);
         // resp = await nextGenStage({
         //   job: this.currJob,
         //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
         // });
-        resp = await this.deployGeneric();
+        // resp = await this.deployGeneric();
       } else {
         // TODO: this should be normal deployGeneric
         // this.logger.save(this.currJob._id, `ITS fake monorepo, let's stage!! All the world's a stage.`);
@@ -139,10 +140,24 @@ export class StagingJobHandler extends JobHandler {
         //   hasConfigRedirects: hasConfigRedirects,
         //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
         // });
-        resp = await this.deployGeneric();
+        // resp = await this.deployGeneric();
       }
+      const preppedLogger = (message: string) => this.logger.save(this.currJob._id, message);
+      const repo_info = await this._docsetsRepo.getRepo(this.currJob.payload.repoName, this.currJob.payload.directory);
+      if (!repo_info) {
+        preppedLogger(`repo info not found`);
+      }
+      console.log('repo info ', repo_info);
+      const environment = process.env.SNOOTY_ENV;
+      console.log('environment ', environment);
+      const bucket = repo_info.bucket.dotcomstg;
+      const url = repo_info.url.dotcomstg;
+      console.log('BUCKET: ', bucket);
+      console.log('URL: ', url);
+
+      const resp = await nextGenStage({ job: this.currJob, preppedLogger, bucket, url });
       const summary = '';
-      if (resp?.output?.includes('Summary')) {
+      if (resp.output?.includes('Summary')) {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));
       }
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);

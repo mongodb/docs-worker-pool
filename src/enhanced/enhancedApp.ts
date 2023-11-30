@@ -42,7 +42,7 @@ async function cleanupJob(): Promise<never> {
  * the `finally` block is always called after the try, even if an exception is thrown. If an exception is thrown, the cleanUp job is called,
  * and the exception is then thrown after.
  */
-async function handleJobAndCleanUp(jobId: string, db: mongodb.Db) {
+export async function handleJobAndCleanUp(jobId: string, db: mongodb.Db) {
   try {
     await handleJob(jobId, db);
   } finally {
