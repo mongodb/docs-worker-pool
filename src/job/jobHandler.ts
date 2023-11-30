@@ -584,7 +584,7 @@ export abstract class JobHandler {
       this.currJob.payload.repoName,
       this._currJob.payload.project,
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      (message: string) => this._logger.save(this._currJob._id, message)
+      ''
     );
     await this.setEnvironmentVariables();
     this._logger.save(this._currJob._id, 'Prepared Environment variables');

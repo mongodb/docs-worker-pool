@@ -81,10 +81,10 @@ async function localApp() {
 
   console.log('snooty build complete');
 
-  console.log('Begin persistence-module');
-  const persistenceModuleRes = await persistenceModule({ job: fakeJob, preppedLogger });
-  console.log(persistenceModuleRes);
-  console.log('persistence-module complete');
+  // console.log('Begin persistence-module');
+  // const persistenceModuleRes = await persistenceModule({ job: fakeJob, preppedLogger });
+  // console.log(persistenceModuleRes);
+  // console.log('persistence-module complete');
 
   console.log('Begin next-gen-html...');
 

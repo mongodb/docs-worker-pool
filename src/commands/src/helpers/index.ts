@@ -255,7 +255,7 @@ export async function readFileAndExec({
   return response;
 }
 
-export async function getPatchId(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+export async function getPatchId(repoDir: string, logger?: (msg: string) => void): Promise<string | undefined> {
   const filePath = path.join(repoDir, 'myPatch.patch');
   try {
     const { outputText: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
@@ -263,11 +263,11 @@ export async function getPatchId(repoDir: string, logger: (msg: string) => void)
     return gitPatchId.slice(0, 7);
   } catch (err) {
     console.warn('No patch ID found: ', +filePath);
-    logger('No patch ID found: ' + filePath + ' ' + err);
+    logger?.('No patch ID found: ' + filePath + ' ' + err);
   }
 }
 
-export async function getCommitBranch(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+export async function getCommitBranch(repoDir: string, logger?: (msg: string) => void): Promise<string | undefined> {
   try {
     // equivalent to git rev-parse --abbrev-ref HEAD
     const response = await executeCliCommand({
@@ -278,12 +278,12 @@ export async function getCommitBranch(repoDir: string, logger: (msg: string) => 
 
     return response.outputText;
   } catch (err) {
-    logger(`commit branch fail: ${err}`);
+    logger?.(`commit branch fail: ${err}`);
     throw Error;
   }
 }
 
-export async function getCommitHash(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+export async function getCommitHash(repoDir: string, logger?: (msg: string) => void): Promise<string | undefined> {
   try {
     // equivalent to git rev-parse --short HEAD
     const response = await executeCliCommand({
@@ -295,7 +295,7 @@ export async function getCommitHash(repoDir: string, logger: (msg: string) => vo
 
     return response.outputText;
   } catch (err) {
-    logger(`commit hash fail: ${err}`);
+    logger?.(`commit hash fail: ${err}`);
     throw Error;
   }
 }
