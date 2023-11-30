@@ -165,6 +165,8 @@ export async function getWorkerEnv(env: AutoBuilderEnv): Promise<Record<string, 
     CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
     MONGO_ATLAS_URL: `mongodb+srv://${envRecord.MONGO_ATLAS_USERNAME}:${envRecord.MONGO_ATLAS_PASSWORD}@${envRecord.MONGO_ATLAS_HOST}/admin?retryWrites=true`,
     STAGE: env,
+    MONGO_TIMEOUT_S: '3000',
+    IS_LOCAL: 'true',
     JOB_UPDATES_QUEUE_URL:
       'https://sqs.us-east-2.amazonaws.com/216656347858/auto-builder-stack-enhancedApp-stg-DO-queuesJobUpdatesQueue60725415-lcqd4XXlmSJp', // temp hardcode
   };

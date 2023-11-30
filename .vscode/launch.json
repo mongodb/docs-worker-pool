@@ -11,8 +11,8 @@
       "port": 9229,
       "address": "localhost",
       "localRoot": "${workspaceFolder}",
-      "remoteRoot": "/app",
-      "autoAttachChildProcesses": true,
+      "remoteRoot": "/home/docsworker-xlarge",
+      "autoAttachChildProcesses": false,
       "protocol": "inspector"    
     }
   ]

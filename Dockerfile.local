@@ -1,4 +1,5 @@
-FROM arm64v8/ubuntu:20.04 as initial
+# FROM arm64v8/ubuntu:20.04 as initial
+FROM ubuntu:20.04 as initial
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ARG SNOOTY_PARSER_VERSION=0.15.0
@@ -7,7 +8,10 @@ ARG MUT_VERSION=0.10.7
 ARG REDOC_CLI_VERSION=1.2.2
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
+ARG WORK_DIRECTORY=/home/docsworker-xlarge
+
 ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR ${WORK_DIRECTORY}
 
 # helper libraries for docs builds
 RUN apt-get update && apt-get install -y vim git unzip zip
@@ -20,7 +24,6 @@ RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 RUN apt-get install --yes python3-pip libxml2-dev libxslt-dev python-dev pkg-config
 
-WORKDIR /app
 
 RUN python3 -m pip install poetry
 
@@ -43,18 +46,20 @@ RUN curl  -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/ta
     && unzip redoc.zip \
     && mv redoc-${REDOC_CLI_VERSION} redoc/ 
 
-ENV PATH="${PATH}:/opt/snooty:/opt/mut:/app/.local/bin"
+ENV PATH="${PATH}:/opt/snooty:/opt/mut:/${WORK_DIRECTORY}/.local/bin"
 
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
-RUN chmod 755 -R /app
-RUN chown -Rv docsworker-xlarge /app
+RUN chmod 755 -R ${WORK_DIRECTORY}
+RUN chown -Rv docsworker-xlarge ${WORK_DIRECTORY}
 USER docsworker-xlarge
 
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        
+
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 FROM initial as persistence
 
@@ -88,7 +93,7 @@ RUN cd ./modules/oas-page-builder \
 
 FROM oas as root
 
-COPY --from=persistence --chown=docsworker-xlarge app/modules/persistence/ ./modules/persistence
+COPY --from=persistence --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/persistence/ ./modules/persistence
 
 # Root project build
 COPY package*.json ./
@@ -101,6 +106,9 @@ COPY api api/
 COPY src src/
 
 RUN npm run build:esbuild
+
+ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/dist/index.js
+ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/dist/index.js
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 RUN mkdir repos && chmod 755 repos

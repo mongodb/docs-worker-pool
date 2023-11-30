@@ -436,6 +436,10 @@ export abstract class JobHandler {
       `rm -f makefile`,
       `make html`,
     ];
+
+    if (process.env.IS_LOCAL === 'true') {
+      this.currJob.buildCommands.shift();
+    }
   }
 
   protected async setEnvironmentVariables(): Promise<void> {

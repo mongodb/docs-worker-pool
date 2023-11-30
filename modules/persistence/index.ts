@@ -59,6 +59,8 @@ const app = async (path: string, githubUser: string, jobId: string) => {
   }
 };
 
+console.log(argv);
+
 app(argv['path'], argv['githubUser'], argv['jobId']).catch(() => {
   console.error('Persistence Module Failure. Ending build.');
   process.exit(1);

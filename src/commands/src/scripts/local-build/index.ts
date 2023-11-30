@@ -58,7 +58,9 @@ async function main() {
   const dbClient = new MongoClient(env.MONGO_ATLAS_URL);
 
   console.log('Building docker container....');
-  const [commit, connectedDbClient] = await Promise.all([commitPromise, dbClient.connect(), buildPromise]);
+  const [commit, connectedDbClient, buildResult] = await Promise.all([commitPromise, dbClient.connect(), buildPromise]);
+  console.log(buildResult.errorText);
+  console.log(buildResult.outputText);
   console.log('build complete');
   const db = connectedDbClient.db(env.DB_NAME);
   const collection = db.collection(env.JOB_QUEUE_COL_NAME);

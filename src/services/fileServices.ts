@@ -50,13 +50,18 @@ export class FileSystemServices implements IFileSystemServices {
   }
 
   async saveUrlAsFile(url: string, path: string, options: any): Promise<boolean> {
-    const resp = await this.download(url);
-    if (resp?.status == 200 && resp?.data) {
-      this.writeToFile(path, resp.data, options);
-    } else {
-      throw new InvalidJobError(`Unable to download file ${url} error: ${resp?.status}`);
+    try {
+      const resp = await this.download(url);
+      if (resp?.status == 200 && resp?.data) {
+        this.writeToFile(path, resp.data, options);
+      } else {
+        throw new InvalidJobError(`Unable to download file ${url} error: ${resp?.status}`);
+      }
+      return true;
+    } catch (error) {
+      console.log('Error');
+      throw error;
     }
-    return true;
   }
 
   getFilesInDirectory(base: string, ext: string, files: any = null, result: any = null): Array<string> {

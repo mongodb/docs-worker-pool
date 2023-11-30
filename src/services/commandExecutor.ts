@@ -52,8 +52,15 @@ export class ShellCommandExecutor implements ICommandExecutor {
       };
       if (cwd) {
         options.cwd = cwd;
+        const cat = await exec('cat Makefile', options);
+        console.log(cat.stdout.trim());
       }
+
+      const res = await exec('ls', options);
+      console.log(res.stdout.trim());
       const { stdout, stderr } = await exec(commands.join(' && '), options);
+
+      console.log(stdout);
 
       resp.output = stdout.trim();
       resp.error = stderr;
