@@ -255,38 +255,49 @@ export async function readFileAndExec({
   return response;
 }
 
-export async function getPatchId(repoDir: string): Promise<string | undefined> {
+export async function getPatchId(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
   const filePath = path.join(repoDir, 'myPatch.patch');
   try {
     const { outputText: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
 
     return gitPatchId.slice(0, 7);
   } catch (err) {
-    console.warn('No patch ID found');
+    console.warn('No patch ID found: ', +filePath);
+    logger('No patch ID found: ' + filePath + ' ' + err);
   }
 }
 
-export async function getCommitBranch(repoDir: string): Promise<string> {
-  // equivalent to git rev-parse --abbrev-ref HEAD
-  const response = await executeCliCommand({
-    command: 'git',
-    args: ['rev-parse', '--abbrev-ref', 'HEAD'],
-    options: { cwd: repoDir },
-  });
+export async function getCommitBranch(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+  try {
+    // equivalent to git rev-parse --abbrev-ref HEAD
+    const response = await executeCliCommand({
+      command: 'git',
+      args: ['rev-parse', '--abbrev-ref', 'HEAD'],
+      options: { cwd: repoDir },
+    });
 
-  return response.outputText;
+    return response.outputText;
+  } catch (err) {
+    logger(`commit branch fail: ${err}`);
+    throw Error;
+  }
 }
 
-export async function getCommitHash(repoDir: string): Promise<string> {
-  // equivalent to git rev-parse --short HEAD
-  const response = await executeCliCommand({
-    command: 'git',
-    args: ['rev-parse', '--short', 'HEAD'],
-    options: { cwd: repoDir },
-  });
-  console.log('commit hash ', response);
+export async function getCommitHash(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+  try {
+    // equivalent to git rev-parse --short HEAD
+    const response = await executeCliCommand({
+      command: 'git',
+      args: ['rev-parse', '--short', 'HEAD'],
+      options: { cwd: repoDir },
+    });
+    console.log('commit hash ', response);
 
-  return response.outputText;
+    return response.outputText;
+  } catch (err) {
+    logger(`commit hash fail: ${err}`);
+    throw Error;
+  }
 }
 
 export const checkIfPatched = async (repoDir: string) => !existsAsync(path.join(repoDir, 'myPatch.patch'));

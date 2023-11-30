@@ -42,6 +42,7 @@ async function createEnvProdFile(
     );
   } catch (e) {
     console.error(`ERROR! Could not write to .env.production`);
+    logger(`ERROR! Could not write to .env.production: ${e}`);
     throw e;
   }
 }
@@ -62,9 +63,9 @@ export async function prepareBuildAndGetDependencies(
 
   // doing these in parallel
   const commandPromises = [
-    getCommitHash(repoDir),
-    getCommitBranch(repoDir),
-    getPatchId(repoDir),
+    getCommitHash(repoDir, preppedLogger),
+    getCommitBranch(repoDir, preppedLogger),
+    getPatchId(repoDir, preppedLogger),
     existsAsync(path.join(process.cwd(), 'config/redirects')),
     createEnvProdFile(repoDir, projectName, baseUrl, preppedLogger),
   ];
@@ -83,7 +84,7 @@ export async function prepareBuildAndGetDependencies(
     };
   } catch (error) {
     console.error('ERROR! Could not get build dependencies');
-    preppedLogger(`error, could not get build deps`);
+    preppedLogger(`error, could not get build deps: ${error}`);
     throw error;
   }
 }
