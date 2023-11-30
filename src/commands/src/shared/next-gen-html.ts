@@ -5,12 +5,12 @@ import { Job } from '../../../entities/job';
 
 export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLogger: (msg: string) => void }) {
   // const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
-  const reposDir = path.join(process.cwd(), `/repos`);
+  // const reposDir = path.join(process.cwd(), `/repos`);
 
-  preppedLogger(`Now running first cp command: cp ${reposDir}/.env.production ${reposDir}/snooty`);
+  preppedLogger(`Now running first cp command: cp ${process.cwd()}/.env.production ${process.cwd()}/snooty`);
   const firstResult = await executeCliCommand({
     command: 'cp',
-    args: [`${reposDir}/.env.production`, `${reposDir}/snooty`],
+    args: [`${process.cwd()}/.env.production`, `${process.cwd()}/snooty`],
     logger: preppedLogger,
   });
   preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
@@ -18,7 +18,7 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   preppedLogger(`Now cd into snooty`);
   const secondResult = await executeCliCommand({
     command: 'cd',
-    args: [`${reposDir}/snooty`],
+    args: [`${process.cwd()}/snooty`],
     logger: preppedLogger,
   });
   preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
@@ -28,16 +28,16 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   const result = await executeCliCommand({
     command: 'npm',
     args: ['run', 'build'],
-    options: { cwd: `${reposDir}/snooty` },
+    options: { cwd: `${process.cwd()}/snooty` },
     logger: preppedLogger,
   });
 
   preppedLogger(`Result of html: ${result.outputText}\n ${result.errorText}`);
 
-  preppedLogger(`Now running second cp command: cp -r ${reposDir}/snooty/public ${reposDir}`);
+  preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${process.cwd()}`);
   const lastResult = await executeCliCommand({
     command: 'cp',
-    args: [`-r`, `${reposDir}/snooty/public`, `${reposDir}`],
+    args: [`-r`, `${process.cwd()}/snooty/public`, `${process.cwd()}`],
     logger: preppedLogger,
   });
   preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
