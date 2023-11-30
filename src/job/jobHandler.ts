@@ -297,13 +297,13 @@ export abstract class JobHandler {
   }
 
   private async exeBuildModified(): Promise<void> {
-    // const stages = {
-    //   ['get-build-dependencies']: 'buildDepsExe', // ??
-    //   ['next-gen-parse']: 'parseExe',
-    //   ['persistence-module']: 'persistenceExe',
-    //   ['next-gen-html']: 'htmlExe',
-    //   ['oas-page-build']: 'oasPageBuildExe',
-    // };
+    const stages = {
+      ['get-build-dependencies']: 'buildDepsExe', // ??
+      ['next-gen-parse']: 'parseExe',
+      ['persistence-module']: 'persistenceExe',
+      ['next-gen-html']: 'htmlExe',
+      ['oas-page-build']: 'oasPageBuildExe',
+    };
 
     // const commandMap: {
     //   [K: string]: ({ job, preppedLogger }: { job: Job; preppedLogger: (message: string) => void }) => any;
@@ -337,49 +337,82 @@ export abstract class JobHandler {
       thisLogger.save(thisJob._id, message);
     };
 
-    // TODO: add conditionals
-    // TODO: add benchmarks
-    await nextGenParse({ job: this._currJob, preppedLogger });
-    this._logger.save(this._currJob._id, 'Repo Parsing Completed');
-    await persistenceModule({ job: this._currJob, preppedLogger });
-    this._logger.save(this._currJob._id, 'Persistence Module Complete');
-    // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
-    const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
-    if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
-      await this.callGatsbyCloudWebhook();
+    const NO_MAKEFILES = true;
+
+    if (NO_MAKEFILES) {
+      // TODO: add conditionals
+      // TODO: add benchmarks
+      // await nextGenParse({ job: this._currJob, preppedLogger });
+      // this._logger.save(this._currJob._id, 'Repo Parsing Completed');
+      // await persistenceModule({ job: this._currJob, preppedLogger });
+      // this._logger.save(this._currJob._id, 'Persistence Module Complete');
+      // // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+      // const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+      // if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      //   await this.callGatsbyCloudWebhook();
+      // }
+      // this._logger.save(this._currJob._id, 'Gatsby Webhook Called');
+      // await oasPageBuild({ job: this._currJob, preppedLogger });
+      // this._logger.save(this._currJob._id, 'OAS Page Build Complete');
+      // await nextGenHtml({ job: this._currJob, preppedLogger });
+      // this._logger.save(this._currJob._id, 'NextGenHtml Finished');
+
+      for (const command of makeCommands) {
+        // works for any make command with the following signature make <make-rule>
+        const key = command.split(' ')[1].trim();
+        this._logger.save(this.currJob._id, `command: ${command}`);
+
+        if (key === 'next-gen-parse') {
+          this._logger.save(this.currJob._id, `running nextGenParse!`);
+          await nextGenParse({ job: this._currJob, preppedLogger });
+          this._logger.save(this._currJob._id, 'Repo Parsing Completed');
+        } else {
+          if (stages[key]) {
+            const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
+            await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
+          } else {
+            const makeCommandsResp = await this._commandExecutor.execute([command]);
+            await this.logBuildDetails(makeCommandsResp);
+          }
+        }
+
+        // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+        const isFeaturePreviewWebhookEnabled =
+          process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+        if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+          await this.callGatsbyCloudWebhook();
+        }
+      }
+    } else {
+      for (const command of makeCommands) {
+        // works for any make command with the following signature make <make-rule>
+        const key = command.split(' ')[1].trim();
+        this._logger.save(this.currJob._id, `command: ${command}`);
+        // if (commandMap[key]) {
+        //   this._logger.save(this.currJob._id, `running from commandMap: ${key}`);
+        //   await commandMap[key]({ job: this.currJob, preppedLogger });
+        // } else if (key === 'next-gen-html') {
+        //   this._logger.save(this.currJob._id, `running nextGenHtml!`);
+        //   await nextGenHtml(preppedLogger);
+        // } else {
+        if (stages[key]) {
+          const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
+          await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
+        } else {
+          const makeCommandsResp = await this._commandExecutor.execute([command]);
+          await this.logBuildDetails(makeCommandsResp);
+        }
+        // }
+
+        // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+        const isFeaturePreviewWebhookEnabled =
+          process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+        if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+          await this.callGatsbyCloudWebhook();
+        }
+      }
     }
-    this._logger.save(this._currJob._id, 'Gatsby Webhook Called');
-    await oasPageBuild({ job: this._currJob, preppedLogger });
-    this._logger.save(this._currJob._id, 'OAS Page Build Complete');
-    await nextGenHtml({ job: this._currJob, preppedLogger });
-    this._logger.save(this._currJob._id, 'NextGenHtml Finished');
 
-    // for (const command of makeCommands) {
-    //   // works for any make command with the following signature make <make-rule>
-    //   const key = command.split(' ')[1].trim();
-    //   this._logger.save(this.currJob._id, `command: ${command}`);
-    //   if (commandMap[key]) {
-    //     this._logger.save(this.currJob._id, `running from commandMap: ${key}`);
-    //     await commandMap[key]({ job: this.currJob, preppedLogger });
-    //   } else if (key === 'next-gen-html') {
-    //     this._logger.save(this.currJob._id, `running nextGenHtml!`);
-    //     await nextGenHtml(preppedLogger);
-    //   } else {
-    //     if (stages[key]) {
-    //       const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
-    //       await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
-    //     } else {
-    //       const makeCommandsResp = await this._commandExecutor.execute([command]);
-    //       await this.logBuildDetails(makeCommandsResp);
-    //     }
-    //   }
-
-    //   // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
-    //   const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
-    //   if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
-    //     await this.callGatsbyCloudWebhook();
-    //   }
-    // }
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
   }
 
