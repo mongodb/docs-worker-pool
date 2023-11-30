@@ -299,7 +299,7 @@ export abstract class JobHandler {
   private async exeBuildModified(): Promise<void> {
     const stages = {
       ['get-build-dependencies']: 'buildDepsExe', // ??
-      ['next-gen-parse']: 'parseExe',
+      // ['next-gen-parse']: 'parseExe',
       ['persistence-module']: 'persistenceExe',
       ['next-gen-html']: 'htmlExe',
       ['oas-page-build']: 'oasPageBuildExe',
@@ -342,8 +342,8 @@ export abstract class JobHandler {
     if (NO_MAKEFILES) {
       // TODO: add conditionals
       // TODO: add benchmarks
-      // await nextGenParse({ job: this._currJob, preppedLogger });
-      // this._logger.save(this._currJob._id, 'Repo Parsing Completed');
+      await nextGenParse({ job: this._currJob, preppedLogger });
+      this._logger.save(this._currJob._id, 'Repo Parsing Completed');
       // await persistenceModule({ job: this._currJob, preppedLogger });
       // this._logger.save(this._currJob._id, 'Persistence Module Complete');
       // // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
@@ -362,19 +362,18 @@ export abstract class JobHandler {
         const key = command.split(' ')[1].trim();
         this._logger.save(this.currJob._id, `command: ${command}`);
 
-        if (key === 'next-gen-parse') {
-          this._logger.save(this.currJob._id, `running nextGenParse!`);
-          await nextGenParse({ job: this._currJob, preppedLogger });
-          this._logger.save(this._currJob._id, 'Repo Parsing Completed');
+        // if (key === 'next-gen-parse') {
+        //   this._logger.save(this.currJob._id, `running nextGenParse!`);
+        //   this._logger.save(this._currJob._id, 'Repo Parsing Completed');
+        // } else {
+        if (stages[key]) {
+          const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
+          await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
         } else {
-          if (stages[key]) {
-            const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
-            await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
-          } else {
-            const makeCommandsResp = await this._commandExecutor.execute([command]);
-            await this.logBuildDetails(makeCommandsResp);
-          }
+          const makeCommandsResp = await this._commandExecutor.execute([command]);
+          await this.logBuildDetails(makeCommandsResp);
         }
+        // }
 
         // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
         const isFeaturePreviewWebhookEnabled =

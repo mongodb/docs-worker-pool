@@ -14,7 +14,15 @@ import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
-import { nextGenDeploy, nextGenStage } from '../commands';
+import {
+  nextGenDeploy,
+  nextGenHtml,
+  nextGenParse,
+  nextGenStage,
+  oasPageBuild,
+  persistenceModule,
+  prepareBuildAndGetDependencies,
+} from '../commands';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
@@ -60,6 +68,33 @@ export class StagingJobHandler extends JobHandler {
         this.currJob.deployCommands[this.currJob.deployCommands.length - 1] = 'make next-gen-stage';
       }
     }
+  }
+
+  async build() {
+    const preppedLogger = (msg: string) => this.logger.save(this.currJob._id, msg);
+
+    await prepareBuildAndGetDependencies(
+      this.currJob.payload.repoName,
+      this.currJob.payload.project,
+      'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
+      (message: string) => this.logger.save(this.currJob._id, message)
+    );
+
+    await nextGenParse({ job: this.currJob, preppedLogger });
+    this.logger.save(this.currJob._id, 'Repo Parsing Completed');
+    await persistenceModule({ job: this.currJob, preppedLogger });
+    this.logger.save(this.currJob._id, 'Persistence Module Complete');
+    // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+    const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+    if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      await this.callGatsbyCloudWebhook();
+    }
+    this.logger.save(this.currJob._id, 'Gatsby Webhook Called');
+    await oasPageBuild({ job: this.currJob, preppedLogger });
+    this.logger.save(this.currJob._id, 'OAS Page Build Complete');
+    await nextGenHtml({ job: this.currJob, preppedLogger });
+    this.logger.save(this.currJob._id, 'NextGenHtml Finished');
+    return true;
   }
 
   prepStageSpecificNextGenCommands(): void {
