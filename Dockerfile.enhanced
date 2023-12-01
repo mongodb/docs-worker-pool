@@ -31,7 +31,9 @@ ARG NPM_EMAIL
 ENV DEBIAN_FRONTEND=noninteractive
 
 # install legacy build environment for docs
-# RUN apt-get -o Acquire::Check-Valid-Until=false update
+RUN apt-get -o Acquire::Check-Valid-Until=false update
+RUN apt-get -y install git rsync unzip curl
+
 # RUN apt-get -y install libpython2.7-dev python2.7 git rsync unzip curl
 # RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 # RUN python2.7 get-pip.py
