@@ -30,6 +30,6 @@ jobs:
           npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
           npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks --outputs-file outputs.json
       - name: Get Webhook URL 
-        uses: mongodb/docs-worker-actions/comment-pr@DOP-4003 # TODO: change branch from feature to main 
+        uses: mongodb/docs-worker-actions/comment-pr@main
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
