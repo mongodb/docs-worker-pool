@@ -24,7 +24,7 @@ export async function oasPageBuild({ job, preppedLogger }: OasPageBuildParams) {
     const { outputText } = await executeCliCommand({
       command: 'node',
       args: [
-        `${process.cwd()}/modules/oas-page-builder/dist/index.js`, // There was a Fix dist/index.js
+        `${process.cwd()}/modules/oas-page-builder/index.js`, // There was a Fix dist/index.js
         '--bundle',
         bundlePath,
         '--output',
