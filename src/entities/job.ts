@@ -17,6 +17,16 @@ export enum JobStatus {
 //   regression = 'regression',
 // }
 
+export type BuildDependencies = {
+  buildDirectory?: string;
+  dependencies: Dependency[];
+};
+
+type Dependency = {
+  url: string;
+  filename: string;
+};
+
 export type Payload = {
   jobType: string;
   source: string;
@@ -72,6 +82,7 @@ export type EnhancedPayload = {
   prefix: string;
   project: string;
   includeInGlobalSearch?: boolean;
+  buildDependencies?: BuildDependencies | null;
 };
 
 export type Job = {

@@ -8,6 +8,15 @@ export class RepoBranchesRepository extends BaseRepository {
     super(config, logger, 'RepoBranchesRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
+  async getBuildDependencies(repoName: string) {
+    const query = { repoName: repoName };
+    const repo = await this.findOne(
+      query,
+      `Mongo Timeout Error: Timedout while retrieving build dependencies for ${repoName}`
+    );
+    return repo?.optionalBuildSteps?.buildDependencies;
+  }
+
   async getRepoBranches(repoName: string, directoryPath?: string): Promise<any> {
     const query = { repoName: repoName };
     if (directoryPath) query['directories.snooty_toml'] = `/${directoryPath}`;

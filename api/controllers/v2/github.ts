@@ -26,6 +26,7 @@ async function prepGithubPushPayload(
     branch_name,
     repoInfo.project
   );
+  const build_dependencies = await repoBranchesRepository.getBuildDependencies(githubEvent.repository.name);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
   const project = repoInfo?.project ?? githubEvent.repository.name;
 
@@ -46,6 +47,7 @@ async function prepGithubPushPayload(
       action: 'push',
       repoName: githubEvent.repository.name,
       branchName: githubEvent.ref.split('/')[2],
+      buildDependencies: build_dependencies,
       isFork: githubEvent.repository.fork,
       repoOwner: githubEvent.repository.owner.login,
       url: githubEvent.repository.clone_url,

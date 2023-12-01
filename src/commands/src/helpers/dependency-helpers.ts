@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
 import { promisify } from 'util';
+import { BuildDependencies } from '../../../entities/job';
 
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
@@ -33,8 +34,7 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-//TODO: define buildDependencies type
-async function downloadBuildDependencies(buildDependencies, repoDir: string) {
+async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoDir: string) {
   console.log('STARTING DOWNLOADING BUILD DEPENDENCIES');
   console.log('buildDependencies:', buildDependencies);
   const buildDir = buildDependencies.buildDirectory ?? repoDir;
