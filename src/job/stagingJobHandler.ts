@@ -73,6 +73,9 @@ export class StagingJobHandler extends JobHandler {
   async build(): Promise<boolean> {
     const preppedLogger = (msg: string) => this.logger.save(this.currJob._id, msg);
 
+    await this.setEnvironmentVariables();
+    this.logger.save(this.currJob._id, 'Prepared Environment variables');
+
     await prepareBuildAndGetDependencies(
       this.currJob.payload.repoOwner,
       this.currJob.payload.repoName,
