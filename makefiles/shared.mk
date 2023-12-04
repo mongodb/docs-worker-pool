@@ -6,7 +6,7 @@ URL = $(shell printenv URL)
 
 # Defaults to an empty string if NO_CACHING is not provided as an arg.
 # If no value is provided for NO_CACHING, then we do want to use the cache when parsing.
-NO_CACHING ?= '' 
+NO_CACHING ?= 
 # "PATCH_ID" related shell commands to manage commitless builds
 PATCH_FILE="myPatch.patch"
 PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} | cut -b 1-7; fi)
