@@ -54,6 +54,7 @@ export type Payload = {
   project: string;
   includeInGlobalSearch: boolean;
   directory?: string;
+  buildDependencies: BuildDependencies | null;
 };
 
 export type EnhancedPayload = {
@@ -82,7 +83,7 @@ export type EnhancedPayload = {
   prefix: string;
   project: string;
   includeInGlobalSearch?: boolean;
-  buildDependencies?: BuildDependencies | null;
+  buildDependencies: BuildDependencies | null;
 };
 
 export type Job = {

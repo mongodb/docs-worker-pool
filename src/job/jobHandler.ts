@@ -480,6 +480,9 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
+    let str = 'null';
+    if (this._currJob.payload.buildDependencies) str = String(this._currJob.payload.buildDependencies);
+    this._logger.save('build dependencies', str);
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
