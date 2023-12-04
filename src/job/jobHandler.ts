@@ -13,6 +13,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
+import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -484,6 +485,7 @@ export abstract class JobHandler {
     if (this._currJob.payload.buildDependencies) str = JSON.stringify(this._currJob.payload.buildDependencies);
     this._logger.save(this._currJob._id, 'HELLO');
     this._logger.save(this._currJob._id, str);
+    // await downloadBuildDependencies(this._currJob.payload.buildDependencies, this._currJob.payload.repoName);
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
