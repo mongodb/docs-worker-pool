@@ -39,16 +39,17 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
   console.log('buildDependencies:', buildDependencies);
   const repoDir = getRepoDir(repoName);
   if (buildDependencies) {
-    buildDependencies.map((dependency) => {
-      console.log(`CURLING ${dependency.url} to ${dependency.buildDir}/${dependency.filename}`);
+    const ret = buildDependencies.map((dependency) => {
       const buildDir = dependency.buildDir ?? repoDir;
       executeCliCommand({
         command: 'curl',
         args: [dependency.url, '-o', `${buildDir}/${dependency.filename}`],
       });
-      console.log(`DONE CURLING ${dependency.url}`);
+      return `curl ${dependency.url} -o ${dependency.buildDir}/${dependency.filename}`;
     });
-    console.log('FINISHED DOWNLOADING BUILD DEPENDENCIES');
+    return ret;
+  } else {
+    return [];
   }
 }
 
