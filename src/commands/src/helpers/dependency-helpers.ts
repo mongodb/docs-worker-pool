@@ -34,21 +34,22 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoDir: string) {
+export async function downloadBuildDependencies(buildDependencies: BuildDependencies | null, repoName: string) {
   console.log('STARTING DOWNLOADING BUILD DEPENDENCIES');
   console.log('buildDependencies:', buildDependencies);
-  const buildDir = buildDependencies.buildDirectory ?? repoDir;
-  console.log('buildDirectory', buildDir);
-  const dependencies = buildDependencies.dependencies;
-  dependencies.map((dependency) => {
-    console.log(`CURLING ${dependency.url} to ${buildDir}/${dependency.filename}`);
-    executeCliCommand({
-      command: 'curl',
-      args: [dependency.url, '-o', `${buildDir}/${dependency.filename}`],
+  const repoDir = getRepoDir(repoName);
+  if (buildDependencies) {
+    buildDependencies.map((dependency) => {
+      console.log(`CURLING ${dependency.url} to ${dependency.buildDir}/${dependency.filename}`);
+      const buildDir = dependency.buildDir ?? repoDir;
+      executeCliCommand({
+        command: 'curl',
+        args: [dependency.url, '-o', `${buildDir}/${dependency.filename}`],
+      });
+      console.log(`DONE CURLING ${dependency.url}`);
     });
-    console.log(`DONE CURLING ${dependency.url}`);
-  });
-  console.log('FINISHED DOWNLOADING BUILD DEPENDENCIES');
+    console.log('FINISHED DOWNLOADING BUILD DEPENDENCIES');
+  }
 }
 
 export async function prepareBuildAndGetDependencies(
@@ -62,7 +63,7 @@ export async function prepareBuildAndGetDependencies(
 
   const repoDir = getRepoDir(repoName);
 
-  downloadBuildDependencies(buildDependencies, repoDir);
+  downloadBuildDependencies(buildDependencies, repoName);
 
   // doing these in parallel
   const commandPromises = [

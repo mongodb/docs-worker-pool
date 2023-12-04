@@ -16,12 +16,8 @@ async function localApp() {
   const bucket = 'docs-java-dotcomstg';
   const mutPrefix = 'docs/drivers/java/sync';
   const buildDependencies = {
-    dependencies: [
-      {
-        url: 'https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-java.yaml',
-        filename: 'published-branches.yaml',
-      },
-    ],
+    url: 'https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-java.yaml',
+    filename: 'published-branches.yaml',
   };
 
   const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await prepareBuildAndGetDependencies(
