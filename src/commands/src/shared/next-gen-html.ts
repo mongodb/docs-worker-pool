@@ -36,13 +36,13 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
 
   preppedLogger(`Result of html: ${result.outputText}\n ${result.errorText}`);
 
-  preppedLogger(`Now running second cp command: cp -r ${repoDir}/snooty/public ${repoDir}}`);
-  const lastResult = await executeCliCommand({
-    command: 'cp',
-    args: [`-r`, `${repoDir}/snooty/public`, `${repoDir}`],
-    logger: preppedLogger,
-  });
-  preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
+  // preppedLogger(`Now running second cp command: cp -r ${repoDir}/snooty/public ${repoDir}}`);
+  // const lastResult = await executeCliCommand({
+  //   command: 'cp',
+  //   args: [`-r`, `${repoDir}/snooty/public`, `${repoDir}`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
 
   return result;
 }
