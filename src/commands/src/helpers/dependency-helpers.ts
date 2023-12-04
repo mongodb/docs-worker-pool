@@ -35,23 +35,26 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
 }
 
 export async function downloadBuildDependencies(buildDependencies: BuildDependencies | null, repoName: string) {
-  console.log('STARTING DOWNLOADING BUILD DEPENDENCIES');
-  console.log('buildDependencies:', buildDependencies);
-
+  const commands: string[] = [];
   if (buildDependencies) {
-    const ret = buildDependencies.map((dependency) => {
+    buildDependencies.map((dependencyInfo) => {
       const repoDir = getRepoDir(repoName);
-      const buildDir = dependency.buildDir ?? repoDir;
+      const buildDir = dependencyInfo.buildDir ?? repoDir;
       executeCliCommand({
-        command: 'curl',
-        args: [dependency.url, '-o', `${buildDir}/${dependency.filename}`],
+        command: 'mkdir',
+        args: ['-p', buildDir],
       });
-      return `curl ${dependency.url} -o ${buildDir}/${dependency.filename}`;
+      commands.push(`mkdir -p ${buildDir}`);
+      dependencyInfo.dependencies.map((dep) => {
+        executeCliCommand({
+          command: 'curl',
+          args: [dep.url, '-o', `${buildDir}/${dep.filename}`],
+        });
+        commands.push(`curl ${dep.url} -o ${buildDir}/${dep.filename}`);
+      });
     });
-    return ret;
-  } else {
-    return [];
   }
+  return commands;
 }
 
 export async function prepareBuildAndGetDependencies(

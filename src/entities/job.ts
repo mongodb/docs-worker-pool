@@ -17,12 +17,16 @@ export enum JobStatus {
 //   regression = 'regression',
 // }
 
-export type BuildDependencies = Dependency[];
+export type BuildDependencies = DependencyInfo[];
 
 type Dependency = {
   url: string;
   filename: string;
-  buildDir: string;
+};
+
+type DependencyInfo = {
+  buildDir?: string;
+  dependencies: Dependency[];
 };
 
 export type Payload = {
