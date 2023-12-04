@@ -48,9 +48,9 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
       dependencyInfo.dependencies.map((dep) => {
         executeCliCommand({
           command: 'curl',
-          args: [dep.url, '-o', `${buildDir}/${dep.filename}`],
+          args: ['-SfL', dep.url, '-o', `${buildDir}/${dep.filename}`],
         });
-        commands.push(`curl ${dep.url} -o ${buildDir}/${dep.filename}`);
+        commands.push(`curl -SfL ${dep.url} -o ${buildDir}/${dep.filename}`);
       });
     });
   }
