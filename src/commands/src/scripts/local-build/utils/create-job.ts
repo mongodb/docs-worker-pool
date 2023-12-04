@@ -6,9 +6,10 @@ interface Props {
   repoOwner: string;
   repoName: string;
   commit: CommitGetResponse;
+  project: string;
 }
 
-export function createLocalJob({ branchName, repoName, repoOwner, commit }: Props): Omit<EnhancedJob, '_id'> {
+export function createLocalJob({ branchName, repoName, repoOwner, commit, project }: Props): Omit<EnhancedJob, '_id'> {
   return {
     title: `${repoOwner}/${repoName}`,
     user: commit.author?.name ?? '',
@@ -20,7 +21,7 @@ export function createLocalJob({ branchName, repoName, repoOwner, commit }: Prop
     priority: 1,
     error: {},
     result: null,
-    pathPrefix: `${repoName}/docsworker-xlarge/${branchName}`,
+    pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
     payload: {
       jobType: 'githubPush',
       source: 'github',
@@ -33,8 +34,9 @@ export function createLocalJob({ branchName, repoName, repoOwner, commit }: Prop
       newHead: commit.sha,
       urlSlug: branchName,
       prefix: '', // empty string for now
-      project: repoName, // Needs to get the project rather than repo name
-      pathPrefix: `${repoName}/docsworker-xlarge/${branchName}`,
+      project: project, // Needs to get the project rather than repo name
+      pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
+      mutPrefix: project,
     },
     logs: [],
   };

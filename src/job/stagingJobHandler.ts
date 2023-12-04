@@ -73,14 +73,6 @@ export class StagingJobHandler extends JobHandler {
   async build(): Promise<boolean> {
     const preppedLogger = (msg: string) => this.logger.save(this.currJob._id, msg);
 
-    await prepareBuildAndGetDependencies(
-      this.currJob.payload.repoOwner,
-      this.currJob.payload.repoName,
-      this.currJob.payload.project,
-      'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      (message: string) => this.logger.save(this.currJob._id, message)
-    );
-
     await nextGenParse({ job: this.currJob, preppedLogger });
     this.logger.save(this.currJob._id, 'Repo Parsing Completed');
     await persistenceModule({ job: this.currJob, preppedLogger });
@@ -117,31 +109,31 @@ export class StagingJobHandler extends JobHandler {
   }
   async deploy(): Promise<CommandExecutorResponse> {
     try {
-      if (this.currJob.payload.repoName === MONOREPO_NAME) {
-        // this.logger.save(this.currJob._id, `ITS MONOREPO, let's stage!! All the world's a stage.`);
-        // resp = await nextGenStage({
-        //   job: this.currJob,
-        //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-        // });
-        // resp = await this.deployGeneric();
-      } else {
-        // TODO: this should be normal deployGeneric
-        // this.logger.save(this.currJob._id, `ITS fake monorepo, let's stage!! All the world's a stage.`);
-        // const hasConfigRedirects = fs.existsSync(path.join(process.cwd(), 'config/redirects'));
-        // this.logger.save(this.currJob._id, `hasConfigRedirects: ${hasConfigRedirects}`);
-        // resp = await nextGenStage({
-        //   job: this.currJob,
-        //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-        // });
-        // this.logger.save(this.currJob._id, `Now to deploy `);
-        // await nextGenDeploy({
-        //   gitBranch: this.currJob.payload.branchName,
-        //   mutPrefix: this.currJob.mutPrefix || '',
-        //   hasConfigRedirects: hasConfigRedirects,
-        //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-        // });
-        // resp = await this.deployGeneric();
-      }
+      // if (this.currJob.payload.repoName === MONOREPO_NAME) {
+      // this.logger.save(this.currJob._id, `ITS MONOREPO, let's stage!! All the world's a stage.`);
+      // resp = await nextGenStage({
+      //   job: this.currJob,
+      //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
+      // });
+      // resp = await this.deployGeneric();
+      // } else {
+      // TODO: this should be normal deployGeneric
+      // this.logger.save(this.currJob._id, `ITS fake monorepo, let's stage!! All the world's a stage.`);
+      // const hasConfigRedirects = fs.existsSync(path.join(process.cwd(), 'config/redirects'));
+      // this.logger.save(this.currJob._id, `hasConfigRedirects: ${hasConfigRedirects}`);
+      // resp = await nextGenStage({
+      //   job: this.currJob,
+      //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
+      // });
+      // this.logger.save(this.currJob._id, `Now to deploy `);
+      // await nextGenDeploy({
+      //   gitBranch: this.currJob.payload.branchName,
+      //   mutPrefix: this.currJob.mutPrefix || '',
+      //   hasConfigRedirects: hasConfigRedirects,
+      //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
+      // });
+      // resp = await this.deployGeneric();
+      // }
       const preppedLogger = (message: string) => this.logger.save(this.currJob._id, message);
       const repo_info = await this._docsetsRepo.getRepo(this.currJob.payload.repoName, this.currJob.payload.directory);
       if (!repo_info) {

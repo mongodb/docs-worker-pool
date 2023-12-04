@@ -10,11 +10,6 @@ interface StageParams {
 }
 
 export async function nextGenStage({ job, preppedLogger, bucket, url }: StageParams) {
-  // TODO: replace with a process to get this url??
-  // const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
-  // TODO: replace with process to access bucket
-  // const bucket = 'docs-atlas-dotcomstg';
-  // const bucket = job.payload.
   const { mutPrefix, branchName, patch, project, newHead } = job.payload;
 
   let prefix = mutPrefix || project;

@@ -1,10 +1,13 @@
-import { MongoClient } from 'mongodb';
 import os from 'os';
+import * as c from 'config';
+import { MongoClient } from 'mongodb';
 import { getOctokitClient } from '../../../../clients/githubClient';
 import { executeCliCommand } from '../../helpers';
 import { getArgs } from './utils/get-args';
 import { getWorkerEnv } from './utils/get-env-vars';
 import { createLocalJob } from './utils/create-job';
+import { DocsetsRepository } from '../../../../repositories/docsetsRepository';
+import { ConsoleLogger } from '../../../../services/logger';
 
 const buildDockerImage = async (npmAuth: string) =>
   executeCliCommand({
@@ -67,7 +70,12 @@ async function main() {
 
   console.log('BRANCH NAME?!?!? ', branchName);
 
-  const job = createLocalJob({ commit: commit.data, branchName, repoName, repoOwner });
+  const consoleLogger = new ConsoleLogger();
+
+  const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
+  const project = (await docsetsRepository.getProjectByRepoName(repoName)) as string;
+
+  const job = createLocalJob({ commit: commit.data, branchName, repoName, repoOwner, project });
 
   console.log('insert job into queue collection');
   const { insertedId: jobId } = await collection.insertOne(job);
