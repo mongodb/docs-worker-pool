@@ -7,13 +7,13 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   const reposDir = path.join(process.cwd(), `/repos`);
 
-  preppedLogger(`Now running first cp command: cp ${repoDir}/.env.production ${process.cwd()}/snooty`);
-  const firstResult = await executeCliCommand({
-    command: 'cp',
-    args: [`${repoDir}/.env.production`, `${process.cwd()}/snooty`],
-    logger: preppedLogger,
-  });
-  preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
+  // preppedLogger(`Now running first cp command: cp ${repoDir}/snooty/.env.production ${process.cwd()}/snooty`);
+  // const firstResult = await executeCliCommand({
+  //   command: 'cp',
+  //   args: [`${repoDir}/.env.production`, `${process.cwd()}/snooty`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
 
   preppedLogger(`Now cd into snooty`);
   const secondResult = await executeCliCommand({
