@@ -46,7 +46,7 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
         command: 'curl',
         args: [dependency.url, '-o', `${buildDir}/${dependency.filename}`],
       });
-      return `1 ${dependency.buildDir} 2 ${repoDir} curl ${dependency.url} -o ${dependency.buildDir}/${dependency.filename}`;
+      return `curl ${dependency.url} -o ${buildDir}/${dependency.filename}`;
     });
     return ret;
   } else {
