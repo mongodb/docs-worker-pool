@@ -73,6 +73,14 @@ export class StagingJobHandler extends JobHandler {
   async build(): Promise<boolean> {
     const preppedLogger = (msg: string) => this.logger.save(this.currJob._id, msg);
 
+    await prepareBuildAndGetDependencies(
+      this.currJob.payload.repoOwner,
+      this.currJob.payload.repoName,
+      this.currJob.payload.project,
+      'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
+      (message: string) => this.logger.save(this.currJob._id, message)
+    );
+
     await nextGenParse({ job: this.currJob, preppedLogger });
     this.logger.save(this.currJob._id, 'Repo Parsing Completed');
     await persistenceModule({ job: this.currJob, preppedLogger });
