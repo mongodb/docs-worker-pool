@@ -18,7 +18,7 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   preppedLogger(`Now cd into snooty`);
   const secondResult = await executeCliCommand({
     command: 'cd',
-    args: [`snooty`],
+    args: [`${process.cwd()}/snooty`],
     logger: preppedLogger,
   });
   preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
@@ -35,6 +35,13 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   });
 
   preppedLogger(`Result of html: ${result.outputText}\n ${result.errorText}`);
+
+  preppedLogger(`Now running cd ..`);
+  const zoomOut = await executeCliCommand({
+    command: 'cd',
+    args: [`..`],
+    logger: preppedLogger,
+  });
 
   preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${repoDir}}`);
   const lastResult = await executeCliCommand({
