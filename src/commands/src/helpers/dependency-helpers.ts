@@ -78,9 +78,9 @@ export async function prepareBuildAndGetDependencies(
   directory?: string
 ) {
   // before we get build dependencies, we need to clone the repo
-  await cloneRepo(repoOwner, repoName);
+  // await cloneRepo(repoOwner, repoName);
   preppedLogger(`in Prepared build and get deps!!`);
-  await pullRepo(repoName, branchName, newHead, preppedLogger);
+  // await pullRepo(repoName, branchName, newHead, preppedLogger);
 
   const repoDir = getRepoDir(repoName, directory);
   // const repoDir = `repos/${repoName}`;

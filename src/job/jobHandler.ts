@@ -641,6 +641,14 @@ export abstract class JobHandler {
       `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`
     );
     try {
+      this.cleanup();
+      await this.cloneRepo(this._config.get<string>('repo_dir'));
+      this._logger.save(this._currJob._id, 'Cloned Repo');
+      await this.commitCheck();
+      this._logger.save(this._currJob._id, 'Checked Commit');
+      await this.pullRepo();
+      this._logger.save(this._currJob._id, 'Pulled Repo');
+
       await this.build();
       const resp = await this.deploy();
       await this.update(resp);

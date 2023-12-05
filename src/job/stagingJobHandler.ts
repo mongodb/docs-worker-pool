@@ -83,6 +83,8 @@ export class StagingJobHandler extends JobHandler {
       (message: string) => this.logger.save(this.currJob._id, message),
       this.currJob.payload.newHead
     );
+    await this.pullRepo();
+    this._logger.save(this._currJob._id, 'Pulled Repo');
 
     await nextGenParse({ job: this.currJob, preppedLogger });
     this.logger.save(this.currJob._id, 'Repo Parsing Completed');
