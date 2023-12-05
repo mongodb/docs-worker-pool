@@ -29,13 +29,16 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   });
   preppedLogger(`Result of pwd: ${pwd.outputText}\n ${pwd.errorText}`);
 
-  preppedLogger(`Now cd into snooty: cd ${process.cwd()}/snooty`);
-  const secondResult = await executeCliCommand({
-    command: 'cd',
-    args: [`${process.cwd()}/snooty`],
-    logger: preppedLogger,
-  });
-  preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
+  // preppedLogger(`Now cd into snooty: cd ${process.cwd()}/snooty`);
+  // const secondResult = await executeCliCommand({
+  //   command: 'cd',
+  //   args: [`${process.cwd()}/snooty`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
+
+  process.chdir(`${process.cwd()}/snooty`);
+  preppedLogger(`new pwd in to snooty? ${process.cwd()}`);
 
   preppedLogger(`Here is the JOB!!! : ${JSON.stringify(job)}`);
 
@@ -50,12 +53,15 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
 
   preppedLogger(`Result of html: ${result.outputText}\n ${result.errorText}`);
 
-  preppedLogger(`Now running cd ..`);
-  const zoomOut = await executeCliCommand({
-    command: 'cd',
-    args: [`..`],
-    logger: preppedLogger,
-  });
+  // preppedLogger(`Now running cd ..`);
+  // const zoomOut = await executeCliCommand({
+  //   command: 'cd',
+  //   args: [`..`],
+  //   logger: preppedLogger,
+  // });
+
+  process.chdir(`../`);
+  preppedLogger(`new pwd out of snooty? ${process.cwd()}`);
 
   preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${repoDir}}`);
   const lastResult = await executeCliCommand({
