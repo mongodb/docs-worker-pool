@@ -36,27 +36,29 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
 
 export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string) {
   const commands: string[] = [];
-  buildDependencies.map((dependencyInfo) => {
-    try {
-      const repoDir = getRepoDir(repoName);
-      const targetDir = dependencyInfo.targetDir ?? repoDir;
-      executeCliCommand({
-        command: 'mkdir',
-        args: ['-p', targetDir],
-      });
-      commands.push(`mkdir -p ${targetDir}`);
-      dependencyInfo.dependencies.map((dep) => {
+  Promise.all(
+    buildDependencies.map((dependencyInfo) => {
+      try {
+        const repoDir = getRepoDir(repoName);
+        const targetDir = dependencyInfo.targetDir ?? repoDir;
         executeCliCommand({
-          command: 'curl',
-          args: ['-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+          command: 'mkdir',
+          args: ['-p', targetDir],
         });
-        commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
-      });
-    } catch (error) {
-      console.error(`ERROR! Could not download the following dependencies: ${JSON.stringify(dependencyInfo)}`);
-      throw error;
-    }
-  });
+        commands.push(`mkdir -p ${targetDir}`);
+        dependencyInfo.dependencies.map((dep) => {
+          executeCliCommand({
+            command: 'curl',
+            args: ['-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+          });
+          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
+        });
+      } catch (error) {
+        console.error(`ERROR! Could not download the following dependencies: ${JSON.stringify(dependencyInfo)}`);
+        throw error;
+      }
+    })
+  );
   return commands;
 }
 
