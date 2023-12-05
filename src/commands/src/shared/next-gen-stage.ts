@@ -41,10 +41,6 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
     const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
     preppedLogger(`OUTPUT of mut publish: ${resultMessage}`);
 
-    // return {
-    //   resultMessage,
-    //   commands: commandArgs,
-    // };
     return {
       status: 'inProgress',
       output: '', // TODO: better values
@@ -53,7 +49,7 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
   } catch (error) {
     preppedLogger(`Failed in nextGenStage.`);
     return {
-      status: 'failure', // Is this correct??
+      status: 'failure', // Is this a correct value??
       output: '', // TODO: better values
       error: '',
     };

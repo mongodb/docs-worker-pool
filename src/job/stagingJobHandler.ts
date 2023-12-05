@@ -153,8 +153,8 @@ export class StagingJobHandler extends JobHandler {
       console.log('repo info ', repo_info);
       const environment = process.env.SNOOTY_ENV;
       console.log('environment ', environment);
-      const bucket = repo_info.bucket.dotcomstg;
-      const url = repo_info.url.dotcomstg;
+      const bucket = repo_info.bucket.stg;
+      const url = repo_info.url.stg;
       console.log('BUCKET: ', bucket);
       console.log('URL: ', url);
 
