@@ -61,7 +61,7 @@ export async function prepareBuildAndGetDependencies(
   repoName: string,
   projectName: string,
   baseUrl: string,
-  buildDependencies
+  buildDependencies: BuildDependencies
 ) {
   // before we get build dependencies, we need to clone the repo
   await cloneRepo(repoName);
