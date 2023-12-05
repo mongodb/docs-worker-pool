@@ -37,8 +37,8 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   // });
   // preppedLogger(`Result of cd : ${secondResult.outputText}\n ${secondResult.errorText}`);
 
-  process.chdir(`${process.cwd()}/snooty`);
-  preppedLogger(`new pwd in to snooty? ${process.cwd()}`);
+  // process.chdir(`${process.cwd()}/snooty`);
+  // preppedLogger(`new pwd in to snooty? ${process.cwd()}`);
 
   preppedLogger(`Here is the JOB!!! : ${JSON.stringify(job)}`);
 
@@ -47,7 +47,7 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   const result = await executeCliCommand({
     command: 'npm',
     args: ['run', 'build'],
-    // options: { cwd: `${process.cwd()}/snooty` },
+    options: { cwd: `${process.cwd()}/snooty` },
     logger: preppedLogger,
   });
 
@@ -60,8 +60,8 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   //   logger: preppedLogger,
   // });
 
-  process.chdir(`../`);
-  preppedLogger(`new pwd out of snooty? ${process.cwd()}`);
+  // process.chdir(`../`);
+  // preppedLogger(`new pwd out of snooty? ${process.cwd()}`);
 
   preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${repoDir}}`);
   const lastResult = await executeCliCommand({
