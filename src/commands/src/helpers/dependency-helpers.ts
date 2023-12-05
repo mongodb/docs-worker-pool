@@ -15,6 +15,26 @@ async function cloneRepo(repoOwner: string, repoName: string) {
     options: { cwd: `${process.cwd()}/repos` },
   });
 }
+
+async function pullRepo(
+  repoDirName: string,
+  branchName: string,
+  newHead: string | null | undefined = null,
+  logger: (msg: string) => void
+) {
+  const pullRepoCommands = [`git checkout ${branchName}`, ' && ', `git pull origin ${branchName}`];
+  if (newHead) {
+    pullRepoCommands.push(' && ', `git checkout ${newHead} .`);
+  }
+
+  await executeCliCommand({
+    command: 'git',
+    args: pullRepoCommands,
+    options: { cwd: `${process.cwd()}/repos/${repoDirName}` },
+    logger,
+  });
+}
+
 async function createEnvProdFile(
   repoDir: string,
   projectName: string,
@@ -52,12 +72,15 @@ export async function prepareBuildAndGetDependencies(
   repoName: string,
   projectName: string,
   baseUrl: string,
+  branchName: string,
   preppedLogger: (message: string) => void,
+  newHead?: string | null,
   directory?: string
 ) {
   // before we get build dependencies, we need to clone the repo
   await cloneRepo(repoOwner, repoName);
   preppedLogger(`in Prepared build and get deps!!`);
+  await pullRepo(repoName, branchName, newHead, preppedLogger);
 
   const repoDir = getRepoDir(repoName, directory);
   // const repoDir = `repos/${repoName}`;

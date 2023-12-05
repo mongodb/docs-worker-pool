@@ -60,7 +60,7 @@ async function localApp() {
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
   const bucket = 'docs-atlas-dotcomstg';
 
-  const { repoOwner, repoName, project, mutPrefix, directory } = fakePayload;
+  const { repoOwner, repoName, branchName, newHead, project, mutPrefix, directory } = fakePayload;
 
   // const repoName = 'docs-java';
   // const project = 'java';
@@ -78,7 +78,9 @@ async function localApp() {
     repoName,
     project,
     baseUrl,
+    branchName,
     preppedLogger,
+    newHead,
     directory
   );
 

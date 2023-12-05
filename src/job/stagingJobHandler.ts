@@ -13,9 +13,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
-import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import {
-  nextGenDeploy,
   nextGenHtml,
   nextGenParse,
   nextGenStage,
@@ -81,7 +79,9 @@ export class StagingJobHandler extends JobHandler {
       this.currJob.payload.repoName,
       this.currJob.payload.project,
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      (message: string) => this.logger.save(this.currJob._id, message)
+      this.currJob.payload.branchName,
+      (message: string) => this.logger.save(this.currJob._id, message),
+      this.currJob.payload.newHead
     );
 
     await nextGenParse({ job: this.currJob, preppedLogger });
@@ -145,6 +145,7 @@ export class StagingJobHandler extends JobHandler {
       // });
       // resp = await this.deployGeneric();
       // }
+      this.currJob;
       const preppedLogger = (message: string) => this.logger.save(this.currJob._id, message);
       const repo_info = await this._docsetsRepo.getRepo(this.currJob.payload.repoName, this.currJob.payload.directory);
       if (!repo_info) {
