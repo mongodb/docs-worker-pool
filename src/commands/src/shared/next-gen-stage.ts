@@ -35,6 +35,7 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
       options: {
         cwd: `${process.cwd()}/snooty`,
       },
+      logger: preppedLogger,
     });
 
     const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
