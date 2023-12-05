@@ -206,6 +206,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async getAndBuildDependencies() {
     const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
+    if (!buildDependencies) return;
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
     this._logger.save(this._currJob._id, commands.join('\n'));
   }

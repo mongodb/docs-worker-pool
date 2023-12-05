@@ -25,7 +25,7 @@ type Dependency = {
 };
 
 type DependencyInfo = {
-  buildDir?: string;
+  targetDir?: string;
   dependencies: Dependency[];
 };
 

@@ -34,26 +34,29 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-export async function downloadBuildDependencies(buildDependencies: BuildDependencies | null, repoName: string) {
+export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string) {
   const commands: string[] = [];
-  if (buildDependencies) {
-    buildDependencies.map((dependencyInfo) => {
+  buildDependencies.map(async (dependencyInfo) => {
+    try {
       const repoDir = getRepoDir(repoName);
-      const buildDir = dependencyInfo.buildDir ?? repoDir;
-      executeCliCommand({
+      const targetDir = dependencyInfo.targetDir ?? repoDir;
+      await executeCliCommand({
         command: 'mkdir',
-        args: ['-p', buildDir],
+        args: ['-p', targetDir],
       });
-      commands.push(`mkdir -p ${buildDir}`);
+      commands.push(`mkdir -p ${targetDir}`);
       dependencyInfo.dependencies.map((dep) => {
         executeCliCommand({
           command: 'curl',
-          args: ['-SfL', dep.url, '-o', `${buildDir}/${dep.filename}`],
+          args: ['-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
         });
-        commands.push(`curl -SfL ${dep.url} -o ${buildDir}/${dep.filename}`);
+        commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
       });
-    });
-  }
+    } catch (error) {
+      console.error(`ERROR! Could not download the following dependencies: ${JSON.stringify(dependencyInfo)}`);
+      throw error;
+    }
+  });
   return commands;
 }
 
@@ -68,7 +71,7 @@ export async function prepareBuildAndGetDependencies(
 
   const repoDir = getRepoDir(repoName);
 
-  downloadBuildDependencies(buildDependencies, repoName);
+  await downloadBuildDependencies(buildDependencies, repoName);
 
   // doing these in parallel
   const commandPromises = [
