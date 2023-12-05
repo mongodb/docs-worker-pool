@@ -169,11 +169,13 @@ export async function executeCliCommand({
     if (writeStream) executedCommand.stdout?.pipe(writeStream);
     executedCommand.stdout?.on('data', (data: Buffer) => {
       console.log(data.toString());
+      if (logger) logger(data.toString());
       outputText.push(data.toString());
     });
 
     executedCommand.stderr?.on('data', (data: Buffer) => {
       console.log(data.toString());
+      if (logger) logger(data.toString());
       errorText.push(data.toString());
     });
 
@@ -189,7 +191,7 @@ export async function executeCliCommand({
         if (logger) {
           logger(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
           logger('Arguments provided: ' + args);
-          logger('Options provided: ' + options);
+          logger('Options provided: ' + JSON.stringify(options));
         }
         console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
