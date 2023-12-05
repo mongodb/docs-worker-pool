@@ -15,7 +15,21 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   // });
   // preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
 
-  preppedLogger(`Now cd into snooty`);
+  const lsResult = await executeCliCommand({
+    command: 'ls',
+    // args: [`${process.cwd()}/snooty`],
+    logger: preppedLogger,
+  });
+  preppedLogger(`lsResult: ${lsResult}`);
+
+  const pwd = await executeCliCommand({
+    command: 'pwd',
+    // args: [`${process.cwd()}/snooty`],
+    logger: preppedLogger,
+  });
+  preppedLogger(`pwd: ${pwd}`);
+
+  preppedLogger(`Now cd into snooty: cd ${process.cwd()}/snooty`);
   const secondResult = await executeCliCommand({
     command: 'cd',
     args: [`${process.cwd()}/snooty`],
