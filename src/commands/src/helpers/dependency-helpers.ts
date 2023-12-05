@@ -36,11 +36,11 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
 
 export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string) {
   const commands: string[] = [];
-  buildDependencies.map(async (dependencyInfo) => {
+  buildDependencies.map((dependencyInfo) => {
     // try {
     const repoDir = getRepoDir(repoName);
     const targetDir = dependencyInfo.targetDir ?? repoDir;
-    await executeCliCommand({
+    executeCliCommand({
       command: 'mkdir',
       args: ['-p', targetDir],
     });
