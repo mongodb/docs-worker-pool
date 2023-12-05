@@ -20,14 +20,14 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
     // args: [`${process.cwd()}/snooty`],
     logger: preppedLogger,
   });
-  preppedLogger(`lsResult: ${lsResult}`);
+  preppedLogger(`Result of lsResult: ${lsResult.outputText}\n ${lsResult.errorText}`);
 
   const pwd = await executeCliCommand({
     command: 'pwd',
     // args: [`${process.cwd()}/snooty`],
     logger: preppedLogger,
   });
-  preppedLogger(`pwd: ${pwd}`);
+  preppedLogger(`Result of pwd: ${pwd.outputText}\n ${pwd.errorText}`);
 
   preppedLogger(`Now cd into snooty: cd ${process.cwd()}/snooty`);
   const secondResult = await executeCliCommand({
