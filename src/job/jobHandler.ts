@@ -204,6 +204,12 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
+  private async getAndBuildDependencies() {
+    const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
+    return await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
+  }
+
+  @throwIfJobInterupted()
   private async downloadMakeFile(): Promise<void> {
     try {
       const makefileFileName =
@@ -481,10 +487,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
-    const buildDeps = await downloadBuildDependencies(
-      this._currJob.payload.buildDependencies,
-      this._currJob.payload.repoName
-    );
+    const buildDeps = await this.getAndBuildDependencies();
     this._logger.save(this._currJob._id, buildDeps.join('\n'));
     this._logger.save(this._currJob._id, 'Downloaded build dependencies');
     this.prepBuildCommands();
