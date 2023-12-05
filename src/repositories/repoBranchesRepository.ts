@@ -2,13 +2,14 @@ import { Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
+import { BuildDependencies } from '../entities/job';
 
 export class RepoBranchesRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {
     super(config, logger, 'RepoBranchesRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
-  async getBuildDependencies(repoName: string) {
+  async getBuildDependencies(repoName: string): Promise<BuildDependencies> {
     const query = { repoName: repoName };
     const repo = await this.findOne(
       query,
