@@ -41,7 +41,7 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
       try {
         const repoDir = getRepoDir(repoName);
         const targetDir = dependencyInfo.targetDir ?? repoDir;
-        executeCliCommand({
+        await executeCliCommand({
           command: 'mkdir',
           args: ['-p', targetDir],
         });
