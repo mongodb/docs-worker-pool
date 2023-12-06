@@ -37,7 +37,7 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
 export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string) {
   const commands: string[] = [];
   Promise.all(
-    buildDependencies.map((dependencyInfo) => {
+    buildDependencies.map(async (dependencyInfo) => {
       try {
         const repoDir = getRepoDir(repoName);
         const targetDir = dependencyInfo.targetDir ?? repoDir;
