@@ -122,6 +122,8 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   }
 
   consoleLogger.info(body.repository.full_name, `IN V2!!! `);
+  consoleLogger.info(body.repository.full_name, `body repo name ${body.repository.name}`);
+  consoleLogger.info(body.repository.full_name, `feature flag value: ${process.env.FEATURE_FLAG_MONOREPO_PATH} `);
 
   if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && body.repository.name === MONOREPO_NAME) {
     consoleLogger.info(body.repository.full_name, `past feature flag and monorepo conditional`);
