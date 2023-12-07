@@ -47,7 +47,8 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
         });
       } catch (error) {
         console.error(
-          `ERROR! Could not create target directory ${targetDir}. Dependency information: ${dependencyInfo}`
+          `ERROR! Could not create target directory ${targetDir}. Dependency information: `,
+          dependencyInfo
         );
         throw error;
       }
@@ -61,7 +62,8 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
             });
           } catch (error) {
             console.error(
-              `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: ${dependencyInfo}`
+              `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
+              dependencyInfo
             );
           }
           commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
