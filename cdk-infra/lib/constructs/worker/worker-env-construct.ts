@@ -50,7 +50,7 @@ export class WorkerEnvConstruct extends Construct {
     // doing this for the time being, but I think we don't need to necessarily retrieve this from ssm for feature branches, nor would we want to in that case
     const previewBuildEnabled = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/preview_build/enabled`);
     const featureFlagUpdatePages = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/update_pages`);
-    const featureFlagMonorepoPath = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/monorepo_path`);
+    const featureFlagMonorepoPath = StringParameter.valueFromLookup(this, `DOP-4127/flag/monorepo_path`);
 
     const entitlementCollection = StringParameter.valueFromLookup(
       this,
