@@ -72,7 +72,9 @@ export class DocsetsRepository extends BaseRepository {
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
-      const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName}`;
+      const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName} ${
+        directory ? `with directory: /${directory}` : ''
+      }`;
       this._logger.info(this._repoName, msg);
     }
     return res?.[0];

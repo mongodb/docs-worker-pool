@@ -112,8 +112,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   async function createAndInsertJob(path?: string) {
     const repoInfo = await docsetsRepository.getRepo(body.repository.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-    const directory = path ? path.slice(1) : undefined;
-    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, directory);
+    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, path);
 
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
@@ -158,7 +157,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       if (path.split('/').length > 1) continue;
 
       try {
-        await createAndInsertJob(`/${path}`);
+        await createAndInsertJob(path);
       } catch (err) {
         return {
           statusCode: 500,
