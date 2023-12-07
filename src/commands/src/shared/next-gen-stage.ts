@@ -1,5 +1,5 @@
 import { Job } from '../../../entities/job';
-import { executeCliCommand } from '../helpers';
+import { executeCliCommand, getRepoDir } from '../helpers';
 
 const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
@@ -28,12 +28,19 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
 
   preppedLogger(`MUT PUBLISH command args: ${commandArgs}`);
 
+  const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
+
   try {
+    await executeCliCommand({
+      command: 'cp',
+      args: ['-r', `${process.cwd()}/snooty/public`, repoDir],
+    });
+
     const { outputText } = await executeCliCommand({
       command: 'mut-publish',
       args: commandArgs,
       options: {
-        cwd: `${process.cwd()}/snooty`,
+        cwd: repoDir,
       },
       logger: preppedLogger,
     });

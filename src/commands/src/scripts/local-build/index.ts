@@ -68,8 +68,6 @@ async function main() {
   const db = connectedDbClient.db(env.DB_NAME);
   const collection = db.collection(env.JOB_QUEUE_COL_NAME);
 
-  console.log('BRANCH NAME?!?!? ', branchName);
-
   const consoleLogger = new ConsoleLogger();
 
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);

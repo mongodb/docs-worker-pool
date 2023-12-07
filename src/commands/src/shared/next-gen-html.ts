@@ -29,6 +29,14 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   });
   preppedLogger(`Result of pwd: ${pwd.outputText}\n ${pwd.errorText}`);
 
+  // rsync -az --exclude '.git' "${PATH_TO_SNOOTY}" "${REPO_DIR}"
+  // const rysnc = await executeCliCommand({
+  //   command: 'rsync',
+  //   args: [`-az --exclude .git ${process.cwd()}/snooty ${repoDir}`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of rsync: ${rysnc.outputText}\n ${rysnc.errorText}`);
+
   // preppedLogger(`Now cd into snooty: cd ${process.cwd()}/snooty`);
   // const secondResult = await executeCliCommand({
   //   command: 'cd',
@@ -63,13 +71,24 @@ export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLog
   // process.chdir(`../`);
   // preppedLogger(`new pwd out of snooty? ${process.cwd()}`);
 
-  preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${repoDir}}`);
-  const lastResult = await executeCliCommand({
-    command: 'cp',
-    args: [`-r`, `${process.cwd()}/snooty/public`, `${repoDir}`],
-    logger: preppedLogger,
-  });
-  preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
+  // await executeCliCommand({
+  //   command: 'ls',
+  //   options: { cwd: `${process.cwd()}/snooty/public` },
+  //   logger: preppedLogger,
+  // });
+
+  // await executeCliCommand({
+  //   command: 'ls',
+  //   options: { cwd: `${process.cwd()}/snooty/public/page-data` },
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Now running second cp command: cp -r ${process.cwd()}/snooty/public ${repoDir}}`);
+  // const lastResult = await executeCliCommand({
+  //   command: 'cp',
+  //   args: [`-r`, `${process.cwd()}/snooty/public`, `${repoDir}`],
+  //   logger: preppedLogger,
+  // });
+  // preppedLogger(`Result of last cp : ${lastResult.outputText}\n ${lastResult.errorText}`);
 
   return result;
 }

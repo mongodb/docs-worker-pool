@@ -44,17 +44,23 @@ async function createEnvProdFile(
 ) {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
   const prodDirName = repoDir;
-  // const prodSnootyFileName = `${prodDirName}snooty/.env.production`;
 
   logger(`PRODFILENAME ${prodFileName}`);
   logger(`PRODDIRNAME: ${prodDirName}`);
+  logger(`write Env Prod File: \nGATSBY_SITE=${projectName}\n
+  GATSBY_MANIFEST_PATH=${prodDirName}/bundle.zip\n
+  GATSBY_PARSER_USER=docsworker-xlarge\n
+  GATSBY_BASE_URL=${baseUrl}\n
+  GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}\n
+  PATH_PREFIX=${prefix}\n
+  'utf8'\n`);
 
   try {
     await writeFileAsync(
       prodFileName,
       `GATSBY_SITE=${projectName}
       GATSBY_MANIFEST_PATH=${prodDirName}/bundle.zip
-      GATSBY_PARSER_USER=${process.env.USER}
+      GATSBY_PARSER_USER=docsworker-xlarge
       GATSBY_BASE_URL=${baseUrl}
       GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}
       PATH_PREFIX=${prefix}`,

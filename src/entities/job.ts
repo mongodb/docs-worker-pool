@@ -72,6 +72,7 @@ export type EnhancedPayload = {
   prefix: string;
   project: string;
   includeInGlobalSearch?: boolean;
+  directory?: string;
 };
 
 export type Job = {

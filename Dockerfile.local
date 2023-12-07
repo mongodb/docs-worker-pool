@@ -57,7 +57,7 @@ RUN chown -Rv docsworker-xlarge ${WORK_DIRECTORY}
 USER docsworker-xlarge
 
 # install snooty frontend and docs-tools
-RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b mm-log --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        
 

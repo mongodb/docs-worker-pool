@@ -582,7 +582,8 @@ export abstract class JobHandler {
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
       this._currJob.payload.branchName,
       (message: string) => this._logger.save(this._currJob._id, message),
-      this._currJob.payload.newHead
+      this._currJob.payload.newHead,
+      this._currJob.payload.directory
     );
     await this.setEnvironmentVariables();
     this._logger.save(this._currJob._id, 'Prepared Environment variables');

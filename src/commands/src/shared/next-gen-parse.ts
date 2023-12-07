@@ -35,7 +35,12 @@ export async function nextGenParse({ job, preppedLogger, isProd }: NextGenParseP
   }
 
   try {
-    return await executeCliCommand({ command: 'snooty', args: commandArgs, logger: preppedLogger });
+    return await executeCliCommand({
+      command: 'snooty',
+      args: commandArgs,
+      options: { cwd: repoDir },
+      logger: preppedLogger,
+    });
   } catch (error) {
     preppedLogger(`ERROR: ${error}\n\n`);
   }

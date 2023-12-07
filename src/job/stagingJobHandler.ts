@@ -81,7 +81,8 @@ export class StagingJobHandler extends JobHandler {
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
       this.currJob.payload.branchName,
       (message: string) => this.logger.save(this.currJob._id, message),
-      this.currJob.payload.newHead
+      this.currJob.payload.newHead,
+      this.currJob.payload.directory
     );
     // await this.pullRepo();
     // this._logger.save(this._currJob._id, 'Pulled Repo');
