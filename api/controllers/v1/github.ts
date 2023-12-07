@@ -93,6 +93,7 @@ export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<
     body = JSON.parse(event.body) as PushEvent;
   } catch (e) {
     console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
+    console.log(`event: ${event} and event body: ${event.body}`);
     return {
       statusCode: 502,
       headers: { 'Content-Type': 'text/plain' },
