@@ -1,20 +1,7 @@
-import path from 'path';
-// import { IJobRepoLogger } from '../../../services/logger';
-import { executeCliCommand, getRepoDir } from '../helpers';
+import { executeCliCommand } from '../helpers';
 import { Job } from '../../../entities/job';
 
 export async function nextGenHtml({ job, preppedLogger }: { job: Job; preppedLogger: (msg: string) => void }) {
-  const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
-  const reposDir = path.join(process.cwd(), `/repos`);
-
-  // preppedLogger(`Now running first cp command: cp ${repoDir}/snooty/.env.production ${process.cwd()}/snooty`);
-  // const firstResult = await executeCliCommand({
-  //   command: 'cp',
-  //   args: [`${repoDir}/.env.production`, `${process.cwd()}/snooty`],
-  //   logger: preppedLogger,
-  // });
-  // preppedLogger(`Result of cp : ${firstResult.outputText}\n ${firstResult.errorText}`);
-
   const lsResult = await executeCliCommand({
     command: 'ls',
     // args: [`${process.cwd()}/snooty`],

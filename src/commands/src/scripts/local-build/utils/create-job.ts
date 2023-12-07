@@ -37,7 +37,6 @@ export function createLocalJob({ branchName, repoName, repoOwner, commit, projec
       project: project, // Needs to get the project rather than repo name
       pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
       mutPrefix: project,
-      directory: 'cloud-docs',
     },
     logs: [],
   };
