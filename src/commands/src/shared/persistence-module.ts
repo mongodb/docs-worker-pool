@@ -24,14 +24,10 @@ export async function persistenceModule({ job, preppedLogger }: PersistenceModul
   //   args.push(job._id);
   // }
 
-  preppedLogger(`persistence args: ${args}`);
-
   const { outputText } = await executeCliCommand({
     command: 'node',
     args,
   });
-
-  preppedLogger(`output text persistence: ${outputText}`);
 
   return outputText;
 }

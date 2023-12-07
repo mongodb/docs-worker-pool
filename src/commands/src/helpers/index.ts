@@ -168,19 +168,17 @@ export async function executeCliCommand({
 
     if (writeStream) executedCommand.stdout?.pipe(writeStream);
     executedCommand.stdout?.on('data', (data: Buffer) => {
-      console.log(data.toString());
       if (logger) logger(data.toString());
       outputText.push(data.toString());
     });
 
     executedCommand.stderr?.on('data', (data: Buffer) => {
-      console.log(data.toString());
       if (logger) logger(data.toString());
       errorText.push(data.toString());
     });
 
     executedCommand.on('error', (err) => {
-      if (logger) logger(`error in cli command: ${err}`);
+      if (logger) logger(`ERROR in executeCliCommand.\nCommand: ${command} ${args.join(' ')}\nError: ${err}`);
       reject(new ExecuteCommandError('The command failed', err));
     });
 
@@ -193,9 +191,6 @@ export async function executeCliCommand({
           logger('Arguments provided: ' + args);
           logger('Options provided: ' + JSON.stringify(options));
         }
-        console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
-        console.error('Arguments provided: ', args);
-        console.error('Options provided: ', options);
 
         if (outputText.length) {
           console.log(outputText.join(''));
@@ -266,7 +261,6 @@ export async function getPatchId(repoDir: string, logger: (msg: string) => void)
 
     return gitPatchId.slice(0, 7);
   } catch (err) {
-    console.warn('No patch ID found: ', +filePath);
     logger('No patch ID found: ' + filePath + ' ' + err);
   }
 }
@@ -282,7 +276,7 @@ export async function getCommitBranch(repoDir: string, logger: (msg: string) => 
 
     return response.outputText;
   } catch (err) {
-    logger(`commit branch fail: ${err}`);
+    logger(`ERROR in getCommitBranch: ${err}`);
     throw Error;
   }
 }
@@ -295,11 +289,10 @@ export async function getCommitHash(repoDir: string, logger: (msg: string) => vo
       args: ['rev-parse', '--short', 'HEAD'],
       options: { cwd: repoDir },
     });
-    console.log('commit hash ', response);
 
     return response.outputText;
   } catch (err) {
-    logger(`commit hash fail: ${err}`);
+    logger(`ERROR in getCommitHash: ${err}`);
     throw Error;
   }
 }

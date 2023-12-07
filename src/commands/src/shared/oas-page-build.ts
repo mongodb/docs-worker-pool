@@ -13,12 +13,8 @@ export async function oasPageBuild({ job, preppedLogger }: OasPageBuildParams) {
   const siteUrl = job.payload.mutPrefix
     ? `${baseUrl}/${job.payload.mutPrefix}`
     : `${baseUrl}/${job.payload.project}/docsworker-xlarge/${job.payload.branchName}`;
-  console.log('siteUrl: ', siteUrl);
-  preppedLogger(`Is there a mutprefix?? : ${job.payload.mutPrefix}`);
-  preppedLogger(`SITE URL: ${siteUrl}`);
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   const bundlePath = `${repoDir}/bundle.zip`;
-  preppedLogger(`BUNDLE PATH ? : ${bundlePath}`);
 
   try {
     const { outputText } = await executeCliCommand({
@@ -38,12 +34,11 @@ export async function oasPageBuild({ job, preppedLogger }: OasPageBuildParams) {
       ],
     });
 
-    preppedLogger(`OAS page builder output text? : ${outputText}`);
+    preppedLogger(outputText);
 
     return outputText;
   } catch (error) {
-    preppedLogger(`Caught error from OAS page builder cli!: ${error}\n\n`);
-
+    preppedLogger(`ERROR: oas-page-build.ts - ${error}`);
     return '';
   }
 }

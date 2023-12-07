@@ -15,7 +15,6 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
   let prefix = mutPrefix || project;
   // TODO: Figure out correct hostedAtUrl
   let hostedAtUrl = `${url}/${prefix}/${DOCS_WORKER_USER}/${branchName}/`;
-  // TODO: Look further into all possible needs for prefix...
 
   const commandArgs = ['public', bucket, '--stage'];
 
@@ -26,10 +25,7 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
 
   commandArgs.push(`--prefix=${prefix}`);
 
-  preppedLogger(`MUT PUBLISH command args: ${commandArgs}`);
-
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
-
   try {
     await executeCliCommand({
       command: 'cp',
@@ -46,7 +42,7 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
     });
 
     const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
-    preppedLogger(`OUTPUT of mut publish: ${resultMessage}`);
+    preppedLogger(resultMessage);
 
     return {
       status: 'inProgress',

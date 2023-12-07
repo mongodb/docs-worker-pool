@@ -1,7 +1,7 @@
 import path from 'path';
 import { Job } from '../../../entities/job';
 import { getDirectory } from '../../../job/jobHandler';
-import { CliCommandResponse, executeCliCommand } from '../helpers';
+import { executeCliCommand } from '../helpers';
 
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 interface NextGenParseParams {

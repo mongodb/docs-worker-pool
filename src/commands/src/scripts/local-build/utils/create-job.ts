@@ -34,7 +34,7 @@ export function createLocalJob({ branchName, repoName, repoOwner, commit, projec
       newHead: commit.sha,
       urlSlug: branchName,
       prefix: '', // empty string for now
-      project: project, // Needs to get the project rather than repo name
+      project: project,
       pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
       mutPrefix: project,
     },

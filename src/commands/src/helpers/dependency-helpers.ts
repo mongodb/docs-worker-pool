@@ -16,25 +16,6 @@ async function cloneRepo(repoOwner: string, repoName: string) {
   });
 }
 
-async function pullRepo(
-  repoDirName: string,
-  branchName: string,
-  newHead: string | null | undefined = null,
-  logger: (msg: string) => void
-) {
-  const pullRepoCommands = [`git checkout ${branchName}`, ' && ', `git pull origin ${branchName}`];
-  if (newHead) {
-    pullRepoCommands.push(' && ', `git checkout ${newHead} .`);
-  }
-
-  await executeCliCommand({
-    command: 'git',
-    args: pullRepoCommands,
-    options: { cwd: `${process.cwd()}/repos/${repoDirName}` },
-    logger,
-  });
-}
-
 async function createEnvProdFile(
   repoDir: string,
   projectName: string,
@@ -44,16 +25,6 @@ async function createEnvProdFile(
 ) {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
   const prodDirName = repoDir;
-
-  logger(`PRODFILENAME ${prodFileName}`);
-  logger(`PRODDIRNAME: ${prodDirName}`);
-  logger(`write Env Prod File: \nGATSBY_SITE=${projectName}\n
-  GATSBY_MANIFEST_PATH=${prodDirName}/bundle.zip\n
-  GATSBY_PARSER_USER=docsworker-xlarge\n
-  GATSBY_BASE_URL=${baseUrl}\n
-  GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}\n
-  PATH_PREFIX=${prefix}\n
-  'utf8'\n`);
 
   try {
     await writeFileAsync(
@@ -67,7 +38,6 @@ async function createEnvProdFile(
       'utf8'
     );
   } catch (e) {
-    console.error(`ERROR! Could not write to .env.production`);
     logger(`ERROR! Could not write to .env.production: ${e}`);
     throw e;
   }
@@ -89,7 +59,6 @@ export async function prepareBuildAndGetDependencies(
   // await pullRepo(repoName, branchName, newHead, preppedLogger);
 
   const repoDir = getRepoDir(repoName, directory);
-  // const repoDir = `repos/${repoName}`;
 
   // doing these in parallel
   const commandPromises = [
@@ -102,7 +71,6 @@ export async function prepareBuildAndGetDependencies(
 
   try {
     const dependencies = await Promise.all(commandPromises);
-    preppedLogger('dependencies ' + dependencies);
 
     return {
       commitHash: dependencies[0] as string,
@@ -113,7 +81,6 @@ export async function prepareBuildAndGetDependencies(
       repoDir,
     };
   } catch (error) {
-    console.error('ERROR! Could not get build dependencies');
     preppedLogger(`error, could not get build deps: ${error}`);
     throw error;
   }
