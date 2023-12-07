@@ -131,11 +131,18 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     let monorepoPaths: string[] = [];
     try {
       if (body.head_commit && body.repository.owner.name) {
+        consoleLogger.info(
+          body.repository.full_name,
+          `commitSha: ${body.head_commit.id}\nrepoName: ${body.repository.name}\nownerName: ${
+            body.repository.owner.name
+          }\nUpdatedfilepaths: ${getUpdatedFilePaths(body.head_commit)}`
+        );
         monorepoPaths = await getMonorepoPaths({
           commitSha: body.head_commit.id,
           repoName: body.repository.name,
           ownerName: body.repository.owner.name,
           updatedFilePaths: getUpdatedFilePaths(body.head_commit),
+          consoleLogger,
         });
         consoleLogger.info(body.repository.full_name, `Monorepo Paths with new changes: ${monorepoPaths}`);
       }
