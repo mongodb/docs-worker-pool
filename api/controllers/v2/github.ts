@@ -18,7 +18,8 @@ async function prepGithubPushPayload(
   githubEvent: PushEvent,
   repoBranchesRepository: RepoBranchesRepository,
   prefix: string,
-  repoInfo: ReposBranchesDocsetsDocument
+  repoInfo: ReposBranchesDocsetsDocument,
+  directory?: string
 ): Promise<Omit<EnhancedJob, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(
@@ -53,6 +54,7 @@ async function prepGithubPushPayload(
       urlSlug: urlSlug,
       prefix: prefix,
       project: project,
+      directory: directory,
     },
     logs: [],
   };
@@ -110,7 +112,8 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   async function createAndInsertJob(path?: string) {
     const repoInfo = await docsetsRepository.getRepo(body.repository.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
+    const directory = path ? path.slice(1) : undefined;
+    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, directory);
 
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
@@ -118,7 +121,10 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     consoleLogger.info(job.title, `Created Job ${jobId}`);
   }
 
+  consoleLogger.info(body.repository.full_name, `IN V2!!! `);
+
   if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && body.repository.name === MONOREPO_NAME) {
+    consoleLogger.info(body.repository.full_name, `past feature flag and monorepo conditional`);
     let monorepoPaths: string[] = [];
     try {
       if (body.head_commit && body.repository.owner.name) {
@@ -128,7 +134,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
           ownerName: body.repository.owner.name,
           updatedFilePaths: getUpdatedFilePaths(body.head_commit),
         });
-        consoleLogger.info('monoRepoPaths', `Monorepo Paths with new changes: ${monorepoPaths}`);
+        consoleLogger.info(body.repository.full_name, `Monorepo Paths with new changes: ${monorepoPaths}`);
       }
     } catch (error) {
       console.warn('Warning, attempting to get repo paths caused an error', error);
@@ -136,6 +142,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
     /* Create and insert Job for each monorepo project that has changes */
     for (const path of monorepoPaths) {
+      consoleLogger.info(body.repository.full_name, `Each path: ${path}`);
       // TODO: Deal with nested monorepo projects
       /* For now, we will ignore nested monorepo projects until necessary */
       if (path.split('/').length > 1) continue;
