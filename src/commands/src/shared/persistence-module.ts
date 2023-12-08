@@ -19,10 +19,10 @@ export async function persistenceModule({ job, logger }: PersistenceModuleParams
     githubUser,
   ];
 
-  // if (job._id) {
-  //   args.push('--jobId');
-  //   args.push(job._id);
-  // }
+  if (job._id) {
+    args.push('--jobId');
+    args.push(job._id);
+  }
 
   const { outputText } = await executeCliCommand({
     command: 'node',

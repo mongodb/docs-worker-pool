@@ -26,8 +26,6 @@ export async function nextGenParse({ job, logger, isProd }: NextGenParseParams):
 
   commandArgs.push(RSTSPEC_FLAG);
 
-  logger(`COMMAND for parse: ${commandArgs.join(' ')}`);
-
   // Not currently used in production builds, adding functionality
   // now so that it is available when it is.
   if (isProd) {
