@@ -5,17 +5,24 @@ FROM public.ecr.aws/lambda/nodejs:18 as builder
 ARG SNOOTY_PARSER_VERSION
 WORKDIR /usr/app
 
-RUN yum install -y curl
+RUN yum install -y curl unzip
 
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
 
-COPY package.json api/ src/  ./
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY api api/
+COPY src src/
+
 RUN npm ci
 RUN npm run build:esbuild:lambda
 
 FROM public.ecr.aws/lambda/nodejs:18
 
-COPY --from=builder dist/ ${LAMBDA_TASK_ROOT}
+ENV PATH="${PATH}:/opt/snooty"
+
+COPY --from=builder /opt/ /opt/
+COPY --from=builder usr/app/dist ${LAMBDA_TASK_ROOT}
 
 CMD ["index.handler"]
