@@ -214,9 +214,10 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async getAndBuildDependencies() {
     const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
-    if (!buildDependencies) return;
-    const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
-    this._logger.save(this._currJob._id, commands.join('\n'));
+    if (!buildDependencies) return [];
+    return buildDependencies;
+    // const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
+    // this._logger.save(this._currJob._id, commands.join('\n'));
   }
 
   @throwIfJobInterupted()
@@ -574,7 +575,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Pulled Repo');
     // this.currJob.buildCommands = []; // Not needed??
 
-    await this.getAndBuildDependencies(); // ?
+    const buildDependencies = await this.getAndBuildDependencies(); // ?? How to combine...
     this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
 
     this.prepBuildCommands();
@@ -591,7 +592,7 @@ export abstract class JobHandler {
       this.currJob.payload.repoName,
       this._currJob.payload.project,
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      [],
+      buildDependencies,
       (message: string) => this._logger.save(this._currJob._id, message),
       this._currJob.payload.directory
     );

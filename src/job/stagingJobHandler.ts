@@ -13,14 +13,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
-import {
-  nextGenHtml,
-  nextGenParse,
-  nextGenStage,
-  oasPageBuild,
-  persistenceModule,
-  prepareBuildAndGetDependencies,
-} from '../commands';
+import { nextGenStage } from '../commands';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 
 export class StagingJobHandler extends JobHandler {
