@@ -60,27 +60,38 @@ async function localApp() {
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
   const bucket = 'docs-atlas-dotcomstg';
 
-  const { repoOwner, repoName, branchName, newHead, project, mutPrefix, directory } = fakePayload;
+  const { repoName, project, mutPrefix, directory } = fakePayload;
 
-  // const repoName = 'docs-java';
-  // const project = 'java';
-  // const baseUrl = 'https://docs-mongodbcom-staging.corp.mongodb.com/';
-  // const bucket = 'docs-java-dotcomstg';
-  // const mutPrefix = 'java'
-  // const repoName = 'cloud-docs';
-  // const project = 'cloud-docs';
-  // const baseUrl = 'https://docs-mongodbcom-staging.corp.mongodb.com';
-  // const bucket = 'docs-atlas-dotcomstg';
-  // const mutPrefix = 'docs-qa/atlas'
+  const buildDependencies = [
+    {
+      dependencies: [
+        {
+          url: 'https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongodb-internal.yaml',
+          filename: 'published-branches.yaml',
+        },
+      ],
+    },
+    {
+      buildDir: 'source/driver-examples',
+      dependencies: [
+        {
+          url: 'https://raw.githubusercontent.com/mongodb/mongo-python-driver/master/test/test_examples.py',
+          filename: 'test_examples.py',
+        },
+        {
+          url: 'https://raw.githubusercontent.com/mongodb/motor/master/test/asyncio_tests/test_examples.py',
+          filename: 'test_examples_motor.py',
+        },
+      ],
+    },
+  ];
 
   const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await prepareBuildAndGetDependencies(
-    repoOwner,
     repoName,
     project,
     baseUrl,
-    branchName,
+    buildDependencies,
     logger,
-    newHead,
     directory
   );
 

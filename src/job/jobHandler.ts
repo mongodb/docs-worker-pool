@@ -17,11 +17,11 @@ import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import {
   nextGenHtml,
   nextGenParse,
-  nextGenStage,
   oasPageBuild,
   persistenceModule,
   prepareBuildAndGetDependencies,
 } from '../commands';
+import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -209,6 +209,14 @@ export abstract class JobHandler {
       await error;
       throw error;
     }
+  }
+
+  @throwIfJobInterupted()
+  private async getAndBuildDependencies() {
+    const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
+    if (!buildDependencies) return;
+    const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
+    this._logger.save(this._currJob._id, commands.join('\n'));
   }
 
   @throwIfJobInterupted()
@@ -564,7 +572,11 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
-    this.currJob.buildCommands = [];
+    // this.currJob.buildCommands = []; // Not needed??
+
+    await this.getAndBuildDependencies(); // ?
+    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
+
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
@@ -576,13 +588,11 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, `payload's project: ${this._currJob.payload.project}`);
     this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
     await prepareBuildAndGetDependencies(
-      this.currJob.payload.repoOwner,
       this.currJob.payload.repoName,
       this._currJob.payload.project,
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      this._currJob.payload.branchName,
+      [],
       (message: string) => this._logger.save(this._currJob._id, message),
-      this._currJob.payload.newHead,
       this._currJob.payload.directory
     );
     await this.setEnvironmentVariables();
@@ -609,13 +619,11 @@ export abstract class JobHandler {
     this.logger.save(job._id, 'Prepared Environment variables');
 
     await prepareBuildAndGetDependencies(
-      job.payload.repoOwner,
       job.payload.repoName,
       job.payload.project,
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      job.payload.branchName,
+      [], // ????? build dependencies...
       logger,
-      job.payload.newHead,
       job.payload.directory
     );
 
