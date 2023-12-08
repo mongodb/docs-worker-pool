@@ -49,24 +49,24 @@ export async function prepareBuildAndGetDependencies(
   projectName: string,
   baseUrl: string,
   branchName: string,
-  preppedLogger: (message: string) => void,
+  logger: (message: string) => void,
   newHead?: string | null,
   directory?: string
 ) {
   // before we get build dependencies, we need to clone the repo
   // await cloneRepo(repoOwner, repoName);
-  preppedLogger(`in Prepared build and get deps!!`);
-  // await pullRepo(repoName, branchName, newHead, preppedLogger);
+  logger(`in Prepared build and get deps!!`);
+  // await pullRepo(repoName, branchName, newHead, logger);
 
   const repoDir = getRepoDir(repoName, directory);
 
   // doing these in parallel
   const commandPromises = [
-    getCommitHash(repoDir, preppedLogger),
-    getCommitBranch(repoDir, preppedLogger),
-    getPatchId(repoDir, preppedLogger),
+    getCommitHash(repoDir, logger),
+    getCommitBranch(repoDir, logger),
+    getPatchId(repoDir, logger),
     existsAsync(path.join(process.cwd(), 'config/redirects')),
-    createEnvProdFile(repoDir, projectName, baseUrl, preppedLogger),
+    createEnvProdFile(repoDir, projectName, baseUrl, logger),
   ];
 
   try {
@@ -81,7 +81,7 @@ export async function prepareBuildAndGetDependencies(
       repoDir,
     };
   } catch (error) {
-    preppedLogger(`error, could not get build deps: ${error}`);
+    logger(`error, could not get build deps: ${error}`);
     throw error;
   }
 }

@@ -96,7 +96,7 @@ export const getDeployableJobs = async (
       // e.g. mongodb/docs-realm/master => (owner/repo/branch)
       [repoOwner, repoName, branchName] = splitValues;
     } else if (splitValues.length === 4) {
-      // TODO: NEED to add feature flag here again
+      // TODO: MONOREPO feature flag needed here
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
       [repoOwner, repoName, directory, branchName] = splitValues;
     } else {

@@ -3,9 +3,9 @@ import { executeCliCommand, getRepoDir } from '../helpers';
 
 interface PersistenceModuleParams {
   job: Job;
-  preppedLogger: (message: string) => void;
+  logger: (message: string) => void;
 }
-export async function persistenceModule({ job, preppedLogger }: PersistenceModuleParams) {
+export async function persistenceModule({ job, logger }: PersistenceModuleParams) {
   const githubUser = job.payload.repoOwner;
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   const bundlePath = `${repoDir}/bundle.zip`;

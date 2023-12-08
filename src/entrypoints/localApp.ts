@@ -52,7 +52,7 @@ const fakeJob: Job = {
   purgedUrls: undefined,
 };
 
-const preppedLogger = (message: string) => {
+const logger = (message: string) => {
   console.log(message);
 };
 
@@ -79,7 +79,7 @@ async function localApp() {
     project,
     baseUrl,
     branchName,
-    preppedLogger,
+    logger,
     newHead,
     directory
   );
@@ -87,20 +87,20 @@ async function localApp() {
   console.log('repoDir ', repoDir);
 
   console.log('Begin snooty build...');
-  const snootyBuildRes = await nextGenParse({ job: fakeJob, preppedLogger });
+  const snootyBuildRes = await nextGenParse({ job: fakeJob, logger });
 
   console.log(snootyBuildRes.errorText);
 
   console.log('snooty build complete');
 
   console.log('Begin persistence-module');
-  const persistenceModuleRes = await persistenceModule({ job: fakeJob, preppedLogger });
+  const persistenceModuleRes = await persistenceModule({ job: fakeJob, logger });
   console.log(persistenceModuleRes);
   console.log('persistence-module complete');
 
   console.log('Begin next-gen-html...');
 
-  const nextGenHtmlRes = await nextGenHtml({ job: fakeJob, preppedLogger });
+  const nextGenHtmlRes = await nextGenHtml({ job: fakeJob, logger });
   console.log(nextGenHtmlRes.outputText);
 
   console.log('next-gen-html complete');
@@ -108,7 +108,7 @@ async function localApp() {
   console.log('Begin oas-page-build...');
   const siteUrl = mutPrefix ? `${baseUrl}/${mutPrefix}` : `${baseUrl}`;
   console.log('siteUrl: ', siteUrl);
-  const oasPageBuildRes = await oasPageBuild({ job: fakeJob, preppedLogger });
+  const oasPageBuildRes = await oasPageBuild({ job: fakeJob, logger });
   console.log('oas-page-build compelte');
 
   console.log(oasPageBuildRes);
@@ -116,7 +116,7 @@ async function localApp() {
 
   await nextGenStage({
     job: fakeJob,
-    preppedLogger,
+    logger,
     bucket,
     url: baseUrl,
   });
@@ -127,7 +127,7 @@ async function localApp() {
     hasConfigRedirects: hasRedirects,
     gitBranch: commitBranch,
     mutPrefix: mutPrefix || '',
-    preppedLogger,
+    logger,
   });
   console.log(deployRes);
   console.log('next-gen-deploy complete');

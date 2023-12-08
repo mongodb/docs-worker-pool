@@ -4,12 +4,12 @@ import { executeCliCommand, getRepoDir } from '../helpers';
 const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
   job: Job;
-  preppedLogger: (message: string) => void;
+  logger: (message: string) => void;
   bucket: string;
   url: string;
 }
 
-export async function nextGenStage({ job, preppedLogger, bucket, url }: StageParams) {
+export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
   const { mutPrefix, branchName, patch, project, newHead } = job.payload;
 
   let prefix = mutPrefix || project;
@@ -38,11 +38,11 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
       options: {
         cwd: repoDir,
       },
-      logger: preppedLogger,
+      logger: logger,
     });
 
     const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
-    preppedLogger(resultMessage);
+    logger(resultMessage);
 
     return {
       status: 'inProgress',
@@ -50,7 +50,7 @@ export async function nextGenStage({ job, preppedLogger, bucket, url }: StagePar
       error: '',
     };
   } catch (error) {
-    preppedLogger(`Failed in nextGenStage.`);
+    logger(`Failed in nextGenStage.`);
     return {
       status: 'failure', // Is this a correct value??
       output: '', // TODO: better values

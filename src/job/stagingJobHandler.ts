@@ -21,6 +21,7 @@ import {
   persistenceModule,
   prepareBuildAndGetDependencies,
 } from '../commands';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
@@ -68,49 +69,6 @@ export class StagingJobHandler extends JobHandler {
     }
   }
 
-  async build(): Promise<boolean> {
-    const preppedLogger = (msg: string) => this.logger.save(this.currJob._id, msg);
-
-    await this.setEnvironmentVariables();
-    this.logger.save(this.currJob._id, 'Prepared Environment variables');
-
-    await prepareBuildAndGetDependencies(
-      this.currJob.payload.repoOwner,
-      this.currJob.payload.repoName,
-      this.currJob.payload.project,
-      'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      this.currJob.payload.branchName,
-      (message: string) => this.logger.save(this.currJob._id, message),
-      this.currJob.payload.newHead,
-      this.currJob.payload.directory
-    );
-    // await this.pullRepo();
-    // this._logger.save(this._currJob._id, 'Pulled Repo');
-    // try {
-    //   await this.repoConnector.pullRepo(this.currJob);
-    // } catch (error) {
-    //   await error;
-    //   throw error;
-    // }
-
-    await nextGenParse({ job: this.currJob, preppedLogger });
-    this.logger.save(this.currJob._id, 'Repo Parsing Completed');
-    await persistenceModule({ job: this.currJob, preppedLogger });
-    this.logger.save(this.currJob._id, 'Persistence Module Complete');
-    // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
-    const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
-    if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
-      await this.callGatsbyCloudWebhook();
-    }
-    this.logger.save(this.currJob._id, 'Gatsby Webhook Called');
-    await oasPageBuild({ job: this.currJob, preppedLogger });
-    this.logger.save(this.currJob._id, 'OAS Page Build Complete');
-    await nextGenHtml({ job: this.currJob, preppedLogger });
-    this.logger.save(this.currJob._id, 'NextGenHtml Finished');
-
-    return true;
-  }
-
   prepStageSpecificNextGenCommands(): void {
     if (this.currJob.buildCommands) {
       this.currJob.buildCommands[this.currJob.buildCommands.length - 1] = 'make next-gen-parse';
@@ -128,47 +86,36 @@ export class StagingJobHandler extends JobHandler {
     }
   }
   async deploy(): Promise<CommandExecutorResponse> {
+    let resp;
     try {
-      // if (this.currJob.payload.repoName === MONOREPO_NAME) {
-      // this.logger.save(this.currJob._id, `ITS MONOREPO, let's stage!! All the world's a stage.`);
-      // resp = await nextGenStage({
-      //   job: this.currJob,
-      //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-      // });
-      // resp = await this.deployGeneric();
-      // } else {
-      // TODO: this should be normal deployGeneric
-      // this.logger.save(this.currJob._id, `ITS fake monorepo, let's stage!! All the world's a stage.`);
-      // const hasConfigRedirects = fs.existsSync(path.join(process.cwd(), 'config/redirects'));
-      // this.logger.save(this.currJob._id, `hasConfigRedirects: ${hasConfigRedirects}`);
-      // resp = await nextGenStage({
-      //   job: this.currJob,
-      //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-      // });
-      // this.logger.save(this.currJob._id, `Now to deploy `);
-      // await nextGenDeploy({
-      //   gitBranch: this.currJob.payload.branchName,
-      //   mutPrefix: this.currJob.mutPrefix || '',
-      //   hasConfigRedirects: hasConfigRedirects,
-      //   preppedLogger: (message: string) => this.logger.save(this.currJob._id, message),
-      // });
-      // resp = await this.deployGeneric();
-      // }
-      this.currJob;
-      const preppedLogger = (message: string) => this.logger.save(this.currJob._id, message);
-      const repo_info = await this._docsetsRepo.getRepo(this.currJob.payload.repoName, this.currJob.payload.directory);
-      if (!repo_info) {
-        preppedLogger(`repo info not found`);
-      }
-      console.log('repo info ', repo_info);
-      const environment = process.env.SNOOTY_ENV;
-      console.log('environment ', environment);
-      const bucket = repo_info.bucket.stg;
-      const url = repo_info.url.stg;
-      console.log('BUCKET: ', bucket);
-      console.log('URL: ', url);
+      // TODO: MONOREPO feature flag needed
+      if (
+        // process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' &&
+        this.currJob.payload.repoName === MONOREPO_NAME
+      ) {
+        const logger = (message: string) => this.logger.save(this.currJob._id, message);
+        const repo_info = await this._docsetsRepo.getRepo(
+          this.currJob.payload.repoName,
+          this.currJob.payload.directory
+        );
+        if (!repo_info) {
+          const errorMessage = `
+            Docset Repo data not found in Atlas for repoName: ${this.currJob.payload.repoName}\n
+            ${this.currJob.payload.directory ? `directory: ${this.currJob.payload.directory}\n` : ''}
+            project: ${this.currJob.payload.project}
+          `;
+          logger(`ERROR: ${errorMessage}`);
+          throw Error(errorMessage);
+        }
+        const environment = process.env.SNOOTY_ENV;
+        logger(`ENVIRONMENT???? process.env.SNOOTY_ENV: "${environment}"`);
+        const bucket = repo_info.bucket.stg;
+        const url = repo_info.url.stg;
 
-      const resp = await nextGenStage({ job: this.currJob, preppedLogger, bucket, url });
+        resp = await nextGenStage({ job: this.currJob, logger, bucket, url });
+      } else {
+        resp = await this.deployGeneric();
+      }
       const summary = '';
       if (resp.output?.includes('Summary')) {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));

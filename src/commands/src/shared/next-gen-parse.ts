@@ -6,10 +6,10 @@ import { executeCliCommand } from '../helpers';
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 interface NextGenParseParams {
   job: Job;
-  preppedLogger: (message: string) => void;
+  logger: (message: string) => void;
   isProd?: boolean;
 }
-export async function nextGenParse({ job, preppedLogger, isProd }: NextGenParseParams): Promise<any> {
+export async function nextGenParse({ job, logger, isProd }: NextGenParseParams): Promise<any> {
   const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(job)}`);
   const commitHash = job.payload.newHead;
   const patchId = job.payload.patch;
@@ -26,7 +26,7 @@ export async function nextGenParse({ job, preppedLogger, isProd }: NextGenParseP
 
   commandArgs.push(RSTSPEC_FLAG);
 
-  preppedLogger(`COMMAND for parse: ${commandArgs.join(' ')}`);
+  logger(`COMMAND for parse: ${commandArgs.join(' ')}`);
 
   // Not currently used in production builds, adding functionality
   // now so that it is available when it is.
@@ -39,9 +39,9 @@ export async function nextGenParse({ job, preppedLogger, isProd }: NextGenParseP
       command: 'snooty',
       args: commandArgs,
       options: { cwd: repoDir },
-      logger: preppedLogger,
+      logger: logger,
     });
   } catch (error) {
-    preppedLogger(`ERROR: ${error}\n\n`);
+    logger(`ERROR: ${error}\n\n`);
   }
 }

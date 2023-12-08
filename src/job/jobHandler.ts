@@ -306,7 +306,7 @@ export abstract class JobHandler {
     };
 
     // const commandMap: {
-    //   [K: string]: ({ job, preppedLogger }: { job: Job; preppedLogger: (message: string) => void }) => any;
+    //   [K: string]: ({ job, logger }: { job: Job; logger: (message: string) => void }) => any;
     // } = {
     //   ['next-gen-parse']: nextGenParse,
     //   ['persistence-module']: persistenceModule,
@@ -333,7 +333,7 @@ export abstract class JobHandler {
     // create constants for command inputs
     const thisLogger = this._logger;
     const thisJob = this.currJob;
-    const preppedLogger = (message: string) => {
+    const logger = (message: string) => {
       thisLogger.save(thisJob._id, message);
     };
 
@@ -342,9 +342,9 @@ export abstract class JobHandler {
     if (NO_MAKEFILES) {
       // TODO: add conditionals
       // TODO: add benchmarks
-      await nextGenParse({ job: this._currJob, preppedLogger });
+      await nextGenParse({ job: this._currJob, logger });
       this._logger.save(this._currJob._id, 'Repo Parsing Completed');
-      // await persistenceModule({ job: this._currJob, preppedLogger });
+      // await persistenceModule({ job: this._currJob, logger });
       // this._logger.save(this._currJob._id, 'Persistence Module Complete');
       // // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
       // const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
@@ -352,9 +352,9 @@ export abstract class JobHandler {
       //   await this.callGatsbyCloudWebhook();
       // }
       // this._logger.save(this._currJob._id, 'Gatsby Webhook Called');
-      // await oasPageBuild({ job: this._currJob, preppedLogger });
+      // await oasPageBuild({ job: this._currJob, logger });
       // this._logger.save(this._currJob._id, 'OAS Page Build Complete');
-      // await nextGenHtml({ job: this._currJob, preppedLogger });
+      // await nextGenHtml({ job: this._currJob, logger });
       // this._logger.save(this._currJob._id, 'NextGenHtml Finished');
 
       for (const command of makeCommands) {
@@ -389,10 +389,10 @@ export abstract class JobHandler {
         this._logger.save(this.currJob._id, `command: ${command}`);
         // if (commandMap[key]) {
         //   this._logger.save(this.currJob._id, `running from commandMap: ${key}`);
-        //   await commandMap[key]({ job: this.currJob, preppedLogger });
+        //   await commandMap[key]({ job: this.currJob, logger });
         // } else if (key === 'next-gen-html') {
         //   this._logger.save(this.currJob._id, `running nextGenHtml!`);
-        //   await nextGenHtml(preppedLogger);
+        //   await nextGenHtml(logger);
         // } else {
         if (stages[key]) {
           const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
@@ -556,7 +556,7 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  protected async build(): Promise<boolean> {
+  protected async buildWithMakefiles(): Promise<boolean> {
     this.cleanup();
     await this.cloneRepo(this._config.get<string>('repo_dir'));
     this._logger.save(this._currJob._id, 'Cloned Repo');
@@ -588,6 +588,54 @@ export abstract class JobHandler {
     await this.setEnvironmentVariables();
     this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
+  }
+
+  /* New build process without Makefiles */
+  @throwIfJobInterupted()
+  protected async build(): Promise<boolean> {
+    this.cleanup();
+
+    const job = this._currJob;
+    const logger = (msg: string) => this.logger.save(this.currJob._id, msg);
+
+    await this.cloneRepo(this._config.get<string>('repo_dir'));
+    this._logger.save(job._id, 'Cloned Repo');
+    await this.commitCheck();
+    this._logger.save(job._id, 'Checked Commit');
+    await this.pullRepo();
+    this._logger.save(job._id, 'Pulled Repo');
+
+    await this.setEnvironmentVariables();
+    this.logger.save(job._id, 'Prepared Environment variables');
+
+    await prepareBuildAndGetDependencies(
+      job.payload.repoOwner,
+      job.payload.repoName,
+      job.payload.project,
+      'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
+      job.payload.branchName,
+      logger,
+      job.payload.newHead,
+      job.payload.directory
+    );
+
+    await nextGenParse({ job, logger });
+    this.logger.save(job._id, 'Repo Parsing Complete');
+    await persistenceModule({ job, logger });
+    this.logger.save(job._id, 'Persistence Module Complete');
+
+    // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+    const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+    if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      await this.callGatsbyCloudWebhook();
+      this.logger.save(job._id, 'Gatsby Webhook Called');
+    }
+
+    await oasPageBuild({ job, logger });
+    this.logger.save(job._id, 'OAS Page Build Complete');
+    await nextGenHtml({ job, logger });
+    this.logger.save(job._id, 'NextGenHtml Complete');
+    return true;
   }
 
   @throwIfJobInterupted()
@@ -650,7 +698,16 @@ export abstract class JobHandler {
       await this.pullRepo();
       this._logger.save(this._currJob._id, 'Pulled Repo');
 
-      await this.build();
+      // TODO: MONOREPO feature flag needed here
+      if (
+        // process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' &&
+        this._currJob.payload.repoName === MONOREPO_NAME
+      ) {
+        await this.build();
+      } else {
+        await this.buildWithMakefiles();
+      }
+
       const resp = await this.deploy();
       await this.update(resp);
       this.cleanup();

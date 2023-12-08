@@ -3,10 +3,10 @@ import { executeCliCommand, getRepoDir } from '../helpers';
 
 interface OasPageBuildParams {
   job: Job;
-  preppedLogger: (message: string) => void;
+  logger: (message: string) => void;
 }
 
-export async function oasPageBuild({ job, preppedLogger }: OasPageBuildParams) {
+export async function oasPageBuild({ job, logger }: OasPageBuildParams) {
   // TODO: replace with a process to get this url??
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
 
@@ -34,11 +34,11 @@ export async function oasPageBuild({ job, preppedLogger }: OasPageBuildParams) {
       ],
     });
 
-    preppedLogger(outputText);
+    logger(outputText);
 
     return outputText;
   } catch (error) {
-    preppedLogger(`ERROR: oas-page-build.ts - ${error}`);
+    logger(`ERROR: oas-page-build.ts - ${error}`);
     return '';
   }
 }
