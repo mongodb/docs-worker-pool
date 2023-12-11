@@ -43,10 +43,10 @@ RUN git clone -b v${MUT_VERSION} --depth 1 https://github.com/mongodb/mut.git \
     && mv dist/mut /opt/
 
 # install redoc fork
-RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
-    # Install dependencies for Redoc CLI
-    && cd redoc/ \
-    && npm ci --prefix cli/ --omit=dev
+# RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+#     # Install dependencies for Redoc CLI
+#     && cd redoc/ \
+#     && npm ci --prefix cli/ --omit=dev
 
 ENV PATH="${PATH}:/opt/snooty:/opt/mut:/${WORK_DIRECTORY}/.local/bin"
 
