@@ -5,12 +5,29 @@ const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
   job: Job;
   logger: (message: string) => void;
-  bucket: string;
-  url: string;
+  bucket?: string;
+  url?: string;
 }
 
 export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
   const { mutPrefix, branchName, patch, project, newHead } = job.payload;
+
+  if (!bucket) {
+    logger(`nextGenStage has failed. Variable for S3 bucket address was undefined.`);
+    return {
+      status: 'failure',
+      output: 'Failed in nextGenDeploy: No value present for S3 bucket',
+      error: 'No value present for S3 bucket.',
+    };
+  }
+  if (!url) {
+    logger(`nextGenStage has failed. Variable for URL address was undefined.`);
+    return {
+      status: 'failure',
+      output: 'Failed in nextGenDeploy: No value present for target url.',
+      error: 'No value present for URL.',
+    };
+  }
 
   let prefix = mutPrefix || project;
   // TODO: Figure out correct hostedAtUrl
@@ -45,16 +62,16 @@ export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
     logger(resultMessage);
 
     return {
-      status: 'inProgress',
-      output: '', // TODO: better values
+      status: 'success',
+      output: '',
       error: '',
     };
   } catch (error) {
     logger(`Failed in nextGenStage.`);
     return {
-      status: 'failure', // Is this a correct value??
-      output: '', // TODO: better values
-      error: '',
+      status: 'failed',
+      output: 'Failed in nextGenStage',
+      error: 'Failed in nextGenStage',
     };
   }
 }

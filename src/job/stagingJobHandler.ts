@@ -100,11 +100,8 @@ export class StagingJobHandler extends JobHandler {
           logger(`ERROR: ${errorMessage}`);
           throw Error(errorMessage);
         }
-        const environment = process.env.SNOOTY_ENV;
-        logger(`ENVIRONMENT???? process.env.SNOOTY_ENV: "${environment}"`);
-        const bucket = repo_info.bucket.stg;
-        const url = repo_info.url.stg;
 
+        const { bucket, url } = await this.getEnvironmentVariables();
         resp = await nextGenStage({ job: this.currJob, logger, bucket, url });
       } else {
         resp = await this.deployGeneric();

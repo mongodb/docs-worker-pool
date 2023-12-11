@@ -21,7 +21,6 @@ import {
   persistenceModule,
   prepareBuildAndGetDependencies,
 } from '../commands';
-import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -212,12 +211,10 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  private async getAndBuildDependencies() {
+  private async getBuildDependencies() {
     const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
     if (!buildDependencies) return [];
     return buildDependencies;
-    // const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
-    // this._logger.save(this._currJob._id, commands.join('\n'));
   }
 
   @throwIfJobInterupted()
@@ -531,7 +528,9 @@ export abstract class JobHandler {
     ];
   }
 
-  protected async setEnvironmentVariables(): Promise<void> {
+  public async getEnvironmentVariables(): Promise<{ bucket?: string; url?: string; regression?: string }> {
+    let bucket: string | undefined, url: string | undefined, regression: string | undefined;
+
     const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(
       this._currJob.payload.repoName,
       this._currJob.payload.project
@@ -539,29 +538,52 @@ export abstract class JobHandler {
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,
-      `setEnvironmentVariables for ${getDirectory(this._currJob)} env ${env} jobType ${this._currJob.payload.jobType}`
+      `getEnvironmentVariables for ${getDirectory(this._currJob)} env ${env} jobType ${this._currJob.payload.jobType}`
     );
     if (repo_info?.['bucket'] && repo_info?.['url']) {
       if (this._currJob.payload.regression) {
         env = 'regression';
-        process.env.REGRESSION = 'true';
+        regression = 'true';
       }
-      process.env.BUCKET = repo_info['bucket'][env];
-      process.env.URL = repo_info['url'][env];
+      bucket = repo_info['bucket'][env];
+      url = repo_info['url'][env];
 
       // Writers are tying to stage it, so lets update the staging bucket.
       if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') {
-        process.env.BUCKET = repo_info['bucket'][env] + '-staging';
-        process.env.URL = repo_info['url']['stg'];
+        bucket = repo_info['bucket'][env] + '-staging';
+        url = repo_info['url']['stg'];
       }
     }
 
-    if (process.env.BUCKET) {
-      this._logger.info(this._currJob._id, process.env.BUCKET);
+    if (!bucket || !url) {
+      this._logger.error(
+        this._currJob._id,
+        `getEnvironmentVariables failed to access AWS bucket and url necessary for ${getDirectory(
+          this._currJob
+        )} env ${env} jobType ${this._currJob.payload.jobType}`
+      );
     }
-    if (process.env.URL) {
-      this._logger.info(this._currJob._id, process.env.URL);
+
+    if (bucket) {
+      this._logger.info(this._currJob._id, bucket);
     }
+    if (url) {
+      this._logger.info(this._currJob._id, url);
+    }
+
+    return {
+      bucket,
+      url,
+      regression,
+    };
+  }
+
+  protected async setEnvironmentVariables(): Promise<void> {
+    const { bucket, url, regression } = await this.getEnvironmentVariables();
+
+    process.env.BUCKET = bucket;
+    process.env.URL = url;
+    process.env.REGRESSION = regression;
   }
 
   @throwIfJobInterupted()
@@ -573,11 +595,6 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
-    // this.currJob.buildCommands = []; // Not needed??
-
-    const buildDependencies = await this.getAndBuildDependencies(); // ?? How to combine...
-    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
-
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
@@ -588,14 +605,6 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
     this._logger.save(this._currJob._id, `payload's project: ${this._currJob.payload.project}`);
     this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
-    await prepareBuildAndGetDependencies(
-      this.currJob.payload.repoName,
-      this._currJob.payload.project,
-      'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      buildDependencies,
-      (message: string) => this._logger.save(this._currJob._id, message),
-      this._currJob.payload.directory
-    );
     await this.setEnvironmentVariables();
     this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
@@ -619,11 +628,14 @@ export abstract class JobHandler {
     await this.setEnvironmentVariables();
     this.logger.save(job._id, 'Prepared Environment variables');
 
+    const buildDependencies = await this.getBuildDependencies();
+    this._logger.save(this._currJob._id, 'Identified Build dependencies');
+
     await prepareBuildAndGetDependencies(
       job.payload.repoName,
       job.payload.project,
       'https://mongodbcom-cdn.website.staging.corp.mongodb.com',
-      [], // ????? build dependencies...
+      buildDependencies,
       logger,
       job.payload.directory
     );

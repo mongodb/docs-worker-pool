@@ -92,14 +92,9 @@ export async function prepareBuildAndGetDependencies(
   logger: (message: string) => void,
   directory?: string
 ) {
-  // before we get build dependencies, we need to clone the repo
-  // await cloneRepo(repoOwner, repoName);
-  logger(`in Prepared build and get deps!!`);
-  // await pullRepo(repoName, branchName, newHead, logger);
-
   const repoDir = getRepoDir(repoName, directory);
-
   await downloadBuildDependencies(buildDependencies, repoName);
+  logger(`Downloaded Build dependencies`);
 
   // doing these in parallel
   const commandPromises = [
