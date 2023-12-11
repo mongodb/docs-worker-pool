@@ -528,16 +528,20 @@ export abstract class JobHandler {
     ];
   }
 
-  public async getEnvironmentVariables(): Promise<{ bucket?: string; url?: string; regression?: string }> {
+  public async getEnvironmentVariables(
+    logger?: (msg: string) => void
+  ): Promise<{ bucket?: string; url?: string; regression?: string }> {
     let bucket: string | undefined, url: string | undefined, regression: string | undefined;
 
     this._logger.info(this._currJob._id, `GET ENVIRONMENT VARIABLES?!`);
+    if (logger) logger(`Get env vars!!!!!!`);
 
     const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(
       this._currJob.payload.repoName,
       this._currJob.payload.project
     );
     let env = this._config.get<string>('env');
+    if (logger) logger(`ENV is: ${env}`);
 
     this._logger.info(
       this._currJob._id,
