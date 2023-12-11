@@ -717,22 +717,17 @@ export abstract class JobHandler {
       this._currJob._id,
       `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`
     );
+    await this._logger.save(this._currJob._id, `* Starting Job with repo name: ${this._currJob.payload.repoName}`);
     try {
-      // this.cleanup();
-      // await this.cloneRepo(this._config.get<string>('repo_dir'));
-      // this._logger.save(this._currJob._id, 'Cloned Repo');
-      // await this.commitCheck();
-      // this._logger.save(this._currJob._id, 'Checked Commit');
-      // await this.pullRepo();
-      // this._logger.save(this._currJob._id, 'Pulled Repo');
-
       // TODO: MONOREPO feature flag needed here
       if (
         // process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' &&
         this._currJob.payload.repoName === MONOREPO_NAME
       ) {
+        await this._logger.save(this._currJob._id, `* Using build without Makefiles`);
         await this.build();
       } else {
+        await this._logger.save(this._currJob._id, `* Using build with Makefiles`);
         await this.buildWithMakefiles();
       }
 
