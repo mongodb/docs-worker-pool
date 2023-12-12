@@ -155,7 +155,7 @@ examples:
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-cxx-driver/master/examples/mongocxx/mongodb.com/documentation_examples.cpp -o ${DRIVERS_PATH}/cpp-documentation-examples.cpp
 
 # go
-	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/examples/documentation_examples/examples.go -o ${DRIVERS_PATH}/go_examples.go
+	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/internal/docexamples/examples.go -o ${DRIVERS_PATH}/go_examples.go
 
 # swift
 	curl -SfL https://raw.githubusercontent.com/mongodb/mongo-swift-driver/master/Examples/Docs/Sources/AsyncExamples/main.swift -o ${DRIVERS_PATH}/swiftAsync.swift
