@@ -1,22 +1,27 @@
 import { executeCliCommand } from '../../../src/commands/src/helpers';
 
 interface TestEvent {
+  repoOwner: string;
   repoName: string;
 }
 
-export async function handler(event: TestEvent) {
-  console.log('event', event);
-
+export async function handler({ repoName, repoOwner }: TestEvent) {
   try {
     const cloneResults = await executeCliCommand({
       command: 'git',
+      args: ['clone', `https://github.com/${repoOwner}/${repoName}`],
     });
-  } catch {}
+
+    console.log('clone: ', cloneResults);
+  } catch (e) {
+    console.error('ERROR WHEN CLONING!!', e);
+    return;
+  }
 
   try {
     const results = await executeCliCommand({
       command: 'snooty',
-      args: ['create-cache'],
+      args: ['create-cache', repoName],
     });
 
     console.log('results', results);
