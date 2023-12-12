@@ -151,7 +151,7 @@ async function NotifyBuildProgress(jobId: string): Promise<void> {
     return;
   }
 
-  const jobTitle = fullDocument.title;
+  const jobTitle = `${fullDocument.title}${fullDocument.payload.directory ? `/${fullDocument.payload.directory}` : ''}`;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);

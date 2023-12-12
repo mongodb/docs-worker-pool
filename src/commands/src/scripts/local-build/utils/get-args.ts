@@ -8,6 +8,7 @@ export function getArgs() {
   }
   const repoOwnerIdx = process.argv.findIndex((str) => str === '--repo-owner' || str === '-o');
   const repoNameIdx = process.argv.findIndex((str) => str === '--repo-name' || str === '-n');
+  const directoryIdx = process.argv.findIndex((str) => str === '--directory' || str === '-d');
 
   // optional
   const branchNameIdx = process.argv.findIndex((str) => str === '--branch-name' || str === '-b');
@@ -28,17 +29,26 @@ export function getArgs() {
   if (process.argv[repoNameIdx + 1].startsWith('-'))
     throw new Error(`Please provide a valid repo name value. Value provided: ${process.argv[repoNameIdx + 1]}`);
 
+  if (directoryIdx + 1 === process.argv.length)
+    throw new Error('Please provide a value for the monorepo directory flag');
+  if (process.argv[directoryIdx + 1].startsWith('-'))
+    throw new Error(
+      `Please provide a valid monorepo directory value. Value provided: ${process.argv[directoryIdx + 1]}`
+    );
+
   if (branchNameIdx + 1 === process.argv.length) throw new Error('Please provide a value for the branch name flag');
   if (process.argv[branchNameIdx + 1].startsWith('-'))
     throw new Error(`Please provide a valid branch name value. Value provided: ${process.argv[branchNameIdx + 1]}`);
 
   const repoOwner = process.argv[repoOwnerIdx + 1];
   const repoName = process.argv[repoNameIdx + 1];
+  const directory = directoryIdx !== -1 ? process.argv[directoryIdx + 1] : undefined;
   const branchName = branchNameIdx !== -1 ? process.argv[branchNameIdx + 1] : 'master';
 
   return {
     repoOwner,
     repoName,
+    directory,
     branchName,
   };
 }

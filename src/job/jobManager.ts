@@ -145,14 +145,14 @@ export class JobManager {
 
   async getQueuedJob(): Promise<Job | null> {
     return await this._jobRepository.getOneQueuedJobAndUpdate().catch((error) => {
-      this._logger.error('JobManager', `Error: ${error}`);
+      this._logger.error('JobManager', `Error: getQueuedJob: ${error}`);
       return null;
     });
   }
 
   async getJob(jobId: string): Promise<Job | null> {
     return await this._jobRepository.getJobByIdAndUpdate(jobId).catch((error) => {
-      this._logger.error('JobManager', `Error: ${error}`);
+      this._logger.error('JobManager', `Error: getJob: ${error}`);
       return null;
     });
   }

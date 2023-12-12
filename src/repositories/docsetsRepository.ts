@@ -52,9 +52,11 @@ export class DocsetsRepository extends BaseRepository {
     ];
   }
 
-  async getProjectByRepoName(repoName: string): Promise<any> {
+  async getProjectByRepoName(repoName: string, directory?: string): Promise<any> {
+    const matchConditions = { repoName };
+    if (directory) matchConditions['directories.snooty_toml'] = `/${directory}`;
     const projection = { project: 1 };
-    const aggregationPipeline = DocsetsRepository.getAggregationPipeline({ repoName }, projection);
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline(matchConditions, projection);
     const cursor = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {

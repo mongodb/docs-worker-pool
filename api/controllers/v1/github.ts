@@ -56,7 +56,6 @@ async function prepGithubPushPayload(
       urlSlug: urlSlug,
       prefix: prefix,
       project: project,
-      directory: 'cloud-docs',
     },
     logs: [],
   };

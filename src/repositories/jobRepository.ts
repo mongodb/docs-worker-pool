@@ -19,6 +19,7 @@ export class JobRepository extends BaseRepository {
     }
     super(config, logger, 'JobRepository', collection);
     this._queueConnector = new SQSConnector(logger, config);
+    this._config = config;
   }
 
   async updateWithStatus(
@@ -120,6 +121,7 @@ export class JobRepository extends BaseRepository {
       options,
       `Mongo Timeout Error: Timed out while retrieving job`
     );
+    console.log('Mongo response: ', response);
     if (response.value) {
       const job: Job = response.value;
       await this.notify(job._id, c.get('jobUpdatesQueueUrl'), JobStatus.inProgress, 0);

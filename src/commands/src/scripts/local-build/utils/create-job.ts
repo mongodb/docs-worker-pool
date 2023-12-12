@@ -7,9 +7,17 @@ interface Props {
   repoName: string;
   commit: CommitGetResponse;
   project: string;
+  directory?: string;
 }
 
-export function createLocalJob({ branchName, repoName, repoOwner, commit, project }: Props): Omit<EnhancedJob, '_id'> {
+export function createLocalJob({
+  branchName,
+  repoName,
+  repoOwner,
+  commit,
+  project,
+  directory,
+}: Props): Omit<EnhancedJob, '_id'> {
   return {
     title: `${repoOwner}/${repoName}`,
     user: commit.author?.name ?? '',
@@ -37,6 +45,7 @@ export function createLocalJob({ branchName, repoName, repoOwner, commit, projec
       project: project,
       pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
       mutPrefix: project,
+      directory: directory,
     },
     logs: [],
   };
