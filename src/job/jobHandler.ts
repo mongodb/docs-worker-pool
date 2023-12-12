@@ -355,19 +355,19 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
-    // if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
-    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
-    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-    if (this.currJob.useWithBenchmark) {
-      await this.exeBuildModified();
+    if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
+      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
+      await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
+      if (this.currJob.useWithBenchmark) {
+        await this.exeBuildModified();
+      } else {
+        await this.exeBuild();
+      }
     } else {
-      await this.exeBuild();
+      const error = new AutoBuilderError('No commands to execute', 'BuildError');
+      await this.logError(error);
+      throw error;
     }
-    // } else {
-    //   const error = new AutoBuilderError('No commands to execute', 'BuildError');
-    //   await this.logError(error);
-    //   throw error;
-    // }
     return true;
   }
 
@@ -534,8 +534,6 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
-    this._logger.save(this._currJob._id, `payload's project: ${this._currJob.payload.project}`);
-    this._logger.save(this.currJob._id, `running getBuildStuff!!!!`);
     await this.setEnvironmentVariables();
     this._logger.save(this._currJob._id, 'Prepared Environment variables');
     return await this.executeBuild();
