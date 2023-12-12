@@ -1,3 +1,4 @@
+import { Duration } from 'aws-cdk-lib';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { DockerImageFunction, DockerImageCode } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
@@ -8,6 +9,7 @@ export class CacheUpdaterConstruct extends Construct {
     super(scope, id);
 
     new DockerImageFunction(this, 'cacheUpdaterLambda', {
+      timeout: Duration.seconds(120),
       code: DockerImageCode.fromImageAsset(path.join(__dirname, '../../../../'), {
         buildArgs: {
           SNOOTY_PARSER_VERSION: '0.15.0',
