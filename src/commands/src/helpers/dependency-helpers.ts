@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
 import { promisify } from 'util';
+import { BuildDependencies } from '../../../entities/job';
 
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
@@ -33,11 +34,58 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
   }
 }
 
-export async function prepareBuildAndGetDependencies(repoName: string, projectName: string, baseUrl: string) {
+export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string) {
+  const commands: string[] = [];
+  await Promise.all(
+    buildDependencies.map(async (dependencyInfo) => {
+      const repoDir = getRepoDir(repoName);
+      const targetDir = dependencyInfo.targetDir ?? repoDir;
+      try {
+        await executeCliCommand({
+          command: 'mkdir',
+          args: ['-p', targetDir],
+        });
+      } catch (error) {
+        console.error(
+          `ERROR! Could not create target directory ${targetDir}. Dependency information: `,
+          dependencyInfo
+        );
+        throw error;
+      }
+      commands.push(`mkdir -p ${targetDir}`);
+      await Promise.all(
+        dependencyInfo.dependencies.map((dep) => {
+          try {
+            executeCliCommand({
+              command: 'curl',
+              args: ['-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+            });
+          } catch (error) {
+            console.error(
+              `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
+              dependencyInfo
+            );
+          }
+          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
+        })
+      );
+    })
+  );
+  return commands;
+}
+
+export async function prepareBuildAndGetDependencies(
+  repoName: string,
+  projectName: string,
+  baseUrl: string,
+  buildDependencies: BuildDependencies
+) {
   // before we get build dependencies, we need to clone the repo
   await cloneRepo(repoName);
 
   const repoDir = getRepoDir(repoName);
+
+  await downloadBuildDependencies(buildDependencies, repoName);
 
   // doing these in parallel
   const commandPromises = [

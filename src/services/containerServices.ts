@@ -97,7 +97,7 @@ export class ECSContainer implements IContainerServices {
       });
 
       // Only stop ECS task if it's still running
-      if (res.tasks?.[0].lastStatus === 'RUNNING') {
+      if (res.tasks?.[0]?.lastStatus === 'RUNNING') {
         await this._client.stopTask({
           cluster: clusterName,
           task: taskId,

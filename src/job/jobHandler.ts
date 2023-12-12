@@ -13,6 +13,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
+import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -200,6 +201,14 @@ export abstract class JobHandler {
       await error;
       throw error;
     }
+  }
+
+  @throwIfJobInterupted()
+  private async getAndBuildDependencies() {
+    const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
+    if (!buildDependencies) return;
+    const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
+    this._logger.save(this._currJob._id, commands.join('\n'));
   }
 
   @throwIfJobInterupted()
@@ -480,6 +489,8 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
+    await this.getAndBuildDependencies();
+    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();

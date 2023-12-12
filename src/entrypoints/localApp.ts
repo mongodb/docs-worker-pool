@@ -15,11 +15,35 @@ async function localApp() {
   const baseUrl = 'https://www.mongodb.com';
   const bucket = 'docs-java-dotcomstg';
   const mutPrefix = 'docs/drivers/java/sync';
+  const buildDependencies = [
+    {
+      dependencies: [
+        {
+          url: 'https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-mongodb-internal.yaml',
+          filename: 'published-branches.yaml',
+        },
+      ],
+    },
+    {
+      buildDir: 'source/driver-examples',
+      dependencies: [
+        {
+          url: 'https://raw.githubusercontent.com/mongodb/mongo-python-driver/master/test/test_examples.py',
+          filename: 'test_examples.py',
+        },
+        {
+          url: 'https://raw.githubusercontent.com/mongodb/motor/master/test/asyncio_tests/test_examples.py',
+          filename: 'test_examples_motor.py',
+        },
+      ],
+    },
+  ];
 
   const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await prepareBuildAndGetDependencies(
     repoName,
     projectName,
-    baseUrl
+    baseUrl,
+    buildDependencies
   );
 
   console.log('Begin snooty build...');
