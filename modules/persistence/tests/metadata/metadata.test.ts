@@ -97,7 +97,7 @@ describe('metadata module', () => {
         .toArray();
       expect(res.length).toEqual(49);
       for (let idx = 0; idx < res.length; idx++) {
-        expect(res[idx].idx).toEqual(9 - idx);
+        expect(res[idx].idx).toEqual(99 - idx);
       }
     });
   });
