@@ -30,6 +30,9 @@ jobs:
         id: filter
         with:
           filters: |
+            cache:
+              - 'api/**'
+              - 'cdk-infra/**'
             webhooks:
               - 'api/**'
               - 'cdk-infra/lib/constructs/api/**'
@@ -55,3 +58,11 @@ jobs:
           npm ci
           npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
+            - name: Update Worker Stack
+      - name: Update Cache Updater
+        run: |
+          npm ci
+          cd cdk-infra/
+          npm ci
+          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
+            cache-updater
