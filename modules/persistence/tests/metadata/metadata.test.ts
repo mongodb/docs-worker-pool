@@ -71,7 +71,7 @@ describe('metadata module', () => {
   describe('deleteStaleMetadata', () => {
     // upserting data
     const testData: Document[] = [];
-    for (let idx = 0; idx < 10; idx++) {
+    for (let idx = 0; idx < 100; idx++) {
       const buildId = new ObjectId();
       const testDoc = {
         ...meta,
@@ -95,7 +95,7 @@ describe('metadata module', () => {
           _id: -1,
         })
         .toArray();
-      expect(res.length).toEqual(4);
+      expect(res.length).toEqual(49);
       for (let idx = 0; idx < res.length; idx++) {
         expect(res[idx].idx).toEqual(9 - idx);
       }
