@@ -567,9 +567,6 @@ export abstract class JobHandler {
     if (this._currJob.payload.regression) {
       env = 'regression';
     }
-    logger(`Docset: ${docset}`);
-    logger(`Env config: ${env}`);
-    logger(`Finding baseUrl: ${docset?.url?.[env]}`);
     const baseUrl = docset?.url?.[env] || 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
 
     await prepareBuildAndGetDependencies(
