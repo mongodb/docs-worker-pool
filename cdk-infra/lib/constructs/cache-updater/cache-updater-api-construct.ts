@@ -1,5 +1,5 @@
 import { Duration } from 'aws-cdk-lib';
-import { DockerImageFunction, DockerImageCode, Architecture } from 'aws-cdk-lib/aws-lambda';
+import { DockerImageFunction, DockerImageCode } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import path from 'path';
 
@@ -9,7 +9,6 @@ export class CacheUpdaterConstruct extends Construct {
 
     new DockerImageFunction(this, 'cacheUpdaterLambda', {
       timeout: Duration.minutes(3),
-      architecture: Architecture.ARM_64,
       memorySize: 2048,
       code: DockerImageCode.fromImageAsset(path.join(__dirname, '../../../../'), {
         buildArgs: {

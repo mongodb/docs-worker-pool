@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.10-arm64 as python-builder
+FROM public.ecr.aws/lambda/python:3.10 as python-builder
 # We intentionally do not set a default value 
 # because we want to provide a specific snooty parser
 # version every time.
@@ -15,8 +15,7 @@ RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/
     && make package \
     && mv dist/snooty /opt/
 
-# adding arm support
-FROM public.ecr.aws/lambda/nodejs:18-arm64 as builder
+FROM public.ecr.aws/lambda/nodejs:18 as builder
 WORKDIR /usr/app
 
 COPY package*.json ./
@@ -27,7 +26,7 @@ COPY src src/
 RUN npm ci
 RUN npm run build:esbuild:lambda
 
-FROM public.ecr.aws/lambda/nodejs:18-arm64
+FROM public.ecr.aws/lambda/nodejs:18
 
 ENV PATH="${PATH}:/opt/snooty"
 
