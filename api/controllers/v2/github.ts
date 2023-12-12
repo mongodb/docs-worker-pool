@@ -122,32 +122,24 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
   if (body.repository.name === MONOREPO_NAME) {
     // TODO: MONOREPO feature flag needed here
-    consoleLogger.info(body.repository.full_name, `past feature flag and monorepo conditional`);
     let monorepoPaths: string[] = [];
     try {
       if (body.head_commit && body.repository.owner.name) {
-        consoleLogger.info(
-          body.repository.full_name,
-          `commitSha: ${body.head_commit.id}\nrepoName: ${body.repository.name}\nownerName: ${
-            body.repository.owner.name
-          }\nUpdatedfilepaths: ${getUpdatedFilePaths(body.head_commit)}`
-        );
         monorepoPaths = await getMonorepoPaths({
           commitSha: body.head_commit.id,
           repoName: body.repository.name,
           ownerName: body.repository.owner.name,
           updatedFilePaths: getUpdatedFilePaths(body.head_commit),
-          consoleLogger,
         });
         consoleLogger.info(body.repository.full_name, `Monorepo Paths with new changes: ${monorepoPaths}`);
       }
     } catch (error) {
-      console.warn('Warning, attempting to get repo paths caused an error', error);
+      console.warn('Warning, attempting to get monorepo paths caused an error', error);
     }
 
     /* Create and insert Job for each monorepo project that has changes */
     for (const path of monorepoPaths) {
-      consoleLogger.info(body.repository.full_name, `Each path: ${path}`);
+      consoleLogger.info(body.repository.full_name, `Create Job for Monorepo directory: /${path}`);
       // TODO: Deal with nested monorepo projects
       /* For now, we will ignore nested monorepo projects until necessary */
       if (path.split('/').length > 1) continue;

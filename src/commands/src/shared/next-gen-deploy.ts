@@ -7,6 +7,7 @@ interface NextGenDeployParams {
   logger: (message: string) => void;
 }
 
+/* This is still in development - use with caution */
 export async function nextGenDeploy({ mutPrefix, gitBranch, hasConfigRedirects, logger }: NextGenDeployParams) {
   try {
     if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {

@@ -12,7 +12,6 @@ import { Job, Payload } from '../entities/job';
 const fakePayload: Payload = {
   repoName: 'cloud-docs',
   project: 'cloud-docs',
-  // directory: 'cloud-docs',
   jobType: '',
   source: '',
   action: '',
@@ -58,7 +57,7 @@ const logger = (message: string) => {
 
 async function localApp() {
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
-  const bucket = 'docs-atlas-dotcomstg';
+  const bucket = 'docs-atlas-stg';
 
   const { repoName, project, mutPrefix, directory } = fakePayload;
 
@@ -95,36 +94,27 @@ async function localApp() {
     directory
   );
 
-  console.log('repoDir ', repoDir);
-
   console.log('Begin snooty build...');
   const snootyBuildRes = await nextGenParse({ job: fakeJob, logger });
-
   console.log(snootyBuildRes.errorText);
-
-  console.log('snooty build complete');
+  console.log('Snooty build complete');
 
   console.log('Begin persistence-module');
   const persistenceModuleRes = await persistenceModule({ job: fakeJob, logger });
   console.log(persistenceModuleRes);
-  console.log('persistence-module complete');
+  console.log('Persistence-module complete');
 
   console.log('Begin next-gen-html...');
-
   const nextGenHtmlRes = await nextGenHtml({ job: fakeJob, logger });
   console.log(nextGenHtmlRes.outputText);
-
   console.log('next-gen-html complete');
 
   console.log('Begin oas-page-build...');
-  const siteUrl = mutPrefix ? `${baseUrl}/${mutPrefix}` : `${baseUrl}`;
-  console.log('siteUrl: ', siteUrl);
-  const oasPageBuildRes = await oasPageBuild({ job: fakeJob, logger });
-  console.log('oas-page-build compelte');
-
+  const oasPageBuildRes = await oasPageBuild({ job: fakeJob, baseUrl, logger });
   console.log(oasPageBuildRes);
-  console.log('Begin next-gen-stage...');
+  console.log('Oas-page-build compelte');
 
+  console.log('Begin next-gen-stage...');
   await nextGenStage({
     job: fakeJob,
     logger,
@@ -141,8 +131,7 @@ async function localApp() {
     logger,
   });
   console.log(deployRes);
-  console.log('next-gen-deploy complete');
-  console.log('bundle Path: ', bundlePath);
+  console.log('Next-gen-deploy complete');
 }
 
 localApp();

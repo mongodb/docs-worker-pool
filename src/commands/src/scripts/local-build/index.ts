@@ -79,10 +79,7 @@ async function main() {
   const { insertedId: jobId } = await collection.insertOne(job);
 
   console.log('starting container');
-  const { outputText, errorText } = await runDockerContainer({ ...env, jobId: jobId.toString() });
-
-  console.log('OUTPUT TEXT', outputText);
-  console.log('ERROR TEXT', errorText);
+  await runDockerContainer({ ...env, jobId: jobId.toString() });
 }
 
 main();

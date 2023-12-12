@@ -1,5 +1,3 @@
-import path from 'path';
-import fs from 'fs';
 import { getDirectory, JobHandler } from './jobHandler';
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';

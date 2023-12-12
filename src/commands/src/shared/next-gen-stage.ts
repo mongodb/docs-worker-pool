@@ -30,7 +30,6 @@ export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
   }
 
   let prefix = mutPrefix || project;
-  // TODO: Figure out correct hostedAtUrl
   let hostedAtUrl = `${url}/${prefix}/${DOCS_WORKER_USER}/${branchName}/`;
 
   const commandArgs = ['public', bucket, '--stage'];

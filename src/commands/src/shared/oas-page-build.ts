@@ -3,13 +3,11 @@ import { executeCliCommand, getRepoDir } from '../helpers';
 
 interface OasPageBuildParams {
   job: Job;
+  baseUrl: string;
   logger: (message: string) => void;
 }
 
-export async function oasPageBuild({ job, logger }: OasPageBuildParams) {
-  // TODO: replace with a process to get this url??
-  const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
-
+export async function oasPageBuild({ job, baseUrl, logger }: OasPageBuildParams) {
   const siteUrl = job.payload.mutPrefix
     ? `${baseUrl}/${job.payload.mutPrefix}`
     : `${baseUrl}/${job.payload.project}/docsworker-xlarge/${job.payload.branchName}`;
@@ -20,7 +18,7 @@ export async function oasPageBuild({ job, logger }: OasPageBuildParams) {
     const { outputText } = await executeCliCommand({
       command: 'node',
       args: [
-        `${process.cwd()}/modules/oas-page-builder/index.js`, // There was a Fix dist/index.js (dist needed for local, not for staging)
+        `${process.cwd()}/modules/oas-page-builder/index.js`,
         '--bundle',
         bundlePath,
         '--output',
@@ -32,10 +30,10 @@ export async function oasPageBuild({ job, logger }: OasPageBuildParams) {
         '--site-url',
         siteUrl,
       ],
+      logger,
     });
 
     logger(outputText);
-
     return outputText;
   } catch (error) {
     logger(`ERROR: oas-page-build.ts - ${error}`);

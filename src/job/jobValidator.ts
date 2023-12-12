@@ -67,10 +67,8 @@ export class JobValidator implements IJobValidator {
   }
 
   public async throwIfJobInvalid(job: Job): Promise<void> {
-    console.log('validating');
     this._validateInput(job);
     if (this.isProd(job.payload.jobType)) {
-      console.log('entitling');
       await this.throwIfUserNotEntitled(job);
     }
   }

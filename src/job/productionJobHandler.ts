@@ -189,7 +189,6 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   async deploy(): Promise<CommandExecutorResponse> {
-    this.logger.save(this.currJob._id, `ITS MONOREPO, but in prodJobHandler?!! All the world's sadly not a stage.`);
     const resp = await this.deployGeneric();
     try {
       if (resp?.output) {

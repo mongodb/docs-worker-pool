@@ -1,4 +1,3 @@
-# FROM arm64v8/ubuntu:20.04 as initial
 FROM arm64v8/ubuntu:20.04 as initial
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
@@ -42,12 +41,6 @@ RUN git clone -b v${MUT_VERSION} --depth 1 https://github.com/mongodb/mut.git \
     && make package \
     && mv dist/mut /opt/
 
-# install redoc fork
-# RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
-#     # Install dependencies for Redoc CLI
-#     && cd redoc/ \
-#     && npm ci --prefix cli/ --omit=dev
-
 ENV PATH="${PATH}:/opt/snooty:/opt/mut:/${WORK_DIRECTORY}/.local/bin"
 
 # setup user and root directory
@@ -57,7 +50,7 @@ RUN chown -Rv docsworker-xlarge ${WORK_DIRECTORY}
 USER docsworker-xlarge
 
 # install snooty frontend and docs-tools
-RUN git clone -b mm-log --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        
 

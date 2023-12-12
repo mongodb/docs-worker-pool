@@ -7,16 +7,6 @@ import { BuildDependencies } from '../../../entities/job';
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
-async function cloneRepo(repoOwner: string, repoName: string) {
-  const botName = process.env.GITHUB_BOT_USERNAME;
-  const botPassword = process.env.GITHUB_BOT_PASSWORD;
-  await executeCliCommand({
-    command: 'git',
-    args: ['clone', `https://${botName}:${botPassword}@github.com/${repoOwner}/${repoName}`],
-    options: { cwd: `${process.cwd()}/repos` },
-  });
-}
-
 async function createEnvProdFile(
   repoDir: string,
   projectName: string,
@@ -25,14 +15,13 @@ async function createEnvProdFile(
   prefix = ''
 ) {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
-  const prodDirName = repoDir;
 
   try {
     await writeFileAsync(
       prodFileName,
       `GATSBY_SITE=${projectName}
-      GATSBY_MANIFEST_PATH=${prodDirName}/bundle.zip
-      GATSBY_PARSER_USER=docsworker-xlarge
+      GATSBY_MANIFEST_PATH=${repoDir}/bundle.zip
+      GATSBY_PARSER_USER=${process.env.USER ?? `docsworker-xlarge`}
       GATSBY_BASE_URL=${baseUrl}
       GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}
       PATH_PREFIX=${prefix}`,
@@ -117,7 +106,7 @@ export async function prepareBuildAndGetDependencies(
       repoDir,
     };
   } catch (error) {
-    logger(`error, could not get build deps: ${error}`);
+    logger(`Error: Could not get build deps: ${error}`);
     throw error;
   }
 }

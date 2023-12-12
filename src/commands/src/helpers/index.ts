@@ -202,7 +202,8 @@ export async function executeCliCommand({
 
         reject(
           new ExecuteCommandError(
-            `The command failed.\n${errorText.join('')}\n${outputText.join('')}\nError Code: ${exitCode}`,
+            `The command failed.\n
+            Error: ${errorText.join('')}`,
             exitCode
           )
         );
@@ -261,7 +262,7 @@ export async function getPatchId(repoDir: string, logger: (msg: string) => void)
 
     return gitPatchId.slice(0, 7);
   } catch (err) {
-    logger('No patch ID found: ' + filePath + ' ' + err);
+    logger('No patch ID found: ' + err);
   }
 }
 

@@ -8,7 +8,6 @@ interface FileUpdatePayload {
   repoName: string;
   commitSha: string;
   updatedFilePaths: string[];
-  consoleLogger: ConsoleLogger;
 }
 
 /**
@@ -28,22 +27,14 @@ export async function getMonorepoPaths({
   ownerName,
   commitSha,
   updatedFilePaths,
-  consoleLogger,
 }: FileUpdatePayload): Promise<string[]> {
   const commitInfo: GitCommitInfo = {
     ownerName,
     repoName,
     commitSha,
   };
-
-  consoleLogger.info(repoName, `${commitInfo}`);
-  consoleLogger.info(repoName, JSON.stringify(commitInfo));
-
   const snootyDirSet = await getSnootyDirSet(commitInfo);
-  consoleLogger.info(repoName, JSON.stringify(snootyDirSet));
-
   const projects = updatedFilePaths.map((path) => getProjectDirFromPath(path, snootyDirSet));
-  consoleLogger.info(repoName, JSON.stringify(projects));
 
   // remove empty strings and remove duplicated values
   return Array.from(new Set(projects.filter((dir) => !!dir)));

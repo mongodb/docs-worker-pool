@@ -11,7 +11,7 @@ export async function persistenceModule({ job, logger }: PersistenceModuleParams
   const bundlePath = `${repoDir}/bundle.zip`;
 
   const args = [
-    `${process.cwd()}/modules/persistence/index.js`, // TODO: Change localApp path from persistence/dist/index.js to persistence/index.js
+    `${process.cwd()}/modules/persistence/index.js`,
     '--unhandled-rejections=strict',
     '--path',
     bundlePath,
@@ -27,6 +27,7 @@ export async function persistenceModule({ job, logger }: PersistenceModuleParams
   const { outputText } = await executeCliCommand({
     command: 'node',
     args,
+    logger,
   });
 
   return outputText;

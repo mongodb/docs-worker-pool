@@ -23,7 +23,6 @@ export async function nextGenParse({ job, logger, isProd }: NextGenParseParams):
     commandArgs.push('--patch');
     commandArgs.push(patchId);
   }
-
   commandArgs.push(RSTSPEC_FLAG);
 
   // Not currently used in production builds, adding functionality

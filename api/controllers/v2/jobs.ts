@@ -64,7 +64,6 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
       try {
         switch (jobStatus) {
           case JobStatus[JobStatus.inProgress]:
-          case JobStatus[JobStatus.inQueue]:
             await NotifyBuildProgress(jobId);
             break;
           case JobStatus[JobStatus.timedOut]:
