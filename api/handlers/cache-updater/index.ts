@@ -8,6 +8,12 @@ export async function handler(event: TestEvent) {
   console.log('event', event);
 
   try {
+    const cloneResults = await executeCliCommand({
+      command: 'git',
+    });
+  } catch {}
+
+  try {
     const results = await executeCliCommand({
       command: 'snooty',
       args: ['create-cache'],

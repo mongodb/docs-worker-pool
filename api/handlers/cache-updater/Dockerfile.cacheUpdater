@@ -29,6 +29,7 @@ RUN npm run build:esbuild:lambda
 FROM public.ecr.aws/lambda/nodejs:18
 
 ENV PATH="${PATH}:/opt/snooty"
+RUN yum install -y git
 
 COPY --from=python-builder /opt/ /opt/
 COPY --from=builder usr/app/dist ${LAMBDA_TASK_ROOT}
