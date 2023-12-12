@@ -99,7 +99,7 @@ export class StagingJobHandler extends JobHandler {
           throw Error(errorMessage);
         }
 
-        const { bucket, url } = await this.getEnvironmentVariables(logger);
+        const { bucket, url } = await this.getEnvironmentVariables();
         resp = await nextGenStage({ job: this.currJob, logger, bucket, url });
       } else {
         resp = await this.deployGeneric();

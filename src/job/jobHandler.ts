@@ -21,6 +21,7 @@ import {
   persistenceModule,
   prepareBuildAndGetDependencies,
 } from '../commands';
+import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -218,6 +219,13 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
+  private async getAndBuildDependencies() {
+    const buildDependencies = await this.getBuildDependencies();
+    const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
+    this._logger.save(this._currJob._id, commands.join('\n'));
+  }
+
+  @throwIfJobInterupted()
   private async downloadMakeFile(): Promise<void> {
     try {
       const makefileFileName =
@@ -329,7 +337,6 @@ export abstract class JobHandler {
     for (const command of makeCommands) {
       // works for any make command with the following signature make <make-rule>
       const key = command.split(' ')[1].trim();
-      this._logger.save(this.currJob._id, `command: ${command}`);
       if (stages[key]) {
         const makeCommandsWithBenchmarksResponse = await this.callWithBenchmark(command, stages[key]);
         await this.logBuildDetails(makeCommandsWithBenchmarksResponse);
@@ -454,18 +461,14 @@ export abstract class JobHandler {
     ];
   }
 
-  public async getEnvironmentVariables(
-    logger?: (msg: string) => void
-  ): Promise<{ bucket?: string; url?: string; regression?: string }> {
+  public async getEnvironmentVariables(): Promise<{ bucket?: string; url?: string; regression?: string }> {
     let bucket: string | undefined, url: string | undefined, regression: string | undefined;
-
-    this._logger.info(this._currJob._id, `GET ENVIRONMENT VARIABLES?!`);
-    if (logger) logger(`Get env vars!!!!!!`);
 
     const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(
       this._currJob.payload.repoName,
       this._currJob.payload.project
     );
+
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,
@@ -526,6 +529,8 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
+    await this.getAndBuildDependencies();
+    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
@@ -543,7 +548,6 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   protected async build(): Promise<boolean> {
     this.cleanup();
-
     const job = this._currJob;
     const logger = (msg: string) => this.logger.save(this.currJob._id, msg);
 
@@ -553,10 +557,8 @@ export abstract class JobHandler {
     this._logger.save(job._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(job._id, 'Pulled Repo');
-
     await this.setEnvironmentVariables();
     this.logger.save(job._id, 'Prepared Environment variables');
-
     const buildDependencies = await this.getBuildDependencies();
     this._logger.save(this._currJob._id, 'Identified Build dependencies');
 
@@ -578,7 +580,6 @@ export abstract class JobHandler {
       logger,
       job.payload.directory
     );
-
     await nextGenParse({ job, logger });
     this.logger.save(job._id, 'Repo Parsing Complete');
     await persistenceModule({ job, logger });
