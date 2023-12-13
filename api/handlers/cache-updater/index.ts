@@ -1,3 +1,4 @@
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { executeCliCommand } from '../../../src/commands/src/helpers';
 
 interface TestEvent {
@@ -30,6 +31,16 @@ async function createSnootyCache(repoName: string) {
   } catch (e) {
     console.error('got error', e);
   }
+}
+
+async function uploadCacheToS3() {
+  const BUCKET_NAME = 'snooty-parse-cache';
+  const client = new S3Client({ region: 'us-east-2' });
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: '',
+  });
 }
 
 export async function handler({ repoName, repoOwner }: TestEvent): Promise<unknown> {

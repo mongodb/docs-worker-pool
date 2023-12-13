@@ -26,6 +26,7 @@
   "dependencies": {
     "@aws-sdk/client-batch": "^3.109.0",
     "@aws-sdk/client-ecs": "^3.49.0",
+    "@aws-sdk/client-s3": "^3.472.0",
     "@aws-sdk/client-sqs": "^3.49.0",
     "@aws-sdk/client-ssm": "^3.54.1",
     "@babel/core": "^7.4.4",
