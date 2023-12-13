@@ -79,7 +79,6 @@ export class StagingJobHandler extends JobHandler {
   async deploy(): Promise<CommandExecutorResponse> {
     let resp;
     try {
-      // TODO: MONOREPO feature flag needed
       if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this.currJob.payload.repoName === MONOREPO_NAME) {
         const repo_info = await this._docsetsRepo.getRepo(
           this.currJob.payload.repoName,

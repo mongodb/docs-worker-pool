@@ -661,7 +661,6 @@ export abstract class JobHandler {
     );
     await this._logger.save(this._currJob._id, `* Starting Job with repo name: ${this._currJob.payload.repoName}`);
     try {
-      // TODO: MONOREPO feature flag needed here
       if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this._currJob.payload.repoName === MONOREPO_NAME) {
         await this._logger.save(this._currJob._id, `* Using build without Makefiles`);
         await this.build();

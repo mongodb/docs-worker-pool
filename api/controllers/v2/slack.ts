@@ -93,7 +93,6 @@ export const getDeployableJobs = async (
     const splitValues = values.repo_option[i].value.split('/');
 
     if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && splitValues.length === 4) {
-      // TODO: MONOREPO feature flag needed here
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
       [repoOwner, repoName, directory, branchName] = splitValues;
     } else {
