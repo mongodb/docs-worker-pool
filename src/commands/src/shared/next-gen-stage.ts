@@ -63,8 +63,8 @@ export async function nextGenStage({ job, bucket, url, logger }: StageParams) {
 
     return {
       status: 'success',
-      output: '',
-      error: '',
+      output: outputText,
+      error: errorText,
     };
   } catch (error) {
     console.log(`Failed in nextGenStage.`);
