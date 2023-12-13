@@ -9,7 +9,7 @@ async function cloneDocsRepo(repoName: string, repoOwner: string) {
   try {
     const cloneResults = await executeCliCommand({
       command: 'git',
-      args: ['clone', `https://github.com/${repoOwner}/${repoName}`],
+      args: ['clone', `https://github.com/${repoOwner}/${repoName}`, `/tmp/${repoName}`],
     });
 
     console.log('clone: ', cloneResults);
@@ -23,7 +23,7 @@ async function createSnootyCache(repoName: string) {
   try {
     const results = await executeCliCommand({
       command: 'snooty',
-      args: ['create-cache', repoName],
+      args: ['create-cache', `/tmp/${repoName}`],
     });
 
     console.log('results', results);
