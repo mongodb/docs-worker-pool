@@ -129,6 +129,7 @@ export class JobManager {
       this._jobHandler = null;
       if (job?.payload) {
         const excludeRepoFromBenchmarks = ['mms-docs', 'docs-k8s-operator'].includes(job.payload.repoName);
+        this._logger.info('JobManager', `JOB NEXT GEN: ${job.payload.isNextGen}`);
         // Can easily rollback with commenting out this flag.
         job.useWithBenchmark = !excludeRepoFromBenchmarks;
         await this.createHandlerAndExecute(job);
