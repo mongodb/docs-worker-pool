@@ -19,7 +19,7 @@ async function cloneDocsRepo(repoName: string, repoOwner: string) {
   }
 }
 
-async function buildSnootyCache(repoName: string) {
+async function createSnootyCache(repoName: string) {
   try {
     const results = await executeCliCommand({
       command: 'snooty',
@@ -32,10 +32,10 @@ async function buildSnootyCache(repoName: string) {
   }
 }
 
-export async function handler({ repoName, repoOwner }: TestEvent) {
+export async function handler({ repoName, repoOwner }: TestEvent): Promise<unknown> {
   await cloneDocsRepo(repoName, repoOwner);
 
-  await buildSnootyCache(repoName);
+  await createSnootyCache(repoName);
 
   return null;
 }
