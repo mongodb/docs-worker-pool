@@ -19,7 +19,15 @@ jobs:
         with:
           node-version: '18.x'
           cache: 'npm'
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            dependencies:
+              - 'package-lock.json'
+              - 'cdk-infra/package-lock.json'
       - name: Install dependencies
+        if: steps.filter.outputs.dependencies == 'true' || (github.event_name == 'pull_request' && github.event.action == 'opened')
         run: |
           npm ci
           cd cdk-infra/
