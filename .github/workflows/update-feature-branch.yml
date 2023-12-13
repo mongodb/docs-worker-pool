@@ -31,7 +31,7 @@ jobs:
           path: |
             node_modules
             cdk-infra/node_modules
-          key: ${{ github.run_number }}
+          key: ${{ github.head_ref }}
   build-webhooks:
     needs: prep-build
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
           path: |
             node_modules
             cdk-infra/node_modules
-          key: ${{ github.run_number }}
+          key: ${{ github.head_ref }}
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -87,7 +87,7 @@ jobs:
           path: |
             node_modules
             cdk-infra/node_modules
-          key: ${{ github.run_number }}
+          key: ${{ github.head_ref }}
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -125,7 +125,7 @@ jobs:
           path: |
             node_modules
             cdk-infra/node_modules
-          key: ${{ github.run_number }}
+          key: ${{ github.head_ref }}
       - name: Update Cache Updater
         run: |
           cd cdk-infra/

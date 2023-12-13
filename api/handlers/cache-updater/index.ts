@@ -5,7 +5,7 @@ interface TestEvent {
   repoName: string;
 }
 
-export async function handler({ repoName, repoOwner }: TestEvent) {
+async function cloneDocsRepo(repoName: string, repoOwner: string) {
   try {
     const cloneResults = await executeCliCommand({
       command: 'git',
@@ -17,7 +17,9 @@ export async function handler({ repoName, repoOwner }: TestEvent) {
     console.error('ERROR WHEN CLONING!!', e);
     return;
   }
+}
 
+async function buildSnootyCache(repoName: string) {
   try {
     const results = await executeCliCommand({
       command: 'snooty',
@@ -28,5 +30,12 @@ export async function handler({ repoName, repoOwner }: TestEvent) {
   } catch (e) {
     console.error('got error', e);
   }
+}
+
+export async function handler({ repoName, repoOwner }: TestEvent) {
+  await cloneDocsRepo(repoName, repoOwner);
+
+  await buildSnootyCache(repoName);
+
   return null;
 }
