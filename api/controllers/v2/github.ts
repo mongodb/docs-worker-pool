@@ -120,7 +120,9 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     consoleLogger.info(job.title, `Created Job ${jobId}`);
   }
 
-  if (body.repository.name === MONOREPO_NAME) {
+  console.log('Feature flag monorepo: ', process.env.FEATURE_FLAG_MONOREPO_PATH);
+
+  if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && body.repository.name === MONOREPO_NAME) {
     // TODO: MONOREPO feature flag needed here
     let monorepoPaths: string[] = [];
     try {

@@ -52,7 +52,7 @@ export class DocsetsRepository extends BaseRepository {
     ];
   }
 
-  async getProjectByRepoName(repoName: string, directory?: string): Promise<any> {
+  async getProjectByRepoName(repoName: string, directory?: string): Promise<string | undefined> {
     const matchConditions = { repoName };
     if (directory) matchConditions['directories.snooty_toml'] = `/${directory}`;
     const projection = { project: 1 };

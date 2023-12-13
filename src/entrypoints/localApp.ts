@@ -8,6 +8,7 @@ import {
   prepareBuildAndGetDependencies,
 } from '../commands';
 import { Job, Payload } from '../entities/job';
+import { IJobRepoLogger } from '../services/logger';
 
 const fakePayload: Payload = {
   repoName: 'cloud-docs',
@@ -51,9 +52,9 @@ const fakeJob: Job = {
   purgedUrls: undefined,
 };
 
-const logger = (message: string) => {
-  console.log(message);
-};
+const logger = {
+  save: (contextId: string, message: string) => console.log(message),
+} as IJobRepoLogger;
 
 async function localApp() {
   const baseUrl = 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
@@ -90,36 +91,35 @@ async function localApp() {
     project,
     baseUrl,
     buildDependencies,
-    logger,
     directory
   );
 
   console.log('Begin snooty build...');
-  const snootyBuildRes = await nextGenParse({ job: fakeJob, logger });
+  const snootyBuildRes = await nextGenParse({ job: fakeJob });
   console.log(snootyBuildRes.errorText);
   console.log('Snooty build complete');
 
   console.log('Begin persistence-module');
-  const persistenceModuleRes = await persistenceModule({ job: fakeJob, logger });
+  const persistenceModuleRes = await persistenceModule({ job: fakeJob });
   console.log(persistenceModuleRes);
   console.log('Persistence-module complete');
 
   console.log('Begin next-gen-html...');
-  const nextGenHtmlRes = await nextGenHtml({ job: fakeJob, logger });
+  const nextGenHtmlRes = await nextGenHtml();
   console.log(nextGenHtmlRes.outputText);
   console.log('next-gen-html complete');
 
   console.log('Begin oas-page-build...');
-  const oasPageBuildRes = await oasPageBuild({ job: fakeJob, baseUrl, logger });
+  const oasPageBuildRes = await oasPageBuild({ job: fakeJob, baseUrl });
   console.log(oasPageBuildRes);
   console.log('Oas-page-build compelte');
 
   console.log('Begin next-gen-stage...');
   await nextGenStage({
     job: fakeJob,
-    logger,
     bucket,
     url: baseUrl,
+    logger,
   });
   console.log('next-gen-stage complete');
 
@@ -128,7 +128,6 @@ async function localApp() {
     hasConfigRedirects: hasRedirects,
     gitBranch: commitBranch,
     mutPrefix: mutPrefix || '',
-    logger,
   });
   console.log(deployRes);
   console.log('Next-gen-deploy complete');

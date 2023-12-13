@@ -1,15 +1,14 @@
 import path from 'path';
 import { Job } from '../../../entities/job';
 import { getDirectory } from '../../../job/jobHandler';
-import { executeCliCommand } from '../helpers';
+import { CliCommandResponse, executeCliCommand } from '../helpers';
 
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 interface NextGenParseParams {
   job: Job;
-  logger: (message: string) => void;
   isProd?: boolean;
 }
-export async function nextGenParse({ job, logger, isProd }: NextGenParseParams): Promise<any> {
+export async function nextGenParse({ job, isProd }: NextGenParseParams): Promise<CliCommandResponse> {
   const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(job)}`);
   const commitHash = job.payload.newHead;
   const patchId = job.payload.patch;
@@ -36,9 +35,11 @@ export async function nextGenParse({ job, logger, isProd }: NextGenParseParams):
       command: 'snooty',
       args: commandArgs,
       options: { cwd: repoDir },
-      logger: logger,
     });
   } catch (error) {
-    logger(`ERROR: ${error}\n\n`);
+    return {
+      outputText: '',
+      errorText: `ERROR: ${error}`,
+    };
   }
 }

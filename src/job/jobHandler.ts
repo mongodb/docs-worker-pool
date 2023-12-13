@@ -549,16 +549,17 @@ export abstract class JobHandler {
   protected async build(): Promise<boolean> {
     this.cleanup();
     const job = this._currJob;
-    const logger = (msg: string) => this.logger.save(this.currJob._id, msg);
 
     await this.cloneRepo(this._config.get<string>('repo_dir'));
     this._logger.save(job._id, 'Cloned Repo');
+
     await this.commitCheck();
     this._logger.save(job._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(job._id, 'Pulled Repo');
     await this.setEnvironmentVariables();
     this.logger.save(job._id, 'Prepared Environment variables');
+
     const buildDependencies = await this.getBuildDependencies();
     this._logger.save(this._currJob._id, 'Identified Build dependencies');
 
@@ -574,13 +575,19 @@ export abstract class JobHandler {
       job.payload.project,
       baseUrl,
       buildDependencies,
-      logger,
       job.payload.directory
     );
-    await nextGenParse({ job, logger });
+
+    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
+    const parseResponse = await nextGenParse({ job });
     this.logger.save(job._id, 'Repo Parsing Complete');
-    await persistenceModule({ job, logger });
+    this.logger.save(job._id, parseResponse.outputText);
+    this.logger.save(job._id, parseResponse.errorText);
+
+    const persistenceResponse = await persistenceModule({ job });
     this.logger.save(job._id, 'Persistence Module Complete');
+    this.logger.save(job._id, persistenceResponse.outputText);
+    this.logger.save(job._id, persistenceResponse.errorText);
 
     // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
     const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
@@ -589,10 +596,15 @@ export abstract class JobHandler {
       this.logger.save(job._id, 'Gatsby Webhook Called');
     }
 
-    await oasPageBuild({ job, baseUrl, logger });
+    const oasResponse = await oasPageBuild({ job, baseUrl });
     this.logger.save(job._id, 'OAS Page Build Complete');
-    await nextGenHtml({ job, logger });
+    this.logger.save(job._id, oasResponse.outputText);
+    this.logger.save(job._id, oasResponse.errorText);
+
+    const htmlResponse = await nextGenHtml();
     this.logger.save(job._id, 'NextGenHtml Complete');
+    this.logger.save(job._id, htmlResponse.outputText);
+    this.logger.save(job._id, htmlResponse.errorText);
     return true;
   }
 
@@ -650,10 +662,7 @@ export abstract class JobHandler {
     await this._logger.save(this._currJob._id, `* Starting Job with repo name: ${this._currJob.payload.repoName}`);
     try {
       // TODO: MONOREPO feature flag needed here
-      if (
-        // process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' &&
-        this._currJob.payload.repoName === MONOREPO_NAME
-      ) {
+      if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this._currJob.payload.repoName === MONOREPO_NAME) {
         await this._logger.save(this._currJob._id, `* Using build without Makefiles`);
         await this.build();
       } else {

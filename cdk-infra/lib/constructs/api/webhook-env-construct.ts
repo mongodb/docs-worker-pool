@@ -50,7 +50,7 @@ export class WebhookEnvConstruct extends Construct {
       USER_ENTITLEMENT_COL_NAME: entitlementCollection,
       DASHBOARD_URL: getDashboardUrl(env, jobCollection),
       STAGE: env,
-      FEATURE_FLAG_MONOREPO_PATH: featureFlagMonorepoPath.stringValue,
+      FEATURE_FLAG_MONOREPO_PATH: featureFlagMonorepoPath,
     };
   }
 }

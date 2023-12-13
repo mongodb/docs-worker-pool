@@ -80,11 +80,7 @@ export class StagingJobHandler extends JobHandler {
     let resp;
     try {
       // TODO: MONOREPO feature flag needed
-      if (
-        // process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' &&
-        this.currJob.payload.repoName === MONOREPO_NAME
-      ) {
-        const logger = (message: string) => this.logger.save(this.currJob._id, message);
+      if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this.currJob.payload.repoName === MONOREPO_NAME) {
         const repo_info = await this._docsetsRepo.getRepo(
           this.currJob.payload.repoName,
           this.currJob.payload.directory
@@ -95,12 +91,11 @@ export class StagingJobHandler extends JobHandler {
             ${this.currJob.payload.directory ? `directory: ${this.currJob.payload.directory}\n` : ''}
             project: ${this.currJob.payload.project}
           `;
-          logger(`ERROR: ${errorMessage}`);
           throw Error(errorMessage);
         }
 
         const { bucket, url } = await this.getEnvironmentVariables();
-        resp = await nextGenStage({ job: this.currJob, logger, bucket, url });
+        resp = await nextGenStage({ job: this.currJob, logger: this.logger, bucket, url });
       } else {
         resp = await this.deployGeneric();
       }

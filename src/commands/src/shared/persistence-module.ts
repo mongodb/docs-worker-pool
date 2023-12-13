@@ -3,9 +3,8 @@ import { executeCliCommand, getRepoDir } from '../helpers';
 
 interface PersistenceModuleParams {
   job: Job;
-  logger: (message: string) => void;
 }
-export async function persistenceModule({ job, logger }: PersistenceModuleParams) {
+export async function persistenceModule({ job }: PersistenceModuleParams) {
   const githubUser = job.payload.repoOwner;
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   const bundlePath = `${repoDir}/bundle.zip`;
@@ -24,11 +23,8 @@ export async function persistenceModule({ job, logger }: PersistenceModuleParams
     args.push(job._id);
   }
 
-  const { outputText } = await executeCliCommand({
+  return await executeCliCommand({
     command: 'node',
     args,
-    logger,
   });
-
-  return outputText;
 }

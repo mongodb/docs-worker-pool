@@ -7,13 +7,7 @@ import { BuildDependencies } from '../../../entities/job';
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
-async function createEnvProdFile(
-  repoDir: string,
-  projectName: string,
-  baseUrl: string,
-  logger: (message: string) => void,
-  prefix = ''
-) {
+async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: string, prefix = '') {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
 
   try {
@@ -21,14 +15,14 @@ async function createEnvProdFile(
       prodFileName,
       `GATSBY_SITE=${projectName}
       GATSBY_MANIFEST_PATH=${repoDir}/bundle.zip
-      GATSBY_PARSER_USER=${process.env.USER ?? `docsworker-xlarge`}
+      GATSBY_PARSER_USER=${process.env.USER ?? 'docsworker-xlarge'}
       GATSBY_BASE_URL=${baseUrl}
       GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}
       PATH_PREFIX=${prefix}`,
       'utf8'
     );
   } catch (e) {
-    logger(`ERROR! Could not write to .env.production: ${e}`);
+    console.log(`ERROR! Could not write to .env.production: ${e}`);
     throw e;
   }
 }
@@ -78,20 +72,19 @@ export async function prepareBuildAndGetDependencies(
   projectName: string,
   baseUrl: string,
   buildDependencies: BuildDependencies,
-  logger: (message: string) => void,
   directory?: string
 ) {
   const repoDir = getRepoDir(repoName, directory);
   await downloadBuildDependencies(buildDependencies, repoName);
-  logger(`Downloaded Build dependencies`);
+  console.log('Downloaded Build dependencies');
 
   // doing these in parallel
   const commandPromises = [
-    getCommitHash(repoDir, logger),
-    getCommitBranch(repoDir, logger),
-    getPatchId(repoDir, logger),
+    getCommitHash(repoDir),
+    getCommitBranch(repoDir),
+    getPatchId(repoDir),
     existsAsync(path.join(process.cwd(), 'config/redirects')),
-    createEnvProdFile(repoDir, projectName, baseUrl, logger),
+    createEnvProdFile(repoDir, projectName, baseUrl),
   ];
 
   try {
@@ -106,7 +99,7 @@ export async function prepareBuildAndGetDependencies(
       repoDir,
     };
   } catch (error) {
-    logger(`Error: Could not get build deps: ${error}`);
+    console.log(`Error: Could not get build deps: ${error}`);
     throw error;
   }
 }

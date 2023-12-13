@@ -4,10 +4,9 @@ import { executeCliCommand, getRepoDir } from '../helpers';
 interface OasPageBuildParams {
   job: Job;
   baseUrl: string;
-  logger: (message: string) => void;
 }
 
-export async function oasPageBuild({ job, baseUrl, logger }: OasPageBuildParams) {
+export async function oasPageBuild({ job, baseUrl }: OasPageBuildParams) {
   const siteUrl = job.payload.mutPrefix
     ? `${baseUrl}/${job.payload.mutPrefix}`
     : `${baseUrl}/${job.payload.project}/docsworker-xlarge/${job.payload.branchName}`;
@@ -15,7 +14,7 @@ export async function oasPageBuild({ job, baseUrl, logger }: OasPageBuildParams)
   const bundlePath = `${repoDir}/bundle.zip`;
 
   try {
-    const { outputText } = await executeCliCommand({
+    return await executeCliCommand({
       command: 'node',
       args: [
         `${process.cwd()}/modules/oas-page-builder/index.js`,
@@ -30,13 +29,11 @@ export async function oasPageBuild({ job, baseUrl, logger }: OasPageBuildParams)
         '--site-url',
         siteUrl,
       ],
-      logger,
     });
-
-    logger(outputText);
-    return outputText;
   } catch (error) {
-    logger(`ERROR: oas-page-build.ts - ${error}`);
-    return '';
+    return {
+      outputText: '',
+      errorText: `ERROR: oas-page-build.ts - ${error}`,
+    };
   }
 }

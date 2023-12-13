@@ -1,19 +1,20 @@
 import { Job } from '../../../entities/job';
+import { IJobRepoLogger } from '../../../services/logger';
 import { executeCliCommand, getRepoDir } from '../helpers';
 
 const DOCS_WORKER_USER = 'docsworker-xlarge';
 interface StageParams {
   job: Job;
-  logger: (message: string) => void;
   bucket?: string;
   url?: string;
+  logger: IJobRepoLogger;
 }
 
-export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
+export async function nextGenStage({ job, bucket, url, logger }: StageParams) {
   const { mutPrefix, branchName, patch, project, newHead } = job.payload;
 
   if (!bucket) {
-    logger(`nextGenStage has failed. Variable for S3 bucket address was undefined.`);
+    console.log(`nextGenStage has failed. Variable for S3 bucket address was undefined.`);
     return {
       status: 'failure',
       output: 'Failed in nextGenStage: No value present for S3 bucket',
@@ -21,7 +22,7 @@ export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
     };
   }
   if (!url) {
-    logger(`nextGenStage has failed. Variable for URL address was undefined.`);
+    console.log(`nextGenStage has failed. Variable for URL address was undefined.`);
     return {
       status: 'failure',
       output: 'Failed in nextGenStage: No value present for target url.',
@@ -48,17 +49,17 @@ export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
       args: ['-r', `${process.cwd()}/snooty/public`, repoDir],
     });
 
-    const { outputText } = await executeCliCommand({
+    const { outputText, errorText } = await executeCliCommand({
       command: 'mut-publish',
       args: commandArgs,
       options: {
         cwd: repoDir,
       },
-      logger: logger,
     });
 
     const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
-    logger(resultMessage);
+    logger.save(job._id, resultMessage);
+    if (errorText) logger.save(job._id, errorText);
 
     return {
       status: 'success',
@@ -66,7 +67,7 @@ export async function nextGenStage({ job, logger, bucket, url }: StageParams) {
       error: '',
     };
   } catch (error) {
-    logger(`Failed in nextGenStage.`);
+    console.log(`Failed in nextGenStage.`);
     return {
       status: 'failed',
       output: 'Failed in nextGenStage',

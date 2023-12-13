@@ -20,13 +20,12 @@ export class ExecuteCommandError extends Error {
   }
 }
 
-interface CliCommandParams {
+export interface CliCommandParams {
   command: string;
   args?: readonly string[];
   options?: SpawnOptions;
   writeStream?: fs.WriteStream;
   writeTarget?: Writable;
-  logger?: (message: string) => void;
 }
 
 export interface CliCommandResponse {
@@ -158,7 +157,6 @@ export async function executeCliCommand({
   args = [],
   options = {},
   writeStream,
-  logger,
 }: CliCommandParams): Promise<CliCommandResponse> {
   return new Promise((resolve, reject) => {
     const outputText: string[] = [];
@@ -168,17 +166,15 @@ export async function executeCliCommand({
 
     if (writeStream) executedCommand.stdout?.pipe(writeStream);
     executedCommand.stdout?.on('data', (data: Buffer) => {
-      if (logger) logger(data.toString());
       outputText.push(data.toString());
     });
 
     executedCommand.stderr?.on('data', (data: Buffer) => {
-      if (logger) logger(data.toString());
       errorText.push(data.toString());
     });
 
     executedCommand.on('error', (err) => {
-      if (logger) logger(`ERROR in executeCliCommand.\nCommand: ${command} ${args.join(' ')}\nError: ${err}`);
+      console.log(`ERROR in executeCliCommand.\nCommand: ${command} ${args.join(' ')}\nError: ${err}`);
       reject(new ExecuteCommandError('The command failed', err));
     });
 
@@ -186,11 +182,9 @@ export async function executeCliCommand({
       if (writeStream) writeStream.end();
 
       if (exitCode !== 0) {
-        if (logger) {
-          logger(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
-          logger('Arguments provided: ' + args);
-          logger('Options provided: ' + JSON.stringify(options));
-        }
+        console.log(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
+        console.log('Arguments provided: ' + args);
+        console.log('Options provided: ' + JSON.stringify(options));
 
         if (outputText.length) {
           console.log(outputText.join(''));
@@ -255,18 +249,18 @@ export async function readFileAndExec({
   return response;
 }
 
-export async function getPatchId(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+export async function getPatchId(repoDir: string): Promise<string | undefined> {
   const filePath = path.join(repoDir, 'myPatch.patch');
   try {
     const { outputText: gitPatchId } = await readFileAndExec({ command: 'git', filePath, args: ['patch-id'] });
 
     return gitPatchId.slice(0, 7);
   } catch (err) {
-    logger('No patch ID found: ' + err);
+    console.log('No patch ID found: ' + err);
   }
 }
 
-export async function getCommitBranch(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+export async function getCommitBranch(repoDir: string): Promise<string | undefined> {
   try {
     // equivalent to git rev-parse --abbrev-ref HEAD
     const response = await executeCliCommand({
@@ -277,12 +271,12 @@ export async function getCommitBranch(repoDir: string, logger: (msg: string) => 
 
     return response.outputText;
   } catch (err) {
-    logger(`ERROR in getCommitBranch: ${err}`);
+    console.log(`ERROR in getCommitBranch: ${err}`);
     throw Error;
   }
 }
 
-export async function getCommitHash(repoDir: string, logger: (msg: string) => void): Promise<string | undefined> {
+export async function getCommitHash(repoDir: string): Promise<string | undefined> {
   try {
     // equivalent to git rev-parse --short HEAD
     const response = await executeCliCommand({
@@ -293,7 +287,7 @@ export async function getCommitHash(repoDir: string, logger: (msg: string) => vo
 
     return response.outputText;
   } catch (err) {
-    logger(`ERROR in getCommitHash: ${err}`);
+    console.log(`ERROR in getCommitHash: ${err}`);
     throw Error;
   }
 }
