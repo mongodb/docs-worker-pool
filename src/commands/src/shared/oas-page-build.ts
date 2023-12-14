@@ -1,12 +1,12 @@
 import { Job } from '../../../entities/job';
-import { executeCliCommand, getRepoDir } from '../helpers';
+import { CliCommandResponse, executeCliCommand, getRepoDir } from '../helpers';
 
 interface OasPageBuildParams {
   job: Job;
   baseUrl: string;
 }
 
-export async function oasPageBuild({ job, baseUrl }: OasPageBuildParams) {
+export async function oasPageBuild({ job, baseUrl }: OasPageBuildParams): Promise<CliCommandResponse> {
   const siteUrl = job.payload.mutPrefix
     ? `${baseUrl}/${job.payload.mutPrefix}`
     : `${baseUrl}/${job.payload.project}/docsworker-xlarge/${job.payload.branchName}`;
@@ -14,7 +14,7 @@ export async function oasPageBuild({ job, baseUrl }: OasPageBuildParams) {
   const bundlePath = `${repoDir}/bundle.zip`;
 
   try {
-    return await executeCliCommand({
+    return executeCliCommand({
       command: 'node',
       args: [
         `${process.cwd()}/modules/oas-page-builder/index.js`,

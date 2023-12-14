@@ -31,7 +31,7 @@ export async function nextGenParse({ job, isProd }: NextGenParseParams): Promise
   }
 
   try {
-    return await executeCliCommand({
+    return executeCliCommand({
       command: 'snooty',
       args: commandArgs,
       options: { cwd: repoDir },

@@ -22,6 +22,7 @@ import {
   prepareBuildAndGetDependencies,
 } from '../commands';
 import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
+import { CliCommandResponse } from '../commands/src/helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -294,6 +295,25 @@ export abstract class JobHandler {
   }
 
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
+  private async wrapWithBenchmarks(
+    buildStepFunc: () => Promise<CliCommandResponse>,
+    stage: string
+  ): Promise<CliCommandResponse> {
+    const start = performance.now();
+
+    const resp = await buildStepFunc();
+
+    const end = performance.now();
+    const update = {
+      [`${stage}StartTime`]: start,
+      [`${stage}EndTime`]: end,
+    };
+
+    this._jobRepository.updateExecutionTime(this.currJob._id, update);
+    return resp;
+  }
+
+  // call this method when we want benchmarks of Makefile commands and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
     const pathToRepo = `repos/${getDirectory(this.currJob)}`;
@@ -579,13 +599,19 @@ export abstract class JobHandler {
     );
     this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
 
-    const parseOutput = await nextGenParse({ job });
-    this.logger.save(job._id, 'Repo Parsing Complete');
-    this.logger.save(job._id, `${parseOutput.outputText}\n${parseOutput.errorText}`);
+    let buildStepOutput: CliCommandResponse;
 
-    const persistenceOutput = await persistenceModule({ job });
+    const parseFunc = async () => nextGenParse({ job });
+    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
+    else buildStepOutput = await parseFunc();
+    this.logger.save(job._id, 'Repo Parsing Complete');
+    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+
+    const persistenceFunc = async () => persistenceModule({ job });
+    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe');
+    else buildStepOutput = await persistenceFunc();
     this.logger.save(job._id, 'Persistence Module Complete');
-    this.logger.save(job._id, `${persistenceOutput.outputText}\n${persistenceOutput.errorText}`);
+    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
     const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
@@ -594,13 +620,17 @@ export abstract class JobHandler {
       this.logger.save(job._id, 'Gatsby Webhook Called');
     }
 
-    const oasBuildOutput = await oasPageBuild({ job, baseUrl });
+    const oasPageBuilderFunc = async () => oasPageBuild({ job, baseUrl });
+    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
+    else buildStepOutput = await oasPageBuilderFunc();
     this.logger.save(job._id, 'OAS Page Build Complete');
-    this.logger.save(job._id, `${oasBuildOutput.outputText}\n${oasBuildOutput.errorText}`);
+    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
-    const htmlOutput = await nextGenHtml();
+    const htmlFunc = async () => await nextGenHtml();
+    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
+    else buildStepOutput = await htmlFunc();
     this.logger.save(job._id, 'NextGenHtml Complete');
-    this.logger.save(job._id, `${htmlOutput.outputText}\n${htmlOutput.errorText}`);
+    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     return true;
   }

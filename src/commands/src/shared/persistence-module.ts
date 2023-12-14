@@ -1,10 +1,10 @@
 import { Job } from '../../../entities/job';
-import { executeCliCommand, getRepoDir } from '../helpers';
+import { CliCommandResponse, executeCliCommand, getRepoDir } from '../helpers';
 
 interface PersistenceModuleParams {
   job: Job;
 }
-export async function persistenceModule({ job }: PersistenceModuleParams) {
+export async function persistenceModule({ job }: PersistenceModuleParams): Promise<CliCommandResponse> {
   const githubUser = job.payload.repoOwner;
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   const bundlePath = `${repoDir}/bundle.zip`;
@@ -23,7 +23,7 @@ export async function persistenceModule({ job }: PersistenceModuleParams) {
     args.push(job._id);
   }
 
-  return await executeCliCommand({
+  return executeCliCommand({
     command: 'node',
     args,
   });

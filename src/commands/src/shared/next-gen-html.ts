@@ -1,6 +1,6 @@
-import { executeCliCommand } from '../helpers';
+import { CliCommandResponse, executeCliCommand } from '../helpers';
 
-export async function nextGenHtml() {
+export async function nextGenHtml(): Promise<CliCommandResponse> {
   return executeCliCommand({
     command: 'npm',
     args: ['run', 'build'],
