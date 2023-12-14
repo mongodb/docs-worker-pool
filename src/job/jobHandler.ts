@@ -535,7 +535,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
     this._logger.save(this._currJob._id, 'Prepared Next Gen build');
-    await this._repoConnector.applyPatch(this.currJob);
+    await this._repoConnector.applyPatch(this._currJob);
     this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
@@ -577,17 +577,15 @@ export abstract class JobHandler {
       buildDependencies,
       job.payload.directory
     );
-
     this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
-    const parseResponse = await nextGenParse({ job });
-    this.logger.save(job._id, 'Repo Parsing Complete');
-    this.logger.save(job._id, parseResponse.outputText);
-    this.logger.save(job._id, parseResponse.errorText);
 
-    const persistenceResponse = await persistenceModule({ job });
+    const parseOutput = await nextGenParse({ job });
+    this.logger.save(job._id, 'Repo Parsing Complete');
+    this.logger.save(job._id, `${parseOutput.outputText}\n${parseOutput.errorText}`);
+
+    const persistenceOutput = await persistenceModule({ job });
     this.logger.save(job._id, 'Persistence Module Complete');
-    this.logger.save(job._id, persistenceResponse.outputText);
-    this.logger.save(job._id, persistenceResponse.errorText);
+    this.logger.save(job._id, `${persistenceOutput.outputText}\n${persistenceOutput.errorText}`);
 
     // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
     const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
@@ -596,15 +594,14 @@ export abstract class JobHandler {
       this.logger.save(job._id, 'Gatsby Webhook Called');
     }
 
-    const oasResponse = await oasPageBuild({ job, baseUrl });
+    const oasBuildOutput = await oasPageBuild({ job, baseUrl });
     this.logger.save(job._id, 'OAS Page Build Complete');
-    this.logger.save(job._id, oasResponse.outputText);
-    this.logger.save(job._id, oasResponse.errorText);
+    this.logger.save(job._id, `${oasBuildOutput.outputText}\n${oasBuildOutput.errorText}`);
 
-    const htmlResponse = await nextGenHtml();
+    const htmlOutput = await nextGenHtml();
     this.logger.save(job._id, 'NextGenHtml Complete');
-    this.logger.save(job._id, htmlResponse.outputText);
-    this.logger.save(job._id, htmlResponse.errorText);
+    this.logger.save(job._id, `${htmlOutput.outputText}\n${htmlOutput.errorText}`);
+
     return true;
   }
 
