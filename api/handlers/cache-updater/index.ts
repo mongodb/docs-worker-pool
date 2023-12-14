@@ -1,12 +1,12 @@
 import os from 'os';
 import fs from 'fs';
 import { promisify } from 'util';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { S3Client } from '@aws-sdk/client-s3';
 
 import { executeCliCommand } from '../../../src/commands/src/helpers';
 
 const readdirAsync = promisify(fs.readdir);
-const readFileAsync = promisify(fs.readFile);
 
 interface TestEvent {
   repoOwner: string;
@@ -40,31 +40,39 @@ async function createSnootyCache(repoName: string) {
   }
 }
 
-async function uploadCacheToS3(fileName: string, content: Buffer) {
+async function uploadCacheToS3(repoName: string, repoOwner: string) {
   const BUCKET_NAME = 'snooty-parse-cache';
   const client = new S3Client({ region: 'us-east-2' });
 
-  const uploadCommand = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: fileName,
-    Body: content,
+  const cacheFileName = (await readdirAsync(os.tmpdir())).find((fileName) => fileName.startsWith('.snooty'));
+
+  if (!cacheFileName) {
+    throw new Error(`ERROR! Cache file not found for ${repoOwner}/${repoName}`);
+  }
+  const cacheFileStream = fs.createReadStream(`${os.tmpdir}/${cacheFileName}`);
+
+  const upload = new Upload({
+    client,
+    params: {
+      Bucket: BUCKET_NAME,
+      Key: cacheFileName,
+      Body: cacheFileStream,
+    },
   });
 
-  const response = await client.send(uploadCommand);
-}
+  upload.on('httpUploadProgress', (progress) => {
+    console.log(progress);
+  });
 
-async function getCachedFiles(repoName: string) {
-  const cacheFile = (await readdirAsync(os.tmpdir())).find((fileName) => fileName.startsWith('.snooty'));
-
-  if (!cacheFile) {
-    throw new Error(`ERROR! Cache file not found for ${repoName}`);
-  }
+  await upload.done();
 }
 
 export async function handler({ repoName, repoOwner }: TestEvent): Promise<unknown> {
   await cloneDocsRepo(repoName, repoOwner);
 
   await createSnootyCache(repoName);
+
+  await uploadCacheToS3(repoName, repoOwner);
 
   return null;
 }
