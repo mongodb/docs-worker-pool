@@ -265,10 +265,6 @@ export abstract class JobHandler {
     } else {
       this.currJob.payload.isNextGen = false;
     }
-    await this._logger.save(
-      this.currJob._id,
-      `MAYA LOGGING: ISNEXT GEN HAS BEEN SET TO ${this.currJob.payload.isNextGen}`
-    );
   }
 
   private async logBuildDetails(resp: CommandExecutorResponse): Promise<void> {
@@ -355,10 +351,6 @@ export abstract class JobHandler {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      await this._logger.save(
-        this.currJob._id,
-        `MAYA LOGGING: BENCHMSARK BEING USED: ${this.currJob.useWithBenchmark} BUT PAYLOAD THING IS ${this.currJob.payload.isNextGen}`
-      );
       if (this.currJob.payload.isNextGen) {
         await this.exeBuildModified();
       } else {
