@@ -359,7 +359,7 @@ export abstract class JobHandler {
         this.currJob._id,
         `MAYA LOGGING: BENCHMSARK BEING USED: ${this.currJob.useWithBenchmark} BUT PAYLOAD THING IS ${this.currJob.payload.isNextGen}`
       );
-      if (this.currJob.payload.isNextGen) {
+      if (this.currJob.useWithBenchmark) {
         await this.exeBuildModified();
       } else {
         await this.exeBuild();
