@@ -131,7 +131,7 @@ export class JobManager {
         const excludeRepoFromBenchmarks = ['mms-docs', 'docs-k8s-operator'].includes(job.payload.repoName);
         await this._logger.save(job._id, `MAYA: IN WORKEX EXCLUDE REPO is ${excludeRepoFromBenchmarks}`);
         // Can easily rollback with commenting out this flag.
-        job.useWithBenchmark = !excludeRepoFromBenchmarks;
+        //job.useWithBenchmark = !excludeRepoFromBenchmarks;
         await this.createHandlerAndExecute(job);
       } else {
         this._logger.info('JobManager', `No Jobs Found: ${new Date()}`);

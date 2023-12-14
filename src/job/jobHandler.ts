@@ -357,9 +357,9 @@ export abstract class JobHandler {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
       await this._logger.save(
         this.currJob._id,
-        `MAYA LOGGING: BENCHMSARK BEING USED: ${this.currJob.useWithBenchmark}`
+        `MAYA LOGGING: BENCHMSARK BEING USED: ${this.currJob.useWithBenchmark} BUT PAYLOAD THING IS ${this.currJob.payload.isNextGen}`
       );
-      if (this.currJob.useWithBenchmark) {
+      if (this.currJob.payload.isNextGen) {
         await this.exeBuildModified();
       } else {
         await this.exeBuild();
