@@ -128,7 +128,6 @@ export class JobManager {
     try {
       this._jobHandler = null;
       if (job?.payload) {
-        // Can easily rollback with commenting out this flag.
         await this.createHandlerAndExecute(job);
       } else {
         this._logger.info('JobManager', `No Jobs Found: ${new Date()}`);
