@@ -82,7 +82,7 @@ export const insertMergedMetadataEntries = async (buildId: ObjectId, metadata: M
 export const deleteStaleMetadata = async (metadata: Metadata) => {
   try {
     const { project, branch } = metadata;
-    const LIMIT = 4;
+    const LIMIT = 49;
     // get most recent metadata for this project-branch
     const snooty = await db();
     const entries = await snooty
