@@ -182,9 +182,9 @@ export async function executeCliCommand({
       if (writeStream) writeStream.end();
 
       if (exitCode !== 0) {
-        console.log(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
-        console.log('Arguments provided: ' + args);
-        console.log('Options provided: ' + JSON.stringify(options));
+        console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
+        console.error('Arguments provided: ', args);
+        console.error('Options provided: ', options);
 
         if (outputText.length) {
           console.log(outputText.join(''));

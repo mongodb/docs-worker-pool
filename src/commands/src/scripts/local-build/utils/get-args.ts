@@ -8,9 +8,9 @@ export function getArgs() {
   }
   const repoOwnerIdx = process.argv.findIndex((str) => str === '--repo-owner' || str === '-o');
   const repoNameIdx = process.argv.findIndex((str) => str === '--repo-name' || str === '-n');
-  const directoryIdx = process.argv.findIndex((str) => str === '--directory' || str === '-d');
 
-  // optional
+  // optional args
+  const directoryIdx = process.argv.findIndex((str) => str === '--directory' || str === '-d');
   const branchNameIdx = process.argv.findIndex((str) => str === '--branch-name' || str === '-b');
 
   if (repoOwnerIdx === -1)

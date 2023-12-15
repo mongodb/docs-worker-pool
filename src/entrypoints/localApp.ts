@@ -24,7 +24,6 @@ const fakePayload: Payload = {
   prefix: '',
   includeInGlobalSearch: true,
 } as Payload;
-// Bucket??
 
 const fakeJob: Job = {
   _id: '082u3roinswdf988888888',
@@ -86,7 +85,7 @@ async function localApp() {
     },
   ];
 
-  const { commitHash, patchId, bundlePath, commitBranch, hasRedirects, repoDir } = await prepareBuildAndGetDependencies(
+  const { commitBranch, hasRedirects } = await prepareBuildAndGetDependencies(
     repoName,
     project,
     baseUrl,
@@ -128,6 +127,8 @@ async function localApp() {
     hasConfigRedirects: hasRedirects,
     gitBranch: commitBranch,
     mutPrefix: mutPrefix || '',
+    bucket,
+    url: baseUrl,
   });
   console.log(deployRes);
   console.log('Next-gen-deploy complete');
