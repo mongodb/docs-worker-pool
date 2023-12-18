@@ -51,20 +51,26 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   }
   const cacheFileStream = fs.createReadStream(`${os.tmpdir}/${cacheFileName}`);
 
-  const upload = new Upload({
-    client,
-    params: {
-      Bucket: BUCKET_NAME,
-      Key: cacheFileName,
-      Body: cacheFileStream,
-    },
-  });
+  try {
+    const upload = new Upload({
+      client,
+      params: {
+        Bucket: BUCKET_NAME,
+        Key: cacheFileName,
+        Body: cacheFileStream,
+      },
+    });
 
-  upload.on('httpUploadProgress', (progress) => {
-    console.log(progress);
-  });
+    upload.on('httpUploadProgress', (progress) => {
+      console.log(progress);
+    });
 
-  await upload.done();
+    await upload.done();
+  } catch (e) {
+    console.error('ERROR! Upload failed', e);
+  } finally {
+    cacheFileStream.close();
+  }
 }
 
 export async function handler({ repoName, repoOwner }: TestEvent): Promise<unknown> {
