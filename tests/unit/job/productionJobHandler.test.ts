@@ -258,7 +258,6 @@ describe('ProductionJobHandler Tests', () => {
       output: 'Great work',
       error: null,
     });
-    jobHandlerTestHelper.job.useWithBenchmark = true;
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
   });
