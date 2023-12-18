@@ -57,10 +57,11 @@ RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongod
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 
-RUN curl  -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/tags/v${REDOC_CLI_VERSION}.zip \
-    && unzip redoc.zip \
-    && mv redoc-${REDOC_CLI_VERSION} redoc/ \
-    && cd redoc/ && npm ci && npm run bundle
+RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+    # Install dependencies for Redoc CLI
+    && cd redoc/ \
+    && npm ci --prefix cli/ --omit=dev
+    
 FROM initial as persistence
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
