@@ -169,6 +169,6 @@ export async function getWorkerEnv(env: AutoBuilderEnv): Promise<Record<string, 
     IS_LOCAL: 'true',
     ENHANCED: 'true',
     JOB_UPDATES_QUEUE_URL:
-      'https://sqs.us-east-2.amazonaws.com/216656347858/auto-builder-stack-enhancedApp-stg-DO-queuesJobUpdatesQueue60725415-lcqd4XXlmSJp', // temp hardcode
+      'https://sqs.us-east-2.amazonaws.com/216656347858/auto-builder-stack-enhancedApp-dotcom-queuesJobUpdatesQueue60725415-k32LRG3HnCHm', // temp hardcode
   };
 }
