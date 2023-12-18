@@ -351,7 +351,7 @@ export abstract class JobHandler {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      if (this.currJob.useWithBenchmark) {
+      if (this.currJob.payload.isNextGen) {
         await this.exeBuildModified();
       } else {
         await this.exeBuild();
