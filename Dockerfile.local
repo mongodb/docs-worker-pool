@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${WORK_DIRECTORY}
 
 # helper libraries for docs builds
-RUN apt-get update && apt-get install -y vim git unzip zip
+RUN apt-get update && apt-get install -y vim git unzip zip chromium-browser
 
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -56,6 +56,11 @@ RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongod
 
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
+
+RUN curl  -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/tags/v${REDOC_CLI_VERSION}.zip \
+    && unzip redoc.zip \
+    && mv redoc-${REDOC_CLI_VERSION} redoc/ \
+    && cd redoc/ && npm ci
 FROM initial as persistence
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
