@@ -85,8 +85,9 @@ export class SlackConnector implements ISlackConnector {
 
   validateSlackRequest(payload: any): boolean {
     // params needed to verify for slack
-    const headerSlackSignature = payload.headers['X-Slack-Signature'].toString(); // no idea why `typeof <sig>` = object
-    const timestamp = payload.headers['X-Slack-Request-Timestamp'];
+    const headerSlackSignature =
+      payload.headers['X-Slack-Signature']?.toString() ?? payload.headers['x-slack-signature']?.toString(); // no idea why `typeof <sig>` = object
+    const timestamp = payload.headers['X-Slack-Request-Timestamp'] ?? payload.headers['x-slack-request-timestamp'];
     const signingSecret = process.env.SLACK_SECRET;
     if (signingSecret) {
       const hmac = crypto.createHmac('sha256', signingSecret);
