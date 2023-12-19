@@ -602,13 +602,13 @@ export abstract class JobHandler {
     let buildStepOutput: CliCommandResponse;
 
     const parseFunc = async () => nextGenParse({ job });
-    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
     else buildStepOutput = await parseFunc();
     this.logger.save(job._id, 'Repo Parsing Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     const persistenceFunc = async () => persistenceModule({ job });
-    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe');
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe');
     else buildStepOutput = await persistenceFunc();
     this.logger.save(job._id, 'Persistence Module Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
@@ -621,13 +621,13 @@ export abstract class JobHandler {
     }
 
     const oasPageBuilderFunc = async () => oasPageBuild({ job, baseUrl });
-    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
     else buildStepOutput = await oasPageBuilderFunc();
     this.logger.save(job._id, 'OAS Page Build Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     const htmlFunc = async () => await nextGenHtml();
-    if (job.useWithBenchmark) buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
     else buildStepOutput = await htmlFunc();
     this.logger.save(job._id, 'NextGenHtml Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
