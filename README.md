@@ -21,49 +21,62 @@ To add a new property:
 - Go to `infrastructure/ecs-main/ecs-service.yml` `TaskDefinition` section
 - Add the new property to the `ContainerDefinitions`/`Environment` section
 
-## Build and Run Docker Image for local testing
+## Debug the Autobuilder for Local Testing
 
-The npm build args are required for the portion of the dockerfile that installs the [snooty-frontend]. `NPM_CONFIG__AUTH`
-and `NPM_CONFIG_EMAIL` are environment variables available in our working directory. `NPM_CONFIG_{OPTION}` environment
-variables can actually be used instead of the `~/.npmrc` file. The reason we need the build args to be `NPM_BASE_64_AUTH`
-and `NPM_EMAIL` is because that's what's expected in the `.npmrc` within [snooty-frontend].
+### Setup
 
-```shell
-docker build --tag=workerpool --build-arg NPM_BASE_64_AUTH=${NPM_CONFIG__AUTH} --build-arg NPM_EMAIL=${NPM_CONFIG_EMAIL} .
-```
+To debug the Autobuilder for local testing, you first need to ensure the following has been done:
 
-```shell
-docker run \
-	--env MONGO_ATLAS_USERNAME \
-	--env MONGO_ATLAS_PASSWORD \
-	--env AWS_ACCESS_KEY_ID \
-	--env AWS_SECRET_ACCESS_KEY \
-	--env GITHUB_BOT_USERNAME \
-	--env GITHUB_BOT_PASSWORD \
-	--env DB_NAME \
-	--env XLARGE \
-	--env SNOOTY_ENV \
-	--env FASTLY_TOKEN \
-	--env FASTLY_DOCHUB_MAP \
-	--env FASTLY_SERVICE_ID \
-	workerpool
-```
+1. Docker is running
+2. The `~/.aws/credentials` file contains unexpired credentials for the `default` profile
 
-- `MONGO_ATLAS_USERNAME` and `MONGO_ATLAS_PASSWORD` is username/password of atlas database
-- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are needed for uploading to S3 via [mut](https://github.com/mongodb/mut)
-- `GITHUB_BOT_USERNAME` and `GITHUB_BOT_PASSWORD` are needed so builder can access private repos
-- `DB_NAME` allows the indication of a pool database (pool, pool_test)
-- `XLARGE` true or false indicates whether this instance will run on an XLARGE server or not
-- `SNOOTY_ENV` indicates whether the build environment is stage, prod, or dev
-- `FASTLY_TOKEN` is needed for connecting to the Fastly edge dictionary
-- `FASTLY_DOCHUB_MAP` is the id of the redirect map that we publish dochub links to
-- `FASTLY_SERVICE_ID` is the id of the service used for dochub
+For retrieving credentials, head to AWS and under `Docs Platform`, click on `Command line or programmatic access`.
+![AWS console](image.png)
 
-If you are running a local version of the docker image for testing, we have a separate staging environment setup. Testing in this environment is automated through the "stage" branch. Add the following env variables to the `docker run` command:
+Copy the value in option 2, `Manually add a profile to your AWS credentials file (Short-term credentials)`.
 
-```
---env DB_NAME
-```
+![Alt text](image-1.png)
+
+From there, paste this value in `~/.aws/credentials`, and replace the randomly generated profile (which looks something like `[123456789_AdministratorAccess]`) with `[default]`.
+You should now have the correct credentials to run the debugger.
+
+_**NOTE: credentials expire pretty quickly. Not sure how exactly how long they last for, but in my experience they expire in approximately 30 minutes.**_
+
+You should now be all set to run the debugger command:
+
+`npm run debug`
+
+To view all of the options for the command, you can run:
+
+`npm run debug -- --help`
+
+Here is an example of running the local debugger for `cloud-docs`:
+
+`npm run debug -- -o 10gen -n 'cloud-docs'`
+
+By default, the environment that is used for the local Autobuilder is `stg`.
+
+### Debugger Behavior
+
+When the command is run, there are several steps that occur before the Autobuilder begins:
+
+1. Environment variables and other information are pulled from Parameter Store
+2. The GitHub repository is queried for data to create the job
+3. The container is built
+   - NOTE: If you have not run the debug command before, the build will take a substantial amount of time (approximately 10-15 minutes).
+     Subsequent builds will be much shorter, especially if the changes are just code changes. If just a code change is made after the initial build, it should only take a few seconds for the build to complete and the container to run. Changes such as updating the version of the Snooty Parser, or the Redoc CLI will cause the builds to take much longer, but these happen much less frequently. The majority of the build should be on the order of a few seconds.
+4. The data from step 2 is then added as a record in the `pool_test.queue`.
+5. The container is then run, and waits for the user to connect to it via the VSCode debugger.
+
+Once the container starts successfully, you should see the following message:
+
+`Container started. Please attach to the debugger to run the Autobuilder.`
+
+To connect, click on the debug tab on the left side of your VSCode editor. Make sure the dropdown to the right of the green play button is set to the `Docker: Attach to Autobuilder` configuration. Press the green play button, and you will attach to the container.
+
+![Alt text](image-2.png)
+
+By default, the container will break at the first line of code, which will be in a file called `bind.js`. Press the fast-forward button to continue the execution. You are also able to add other breakpoints to stop the application. Once the application is complete, press `CTRL + C` for the terminal to exit out of the connection to the container.
 
 ## Run Tests
 
