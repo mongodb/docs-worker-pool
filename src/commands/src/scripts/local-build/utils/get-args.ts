@@ -9,7 +9,7 @@ export function getArgs() {
       --repo-owner, -o  (required)       The owner of the repo. Typically this is 'mongodb' or '10gen'. This should be your username for a fork.
       --repo-name,  -n  (required)       The name of the repo e.g. docs-java or cloud-docs.
       --directory,  -d  (optional)       The project directory path for a monorepo project.
-      --branc-name, -d  (optional)       The branch name we want to parse. If not provided, the value 'master' is used by default.
+      --branch-name, -d  (optional)       The branch name we want to parse. If not provided, the value 'master' is used by default.
     `);
 
     process.exit(0);
