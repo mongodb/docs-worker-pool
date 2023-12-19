@@ -89,7 +89,6 @@ export type EnhancedPayload = {
 
 export type Job = {
   _id: string;
-  useWithBenchmark?: boolean;
   payload: Payload;
   createdTime: Date;
   endTime: Date | null | undefined;
@@ -115,7 +114,6 @@ export type Job = {
 
 export type EnhancedJob = {
   _id: string;
-  useWithBenchmark?: boolean;
   payload: EnhancedPayload;
   createdTime: Date;
   endTime: Date | null | undefined;

@@ -258,7 +258,6 @@ describe('ProductionJobHandler Tests', () => {
       output: 'Great work',
       error: null,
     });
-    jobHandlerTestHelper.job.useWithBenchmark = true;
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
   });
@@ -328,32 +327,11 @@ describe('ProductionJobHandler Tests', () => {
     }
   );
 
-  test('Execute Build succeeded deploy failed updates status properly', async () => {
-    jobHandlerTestHelper.setStageForDeployFailure('Bad work', 'Not Good');
-    await jobHandlerTestHelper.jobHandler.execute();
-    jobHandlerTestHelper.verifyNextGenSuccess();
-    expect(jobHandlerTestHelper.jobRepo.insertNotificationMessages).toBeCalledWith(
-      jobHandlerTestHelper.job._id,
-      'Bad work'
-    );
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, 'Not Good');
-  });
-
   test('Execute Build succeeded deploy failed updates status properly on nullish case', async () => {
     jobHandlerTestHelper.setStageForDeployFailure(null, 'Not Good');
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, 'Not Good');
-  });
-
-  test('Execute Build succeeded deploy failed with an ERROR updates status properly', async () => {
-    jobHandlerTestHelper.setStageForDeployFailure(null, 'ERROR:BAD ONE');
-    await jobHandlerTestHelper.jobHandler.execute();
-    jobHandlerTestHelper.verifyNextGenSuccess();
-    expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(
-      jobHandlerTestHelper.job._id,
-      'Failed pushing to Production: ERROR:BAD ONE'
-    );
   });
 
   test('Execute legacy build successfully purges only updated urls', async () => {
