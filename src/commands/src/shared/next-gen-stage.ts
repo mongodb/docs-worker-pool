@@ -1,6 +1,5 @@
 import { Job } from '../../../entities/job';
 import { CommandExecutorResponse, CommandExecutorResponseStatus } from '../../../services/commandExecutor';
-import { IJobRepoLogger } from '../../../services/logger';
 import { executeCliCommand, getRepoDir } from '../helpers';
 
 const DOCS_WORKER_USER = 'docsworker-xlarge';
@@ -8,10 +7,9 @@ interface StageParams {
   job: Job;
   bucket?: string;
   url?: string;
-  logger: IJobRepoLogger;
 }
 
-export async function nextGenStage({ job, bucket, url, logger }: StageParams): Promise<CommandExecutorResponse> {
+export async function nextGenStage({ job, bucket, url }: StageParams): Promise<CommandExecutorResponse> {
   const { mutPrefix, branchName, patch, project, newHead } = job.payload;
 
   if (!bucket) {
@@ -59,12 +57,10 @@ export async function nextGenStage({ job, bucket, url, logger }: StageParams): P
     });
 
     const resultMessage = `${outputText}\n Hosted at ${hostedAtUrl}\n\nHere are the commands: ${commandArgs}`;
-    logger.save(job._id, resultMessage);
-    if (errorText) logger.save(job._id, errorText);
 
     return {
       status: CommandExecutorResponseStatus.success,
-      output: outputText,
+      output: resultMessage,
       error: errorText,
     };
   } catch (error) {

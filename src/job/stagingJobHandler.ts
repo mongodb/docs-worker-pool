@@ -94,7 +94,8 @@ export class StagingJobHandler extends JobHandler {
         }
 
         const { bucket, url } = await this.getEnvironmentVariables();
-        resp = await nextGenStage({ job: this.currJob, logger: this.logger, bucket, url });
+        resp = await nextGenStage({ job: this.currJob, bucket, url });
+        await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)} ${resp.output}`);
       } else {
         resp = await this.deployGeneric();
       }

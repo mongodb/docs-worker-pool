@@ -22,7 +22,7 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
       'utf8'
     );
   } catch (e) {
-    console.log(`ERROR! Could not write to .env.production: ${e}`);
+    console.error(`ERROR! Could not write to .env.production: ${e}`);
     throw e;
   }
 }
@@ -32,7 +32,7 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
       const repoDir = getRepoDir(repoName);
-      const targetDir = dependencyInfo.targetDir ? dependencyInfo.targetDir : repoDir;
+      const targetDir = dependencyInfo.targetDir ?? repoDir;
       try {
         await executeCliCommand({
           command: 'mkdir',
@@ -99,7 +99,7 @@ export async function prepareBuildAndGetDependencies(
       repoDir,
     };
   } catch (error) {
-    console.log(`Error: Could not get build deps: ${error}`);
+    console.error(`Error: Could not get build deps: ${error}`);
     throw error;
   }
 }
