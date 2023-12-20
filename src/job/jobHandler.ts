@@ -590,7 +590,7 @@ export abstract class JobHandler {
     }
     const baseUrl = docset?.url?.[env] || 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
 
-    await prepareBuildAndGetDependencies(
+    const { patchId } = await prepareBuildAndGetDependencies(
       job.payload.repoName,
       job.payload.project,
       baseUrl,
@@ -601,7 +601,7 @@ export abstract class JobHandler {
 
     let buildStepOutput: CliCommandResponse;
 
-    const parseFunc = async () => nextGenParse({ job });
+    const parseFunc = async () => nextGenParse({ job, patchId });
     if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
     else buildStepOutput = await parseFunc();
     this.logger.save(job._id, 'Repo Parsing Complete');
