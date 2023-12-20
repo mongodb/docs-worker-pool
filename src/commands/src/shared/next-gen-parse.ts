@@ -6,12 +6,12 @@ import { CliCommandResponse, executeCliCommand } from '../helpers';
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 interface NextGenParseParams {
   job: Job;
+  patchId?: string;
   isProd?: boolean;
 }
-export async function nextGenParse({ job, isProd }: NextGenParseParams): Promise<CliCommandResponse> {
+export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams): Promise<CliCommandResponse> {
   const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(job)}`);
   const commitHash = job.payload.newHead;
-  const patchId = job.payload.patch;
 
   const commandArgs = ['build', `${repoDir}`, '--output', `${repoDir}/bundle.zip`];
 
