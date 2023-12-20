@@ -74,6 +74,19 @@ Once the container starts successfully, you should see the following message:
 
 To connect, click on the debug tab on the left side of your VSCode editor. Make sure the dropdown to the right of the green play button is set to the `Docker: Attach to Autobuilder` configuration. Press the green play button, and you will attach to the container.
 
+### Troubleshooting
+
+The most frequent cause of build failures will be related to expired AWS credentials, or not having Docker running. Also, if you haven't ran `npm ci` in a while, you will need to do so as a new dependency was added to run the command.
+
+Occasionally, errors may occur inexplicably, and the error messages may seem unrelated to any change made. Oftentimes, running the following commands can resolve these sporadic issues:
+
+```sh
+docker image prune
+docker container prune
+```
+
+Also, another potential error could be due to the Dockerfile.local not being updated. If you are not seeing changes that are occurring in the Autobuilder in another environment, this may be why. For example, the Dockerfile.local could be using an older version of the Snooty Parser.
+
 ![Alt text](image-2.png)
 
 By default, the container will break at the first line of code, which will be in a file called `bind.js`. Press the fast-forward button to continue the execution. You are also able to add other breakpoints to stop the application. Once the application is complete, press `CTRL + C` for the terminal to exit out of the connection to the container.
