@@ -31,11 +31,11 @@ To debug the Autobuilder for local testing, you first need to ensure the followi
 2. The `~/.aws/credentials` file contains unexpired credentials for the `default` profile
 
 For retrieving credentials, head to AWS and under `Docs Platform`, click on `Command line or programmatic access`.
-![AWS console](image.png)
+![AWS console](images/aws-console-admin.png)
 
 Copy the value in option 2, `Manually add a profile to your AWS credentials file (Short-term credentials)`.
 
-![Alt text](image-1.png)
+![Alt text](images/aws-credentials.png)
 
 From there, paste this value in `~/.aws/credentials`, and replace the randomly generated profile (which looks something like `[123456789_AdministratorAccess]`) with `[default]`.
 You should now have the correct credentials to run the debugger.
@@ -87,7 +87,7 @@ docker container prune
 
 Also, another potential error could be due to the Dockerfile.local not being updated. If you are not seeing changes that are occurring in the Autobuilder in another environment, this may be why. For example, the Dockerfile.local could be using an older version of the Snooty Parser.
 
-![Alt text](image-2.png)
+![Alt text](images/vsode-debugger.png)
 
 By default, the container will break at the first line of code, which will be in a file called `bind.js`. Press the fast-forward button to continue the execution. You are also able to add other breakpoints to stop the application. Once the application is complete, press `CTRL + C` for the terminal to exit out of the connection to the container.
 
