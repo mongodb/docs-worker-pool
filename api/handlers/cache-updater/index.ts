@@ -31,7 +31,7 @@ async function createSnootyCache(repoName: string) {
   try {
     const results = await executeCliCommand({
       command: 'snooty',
-      args: ['create-cache', `/tmp/${repoName}`, '--no-caching'],
+      args: ['create-cache', '--no-caching', `/tmp/${repoName}`],
     });
 
     console.log('results', results);
