@@ -12,3 +12,4 @@ worker/docs-tools
 worker/repos/*
 cdk-infra/*
 modules/*
+dist/*
