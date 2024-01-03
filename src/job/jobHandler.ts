@@ -297,8 +297,7 @@ export abstract class JobHandler {
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
   private async wrapWithBenchmarks(
     buildStepFunc: () => Promise<CliCommandResponse>,
-    stage: string,
-    logger: IJobRepoLogger
+    stage: string
   ): Promise<CliCommandResponse> {
     const start = performance.now();
 
@@ -307,7 +306,7 @@ export abstract class JobHandler {
     const end = performance.now();
 
     if (resp.errorText?.length > 0) {
-      logger.error(stage, `Error in "${stage}" stage: ${resp.errorText}`);
+      this.logger.error(stage, `Error in "${stage}" stage: ${resp.errorText}`);
       throw Error(resp.errorText);
     }
 
@@ -611,14 +610,13 @@ export abstract class JobHandler {
     let buildStepOutput: CliCommandResponse;
 
     const parseFunc = async () => nextGenParse({ job, patchId });
-    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe', this.logger);
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
     else buildStepOutput = await parseFunc();
     this.logger.save(job._id, 'Repo Parsing Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     const persistenceFunc = async () => persistenceModule({ job });
-    if (job.payload.isNextGen)
-      buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe', this.logger);
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe');
     else buildStepOutput = await persistenceFunc();
     this.logger.save(job._id, 'Persistence Module Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
@@ -631,14 +629,13 @@ export abstract class JobHandler {
     }
 
     const oasPageBuilderFunc = async () => oasPageBuild({ job, baseUrl });
-    if (job.payload.isNextGen)
-      buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe', this.logger);
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
     else buildStepOutput = await oasPageBuilderFunc();
     this.logger.save(job._id, 'OAS Page Build Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     const htmlFunc = async () => await nextGenHtml();
-    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe', this.logger);
+    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
     else buildStepOutput = await htmlFunc();
     this.logger.save(job._id, 'NextGenHtml Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
