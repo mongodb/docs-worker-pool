@@ -222,6 +222,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async getAndBuildDependencies() {
     const buildDependencies = await this.getBuildDependencies();
+    this._logger.save(this._currJob._id, `BUILD DEPENDENCIES:, buildDependencies`);
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
     this._logger.save(this._currJob._id, commands.join('\n'));
   }
