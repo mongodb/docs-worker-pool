@@ -9,7 +9,7 @@ RUN yum install -y git zip unzip tar make
 RUN python3 -m pip install poetry
 
 # install snooty parser
-RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git \
+RUN git clone -b debugging --depth 1 https://github.com/mongodb/snooty-parser.git \
     && cd snooty-parser \
     && python3 -m poetry install \
     && make package \
