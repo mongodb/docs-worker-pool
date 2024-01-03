@@ -31,12 +31,13 @@ async function createSnootyCache(repoName: string) {
   try {
     const results = await executeCliCommand({
       command: 'snooty',
-      args: ['create-cache', '--no-caching', `/tmp/${repoName}`],
+      args: ['create-cache', `/tmp/${repoName}`, '--no-caching'],
     });
 
     console.log('results', results);
   } catch (e) {
     console.error('got error', e);
+    throw e;
   }
 }
 
