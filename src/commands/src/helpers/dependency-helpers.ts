@@ -67,7 +67,7 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
           try {
             executeCliCommand({
               command: 'curl',
-              args: ['-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+              args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
             });
           } catch (error) {
             console.error(
