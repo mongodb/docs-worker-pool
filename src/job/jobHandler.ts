@@ -215,6 +215,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async getBuildDependencies() {
     const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
+    await this._logger.save(this._currJob._id, `logging buildDependencies: ${buildDependencies}`);
     if (!buildDependencies) return [];
     return buildDependencies;
   }
