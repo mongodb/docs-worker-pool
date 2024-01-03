@@ -12,7 +12,7 @@ export class CacheUpdaterConstruct extends Construct {
       memorySize: 2048,
       code: DockerImageCode.fromImageAsset(path.join(__dirname, '../../../../'), {
         buildArgs: {
-          SNOOTY_PARSER_VERSION: '0.15.1',
+          SNOOTY_PARSER_VERSION: '0.15.2',
         },
         file: 'api/handlers/cache-updater/Dockerfile.cacheUpdater',
       }),
