@@ -23,8 +23,15 @@ export async function persistenceModule({ job }: PersistenceModuleParams): Promi
     args.push(job._id);
   }
 
-  return executeCliCommand({
-    command: 'node',
-    args,
-  });
+  try {
+    return executeCliCommand({
+      command: 'node',
+      args,
+    });
+  } catch (error) {
+    return {
+      outputText: '',
+      errorText: `ERROR: ${error}`,
+    };
+  }
 }

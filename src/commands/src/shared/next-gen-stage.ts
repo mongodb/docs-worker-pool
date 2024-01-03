@@ -17,7 +17,7 @@ export async function nextGenStage({ job, bucket, url }: StageParams): Promise<C
     return {
       status: CommandExecutorResponseStatus.failed,
       output: 'Failed in nextGenStage: No value present for S3 bucket',
-      error: 'No value present for S3 bucket.',
+      error: 'ERROR: No value present for S3 bucket.',
     };
   }
   if (!url) {
@@ -25,7 +25,7 @@ export async function nextGenStage({ job, bucket, url }: StageParams): Promise<C
     return {
       status: CommandExecutorResponseStatus.failed,
       output: 'Failed in nextGenStage: No value present for target url.',
-      error: 'No value present for URL.',
+      error: 'ERROR: No value present for URL.',
     };
   }
 
@@ -68,7 +68,7 @@ export async function nextGenStage({ job, bucket, url }: StageParams): Promise<C
     return {
       status: CommandExecutorResponseStatus.failed,
       output: 'Failed in nextGenStage',
-      error: 'Failed in nextGenStage',
+      error: 'ERROR: Failed in nextGenStage',
     };
   }
 }
