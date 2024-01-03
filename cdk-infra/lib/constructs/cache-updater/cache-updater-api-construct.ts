@@ -3,7 +3,7 @@ import { DockerImageFunction, DockerImageCode } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import path from 'path';
 
-export class CacheUpdaterConstruct extends Construct {
+export class CacheUpdaterApiConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
