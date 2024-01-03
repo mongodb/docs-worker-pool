@@ -305,11 +305,6 @@ export abstract class JobHandler {
 
     const end = performance.now();
 
-    if (resp.errorText?.length > 0) {
-      this.logger.error(stage, `Error in "${stage}" stage: ${resp.errorText}`);
-      throw Error(resp.errorText);
-    }
-
     const update = {
       [`${stage}StartTime`]: start,
       [`${stage}EndTime`]: end,
@@ -610,35 +605,33 @@ export abstract class JobHandler {
     let buildStepOutput: CliCommandResponse;
 
     const parseFunc = async () => nextGenParse({ job, patchId });
-    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
-    else buildStepOutput = await parseFunc();
+    buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
     this.logger.save(job._id, 'Repo Parsing Complete');
     this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     const persistenceFunc = async () => persistenceModule({ job });
-    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe');
-    else buildStepOutput = await persistenceFunc();
-    this.logger.save(job._id, 'Persistence Module Complete');
-    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+    buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe');
+    await this.logger.save(job._id, 'Persistence Module Complete');
+    await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
     const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
     if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
       await this.callGatsbyCloudWebhook();
-      this.logger.save(job._id, 'Gatsby Webhook Called');
+      await this.logger.save(job._id, 'Gatsby Webhook Called');
     }
 
     const oasPageBuilderFunc = async () => oasPageBuild({ job, baseUrl });
-    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
-    else buildStepOutput = await oasPageBuilderFunc();
-    this.logger.save(job._id, 'OAS Page Build Complete');
-    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+    buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
+
+    await this.logger.save(job._id, 'OAS Page Build Complete');
+    await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     const htmlFunc = async () => await nextGenHtml();
-    if (job.payload.isNextGen) buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
-    else buildStepOutput = await htmlFunc();
-    this.logger.save(job._id, 'NextGenHtml Complete');
-    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+    buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
+
+    await this.logger.save(job._id, 'NextGenHtml Complete');
+    await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     return true;
   }
@@ -696,7 +689,10 @@ export abstract class JobHandler {
     );
     await this._logger.save(this._currJob._id, `* Starting Job with repo name: ${this._currJob.payload.repoName}`);
     try {
-      if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this._currJob.payload.repoName === MONOREPO_NAME) {
+      if (
+        (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this._currJob.payload.repoName === MONOREPO_NAME) ||
+        true
+      ) {
         await this._logger.save(this._currJob._id, `* Using build without Makefiles`);
         await this.build();
       } else {
@@ -708,8 +704,10 @@ export abstract class JobHandler {
       await this.update(resp);
       this.cleanup();
     } catch (error) {
+      this.logger.save(this._currJob._id, `Error during the build process: ${error.stack}`);
       try {
         await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message);
+
         this.cleanup();
       } catch (error) {
         this._logger.error(this._currJob._id, error.message);

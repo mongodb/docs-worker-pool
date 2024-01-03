@@ -68,9 +68,9 @@ When the command is run, there are several steps that occur before the Autobuild
 4. The data from step 2 is then added as a record in the `pool_test.queue`.
 5. The container is then run, and waits for the user to connect to it via the VSCode debugger.
 
-Once the container starts successfully, you should see the following message:
+Once the container starts successfully, you should see something like the following message:
 
-`Container started. Please attach to the debugger to run the Autobuilder.`
+`Debugger listening on ws://0.0.0.0:9229/....`
 
 To connect, click on the debug tab on the left side of your VSCode editor. Make sure the dropdown to the right of the green play button is set to the `Docker: Attach to Autobuilder` configuration. Press the green play button, and you will attach to the container.
 

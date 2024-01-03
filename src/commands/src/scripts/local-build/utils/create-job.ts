@@ -17,8 +17,9 @@ export function createLocalJob({
   commit,
   project,
   directory,
-}: Props): Omit<EnhancedJob, '_id'> {
+}: Props): Omit<EnhancedJob & { isLocal: boolean }, '_id'> {
   return {
+    isLocal: true,
     title: `${repoOwner}/${repoName}`,
     user: commit.author?.name ?? '',
     email: commit.author?.email ?? '',
