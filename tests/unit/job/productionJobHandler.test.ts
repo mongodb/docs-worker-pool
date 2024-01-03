@@ -55,7 +55,7 @@ describe('ProductionJobHandler Tests', () => {
       'Invalid RepoName'
     );
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
-    expect(jobHandlerTestHelper.logger.save).toBeCalledTimes(5);
+    expect(jobHandlerTestHelper.logger.save).toBeCalledTimes(6);
   });
 
   describe.each(TestDataProvider.getAllCommitCheckCases())('Validate all commit check error cases', (element) => {
