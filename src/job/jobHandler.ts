@@ -604,6 +604,8 @@ export abstract class JobHandler {
       buildDependencies,
       job.payload.directory
     );
+    // Set patchId on payload for use in nextGenStage
+    this._currJob.payload.patchId = patchId;
     this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
 
     let buildStepOutput: CliCommandResponse;

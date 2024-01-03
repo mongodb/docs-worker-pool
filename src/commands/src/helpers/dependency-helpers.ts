@@ -7,7 +7,21 @@ import { BuildDependencies } from '../../../entities/job';
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
-async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: string, prefix = '') {
+async function createEnvProdFile({
+  repoDir,
+  projectName,
+  baseUrl,
+  prefix = '',
+  patchId,
+  commitHash,
+}: {
+  repoDir: string;
+  projectName: string;
+  baseUrl: string;
+  prefix?: string;
+  patchId?: string;
+  commitHash?: string;
+}) {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
 
   try {
@@ -18,7 +32,9 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
       GATSBY_PARSER_USER=${process.env.USER ?? 'docsworker-xlarge'}
       GATSBY_BASE_URL=${baseUrl}
       GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}
-      PATH_PREFIX=${prefix}`,
+      PATH_PREFIX=${prefix}
+      ${patchId ? `PATCH_ID=${patchId}` : ''}
+      ${commitHash ? `COMMIT_HASH=${commitHash}` : ''}`,
       'utf8'
     );
   } catch (e) {
@@ -84,11 +100,17 @@ export async function prepareBuildAndGetDependencies(
     getCommitBranch(repoDir),
     getPatchId(repoDir),
     existsAsync(path.join(process.cwd(), 'config/redirects')),
-    createEnvProdFile(repoDir, projectName, baseUrl),
   ];
 
   try {
     const dependencies = await Promise.all(commandPromises);
+    await createEnvProdFile({
+      repoDir,
+      projectName,
+      baseUrl,
+      commitHash: dependencies[1] as string | undefined,
+      patchId: dependencies[2] as string | undefined,
+    });
 
     return {
       commitHash: dependencies[0] as string,
