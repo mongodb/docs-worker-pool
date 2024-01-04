@@ -92,7 +92,7 @@ COPY --chown=docsworker-xlarge modules/oas-page-builder/index.ts ./modules/oas-p
 RUN cd ./modules/oas-page-builder \
     && npm run build:esbuild
 
-FROM arm64v8/ubuntu:20.04 as root
+FROM initial as root
 
 COPY --from=persistence --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/persistence/dist/ ./modules/persistence
 COPY --from=oas --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/oas-page-builder/dist/ ./modules/oas-page-builder
