@@ -95,7 +95,7 @@ RUN cd ./modules/oas-page-builder \
 FROM arm64v8/ubuntu:20.04 as root
 
 COPY --from=persistence --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/persistence/dist/ ./modules/persistence
-COPY --from=oas --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/oas-page-builde/dist/ ./modules/oas-page-builder
+COPY --from=oas --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/oas-page-builder/dist/ ./modules/oas-page-builder
 
 # Root project build
 COPY package*.json ./
