@@ -52,7 +52,11 @@ To view all of the options for the command, you can run:
 
 Here is an example of running the local debugger for `cloud-docs`:
 
-`npm run debug -- -o 10gen -n 'cloud-docs'`
+`npm run debug -- -o 10gen -n cloud-docs`
+
+Here is an example of running the local debugger for `docs-monorepo/docs-landing` on branch `groot`:
+
+`npm run debug -- -o 10gen -n docs-monorepo -d cloud-docs -b groot`
 
 By default, the environment that is used for the local Autobuilder is `stg`.
 
@@ -76,7 +80,7 @@ To connect, click on the debug tab on the left side of your VSCode editor. Make 
 
 ### Troubleshooting
 
-The most frequent cause of build failures will be related to expired AWS credentials, or not having Docker running. Also, if you haven't ran `npm ci` in a while, you will need to do so as a new dependency was added to run the command.
+The most frequent cause of build failures will be related to expired AWS credentials, or not having Docker running. Also, if you haven't run `npm ci` in a while, you will need to do so as a new dependency was added to run the command.
 
 Occasionally, errors may occur inexplicably, and the error messages may seem unrelated to any change made. Oftentimes, running the following commands can resolve these sporadic issues:
 

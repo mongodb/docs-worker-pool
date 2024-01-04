@@ -13,7 +13,7 @@ export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams)
   const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(job)}`);
   const commitHash = job.payload.newHead;
 
-  const commandArgs = ['build', `${repoDir}`, '--output', `${repoDir}/bundle.zip`];
+  const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`];
 
   if (patchId && commitHash) {
     commandArgs.push('--commit');
