@@ -1,21 +1,27 @@
-FROM public.ecr.aws/lambda/python:3.11 as python-builder
+FROM python:3.11-slim-bullseye as python-builder
 # We intentionally do not set a default value 
 # because we want to provide a specific snooty parser
 # version every time.
 ARG SNOOTY_PARSER_VERSION
 WORKDIR /usr/app
 
-RUN yum install -y git zip unzip tar make
-RUN python3 -m pip install poetry
+RUN apt-get -o Acquire::Check-Valid-Until=false update
+RUN apt-get -y install git zip unzip tar make curl
 
 # install snooty parser
-RUN git clone -b debugging --depth 1 https://github.com/mongodb/snooty-parser.git \
-    && cd snooty-parser \
-    && python3 -m poetry install \
-    && make package \
-    && mv dist/snooty /opt/
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ snooty-parser.zip
 
-FROM public.ecr.aws/lambda/nodejs:18 as builder
+# RUN python3 -m pip install poetry
+
+# # install snooty parser
+# RUN git clone -b debugging --depth 1 https://github.com/mongodb/snooty-parser.git \
+#     && cd snooty-parser \
+#     && python3 -m poetry install \
+#     && make package \
+#     && mv dist/snooty /opt/
+
+FROM node:18-bullseye-slim as builder
 WORKDIR /usr/app
 
 COPY package*.json ./
@@ -26,10 +32,10 @@ COPY src src/
 RUN npm ci
 RUN npm run build:esbuild:lambda
 
-FROM public.ecr.aws/lambda/nodejs:18
+FROM node:18-bullseye-slim
 
 ENV PATH="${PATH}:/opt/snooty"
-RUN yum install -y git
+RUN apt-get -o Acquire::Check-Valid-Until=false update && apt-get -y install git
 
 COPY --from=python-builder /opt/ /opt/
 COPY --from=builder usr/app/dist ${LAMBDA_TASK_ROOT}
