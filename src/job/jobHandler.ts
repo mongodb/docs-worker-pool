@@ -623,13 +623,11 @@ export abstract class JobHandler {
 
     const oasPageBuilderFunc = async () => oasPageBuild({ job, baseUrl });
     buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
-
     await this.logger.save(job._id, 'OAS Page Build Complete');
     await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
     const htmlFunc = async () => await nextGenHtml();
     buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
-
     await this.logger.save(job._id, 'NextGenHtml Complete');
     await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
 
