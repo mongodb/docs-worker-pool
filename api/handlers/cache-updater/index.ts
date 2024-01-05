@@ -80,6 +80,12 @@ interface HandlerProps {
   repoName: string;
 }
 
+// TODO: Refactor this to handle multiple requests
+
+/**
+ * The handler function processes a request to
+ * @param repoName - the name of the repository that we are creating a cache for.
+ */
 export async function handler({ repoName, repoOwner }: HandlerProps): Promise<void> {
   console.log(`-------- Cloning repository: ${repoOwner}/${repoName} ------------`);
   await cloneDocsRepo(repoName, repoOwner);
