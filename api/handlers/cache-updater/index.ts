@@ -1,5 +1,5 @@
-import os from 'os';
 import fs from 'fs';
+import path from 'path';
 import { promisify } from 'util';
 import { Upload } from '@aws-sdk/lib-storage';
 import { S3Client } from '@aws-sdk/client-s3';
@@ -17,7 +17,7 @@ async function cloneDocsRepo(repoName: string, repoOwner: string) {
   try {
     const cloneResults = await executeCliCommand({
       command: 'git',
-      args: ['clone', `https://github.com/${repoOwner}/${repoName}`, `/tmp/${repoName}`],
+      args: ['clone', `https://github.com/${repoOwner}/${repoName}`],
     });
 
     console.log('clone: ', cloneResults);
@@ -31,7 +31,7 @@ async function createSnootyCache(repoName: string) {
   try {
     const results = await executeCliCommand({
       command: 'snooty',
-      args: ['create-cache', `/tmp/${repoName}`, '--no-caching'],
+      args: ['create-cache', repoName, '--no-caching'],
     });
 
     console.log('results', results);
@@ -45,12 +45,16 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   const BUCKET_NAME = 'snooty-parse-cache';
   const client = new S3Client({ region: 'us-east-2' });
 
-  const cacheFileName = (await readdirAsync(os.tmpdir())).find((fileName) => fileName.startsWith('.snooty'));
+  const repoPath = path.join(__dirname, repoName);
+  const cacheFileName = (await readdirAsync(repoPath)).find((fileName) => fileName.startsWith('.snooty'));
 
   if (!cacheFileName) {
     throw new Error(`ERROR! Cache file not found for ${repoOwner}/${repoName}`);
   }
-  const cacheFileStream = fs.createReadStream(`${os.tmpdir}/${cacheFileName}`);
+
+  const cacheFilePath = path.join(repoPath, cacheFileName);
+
+  const cacheFileStream = fs.createReadStream(cacheFilePath);
 
   try {
     const upload = new Upload({
@@ -74,12 +78,23 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   }
 }
 
-export async function handler({ repoName, repoOwner }: TestEvent): Promise<unknown> {
+export async function handler({ repoName, repoOwner }: TestEvent): Promise<void> {
+  console.log(`-------- Cloning repository: ${repoOwner}/${repoName} ------------`);
   await cloneDocsRepo(repoName, repoOwner);
-
+  console.log(`-------- Creating cache ------------`);
   await createSnootyCache(repoName);
+
+  console.log(`-------- Uploading cache to S3 ------------`);
 
   await uploadCacheToS3(repoName, repoOwner);
 
-  return null;
+  console.log('-------- Upload complete ------------');
 }
+
+const repoName = process.env.REPO_NAME;
+const repoOwner = process.env.REPO_OWNER;
+
+if (!repoName) throw new Error('ERROR! repoName not defined');
+if (!repoOwner) throw new Error('ERROR! repoOwner not defined');
+
+handler({ repoName, repoOwner });
