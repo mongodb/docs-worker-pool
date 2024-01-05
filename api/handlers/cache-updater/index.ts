@@ -8,11 +8,6 @@ import { executeCliCommand } from '../../../src/commands/src/helpers';
 
 const readdirAsync = promisify(fs.readdir);
 
-interface TestEvent {
-  repoOwner: string;
-  repoName: string;
-}
-
 async function cloneDocsRepo(repoName: string, repoOwner: string) {
   try {
     const cloneResults = await executeCliCommand({
@@ -57,6 +52,8 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   const cacheFileStream = fs.createReadStream(cacheFilePath);
 
   try {
+    // this class conveniently handles multi-part uploads to S3.
+    // Overwrites current cache file if identical one exists.
     const upload = new Upload({
       client,
       params: {
@@ -78,7 +75,12 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   }
 }
 
-export async function handler({ repoName, repoOwner }: TestEvent): Promise<void> {
+interface HandlerProps {
+  repoOwner: string;
+  repoName: string;
+}
+
+export async function handler({ repoName, repoOwner }: HandlerProps): Promise<void> {
   console.log(`-------- Cloning repository: ${repoOwner}/${repoName} ------------`);
   await cloneDocsRepo(repoName, repoOwner);
   console.log(`-------- Creating cache ------------`);
