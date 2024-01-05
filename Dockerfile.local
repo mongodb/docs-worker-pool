@@ -111,6 +111,7 @@ RUN npm run build:esbuild
 
 ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
 ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
+ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 RUN mkdir repos && chmod 755 repos
