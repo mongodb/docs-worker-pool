@@ -60,6 +60,7 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
           `ERROR! Could not create target directory ${targetDir}. Dependency information: `,
           dependencyInfo
         );
+        await logger.save(id, `${targetDir} not succesffuly created`);
         throw error;
       }
       commands.push(`mkdir -p ${targetDir}`);
