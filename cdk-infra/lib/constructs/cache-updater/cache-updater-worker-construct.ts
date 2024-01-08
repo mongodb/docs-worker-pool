@@ -24,7 +24,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
 
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
-        file: path.join(__dirname, '../../../../src/cache-updater/Dockerfile.cacheUpdater'),
+        file: 'src/cache-updater/Dockerfile.cacheUpdater',
         exclude: ['tests/', 'node_modules/', 'cdk-infra/'], // adding this just in case it doesn't pick up our dockerignore
       }),
     });
