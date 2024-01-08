@@ -92,14 +92,12 @@ export const getDeployableJobs = async (
     let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
     const splitValues = values.repo_option[i].value.split('/');
 
-    if (splitValues.length === 3) {
-      // e.g. mongodb/docs-realm/master => (owner/repo/branch)
-      [repoOwner, repoName, branchName] = splitValues;
-    } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
+    if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && splitValues.length === 4) {
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
       [repoOwner, repoName, directory, branchName] = splitValues;
     } else {
-      throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
+      // e.g. mongodb/docs-realm/master => (owner/repo/branch)
+      [repoOwner, repoName, branchName] = splitValues;
     }
 
     const hashOption = values?.hash_option ?? null;

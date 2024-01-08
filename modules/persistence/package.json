@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .ts",
     "test": "jest --coverage",
     "build": "tsc",
+    "build:esbuild": "esbuild index.ts --bundle --platform=node --outdir=./dist --allow-overwrite",
     "start": "node --unhandled-rejections=strict ./dist/index.js",
     "dev": "tsc && node --unhandled-rejections=strict ./dist/index.js --path ./build/artifacts.zip "
   },
@@ -36,6 +37,7 @@
     "@shelf/jest-mongodb": "^4.1.4",
     "@typescript-eslint/eslint-plugin": "~5.5.0",
     "@typescript-eslint/parser": "^5.47.0",
+    "esbuild": "^0.19.11",
     "eslint": "^8.3.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",

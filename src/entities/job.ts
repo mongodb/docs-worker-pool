@@ -56,6 +56,7 @@ export type Payload = {
   project: string;
   includeInGlobalSearch: boolean;
   directory?: string;
+  patchId?: string;
 };
 
 export type EnhancedPayload = {
@@ -84,6 +85,8 @@ export type EnhancedPayload = {
   prefix: string;
   project: string;
   includeInGlobalSearch?: boolean;
+  directory?: string;
+  patchId?: string;
 };
 
 export type Job = {

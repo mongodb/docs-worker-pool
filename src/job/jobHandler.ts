@@ -1,3 +1,4 @@
+import path from 'path';
 import axios, { AxiosResponse } from 'axios';
 import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
@@ -13,7 +14,15 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
+import {
+  nextGenHtml,
+  nextGenParse,
+  oasPageBuild,
+  persistenceModule,
+  prepareBuildAndGetDependencies,
+} from '../commands';
 import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
+import { CliCommandResponse } from '../commands/src/helpers';
 require('fs');
 
 export abstract class JobHandler {
@@ -204,9 +213,15 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  private async getAndBuildDependencies() {
+  private async getBuildDependencies() {
     const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(this.currJob.payload.repoName);
-    if (!buildDependencies) return;
+    if (!buildDependencies) return [];
+    return buildDependencies;
+  }
+
+  @throwIfJobInterupted()
+  private async getAndBuildDependencies() {
+    const buildDependencies = await this.getBuildDependencies();
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
     this._logger.save(this._currJob._id, commands.join('\n'));
   }
@@ -280,6 +295,26 @@ export abstract class JobHandler {
   }
 
   // call this method when we want benchmarks and uses cwd option to call command outside of a one liner.
+  private async wrapWithBenchmarks(
+    buildStepFunc: () => Promise<CliCommandResponse>,
+    stage: string
+  ): Promise<CliCommandResponse> {
+    const start = performance.now();
+
+    const resp = await buildStepFunc();
+
+    const end = performance.now();
+
+    const update = {
+      [`${stage}StartTime`]: start,
+      [`${stage}EndTime`]: end,
+    };
+
+    this._jobRepository.updateExecutionTime(this.currJob._id, update);
+    return resp;
+  }
+
+  // call this method when we want benchmarks of Makefile commands and uses cwd option to call command outside of a one liner.
   private async callWithBenchmark(command: string, stage: string): Promise<CommandExecutorResponse> {
     const start = performance.now();
     const pathToRepo = `repos/${getDirectory(this.currJob)}`;
@@ -447,41 +482,67 @@ export abstract class JobHandler {
     ];
   }
 
-  protected async setEnvironmentVariables(): Promise<void> {
+  public async getEnvironmentVariables(): Promise<{ bucket?: string; url?: string; regression?: string }> {
+    let bucket: string | undefined, url: string | undefined, regression: string | undefined;
+
     const repo_info = await this._docsetsRepo.getRepoBranchesByRepoName(
       this._currJob.payload.repoName,
       this._currJob.payload.project
     );
+
     let env = this._config.get<string>('env');
     this._logger.info(
       this._currJob._id,
-      `setEnvironmentVariables for ${getDirectory(this._currJob)} env ${env} jobType ${this._currJob.payload.jobType}`
+      `getEnvironmentVariables for ${getDirectory(this._currJob)} env ${env} jobType ${this._currJob.payload.jobType}`
     );
     if (repo_info?.['bucket'] && repo_info?.['url']) {
       if (this._currJob.payload.regression) {
         env = 'regression';
-        process.env.REGRESSION = 'true';
+        regression = 'true';
       }
-      process.env.BUCKET = repo_info['bucket'][env];
-      process.env.URL = repo_info['url'][env];
+      bucket = repo_info['bucket'][env];
+      url = repo_info['url'][env];
 
       // Writers are tying to stage it, so lets update the staging bucket.
       if (env == 'prd' && this._currJob.payload.jobType == 'githubPush') {
-        process.env.BUCKET = repo_info['bucket'][env] + '-staging';
-        process.env.URL = repo_info['url']['stg'];
+        bucket = repo_info['bucket'][env] + '-staging';
+        url = repo_info['url']['stg'];
       }
     }
 
-    if (process.env.BUCKET) {
-      this._logger.info(this._currJob._id, process.env.BUCKET);
+    if (!bucket || !url) {
+      this._logger.error(
+        this._currJob._id,
+        `getEnvironmentVariables failed to access AWS bucket and url necessary for ${getDirectory(
+          this._currJob
+        )} env ${env} jobType ${this._currJob.payload.jobType}`
+      );
     }
-    if (process.env.URL) {
-      this._logger.info(this._currJob._id, process.env.URL);
+
+    if (bucket) {
+      this._logger.info(this._currJob._id, bucket);
     }
+    if (url) {
+      this._logger.info(this._currJob._id, url);
+    }
+
+    return {
+      bucket,
+      url,
+      regression,
+    };
+  }
+
+  protected async setEnvironmentVariables(): Promise<void> {
+    const { bucket, url, regression } = await this.getEnvironmentVariables();
+
+    process.env.BUCKET = bucket;
+    process.env.URL = url;
+    process.env.REGRESSION = regression;
   }
 
   @throwIfJobInterupted()
-  protected async build(): Promise<boolean> {
+  protected async buildWithMakefiles(): Promise<boolean> {
     this.cleanup();
     await this.cloneRepo(this._config.get<string>('repo_dir'));
     this._logger.save(this._currJob._id, 'Cloned Repo');
@@ -495,7 +556,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
     this._logger.save(this._currJob._id, 'Prepared Next Gen build');
-    await this._repoConnector.applyPatch(this.currJob);
+    await this._repoConnector.applyPatch(this._currJob);
     this._logger.save(this._currJob._id, 'Patch Applied');
     await this.downloadMakeFile();
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
@@ -504,12 +565,82 @@ export abstract class JobHandler {
     return await this.executeBuild();
   }
 
+  /* New build process without Makefiles */
+  @throwIfJobInterupted()
+  protected async build(): Promise<boolean> {
+    this.cleanup();
+    const job = this._currJob;
+
+    await this.cloneRepo(this._config.get<string>('repo_dir'));
+    this._logger.save(job._id, 'Cloned Repo');
+
+    await this.commitCheck();
+    this._logger.save(job._id, 'Checked Commit');
+    await this.pullRepo();
+    this._logger.save(job._id, 'Pulled Repo');
+    await this.setEnvironmentVariables();
+    this.logger.save(job._id, 'Prepared Environment variables');
+
+    const buildDependencies = await this.getBuildDependencies();
+    this._logger.save(this._currJob._id, 'Identified Build dependencies');
+
+    const docset = await this._docsetsRepo.getRepo(this._currJob.payload.repoName, this._currJob.payload.directory);
+    let env = this._config.get<string>('env');
+    if (this._currJob.payload.regression) {
+      env = 'regression';
+    }
+    const baseUrl = docset?.url?.[env] || 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
+
+    const { patchId } = await prepareBuildAndGetDependencies(
+      job.payload.repoName,
+      job.payload.project,
+      baseUrl,
+      buildDependencies,
+      job.payload.directory
+    );
+    // Set patchId on payload for use in nextGenStage
+    this._currJob.payload.patchId = patchId;
+    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
+
+    let buildStepOutput: CliCommandResponse;
+
+    const parseFunc = async () => nextGenParse({ job, patchId });
+    buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
+    this.logger.save(job._id, 'Repo Parsing Complete');
+    this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+
+    const persistenceFunc = async () => persistenceModule({ job });
+    buildStepOutput = await this.wrapWithBenchmarks(persistenceFunc, 'persistenceExe');
+    await this.logger.save(job._id, 'Persistence Module Complete');
+    await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+
+    // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
+    const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
+    if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      await this.callGatsbyCloudWebhook();
+      await this.logger.save(job._id, 'Gatsby Webhook Called');
+    }
+
+    const oasPageBuilderFunc = async () => oasPageBuild({ job, baseUrl });
+    buildStepOutput = await this.wrapWithBenchmarks(oasPageBuilderFunc, 'oasPageBuildExe');
+    await this.logger.save(job._id, 'OAS Page Build Complete');
+    await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+
+    const htmlFunc = async () => await nextGenHtml();
+    buildStepOutput = await this.wrapWithBenchmarks(htmlFunc, 'htmlExe');
+    await this.logger.save(job._id, 'NextGenHtml Complete');
+    await this.logger.save(job._id, `${buildStepOutput.outputText}\n${buildStepOutput.errorText}`);
+
+    return true;
+  }
+
   @throwIfJobInterupted()
   protected async deployGeneric(): Promise<CommandExecutorResponse> {
     this.prepDeployCommands();
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
     if ((this.currJob?.deployCommands?.length ?? 0) > 0) {
+      await this._logger.save(this.currJob._id, `deploy commands: ${this.currJob.deployCommands.join(' ')}`);
       // extract search deploy job to time and test
       const searchCommandIdx = this.currJob.deployCommands.findIndex((c) => c.match(/^mut\-index/));
       let deployCmdsNoSearch = this.currJob.deployCommands;
@@ -554,14 +685,24 @@ export abstract class JobHandler {
       this._currJob._id,
       `* Starting Job with ID: ${this._currJob._id} and type: ${this._currJob.payload.jobType}`
     );
+    await this._logger.save(this._currJob._id, `* Starting Job with repo name: ${this._currJob.payload.repoName}`);
     try {
-      await this.build();
+      if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this._currJob.payload.repoName === MONOREPO_NAME) {
+        await this._logger.save(this._currJob._id, `* Using build without Makefiles`);
+        await this.build();
+      } else {
+        await this._logger.save(this._currJob._id, `* Using build with Makefiles`);
+        await this.buildWithMakefiles();
+      }
+
       const resp = await this.deploy();
       await this.update(resp);
       this.cleanup();
     } catch (error) {
+      this.logger.save(this._currJob._id, `Error during the build process: ${error.stack}`);
       try {
         await this._jobRepository.updateWithErrorStatus(this._currJob._id, error.message);
+
         this.cleanup();
       } catch (error) {
         this._logger.error(this._currJob._id, error.message);

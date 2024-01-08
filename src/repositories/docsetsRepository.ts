@@ -52,9 +52,11 @@ export class DocsetsRepository extends BaseRepository {
     ];
   }
 
-  async getProjectByRepoName(repoName: string): Promise<any> {
+  async getProjectByRepoName(repoName: string, directory?: string): Promise<string | undefined> {
+    const matchConditions = { repoName };
+    if (directory) matchConditions['directories.snooty_toml'] = `/${directory}`;
     const projection = { project: 1 };
-    const aggregationPipeline = DocsetsRepository.getAggregationPipeline({ repoName }, projection);
+    const aggregationPipeline = DocsetsRepository.getAggregationPipeline(matchConditions, projection);
     const cursor = await this.aggregate(aggregationPipeline, `Error while getting project by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
@@ -72,7 +74,9 @@ export class DocsetsRepository extends BaseRepository {
     const cursor = await this.aggregate(aggregationPipeline, `Error while fetching repo by repo name ${repoName}`);
     const res = await cursor.toArray();
     if (!res.length) {
-      const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName}`;
+      const msg = `DocsetsRepository.getRepo - Could not find repo by repoName: ${repoName} ${
+        directory ? `with directory: /${directory}` : ''
+      }`;
       this._logger.info(this._repoName, msg);
     }
     return res?.[0];

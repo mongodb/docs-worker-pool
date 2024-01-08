@@ -72,7 +72,7 @@ export const HandleJobs = async (event: SQSEvent): Promise<void> => {
             await notifyBuildSummary(jobId);
             break;
           default:
-            consoleLogger.error(jobId, 'Invalid status');
+            consoleLogger.error(jobId, `Invalid status: ${jobStatus}`);
             break;
         }
       } catch (err) {
@@ -150,7 +150,7 @@ async function NotifyBuildProgress(jobId: string): Promise<void> {
     return;
   }
 
-  const jobTitle = fullDocument.title;
+  const jobTitle = `${fullDocument.title}${fullDocument.payload.directory ? `/${fullDocument.payload.directory}` : ''}`;
   const username = fullDocument.user;
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const entitlement = await repoEntitlementRepository.getSlackUserIdByGithubUsername(username);

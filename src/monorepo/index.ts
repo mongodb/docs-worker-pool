@@ -1,6 +1,7 @@
 import { getSnootyDirSet } from './utils/path-utils';
 import { GitCommitInfo } from './types/github-types';
 import { getProjectDirFromPath } from './services/get-paths';
+import { ConsoleLogger } from '../services/logger';
 
 interface FileUpdatePayload {
   ownerName: string;
@@ -32,9 +33,7 @@ export async function getMonorepoPaths({
     repoName,
     commitSha,
   };
-
   const snootyDirSet = await getSnootyDirSet(commitInfo);
-
   const projects = updatedFilePaths.map((path) => getProjectDirFromPath(path, snootyDirSet));
 
   // remove empty strings and remove duplicated values

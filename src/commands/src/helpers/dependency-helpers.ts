@@ -7,14 +7,21 @@ import { BuildDependencies } from '../../../entities/job';
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
-async function cloneRepo(repoName: string) {
-  await executeCliCommand({
-    command: 'git',
-    args: ['clone', `https://github.com/mongodb/${repoName}`],
-    options: { cwd: `${process.cwd()}/repos` },
-  });
-}
-async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: string, prefix = '') {
+async function createEnvProdFile({
+  repoDir,
+  projectName,
+  baseUrl,
+  prefix = '',
+  patchId,
+  commitHash,
+}: {
+  repoDir: string;
+  projectName: string;
+  baseUrl: string;
+  prefix?: string;
+  patchId?: string;
+  commitHash?: string;
+}) {
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
 
   try {
@@ -22,14 +29,16 @@ async function createEnvProdFile(repoDir: string, projectName: string, baseUrl: 
       prodFileName,
       `GATSBY_SITE=${projectName}
       GATSBY_MANIFEST_PATH=${repoDir}/bundle.zip
-      GATSBY_PARSER_USER=${process.env.USER}
+      GATSBY_PARSER_USER=${process.env.USER ?? 'docsworker-xlarge'}
       GATSBY_BASE_URL=${baseUrl}
       GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}
-      PATH_PREFIX=${prefix}`,
+      PATH_PREFIX=${prefix}
+      ${patchId ? `PATCH_ID=${patchId}` : ''}
+      ${commitHash ? `COMMIT_HASH=${commitHash}` : ''}`,
       'utf8'
     );
   } catch (e) {
-    console.error(`ERROR! Could not write to .env.production`);
+    console.error(`ERROR! Could not write to .env.production: ${e}`);
     throw e;
   }
 }
@@ -78,14 +87,12 @@ export async function prepareBuildAndGetDependencies(
   repoName: string,
   projectName: string,
   baseUrl: string,
-  buildDependencies: BuildDependencies
+  buildDependencies: BuildDependencies,
+  directory?: string
 ) {
-  // before we get build dependencies, we need to clone the repo
-  await cloneRepo(repoName);
-
-  const repoDir = getRepoDir(repoName);
-
+  const repoDir = getRepoDir(repoName, directory);
   await downloadBuildDependencies(buildDependencies, repoName);
+  console.log('Downloaded Build dependencies');
 
   // doing these in parallel
   const commandPromises = [
@@ -93,11 +100,17 @@ export async function prepareBuildAndGetDependencies(
     getCommitBranch(repoDir),
     getPatchId(repoDir),
     existsAsync(path.join(process.cwd(), 'config/redirects')),
-    createEnvProdFile(repoDir, projectName, baseUrl),
   ];
 
   try {
     const dependencies = await Promise.all(commandPromises);
+    await createEnvProdFile({
+      repoDir,
+      projectName,
+      baseUrl,
+      commitHash: dependencies[1] as string | undefined,
+      patchId: dependencies[2] as string | undefined,
+    });
 
     return {
       commitHash: dependencies[0] as string,
@@ -108,7 +121,7 @@ export async function prepareBuildAndGetDependencies(
       repoDir,
     };
   } catch (error) {
-    console.error('ERROR! Could not get build dependencies');
+    console.error(`Error: Could not get build deps: ${error}`);
     throw error;
   }
 }

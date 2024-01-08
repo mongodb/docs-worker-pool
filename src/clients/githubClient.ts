@@ -2,11 +2,11 @@ import { Octokit } from '@octokit/rest';
 
 let client: Octokit;
 
-export function getOctokitClient(): Octokit {
+export function getOctokitClient(password?: string): Octokit {
   if (client) return client;
 
   try {
-    const { GITHUB_BOT_PASSWORD } = process.env;
+    const GITHUB_BOT_PASSWORD = process.env.GITHUB_BOT_PASSWORD ?? password;
 
     if (!GITHUB_BOT_PASSWORD) throw new Error('GITHUB_BOT_PASSWORD is not defined');
 

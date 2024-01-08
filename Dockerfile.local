@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:20.04
+FROM arm64v8/ubuntu:20.04 as initial
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ARG SNOOTY_PARSER_VERSION=0.15.0
@@ -7,10 +7,13 @@ ARG MUT_VERSION=0.10.7
 ARG REDOC_CLI_VERSION=1.2.3
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
+ARG WORK_DIRECTORY=/home/docsworker-xlarge
+
 ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR ${WORK_DIRECTORY}
 
 # helper libraries for docs builds
-RUN apt-get update && apt-get install -y vim git unzip zip
+RUN apt-get update && apt-get install -y vim git unzip zip chromium-browser rsync
 
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -20,7 +23,6 @@ RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
 RUN apt-get install --yes python3-pip libxml2-dev libxslt-dev python-dev pkg-config
 
-WORKDIR /app
 
 RUN python3 -m pip install poetry
 
@@ -39,53 +41,66 @@ RUN git clone -b v${MUT_VERSION} --depth 1 https://github.com/mongodb/mut.git \
     && make package \
     && mv dist/mut /opt/
 
-RUN curl  -L -o redoc.zip https://github.com/mongodb-forks/redoc/archive/refs/tags/v${REDOC_CLI_VERSION}.zip \
-    && unzip redoc.zip \
-    && mv redoc-${REDOC_CLI_VERSION} redoc/ 
-
-ENV PATH="${PATH}:/opt/snooty:/opt/mut:/app/.local/bin"
+ENV PATH="${PATH}:/opt/snooty:/opt/mut:/${WORK_DIRECTORY}/.local/bin"
 
 # setup user and root directory
-RUN useradd -ms /bin/bash docsworker
-RUN chmod 755 -R /app
-RUN chown -Rv docsworker /app
-USER docsworker
+RUN useradd -ms /bin/bash docsworker-xlarge
+RUN chmod 755 -R ${WORK_DIRECTORY}
+RUN chown -Rv docsworker-xlarge ${WORK_DIRECTORY}
+USER docsworker-xlarge
 
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        
 
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+
+
+RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
+    # Install dependencies for Redoc CLI
+    && cd redoc/ \
+    && npm ci --prefix cli/ --omit=dev
+    
+FROM initial as persistence
+
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 COPY modules/persistence/package*.json ./modules/persistence/
 RUN cd ./modules/persistence \
     && npm ci --legacy-peer-deps 
+# Build persistence module
+
+COPY --chown=docsworker-xlarge modules/persistence/tsconfig*.json ./modules/persistence
+COPY --chown=docsworker-xlarge modules/persistence/src ./modules/persistence/src/
+COPY --chown=docsworker-xlarge modules/persistence/index.ts ./modules/persistence
+
+RUN cd ./modules/persistence \
+    && npm run build:esbuild
+
+FROM initial as oas
 
 RUN  mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
 COPY modules/oas-page-builder/package*.json ./modules/oas-page-builder/
 RUN cd ./modules/oas-page-builder \
     && npm ci --legacy-peer-deps 
+# Build modules
+# OAS Page Builder
+COPY --chown=docsworker-xlarge modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
+COPY --chown=docsworker-xlarge modules/oas-page-builder/src ./modules/oas-page-builder/src/
+COPY --chown=docsworker-xlarge modules/oas-page-builder/index.ts ./modules/oas-page-builder
+
+RUN cd ./modules/oas-page-builder \
+    && npm run build:esbuild
+
+FROM initial as root
+
+COPY --from=persistence --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/persistence/dist/ ./modules/persistence
+COPY --from=oas --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/oas-page-builder/dist/ ./modules/oas-page-builder
 
 # Root project build
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
-# Build persistence module
 
-COPY --chown=docsworker modules/persistence/tsconfig*.json ./modules/persistence
-COPY --chown=docsworker modules/persistence/src ./modules/persistence/src/
-COPY --chown=docsworker modules/persistence/index.ts ./modules/persistence
-
-RUN cd ./modules/persistence \
-    && npm run build
-
-# Build modules
-# OAS Page Builder
-COPY --chown=docsworker modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
-COPY --chown=docsworker modules/oas-page-builder/src ./modules/oas-page-builder/src/
-COPY --chown=docsworker modules/oas-page-builder/index.ts ./modules/oas-page-builder
-
-RUN cd ./modules/oas-page-builder \
-    && npm run build
 
 COPY tsconfig*.json ./
 COPY config config/
@@ -94,8 +109,13 @@ COPY src src/
 
 RUN npm run build:esbuild
 
+ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
+ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
+ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
+
+RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 RUN mkdir repos && chmod 755 repos
 
 EXPOSE 3000
 
-CMD ["node", "--enable-source-maps", "dist/entrypoints/localApp.js"]
+CMD ["node", "--inspect-brk=0.0.0.0", "--enable-source-maps", "dist/entrypoints/onDemandApp.js"]
