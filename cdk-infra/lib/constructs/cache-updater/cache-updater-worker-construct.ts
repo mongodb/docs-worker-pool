@@ -20,9 +20,6 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     const taskDefinition = new FargateTaskDefinition(this, 'cacheUpdaterWorker', {
       cpu: 2048,
       memoryLimitMiB: 4096,
-      runtimePlatform: {
-        cpuArchitecture: CpuArchitecture.ARM64,
-      },
     });
 
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {

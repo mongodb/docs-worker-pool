@@ -1,4 +1,4 @@
-FROM arm64v8/python:3.11-slim-bullseye as python-builder
+FROM python:3.11-slim-bullseye as python-builder
 # We intentionally do not set a default value 
 # because we want to provide a specific snooty parser
 # version every time.
@@ -7,7 +7,6 @@ WORKDIR /usr/app
 
 RUN apt-get -o Acquire::Check-Valid-Until=false update
 RUN apt-get -y install git zip unzip tar make curl
-
 RUN python3 -m pip install poetry
 
 # install snooty parser
@@ -17,7 +16,7 @@ RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/
     && make package \
     && mv dist/snooty /opt/
 
-FROM arm64v8/node:18-bullseye-slim as builder
+FROM node:18-bullseye-slim as builder
 WORKDIR /usr/app
 
 COPY package*.json ./
@@ -29,7 +28,7 @@ COPY src src/
 
 RUN npm run build:esbuild:cacheUpdater
 
-FROM arm64v8/node:18-bullseye-slim
+FROM node:18-bullseye-slim
 WORKDIR /usr/app
 
 
