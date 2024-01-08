@@ -20,7 +20,7 @@ export class ExecuteCommandError extends Error {
   }
 }
 
-interface CliCommandParams {
+export interface CliCommandParams {
   command: string;
   args?: readonly string[];
   options?: SpawnOptions;
@@ -167,13 +167,16 @@ export async function executeCliCommand({
     if (writeStream) executedCommand.stdout?.pipe(writeStream);
     executedCommand.stdout?.on('data', (data: Buffer) => {
       outputText.push(data.toString());
+      console.log(data.toString());
     });
 
     executedCommand.stderr?.on('data', (data: Buffer) => {
       errorText.push(data.toString());
+      console.log(data.toString());
     });
 
     executedCommand.on('error', (err) => {
+      console.log(`ERROR in executeCliCommand.\nCommand: ${command} ${args.join(' ')}\nError: ${err}`);
       reject(new ExecuteCommandError('The command failed', err));
     });
 
@@ -181,7 +184,7 @@ export async function executeCliCommand({
       if (writeStream) writeStream.end();
 
       if (exitCode !== 0) {
-        console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
+        console.error(`ERROR! The command "${command}" closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
 
@@ -193,7 +196,17 @@ export async function executeCliCommand({
           console.error(errorText.join(''));
         }
 
-        reject(new ExecuteCommandError('The command failed', exitCode));
+        reject(
+          new ExecuteCommandError(
+            `The command failed.\n
+            ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.\n
+            Arguments provided: ${args}\n
+            Options provided: ${JSON.stringify(options, null, 4)}\n
+            Stdout: ${outputText.join('')} \n
+            Error: ${errorText.join('')}`,
+            exitCode
+          )
+        );
         return;
       }
 
@@ -249,31 +262,42 @@ export async function getPatchId(repoDir: string): Promise<string | undefined> {
 
     return gitPatchId.slice(0, 7);
   } catch (err) {
-    console.warn('No patch ID found');
+    console.log('No patch ID found: ' + err);
   }
 }
 
-export async function getCommitBranch(repoDir: string): Promise<string> {
-  // equivalent to git rev-parse --abbrev-ref HEAD
-  const response = await executeCliCommand({
-    command: 'git',
-    args: ['rev-parse', '--abbrev-ref', 'HEAD'],
-    options: { cwd: repoDir },
-  });
+export async function getCommitBranch(repoDir: string): Promise<string | undefined> {
+  try {
+    // equivalent to git rev-parse --abbrev-ref HEAD
+    const response = await executeCliCommand({
+      command: 'git',
+      args: ['rev-parse', '--abbrev-ref', 'HEAD'],
+      options: { cwd: repoDir },
+    });
 
-  return response.outputText;
+    return response.outputText;
+  } catch (err) {
+    console.log(`ERROR in getCommitBranch: ${err}`);
+    throw Error;
+  }
 }
 
-export async function getCommitHash(repoDir: string): Promise<string> {
-  // equivalent to git rev-parse --short HEAD
-  const response = await executeCliCommand({
-    command: 'git',
-    args: ['rev-parse', '--short', 'HEAD'],
-    options: { cwd: repoDir },
-  });
+export async function getCommitHash(repoDir: string): Promise<string | undefined> {
+  try {
+    // equivalent to git rev-parse --short HEAD
+    const response = await executeCliCommand({
+      command: 'git',
+      args: ['rev-parse', '--short', 'HEAD'],
+      options: { cwd: repoDir },
+    });
 
-  return response.outputText;
+    return response.outputText;
+  } catch (err) {
+    console.log(`ERROR in getCommitHash: ${err}`);
+    throw Error;
+  }
 }
 
 export const checkIfPatched = async (repoDir: string) => !existsAsync(path.join(repoDir, 'myPatch.patch'));
-export const getRepoDir = (repoName: string) => path.join(process.cwd(), `repos/${repoName}`);
+export const getRepoDir = (repoName: string, directory?: string) =>
+  path.join(process.cwd(), `/repos/${repoName}${directory ? `/${directory}` : ''}`);

@@ -18,7 +18,8 @@ async function prepGithubPushPayload(
   githubEvent: PushEvent,
   repoBranchesRepository: RepoBranchesRepository,
   prefix: string,
-  repoInfo: ReposBranchesDocsetsDocument
+  repoInfo: ReposBranchesDocsetsDocument,
+  directory?: string
 ): Promise<Omit<EnhancedJob, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(
@@ -53,6 +54,7 @@ async function prepGithubPushPayload(
       urlSlug: urlSlug,
       prefix: prefix,
       project: project,
+      directory: directory,
     },
     logs: [],
   };
@@ -110,7 +112,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   async function createAndInsertJob(path?: string) {
     const repoInfo = await docsetsRepository.getRepo(body.repository.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
+    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, path);
 
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
@@ -128,10 +130,10 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
           ownerName: body.repository.owner.name,
           updatedFilePaths: getUpdatedFilePaths(body.head_commit),
         });
-        consoleLogger.info('monoRepoPaths', `Monorepo Paths with new changes: ${monorepoPaths}`);
+        consoleLogger.info(body.repository.full_name, `Monorepo Paths with new changes: ${monorepoPaths}`);
       }
     } catch (error) {
-      console.warn('Warning, attempting to get repo paths caused an error', error);
+      consoleLogger.warn('Warning, attempting to get monorepo paths caused an error', error);
     }
 
     /* Create and insert Job for each monorepo project that has changes */
@@ -141,7 +143,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       if (path.split('/').length > 1) continue;
 
       try {
-        await createAndInsertJob(`/${path}`);
+        await createAndInsertJob(path);
       } catch (err) {
         return {
           statusCode: 500,

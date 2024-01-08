@@ -128,9 +128,6 @@ export class JobManager {
     try {
       this._jobHandler = null;
       if (job?.payload) {
-        const excludeRepoFromBenchmarks = ['mms-docs', 'docs-k8s-operator'].includes(job.payload.repoName);
-        // Can easily rollback with commenting out this flag.
-        job.useWithBenchmark = !excludeRepoFromBenchmarks;
         await this.createHandlerAndExecute(job);
       } else {
         this._logger.info('JobManager', `No Jobs Found: ${new Date()}`);
@@ -145,14 +142,14 @@ export class JobManager {
 
   async getQueuedJob(): Promise<Job | null> {
     return await this._jobRepository.getOneQueuedJobAndUpdate().catch((error) => {
-      this._logger.error('JobManager', `Error: ${error}`);
+      this._logger.error('JobManager', `Error: getQueuedJob: ${error}`);
       return null;
     });
   }
 
   async getJob(jobId: string): Promise<Job | null> {
     return await this._jobRepository.getJobByIdAndUpdate(jobId).catch((error) => {
-      this._logger.error('JobManager', `Error: ${error}`);
+      this._logger.error('JobManager', `Error: getJob: ${error}`);
       return null;
     });
   }

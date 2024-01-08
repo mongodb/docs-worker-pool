@@ -11,6 +11,8 @@ import { IJobValidator } from './jobValidator';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
+import { nextGenStage } from '../commands';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 
 export class StagingJobHandler extends JobHandler {
   constructor(
@@ -75,10 +77,30 @@ export class StagingJobHandler extends JobHandler {
     }
   }
   async deploy(): Promise<CommandExecutorResponse> {
+    let resp;
     try {
-      const resp = await this.deployGeneric();
+      if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this.currJob.payload.repoName === MONOREPO_NAME) {
+        const repo_info = await this._docsetsRepo.getRepo(
+          this.currJob.payload.repoName,
+          this.currJob.payload.directory
+        );
+        if (!repo_info) {
+          const errorMessage = `
+            Docset Repo data not found in Atlas for repoName: ${this.currJob.payload.repoName}\n
+            ${this.currJob.payload.directory ? `directory: ${this.currJob.payload.directory}\n` : ''}
+            project: ${this.currJob.payload.project}
+          `;
+          throw Error(errorMessage);
+        }
+
+        const { bucket, url } = await this.getEnvironmentVariables();
+        resp = await nextGenStage({ job: this.currJob, bucket, url });
+        await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)} ${resp.output}`);
+      } else {
+        resp = await this.deployGeneric();
+      }
       const summary = '';
-      if (resp?.output?.includes('Summary')) {
+      if (resp.output?.includes('Summary')) {
         resp.output = resp.output.slice(resp.output.indexOf('Summary'));
       }
       await this.logger.save(this.currJob._id, `${'(stage)'.padEnd(15)}Finished pushing to staging`);

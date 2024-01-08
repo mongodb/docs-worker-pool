@@ -14,8 +14,13 @@ const execWithOptions: (
 // The expected return signature is a Promise<{stdout:string, stderr:string}>
 const exec = promisify(execWithOptions) as any;
 
+export enum CommandExecutorResponseStatus {
+  success = 'success',
+  failed = 'failed',
+}
+
 export class CommandExecutorResponse {
-  status: string;
+  status: CommandExecutorResponseStatus;
   output: string;
   error: string;
 }
@@ -57,12 +62,12 @@ export class ShellCommandExecutor implements ICommandExecutor {
 
       resp.output = stdout.trim();
       resp.error = stderr;
-      resp.status = 'success';
+      resp.status = CommandExecutorResponseStatus.success;
       return resp;
     } catch (error) {
       resp.output = '';
       resp.error = error;
-      resp.status = 'failed';
+      resp.status = CommandExecutorResponseStatus.failed;
     }
     return resp;
   }

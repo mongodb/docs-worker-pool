@@ -55,7 +55,7 @@ npm run start -- --bundle /home/docsworker-xlarge/repos/cloud-docs/bundle.zip --
 ### (Required) Options
 
 | Option   | Description                                                                                                                                                                            |
-| ------   | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | bundle   | Path to the parsed bundle zip file. This should be the output of the parser and will be used to obtain build metadata about OpenAPI content pages.                                     |
 | output   | Path to the directory that the OpenAPI content pages should be built to. Typically, this would be the same output `public/` directory of a Snooty frontend build.                      |
 | redoc    | Path to the local installation of Redoc CLI to use. This should point to the team's [fork of Redoc](https://github.com/mongodb-forks/redoc), with the target being a compiled JS file. |

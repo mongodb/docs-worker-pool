@@ -8,13 +8,14 @@
     "start": "node index.js",
     "clean": "node maintain.js",
     "build": "tsc",
-    "build:esbuild": "esbuild src/entrypoints/localApp.ts --bundle --platform=node --outdir=./dist/entrypoints --allow-overwrite --sourcemap",
     "build:esbuild:cacheUpdater": "esbuild src/cache-updater/index.ts --bundle --platform=node --outdir=./dist/ --allow-overwrite --sourcemap",
+    "build:esbuild": "esbuild src/onDemandApp.ts --bundle --platform=node --outdir=./dist/entrypoints --allow-overwrite --sourcemap",
     "format": "npm run prettier -- --check",
     "format:fix": "npm run prettier -- --write",
     "lint": "eslint --ext .ts .",
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier '**/*.{js,jsx,json,md,ts}' '!modules/**' '!cdk-infra/**'",
+    "debug": "npm run build:esbuild && tsx src/commands/src/scripts/local-build/index.ts",
     "prepare": "husky install"
   },
   "repository": {
@@ -87,6 +88,7 @@
     "serverless-plugin-include-dependencies": "^5.1.0",
     "serverless-prune-plugin": "^2.0.2",
     "ts-jest": "^27.0.5",
+    "tsx": "^4.6.0",
     "typescript": "^4.4.3"
   },
   "husky": {
