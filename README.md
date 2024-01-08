@@ -95,7 +95,7 @@ Also, another potential error could be due to the Dockerfile.local not being upd
 
 By default, the container will break at the first line of code, which will be in a file called `bind.js`. Press the fast-forward button to continue the execution. You are also able to add other breakpoints to stop the application. Once the application is complete, press `CTRL + C` for the terminal to exit out of the connection to the container.
 
-If you receive `CredentialsProviderError: Could not load credentials from any providers`, make sure that the `~/.aws/credentials` file has the `[default]` profile defined.
+If you receive `CredentialsProviderError: Could not load credentials from any providers`, make sure that there is no env `AWS_PROFILE` defined as a different profile anywhere (such as in the global `~/.zshrc` file). Otherwise, ensure that `AWS_PROFILE` matches the same profile defined in `~/.aws/credentials`.
 
 ## Run Tests
 
