@@ -13,9 +13,6 @@ export class CacheUpdaterWorkerConstruct extends Construct {
   constructor(scope: Construct, id: string, { vpc }: CacheUpdaterWorkerConstructProps) {
     super(scope, id);
 
-    // want to create fargate task def, do I even need cluster?
-    // I do, because this represents the task_definition_family value, and
-    // I need to start a task within a cluster.
     const cluster = new Cluster(this, 'cacheUpdaterCluster', {
       vpc,
     });
@@ -26,7 +23,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     });
 
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../api/handlers/cache-updater'), {
+      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../src/cache-updater'), {
         file: 'Dockerfile.cacheUpdater',
         exclude: ['tests/', 'node_modules/', 'cdk-infra/'], // adding this just in case it doesn't pick up our dockerignore
       }),

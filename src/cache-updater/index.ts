@@ -80,10 +80,8 @@ interface RepoInfo {
   repoName: string;
 }
 
-// TODO: Refactor this to handle multiple requests
-
 /**
- * The handler function processes a request to
+ * The handler function processes a request to rebuild a doc site's Snooty cache.
  * @param repoName - the name of the repository that we are creating a cache for.
  */
 export async function handler({ repoName, repoOwner }: RepoInfo): Promise<void> {
@@ -98,9 +96,6 @@ export async function handler({ repoName, repoOwner }: RepoInfo): Promise<void> 
 
   console.log('-------- Upload complete ------------');
 }
-
-const repoName = process.env.REPO_NAME;
-const repoOwner = process.env.REPO_OWNER;
 
 function getRepos(): RepoInfo[] {
   const reposString = process.env.REPOS;
