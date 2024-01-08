@@ -134,6 +134,8 @@ jobs:
             node_modules
             cdk-infra/node_modules
           key: ${{ github.head_ref }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
       - name: Update Cache Updater
         run: |
           cd cdk-infra/
