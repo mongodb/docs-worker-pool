@@ -231,7 +231,12 @@ export abstract class JobHandler {
   private async getAndBuildDependencies() {
     const buildDependencies = await this.getBuildDependencies();
     await this._logger.save(this._currJob._id, `BUILD DEPENDENCIES:, buildDependencies`);
-    const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName);
+    const commands = await downloadBuildDependencies(
+      buildDependencies,
+      this.currJob.payload.repoName,
+      this._logger,
+      this._currJob._id
+    );
     this._logger.save(this._currJob._id, commands.join('\n'));
   }
 

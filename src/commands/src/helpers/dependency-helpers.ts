@@ -43,7 +43,7 @@ async function createEnvProdFile({
   }
 }
 
-export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string) {
+export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string, logger, id) {
   const commands: string[] = [];
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
@@ -63,7 +63,7 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
       }
       commands.push(`mkdir -p ${targetDir}`);
       await Promise.all(
-        dependencyInfo.dependencies.map((dep) => {
+        dependencyInfo.dependencies.map(async (dep) => {
           try {
             executeCliCommand({
               command: 'curl',
@@ -74,6 +74,8 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
               `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
               dependencyInfo
             );
+            await logger.save(id, `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}.`);
+            return commands;
           }
           commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
         })
@@ -91,7 +93,7 @@ export async function prepareBuildAndGetDependencies(
   directory?: string
 ) {
   const repoDir = getRepoDir(repoName, directory);
-  await downloadBuildDependencies(buildDependencies, repoName);
+  // await downloadBuildDependencies(buildDependencies, repoName);
   console.log('Downloaded Build dependencies');
 
   // doing these in parallel
