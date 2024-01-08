@@ -28,6 +28,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
         file: 'src/cache-updater/Dockerfile.cacheUpdater',
+        buildArgs: { SNOOTY_PARSER_VERSION: '0.15.2' },
         exclude: ['tests/', 'node_modules/', 'cdk-infra/'], // adding this just in case it doesn't pick up our dockerignore
       }),
     });
