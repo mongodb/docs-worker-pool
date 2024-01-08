@@ -54,6 +54,7 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
           command: 'mkdir',
           args: ['-p', targetDir],
         });
+        await logger.save(id, `${targetDir} successfully exists or created`);
       } catch (error) {
         console.error(
           `ERROR! Could not create target directory ${targetDir}. Dependency information: `,
