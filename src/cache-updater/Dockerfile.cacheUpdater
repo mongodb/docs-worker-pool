@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye as python-builder
+FROM python:3.11-bullseye as python-builder
 # We intentionally do not set a default value 
 # because we want to provide a specific snooty parser
 # version every time.
