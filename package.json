@@ -9,7 +9,7 @@
     "clean": "node maintain.js",
     "build": "tsc",
     "build:esbuild": "esbuild src/entrypoints/localApp.ts --bundle --platform=node --outdir=./dist/entrypoints --allow-overwrite --sourcemap",
-    "build:esbuild:cacheUpdater": "esbuild api/handlers/cache-updater/index.ts --bundle --platform=node --outdir=./dist/ --allow-overwrite --sourcemap",
+    "build:esbuild:cacheUpdater": "esbuild src/cache-updater/index.ts --bundle --platform=node --outdir=./dist/ --allow-overwrite --sourcemap",
     "format": "npm run prettier -- --check",
     "format:fix": "npm run prettier -- --write",
     "lint": "eslint --ext .ts .",

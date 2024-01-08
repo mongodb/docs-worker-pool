@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import { Upload } from '@aws-sdk/lib-storage';
 import { S3Client } from '@aws-sdk/client-s3';
 
-import { executeCliCommand } from '../../../src/commands/src/helpers';
+import { executeCliCommand } from '../commands/src/helpers';
 
 const readdirAsync = promisify(fs.readdir);
 
@@ -75,7 +75,7 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   }
 }
 
-interface HandlerProps {
+interface RepoInfo {
   repoOwner: string;
   repoName: string;
 }
@@ -86,7 +86,7 @@ interface HandlerProps {
  * The handler function processes a request to
  * @param repoName - the name of the repository that we are creating a cache for.
  */
-export async function handler({ repoName, repoOwner }: HandlerProps): Promise<void> {
+export async function handler({ repoName, repoOwner }: RepoInfo): Promise<void> {
   console.log(`-------- Cloning repository: ${repoOwner}/${repoName} ------------`);
   await cloneDocsRepo(repoName, repoOwner);
   console.log(`-------- Creating cache ------------`);
@@ -102,7 +102,33 @@ export async function handler({ repoName, repoOwner }: HandlerProps): Promise<vo
 const repoName = process.env.REPO_NAME;
 const repoOwner = process.env.REPO_OWNER;
 
-if (!repoName) throw new Error('ERROR! repoName not defined');
-if (!repoOwner) throw new Error('ERROR! repoOwner not defined');
+function getRepos(): RepoInfo[] {
+  const reposString = process.env.REPOS;
 
-handler({ repoName, repoOwner });
+  if (!reposString) throw new Error('Error: REPOS is not defined');
+
+  try {
+    const repos = JSON.parse(reposString);
+    return repos.filter(({ repoName, repoOwner }: RepoInfo) => {
+      const isRepoInfo = typeof repoName === 'string' && typeof repoOwner === 'string';
+
+      if (!isRepoInfo) {
+        console.warn(`Invalid repo information for cache update job. 
+        Values provided: repoName -> ${repoName} repoOwner -> ${repoOwner}`);
+      }
+
+      return isRepoInfo;
+    });
+  } catch (error) {
+    console.error('Error when parsing the process.env.REPOS environment variable. Is it set?');
+    throw error;
+  }
+}
+
+const repos = getRepos();
+
+repos.forEach((repo) =>
+  handler(repo).catch((error) => {
+    console.error('An error occurred!', error);
+  })
+);
