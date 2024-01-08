@@ -1,5 +1,5 @@
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, CpuArchitecture, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Construct } from 'constructs';
 import path from 'path';
 
@@ -20,6 +20,9 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     const taskDefinition = new FargateTaskDefinition(this, 'cacheUpdaterWorker', {
       cpu: 2048,
       memoryLimitMiB: 4096,
+      runtimePlatform: {
+        cpuArchitecture: CpuArchitecture.ARM64,
+      },
     });
 
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
