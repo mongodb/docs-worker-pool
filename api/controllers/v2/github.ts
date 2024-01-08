@@ -133,7 +133,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
         consoleLogger.info(body.repository.full_name, `Monorepo Paths with new changes: ${monorepoPaths}`);
       }
     } catch (error) {
-      console.warn('Warning, attempting to get monorepo paths caused an error', error);
+      consoleLogger.warn('Warning, attempting to get monorepo paths caused an error', error);
     }
 
     /* Create and insert Job for each monorepo project that has changes */

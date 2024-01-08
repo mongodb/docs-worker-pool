@@ -14,7 +14,7 @@ export async function oasPageBuild({ job, baseUrl }: OasPageBuildParams): Promis
   const bundlePath = `${repoDir}/bundle.zip`;
 
   try {
-    return executeCliCommand({
+    const result = await executeCliCommand({
       command: 'node',
       args: [
         `${process.cwd()}/modules/oas-page-builder/index.js`,
@@ -30,10 +30,9 @@ export async function oasPageBuild({ job, baseUrl }: OasPageBuildParams): Promis
         siteUrl,
       ],
     });
+
+    return result;
   } catch (error) {
-    return {
-      outputText: '',
-      errorText: `ERROR: oas-page-build.ts - ${error}`,
-    };
+    throw new Error(`oas-page-build failed. \n ${error}`);
   }
 }

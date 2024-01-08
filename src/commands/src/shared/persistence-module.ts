@@ -24,14 +24,13 @@ export async function persistenceModule({ job }: PersistenceModuleParams): Promi
   }
 
   try {
-    return executeCliCommand({
+    const result = await executeCliCommand({
       command: 'node',
       args,
     });
+
+    return result;
   } catch (error) {
-    return {
-      outputText: '',
-      errorText: `ERROR: ${error}`,
-    };
+    throw new Error(`oas-page-build failed. \n ${error}`);
   }
 }

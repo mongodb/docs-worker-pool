@@ -184,7 +184,7 @@ export async function executeCliCommand({
       if (writeStream) writeStream.end();
 
       if (exitCode !== 0) {
-        console.error(`ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.`);
+        console.error(`ERROR! The command "${command}" closed with an exit code other than 0: ${exitCode}.`);
         console.error('Arguments provided: ', args);
         console.error('Options provided: ', options);
 
@@ -199,6 +199,10 @@ export async function executeCliCommand({
         reject(
           new ExecuteCommandError(
             `The command failed.\n
+            ERROR! The command ${command} closed with an exit code other than 0: ${exitCode}.\n
+            Arguments provided: ${args}\n
+            Options provided: ${JSON.stringify(options, null, 4)}\n
+            Stdout: ${outputText.join('')} \n
             Error: ${errorText.join('')}`,
             exitCode
           )
