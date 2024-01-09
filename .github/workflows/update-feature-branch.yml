@@ -22,7 +22,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          base: ${{ github.ref }}
+          initial-fetch-depth: '1'
           filters: |
             dependencies:
               - 'package-lock.json'
@@ -65,7 +65,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          base: ${{ github.ref }}
+          initial-fetch-depth: '1'
           filters: |
             webhooks:
               - 'api/**'
@@ -101,7 +101,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          base: ${{ github.ref }}
+          initial-fetch-depth: '1'
           filters: |
             worker:
               - 'src/!(cache-updater/**)/**'
@@ -124,7 +124,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          base: ${{ github.ref }}
+          initial-fetch-depth: '1'
           filters: |
             cache:
               - 'src/cache-updater/**'
