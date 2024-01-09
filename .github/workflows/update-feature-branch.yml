@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         if: steps.filter.outputs.dependencies == 'true' || (github.event_name == 'pull_request' && github.event.action == 'opened')
         run: |
+          echo ${{steps.filter.outputs.dependencies}}
+          echo ${{github.event_name}}
+          echo ${{github.event.action}}
           npm ci
           cd cdk-infra/
           npm ci
