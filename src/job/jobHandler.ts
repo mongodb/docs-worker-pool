@@ -231,6 +231,7 @@ export abstract class JobHandler {
     const buildDependencies = await this.getBuildDependencies();
     await this._logger.save(this._currJob._id, `BUILD DEPENDENCIES:, buildDependencies`);
     const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
+    await this._logger.save(this._currJob._id, `directory: ${directory}`);
     const commands = await downloadBuildDependencies(
       buildDependencies,
       this.currJob.payload.repoName,
