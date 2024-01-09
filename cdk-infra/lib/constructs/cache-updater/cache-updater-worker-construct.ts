@@ -1,6 +1,8 @@
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition, LogDrivers } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateTaskDefinition, LogDrivers, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import path from 'path';
 
@@ -18,9 +20,18 @@ export class CacheUpdaterWorkerConstruct extends Construct {
       vpc,
     });
 
+    const taskRole = new Role(this, 'cacheUpdateWorkerTaskRole', {
+      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
+    });
+
+    const snootyParseCacheBucket = Bucket.fromBucketName(this, 'snooty-parse-cache', 'snooty-parse-cache');
+
+    snootyParseCacheBucket.grantWrite(taskRole);
+
     const taskDefinition = new FargateTaskDefinition(this, 'cacheUpdaterWorker', {
       cpu: 2048,
       memoryLimitMiB: 4096,
+      taskRole,
     });
 
     const taskDefLogGroup = new LogGroup(this, 'cacheUpdaterWorkerLogGroup');
