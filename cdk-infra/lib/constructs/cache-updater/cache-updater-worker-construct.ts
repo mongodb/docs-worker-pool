@@ -1,5 +1,6 @@
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, CpuArchitecture, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateTaskDefinition, LogDrivers } from 'aws-cdk-lib/aws-ecs';
+import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import path from 'path';
 
@@ -22,11 +23,17 @@ export class CacheUpdaterWorkerConstruct extends Construct {
       memoryLimitMiB: 4096,
     });
 
+    const taskDefLogGroup = new LogGroup(this, 'cacheUpdaterWorkerLogGroup');
+
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
         file: 'src/cache-updater/Dockerfile.cacheUpdater',
         buildArgs: { SNOOTY_PARSER_VERSION: '0.15.2' },
         exclude: ['tests/', 'node_modules/', 'cdk-infra/'], // adding this just in case it doesn't pick up our dockerignore
+      }),
+      logging: LogDrivers.awsLogs({
+        streamPrefix: 'cacheupdater',
+        logGroup: taskDefLogGroup,
       }),
     });
 
