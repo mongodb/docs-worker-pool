@@ -31,7 +31,7 @@ jobs:
         run: |
           echo ${{steps.filter.outputs.dependencies}}
           echo ${{github.event_name}}
-          echo ${{github.event.action}}
+          echo ${{fromJson(github.event)}}
           npm ci
           cd cdk-infra/
           npm ci
