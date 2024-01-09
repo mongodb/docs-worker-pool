@@ -55,13 +55,16 @@ export async function downloadBuildDependencies(
     buildDependencies.map(async (dependencyInfo) => {
       const repoDir = directory ? getRepoDir(repoName, directory) : getRepoDir(repoName);
       const targetDir = dependencyInfo.targetDir ?? repoDir;
+      let options = {};
+      if (targetDir != repoDir) {
+        options = { cwd: repoDir };
+      }
       try {
-        if (targetDir != repoDir)
-          await executeCliCommand({
-            command: 'mkdir',
-            args: ['-p', targetDir],
-            options: { cwd: repoDir },
-          });
+        await executeCliCommand({
+          command: 'mkdir',
+          args: ['-p', targetDir],
+          options: options,
+        });
         await logger.save(id, `${targetDir} successfully exists or created`);
       } catch (error) {
         console.error(
@@ -78,6 +81,7 @@ export async function downloadBuildDependencies(
             executeCliCommand({
               command: 'curl',
               args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+              options: options,
             });
           } catch (error) {
             console.error(
