@@ -22,6 +22,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          base: ${{ github.ref }}
           filters: |
             dependencies:
               - 'package-lock.json'
@@ -29,9 +30,6 @@ jobs:
       - name: Install dependencies
         if: steps.filter.outputs.dependencies == 'true' || (github.event_name == 'pull_request' && github.event.action == 'opened')
         run: |
-          echo ${{steps.filter.outputs.dependencies}}
-          echo ${{github.event_name}}
-          echo ${{toJson(github.event)}}
           npm ci
           cd cdk-infra/
           npm ci
@@ -67,6 +65,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          base: ${{ github.ref }}
           filters: |
             webhooks:
               - 'api/**'
@@ -102,6 +101,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          base: ${{ github.ref }}
           filters: |
             worker:
               - 'src/!(cache-updater/**)/**'
@@ -124,6 +124,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          base: ${{ github.ref }}
           filters: |
             cache:
               - 'src/cache-updater/**'
