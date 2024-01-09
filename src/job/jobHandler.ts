@@ -215,7 +215,6 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async getBuildDependencies() {
     const repoName = this.currJob.payload.repoName;
-
     const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
     await this._logger.save(
       this._currJob._id,
@@ -231,11 +230,13 @@ export abstract class JobHandler {
   private async getAndBuildDependencies() {
     const buildDependencies = await this.getBuildDependencies();
     await this._logger.save(this._currJob._id, `BUILD DEPENDENCIES:, buildDependencies`);
+    const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
     const commands = await downloadBuildDependencies(
       buildDependencies,
       this.currJob.payload.repoName,
       this._logger,
-      this._currJob._id
+      this._currJob._id,
+      directory
     );
     this._logger.save(this._currJob._id, commands.join('\n'));
   }

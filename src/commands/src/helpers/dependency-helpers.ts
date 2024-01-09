@@ -43,11 +43,17 @@ async function createEnvProdFile({
   }
 }
 
-export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string, logger, id) {
+export async function downloadBuildDependencies(
+  buildDependencies: BuildDependencies,
+  repoName: string,
+  logger,
+  id,
+  directory?: string | undefined
+) {
   const commands: string[] = [];
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
-      const repoDir = getRepoDir(repoName);
+      const repoDir = directory ? getRepoDir(repoName, directory) : getRepoDir(repoName);
       const targetDir = dependencyInfo.targetDir ? `${repoDir}/${dependencyInfo.targetDir}` : repoDir;
       try {
         await executeCliCommand({
