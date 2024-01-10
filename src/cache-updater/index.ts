@@ -18,7 +18,7 @@ async function cloneDocsRepo(repoName: string, repoOwner: string) {
     console.log('clone: ', cloneResults);
   } catch (e) {
     console.error('ERROR WHEN CLONING!!', e);
-    return;
+    throw e;
   }
 }
 
@@ -70,6 +70,7 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
     await upload.done();
   } catch (e) {
     console.error('ERROR! Upload failed', e);
+    throw e;
   } finally {
     cacheFileStream.close();
   }
