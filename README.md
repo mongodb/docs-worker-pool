@@ -56,7 +56,7 @@ Here is an example of running the local debugger for `cloud-docs`:
 
 Here is an example of running the local debugger for `docs-monorepo/docs-landing` on branch `groot`:
 
-`npm run debug -- -o 10gen -n docs-monorepo -d cloud-docs -b groot`
+`npm run debug -- -o 10gen -n docs-monorepo -d docs-landing -b groot`
 
 By default, the environment that is used for the local Autobuilder is `stg`.
 
