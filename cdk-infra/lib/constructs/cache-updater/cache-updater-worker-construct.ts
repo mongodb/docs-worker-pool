@@ -5,7 +5,8 @@ import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import path from 'path';
-import { SNOOTY_CACHE_BUCKET_NAME } from '../../../../src/cache-updater/index';
+
+const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
 
 interface CacheUpdaterWorkerConstructProps {
   vpc: IVpc;

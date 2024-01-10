@@ -7,7 +7,7 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { executeCliCommand } from '../commands/src/helpers';
 
 const readdirAsync = promisify(fs.readdir);
-export const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
+const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
 
 async function cloneDocsRepo(repoName: string, repoOwner: string) {
   try {
