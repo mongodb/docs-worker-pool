@@ -46,15 +46,16 @@ async function createEnvProdFile({
 export async function downloadBuildDependencies(
   buildDependencies: BuildDependencies,
   repoName: string,
-  logger,
-  id,
   directory?: string | undefined
 ) {
   const commands: string[] = [];
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
       const repoDir = directory ? getRepoDir(repoName, directory) : getRepoDir(repoName);
+      commands.push(`REPODIR ${repoDir}`);
+      console.log(`REPO DIR, DIRECTORY, ${repoDir}, ${directory}`);
       const targetDir = dependencyInfo.targetDir ?? repoDir;
+      console.log(`targetDIRRRR ${targetDir}`);
       let options = {};
       if (targetDir != repoDir) {
         options = { cwd: repoDir };
@@ -65,16 +66,16 @@ export async function downloadBuildDependencies(
           args: ['-p', targetDir],
           options: options,
         });
-        await logger.save(id, `${targetDir} successfully exists or created`);
+        // console.log(id, `${targetDir} successfully exists or created`);
       } catch (error) {
         console.error(
           `ERROR! Could not create target directory ${targetDir}. Dependency information: `,
           dependencyInfo
         );
-        await logger.save(id, `${targetDir} not succesffuly created`);
+        // await logger.save(id, `${targetDir} not succesffuly created`);
         throw error;
       }
-      commands.push(`mkdir -p ${targetDir}`);
+      commands.push(`mkdir -p ${targetDir} from ${JSON.stringify(options)}`);
       await Promise.all(
         dependencyInfo.dependencies.map(async (dep) => {
           try {
@@ -83,15 +84,16 @@ export async function downloadBuildDependencies(
               args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
               options: options,
             });
+            console.log(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
           } catch (error) {
             console.error(
               `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
               dependencyInfo
             );
-            await logger.save(id, `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}.`);
+            // await logger.save(id, `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}.`);
             return commands;
           }
-          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
+          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename} from ${JSON.stringify(options)}`);
         })
       );
     })
