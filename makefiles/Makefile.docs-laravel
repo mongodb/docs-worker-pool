@@ -16,6 +16,9 @@ SNOOTY_DB_PWD = $(shell printenv MONGO_ATLAS_PASSWORD)
 
 include ~/shared.mk
 
+fetch-submodule:
+	git submodule update --remote --init
+	rsync -a --delete ${REPO_DIR}/laravel-mongodb/docs/ ${REPO_DIR}/source
 
-get-build-dependencies: 
+get-build-dependencies: fetch-submodule
 	echo "Published branches information stored in Atlas collection"
