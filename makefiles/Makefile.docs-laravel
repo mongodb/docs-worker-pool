@@ -73,4 +73,6 @@ get-build-dependencies:
 
 fetch-submodule:
 	git submodule update --remote --init
-	rsync -a --delete ${REPO_DIR}/laravel-mongodb/docs/ ${REPO_DIR}/source
+	if [ -d "${REPO_DIR}/laravel-mongodb/docs" ]; then \
+		rsync -a --delete ${REPO_DIR}/laravel-mongodb/docs/ ${REPO_DIR}/source; \
+	fi
