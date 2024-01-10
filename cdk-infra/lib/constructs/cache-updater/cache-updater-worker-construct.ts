@@ -5,6 +5,7 @@ import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import path from 'path';
+import { SNOOTY_CACHE_BUCKET_NAME } from '../../../../src/cache-updater/index';
 
 interface CacheUpdaterWorkerConstructProps {
   vpc: IVpc;
@@ -24,7 +25,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
       assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
 
-    const snootyParseCacheBucket = Bucket.fromBucketName(this, 'snooty-parse-cache', 'snooty-parse-cache');
+    const snootyParseCacheBucket = Bucket.fromBucketName(this, SNOOTY_CACHE_BUCKET_NAME, SNOOTY_CACHE_BUCKET_NAME);
 
     snootyParseCacheBucket.grantWrite(taskRole);
 

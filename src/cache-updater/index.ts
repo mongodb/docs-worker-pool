@@ -7,6 +7,7 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { executeCliCommand } from '../commands/src/helpers';
 
 const readdirAsync = promisify(fs.readdir);
+export const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
 
 async function cloneDocsRepo(repoName: string, repoOwner: string) {
   try {
@@ -37,7 +38,6 @@ async function createSnootyCache(repoName: string) {
 }
 
 async function uploadCacheToS3(repoName: string, repoOwner: string) {
-  const BUCKET_NAME = 'snooty-parse-cache';
   const client = new S3Client({ region: 'us-east-2' });
 
   const repoPath = path.join(__dirname, repoName);
@@ -57,7 +57,7 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
     const upload = new Upload({
       client,
       params: {
-        Bucket: BUCKET_NAME,
+        Bucket: SNOOTY_CACHE_BUCKET_NAME,
         Key: cacheFileName,
         Body: cacheFileStream,
       },
