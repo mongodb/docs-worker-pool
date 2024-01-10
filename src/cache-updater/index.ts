@@ -7,7 +7,9 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { executeCliCommand } from '../commands/src/helpers';
 
 const readdirAsync = promisify(fs.readdir);
-const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
+const SNOOTY_CACHE_BUCKET_NAME = process.env.SNOOTY_CACHE_BUCKET_NAME;
+
+if (!SNOOTY_CACHE_BUCKET_NAME) throw new Error('ERROR! SNOOTY_CACHE_BUCKET_NAME is not defined');
 
 async function cloneDocsRepo(repoName: string, repoOwner: string) {
   try {

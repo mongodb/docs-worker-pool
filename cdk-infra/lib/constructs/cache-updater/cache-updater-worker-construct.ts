@@ -44,6 +44,9 @@ export class CacheUpdaterWorkerConstruct extends Construct {
         buildArgs: { SNOOTY_PARSER_VERSION: '0.15.2' },
         exclude: ['tests/', 'node_modules/', 'cdk-infra/'], // adding this just in case it doesn't pick up our dockerignore
       }),
+      environment: {
+        SNOOTY_CACHE_BUCKET_NAME,
+      },
       logging: LogDrivers.awsLogs({
         streamPrefix: 'cacheupdater',
         logGroup: taskDefLogGroup,
