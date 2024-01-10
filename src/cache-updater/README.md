@@ -10,4 +10,8 @@ A cache invalidation event occurs under two circumstances:
 
 ### Architecture
 
-The cache update worker is an ephemeral ECS task that is spun up in response to a cache invalidation event. The doc sites that need to be rebuilt will be provided as an environment variable called `REPOS`. This is an array of objects that contain the `repoOwner` and `repoName` properties.
+The cache update worker is an ephemeral ECS task that is spun up in response to a cache invalidation event. The doc sites that need to be rebuilt will be provided as an environment variable called `REPOS`. This is an array of objects that contain the `repoOwner` and `repoName` properties. The task is capable of processing multiple uploads concurrently. The code defined for it can be found in `src/cache-updater.ts`.
+
+The infrastructure defined for the worker is defined [here](../../cdk-infra/lib/constructs/cache-updater/cache-updater-worker-construct.ts).
+
+(TODO): Update README when [DOP-4171 is complete](https://jira.mongodb.org/browse/DOP-4171).
