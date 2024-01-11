@@ -213,35 +213,13 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  private async getBuildDependencies() {
+  private async getAndDownloadBuildDependencies() {
     const repoName = this.currJob.payload.repoName;
     const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
-    await this._logger.save(
-      this._currJob._id,
-      `logging repoName and directory and payload direcotyr ${repoName}, ${directory}, ${this.currJob.payload.directory}, ${MONOREPO_NAME}`
-    );
     const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(repoName, directory);
-    await this._logger.save(this._currJob._id, `logging buildDependencies: ${JSON.stringify(buildDependencies)}`);
-    if (!buildDependencies) return [];
+    if (!buildDependencies) return;
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName, directory);
-    await this._logger.save(this._currJob._id, `commands: ${commands}`);
-    return buildDependencies;
-  }
-
-  @throwIfJobInterupted()
-  private async getAndBuildDependencies() {
-    const buildDependencies = await this.getBuildDependencies();
-    // await this._logger.save(this._currJob._id, `BUILD DEPENDENCIES:, buildDependencies`);
-    // const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
-    // await this._logger.save(this._currJob._id, `directory: ${directory}`);
-    // const commands = await downloadBuildDependencies(
-    //   buildDependencies,
-    //   this.currJob.payload.repoName,
-    //   this._logger,
-    //   this._currJob._id,
-    //   directory
-    // );
-    // this._logger.save(this._currJob._id, commands.join('\n'));
+    await this._logger.save(this._currJob._id, `${commands.join('\n')}`);
   }
 
   @throwIfJobInterupted()
@@ -568,7 +546,7 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
-    await this.getAndBuildDependencies();
+    await this.getAndDownloadBuildDependencies();
     this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
