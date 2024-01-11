@@ -59,7 +59,7 @@ Here is an example of running the local debugger for `cloud-docs`:
 
 Here is an example of running the local debugger for `docs-monorepo/docs-landing` on branch `groot`:
 
-`npm run debug -- -o 10gen -n docs-monorepo -d cloud-docs -b groot`
+`npm run debug -- -o 10gen -n docs-monorepo -d docs-landing -b groot`
 
 > > > > > > > d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
