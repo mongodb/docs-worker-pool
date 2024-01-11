@@ -213,11 +213,20 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  private async getAndDownloadBuildDependencies() {
+  private async getBuildDependencies() {
     const repoName = this.currJob.payload.repoName;
     const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
     const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(repoName, directory);
-    if (!buildDependencies) return;
+    if (!buildDependencies) return [];
+    await this._logger.save(this._currJob._id, 'Identified Build dependencies');
+    return buildDependencies;
+  }
+
+  @throwIfJobInterupted()
+  private async getAndDownloadBuildDependencies() {
+    const repoName = this.currJob.payload.repoName;
+    const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
+    const buildDependencies = await this.getBuildDependencies();
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName, directory);
     await this._logger.save(this._currJob._id, `${commands.join('\n')}`);
   }
@@ -577,8 +586,8 @@ export abstract class JobHandler {
     await this.setEnvironmentVariables();
     this.logger.save(job._id, 'Prepared Environment variables');
 
-    const buildDependencies = await this.getBuildDependencies();
-    this._logger.save(this._currJob._id, 'Identified Build dependencies');
+    await this.getAndDownloadBuildDependencies();
+    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
 
     const docset = await this._docsetsRepo.getRepo(this._currJob.payload.repoName, this._currJob.payload.directory);
     let env = this._config.get<string>('env');
@@ -591,12 +600,10 @@ export abstract class JobHandler {
       job.payload.repoName,
       job.payload.project,
       baseUrl,
-      buildDependencies,
       job.payload.directory
     );
     // Set patchId on payload for use in nextGenStage
     this._currJob.payload.patchId = patchId;
-    this._logger.save(this._currJob._id, 'Downloaded Build dependencies');
 
     let buildStepOutput: CliCommandResponse;
 

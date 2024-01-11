@@ -98,11 +98,9 @@ export async function prepareBuildAndGetDependencies(
   repoName: string,
   projectName: string,
   baseUrl: string,
-  buildDependencies: BuildDependencies,
   directory?: string
 ) {
   const repoDir = getRepoDir(repoName, directory);
-  await downloadBuildDependencies(buildDependencies, repoName, directory);
 
   // doing these in parallel
   const commandPromises = [
