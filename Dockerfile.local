@@ -13,11 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${WORK_DIRECTORY}
 
 # helper libraries for docs builds
-<<<<<<< HEAD
-RUN apt-get update && apt-get install -y vim git unzip zip chromium-browser
-=======
 RUN apt-get update && apt-get install -y vim git unzip zip chromium-browser rsync
->>>>>>> d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -79,11 +75,7 @@ COPY --chown=docsworker-xlarge modules/persistence/src ./modules/persistence/src
 COPY --chown=docsworker-xlarge modules/persistence/index.ts ./modules/persistence
 
 RUN cd ./modules/persistence \
-<<<<<<< HEAD
-    && npm run build
-=======
     && npm run build:esbuild
->>>>>>> d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 FROM initial as oas
 
@@ -98,20 +90,12 @@ COPY --chown=docsworker-xlarge modules/oas-page-builder/src ./modules/oas-page-b
 COPY --chown=docsworker-xlarge modules/oas-page-builder/index.ts ./modules/oas-page-builder
 
 RUN cd ./modules/oas-page-builder \
-<<<<<<< HEAD
-    && npm run build
-
-FROM oas as root
-
-COPY --from=persistence --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/persistence/ ./modules/persistence
-=======
     && npm run build:esbuild
 
 FROM initial as root
 
 COPY --from=persistence --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/persistence/dist/ ./modules/persistence
 COPY --from=oas --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/oas-page-builder/dist/ ./modules/oas-page-builder
->>>>>>> d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 # Root project build
 COPY package*.json ./
@@ -125,14 +109,9 @@ COPY src src/
 
 RUN npm run build:esbuild
 
-<<<<<<< HEAD
-ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/dist/index.js
-ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/dist/index.js
-=======
 ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
 ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
 ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
->>>>>>> d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 RUN mkdir repos && chmod 755 repos
