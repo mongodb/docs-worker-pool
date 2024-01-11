@@ -23,7 +23,6 @@ COPY package*.json ./
 RUN npm ci
 
 COPY tsconfig*.json ./
-COPY api api/
 COPY src src/
 
 RUN npm run build:esbuild:cacheUpdater
