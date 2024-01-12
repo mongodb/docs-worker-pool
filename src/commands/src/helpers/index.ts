@@ -212,7 +212,11 @@ export async function executeCliCommand({
             Options provided: ${JSON.stringify(options, null, 4)}\n
             Stdout: ${outputText.join('')} \n
             Error: ${errorText.join('')}`,
-            exitCode
+            exitCode,
+            {
+              outputText: outputText.join(''),
+              errorText: errorText.join(''),
+            }
           )
         );
         return;
