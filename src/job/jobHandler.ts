@@ -14,13 +14,7 @@ import { IJobValidator } from './jobValidator';
 import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepository';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
-import {
-  nextGenHtml,
-  nextGenParse,
-  oasPageBuild,
-  persistenceModule,
-  prepareBuildAndGetDependencies,
-} from '../commands';
+import { nextGenHtml, nextGenParse, oasPageBuild, persistenceModule, prepareBuild } from '../commands';
 import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 import { CliCommandResponse } from '../commands/src/helpers';
 require('fs');
@@ -213,20 +207,12 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  private async getBuildDependencies() {
-    const repoName = this.currJob.payload.repoName;
-    const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
-    const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(repoName, directory);
-    if (!buildDependencies) return [];
-    await this._logger.save(this._currJob._id, 'Identified Build dependencies');
-    return buildDependencies;
-  }
-
-  @throwIfJobInterupted()
   private async getAndDownloadBuildDependencies() {
     const repoName = this.currJob.payload.repoName;
     const directory = this.currJob.payload.repoName === MONOREPO_NAME ? this.currJob.payload.directory : undefined;
-    const buildDependencies = await this.getBuildDependencies();
+    const buildDependencies = await this._repoBranchesRepo.getBuildDependencies(repoName, directory);
+    if (!buildDependencies) return;
+    await this._logger.save(this._currJob._id, 'Identified Build dependencies');
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName, directory);
     await this._logger.save(this._currJob._id, `${commands.join('\n')}`);
   }
@@ -596,12 +582,7 @@ export abstract class JobHandler {
     }
     const baseUrl = docset?.url?.[env] || 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
 
-    const { patchId } = await prepareBuildAndGetDependencies(
-      job.payload.repoName,
-      job.payload.project,
-      baseUrl,
-      job.payload.directory
-    );
+    const { patchId } = await prepareBuild(job.payload.repoName, job.payload.project, baseUrl, job.payload.directory);
     // Set patchId on payload for use in nextGenStage
     this._currJob.payload.patchId = patchId;
 
