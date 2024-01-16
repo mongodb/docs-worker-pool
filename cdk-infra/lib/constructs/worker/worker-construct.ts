@@ -76,6 +76,11 @@ export class WorkerConstruct extends Construct {
     const fileSystem = new FileSystem(this, 'snootyCacheFileSystem', {
       vpc,
     });
+
+    fileSystem.addAccessPoint('cache/', {
+      path: '/cache',
+    });
+
     fileSystem.addToResourcePolicy(
       new PolicyStatement({
         actions: ['elasticfilesystem:ClientMount'],
