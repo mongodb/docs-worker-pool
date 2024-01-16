@@ -81,6 +81,7 @@ export async function downloadBuildDependencies(
               options: options,
             });
           } catch (error) {
+            commands.push(`ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}.`);
             console.error(
               `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
               dependencyInfo
