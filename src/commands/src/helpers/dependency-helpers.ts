@@ -51,7 +51,7 @@ export async function downloadBuildDependencies(
   const commands: string[] = [];
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
-      const repoDir = directory ? getRepoDir(repoName, directory) : getRepoDir(repoName);
+      const repoDir = getRepoDir(repoName, directory);
       const targetDir = dependencyInfo.targetDir ?? repoDir;
       let options = {};
       if (targetDir != repoDir) {

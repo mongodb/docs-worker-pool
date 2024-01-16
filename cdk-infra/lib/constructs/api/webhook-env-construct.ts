@@ -19,7 +19,7 @@ export class WebhookEnvConstruct extends Construct {
     const ssmPrefix = getSsmPathPrefix();
     const env = getEnv();
 
-    const featureFlagMonorepoPath = StringParameter.valueFromLookup(this, `${ssmPrefix}/DOP-4127/flag/monorepo_path`);
+    const featureFlagMonorepoPath = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/monorepo_path`);
     const dbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/dbname`);
     const snootyDbName = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/snooty`);
     const repoBranchesCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/repo`);
