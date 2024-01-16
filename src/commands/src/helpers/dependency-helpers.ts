@@ -74,18 +74,30 @@ export async function downloadBuildDependencies(
       await Promise.all(
         dependencyInfo.dependencies.map(async (dep) => {
           commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
-          try {
-            return await executeCliCommand({
-              command: 'curl',
-              args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
-              options: options,
+          executeCliCommand({
+            command: 'curl',
+            args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+            options: options,
+          })
+            .then((res) => {
+              commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
+            })
+            .catch((error) => {
+              commands.push(`ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}.`);
             });
-          } catch (error) {
-            console.error(
-              `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
-              dependencyInfo
-            );
-          }
+
+          // try {
+          //   return await executeCliCommand({
+          //     command: 'curl',
+          //     args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+          //     options: options,
+          //   });
+          // } catch (error) {
+          //   console.error(
+          //     `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
+          //     dependencyInfo
+          //   );
+          // }
         })
       );
     })
