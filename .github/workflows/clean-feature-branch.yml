@@ -31,3 +31,5 @@ jobs:
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
       - name: Delete cache
         run: gh cache delete ${{github.head_ref}}
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
