@@ -73,8 +73,9 @@ export async function downloadBuildDependencies(
       commands.push(`mkdir -p ${targetDir}`);
       await Promise.all(
         dependencyInfo.dependencies.map(async (dep) => {
+          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
           try {
-            executeCliCommand({
+            return await executeCliCommand({
               command: 'curl',
               args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
               options: options,
@@ -84,9 +85,7 @@ export async function downloadBuildDependencies(
               `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
               dependencyInfo
             );
-            return commands;
           }
-          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
         })
       );
     })
