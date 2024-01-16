@@ -52,16 +52,11 @@ To view all of the options for the command, you can run:
 
 Here is an example of running the local debugger for `cloud-docs`:
 
-<<<<<<< HEAD
-`npm run debug -- -o 10gen -n 'cloud-docs'`
-=======
 `npm run debug -- -o 10gen -n cloud-docs`
 
 Here is an example of running the local debugger for `docs-monorepo/docs-landing` on branch `groot`:
 
 `npm run debug -- -o 10gen -n docs-monorepo -d docs-landing -b groot`
-
-> > > > > > > d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 By default, the environment that is used for the local Autobuilder is `stg`.
 
@@ -77,27 +72,15 @@ When the command is run, there are several steps that occur before the Autobuild
 4. The data from step 2 is then added as a record in the `pool_test.queue`.
 5. The container is then run, and waits for the user to connect to it via the VSCode debugger.
 
-<<<<<<< HEAD
-Once the container starts successfully, you should see the following message:
-
-# `Container started. Please attach to the debugger to run the Autobuilder.`
-
 Once the container starts successfully, you should see something like the following message:
 
 `Debugger listening on ws://0.0.0.0:9229/....`
-
-> > > > > > > d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 To connect, click on the debug tab on the left side of your VSCode editor. Make sure the dropdown to the right of the green play button is set to the `Docker: Attach to Autobuilder` configuration. Press the green play button, and you will attach to the container.
 
 ### Troubleshooting
 
-<<<<<<< HEAD
-The most frequent cause of build failures will be related to expired AWS credentials, or not having Docker running. Also, if you haven't ran `npm ci` in a while, you will need to do so as a new dependency was added to run the command.
-=======
 The most frequent cause of build failures will be related to expired AWS credentials, or not having Docker running. Also, if you haven't run `npm ci` in a while, you will need to do so as a new dependency was added to run the command.
-
-> > > > > > > d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 Occasionally, errors may occur inexplicably, and the error messages may seem unrelated to any change made. Oftentimes, running the following commands can resolve these sporadic issues:
 
@@ -112,12 +95,7 @@ Also, another potential error could be due to the Dockerfile.local not being upd
 
 By default, the container will break at the first line of code, which will be in a file called `bind.js`. Press the fast-forward button to continue the execution. You are also able to add other breakpoints to stop the application. Once the application is complete, press `CTRL + C` for the terminal to exit out of the connection to the container.
 
-<<<<<<< HEAD
-If you receive `CredentialsProviderError: Could not load credentials from any providers`, make sure that the `~/.aws/credentials` file has the `[default]` profile defined.
-=======
 If you receive `CredentialsProviderError: Could not load credentials from any providers`, make sure that there is no env `AWS_PROFILE` defined as a different profile anywhere (such as in the global `~/.zshrc` file). Otherwise, ensure that `AWS_PROFILE` matches the same profile defined in `~/.aws/credentials`.
-
-> > > > > > > d5194e973afbcf295f5bd32ca5f2b5dc24dcf9b2
 
 ## Run Tests
 
