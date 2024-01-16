@@ -27,7 +27,7 @@ jobs:
               - 'package-lock.json'
               - 'cdk-infra/package-lock.json'
       - name: Install dependencies
-        if: steps.filter.outputs.dependencies == 'true' || (github.event_name == 'pull_request' && github.event.action == 'opened')
+        if: steps.filter.outputs.dependencies == 'true'
         run: |
           npm ci
           cd cdk-infra/
