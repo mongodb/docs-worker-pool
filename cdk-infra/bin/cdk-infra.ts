@@ -7,6 +7,7 @@ import { AutoBuilderQueueStack } from '../lib/stacks/auto-builder-queue-stack';
 import { WorkerStack } from '../lib/stacks/worker-stack';
 import { WebhookStack } from '../lib/stacks/webhook-stack';
 import { AutoBuilderVpcStack } from '../lib/stacks/auto-builder-vpc-stack';
+import { CacheUpdaterStack } from '../lib/stacks/cache-updater-stack';
 
 async function main() {
   const app = new cdk.App();
@@ -44,6 +45,8 @@ async function main() {
     webhookSecureStrings,
     env,
   });
+
+  new CacheUpdaterStack(app, 'cache-updater', { vpc });
 }
 
 main();
