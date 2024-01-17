@@ -32,7 +32,7 @@ export async function buildEntitledBranchList(entitlement: any, repoBranchesRepo
             branch['gitBranchName']
           }`;
           if (!active) {
-            entitledBranches.push(`!inactive ` + `${repoPath}`);
+            entitledBranches.push(`!inactive `);
           } else {
             entitledBranches.push(repoPath);
           }
