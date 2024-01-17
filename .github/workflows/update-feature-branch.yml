@@ -111,8 +111,6 @@ jobs:
           cd cdk-infra/
           npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
-
-
   build-cache-updater:
     needs: prep-build
     runs-on: ubuntu-latest
