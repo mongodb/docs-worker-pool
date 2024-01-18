@@ -28,16 +28,25 @@ To add a new property:
 To debug the Autobuilder for local testing, you first need to ensure the following has been done:
 
 1. Docker is running
-2. The `~/.aws/credentials` file contains unexpired credentials for the `default` profile
+2. AWS cli is installed and configured
+3. The `~/.aws/credentials` file contains unexpired credentials for the `default` profile
 
-For retrieving credentials, head to AWS and under `Docs Platform`, click on `Command line or programmatic access`.
+If you do not have the AWS cli installed, install and configure it in your home directory:
+
+`brew install awscli`
+
+`aws configure`
+
+You will be prompted to enter values for several fields, populate at least one of them(it doesn't matter which or what it is populated with, it will be changed). After this, you should have and be able to access a file with the path `~/.aws/credentials`.
+
+For retrieving correct credentials, head to AWS console, and under `Docs Platform`, click on `Command line or programmatic access`.
 ![AWS console](images/aws-console-admin.png)
 
 Copy the value in option 2, `Manually add a profile to your AWS credentials file (Short-term credentials)`.
 
 ![Alt text](images/aws-credentials.png)
 
-From there, paste this value in `~/.aws/credentials`, and replace the randomly generated profile (which looks something like `[123456789_AdministratorAccess]`) with `[default]`.
+Paste this value in `~/.aws/credentials`, and replace the randomly generated profile (which looks something like `[123456789_AdministratorAccess]`) with `[default]`.
 You should now have the correct credentials to run the debugger.
 
 _**NOTE: credentials expire pretty quickly. Not sure how exactly how long they last for, but in my experience they expire in approximately 30 minutes.**_
