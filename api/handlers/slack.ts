@@ -31,12 +31,11 @@ export async function buildEntitledBranchList(entitlement: any, repoBranchesRepo
           const repoPath = `${repoOwner}/${repoName}${directoryPath ? '/' + directoryPath : ''}/${
             branch['gitBranchName']
           }`;
-          entitledBranches.push(`!inactive `);
-          // if (!active) {
-          //   entitledBranches.push(`!inactive ` + `${repoPath}`);
-          // } else {
-          //   entitledBranches.push(repoPath);
-          // }
+          if (!active) {
+            entitledBranches.push(`!inactive ` + `${repoPath}`);
+          } else {
+            entitledBranches.push(repoPath);
+          }
         }
       }
     }

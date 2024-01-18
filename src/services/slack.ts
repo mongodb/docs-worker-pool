@@ -186,9 +186,9 @@ export class SlackConnector implements ISlackConnector {
       const opt = {
         text: {
           type: 'plain_text',
-          text: 'displayBranchPath',
+          text: displayBranchPath,
         },
-        value: 'valueBranchPath',
+        value: valueBranchPath,
       };
       reposToShow.push(opt);
     });
