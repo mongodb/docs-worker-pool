@@ -65,6 +65,11 @@ const getAggregationPipeline = (matchCondition: any) => {
         repo: 0,
       },
     },
+    {
+      $sort: {
+        prodDeployable: -1,
+      },
+    },
   ];
 };
 
