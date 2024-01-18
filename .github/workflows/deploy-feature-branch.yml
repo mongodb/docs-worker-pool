@@ -33,3 +33,11 @@ jobs:
         uses: mongodb/docs-worker-actions/comment-pr@main
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache root node_modules
+        id: cache-root
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            cdk-infra/node_modules
+          key: ${{ github.head_ref }}
