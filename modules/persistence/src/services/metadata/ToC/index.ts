@@ -93,15 +93,19 @@ const mergeTocTreeOrder = (metadata: Metadata, node, insertions: TocOrderInserti
 // contains an associated_products entry
 export const traverseAndMerge = (
   metadata: Metadata,
-  associated_products: AssociatedProduct[],
+  umbrellaMetadata: Metadata,
   umbrellaToCs: ToCCopies,
   tocInsertions: ToCInsertions,
   tocOrderInsertions: TocOrderInsertions
 ) => {
   const { project } = metadata;
+  const associatedProducts = umbrellaMetadata.associated_products || [];
 
-  const toctree = hasAssociations(metadata) ? umbrellaToCs.original : umbrellaToCs.urlified;
-  const toBeInserted = new Set(associated_products.map((p) => p.name));
+  const associatedProductNames = associatedProducts.map((p) => p.name);
+  const toctree = structuredClone(
+    metadata.project === umbrellaMetadata.project ? umbrellaToCs.original : umbrellaToCs.urlified
+  );
+  const toBeInserted = new Set(associatedProductNames);
   let queue = [toctree];
   while (queue?.length && toBeInserted.size) {
     let next = queue.shift();
