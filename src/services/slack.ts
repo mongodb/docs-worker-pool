@@ -140,7 +140,7 @@ export class SlackConnector implements ISlackConnector {
               action_id: 'repo_option',
               placeholder: {
                 type: 'plain_text',
-                text: 'deploy',
+                text: 'Select a repo to deploy',
                 emoji: true,
               },
               options: repos,

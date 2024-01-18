@@ -24,18 +24,15 @@ export async function buildEntitledBranchList(entitlement: any, repoBranchesRepo
     const [repoOwner, repoName, directoryPath] = repo.split('/');
     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
     for (const branch of branches) {
-      if ('buildsWithSnooty' in branch) {
-        const buildWithSnooty = branch['buildsWithSnooty'];
-        if (buildWithSnooty) {
-          const active = branch['active'];
-          const repoPath = `${repoOwner}/${repoName}${directoryPath ? '/' + directoryPath : ''}/${
-            branch['gitBranchName']
-          }`;
-          if (!active) {
-            entitledBranches.push(`!inactive ` + `${repoPath}`);
-          } else {
-            entitledBranches.push(repoPath);
-          }
+      if ('buildWithSnooty' in branch && branch['buildsWithSnooty']) {
+        const active = branch['active'];
+        const repoPath = `${repoOwner}/${repoName}${directoryPath ? '/' + directoryPath : ''}/${
+          branch['gitBranchName']
+        }`;
+        if (!active) {
+          entitledBranches.push(`!inactive ` + `${repoPath}`);
+        } else {
+          entitledBranches.push(repoPath);
         }
       }
     }
