@@ -26,12 +26,6 @@ interface AggregatedMetadata {
   most_recent: Metadata;
 }
 
-type EnvKeyedObject = {
-  prd: any;
-  preprd: any;
-  dotcomstg: any;
-  dotcomprd: any;
-};
 // TODO: move the branch/repobranch interfaces into their own file, or into a seperate abstraction?
 export interface BranchEntry {
   name: string;

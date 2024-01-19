@@ -1,4 +1,3 @@
-import { AssociatedProduct, hasAssociations } from '../associated_products';
 import { Metadata } from '..';
 import { convertSlugToUrl } from './utils/convertSlugToUrl';
 
