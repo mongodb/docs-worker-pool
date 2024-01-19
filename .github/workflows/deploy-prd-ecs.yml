@@ -1,7 +1,6 @@
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [released]
 concurrency:
   group: environment-prd-${{ github.ref }}
   cancel-in-progress: true
