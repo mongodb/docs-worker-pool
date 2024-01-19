@@ -78,6 +78,12 @@ Resources:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.1
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/php-library/master
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/php-library/upcoming
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
     Properties:
