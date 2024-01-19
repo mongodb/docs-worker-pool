@@ -78,7 +78,7 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   }
 }
 
-interface RepoInfo {
+export interface RepoInfo {
   repoOwner: string;
   repoName: string;
 }
