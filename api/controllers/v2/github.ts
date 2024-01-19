@@ -138,7 +138,6 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
     /* Create and insert Job for each monorepo project that has changes */
     for (const path of monorepoPaths) {
-      consoleLogger.info(body.repository.full_name, `Create Job for Monorepo directory: /${path}`);
       // TODO: Deal with nested monorepo projects
       /* For now, we will ignore nested monorepo projects until necessary */
       if (path.split('/').length > 1) continue;
