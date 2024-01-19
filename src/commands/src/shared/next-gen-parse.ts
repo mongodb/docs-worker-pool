@@ -13,7 +13,7 @@ export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams)
   const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(job)}`);
   const commitHash = job.payload.newHead;
 
-  const commandArgs = ['build', `${repoDir}`, '--output', `${repoDir}/bundle.zip`];
+  const commandArgs = ['build', repoDir, '--output', `${repoDir}/bundle.zip`];
 
   if (patchId && commitHash) {
     commandArgs.push('--commit');
@@ -29,17 +29,14 @@ export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams)
   if (isProd) {
     commandArgs.push('--no-caching');
   }
-
   try {
-    return executeCliCommand({
+    const result = await executeCliCommand({
       command: 'snooty',
       args: commandArgs,
       options: { cwd: repoDir },
     });
+    return result;
   } catch (error) {
-    return {
-      outputText: '',
-      errorText: `ERROR: ${error}`,
-    };
+    throw new Error(`next-gen-parse failed. \n ${error}`);
   }
 }

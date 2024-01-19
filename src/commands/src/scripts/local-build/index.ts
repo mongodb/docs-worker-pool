@@ -78,7 +78,7 @@ async function main() {
 
   console.log('starting container');
   await runDockerContainer({ ...env, jobId: jobId.toString() });
-  console.log('Container started. Please attach to the debugger to run the Autobuilder.');
+  console.log('Job complete. Please press CTRL+C to exit.');
 }
 
 main();

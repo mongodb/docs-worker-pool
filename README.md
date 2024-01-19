@@ -28,16 +28,25 @@ To add a new property:
 To debug the Autobuilder for local testing, you first need to ensure the following has been done:
 
 1. Docker is running
-2. The `~/.aws/credentials` file contains unexpired credentials for the `default` profile
+2. AWS cli is installed and configured
+3. The `~/.aws/credentials` file contains unexpired credentials for the `default` profile
 
-For retrieving credentials, head to AWS and under `Docs Platform`, click on `Command line or programmatic access`.
+If you do not have the AWS cli installed, install and configure it in your home directory:
+
+`brew install awscli`
+
+`aws configure`
+
+You will be prompted to enter values for several fields, populate at least one of them(it doesn't matter which or what it is populated with, it will be changed). After this, you should have and be able to access a file with the path `~/.aws/credentials`.
+
+For retrieving correct credentials, head to AWS console, and under `Docs Platform`, click on `Command line or programmatic access`.
 ![AWS console](images/aws-console-admin.png)
 
 Copy the value in option 2, `Manually add a profile to your AWS credentials file (Short-term credentials)`.
 
 ![Alt text](images/aws-credentials.png)
 
-From there, paste this value in `~/.aws/credentials`, and replace the randomly generated profile (which looks something like `[123456789_AdministratorAccess]`) with `[default]`.
+Paste this value in `~/.aws/credentials`, and replace the randomly generated profile (which looks something like `[123456789_AdministratorAccess]`) with `[default]`.
 You should now have the correct credentials to run the debugger.
 
 _**NOTE: credentials expire pretty quickly. Not sure how exactly how long they last for, but in my experience they expire in approximately 30 minutes.**_
@@ -52,7 +61,11 @@ To view all of the options for the command, you can run:
 
 Here is an example of running the local debugger for `cloud-docs`:
 
-`npm run debug -- -o 10gen -n 'cloud-docs'`
+`npm run debug -- -o 10gen -n cloud-docs`
+
+Here is an example of running the local debugger for `docs-monorepo/docs-landing` on branch `groot`:
+
+`npm run debug -- -o 10gen -n docs-monorepo -d docs-landing -b groot`
 
 By default, the environment that is used for the local Autobuilder is `stg`.
 
@@ -68,15 +81,15 @@ When the command is run, there are several steps that occur before the Autobuild
 4. The data from step 2 is then added as a record in the `pool_test.queue`.
 5. The container is then run, and waits for the user to connect to it via the VSCode debugger.
 
-Once the container starts successfully, you should see the following message:
+Once the container starts successfully, you should see something like the following message:
 
-`Container started. Please attach to the debugger to run the Autobuilder.`
+`Debugger listening on ws://0.0.0.0:9229/....`
 
 To connect, click on the debug tab on the left side of your VSCode editor. Make sure the dropdown to the right of the green play button is set to the `Docker: Attach to Autobuilder` configuration. Press the green play button, and you will attach to the container.
 
 ### Troubleshooting
 
-The most frequent cause of build failures will be related to expired AWS credentials, or not having Docker running. Also, if you haven't ran `npm ci` in a while, you will need to do so as a new dependency was added to run the command.
+The most frequent cause of build failures will be related to expired AWS credentials, or not having Docker running. Also, if you haven't run `npm ci` in a while, you will need to do so as a new dependency was added to run the command.
 
 Occasionally, errors may occur inexplicably, and the error messages may seem unrelated to any change made. Oftentimes, running the following commands can resolve these sporadic issues:
 
@@ -91,7 +104,7 @@ Also, another potential error could be due to the Dockerfile.local not being upd
 
 By default, the container will break at the first line of code, which will be in a file called `bind.js`. Press the fast-forward button to continue the execution. You are also able to add other breakpoints to stop the application. Once the application is complete, press `CTRL + C` for the terminal to exit out of the connection to the container.
 
-If you receive `CredentialsProviderError: Could not load credentials from any providers`, make sure that the `~/.aws/credentials` file has the `[default]` profile defined.
+If you receive `CredentialsProviderError: Could not load credentials from any providers`, make sure that there is no env `AWS_PROFILE` defined as a different profile anywhere (such as in the global `~/.zshrc` file). Otherwise, ensure that `AWS_PROFILE` matches the same profile defined in `~/.aws/credentials`.
 
 ## Run Tests
 
