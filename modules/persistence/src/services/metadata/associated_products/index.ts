@@ -26,12 +26,6 @@ interface AggregatedMetadata {
   most_recent: Metadata;
 }
 
-type EnvKeyedObject = {
-  prd: any;
-  preprd: any;
-  dotcomstg: any;
-  dotcomprd: any;
-};
 // TODO: move the branch/repobranch interfaces into their own file, or into a seperate abstraction?
 export interface BranchEntry {
   name: string;
@@ -69,8 +63,8 @@ const umbrellaMetadataEntry = async (project: string): Promise<Metadata> => {
       return null as unknown as Metadata;
     }
 
-    const repoDoc = await getRepoBranchesEntry(project);
-    const branchNames = repoDoc.branches.map((branchEntry) => branchEntry.gitBranchName);
+    const umbrellaRepos = await getRepoBranchesEntry(umbrella.project);
+    const branchNames = umbrellaRepos.branches.map((branchEntry) => branchEntry.gitBranchName);
     const entry = await snooty
       .collection('metadata')
       .find({
@@ -198,7 +192,7 @@ export const mergeAssociatedToCs = async (metadata: Metadata) => {
     const mergedMetadataEntries = [umbrellaMetadata, ...associatedMetadataEntries].map((metadataEntry) => {
       const mergedMetadataEntry = traverseAndMerge(
         metadataEntry,
-        umbrellaMetadata.associated_products || [],
+        umbrellaMetadata,
         umbrellaToCs,
         tocInsertions,
         tocOrderInsertions
