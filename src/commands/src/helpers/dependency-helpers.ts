@@ -75,12 +75,11 @@ export async function downloadBuildDependencies(
         dependencyInfo.dependencies.map(async (dep) => {
           commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
           try {
-            const cli = await executeCliCommand({
+            return await executeCliCommand({
               command: 'curl',
               args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
               options: options,
             });
-            return cli;
           } catch (error) {
             console.error(
               `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
