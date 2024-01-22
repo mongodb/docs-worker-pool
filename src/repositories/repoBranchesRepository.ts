@@ -9,8 +9,9 @@ export class RepoBranchesRepository extends BaseRepository {
     super(config, logger, 'RepoBranchesRepository', db.collection(config.get('repoBranchesCollection')));
   }
 
-  async getBuildDependencies(repoName: string): Promise<BuildDependencies> {
+  async getBuildDependencies(repoName: string, directoryName?: string): Promise<BuildDependencies> {
     const query = { repoName: repoName };
+    if (directoryName) query['directories.snooty_toml'] = `/${directoryName}`;
     const repo = await this.findOne(
       query,
       `Mongo Timeout Error: Timedout while retrieving build dependencies for ${repoName}`

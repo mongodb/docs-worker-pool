@@ -1,7 +1,7 @@
 import path from 'path';
 import { Job } from '../../../entities/job';
 import { getDirectory } from '../../../job/jobHandler';
-import { CliCommandResponse, executeCliCommand } from '../helpers';
+import { CliCommandResponse, ExecuteCommandError, executeCliCommand } from '../helpers';
 
 const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
 interface NextGenParseParams {
@@ -37,6 +37,9 @@ export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams)
     });
     return result;
   } catch (error) {
+    if (error instanceof ExecuteCommandError && error.exitCode !== 1) {
+      return error.data as CliCommandResponse;
+    }
     throw new Error(`next-gen-parse failed. \n ${error}`);
   }
 }
