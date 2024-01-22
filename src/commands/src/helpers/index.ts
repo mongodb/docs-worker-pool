@@ -14,9 +14,11 @@ const EPIPE_SYSCALL = 'write';
 
 export class ExecuteCommandError extends Error {
   data: unknown;
-  constructor(message: string, data: unknown) {
+  exitCode: number | null;
+  constructor(message: string, exitCode: number | null, data?: unknown) {
     super(message);
     this.data = data;
+    this.exitCode = exitCode;
   }
 }
 
@@ -80,7 +82,7 @@ export async function executeAndPipeCommands(
         return;
       }
 
-      reject(new ExecuteCommandError('The first command stdin (cmdTo) failed', err));
+      reject(new ExecuteCommandError('The first command stdin (cmdTo) failed', err.errno, err));
       hasRejected = true;
     });
 
@@ -89,7 +91,7 @@ export async function executeAndPipeCommands(
     });
 
     cmdFrom.on('error', (err) => {
-      reject(new ExecuteCommandError('The first command (cmdTo) failed', err));
+      reject(new ExecuteCommandError('The first command (cmdTo) failed', 1, err));
       hasRejected = true;
     });
 
@@ -105,7 +107,7 @@ export async function executeAndPipeCommands(
     });
 
     cmdTo.on('error', (err) => {
-      reject(new ExecuteCommandError('The second command failed', err));
+      reject(new ExecuteCommandError('The second command failed', 1, err));
     });
 
     cmdTo.on('exit', (exitCode) => {
@@ -127,7 +129,13 @@ export async function executeAndPipeCommands(
           console.error('error', errorText.join(''));
         }
 
-        reject(new ExecuteCommandError('The command failed', { exitCode, outputText, errorText }));
+        reject(
+          new ExecuteCommandError('The command failed', exitCode, {
+            exitCode,
+            outputText: outputText.join(''),
+            errorText: errorText.join(''),
+          })
+        );
         return;
       }
 
@@ -177,7 +185,7 @@ export async function executeCliCommand({
 
     executedCommand.on('error', (err) => {
       console.log(`ERROR in executeCliCommand.\nCommand: ${command} ${args.join(' ')}\nError: ${err}`);
-      reject(new ExecuteCommandError('The command failed', err));
+      reject(new ExecuteCommandError('The command failed', 1, err));
     });
 
     executedCommand.on('close', (exitCode) => {
@@ -204,7 +212,11 @@ export async function executeCliCommand({
             Options provided: ${JSON.stringify(options, null, 4)}\n
             Stdout: ${outputText.join('')} \n
             Error: ${errorText.join('')}`,
-            exitCode
+            exitCode,
+            {
+              outputText: outputText.join(''),
+              errorText: errorText.join(''),
+            }
           )
         );
         return;
