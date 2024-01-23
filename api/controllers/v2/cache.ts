@@ -27,9 +27,11 @@ function isRebuildRequest(body: unknown): body is RepoInfo[] {
 
 async function runCacheRebuildJob(repos: RepoInfo[]) {
   const TASK_DEFINITION = process.env.TASK_DEFINITION;
+  const CONTAINER_NAME = process.env.CONTAINER_NAME;
   const CLUSTER = process.env.CLUSTER;
 
   if (!TASK_DEFINITION) throw new Error('ERROR! process.env.TASK_DEFINITION is not defined');
+  if (!CONTAINER_NAME) throw new Error('ERROR! process.env.CONTAINER_NAME is not defined');
   if (!CLUSTER) throw new Error('ERROR! process.env.CLUSTER is not defined');
 
   const client = new ECSClient({
@@ -42,6 +44,7 @@ async function runCacheRebuildJob(repos: RepoInfo[]) {
     overrides: {
       containerOverrides: [
         {
+          name: CONTAINER_NAME,
           environment: [
             {
               name: 'REPOS',
@@ -83,8 +86,17 @@ export async function rebuildCacheHandler(event: APIGatewayEvent): Promise<APIGa
     };
   }
 
-  return {
-    statusCode: 200,
-    body: 'ok',
-  };
+  try {
+    await runCacheRebuildJob(rebuildRequest);
+    return {
+      statusCode: 200,
+      body: 'Cache rebuild job successfully created',
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      statusCode: 500,
+      body: 'Error occurred when starting cache rebuild job',
+    };
+  }
 }
