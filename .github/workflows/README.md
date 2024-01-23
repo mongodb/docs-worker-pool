@@ -2,6 +2,14 @@
 
 This README describes the various workflows defined for the docs-worker-pool repository.
 
+## Releases
+
+The release process occurs whenever someone releases a specific tag via the GitHub UI. Three separate workflows are run upon release:
+
+1. `deploy-prd-ecs.yml` - Builds and deploys the old Autobuilder to prd
+2. `deploy-prd-enhanced-webhooks.yml` - Builds and deploys webhooks (GitHub and Slack handlers) for the enhanced Autobuilder
+3. `deploy-prd-enhanced-worker.yml` - Builds and deploys the Autobuilder worker to prd
+
 ## Feature Branch Deploys
 
 The feature branch deploy process occurs whenever a developer opens a pull request. It consists of three separate workflows:
