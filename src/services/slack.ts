@@ -178,7 +178,7 @@ export class SlackConnector implements ISlackConnector {
     branches.forEach((fullPath) => {
       const displayBranchPath = fullPath;
       let valueBranchPath = fullPath;
-      const isInactive = fullPath.startsWith('(!inactiveStr)');
+      const isInactive = fullPath.startsWith('(!inactive)');
       if (isInactive == true) {
         valueBranchPath = fullPath.slice(12);
       }
