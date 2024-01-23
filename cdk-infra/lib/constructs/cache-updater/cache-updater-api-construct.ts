@@ -1,5 +1,6 @@
 import { Duration } from 'aws-cdk-lib';
 import { Cors, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import { TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -10,6 +11,7 @@ interface CacheUpdaterApiConstructProps {
   clusterName: string;
   taskDefinition: TaskDefinition;
   containerName: string;
+  vpc: Vpc;
 }
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
@@ -18,7 +20,7 @@ export class CacheUpdaterApiConstruct extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    { clusterName, taskDefinition, containerName }: CacheUpdaterApiConstructProps
+    { clusterName, taskDefinition, containerName, vpc }: CacheUpdaterApiConstructProps
   ) {
     super(scope, id);
 
@@ -32,6 +34,7 @@ export class CacheUpdaterApiConstruct extends Construct {
         CLUSTER: clusterName,
         TASK_DEFINITION: taskDefinition.taskDefinitionArn,
         CONTAINER_NAME: containerName,
+        SUBNETS: JSON.stringify(vpc.privateSubnets.map((subnet) => subnet.subnetId)),
       },
     });
 

@@ -29,10 +29,12 @@ async function runCacheRebuildJob(repos: RepoInfo[]) {
   const TASK_DEFINITION = process.env.TASK_DEFINITION;
   const CONTAINER_NAME = process.env.CONTAINER_NAME;
   const CLUSTER = process.env.CLUSTER;
+  const SUBNETS = process.env.SUBNETS;
 
   if (!TASK_DEFINITION) throw new Error('ERROR! process.env.TASK_DEFINITION is not defined');
   if (!CONTAINER_NAME) throw new Error('ERROR! process.env.CONTAINER_NAME is not defined');
   if (!CLUSTER) throw new Error('ERROR! process.env.CLUSTER is not defined');
+  if (!SUBNETS) throw new Error('ERROR! process.env.SUBNETS is not defined');
 
   const client = new ECSClient({
     region: 'us-east-2',
@@ -41,6 +43,12 @@ async function runCacheRebuildJob(repos: RepoInfo[]) {
   const command = new RunTaskCommand({
     taskDefinition: TASK_DEFINITION,
     cluster: CLUSTER,
+    launchType: 'FARGATE',
+    networkConfiguration: {
+      awsvpcConfiguration: {
+        subnets: JSON.parse(SUBNETS),
+      },
+    },
     overrides: {
       containerOverrides: [
         {

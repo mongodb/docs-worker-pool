@@ -1,15 +1,15 @@
-import { Stack } from 'aws-cdk-lib';
+import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CacheUpdaterWorkerConstruct } from '../constructs/cache-updater/cache-updater-worker-construct';
-import { IVpc } from 'aws-cdk-lib/aws-ec2';
+import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import { CacheUpdaterApiConstruct } from '../constructs/cache-updater/cache-updater-api-construct';
 
-interface CacheUpdaterStackProps {
-  vpc: IVpc;
+interface CacheUpdaterStackProps extends StackProps {
+  vpc: Vpc;
 }
 export class CacheUpdaterStack extends Stack {
-  constructor(scope: Construct, id: string, { vpc }: CacheUpdaterStackProps) {
-    super(scope, id);
+  constructor(scope: Construct, id: string, { vpc, ...props }: CacheUpdaterStackProps) {
+    super(scope, id, props);
 
     const { clusterName, taskDefinition, containerName } = new CacheUpdaterWorkerConstruct(
       this,
@@ -21,6 +21,7 @@ export class CacheUpdaterStack extends Stack {
       clusterName,
       taskDefinition,
       containerName,
+      vpc,
     });
   }
 }
