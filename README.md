@@ -157,7 +157,8 @@ docs-worker-pool contains various triggers for release to higher environments. C
 
 - Create release tags. We currently follow [semver](https://semver.org/) standards.
 - If you don't have push access, open an issue or otherwise contact a contributor with administrator privileges.
-- Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances.
+- Using the GitHub UI, create a release associated with the tag. 
+- Verify that the deploy-production-ec2 workflow executed successfully for both job runs across both production instances. The workflow should only run when a release is published.
 
 ### Serverless Development
 
