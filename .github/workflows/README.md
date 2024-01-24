@@ -4,7 +4,7 @@ This README describes the various workflows defined for the docs-worker-pool rep
 
 ## Releases
 
-The release process occurs whenever someone releases a specific tag via the GitHub UI. Three separate workflows are run upon release:
+The release process occurs whenever someone releases a specific tag (note: it does not run upon creation of a tag, only release). Three separate workflows are run upon release:
 
 1. `deploy-prd-ecs.yml` - Builds and deploys the old Autobuilder to prd
 2. `deploy-prd-enhanced-webhooks.yml` - Builds and deploys webhooks (GitHub and Slack handlers) for the enhanced Autobuilder
