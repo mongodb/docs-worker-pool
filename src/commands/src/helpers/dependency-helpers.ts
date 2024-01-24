@@ -43,16 +43,25 @@ async function createEnvProdFile({
   }
 }
 
-export async function downloadBuildDependencies(buildDependencies: BuildDependencies, repoName: string) {
+export async function downloadBuildDependencies(
+  buildDependencies: BuildDependencies,
+  repoName: string,
+  directory?: string
+) {
   const commands: string[] = [];
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
-      const repoDir = getRepoDir(repoName);
+      const repoDir = getRepoDir(repoName, directory);
       const targetDir = dependencyInfo.targetDir ?? repoDir;
+      let options = {};
+      if (targetDir != repoDir) {
+        options = { cwd: repoDir };
+      }
       try {
         await executeCliCommand({
           command: 'mkdir',
           args: ['-p', targetDir],
+          options: options,
         });
       } catch (error) {
         console.error(
@@ -63,11 +72,13 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
       }
       commands.push(`mkdir -p ${targetDir}`);
       await Promise.all(
-        dependencyInfo.dependencies.map((dep) => {
+        dependencyInfo.dependencies.map(async (dep) => {
+          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
           try {
-            executeCliCommand({
+            return await executeCliCommand({
               command: 'curl',
-              args: ['-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+              args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+              options: options,
             });
           } catch (error) {
             console.error(
@@ -75,7 +86,6 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
               dependencyInfo
             );
           }
-          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
         })
       );
     })
@@ -83,16 +93,8 @@ export async function downloadBuildDependencies(buildDependencies: BuildDependen
   return commands;
 }
 
-export async function prepareBuildAndGetDependencies(
-  repoName: string,
-  projectName: string,
-  baseUrl: string,
-  buildDependencies: BuildDependencies,
-  directory?: string
-) {
+export async function prepareBuild(repoName: string, projectName: string, baseUrl: string, directory?: string) {
   const repoDir = getRepoDir(repoName, directory);
-  await downloadBuildDependencies(buildDependencies, repoName);
-  console.log('Downloaded Build dependencies');
 
   // doing these in parallel
   const commandPromises = [
