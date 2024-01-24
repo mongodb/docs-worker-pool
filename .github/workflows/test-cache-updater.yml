@@ -15,19 +15,9 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-      - name: test obfuscate
-        run: |
-          MY_NAME="Mona The Octocat"
-          MY_VAR="secret_var"
-          MY_URL="secret_var@url.com"
-          echo "::add-mask::$MY_NAME"
-          echo "::add-mask::$MY_VAR"
-          echo "::add-mask::$MY_URL"
 
-          echo "Mona The Octocat is Mona The Octocat"
-          echo "$MY_URL"
-
-      # - name: Get Webhook URL 
-      #   uses: mongodb/docs-worker-actions/comment-pr@main
-      #   env: 
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get Webhook URL 
+        uses: mongodb/docs-worker-actions/rebuild-parse-cache@DOP-4294
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_SHA: ${{ github.sha }}
