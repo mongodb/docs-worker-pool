@@ -2,7 +2,7 @@ on:
   push:
     paths: ["src/**", "cdk-infra/lib/constructs/worker/**", "Dockerfile.enhanced", "modules/**"]
     branches:
-      - 'master'
+      - 'main'
       - 'integration'
 
 concurrency:
