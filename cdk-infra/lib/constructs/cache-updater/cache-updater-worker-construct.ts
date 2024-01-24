@@ -5,6 +5,7 @@ import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import path from 'path';
+import { getSnootyParserVersion } from '../../../utils/env';
 
 const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
 
@@ -40,10 +41,13 @@ export class CacheUpdaterWorkerConstruct extends Construct {
 
     const containerName = 'cacheUpdaterWorkerImage';
     const taskDefLogGroup = new LogGroup(this, 'cacheUpdaterWorkerLogGroup');
+
+    const snootyParserVersion = getSnootyParserVersion();
+
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
         file: 'src/cache-updater/Dockerfile.cacheUpdater',
-        buildArgs: { SNOOTY_PARSER_VERSION: '0.15.2' }, // TODO: Update this to use a context variable
+        buildArgs: { SNOOTY_PARSER_VERSION: snootyParserVersion },
         exclude: ['tests/', 'node_modules/', 'cdk-infra/'], // adding this just in case it doesn't pick up our dockerignore
       }),
       environment: {

@@ -9,6 +9,7 @@ const autoBuilderContextVariables = [
   'customFeatureName',
   'env',
   'useCustomBuckets',
+  'snootyParserVersion',
 ] as const;
 
 export type SnootyEnv = (typeof snootyEnvs)[number];
@@ -76,7 +77,13 @@ export function getEnv(): AutoBuilderEnv {
 export function isEnhanced(): boolean {
   return !!contextVarsMap.get('enhanced');
 }
+export function getSnootyParserVersion(): string {
+  checkContextInit();
+  const snootyParserVersion = contextVarsMap.get('snootyParserVersion');
+  if (!snootyParserVersion) throw new Error('Error! The context variable snootyParserVersion is not defined.');
 
+  return snootyParserVersion;
+}
 export function getFeatureName(): string {
   checkContextInit();
 
