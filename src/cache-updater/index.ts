@@ -123,10 +123,17 @@ function getRepos(): RepoInfo[] {
   }
 }
 
-const repos = getRepos();
 
-repos.forEach((repo) =>
-  handler(repo).catch((error) => {
-    console.error('An error occurred!', error);
-  })
-);
+async function main() {
+  const repos = getRepos();
+
+  await Promise.all(repos.map((repo) =>
+    handler(repo).catch((error) => {
+      console.error('An error occurred!', error);
+    })
+  ));
+  
+  process.exit(0);
+}
+
+main();
