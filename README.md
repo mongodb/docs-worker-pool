@@ -126,7 +126,7 @@ See the [spec doc](https://docs.google.com/document/d/1XZOuuGmozcLQRSDitx0UWhZzJ
 
 ## Branches
 
-Development in this repository can be done via forks or branches. Currently, we support a `master` branch and `meta` branch. In general, the development workflow is to open pull requests against `master`, and to test `master` prior to creating new tags for a release.
+Development in this repository can be done via forks or branches. Currently, we support a `main` branch and `meta` branch. In general, the development workflow is to open pull requests against `main`, and to test `main` prior to creating new tags for a release.
 
 In general, the git workflow within this repository loosely follows https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow .
 
@@ -134,11 +134,11 @@ In general, the git workflow within this repository loosely follows https://www.
 
 `meta` contains various makefiles and .yaml files used for configuration.
 Changes or additions to/of makefiles and .yaml for publishing purposes should be performed against this branch.
-There is no general requirement to keep `meta` up to date with `master` or `integration`.
+There is no general requirement to keep `meta` up to date with `main` or `integration`.
 
-### Master
+### Main
 
-`master` is treated as a running pre-production feature branch. Changes should not go into master until properly tested for regressions in an acceptance environment. It is an expectation that hotfixes may have to occur on occasion - on such an occasion, a feature branch should be made from the commit hash of the last release tag, and not from the head of master. Master may contain changes that have yet to be fully tested for a production release.
+`main` is treated as a running pre-production feature branch. Changes should not go into main until properly tested for regressions in an acceptance environment. It is an expectation that hotfixes may have to occur on occasion - on such an occasion, a feature branch should be made from the commit hash of the last release tag, and not from the head of main. Main may contain changes that have yet to be fully tested for a production release.
 
 ### Release Tags
 
@@ -146,11 +146,11 @@ Each release tag represents a presumptive stable release - with the most recent 
 
 ## Release Process
 
-docs-worker-pool contains various triggers for release to higher environments. Currently, the repository supports an integration environment (reflecting the state of the master branch) and a production environment (reflecting the state of the most recent release tag).
+docs-worker-pool contains various triggers for release to higher environments. Currently, the repository supports an integration environment (reflecting the state of the main branch) and a production environment (reflecting the state of the most recent release tag).
 
 ### Integration Environment
 
-- Merge a pull request or otherwise push a commit to `master` branch.
+- Merge a pull request or otherwise push a commit to `main` branch.
 - Verify that the deploy-integration-ec2 workflow has executed successfully.
 
 ### Production Environment

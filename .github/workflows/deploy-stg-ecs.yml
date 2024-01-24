@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - "master"
+      - "main"
       - "integration"
 concurrency:
   group: environment-stg-${{ github.ref }}

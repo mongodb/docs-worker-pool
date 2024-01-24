@@ -2,7 +2,7 @@ on:
   push:
     paths: ["api/v2/**", "cdk-infra/lib/constructs/api/**", "cdk-infra/utils/**"]
     branches:
-      - "master"
+      - "main"
       - "integration"
 
 concurrency:
