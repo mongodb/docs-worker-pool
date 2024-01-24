@@ -19,7 +19,7 @@ jobs:
         run: |
           MY_NAME="Mona The Octocat"
           MY_VAR="secret_var"
-          MY_URL="secet_var@url.com"
+          MY_URL="secret_var@url.com"
           echo "::add-mask::$MY_NAME"
           echo "::add-mask::$MY_VAR"
           echo "Mona The Octocat is Mona The Octocat"
