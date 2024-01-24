@@ -1,9 +1,16 @@
 import { Duration } from 'aws-cdk-lib';
-import { Cors, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import {
+  ApiKeySourceType,
+  Cors,
+  LambdaIntegration,
+  LambdaRestApi,
+  LogGroupLogDestination,
+} from 'aws-cdk-lib/aws-apigateway';
 import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import { TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import path from 'path';
 
@@ -47,12 +54,35 @@ export class CacheUpdaterApiConstruct extends Construct {
       handler: 'RootEndpointLambda',
     });
 
-    const restApi = new LambdaRestApi(this, 'cacheUpdaterRestApi', { handler: rootEndpointLambda, proxy: false });
+    const apiLogGroup = new LogGroup(this, 'cacheUpdaterLogGroup');
+
+    const restApi = new LambdaRestApi(this, 'cacheUpdaterRestApi', {
+      handler: rootEndpointLambda,
+      proxy: false,
+      apiKeySourceType: ApiKeySourceType.HEADER,
+      deployOptions: {
+        accessLogDestination: new LogGroupLogDestination(apiLogGroup),
+      },
+    });
 
     restApi.root
       .addResource('webhook', {
         defaultCorsPreflightOptions: { allowOrigins: Cors.ALL_ORIGINS },
       })
-      .addMethod('POST', new LambdaIntegration(cacheWebhookLambda));
+      .addMethod('POST', new LambdaIntegration(cacheWebhookLambda), { apiKeyRequired: true });
+
+    const usagePlan = restApi.addUsagePlan('cacheUpdaterUsagePlan', {
+      name: 'defaultPlan',
+      apiStages: [
+        {
+          api: restApi,
+          stage: restApi.deploymentStage,
+        },
+      ],
+    });
+
+    const apiKey = restApi.addApiKey('cacheUpdaterApiKey');
+
+    usagePlan.addApiKey(apiKey);
   }
 }

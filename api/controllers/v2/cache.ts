@@ -2,6 +2,7 @@ import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { RepoInfo } from '../../../src/cache-updater/index';
 import { ECSClient, RunTaskCommand } from '@aws-sdk/client-ecs';
+import { validateJsonWebhook } from '../../handlers/github';
 
 /**
  * validates request
@@ -26,10 +27,7 @@ function isRebuildRequest(body: unknown): body is RepoInfo[] {
 }
 
 async function runCacheRebuildJob(repos: RepoInfo[]) {
-  const TASK_DEFINITION = process.env.TASK_DEFINITION;
-  const CONTAINER_NAME = process.env.CONTAINER_NAME;
-  const CLUSTER = process.env.CLUSTER;
-  const SUBNETS = process.env.SUBNETS;
+  const { TASK_DEFINITION, CONTAINER_NAME, CLUSTER, SUBNETS } = process.env;
 
   if (!TASK_DEFINITION) throw new Error('ERROR! process.env.TASK_DEFINITION is not defined');
   if (!CONTAINER_NAME) throw new Error('ERROR! process.env.CONTAINER_NAME is not defined');
