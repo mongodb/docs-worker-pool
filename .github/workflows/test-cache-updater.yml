@@ -22,6 +22,8 @@ jobs:
           MY_URL="secret_var@url.com"
           echo "::add-mask::$MY_NAME"
           echo "::add-mask::$MY_VAR"
+          echo "::add-mask::$MY_URL"
+
           echo "Mona The Octocat is Mona The Octocat"
           echo "$MY_URL"
 
