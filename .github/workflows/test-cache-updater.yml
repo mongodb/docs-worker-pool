@@ -1,0 +1,31 @@
+# NOTE: This will be removed on merge of PR
+on:
+  push:
+    branches:
+      - DOP-4171
+
+jobs:
+  test:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: test obfuscate
+        run: |
+          MY_NAME="Mona The Octocat"
+          MY_VAR="secret_var"
+          MY_URL="secet_var@url.com"
+          echo "::add-mask::$MY_NAME"
+          echo "::add-mask::$MY_VAR"
+          echo "Mona The Octocat is Mona The Octocat"
+          echo "$MY_URL"
+
+      # - name: Get Webhook URL 
+      #   uses: mongodb/docs-worker-actions/comment-pr@main
+      #   env: 
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
