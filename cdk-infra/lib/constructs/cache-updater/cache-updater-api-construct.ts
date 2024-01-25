@@ -45,6 +45,20 @@ export class CacheUpdaterApiConstruct extends Construct {
       },
     });
 
+    const cacheGithubWebhookLambda = new NodejsFunction(this, 'cacheUpdaterWebhookLambda', {
+      entry: `${HANDLERS_PATH}/cache.ts`,
+      handler: 'rebuildCacheGithubWebhookHandler',
+      runtime: Runtime.NODEJS_18_X,
+      timeout: Duration.minutes(2),
+      memorySize: 1024,
+      environment: {
+        CLUSTER: clusterName,
+        TASK_DEFINITION: taskDefinition.taskDefinitionArn,
+        CONTAINER_NAME: containerName,
+        SUBNETS: JSON.stringify(vpc.privateSubnets.map((subnet) => subnet.subnetId)),
+      },
+    });
+
     taskDefinition.grantRun(cacheWebhookLambda);
 
     // generic handler for the root endpoint
@@ -65,11 +79,11 @@ export class CacheUpdaterApiConstruct extends Construct {
       },
     });
 
-    restApi.root
-      .addResource('webhook', {
-        defaultCorsPreflightOptions: { allowOrigins: Cors.ALL_ORIGINS },
-      })
-      .addMethod('POST', new LambdaIntegration(cacheWebhookLambda), { apiKeyRequired: true });
+    const webhook = restApi.root.addResource('webhook', {
+      defaultCorsPreflightOptions: { allowOrigins: Cors.ALL_ORIGINS },
+    });
+
+    webhook.addMethod('POST', new LambdaIntegration(cacheWebhookLambda), { apiKeyRequired: true });
 
     const usagePlan = restApi.addUsagePlan('cacheUpdaterUsagePlan', {
       name: 'defaultPlan',
@@ -84,5 +98,11 @@ export class CacheUpdaterApiConstruct extends Construct {
     const apiKey = restApi.addApiKey('cacheUpdaterApiKey');
 
     usagePlan.addApiKey(apiKey);
+
+    const githubWebhook = webhook.addResource('github', {
+      defaultCorsPreflightOptions: { allowOrigins: Cors.ALL_ORIGINS },
+    });
+
+    githubWebhook.addMethod('POST', new LambdaIntegration(cacheGithubWebhookLambda), { apiKeyRequired: false });
   }
 }

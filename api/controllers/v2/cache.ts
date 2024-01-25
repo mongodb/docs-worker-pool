@@ -106,3 +106,16 @@ export async function rebuildCacheHandler(event: APIGatewayEvent): Promise<APIGa
     };
   }
 }
+
+export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent) {
+  // TODO: Add GITHUB_SECRET
+  if (!validateJsonWebhook(event, '')) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+  return rebuildCacheHandler(event);
+}
