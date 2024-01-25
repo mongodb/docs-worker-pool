@@ -7,12 +7,13 @@ import {
   FargateTaskDefinition,
   LogDrivers,
 } from 'aws-cdk-lib/aws-ecs';
-import { Effect, IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { AnyPrincipal, Effect, IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
 import { getEnv, isEnhanced } from '../../../utils/env';
+import { FileSystem } from 'aws-cdk-lib/aws-efs';
 
 interface WorkerConstructProps {
   dockerEnvironment: Record<string, string>;
@@ -72,12 +73,43 @@ export class WorkerConstruct extends Construct {
       },
     };
 
+    const fileSystem = new FileSystem(this, 'snootyCacheFileSystem', {
+      vpc,
+    });
+
+    fileSystem.addAccessPoint('cache/', {
+      path: '/cache',
+    });
+
+    fileSystem.addToResourcePolicy(
+      new PolicyStatement({
+        actions: ['elasticfilesystem:ClientMount'],
+        principals: [new AnyPrincipal()],
+        conditions: {
+          Bool: {
+            'elasticfilesystem:AccessedViaMountTarget': 'true',
+          },
+        },
+      })
+    );
+
+    fileSystem.grantReadWrite(taskRole);
+
+    const VOLUME_NAME = 'efsVolume';
     const taskDefLogGroup = new LogGroup(this, 'workerLogGroup');
     const taskDefinition = new FargateTaskDefinition(this, 'workerTaskDefinition', {
       cpu: 4096,
       memoryLimitMiB: 8192,
       taskRole,
       executionRole,
+      volumes: [
+        {
+          name: VOLUME_NAME,
+          efsVolumeConfiguration: {
+            fileSystemId: fileSystem.fileSystemId,
+          },
+        },
+      ],
     });
 
     const updateTaskProtectionPolicy = new PolicyStatement({
@@ -93,14 +125,20 @@ export class WorkerConstruct extends Construct {
 
     taskRole.addToPolicy(updateTaskProtectionPolicy);
 
-    taskDefinition.addContainer('workerImage', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
-      environment: dockerEnvironment,
-      logging: LogDrivers.awsLogs({
-        streamPrefix: 'autobuilderworker',
-        logGroup: taskDefLogGroup,
-      }),
-    });
+    taskDefinition
+      .addContainer('workerImage', {
+        image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
+        environment: dockerEnvironment,
+        logging: LogDrivers.awsLogs({
+          streamPrefix: 'autobuilderworker',
+          logGroup: taskDefLogGroup,
+        }),
+      })
+      .addMountPoints({
+        sourceVolume: VOLUME_NAME,
+        containerPath: '/cache',
+        readOnly: false,
+      });
 
     const env = getEnv();
 
