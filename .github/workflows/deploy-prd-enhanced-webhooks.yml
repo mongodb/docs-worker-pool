@@ -1,8 +1,6 @@
 on:
-  push:
-    tags:
-      - 'v*'
-
+  release:
+    types: [released]
 concurrency:
   group: environment-prd-enhanced-webhooks-${{ github.ref }}
   cancel-in-progress: true

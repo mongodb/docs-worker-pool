@@ -122,7 +122,7 @@ describe('ToC module', () => {
         expect(
           traverseAndMerge(
             umbrellaMetadata as unknown as Metadata,
-            umbrellaMetadata.associated_products || [],
+            umbrellaMetadata,
             umbrellaToCs,
             tocInsertions,
             tocOrderInsertions
@@ -135,7 +135,7 @@ describe('ToC module', () => {
         expect(
           traverseAndMerge(
             metadata[0] as unknown as Metadata,
-            umbrellaMetadata.associated_products || [],
+            umbrellaMetadata,
             umbrellaToCs,
             tocInsertions,
             tocOrderInsertions

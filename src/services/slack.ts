@@ -176,13 +176,18 @@ export class SlackConnector implements ISlackConnector {
   private _buildDropdown(branches: Array<string>, triggerId: string): any {
     let reposToShow: Array<any> = [];
     branches.forEach((fullPath) => {
-      const fullBranchPath = fullPath;
+      const displayBranchPath = fullPath;
+      let valueBranchPath = fullPath;
+      const isInactive = fullPath.startsWith('(!inactive)');
+      if (isInactive == true) {
+        valueBranchPath = fullPath.slice(12);
+      }
       const opt = {
         text: {
           type: 'plain_text',
-          text: fullBranchPath,
+          text: displayBranchPath,
         },
-        value: fullBranchPath,
+        value: valueBranchPath,
       };
       reposToShow.push(opt);
     });
