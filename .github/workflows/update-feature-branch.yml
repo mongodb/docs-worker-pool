@@ -111,38 +111,3 @@ jobs:
           cd cdk-infra/
           npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
-  build-cache-updater:
-    needs: prep-build
-    runs-on: ubuntu-latest
-    steps:
-
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            cache:
-              - 'src/cache-updater/**'
-              - 'cdk-infra/lib/constructs/cache-updater/**'
-      - uses: actions/checkout@v4
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
-      - uses: actions/cache/restore@v3
-        id: cache-restore
-        with:
-          path: |
-            node_modules
-            cdk-infra/node_modules
-          key: ${{ github.head_ref }}
-      - name: Update Cache Updater
-        if: steps.filter.outputs.cache == 'true'
-        run: |
-          cd cdk-infra/
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
-            cache-updater
