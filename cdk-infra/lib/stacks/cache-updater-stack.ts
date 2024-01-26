@@ -6,9 +6,10 @@ import { CacheUpdaterApiConstruct } from '../constructs/cache-updater/cache-upda
 
 interface CacheUpdaterStackProps extends StackProps {
   vpc: Vpc;
+  githubSecret: string;
 }
 export class CacheUpdaterStack extends Stack {
-  constructor(scope: Construct, id: string, { vpc, ...props }: CacheUpdaterStackProps) {
+  constructor(scope: Construct, id: string, { vpc, githubSecret, ...props }: CacheUpdaterStackProps) {
     super(scope, id, props);
 
     const { clusterName, taskDefinition, containerName } = new CacheUpdaterWorkerConstruct(
@@ -22,6 +23,7 @@ export class CacheUpdaterStack extends Stack {
       taskDefinition,
       containerName,
       vpc,
+      githubSecret,
     });
   }
 }

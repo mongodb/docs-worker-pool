@@ -3,6 +3,7 @@ import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { RepoInfo } from '../../../src/cache-updater/index';
 import { ECSClient, RunTaskCommand } from '@aws-sdk/client-ecs';
 import { validateJsonWebhook } from '../../handlers/github';
+import { PushEvent } from '@octokit/webhooks-types';
 
 /**
  * validates request
@@ -108,8 +109,39 @@ export async function rebuildCacheHandler(event: APIGatewayEvent): Promise<APIGa
 }
 
 export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent) {
-  // TODO: Add GITHUB_SECRET
-  if (!validateJsonWebhook(event, '')) {
+  if (!event.body) {
+    const errorMessage = 'Error! No body found in event payload.';
+    console.error(errorMessage);
+    return {
+      statusCode: 400,
+      body: errorMessage,
+    };
+  }
+
+  let body: PushEvent;
+  try {
+    body = JSON.parse(event.body) as PushEvent;
+  } catch (e) {
+    console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
+    return {
+      statusCode: 502,
+      headers: { 'Content-Type': 'text/plain' },
+      body: ' ERROR! Could not parse event.body',
+    };
+  }
+
+  const cacheUpdateBody = JSON.stringify([{ repoOwner: body.repository.owner.login, repoName: body.repository.name }]);
+  const { GITHUB_SECRET } = process.env;
+
+  if (!GITHUB_SECRET) {
+    console.error('GITHUB_SECRET is not defined');
+    return {
+      statusCode: 500,
+      body: 'internal server error',
+    };
+  }
+
+  if (!validateJsonWebhook(event, GITHUB_SECRET)) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
       statusCode: 401,
@@ -117,5 +149,5 @@ export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent) {
       body: errMsg,
     };
   }
-  return rebuildCacheHandler(event);
+  return rebuildCacheHandler({ ...event, body: cacheUpdateBody });
 }

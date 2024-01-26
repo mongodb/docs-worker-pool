@@ -19,6 +19,7 @@ interface CacheUpdaterApiConstructProps {
   taskDefinition: TaskDefinition;
   containerName: string;
   vpc: Vpc;
+  githubSecret: string;
 }
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
@@ -27,7 +28,7 @@ export class CacheUpdaterApiConstruct extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    { clusterName, taskDefinition, containerName, vpc }: CacheUpdaterApiConstructProps
+    { clusterName, taskDefinition, containerName, vpc, githubSecret }: CacheUpdaterApiConstructProps
   ) {
     super(scope, id);
 
@@ -45,7 +46,7 @@ export class CacheUpdaterApiConstruct extends Construct {
       },
     });
 
-    const cacheGithubWebhookLambda = new NodejsFunction(this, 'cacheUpdaterWebhookLambda', {
+    const cacheGithubWebhookLambda = new NodejsFunction(this, 'cacheUpdaterGithubWebhookLambda', {
       entry: `${HANDLERS_PATH}/cache.ts`,
       handler: 'rebuildCacheGithubWebhookHandler',
       runtime: Runtime.NODEJS_18_X,
@@ -56,6 +57,7 @@ export class CacheUpdaterApiConstruct extends Construct {
         TASK_DEFINITION: taskDefinition.taskDefinitionArn,
         CONTAINER_NAME: containerName,
         SUBNETS: JSON.stringify(vpc.privateSubnets.map((subnet) => subnet.subnetId)),
+        GITHUB_SECRET: githubSecret,
       },
     });
 
