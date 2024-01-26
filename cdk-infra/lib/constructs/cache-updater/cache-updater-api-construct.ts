@@ -62,6 +62,7 @@ export class CacheUpdaterApiConstruct extends Construct {
     });
 
     taskDefinition.grantRun(cacheWebhookLambda);
+    taskDefinition.grantRun(cacheGithubWebhookLambda);
 
     // generic handler for the root endpoint
     const rootEndpointLambda = new Function(this, 'RootEndpointLambda', {

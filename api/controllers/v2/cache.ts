@@ -130,7 +130,18 @@ export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent) {
     };
   }
 
-  const cacheUpdateBody = JSON.stringify([{ repoOwner: body.repository.owner.login, repoName: body.repository.name }]);
+  const repoOwner = body.repository.owner.login;
+  const repoName = body.repository.name;
+
+  const ref = body.ref;
+  if ((ref !== 'refs/head/master' && ref !== 'refs/head/main') || (repoOwner !== '10gen' && repoOwner !== 'mongodb')) {
+    return {
+      statusCode: 403,
+      body: 'Cache job not processed because the request is not for the primary branch and/or the repository does not belong to the 10gen or mongodb organizations',
+    };
+  }
+
+  const cacheUpdateBody = JSON.stringify([{ repoOwner, repoName }]);
   const { GITHUB_SECRET } = process.env;
 
   if (!GITHUB_SECRET) {
