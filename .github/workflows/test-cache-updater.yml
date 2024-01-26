@@ -20,7 +20,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      - name: Get Webhook URL 
+      - name: Rebuild Cache if New Snooty Parser Version
         uses: mongodb/docs-worker-actions/rebuild-parse-cache@DOP-4294
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

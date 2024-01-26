@@ -21,18 +21,13 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-      - name: Deploy Feature Branch Infrastructure
+
+      - name: Install Node Dependencies
         run: |
           npm ci
           cd cdk-infra/
           npm ci
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-queues
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks --outputs-file outputs.json
-      - name: Get Webhook URL 
-        uses: mongodb/docs-worker-actions/comment-pr@main
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Cache root node_modules
         id: cache-root
         uses: actions/cache@v3
@@ -41,3 +36,12 @@ jobs:
             node_modules
             cdk-infra/node_modules
           key: ${{ github.head_ref }}
+      - name: Deploy Feature Branch Infrastructure
+        run: |
+          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-queues
+          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
+          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks --outputs-file outputs.json
+      - name: Get Webhook URL 
+        uses: mongodb/docs-worker-actions/comment-pr@main
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
