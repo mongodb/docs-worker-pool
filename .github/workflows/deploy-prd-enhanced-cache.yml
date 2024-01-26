@@ -23,5 +23,4 @@ jobs:
         uses: mongodb/docs-worker-actions/rebuild-parse-cache@DOP-4294
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TEST_SHA: ${{ github.sha }}
           WORKSPACE: ${{ github.workspace }}

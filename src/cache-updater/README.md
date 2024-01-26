@@ -15,3 +15,7 @@ The cache update worker is an ephemeral ECS task that is spun up in response to 
 The infrastructure defined for the worker is defined [here](../../cdk-infra/lib/constructs/cache-updater/cache-updater-worker-construct.ts).
 
 (TODO): Update README when [DOP-4171 is complete](https://jira.mongodb.org/browse/DOP-4171).
+
+Diagram outlining the cache update process:
+
+![Snooty Parse Cache Diagram](../../images/snooty-cache-updater.svg)
