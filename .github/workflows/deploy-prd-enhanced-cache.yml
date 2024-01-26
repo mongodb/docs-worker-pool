@@ -1,0 +1,27 @@
+on:
+  release:
+    types: [released]
+concurrency:
+  group: environment-prd-enhanced-cacheUpdate-${{ github.ref }}
+  cancel-in-progress: true
+name: Deploy Production ECS Enhanced Webhooks
+jobs:
+  deploy-prd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '18.x'
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: Rebuild Cache if New Snooty Parser Version
+        uses: mongodb/docs-worker-actions/rebuild-parse-cache@DOP-4294
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_SHA: ${{ github.sha }}
+          WORKSPACE: ${{ github.workspace }}
