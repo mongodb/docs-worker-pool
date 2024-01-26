@@ -24,6 +24,9 @@ interface CacheUpdaterApiConstructProps {
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
 
+/**
+ * This stack creates the resources for the Snooty Parser cache updater.
+ */
 export class CacheUpdaterApiConstruct extends Construct {
   constructor(
     scope: Construct,

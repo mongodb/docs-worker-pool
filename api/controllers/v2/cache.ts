@@ -69,7 +69,9 @@ async function runCacheRebuildJob(repos: RepoInfo[]) {
 /**
  * Handles requests from individual doc sites and when the docs-worker-pool repository has a release with an updated Snooty Parser version.
  * In the latter case, we should receive an event to build all doc site caches.
- * @param {APIGatewayEvent} event
+ * @param {APIGatewayEvent} event An event object that comes from either a webhook payload or from the custom GitHub Action for the docs-worker pool.
+ *
+ * In either scenario, the body should contain an array of RepoInfo objects.
  * @returns {Promise<APIGatewayProxyResult>}
  */
 export async function rebuildCacheHandler(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
@@ -108,7 +110,13 @@ export async function rebuildCacheHandler(event: APIGatewayEvent): Promise<APIGa
   }
 }
 
-export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent) {
+/**
+ * This is for the GitHub webhooks. The GitHub webhooks will be used by individual doc sites to rebuild the cache if
+ * the snooty.toml file is modified.
+ * @param {APIGatewayEvent} event GitHub webhook push event. Body should be a PushEvent type.
+ * @returns {Promise<APIGatewayProxyResult>}
+ */
+export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
   if (!event.body) {
     const errorMessage = 'Error! No body found in event payload.';
     console.error(errorMessage);
@@ -133,7 +141,20 @@ export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent) {
   const repoOwner = body.repository.owner.login;
   const repoName = body.repository.name;
 
+  // Checks the commits to see if there have been changes made to the snooty.toml file.
+  const snootyTomlChanged = body.commits.some(
+    (commit) =>
+      commit.added.some((fileName) => fileName === 'snooty.toml') ||
+      commit.removed.some((fileName) => fileName === 'snooty.toml') ||
+      commit.modified.some((fileName) => fileName === 'snooty.toml')
+  );
+
+  if (!snootyTomlChanged) {
+    return { statusCode: 202, body: 'snooty.toml has not changed, no need to rebuild cache' };
+  }
+
   const ref = body.ref;
+  // For webhook requests, this should only run on the primary branch, and if the repository belongs to the 10gen or mongodb orgs.
   if ((ref !== 'refs/head/master' && ref !== 'refs/head/main') || (repoOwner !== '10gen' && repoOwner !== 'mongodb')) {
     return {
       statusCode: 403,
