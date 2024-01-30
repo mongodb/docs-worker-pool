@@ -21,8 +21,8 @@ export function createLocalJob({
   return {
     isLocal: true,
     title: `${repoOwner}/${repoName}`,
-    user: commit.author?.name ?? '',
-    email: commit.author?.email ?? '',
+    user: commit.author?.name ?? 'seung.park',
+    email: commit.author?.email ?? 'seung.park@mongodb.com',
     status: JobStatus.inQueue,
     createdTime: new Date(),
     startTime: null,
