@@ -1,8 +1,8 @@
-import { Vpc, GatewayVpcEndpointAwsService, InterfaceVpcEndpointAwsService, IVpc } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, GatewayVpcEndpointAwsService, InterfaceVpcEndpointAwsService } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 export class AutoBuilderVpcConstruct extends Construct {
-  readonly vpc: IVpc;
+  readonly vpc: Vpc;
   constructor(scope: Construct, id: string) {
     super(scope, id);
 

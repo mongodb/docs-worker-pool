@@ -30,11 +30,8 @@ RUN npm run build:esbuild:cacheUpdater
 FROM node:18-bullseye-slim
 WORKDIR /usr/app
 
-
 ENV PATH="${PATH}:/opt/snooty"
 RUN apt-get -o Acquire::Check-Valid-Until=false update && apt-get -y install git
-
-
 
 COPY --from=python-builder /opt/ /opt/
 COPY --from=builder /usr/app/dist/ .
