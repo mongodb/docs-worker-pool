@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:20.04 as initial
+FROM ubuntu:20.04 as initial
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ARG SNOOTY_PARSER_VERSION=0.15.2
@@ -27,19 +27,12 @@ RUN apt-get install --yes python3-pip libxml2-dev libxslt-dev python-dev pkg-con
 RUN python3 -m pip install poetry
 
 # install snooty parser
-RUN git clone -b v${SNOOTY_PARSER_VERSION} --depth 1 https://github.com/mongodb/snooty-parser.git \
-    && cd snooty-parser \
-    && python3 -m poetry install \
-    && make package \
-    && mv dist/snooty /opt/
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ snooty-parser.zip
 
 # install mut
-
-RUN git clone -b v${MUT_VERSION} --depth 1 https://github.com/mongodb/mut.git \
-    && cd mut \
-    && python3 -m poetry install \
-    && make package \
-    && mv dist/mut /opt/
+RUN curl -L -o mut.zip https://github.com/mongodb/mut/releases/download/v${MUT_VERSION}/mut-v${MUT_VERSION}-linux_x86_64.zip \
+    && unzip -d /opt/ mut.zip
 
 ENV PATH="${PATH}:/opt/snooty:/opt/mut:/${WORK_DIRECTORY}/.local/bin"
 
