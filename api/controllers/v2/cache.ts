@@ -130,7 +130,7 @@ export async function rebuildCacheGithubWebhookHandler(event: APIGatewayEvent): 
   try {
     body = JSON.parse(event.body) as PushEvent;
   } catch (e) {
-    console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
+    console.log('ERROR! Could not parse event.body', e);
     return {
       statusCode: 502,
       headers: { 'Content-Type': 'text/plain' },
