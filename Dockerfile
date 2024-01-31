@@ -30,12 +30,6 @@ ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ENV DEBIAN_FRONTEND=noninteractive
 
-# helper libraries for docs builds
-RUN apt-get update && apt-get install -y vim git
-
-
-ENV PATH="${PATH}:/opt/snooty:/opt/mut:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
-
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
 RUN apt-get install --yes curl
