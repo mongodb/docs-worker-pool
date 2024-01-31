@@ -3,10 +3,10 @@ name: CI - OAS Page Builder
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   # Checks for changes to the modules/oas-page-builder directory
