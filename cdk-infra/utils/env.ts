@@ -77,6 +77,10 @@ export function getEnv(): AutoBuilderEnv {
 export function isEnhanced(): boolean {
   return !!contextVarsMap.get('enhanced');
 }
+
+/**
+ * This value is used by the rebuild-parse-cache custom GitHub Action
+ */
 export function getSnootyParserVersion(): string {
   checkContextInit();
   const snootyParserVersion = contextVarsMap.get('snootyParserVersion');
