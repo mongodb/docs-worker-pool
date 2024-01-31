@@ -97,7 +97,7 @@ export class ManifestJobHandler extends JobHandler {
       throw new InvalidJobError(`Manifest prefix not found for ${this.currJob._id}`);
     }
 
-    // For mut-index usage info, see: https://github.com/mongodb/mut/blob/master/mut/index/main.py#L2
+    // For mut-index usage info, see: https://github.com/mongodb/mut/blob/main/mut/index/main.py#L2
     this.currJob.deployCommands = [
       '. /venv/bin/activate',
       `cd repos/${getDirectory(this.currJob)}`,
