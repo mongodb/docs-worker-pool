@@ -1,10 +1,11 @@
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition, LogDrivers } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateTaskDefinition, LogDrivers, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import path from 'path';
+import { getSnootyParserVersion } from '../../../utils/env';
 
 const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
 
@@ -13,7 +14,9 @@ interface CacheUpdaterWorkerConstructProps {
 }
 
 export class CacheUpdaterWorkerConstruct extends Construct {
-  clusterName: string;
+  readonly clusterName: string;
+  readonly taskDefinition: TaskDefinition;
+  readonly containerName: string;
 
   constructor(scope: Construct, id: string, { vpc }: CacheUpdaterWorkerConstructProps) {
     super(scope, id);
@@ -36,12 +39,15 @@ export class CacheUpdaterWorkerConstruct extends Construct {
       taskRole,
     });
 
+    const containerName = 'cacheUpdaterWorkerImage';
     const taskDefLogGroup = new LogGroup(this, 'cacheUpdaterWorkerLogGroup');
+
+    const snootyParserVersion = getSnootyParserVersion();
 
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
         file: 'src/cache-updater/Dockerfile.cacheUpdater',
-        buildArgs: { SNOOTY_PARSER_VERSION: '0.15.2' },
+        buildArgs: { SNOOTY_PARSER_VERSION: snootyParserVersion },
         exclude: ['tests/', 'node_modules/', 'cdk-infra/'], // adding this just in case it doesn't pick up our dockerignore
       }),
       environment: {
@@ -54,5 +60,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     });
 
     this.clusterName = cluster.clusterName;
+    this.taskDefinition = taskDefinition;
+    this.containerName = containerName;
   }
 }

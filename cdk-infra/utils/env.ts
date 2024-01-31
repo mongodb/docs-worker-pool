@@ -9,6 +9,7 @@ const autoBuilderContextVariables = [
   'customFeatureName',
   'env',
   'useCustomBuckets',
+  'snootyParserVersion',
 ] as const;
 
 export type SnootyEnv = (typeof snootyEnvs)[number];
@@ -77,6 +78,20 @@ export function isEnhanced(): boolean {
   return !!contextVarsMap.get('enhanced');
 }
 
+/**
+ * This value is used by the rebuild-parse-cache custom GitHub Action
+ */
+export function getSnootyParserVersion(): string {
+  checkContextInit();
+  const snootyParserVersion = contextVarsMap.get('snootyParserVersion');
+
+  if (!snootyParserVersion) {
+    console.warn('Error! The context variable snootyParserVersion is not defined.');
+    return '';
+  }
+
+  return snootyParserVersion;
+}
 export function getFeatureName(): string {
   checkContextInit();
 
