@@ -31,7 +31,7 @@ FROM node:18-bullseye-slim
 WORKDIR /usr/app
 
 
-ENV PATH="${PATH}:/opt/snooty"
+ENV PATH="${}:/opt/snooty"
 RUN apt-get -o Acquire::Check-Valid-Until=false update && apt-get -y install git
 
 

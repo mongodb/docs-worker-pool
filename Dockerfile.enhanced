@@ -30,17 +30,6 @@ ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ENV DEBIAN_FRONTEND=noninteractive
 
-# install legacy build environment for docs
-RUN apt-get -o Acquire::Check-Valid-Until=false update
-RUN apt-get -y install libpython2.7-dev python2.7 git rsync unzip curl
-RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
-RUN python2.7 get-pip.py
-RUN pip install requests virtualenv virtualenvwrapper py-dateutil
-RUN python2.7 -m pip install python-dateutil
-RUN virtualenv /venv
-RUN /venv/bin/pip install --upgrade --force setuptools
-RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
-
 # helper libraries for docs builds
 RUN apt-get update && apt-get install -y vim git
 
