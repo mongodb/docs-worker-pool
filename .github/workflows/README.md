@@ -42,6 +42,6 @@ As the name suggests, this workflow cleans up the feature branch infrastructure.
 
 ### Bugs
 
-Right now, there is a small bug with the `update-feature-branch.yml` workflow. This workflow conditionally deploys the various stacks depending on what files have changed from a commit. The issue is that the custom filter action compares the PR branch to master for every workflow run. This means that if you make a change to `src/app.ts` in the first commit, but only make changes to files in the `api/` directory in subsequent commits, it will still run the deploy for the worker.
+Right now, there is a small bug with the `update-feature-branch.yml` workflow. This workflow conditionally deploys the various stacks depending on what files have changed from a commit. The issue is that the custom filter action compares the PR branch to main for every workflow run. This means that if you make a change to `src/app.ts` in the first commit, but only make changes to files in the `api/` directory in subsequent commits, it will still run the deploy for the worker.
 
 For the `deploy-feature-branch.yml` workflow, this will not re-run if the first build when opening a PR fails. This means that subsequent builds of the `update-feature-branch.yml` workflow will also fail. This is due to the fact that the SQS queues would not have been deployed. For now, the workaround is to close and re-open the PR. This will run the `deploy-feature-branch.yml` workflow.
