@@ -38,6 +38,7 @@ export class WorkerEnvConstruct extends Construct {
 
     // font-end feature flag for unified footer locale selector
     const gatsbyHideUnifiedFooterLocale = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/hide_locale`);
+    console.log('gatsbyHideUnifiedFooterLocale', gatsbyHideUnifiedFooterLocale);
 
     // front end feature flag for chatbot UI
     const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
