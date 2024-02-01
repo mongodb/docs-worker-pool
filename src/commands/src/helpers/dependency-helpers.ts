@@ -49,47 +49,44 @@ export async function downloadBuildDependencies(
   directory?: string
 ) {
   const commands: string[] = [];
-  await Promise.all(
-    buildDependencies.map(async (dependencyInfo) => {
-      const repoDir = getRepoDir(repoName, directory);
-      const targetDir = dependencyInfo.targetDir ?? repoDir;
-      let options = {};
-      if (targetDir != repoDir) {
-        options = { cwd: repoDir };
-      }
+  // await Promise.all(
+  buildDependencies.map(async (dependencyInfo) => {
+    const repoDir = getRepoDir(repoName, directory);
+    const targetDir = dependencyInfo.targetDir ?? repoDir;
+    let options = {};
+    if (targetDir != repoDir) {
+      options = { cwd: repoDir };
+    }
+    try {
+      await executeCliCommand({
+        command: 'mkdir',
+        args: ['-p', targetDir],
+        options: options,
+      });
+    } catch (error) {
+      console.error(`ERROR! Could not create target directory ${targetDir}. Dependency information: `, dependencyInfo);
+      throw error;
+    }
+    commands.push(`mkdir -p ${targetDir}`);
+    // await Promise.all(
+    dependencyInfo.dependencies.map(async (dep) => {
+      commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
       try {
-        await executeCliCommand({
-          command: 'mkdir',
-          args: ['-p', targetDir],
+        return await executeCliCommand({
+          command: 'curl',
+          args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
           options: options,
         });
       } catch (error) {
         console.error(
-          `ERROR! Could not create target directory ${targetDir}. Dependency information: `,
+          `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
           dependencyInfo
         );
-        throw error;
       }
-      commands.push(`mkdir -p ${targetDir}`);
-      await Promise.all(
-        dependencyInfo.dependencies.map(async (dep) => {
-          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
-          try {
-            return await executeCliCommand({
-              command: 'curl',
-              args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
-              options: options,
-            });
-          } catch (error) {
-            console.error(
-              `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
-              dependencyInfo
-            );
-          }
-        })
-      );
-    })
-  );
+    });
+    // );
+  });
+  // );
   return commands;
 }
 
