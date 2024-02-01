@@ -49,7 +49,7 @@ export async function downloadBuildDependencies(
   directory?: string
 ) {
   const commands: string[] = [];
-  await Promise.all(
+  await Promise.allSettled(
     buildDependencies.map(async (dependencyInfo) => {
       const repoDir = getRepoDir(repoName, directory);
       const targetDir = dependencyInfo.targetDir ?? repoDir;
@@ -71,7 +71,7 @@ export async function downloadBuildDependencies(
         throw error;
       }
       commands.push(`mkdir -p ${targetDir}`);
-      await Promise.all(
+      await Promise.allSettled(
         dependencyInfo.dependencies.map(async (dep) => {
           commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
           try {
