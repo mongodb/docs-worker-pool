@@ -22,6 +22,7 @@ async function createEnvProdFile({
   patchId?: string;
   commitHash?: string;
 }) {
+  // Comment to get webhook!!
   const prodFileName = `${process.cwd()}/snooty/.env.production`;
 
   try {
