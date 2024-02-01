@@ -9,7 +9,6 @@
     "baseUrl": "./types",
     "sourceMap": true,
     "experimentalDecorators": true,
-    "lib": ["es2020"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["modules", "node_modules", "tests/**/*.ts", "api/**/*.ts", "cdk-infra"]
