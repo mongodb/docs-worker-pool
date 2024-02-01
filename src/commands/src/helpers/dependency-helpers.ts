@@ -93,16 +93,13 @@ export async function downloadBuildDependencies(
   return commands;
 }
 
+export const checkRedirects = async () => existsAsync(path.join(process.cwd(), 'config/redirects'));
+
 export async function prepareBuild(repoName: string, projectName: string, baseUrl: string, directory?: string) {
   const repoDir = getRepoDir(repoName, directory);
 
   // doing these in parallel
-  const commandPromises = [
-    getCommitHash(repoDir),
-    getCommitBranch(repoDir),
-    getPatchId(repoDir),
-    existsAsync(path.join(process.cwd(), 'config/redirects')),
-  ];
+  const commandPromises = [getCommitHash(repoDir), getCommitBranch(repoDir), getPatchId(repoDir)];
 
   try {
     const dependencies = await Promise.all(commandPromises);
@@ -118,7 +115,6 @@ export async function prepareBuild(repoName: string, projectName: string, baseUr
       commitHash: dependencies[0] as string,
       commitBranch: dependencies[1] as string,
       patchId: dependencies[2] as string | undefined,
-      hasRedirects: dependencies[3] as boolean,
       bundlePath: `${repoDir}/bundle.zip`,
       repoDir,
     };

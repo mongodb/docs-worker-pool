@@ -2,27 +2,44 @@ import { CommandExecutorResponse, CommandExecutorResponseStatus } from '../../..
 import { executeAndPipeCommands, executeCliCommand } from '../helpers';
 
 interface NextGenDeployParams {
-  mutPrefix: string;
-  gitBranch: string;
+  branchName: string;
   hasConfigRedirects: boolean;
-  bucket: string;
-  url: string;
+  mutPrefix?: string | null;
+  bucket?: string;
+  url?: string;
 }
 
 /* This is still in development - use with caution */
 /* Logs here for future debugging purposes */
 export async function nextGenDeploy({
   mutPrefix,
-  gitBranch,
+  branchName,
   hasConfigRedirects,
   bucket,
   url,
 }: NextGenDeployParams): Promise<CommandExecutorResponse> {
   try {
-    if (hasConfigRedirects && (gitBranch === 'main' || gitBranch === 'master')) {
+    if (hasConfigRedirects && (branchName === 'main' || branchName === 'master')) {
       // equivalent to: mut-redirects config/redirects -o public/.htaccess
       await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
       console.log(`COMMAND: mut-redirects config/redirects -o public/.htaccess`);
+    }
+
+    if (!bucket) {
+      console.log(`nextGenStage has failed. Variable for S3 bucket address was undefined.`);
+      return {
+        status: CommandExecutorResponseStatus.failed,
+        output: 'Failed in nextGenStage: No value present for S3 bucket',
+        error: 'ERROR: No value present for S3 bucket.',
+      };
+    }
+    if (!url) {
+      console.log(`nextGenStage has failed. Variable for URL address was undefined.`);
+      return {
+        status: CommandExecutorResponseStatus.failed,
+        output: 'Failed in nextGenStage: No value present for target url.',
+        error: 'ERROR: No value present for URL.',
+      };
     }
 
     // equivalent to: yes | mut-publish public ${BUCKET} --prefix=${MUT_PREFIX} --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};

@@ -13,6 +13,9 @@ import { IRepoConnector } from '../services/repo';
 import { getDirectory, JobHandler } from './jobHandler';
 import { IJobValidator } from './jobValidator';
 import { joinUrlAndPrefix } from './manifestJobHandler';
+import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
+import { nextGenDeploy } from '../commands';
+import { checkRedirects } from '../commands/src/helpers/dependency-helpers';
 
 export class ProductionJobHandler extends JobHandler {
   constructor(
@@ -189,7 +192,15 @@ export class ProductionJobHandler extends JobHandler {
   }
 
   async deploy(): Promise<CommandExecutorResponse> {
-    const resp = await this.deployGeneric();
+    if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this.currJob.payload.repoName === MONOREPO_NAME) {
+      const { mutPrefix, branchName } = this.currJob.payload;
+      const { bucket, url } = await this.getEnvironmentVariables();
+      const hasConfigRedirects = await checkRedirects();
+
+      await nextGenDeploy({ mutPrefix, bucket, url, branchName, hasConfigRedirects });
+    } else {
+    }
+    const resp = await this.deployWithMakefiles();
     try {
       if (resp?.output) {
         const makefileOutput = resp.output.replace(/\r/g, '').split(/\n/);

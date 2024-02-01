@@ -117,7 +117,7 @@ export class ManifestJobHandler extends JobHandler {
 
   async deploy(): Promise<CommandExecutorResponse> {
     try {
-      const resp = await this.deployGeneric(); // runs prepDeployCommands
+      const resp = await this.deployWithMakefiles(); // runs prepDeployCommands
       await this.logger.save(this.currJob._id, `(generate manifest) Manifest generation details:\n\n${resp?.output}`);
       return resp;
     } catch (errResult) {

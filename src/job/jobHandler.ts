@@ -619,7 +619,7 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  protected async deployGeneric(): Promise<CommandExecutorResponse> {
+  protected async deployWithMakefiles(): Promise<CommandExecutorResponse> {
     this.prepDeployCommands();
     await this._logger.save(this.currJob._id, `${this._config.get<string>('stage').padEnd(15)}Pushing to ${this.name}`);
 
