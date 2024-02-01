@@ -109,6 +109,14 @@ export class WebhookApiConstruct extends Construct {
       bundling,
       timeout,
     });
+    const testDeployLambda = new NodejsFunction(this, 'testDeployLambda', {
+      entry: `${HANDLERS_PATH}/test-deploy.ts`,
+      runtime,
+      handler: 'handleTestDeployRequest',
+      environment,
+      bundling,
+      timeout,
+    });
 
     // generic handler for the root endpoint
     const rootEndpointLambda = new Function(this, 'RootEndpointLambda', {
@@ -125,6 +133,20 @@ export class WebhookApiConstruct extends Construct {
       proxy: false,
     });
 
+    const usagePlan = restApi.addUsagePlan('cacheUpdaterUsagePlan', {
+      name: 'defaultPlan',
+      apiStages: [
+        {
+          api: restApi,
+          stage: restApi.deploymentStage,
+        },
+      ],
+    });
+
+    const apiKey = restApi.addApiKey('cacheUpdaterApiKey');
+
+    usagePlan.addApiKey(apiKey);
+
     const webhookEndpoint = restApi.root.addResource('webhook');
 
     const slackEndpoint = webhookEndpoint.addResource('slack');
@@ -132,6 +154,7 @@ export class WebhookApiConstruct extends Construct {
     const githubEndpoint = webhookEndpoint.addResource('githubEndpoint');
     const localEndpoint = webhookEndpoint.addResource('local');
     const snootyEndpoint = webhookEndpoint.addResource('snooty');
+    const testDeployEndpoint = webhookEndpoint.addResource('test-deploy');
 
     // Shared /githubEndpoint/trigger endpoint
     const githubEndpointTrigger = githubEndpoint.addResource('trigger');
@@ -173,6 +196,11 @@ export class WebhookApiConstruct extends Construct {
       .addResource('trigger')
       .addResource('complete', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(snootyBuildCompleteLambda));
+
+    testDeployEndpoint
+      .addResource('trigger')
+      .addResource('build', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(testDeployLambda), { apiKeyRequired: true });
 
     // grant permission for lambdas to enqueue messages to the jobs queue
     jobsQueue.grantSendMessages(slackTriggerLambda);
