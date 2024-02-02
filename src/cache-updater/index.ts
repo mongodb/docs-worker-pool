@@ -78,7 +78,7 @@ async function uploadCacheToS3(repoName: string, repoOwner: string) {
   }
 }
 
-interface RepoInfo {
+export interface RepoInfo {
   repoOwner: string;
   repoName: string;
 }
@@ -123,10 +123,18 @@ function getRepos(): RepoInfo[] {
   }
 }
 
-const repos = getRepos();
+async function main() {
+  const repos = getRepos();
 
-repos.forEach((repo) =>
-  handler(repo).catch((error) => {
-    console.error('An error occurred!', error);
-  })
-);
+  await Promise.all(
+    repos.map((repo) =>
+      handler(repo).catch((error) => {
+        console.error('An error occurred!', error);
+      })
+    )
+  );
+
+  process.exit(0);
+}
+
+main();
