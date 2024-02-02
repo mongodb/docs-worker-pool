@@ -364,7 +364,12 @@ export abstract class JobHandler {
 
       // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
       const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
-      if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      if (
+        key === 'persistence-module' &&
+        this.name === 'Staging' &&
+        isFeaturePreviewWebhookEnabled &&
+        process.env.IS_FEATURE_BRANCH !== 'true'
+      ) {
         await this.callGatsbyCloudWebhook();
       }
     }
