@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import axios from 'axios';
 import { executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
 import { promisify } from 'util';
 import { BuildDependencies } from '../../../entities/job';
@@ -75,10 +76,18 @@ export async function downloadBuildDependencies(
         dependencyInfo.dependencies.map(async (dep) => {
           commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
           try {
-            await executeCliCommand({
-              command: 'curl',
-              args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
-              options: options,
+            // await executeCliCommand({
+            //   command: 'curl',
+            //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+            //   options: options,
+            // });
+            await axios({
+              method: 'get',
+              url: dep.url,
+              timeout: 10000,
+              responseType: 'stream',
+            }).then(async function (response) {
+              await response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
             });
           } catch (error) {
             console.error(
