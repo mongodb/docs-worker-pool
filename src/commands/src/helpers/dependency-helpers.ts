@@ -81,14 +81,11 @@ export async function downloadBuildDependencies(
             //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
             //   options: options,
             // });
-            await axios({
-              method: 'get',
-              url: dep.url,
-              timeout: 10000,
-              responseType: 'stream',
-            }).then(async function (response) {
-              await response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
-            });
+            const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
+            response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
+            // then(async function (response) {
+            // await response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
+            // });
           } catch (error) {
             console.error(
               `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
