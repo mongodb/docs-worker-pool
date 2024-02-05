@@ -54,19 +54,18 @@ export class ProductionJobHandler extends JobHandler {
     ];
 
     // TODO: Reduce confusion between job.manifestPrefix and job.payload.manifestPrefix
-    if (this.currJob.payload.isNextGen) {
-      this.currJob.manifestPrefix = this.currJob.manifestPrefix ?? this.constructManifestPrefix();
+    this.currJob.manifestPrefix = this.currJob.manifestPrefix ?? this.constructManifestPrefix();
+    this.currJob.deployCommands[
+      this.currJob.deployCommands.length - 1
+    ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+    // TODO: Remove when satisfied with new manifestJobHandler infrastructure
+    if (this.currJob.manifestPrefix) {
+      const searchFlag = this.currJob.payload.stable ? '-g' : '';
       this.currJob.deployCommands[
         this.currJob.deployCommands.length - 1
-      ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
-      // TODO: Remove when satisfied with new manifestJobHandler infrastructure
-      if (this.currJob.manifestPrefix) {
-        const searchFlag = this.currJob.payload.stable ? '-g' : '';
-        this.currJob.deployCommands[
-          this.currJob.deployCommands.length - 1
-        ] += ` MANIFEST_PREFIX=${this.currJob.manifestPrefix} GLOBAL_SEARCH_FLAG=${searchFlag}`;
-      }
+      ] += ` MANIFEST_PREFIX=${this.currJob.manifestPrefix} GLOBAL_SEARCH_FLAG=${searchFlag}`;
     }
+
     // have to combine search deploy commands
     // manifestJobHandler.prepDeployCommands
 

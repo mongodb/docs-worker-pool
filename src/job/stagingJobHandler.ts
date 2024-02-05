@@ -49,14 +49,12 @@ export class StagingJobHandler extends JobHandler {
   prepDeployCommands(): void {
     // TODO: Can we make this more readable?
     this.currJob.deployCommands = ['. /venv/bin/activate', `cd repos/${getDirectory(this.currJob)}`, 'make stage'];
-    if (this.currJob.payload.isNextGen) {
-      if (this.currJob.payload.pathPrefix) {
-        this.currJob.deployCommands[
-          this.currJob.deployCommands.length - 1
-        ] = `make next-gen-stage MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
-      } else {
-        this.currJob.deployCommands[this.currJob.deployCommands.length - 1] = 'make next-gen-stage';
-      }
+    if (this.currJob.payload.pathPrefix) {
+      this.currJob.deployCommands[
+        this.currJob.deployCommands.length - 1
+      ] = `make next-gen-stage MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+    } else {
+      this.currJob.deployCommands[this.currJob.deployCommands.length - 1] = 'make next-gen-stage';
     }
   }
 

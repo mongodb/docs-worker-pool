@@ -253,7 +253,7 @@ describe('ProductionJobHandler Tests', () => {
   });
 
   test('Execute Next Gen Build successfully', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false, {
+    jobHandlerTestHelper.ess(false, {
       status: 'success',
       output: 'Great work',
       error: null,
@@ -334,26 +334,8 @@ describe('ProductionJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledWith(jobHandlerTestHelper.job._id, 'Not Good');
   });
 
-  test('Execute legacy build successfully purges only updated urls', async () => {
-    const purgedUrls = jobHandlerTestHelper.setStageForDeploySuccess(false);
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(false);
-    expect(jobHandlerTestHelper.job.buildCommands).toEqual(
-      TestDataProvider.getCommonBuildCommands(jobHandlerTestHelper.job)
-    );
-    expect(jobHandlerTestHelper.job.deployCommands).toEqual(
-      TestDataProvider.getCommonDeployCommands(jobHandlerTestHelper.job)
-    );
-    expect(jobHandlerTestHelper.cdnConnector.purge).toBeCalledWith(
-      jobHandlerTestHelper.job._id,
-      purgedUrls,
-      jobHandlerTestHelper.job.payload.prefix
-    );
-    expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toBeCalledWith(jobHandlerTestHelper.job._id, purgedUrls);
-  });
-
   test('Deploy purge process inserts invalidationStatusUrl', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true);
+    jobHandlerTestHelper.setStageForDeploySuccess();
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.jobRepo.insertInvalidationRequestStatusUrl).toBeCalledTimes(1);
   });
