@@ -71,7 +71,7 @@ To verify the CloudFormation is being generated successfully, you can use the `c
 npm run cdk synth -- -c enhanced=true -c customFeatureName=enhancedApp > cdk.out/template.yaml
 ```
 
-Make sure to update your `~/.aws/credentials` file. The `enhanced` context variable, if set to true, will use the `Dockerfile.enhanced` dockerfile instead of the standard one. The `featureName` context variable is used to provide a different name for a custom stack other than the branch name. In the future for feature branches, the context variable `isFeature` will be used to use the Git branch name and append that to the stack name.
+Make sure to update your `~/.aws/credentials` file. The `enhanced` context variable, if set to true, will use the `Dockerfile` dockerfile instead of the standard one. The `featureName` context variable is used to provide a different name for a custom stack other than the branch name. In the future for feature branches, the context variable `isFeature` will be used to use the Git branch name and append that to the stack name.
 
 ## MongoDB Enhanced Infrastructure Commands
 
