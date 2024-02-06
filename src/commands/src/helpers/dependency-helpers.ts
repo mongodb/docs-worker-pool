@@ -82,6 +82,7 @@ export async function downloadBuildDependencies(
             //   options: options,
             // });
             const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
+            console.log(response);
             response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
             // then(async function (response) {
             // await response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
