@@ -41,7 +41,6 @@ RUN python2.7 -m pip install python-dateutil
 RUN python2.7 get-pip.py
 RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
-RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
 
 
 RUN apt-get update && apt-get install -y vim git
