@@ -92,6 +92,19 @@ export function getSnootyParserVersion(): string {
 
   return snootyParserVersion;
 }
+
+export function getIsFeatureBranch() {
+  checkContextInit();
+  const isFeatureBranch = contextVarsMap.get('isFeatureBranch');
+
+  if (!isFeatureBranch) {
+    console.warn('Error! The context variable isFeatureBranch is not defined.');
+    return '';
+  }
+
+  return isFeatureBranch;
+}
+
 export function getFeatureName(): string {
   checkContextInit();
 
