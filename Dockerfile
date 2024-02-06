@@ -33,8 +33,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # helper libraries for docs builds
 RUN apt-get -o Acquire::Check-Valid-Until=false update
+RUN apt-get -y install libpython2.7-dev python2.7 git rsync unzip curl
+RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+RUN python2.7 get-pip.py
 RUN virtualenv /venv
 RUN /venv/bin/pip install --upgrade --force setuptools
+RUN /venv/bin/pip install -r https://raw.githubusercontent.com/mongodb/docs-tools/master/giza/requirements.txt
+
+
 RUN apt-get update && apt-get install -y vim git
 
 
