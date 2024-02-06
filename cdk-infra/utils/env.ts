@@ -1,8 +1,8 @@
 import { Construct } from 'constructs';
 import { getCurrentBranch } from './git';
 
-const snootyEnvs = ['staging', 'production', 'dotcomstg', 'dotcomprd', 'legacydotcomprd', 'legacydotcomstg'] as const;
-const autoBuilderEnvs = ['stg', 'prd', 'dev', 'dotcomstg', 'dotcomprd', 'legacydotcomstg', 'legacydotcomprd'] as const;
+const snootyEnvs = ['staging', 'production', 'dotcomstg', 'dotcomprd'] as const;
+const autoBuilderEnvs = ['stg', 'prd', 'dev', 'dotcomstg', 'dotcomprd'] as const;
 const autoBuilderContextVariables = [
   'enhanced',
   'isFeatureBranch',
@@ -24,8 +24,6 @@ const autoBuilderToSnootyEnvMap: Record<AutoBuilderEnv, SnootyEnv> = {
   prd: 'production',
   dotcomprd: 'dotcomprd',
   dotcomstg: 'dotcomstg',
-  legacydotcomstg: 'legacydotcomstg',
-  legacydotcomprd: 'legacydotcomprd',
 };
 
 export function envShortToFullName(env: string): SnootyEnv {
