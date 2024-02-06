@@ -33,6 +33,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # helper libraries for docs builds
 RUN apt-get -o Acquire::Check-Valid-Until=false update
+RUN virtualenv /venv
+RUN /venv/bin/pip install --upgrade --force setuptools
 RUN apt-get update && apt-get install -y vim git
 
 
