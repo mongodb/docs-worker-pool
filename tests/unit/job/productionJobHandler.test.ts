@@ -253,7 +253,7 @@ describe('ProductionJobHandler Tests', () => {
   });
 
   test('Execute Next Gen Build successfully', async () => {
-    jobHandlerTestHelper.ess(false, {
+    jobHandlerTestHelper.setStageForDeploySuccess(false, {
       status: 'success',
       output: 'Great work',
       error: null,
