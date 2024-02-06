@@ -81,11 +81,15 @@ export async function downloadBuildDependencies(
             //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
             //   options: options,
             // });
+            const rootDir = options['cwd'] ? `${repoDir}/` : '';
+            if (options['cwd']) {
+              await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
+            }
             axios
               .get(dep.url, { timeout: 10000, responseType: 'stream' })
               .then((res) => {
                 console.log(res);
-                res.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
+                res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
               })
               .catch((error) => {
                 console.log('ERRRORRRRR PULING');
