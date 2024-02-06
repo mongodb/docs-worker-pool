@@ -114,7 +114,12 @@ export abstract class JobHandler {
         // completed after the Gatsby Cloud build via the SnootyBuildComplete lambda.
         const { _id: jobId, user } = this.currJob;
         const gatsbyCloudSiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(user);
-        if (this.currJob.payload.isNextGen && gatsbyCloudSiteId && this.currJob.payload.jobType === 'githubPush') {
+        if (
+          this.currJob.payload.isNextGen &&
+          gatsbyCloudSiteId &&
+          this.currJob.payload.jobType === 'githubPush' &&
+          process.env.IS_FEATURE_BRANCH !== 'true'
+        ) {
           this.logger.info(
             jobId,
             `User ${user} has a Gatsby Cloud site. The Autobuilder will not mark the build as completed right now.`
@@ -359,7 +364,12 @@ export abstract class JobHandler {
 
       // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
       const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
-      if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      if (
+        key === 'persistence-module' &&
+        this.name === 'Staging' &&
+        isFeaturePreviewWebhookEnabled &&
+        process.env.IS_FEATURE_BRANCH !== 'true'
+      ) {
         await this.callGatsbyCloudWebhook();
       }
     }
