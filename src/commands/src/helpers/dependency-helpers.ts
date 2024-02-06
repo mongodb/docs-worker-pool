@@ -81,9 +81,19 @@ export async function downloadBuildDependencies(
             //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
             //   options: options,
             // });
-            const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
-            console.log(response);
-            response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
+            axios
+              .get(dep.url, { timeout: 10000, responseType: 'stream' })
+              .then((res) => {
+                console.log(res);
+                res.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
+              })
+              .catch((error) => {
+                console.log('ERRRORRRRR PULING');
+              });
+
+            // const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
+            // console.log(response);
+            // response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
             // then(async function (response) {
             // await response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
             // });
