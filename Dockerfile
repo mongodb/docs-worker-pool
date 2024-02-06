@@ -37,9 +37,6 @@ RUN apt-get -y install libpython2.7-dev python2.7 git rsync unzip curl
 RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 RUN python2.7 get-pip.py
 RUN pip install virtualenv virtualenvwrapper
-RUN virtualenv /venv
-RUN /venv/bin/pip install --upgrade --force setuptools
-
 
 RUN apt-get update && apt-get install -y vim git
 
