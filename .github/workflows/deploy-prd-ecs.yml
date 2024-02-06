@@ -32,7 +32,6 @@ jobs:
           npm ci
           sls deploy --stage prd
           sls deploy --stage dotcomprd
-          sls deploy --stage legacydotcomprd
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and push to ECR
         with:
