@@ -35,6 +35,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -o Acquire::Check-Valid-Until=false update
 RUN apt-get -y install libpython2.7-dev python2.7 git rsync unzip curl
 RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+RUN python2.7 get-pip.py
 RUN pip install requests virtualenv virtualenvwrapper py-dateutil
 RUN python2.7 -m pip install python-dateutil
 RUN python2.7 get-pip.py
