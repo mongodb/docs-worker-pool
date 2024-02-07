@@ -32,7 +32,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 
 # helper libraries for docs builds
-RUN apt-get update && apt-get install -y vim git
+RUN apt-get update && apt-get install -y vim git && apt-get install unzip
 
 
 ENV PATH="${PATH}:/opt/snooty:/opt/mut:/home/docsworker-xlarge/.local/bin:/usr/local/lib/python2.7/dist-packages/virtualenv/bin"
