@@ -74,14 +74,15 @@ export async function downloadBuildDependencies(
       commands.push(`mkdir -p ${targetDir}`);
       await Promise.all(
         dependencyInfo.dependencies.map(async (dep) => {
-          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
+          const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
+
           try {
             // await executeCliCommand({
             //   command: 'curl',
             //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
             //   options: options,
             // });
-            const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
+
             // if (options['cwd']) {
             //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
             // }
@@ -90,9 +91,13 @@ export async function downloadBuildDependencies(
               .then((res) => {
                 console.log(res);
                 res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
+                commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
               })
               .catch((error) => {
                 console.log('ERRRORRRRR PULING');
+                commands.push(
+                  `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
+                );
               });
 
             // const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
