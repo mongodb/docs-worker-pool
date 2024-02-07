@@ -94,6 +94,12 @@ export async function downloadBuildDependencies(
                   'https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/internal/kjkjh/examples.go'
                 )
                   console.log(res);
+                if (res.status == 404) {
+                  console.log(`ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`);
+                  commands.push(
+                    `ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
+                  );
+                }
                 res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
                 commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
               })
