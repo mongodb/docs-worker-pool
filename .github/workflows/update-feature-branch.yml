@@ -73,7 +73,7 @@ jobs:
         if: steps.filter.outputs.webhooks == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
   build-worker:
     needs: prep-build
@@ -109,5 +109,5 @@ jobs:
         if: steps.filter.outputs.worker == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
