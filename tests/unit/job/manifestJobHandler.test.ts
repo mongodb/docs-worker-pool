@@ -46,7 +46,6 @@ describe('ManifestJobHandler Tests', () => {
     await jobHandlerTestHelper.jobHandler.execute();
     expect(prepSpy).toBeCalledTimes(1);
     const o = [
-      '. /venv/bin/activate',
       'cd repos/testauth',
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',

@@ -138,7 +138,7 @@ export class TestDataProvider {
   }
 
   static getCommonBuildCommands(job: Job): Array<string> {
-    return [`. /venv/bin/activate`, `cd repos/${job.payload.repoName}`, `rm -f makefile`, `make html`];
+    return [`cd repos/${job.payload.repoName}`, `rm -f makefile`];
   }
 
   static getExpectedProdBuildNextGenCommands(job: Job): Array<string> {
@@ -245,11 +245,11 @@ export class TestDataProvider {
   }
 
   static getCommonDeployCommands(job: Job): Array<string> {
-    return ['. /venv/bin/activate', `cd repos/${job.payload.repoName}`, 'make publish && make deploy'];
+    return [`cd repos/${job.payload.repoName}`, 'make publish'];
   }
 
   static getCommonDeployCommandsForStaging(job: Job): Array<string> {
-    return ['. /venv/bin/activate', `cd repos/${job.payload.repoName}`, 'make stage'];
+    return [`cd repos/${job.payload.repoName}`];
   }
 
   static getExpectedStageDeployNextGenCommands(job: Job): Array<string> {

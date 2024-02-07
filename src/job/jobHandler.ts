@@ -458,12 +458,7 @@ export abstract class JobHandler {
 
   // TODO: Reduce state changes
   protected prepBuildCommands(): void {
-    this.currJob.buildCommands = [
-      `. /venv/bin/activate`,
-      `cd repos/${getDirectory(this.currJob)}`,
-      `rm -f makefile`,
-      `make html`,
-    ];
+    this.currJob.buildCommands = [`cd repos/${getDirectory(this.currJob)}`, `rm -f makefile`];
   }
 
   public async getEnvironmentVariables(): Promise<{ bucket?: string; url?: string; regression?: string }> {

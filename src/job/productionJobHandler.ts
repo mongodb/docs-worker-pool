@@ -47,11 +47,7 @@ export class ProductionJobHandler extends JobHandler {
   }
   prepDeployCommands(): void {
     // TODO: Can we simplify the chain of logic here?
-    this.currJob.deployCommands = [
-      '. /venv/bin/activate',
-      `cd repos/${getDirectory(this.currJob)}`,
-      'make publish && make deploy',
-    ];
+    this.currJob.deployCommands = [`cd repos/${getDirectory(this.currJob)}`, 'make publish'];
 
     // TODO: Reduce confusion between job.manifestPrefix and job.payload.manifestPrefix
     this.currJob.manifestPrefix = this.currJob.manifestPrefix ?? this.constructManifestPrefix();
@@ -114,7 +110,6 @@ export class ProductionJobHandler extends JobHandler {
       return;
     }
     const searchCommands = [
-      '. /venv/bin/activate',
       `cd repos/${getDirectory(this.currJob)}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
