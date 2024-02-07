@@ -38,8 +38,6 @@ custom:
     prd: worker-pool-deployment
     dotcomstg: worker-pool-deployment
     dotcomprd: worker-pool-deployment
-    legacydotcomstg: worker-pool-deployment
-    legacydotcomprd: worker-pool-deployment
   ecs:
     port: '80'
     imageUrl: ${self:custom.accountId.${self:provider.stage}}.dkr.ecr.us-east-2.amazonaws.com/${self:service}-${self:provider.stage}:latest
@@ -49,16 +47,13 @@ custom:
       prd: '4096'
       dotcomstg: '2048'
       dotcomprd: '4096'
-      legacydotcomstg: '2048'
-      legacydotcomprd: '4096'
     containerMemory:
       dev: '8192'
       stg: '8192'
       prd: '24576'
       dotcomstg: '8192'
       dotcomprd: '24576'
-      legacydotcomstg: '8192'
-      legacydotcomprd: '24576'
+
     desiredCount:
       dev: '4'
       stg: '4'
