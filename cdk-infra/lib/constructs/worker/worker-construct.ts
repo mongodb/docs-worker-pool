@@ -65,7 +65,6 @@ export class WorkerConstruct extends Construct {
     executionRole.addToPolicy(executionRoleSsmPolicy);
 
     const containerProps: AssetImageProps = {
-      file: isEnhanced() ? 'Dockerfile.enhanced' : undefined,
       buildArgs: {
         NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
         NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
@@ -96,6 +95,7 @@ export class WorkerConstruct extends Construct {
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment: dockerEnvironment,
+      command: ['node', '--enable-source-maps', 'enhanced/enhancedApp.js'],
       logging: LogDrivers.awsLogs({
         streamPrefix: 'autobuilderworker',
         logGroup: taskDefLogGroup,
