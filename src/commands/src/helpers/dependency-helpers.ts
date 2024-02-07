@@ -89,11 +89,16 @@ export async function downloadBuildDependencies(
             axios
               .get(dep.url, { timeout: 10000, responseType: 'stream' })
               .then((res) => {
-                console.log(res);
+                if (
+                  dep.url ==
+                  'https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/internal/kjkjh/examples.go'
+                )
+                  console.log(res);
                 res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
                 commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
               })
               .catch((error) => {
+                throw error;
                 console.log('ERRRORRRRR PULING');
                 commands.push(
                   `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
