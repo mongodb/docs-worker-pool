@@ -81,7 +81,7 @@ export async function downloadBuildDependencies(
             //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
             //   options: options,
             // });
-            const rootDir = options['cwd'] ? `${repoDir}/` : '';
+            const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
             // if (options['cwd']) {
             //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
             // }
