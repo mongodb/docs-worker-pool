@@ -103,7 +103,7 @@ jobs:
             worker:
               - 'src/!(cache-updater/**)/**'
               - 'cdk-infra/lib/constructs/worker/**'
-              - 'Dockerfile.enhanced'
+              - 'Dockerfile'
               - 'modules/**'
       - name: Update Worker Stack
         if: steps.filter.outputs.worker == 'true'
