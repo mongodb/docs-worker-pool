@@ -104,7 +104,7 @@ export async function downloadBuildDependencies(
                 commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
               })
               .catch((error) => {
-                console.log('ERRRORRRRR PULING');
+                console.log(`ERRRORRRRR PULING ${dep.filename}`);
                 commands.push(
                   `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
                 );
