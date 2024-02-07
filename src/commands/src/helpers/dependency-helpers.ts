@@ -75,7 +75,7 @@ export async function downloadBuildDependencies(
       await Promise.all(
         dependencyInfo.dependencies.map(async (dep) => {
           const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
-          commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
+
           try {
             // await executeCliCommand({
             //   command: 'curl',
@@ -86,6 +86,7 @@ export async function downloadBuildDependencies(
             // if (options['cwd']) {
             //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
             // }
+            commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
             axios
               .get(dep.url, { timeout: 10000, responseType: 'stream' })
               .then((res) => {
