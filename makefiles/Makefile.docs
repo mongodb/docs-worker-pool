@@ -97,20 +97,6 @@ test: html ## Runs test framework over the corpus
 	node ./build/docs-tools/tools/rst-testing/compile-blocks.js ${BLOCKS_FILE} > ${TEST_FILE}
 	./build/docs-tools/tools/rst-testing/rst_tester.py ${TEST_FILE}
 
-html: examples ## Builds this branch's HTML under build/<branch>/html
-	if [ ! -z "${PATCH_ID}" ]; then git checkout -b ${GIT_BRANCH}-${PATCH_ID}; fi;
-	giza make html
-	# TEMP copy of video file. Remove once video infrastructure in place.
-	if [ ! -z "${PATCH_ID}" ]; then mkdir -p build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi;
-	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}${URL_APPENDIX}/html/_images/; fi
-
-publish: examples ## Builds this branch's publishable HTML and other artifacts under build/public
-	if [ ${GIT_BRANCH} = master ]; then rm -rf build/master build/public; fi
-	giza make publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
-	# TEMP copy of video file. Remove once video infrastructure in place.
-	if [ -f source/images/agg-pipeline.mp4 ]; then cp source/images/agg-pipeline.mp4 build/public/${GIT_BRANCH}/_images/; cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}/html/_images/; cp source/images/agg-pipeline.mp4 build/${GIT_BRANCH}/dirhtml/_images/;fi
-
 # - Enter build/<branch>/html, and recurse over each regular file
 #   <basename>/<filename>.
 #   * Upload each to the S3 bucket under <project>/<username>/<basename>/<filename>

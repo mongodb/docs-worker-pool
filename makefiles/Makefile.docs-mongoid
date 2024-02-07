@@ -72,29 +72,6 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
 
-########################
-# GIZA MAKEFILE COMMANDS
-########################
-
-html:
-	giza make html
-
-publish: ## Build docs locally
-# !!! DOES NOT PUT STUFF ONTO THE INTERNET !!!
-# Builds the artifacts that you will deploy with other targets.
-# Also builds an HTML rendering for local viewing.
-#
-# If master branch, giza creates any symlinks needed per integrations.yaml
-# If master, giza creates any redirects per build_conf.yaml / htaccess.yaml
-
-	# get the latest for mongoid/docs git submodule:
-	git submodule update --remote --init
-	# rsync the docs source from the submodule to the source/ directory:
-	rsync -a --delete mongoid/docs/ source/
-	# build the publish artefacts using giza:
-	giza make publish
-	if [ ${GIT_BRANCH} = master ]; then mut-redirects config/redirects -o build/public/.htaccess; fi
-
 stage: ## Host online for review
 # !!! DEPLOY HTML TO STAGING WEBSITE !!!
 # Deploys the HTML from the build/<branch> directory to the BUCKET.
