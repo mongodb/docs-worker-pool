@@ -82,9 +82,9 @@ export async function downloadBuildDependencies(
             //   options: options,
             // });
             const rootDir = options['cwd'] ? `${repoDir}/` : '';
-            if (options['cwd']) {
-              await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
-            }
+            // if (options['cwd']) {
+            //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
+            // }
             axios
               .get(dep.url, { timeout: 10000, responseType: 'stream' })
               .then((res) => {
