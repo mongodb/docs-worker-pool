@@ -75,7 +75,7 @@ export async function downloadBuildDependencies(
       await Promise.all(
         dependencyInfo.dependencies.map(async (dep) => {
           const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
-
+          commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
           try {
             // await executeCliCommand({
             //   command: 'curl',
