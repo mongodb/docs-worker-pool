@@ -31970,7 +31970,7 @@
       "reference/api/checkpoints",
       "reference/api/checkpoints-get-all",
       "reference/api/checkpoints-get-one",
-      "reference/api/-backup/schedule/schedules",
+      "reference/api/legacy-backup/schedule/schedules",
       "reference/api/legacy-backup/schedule/get-schedule",
       "reference/api/legacy-backup/schedule/patch-schedule",
       "reference/api/cloud-backup/backup/backups",
