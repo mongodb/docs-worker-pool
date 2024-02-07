@@ -86,7 +86,7 @@ export async function downloadBuildDependencies(
             // if (options['cwd']) {
             //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
             // }
-            commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
+
             axios
               .get(dep.url, { timeout: 10000, responseType: 'stream' })
               .then((res) => {
@@ -95,6 +95,7 @@ export async function downloadBuildDependencies(
                   'https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/internal/kjkjh/examples.go'
                 )
                   console.log(res);
+                commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
                 if (res.status == 404) {
                   console.log(`ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`);
                   commands.push(
