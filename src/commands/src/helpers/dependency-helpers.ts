@@ -86,7 +86,7 @@ export async function downloadBuildDependencies(
         //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
         // }
 
-        axios
+        const curlString = axios
           .get(dep.url, { timeout: 10000, responseType: 'stream' })
           .then((res) => {
             if (
@@ -110,7 +110,7 @@ export async function downloadBuildDependencies(
             );
             // return `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`;
           });
-
+        return curlString;
         // const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
         // console.log(response);
         // response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
