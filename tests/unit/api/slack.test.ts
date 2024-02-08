@@ -53,6 +53,7 @@ jest.mock('../../../src/repositories/docsetsRepository', () => ({
 jest.mock('config');
 
 describe('Slack API Controller Tests', () => {
+  console.log('hello');
   const mockEntitlement = {
     email: 'test.user@mongodb.com',
     github_username: 'test.user',
