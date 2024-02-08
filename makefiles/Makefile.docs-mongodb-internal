@@ -73,13 +73,6 @@ next-gen-stage: ## Host online for review
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
 
-# - Enter build/<branch>/html, and recurse over each regular file
-#   <basename>/<filename>.
-#   * Upload each to the S3 bucket under <project>/<username>/<basename>/<filename>
-stage: ## Host online for review
-	mut-publish build/${GIT_BRANCH}/html ${BUCKET} --prefix=${PROJECT} --stage ${ARGS}
-	@echo "Hosted at ${URL}/${PROJECT}/${USER}/${GIT_BRANCH}/index.html"
-
 examples:
 	mkdir -p ${DRIVERS_PATH}
 # python
