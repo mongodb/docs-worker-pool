@@ -191,21 +191,21 @@ export class SlackConnector implements ISlackConnector {
       };
       reposToShow.push(opt);
     });
+
     // THis is the limitation enforced by slack as no more 100 items are allowd in the dropdown
     //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
 
+    if (reposToShow.length > 100) {
+      reposToShow = reposToShow.sort().reverse().splice(0, 100);
+    }
+
     reposToShow.sort((a, b) => {
-      return b.value
+      return b.text.text
         .toString()
         .replace(/\d+/g, (n) => +n + 100000)
-        .localeCompare(a.value.toString().replace(/\d+/g, (n) => +n + 100000));
+        .localeCompare(a.text.text.toString().replace(/\d+/g, (n) => +n + 100000));
     });
 
-    console.log('hello', reposToShow);
-
-    if (reposToShow.length > 100) {
-      reposToShow = reposToShow.splice(0, 100);
-    }
     return this._getDropDownView(triggerId, reposToShow);
   }
 }
