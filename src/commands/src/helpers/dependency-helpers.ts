@@ -72,62 +72,62 @@ export async function downloadBuildDependencies(
         throw error;
       }
       commands.push(`mkdir -p ${targetDir}`);
-      await Promise.all(
-        dependencyInfo.dependencies.map(async (dep) => {
-          const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
 
-          try {
-            // await executeCliCommand({
-            //   command: 'curl',
-            //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
-            //   options: options,
-            // });
+      const result = dependencyInfo.dependencies.map(async (dep) => {
+        const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
+        try {
+          // await executeCliCommand({
+          //   command: 'curl',
+          //   args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
+          //   options: options,
+          // });
 
-            // if (options['cwd']) {
-            //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
-            // }
+          // if (options['cwd']) {
+          //   await executeCliCommand({ command: 'cd', args: [`${options['cwd']}`] });
+          // }
 
-            axios
-              .get(dep.url, { timeout: 10000, responseType: 'stream' })
-              .then((res) => {
-                if (
-                  dep.url ==
-                  'https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/internal/kjkjh/examples.go'
-                )
-                  console.log(res);
-                console.log(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
-                // commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
-                if (res.status == 404) {
-                  console.log(`ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`);
-                  commands.push(
-                    `ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
-                  );
-                }
-                res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
-                commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
-              })
-              .catch((error) => {
-                console.log(`ERRRORRRRR PULING ${dep.filename}`);
-                commands.push(
-                  `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
-                );
-              });
+          axios
+            .get(dep.url, { timeout: 10000, responseType: 'stream' })
+            .then((res) => {
+              if (
+                dep.url == 'https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/internal/kjkjh/examples.go'
+              )
+                console.log(res);
+              console.log(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
+              // commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
+              if (res.status == 404) {
+                console.log(`ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`);
+                commands.push(`ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`);
+              }
+              return `curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`;
+              res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
+              commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
+            })
+            .catch((error) => {
+              console.log(`ERRRORRRRR PULING ${dep.filename}`);
+              commands.push(
+                `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
+              );
+              return `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`;
+            });
 
-            // const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
-            // console.log(response);
-            // response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
-            // then(async function (response) {
-            // await response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
-            // });
-          } catch (error) {
-            console.error(
-              `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
-              dependencyInfo
-            );
-            commands.push(`ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}.`);
-          }
-        })
-      );
+          // const response = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
+          // console.log(response);
+          // response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
+          // then(async function (response) {
+          // await response.data.pipe(fs.createWriteStream(`${targetDir}/${dep.filename}`));
+          // });
+        } catch (error) {
+          console.error(
+            `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
+            dependencyInfo
+          );
+          commands.push(`ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}.`);
+        }
+      });
+      const syncResult = await Promise.all(result);
+      console.log('SYNC RESULT');
+      console.log(syncResult);
     })
   );
   return commands;
