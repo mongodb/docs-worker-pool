@@ -197,14 +197,9 @@ export class SlackConnector implements ISlackConnector {
     if (reposToShow.length > 100) {
       reposToShow = reposToShow.splice(0, 100);
     }
-    reposToShow
-      .sort((a, b) =>
-        a
-          .toString()
-          .replace(/\d+/g, (n) => +n + 1000)
-          .localeCompare(b.text.toString().replace(/\d+/g, (n) => +n + 1000))
-      )
-      .reverse();
+    reposToShow.sort((a, b) =>
+      a.text.replace(/\d+/g, (n) => +n + 1000).localeCompare(b.text.toString().replace(/\d+/g, (n) => +n + 1000))
+    );
     return this._getDropDownView(triggerId, reposToShow);
   }
 }
