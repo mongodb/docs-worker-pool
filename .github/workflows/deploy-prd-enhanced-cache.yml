@@ -4,7 +4,7 @@ on:
 concurrency:
   group: environment-prd-enhanced-cacheUpdate-${{ github.ref }}
   cancel-in-progress: true
-name: Deploy Production ECS Enhanced Webhooks
+name: Run Cache Update Check
 jobs:
   deploy-prd:
     runs-on: ubuntu-latest
