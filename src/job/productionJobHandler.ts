@@ -47,7 +47,10 @@ export class ProductionJobHandler extends JobHandler {
   }
   prepDeployCommands(): void {
     // TODO: Can we simplify the chain of logic here?
-    this.currJob.deployCommands = [`cd repos/${getDirectory(this.currJob)}`, 'make publish'];
+    this.currJob.deployCommands = [
+      `cd repos/${getDirectory(this.currJob)}`,
+      'make next-gen-publish && make next-gen-deploy',
+    ];
 
     // TODO: Reduce confusion between job.manifestPrefix and job.payload.manifestPrefix
     this.currJob.manifestPrefix = this.currJob.manifestPrefix ?? this.constructManifestPrefix();

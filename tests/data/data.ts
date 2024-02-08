@@ -265,7 +265,7 @@ export class TestDataProvider {
 
   static getExpectedProdDeployNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonDeployCommands(job);
-    // TODO: simplify construction of return value
+    // TODO: simplify constru ction of return value
     const ret = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       `make next-gen-deploy MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);
