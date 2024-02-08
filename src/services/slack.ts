@@ -197,7 +197,7 @@ export class SlackConnector implements ISlackConnector {
     if (reposToShow.length > 100) {
       reposToShow = reposToShow.splice(0, 100);
     }
-    reposToShow.sort();
+    reposToShow.sort().reverse();
     return this._getDropDownView(triggerId, reposToShow);
   }
 }
