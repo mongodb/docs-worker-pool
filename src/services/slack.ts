@@ -194,15 +194,16 @@ export class SlackConnector implements ISlackConnector {
     // THis is the limitation enforced by slack as no more 100 items are allowd in the dropdown
     //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
 
-    if (reposToShow.length > 100) {
-      reposToShow = reposToShow.splice(0, 100);
-    }
     reposToShow.sort((a, b) =>
       b.text
         .toString()
         .replace(/\d+/g, (n) => +n + 1000)
         .localeCompare(a.text.toString().replace(/\d+/g, (n) => +n + 1000))
     );
+
+    if (reposToShow.length > 100) {
+      reposToShow = reposToShow.splice(0, 100);
+    }
     return this._getDropDownView(triggerId, reposToShow);
   }
 }
