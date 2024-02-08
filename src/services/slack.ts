@@ -193,12 +193,14 @@ export class SlackConnector implements ISlackConnector {
     });
 
     // THis is the limitation enforced by slack as no more 100 items are allowd in the dropdown
+    //Sort the list so that any inactive versions are at the end and will be truncated if any items must be truncated
     //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
 
     if (reposToShow.length > 100) {
       reposToShow = reposToShow.sort().reverse().splice(0, 100);
     }
 
+    //sort versions like so: 4.1, 4.2, 4.11
     reposToShow.sort((a, b) => {
       return b.text.text
         .toString()
