@@ -138,7 +138,7 @@ export class TestDataProvider {
   }
 
   static getCommonBuildCommands(job: Job): Array<string> {
-    return [`cd repos/${job.payload.repoName}`, `rm -f makefile`];
+    return [`cd repos/${job.payload.repoName}`, `rm -f makefile`, `make next-gen-html`];
   }
 
   static getExpectedProdBuildNextGenCommands(job: Job): Array<string> {
@@ -245,11 +245,11 @@ export class TestDataProvider {
   }
 
   static getCommonDeployCommands(job: Job): Array<string> {
-    return [`cd repos/${job.payload.repoName}`, 'make publish'];
+    return [`cd repos/${job.payload.repoName}`, 'make next-gen-publish && make next-gen-deploy'];
   }
 
   static getCommonDeployCommandsForStaging(job: Job): Array<string> {
-    return [`cd repos/${job.payload.repoName}`];
+    return [`cd repos/${job.payload.repoName}`, `make next-gen-stage`];
   }
 
   static getExpectedStageDeployNextGenCommands(job: Job): Array<string> {
