@@ -82,7 +82,7 @@ export async function downloadBuildDependencies(
             return `curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`;
           })
           .catch((error) => {
-            return `ERROR! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. Error: ${error}`;
+            return `ERROR! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`;
           });
         return curlString;
       });
