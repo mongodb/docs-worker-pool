@@ -73,7 +73,7 @@ export async function downloadBuildDependencies(
       }
       commands.push(`mkdir -p ${targetDir}`);
 
-      const response = dependencyInfo.dependencies.map(async (dep) => {
+      const response = dependencyInfo.dependencies.map((dep) => {
         const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
         const curlString = axios
           .get(dep.url, { timeout: 10000, responseType: 'stream' })
