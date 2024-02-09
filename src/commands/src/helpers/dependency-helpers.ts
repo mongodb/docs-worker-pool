@@ -49,7 +49,7 @@ export async function downloadBuildDependencies(
   repoName: string,
   directory?: string
 ) {
-  let commands: string[] = [];
+  const commands: string[] = [];
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
       const repoDir = getRepoDir(repoName, directory);
@@ -86,9 +86,8 @@ export async function downloadBuildDependencies(
           });
         return curlString;
       });
-
       const responseSync = await Promise.all(response);
-      commands = commands.concat(responseSync);
+      commands.push(...responseSync);
     })
   );
   return commands;
