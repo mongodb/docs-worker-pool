@@ -43,9 +43,9 @@ async function runDockerContainer(env: Record<string, string>) {
 }
 
 async function main() {
-  const { repoName, repoOwner, directory, branchName } = getArgs();
+  const { repoName, repoOwner, directory, branchName, jobType } = getArgs();
 
-  const env = await getWorkerEnv('stg');
+  const env = await getWorkerEnv('dotcomstg');
   const octokitClient = getOctokitClient(env.GITHUB_BOT_PASSWORD);
 
   const commitPromise = octokitClient.request('GET /repos/{owner}/{repo}/commits/{ref}', {
@@ -71,7 +71,7 @@ async function main() {
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const project = (await docsetsRepository.getProjectByRepoName(repoName, directory)) as string;
 
-  const job = createLocalJob({ commit: commit.data, branchName, repoName, repoOwner, project, directory });
+  const job = createLocalJob({ commit: commit.data, branchName, repoName, repoOwner, project, directory, jobType });
 
   console.log('inserting job into queue collection');
   const { insertedId: jobId } = await collection.insertOne(job);

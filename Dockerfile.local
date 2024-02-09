@@ -61,7 +61,7 @@ RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.co
     # Install dependencies for Redoc CLI
     && cd redoc/ \
     && npm ci --prefix cli/ --omit=dev
-    
+
 FROM initial as persistence
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence

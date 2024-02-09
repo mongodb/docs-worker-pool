@@ -160,6 +160,7 @@ export async function getWorkerEnv(env: AutoBuilderEnv): Promise<Record<string, 
   // TODO: Add JOB_UPDATES_QUEUE_URL. Can retrieve with https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cloudformation/command/DescribeStacksCommand/
   return {
     ...envRecord,
+    FEATURE_FLAG_MONOREPO_PATH: 'true', // setting this to true temporarily.
     SNOOTY_ENV: envShortToFullName(env),
     SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
     CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),

@@ -65,7 +65,10 @@ export const bulkWrite = async (operations: mongodb.AnyBulkWriteOperation[], col
     if (!operations || !operations.length) {
       return;
     }
-    return dbSession.collection(collection).bulkWrite(operations, { ordered: false });
+    const result = await dbSession
+      .collection(collection)
+      .bulkWrite(operations, { ordered: false, maxTimeMS: 10000000 });
+    return result;
   } catch (error) {
     console.error(`Error at bulk write time for ${collection}: ${error}`);
     throw error;

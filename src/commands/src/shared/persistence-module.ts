@@ -31,6 +31,6 @@ export async function persistenceModule({ job }: PersistenceModuleParams): Promi
 
     return result;
   } catch (error) {
-    throw new Error(`oas-page-build failed. \n ${error}`);
+    throw new Error(`persistence-module failed. \n ${error}`);
   }
 }

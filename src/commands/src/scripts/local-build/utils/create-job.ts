@@ -1,12 +1,17 @@
 import { EnhancedJob, JobStatus } from '../../../../../entities/job';
 import { CommitGetResponse } from './types';
 
+export const JOB_TYPES = ['githubPush', 'productionDeploy', 'manifestGeneration', 'regression'] as const;
+export type JobType = (typeof JOB_TYPES)[number];
+
+export const isValidJobType = (val: string): val is JobType => JOB_TYPES.includes(val as JobType);
 interface Props {
   branchName: string;
   repoOwner: string;
   repoName: string;
   commit: CommitGetResponse;
   project: string;
+  jobType: JobType;
   directory?: string;
 }
 
@@ -17,11 +22,12 @@ export function createLocalJob({
   commit,
   project,
   directory,
+  jobType,
 }: Props): Omit<EnhancedJob & { isLocal: boolean }, '_id'> {
   return {
     isLocal: true,
     title: `${repoOwner}/${repoName}`,
-    user: commit.author?.name ?? '',
+    user: commit.author?.name ?? 'branberry',
     email: commit.author?.email ?? '',
     status: JobStatus.inQueue,
     createdTime: new Date(),
@@ -32,9 +38,9 @@ export function createLocalJob({
     result: null,
     pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
     payload: {
-      jobType: 'githubPush',
-      source: 'github',
-      action: 'push',
+      jobType: jobType,
+      source: 'local',
+      action: 'debug',
       repoName,
       branchName,
       isFork: repoOwner !== '10gen' && repoOwner !== 'mongodb',

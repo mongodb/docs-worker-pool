@@ -9,7 +9,6 @@
       "type": "node",
       "request": "attach",
       "port": 9229,
-      "address": "localhost",
       "localRoot": "${workspaceFolder}",
       "remoteRoot": "/home/docsworker-xlarge",
       "autoAttachChildProcesses": false,

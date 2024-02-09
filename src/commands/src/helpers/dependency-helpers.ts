@@ -49,10 +49,11 @@ export async function downloadBuildDependencies(
   directory?: string
 ) {
   const commands: string[] = [];
+  const repoDir = getRepoDir(repoName, directory);
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
-      const repoDir = getRepoDir(repoName, directory);
       const targetDir = dependencyInfo.targetDir ?? repoDir;
+
       let options = {};
       if (targetDir != repoDir) {
         options = { cwd: repoDir };
@@ -90,6 +91,12 @@ export async function downloadBuildDependencies(
       );
     })
   );
+
+  try {
+    await executeCliCommand({ command: 'ls', args: ['source/driver-examples'], options: { cwd: repoDir } });
+  } catch (e) {
+    console.error(e);
+  }
   return commands;
 }
 

@@ -1,3 +1,5 @@
+import { isValidJobType } from './create-job';
+
 export function getArgs() {
   const helpIdx = process.argv.findIndex((str) => str === '--help' || str === '-h');
 
@@ -10,6 +12,7 @@ export function getArgs() {
       --repo-name,   -n  (required)       The name of the repo e.g. docs-java or cloud-docs.
       --directory,   -d  (optional)       The project directory path for a monorepo project. A slash is not needed at the beginning. For example, cloud-docs in the monorepo would just be cloud-docs for the argument.
       --branch-name, -b  (optional)       The branch name we want to parse. If not provided, the value 'master' is used by default.
+      --job-type     -t  (optional)       The job type. Can be githubPush (uses the StagingJobHandler), productionDeploy (uses the ProductionJobHandler), manifestGeneration (uses the ManifestJobHandler), and regression (uses the RegressionJobHandler). Default value is githubPush.
     `);
 
     process.exit(0);
@@ -20,6 +23,7 @@ export function getArgs() {
   // optional args
   const directoryIdx = process.argv.findIndex((str) => str === '--directory' || str === '-d');
   const branchNameIdx = process.argv.findIndex((str) => str === '--branch-name' || str === '-b');
+  const jobTypeIdx = process.argv.findIndex((str) => str === '--job-type' || str === '-t');
 
   if (repoOwnerIdx === -1)
     throw new Error(
@@ -48,15 +52,26 @@ export function getArgs() {
   if (process.argv[branchNameIdx + 1].startsWith('-'))
     throw new Error(`Please provide a valid branch name value. Value provided: ${process.argv[branchNameIdx + 1]}`);
 
+  if (jobTypeIdx + 1 === process.argv.length) throw new Error('Please provide a value for the branch name flag');
+  if (process.argv[jobTypeIdx + 1].startsWith('-'))
+    throw new Error(`Please provide a valid branch name value. Value provided: ${process.argv[jobTypeIdx + 1]}`);
+
   const repoOwner = process.argv[repoOwnerIdx + 1];
   const repoName = process.argv[repoNameIdx + 1];
   const directory = directoryIdx !== -1 ? process.argv[directoryIdx + 1] : undefined;
   const branchName = branchNameIdx !== -1 ? process.argv[branchNameIdx + 1] : 'master';
+  const jobType = jobTypeIdx !== -1 ? process.argv[jobTypeIdx + 1] : 'githubPush';
+
+  if (!isValidJobType(jobType))
+    throw new Error(
+      `Error! Invalid option provided for jobType. Value provided: ${jobType}. Please run the command with the --help flag to view the valid options for this parameter.`
+    );
 
   return {
     repoOwner,
     repoName,
     directory,
     branchName,
+    jobType,
   };
 }
