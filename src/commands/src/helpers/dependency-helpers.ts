@@ -79,10 +79,10 @@ export async function downloadBuildDependencies(
           .get(dep.url, { timeout: 10000, responseType: 'stream' })
           .then((res) => {
             res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
-            return `curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`;
+            return `Downloading ${dep.url} into ${rootDir}${targetDir}/${dep.filename}`;
           })
           .catch((error) => {
-            return `ERROR! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`;
+            return `ERROR! Could not download ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`;
           });
         return curlString;
       });
