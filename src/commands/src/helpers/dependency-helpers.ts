@@ -86,6 +86,7 @@ export async function downloadBuildDependencies(
           });
         return curlString;
       });
+
       const responseSync = await Promise.all(response);
       commands = commands.concat(responseSync);
     })
