@@ -78,34 +78,16 @@ export async function downloadBuildDependencies(
         const curlString = axios
           .get(dep.url, { timeout: 10000, responseType: 'stream' })
           .then((res) => {
-            if (
-              dep.url == 'https://raw.githubusercontent.com/mongodb/mongo-go-driver/master/internal/kjkjh/examples.go'
-            )
-              console.log(res);
-            console.log(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
-            // commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
-            if (res.status == 404) {
-              console.log(`ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`);
-              commands.push(`ERROR FROM IF! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`);
-            }
             res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
-
-            // commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
             return `curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`;
           })
           .catch((error) => {
-            // console.log(`ERRRORRRRR PULING ${dep.filename}`);
-            // commands.push(
-            //   `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
-            // );
-            return `ERROR! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`;
+            return `ERROR! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. Error: ${error}`;
           });
         return curlString;
       });
       const responseSync = await Promise.all(response);
       commands = commands.concat(responseSync);
-      // console.log('RESPONSE SYNC');
-      // console.log(responseSync);
     })
   );
   return commands;
