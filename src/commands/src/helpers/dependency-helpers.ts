@@ -49,7 +49,7 @@ export async function downloadBuildDependencies(
   repoName: string,
   directory?: string
 ) {
-  const commands: string[] = [];
+  let commands: string[] = [];
   await Promise.all(
     buildDependencies.map(async (dependencyInfo) => {
       const repoDir = getRepoDir(repoName, directory);
@@ -75,7 +75,7 @@ export async function downloadBuildDependencies(
 
       const response = dependencyInfo.dependencies.map(async (dep) => {
         const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
-        axios
+        const curlString = axios
           .get(dep.url, { timeout: 10000, responseType: 'stream' })
           .then((res) => {
             if (
@@ -90,18 +90,22 @@ export async function downloadBuildDependencies(
             }
             res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
 
-            commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
-            //return `curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`;
+            // commands.push(`curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`);
+            return `curl -SfL ${dep.url} -o ${rootDir}${targetDir}/${dep.filename}`;
           })
           .catch((error) => {
-            console.log(`ERRRORRRRR PULING ${dep.filename}`);
-            commands.push(
-              `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
-            );
-            // return `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`;
+            // console.log(`ERRRORRRRR PULING ${dep.filename}`);
+            // commands.push(
+            //   `ERROR FROM INNERMOST! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`
+            // );
+            return `ERROR! Could not curl ${dep.url} into ${rootDir}${targetDir}/${dep.filename}.`;
           });
+        return curlString;
       });
-      await Promise.all(response);
+      const responseSync = await Promise.all(response);
+      commands = commands.concat(responseSync);
+      // console.log('RESPONSE SYNC');
+      // console.log(responseSync);
     })
   );
   return commands;
