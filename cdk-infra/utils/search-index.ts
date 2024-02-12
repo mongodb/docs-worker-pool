@@ -6,10 +6,8 @@ export function getSearchIndexFolder(env: AutoBuilderEnv): string {
       return '';
     case 'stg':
     case 'dotcomstg':
-    case 'legacydotcomstg':
       return 'preprd';
     case 'dotcomprd':
-    case 'legacydotcomprd':
     case 'prd':
       return 'prd';
   }

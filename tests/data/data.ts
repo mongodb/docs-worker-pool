@@ -138,7 +138,7 @@ export class TestDataProvider {
   }
 
   static getCommonBuildCommands(job: Job): Array<string> {
-    return [`. /venv/bin/activate`, `cd repos/${job.payload.repoName}`, `rm -f makefile`, `make html`];
+    return [`cd repos/${job.payload.repoName}`, `rm -f makefile`, `make next-gen-html`];
   }
 
   static getExpectedProdBuildNextGenCommands(job: Job): Array<string> {
@@ -245,11 +245,11 @@ export class TestDataProvider {
   }
 
   static getCommonDeployCommands(job: Job): Array<string> {
-    return ['. /venv/bin/activate', `cd repos/${job.payload.repoName}`, 'make publish && make deploy'];
+    return [`cd repos/${job.payload.repoName}`, 'make next-gen-publish && make next-gen-deploy'];
   }
 
   static getCommonDeployCommandsForStaging(job: Job): Array<string> {
-    return ['. /venv/bin/activate', `cd repos/${job.payload.repoName}`, 'make stage'];
+    return [`cd repos/${job.payload.repoName}`, `make next-gen-stage`];
   }
 
   static getExpectedStageDeployNextGenCommands(job: Job): Array<string> {
@@ -265,7 +265,7 @@ export class TestDataProvider {
 
   static getExpectedProdDeployNextGenCommands(job: Job): Array<string> {
     const genericCommands = TestDataProvider.getCommonDeployCommands(job);
-    // TODO: simplify construction of return value
+    // TODO: simplify constru ction of return value
     const ret = Array<string>().concat(genericCommands.slice(0, genericCommands.length - 1), [
       `make next-gen-deploy MUT_PREFIX=${job.payload.mutPrefix}`,
     ]);

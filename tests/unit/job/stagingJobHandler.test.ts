@@ -21,24 +21,9 @@ describe('StagingJobHandler Tests', () => {
     }).toThrow(`${jobHandlerTestHelper.job._id} is stopped`);
   });
 
-  test('Execute legacy build runs successfully', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(false, false);
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(false);
-    expect(jobHandlerTestHelper.job.buildCommands).toEqual(
-      TestDataProvider.getCommonBuildCommands(jobHandlerTestHelper.job)
-    );
-    expect(jobHandlerTestHelper.job.deployCommands).toEqual(
-      TestDataProvider.getCommonDeployCommandsForStaging(jobHandlerTestHelper.job)
-    );
-    expect(jobHandlerTestHelper.cdnConnector.purge).toHaveBeenCalledTimes(0);
-    expect(jobHandlerTestHelper.jobRepo.insertPurgedUrls).toHaveBeenCalledTimes(0);
-  });
-
   test('Execute nextgen build runs successfully without path prefix', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    jobHandlerTestHelper.setStageForDeploySuccess(false);
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(true);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(
       TestDataProvider.getExpectedStagingBuildNextGenCommands(jobHandlerTestHelper.job)
     );
@@ -50,12 +35,11 @@ describe('StagingJobHandler Tests', () => {
   });
 
   test('Execute nextgen build runs successfully with pathprefix', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    jobHandlerTestHelper.setStageForDeploySuccess(false);
     jobHandlerTestHelper.job.payload.repoBranches = TestDataProvider.getRepoBranchesData(jobHandlerTestHelper.job);
     jobHandlerTestHelper.job.payload.pathPrefix = 'Mutprefix';
     jobHandlerTestHelper.job.payload.mutPrefix = 'Mutprefix';
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(true);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(
       TestDataProvider.getExpectedStagingBuildNextGenCommands(jobHandlerTestHelper.job)
     );
@@ -65,9 +49,8 @@ describe('StagingJobHandler Tests', () => {
   });
 
   test('Execute nextgen build runs successfully and results in summary message', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    jobHandlerTestHelper.setStageForDeploySuccess(false);
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(true);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(
       TestDataProvider.getExpectedStagingBuildNextGenCommands(jobHandlerTestHelper.job)
     );
@@ -81,7 +64,6 @@ describe('StagingJobHandler Tests', () => {
   test('Execute nextgen build deploy throws error updates the job with correct error message', async () => {
     jobHandlerTestHelper.setStageForDeployFailure(null, 'ERROR:BAD ONE');
     await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.job.payload.isNextGen).toEqual(true);
     expect(jobHandlerTestHelper.job.buildCommands).toEqual(
       TestDataProvider.getExpectedStagingBuildNextGenCommands(jobHandlerTestHelper.job)
     );
@@ -101,7 +83,7 @@ describe('StagingJobHandler Tests', () => {
   });
 
   test('Staging deploy with Gatsby Cloud site does not result in job completion', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false, undefined, { hasGatsbySiteId: true });
+    jobHandlerTestHelper.setStageForDeploySuccess(false, undefined, { hasGatsbySiteId: true });
     await jobHandlerTestHelper.jobHandler.execute();
     expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledTimes(0);
   });
