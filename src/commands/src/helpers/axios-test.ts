@@ -13,6 +13,7 @@ export async function testAxios(repoName: string, directory?: string) {
     await res.data.pipe(fs.createWriteStream(buildPath));
     console.log('PIPED? IDK');
     await executeCliCommand({ command: 'cat', args: [`${buildPath}`] });
+    await executeCliCommand({ command: 'ls', args: ['-al', `${repoDir}/source/driver-examples`] });
     return `Downloading ${url} into ${buildPath}`;
   } catch (error) {
     return `ERROR! Could not download ${url} into ${buildPath}. ${error}`;
