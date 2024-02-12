@@ -215,6 +215,8 @@ export abstract class JobHandler {
     await this._logger.save(this._currJob._id, 'Identified Build dependencies');
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName, directory);
     await this._logger.save(this._currJob._id, `${commands.join('\n')}`);
+    const err = commands.find((element) => element.includes('ERROR'));
+    if (err) throw new Error(err);
   }
 
   @throwIfJobInterupted()

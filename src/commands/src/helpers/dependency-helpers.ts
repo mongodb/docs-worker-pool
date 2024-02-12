@@ -82,9 +82,7 @@ export async function downloadBuildDependencies(
             return `Downloading ${dep.url} into ${rootDir}${targetDir}/${dep.filename}`;
           })
           .catch((error) => {
-            throw new Error(
-              `ERROR! Could not download ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`
-            );
+            return `ERROR! Could not download ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`;
           });
         return curlString;
       });
