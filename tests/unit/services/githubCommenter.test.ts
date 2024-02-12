@@ -43,7 +43,6 @@ const mockPayload = {
   alias: '',
   aliased: false,
   primaryAlias: '',
-  isNextGen: true,
   stable: true,
   includeInGlobalSearch: true,
   regression: false,

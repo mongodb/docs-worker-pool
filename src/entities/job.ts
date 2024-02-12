@@ -49,7 +49,6 @@ export type Payload = {
   primaryAlias: string | null | undefined;
   repoBranches: any;
   stable: boolean | null | undefined;
-  isNextGen: boolean | null | undefined;
   regression: boolean | null | undefined;
   urlSlug: string | null | undefined;
   prefix: string;
@@ -78,7 +77,6 @@ export type EnhancedPayload = {
   aliased?: boolean | null;
   primaryAlias?: string | null;
   stable?: boolean | null;
-  isNextGen?: boolean | null;
   repoBranches?: any;
   regression?: boolean | null;
   urlSlug?: string | null;
