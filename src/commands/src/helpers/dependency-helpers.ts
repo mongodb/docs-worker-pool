@@ -73,18 +73,23 @@ export async function downloadBuildDependencies(
       }
       commands.push(`mkdir -p ${targetDir}`);
 
-      const response = dependencyInfo.dependencies.map((dep) => {
+      const response = dependencyInfo.dependencies.map(async (dep) => {
         const rootDir = targetDir != repoDir ? `${repoDir}/` : '';
-        const curlString = axios
-          .get(dep.url, { timeout: 10000, responseType: 'stream' })
-          .then((res) => {
-            res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
-            return `Downloading ${dep.url} into ${rootDir}${targetDir}/${dep.filename}`;
-          })
-          .catch((error) => {
-            return `ERROR! Could not download ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`;
-          });
-        return curlString;
+        try {
+          const res = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
+          res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
+          return `Downloading ${dep.url} into ${rootDir}${targetDir}/${dep.filename}`;
+        } catch (error) {
+          return `ERROR! Could not download ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`;
+        }
+        //   // .then((res) => {
+        //   //   res.data.pipe(fs.createWriteStream(`${rootDir}${targetDir}/${dep.filename}`));
+        //   //   return `Downloading ${dep.url} into ${rootDir}${targetDir}/${dep.filename}`;
+        //   // })
+        //   // .catch((error) => {
+        //   //   return `ERROR! Could not download ${dep.url} into ${rootDir}${targetDir}/${dep.filename}. ${error}`;
+        //   // });
+        // return curlString;
       });
       const responseSync = await Promise.all(response);
       commands.push(...responseSync);
