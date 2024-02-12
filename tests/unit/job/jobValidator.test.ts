@@ -106,7 +106,6 @@ describe('JobValidator Tests', () => {
       repos: [`${job.payload.repoOwner}/${job.payload.repoName}`],
       github_username: job.user,
     });
-    job.payload.isNextGen = true;
     await jobValidator.throwIfJobInvalid(job);
     expect(repoEntitlementRepository.getRepoEntitlementsByGithubUsername).toHaveBeenCalledTimes(1);
   });

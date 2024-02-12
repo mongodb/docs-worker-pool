@@ -51,25 +51,23 @@ export class ProductionJobHandler extends JobHandler {
   prepDeployCommands(): void {
     // TODO: Can we simplify the chain of logic here?
     this.currJob.deployCommands = [
-      '. /venv/bin/activate',
       `cd repos/${getDirectory(this.currJob)}`,
-      'make publish && make deploy',
+      'make next-gen-publish && make next-gen-deploy',
     ];
 
     // TODO: Reduce confusion between job.manifestPrefix and job.payload.manifestPrefix
-    if (this.currJob.payload.isNextGen) {
-      this.currJob.manifestPrefix = this.currJob.manifestPrefix ?? this.constructManifestPrefix();
+    this.currJob.manifestPrefix = this.currJob.manifestPrefix ?? this.constructManifestPrefix();
+    this.currJob.deployCommands[
+      this.currJob.deployCommands.length - 1
+    ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
+    // TODO: Remove when satisfied with new manifestJobHandler infrastructure
+    if (this.currJob.manifestPrefix) {
+      const searchFlag = this.currJob.payload.stable ? '-g' : '';
       this.currJob.deployCommands[
         this.currJob.deployCommands.length - 1
-      ] = `make next-gen-deploy MUT_PREFIX=${this.currJob.payload.mutPrefix}`;
-      // TODO: Remove when satisfied with new manifestJobHandler infrastructure
-      if (this.currJob.manifestPrefix) {
-        const searchFlag = this.currJob.payload.stable ? '-g' : '';
-        this.currJob.deployCommands[
-          this.currJob.deployCommands.length - 1
-        ] += ` MANIFEST_PREFIX=${this.currJob.manifestPrefix} GLOBAL_SEARCH_FLAG=${searchFlag}`;
-      }
+      ] += ` MANIFEST_PREFIX=${this.currJob.manifestPrefix} GLOBAL_SEARCH_FLAG=${searchFlag}`;
     }
+
     // have to combine search deploy commands
     // manifestJobHandler.prepDeployCommands
 
@@ -118,7 +116,6 @@ export class ProductionJobHandler extends JobHandler {
       return;
     }
     const searchCommands = [
-      '. /venv/bin/activate',
       `cd repos/${getDirectory(this.currJob)}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',

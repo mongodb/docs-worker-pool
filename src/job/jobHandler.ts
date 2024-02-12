@@ -114,7 +114,6 @@ export abstract class JobHandler {
         const { _id: jobId, user } = this.currJob;
         const gatsbyCloudSiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(user);
         if (
-          this.currJob.payload.isNextGen &&
           gatsbyCloudSiteId &&
           this.currJob.payload.jobType === 'githubPush' &&
           process.env.IS_FEATURE_BRANCH !== 'true'
@@ -255,25 +254,20 @@ export abstract class JobHandler {
 
   @throwIfJobInterupted()
   private async prepNextGenBuild(): Promise<void> {
-    if (this.isbuildNextGen()) {
-      await this._validator.throwIfBranchNotConfigured(this.currJob);
-      await this.constructPrefix();
-      // TODO: Look into moving the generation of manifestPrefix into the manifestJobHandler,
-      // as well as reducing difficult-to-debug state changes
-      // if this payload is NOT aliased or if it's the primary alias, we need the index path
-      if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
-        this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
-        this._logger.info(this.currJob._id, `Created payload manifestPrefix: ${this.currJob.payload.manifestPrefix}`);
-      }
+    await this._validator.throwIfBranchNotConfigured(this.currJob);
+    await this.constructPrefix();
+    // TODO: Look into moving the generation of manifestPrefix into the manifestJobHandler,
+    // as well as reducing difficult-to-debug state changes
+    // if this payload is NOT aliased or if it's the primary alias, we need the index path
+    if (!this.currJob.payload.aliased || (this.currJob.payload.aliased && this.currJob.payload.primaryAlias)) {
+      this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
+      this._logger.info(this.currJob._id, `Created payload manifestPrefix: ${this.currJob.payload.manifestPrefix}`);
+    }
 
-      this.prepStageSpecificNextGenCommands();
-      this.constructEnvVars();
-      this.currJob.payload.isNextGen = true;
-      if (this._currJob.payload.jobType === 'productionDeploy') {
-        this._validator.throwIfNotPublishable(this._currJob);
-      }
-    } else {
-      this.currJob.payload.isNextGen = false;
+    this.prepStageSpecificNextGenCommands();
+    this.constructEnvVars();
+    if (this._currJob.payload.jobType === 'productionDeploy') {
+      this._validator.throwIfNotPublishable(this._currJob);
     }
   }
 
@@ -375,22 +369,12 @@ export abstract class JobHandler {
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
   }
 
-  private async exeBuild(): Promise<void> {
-    const resp = await this._commandExecutor.execute(this.currJob.buildCommands);
-    this.logBuildDetails(resp);
-    await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
-  }
-
   @throwIfJobInterupted()
   private async executeBuild(): Promise<boolean> {
     if (this.currJob.buildCommands && this.currJob.buildCommands.length > 0) {
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Running Build`);
       await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}running worker.sh`);
-      if (this.currJob.payload.isNextGen) {
-        await this.exeBuildModified();
-      } else {
-        await this.exeBuild();
-      }
+      await this.exeBuildModified();
     } else {
       const error = new AutoBuilderError('No commands to execute', 'BuildError');
       await this.logError(error);
@@ -474,12 +458,7 @@ export abstract class JobHandler {
 
   // TODO: Reduce state changes
   protected prepBuildCommands(): void {
-    this.currJob.buildCommands = [
-      `. /venv/bin/activate`,
-      `cd repos/${getDirectory(this.currJob)}`,
-      `rm -f makefile`,
-      `make html`,
-    ];
+    this.currJob.buildCommands = [`cd repos/${getDirectory(this.currJob)}`, `rm -f makefile`, `make next-gen-html`];
   }
 
   public async getEnvironmentVariables(): Promise<{ bucket?: string; url?: string; regression?: string }> {

@@ -5,8 +5,6 @@ const dashboardUrls: Record<AutoBuilderEnv, string> = {
   prd: `https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=`,
   dotcomstg: `https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=`,
   dotcomprd: `https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=`,
-  legacydotcomstg: `https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=`,
-  legacydotcomprd: `https://workerpool-boxgs.mongodbstitch.com/pages/job.html?collName=`,
   dev: `https://workerpoolstaging-qgeyp.mongodbstitch.com/pages/job.html?collName=`,
 };
 

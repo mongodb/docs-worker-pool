@@ -120,8 +120,8 @@ async function getSecureStrings(
   return paramsMap;
 }
 
-const snootyEnvs = ['staging', 'production', 'dotcomstg', 'dotcomprd', 'legacydotcomprd', 'legacydotcomstg'] as const;
-const autoBuilderEnvs = ['stg', 'prd', 'dev', 'dotcomstg', 'dotcomprd', 'legacydotcomstg', 'legacydotcomprd'] as const;
+const snootyEnvs = ['staging', 'production', 'dotcomstg', 'dotcomprd'] as const;
+const autoBuilderEnvs = ['stg', 'prd', 'dev', 'dotcomstg', 'dotcomprd'] as const;
 
 type SnootyEnv = (typeof snootyEnvs)[number];
 type AutoBuilderEnv = (typeof autoBuilderEnvs)[number];
@@ -134,8 +134,6 @@ const autoBuilderToSnootyEnvMap: Record<AutoBuilderEnv, SnootyEnv> = {
   prd: 'production',
   dotcomprd: 'dotcomprd',
   dotcomstg: 'dotcomstg',
-  legacydotcomstg: 'legacydotcomstg',
-  legacydotcomprd: 'legacydotcomprd',
 };
 
 function envShortToFullName(env: string): SnootyEnv {

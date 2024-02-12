@@ -99,7 +99,6 @@ export class ManifestJobHandler extends JobHandler {
 
     // For mut-index usage info, see: https://github.com/mongodb/mut/blob/main/mut/index/main.py#L2
     this.currJob.deployCommands = [
-      '. /venv/bin/activate',
       `cd repos/${getDirectory(this.currJob)}`,
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',

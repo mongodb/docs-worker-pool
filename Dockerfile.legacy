@@ -3,7 +3,7 @@
 FROM node:14-bullseye-slim
 
 ARG MUT_VERSION=0.10.6
-
+ 
 ENV PATH="${PATH}:/opt/mut"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
