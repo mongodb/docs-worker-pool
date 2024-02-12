@@ -19,7 +19,7 @@ export async function nextGenDeploy({
   url,
 }: NextGenDeployParams): Promise<CommandExecutorResponse> {
   try {
-    if (hasConfigRedirects && (branchName === 'main' || branchName === 'master')) {
+    if (hasConfigRedirects && (branchName === 'main' || branchName === 'master' || branchName === 'current')) {
       // equivalent to: mut-redirects config/redirects -o public/.htaccess
       await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
       console.log(`COMMAND: mut-redirects config/redirects -o public/.htaccess`);
@@ -62,13 +62,14 @@ export async function nextGenDeploy({
         },
       }
     );
-    console.log(
-      `COMMAND: yes | mut-publish public ${bucket} --prefix=${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories --dry-run`
-    );
-    console.log(`${outputText}\n Hosted at ${url}/${mutPrefix}`);
+    const output = `COMMAND: yes | mut-publish public ${bucket} --prefix=${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories --dry-run
+      \n${outputText}\n Hosted at ${url}/${mutPrefix}
+    `;
+
+    console.log(output);
     return {
       status: CommandExecutorResponseStatus.success,
-      output: outputText,
+      output,
       error: '',
     };
   } catch (error) {
