@@ -216,7 +216,7 @@ export abstract class JobHandler {
     const commands = await downloadBuildDependencies(buildDependencies, this.currJob.payload.repoName, directory);
     await this._logger.save(this._currJob._id, `${commands.join('\n')}`);
     const err = commands.find((element) => element.includes('ERROR'));
-    if (err) throw new Error(err);
+    if (err) throw new Error('Could not download some dependencies');
   }
 
   @throwIfJobInterupted()
