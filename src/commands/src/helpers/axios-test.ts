@@ -10,6 +10,7 @@ export async function testAxios(repoName: string, directory?: string) {
     const res = await axios.get(url, { timeout: 10000, responseType: 'stream' });
     console.log('MAYA RES');
     console.log(res);
+    console.log('maya buildPath', buildPath);
     await res.data.pipe(fs.createWriteStream(buildPath));
     console.log('PIPED? IDK');
     await executeCliCommand({ command: 'cat', args: [`${buildPath}`] });
