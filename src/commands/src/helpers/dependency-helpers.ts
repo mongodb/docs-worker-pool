@@ -4,6 +4,7 @@ import axios from 'axios';
 import { executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
 import { promisify } from 'util';
 import { BuildDependencies } from '../../../entities/job';
+import { finished } from 'stream';
 
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
@@ -78,7 +79,12 @@ export async function downloadBuildDependencies(
           targetDir == repoDir ? `${targetDir}/${dep.filename}` : `${repoDir}/${targetDir}/${dep.filename}`;
         try {
           const res = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
-          res.data.pipe(fs.createWriteStream(buildPath));
+          const write = fs.createWriteStream(buildPath);
+          res.data.pipe(write);
+          //TODO: try to get the promise version of this?
+          finished(write, async () => {
+            console.log(`successfully wrote to ${buildPath}`);
+          });
           return `Downloading ${dep.url} into ${buildPath}`;
         } catch (error) {
           return `ERROR! Could not download ${dep.url} into ${buildPath}. ${error}`;
