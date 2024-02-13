@@ -82,7 +82,7 @@ export async function downloadBuildDependencies(
           const write = fs.createWriteStream(buildPath);
           res.data.pipe(write);
           //TODO: try to get the promise version of this?
-          finished(write, async () => {
+          await finished(write, async () => {
             console.log(`successfully wrote to ${buildPath}`);
           });
           return `Downloading ${dep.url} into ${buildPath}`;
