@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import { executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
 import { finished } from 'stream';
+import { open } from 'fs';
 
 export async function testAxios(repoName: string, directory?: string) {
   const repoDir = getRepoDir(repoName, directory);
@@ -14,14 +15,15 @@ export async function testAxios(repoName: string, directory?: string) {
     console.log('maya buildPath', buildPath);
     const write = fs.createWriteStream(buildPath);
     res.data.pipe(write);
-    await finished(write, (err) => {
+    await finished(write, async (err) => {
       if (err) {
         console.error('MAYA Stream failed.', err);
       } else {
         console.log('MAYA Stream is done reading.');
+        await executeCliCommand({ command: 'cat', args: [`${buildPath}`] });
       }
     });
-    await executeCliCommand({ command: 'cat', args: [`${buildPath}`] });
+    // await executeCliCommand({ command: 'cat', args: [`${buildPath}`] });
     await executeCliCommand({ command: 'ls', args: ['-al', `${repoDir}/source/driver-examples`] });
     return `Downloading ${url} into ${buildPath}`;
   } catch (error) {
