@@ -17,7 +17,6 @@ import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import { nextGenHtml, nextGenParse, oasPageBuild, persistenceModule, prepareBuild } from '../commands';
 import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
 import { CliCommandResponse } from '../commands/src/helpers';
-import { testAxios } from '../commands/src/helpers/axios-test';
 require('fs');
 
 export abstract class JobHandler {
@@ -218,7 +217,6 @@ export abstract class JobHandler {
     await this._logger.save(this._currJob._id, `${commands.join('\n')}`);
     const err = commands.find((element) => element.includes('ERROR'));
     if (err) throw new Error('Could not download some dependencies');
-    await testAxios(repoName, directory);
   }
 
   @throwIfJobInterupted()

@@ -81,13 +81,7 @@ export async function downloadBuildDependencies(
           const res = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
           const write = fs.createWriteStream(buildPath);
           res.data.pipe(write);
-          //TODO: try to get the promise version of this?
           await finished(write);
-
-          // finished(write, async (err) => {
-          //   if (err) return `ERROR! Could not download ${dep.url} into ${buildPath}. ${err}`;
-          //   else return `Downloading ${dep.url} into ${buildPath}`;
-          // });
           return `Downloading ${dep.url} into ${buildPath}`;
         } catch (error) {
           return `ERROR! Could not download ${dep.url} into ${buildPath}. ${error}`;
