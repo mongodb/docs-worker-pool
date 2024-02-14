@@ -55,7 +55,6 @@ export async function nextGenDeploy({
           `--deployed-url-prefix=${url}`,
           '--json',
           '--all-subdirectories',
-          '--dry-run',
         ],
         options: {
           cwd: `${process.cwd()}/snooty`,
