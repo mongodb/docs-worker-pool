@@ -100,7 +100,8 @@ export async function downloadBuildDependencies(
   return commands;
 }
 
-export const checkRedirects = async () => existsAsync(path.join(process.cwd(), 'config/redirects'));
+export const checkRedirects = async (repoName: string, directory?: string) =>
+  existsAsync(path.join(process.cwd(), getRepoDir(repoName, directory), 'config/redirects'));
 
 export async function prepareBuild(repoName: string, projectName: string, baseUrl: string, directory?: string) {
   const repoDir = getRepoDir(repoName, directory);

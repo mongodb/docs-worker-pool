@@ -180,8 +180,10 @@ export class ProductionJobHandler extends JobHandler {
     let resp;
     if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this.currJob.payload.repoName === MONOREPO_NAME) {
       const { mutPrefix, branchName } = this.currJob.payload;
+      await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)} Begin Deploy without makefiles`);
+
       const { bucket, url } = await this.getEnvironmentVariables();
-      const hasConfigRedirects = await checkRedirects();
+      const hasConfigRedirects = await checkRedirects(this.currJob.payload.repoName, this.currJob.payload.directory);
 
       resp = await nextGenDeploy({ mutPrefix, bucket, url, branchName, hasConfigRedirects });
     } else {
