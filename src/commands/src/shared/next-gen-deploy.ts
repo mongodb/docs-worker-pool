@@ -43,7 +43,7 @@ export async function nextGenDeploy({
     }
 
     // equivalent to: yes | mut-publish public ${BUCKET} --prefix=${MUT_PREFIX} --deploy --deployed-url-prefix=${URL} --json --all-subdirectories ${ARGS};
-    const { outputText } = await executeAndPipeCommands(
+    const { outputText, errorText } = await executeAndPipeCommands(
       { command: 'yes' },
       {
         command: 'mut-publish',
@@ -63,7 +63,7 @@ export async function nextGenDeploy({
       }
     );
     const output = `COMMAND: yes | mut-publish public ${bucket} --prefix=${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories --dry-run
-      \n${outputText}\n Hosted at ${url}/${mutPrefix}
+      \n${outputText} \n ${errorText} \n Hosted at ${url}/${mutPrefix}
     `;
 
     console.log(output);
