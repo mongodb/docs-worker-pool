@@ -18,17 +18,6 @@ describe('ShellCommandExecutor Tests', () => {
   });
 
   describe('ShellCommandExecutor Tests', () => {
-    test('ShellCommandExecutor resp contains stderr on success case (needed for legacy builds)', async () => {
-      cp.exec.mockImplementation((command, options, callback) => {
-        callback(null, { stderr: 'test warning', stdout: 'test success' });
-      });
-      const resp = await commandExecutor.execute([]);
-      expect(resp.error).toBe('test warning');
-      expect(resp.output).toBe('test success');
-      expect(resp.status).toBe('success');
-      expect(cp.exec).toBeCalledTimes(1);
-    });
-
     test('ShellCommandExecutor properly throws on system level error', async () => {
       cp.exec.mockImplementation((command, options, callback) => {
         callback(Error('Test error'), { stdErr: 'invalid command', stdout: 'test_repo_project_snooty_name' });

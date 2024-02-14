@@ -9,10 +9,10 @@ concurrency:
   group: environment-stg-feature-${{ github.ref }}
   cancel-in-progress: true
 name: Update Feature Branch Infrastructure
-jobs: 
+jobs:
   prep-build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -73,7 +73,7 @@ jobs:
         if: steps.filter.outputs.webhooks == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
   build-worker:
     needs: prep-build
@@ -103,11 +103,11 @@ jobs:
             worker:
               - 'src/!(cache-updater/**)/**'
               - 'cdk-infra/lib/constructs/worker/**'
-              - 'Dockerfile.enhanced'
+              - 'Dockerfile'
               - 'modules/**'
       - name: Update Worker Stack
         if: steps.filter.outputs.worker == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker

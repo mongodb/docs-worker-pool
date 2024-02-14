@@ -119,7 +119,6 @@ export const getManifestJobDef = (): Omit<Job, '_id'> => ({
     action: 'push',
     branchName: 'DOCSP-666',
     isFork: false,
-    isNextGen: true,
     manifestPrefix: 'testauth-UsingAlias',
     mutPrefix: 'compass/UsingAlias',
     newHead: '38b805e9c7c4f1c364476682e93f9d24a87f470a',

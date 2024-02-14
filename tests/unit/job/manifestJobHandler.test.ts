@@ -22,7 +22,7 @@ describe('ManifestJobHandler Tests', () => {
   test('Execute manifestJob runs successfully and does not queue another manifest job', async () => {
     const queueManifestJobSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'queueManifestJob');
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    jobHandlerTestHelper.setStageForDeploySuccess(false);
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyManifestSuccess();
     expect(queueManifestJobSpy).toBeCalledTimes(0);
@@ -42,11 +42,10 @@ describe('ManifestJobHandler Tests', () => {
       dotcomprd: 'example-prd',
     };
     jobHandlerTestHelper.config.get.calledWith('searchIndexFolder').mockReturnValue(mockFolderConfig);
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    jobHandlerTestHelper.setStageForDeploySuccess(false);
     await jobHandlerTestHelper.jobHandler.execute();
     expect(prepSpy).toBeCalledTimes(1);
     const o = [
-      '. /venv/bin/activate',
       'cd repos/testauth',
       'echo IGNORE: testing manifest generation deploy commands',
       'ls -al',
@@ -58,7 +57,7 @@ describe('ManifestJobHandler Tests', () => {
   test('prepDeployCommands throws error without manifestPrefix', async () => {
     const prepSpy = jest.spyOn(jobHandlerTestHelper.jobHandler, 'prepDeployCommands');
     jobHandlerTestHelper.jobHandler.currJob.payload.jobType = 'manifestGeneration';
-    jobHandlerTestHelper.setStageForDeploySuccess(true, false);
+    jobHandlerTestHelper.setStageForDeploySuccess(false);
     await jobHandlerTestHelper.jobHandler.execute();
     expect(prepSpy).toBeCalledTimes(1);
     expect(prepSpy).toThrowError();

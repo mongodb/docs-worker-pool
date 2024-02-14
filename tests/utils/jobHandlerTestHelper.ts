@@ -80,13 +80,12 @@ export class JobHandlerTestHelper {
   }
 
   setStageForDeploySuccess(
-    isNextGen = true,
     prodDeploy = true,
     returnValue?: MockReturnValueOnce,
     setupOptions: SetupOptions = {}
   ): string[] {
     this.job.payload.repoBranches = TestDataProvider.getPublishBranchesContent(this.job);
-    this.setupForSuccess(isNextGen);
+    this.setupForSuccess();
     const publishOutput = TestDataProvider.getPublishOutputWithPurgedUrls(prodDeploy);
 
     const { hasGatsbySiteId } = setupOptions;
@@ -133,7 +132,6 @@ export class JobHandlerTestHelper {
     expect(this.repoConnector.checkCommits).toBeCalledTimes(1);
     expect(this.repoConnector.applyPatch).toBeCalledTimes(1);
     expect(this.job.buildCommands).toEqual(expectedCommandSet);
-    expect(this.job.payload.isNextGen).toEqual(true);
   }
 
   verifyManifestSuccess(): void {
@@ -143,7 +141,6 @@ export class JobHandlerTestHelper {
     expect(this.repoConnector.checkCommits).toBeCalledTimes(1);
     expect(this.repoConnector.applyPatch).toBeCalledTimes(1);
     expect(this.job.buildCommands).toEqual(expectedCommandSet);
-    expect(this.job.payload.isNextGen).toEqual(true);
   }
 
   setupForSuccess(rootFileExists = true, nextGenEntry: string = TestDataProvider.nextGenEntryInWorkerFile()): void {
