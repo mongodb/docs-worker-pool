@@ -1,8 +1,10 @@
 import path from 'path';
 import fs from 'fs';
+import axios from 'axios';
 import { executeCliCommand, getCommitBranch, getCommitHash, getPatchId, getRepoDir } from '.';
 import { promisify } from 'util';
 import { BuildDependencies } from '../../../entities/job';
+import { finished } from 'stream/promises';
 
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
@@ -71,23 +73,22 @@ export async function downloadBuildDependencies(
         throw error;
       }
       commands.push(`mkdir -p ${targetDir}`);
-      await Promise.all(
-        dependencyInfo.dependencies.map(async (dep) => {
-          commands.push(`curl -SfL ${dep.url} -o ${targetDir}/${dep.filename}`);
-          try {
-            return await executeCliCommand({
-              command: 'curl',
-              args: ['--max-time', '10', '-SfL', dep.url, '-o', `${targetDir}/${dep.filename}`],
-              options: options,
-            });
-          } catch (error) {
-            console.error(
-              `ERROR! Could not curl ${dep.url} into ${targetDir}/${dep.filename}. Dependency information: `,
-              dependencyInfo
-            );
-          }
-        })
-      );
+
+      const response = dependencyInfo.dependencies.map(async (dep) => {
+        const buildPath =
+          targetDir == repoDir ? `${targetDir}/${dep.filename}` : `${repoDir}/${targetDir}/${dep.filename}`;
+        try {
+          const res = await axios.get(dep.url, { timeout: 10000, responseType: 'stream' });
+          const write = fs.createWriteStream(buildPath);
+          res.data.pipe(write);
+          await finished(write);
+          return `Downloading ${dep.url} into ${buildPath}`;
+        } catch (error) {
+          return `ERROR! Could not download ${dep.url} into ${buildPath}. ${error}`;
+        }
+      });
+      const responseSync = await Promise.all(response);
+      commands.push(...responseSync);
     })
   );
   return commands;

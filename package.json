@@ -60,7 +60,7 @@
     "@octokit/webhooks-types": "^7.1.0",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.1",
-    "@types/node": "12.12.43",
+    "@types/node": "^15.0.0",
     "@types/readable-stream": "2.3.5",
     "@typescript-eslint/eslint-plugin": "~5.5.0",
     "@typescript-eslint/parser": "~5.5.0",
