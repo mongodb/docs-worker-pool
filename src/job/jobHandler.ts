@@ -550,10 +550,14 @@ export abstract class JobHandler {
 
     await this.cloneRepo(this._config.get<string>('repo_dir'));
     this._logger.save(job._id, 'Cloned Repo');
-
     await this.commitCheck();
+
     this._logger.save(job._id, 'Checked Commit');
     await this.pullRepo();
+
+    this._logger.save(job._id, 'Next gen build');
+    await this.prepNextGenBuild();
+
     this._logger.save(job._id, 'Pulled Repo');
     await this.setEnvironmentVariables();
     this.logger.save(job._id, 'Prepared Environment variables');
