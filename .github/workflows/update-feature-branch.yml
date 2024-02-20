@@ -6,7 +6,7 @@ on:
       - synchronize
 
 concurrency:
-  group: environment-stg-feature-${{ github.ref }}
+  group: environment-dotcomstg-feature-${{ github.ref }}
   cancel-in-progress: true
 name: Update Feature Branch Infrastructure
 jobs:
@@ -73,8 +73,8 @@ jobs:
         if: steps.filter.outputs.webhooks == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
-            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.head_ref}} \
+            auto-builder-stack-enhancedApp-dotcomstg-${{github.head_ref}}-webhooks
   build-worker:
     needs: prep-build
     runs-on: ubuntu-latest
@@ -109,5 +109,5 @@ jobs:
         if: steps.filter.outputs.worker == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
-            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.head_ref}} \
+            auto-builder-stack-enhancedApp-dotcomstg-${{github.head_ref}}-worker

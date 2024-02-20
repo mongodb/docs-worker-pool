@@ -1,6 +1,5 @@
 import { IConfig } from 'config';
 import type { Job } from '../entities/job';
-import { InvalidJobError } from '../errors/errors';
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -182,10 +181,16 @@ export class ProductionJobHandler extends JobHandler {
       const { mutPrefix, branchName } = this.currJob.payload;
       await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)} Begin Deploy without makefiles`);
 
+      // using this as a way to test deploy with feature branches in dotcomstg (preprod)
+      const finalMutPrefix =
+        process.env.IS_FEATURE_BRANCH === 'true' && process.env.FEATURE_NAME
+          ? `${mutPrefix}${process.env.FEATURE_NAME}`
+          : mutPrefix;
+
       const { bucket, url } = await this.getEnvironmentVariables();
       const hasConfigRedirects = await checkRedirects(this.currJob.payload.repoName, this.currJob.payload.directory);
 
-      resp = await nextGenDeploy({ mutPrefix, bucket, url, branchName, hasConfigRedirects });
+      resp = await nextGenDeploy({ mutPrefix: finalMutPrefix, bucket, url, branchName, hasConfigRedirects });
     } else {
       resp = await this.deployWithMakefiles();
     }

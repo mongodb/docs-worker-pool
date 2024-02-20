@@ -61,7 +61,7 @@ export async function nextGenDeploy({
         },
       }
     );
-    const output = `COMMAND: yes | mut-publish public ${bucket} --prefix=${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories --dry-run
+    const output = `COMMAND: yes | mut-publish public ${bucket} --prefix=${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories
       \n${outputText} \n ${errorText} \n Hosted at ${url}${mutPrefix}
     `;
 

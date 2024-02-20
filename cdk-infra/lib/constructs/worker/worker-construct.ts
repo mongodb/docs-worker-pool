@@ -12,7 +12,7 @@ import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
-import { getEnv, isEnhanced } from '../../../utils/env';
+import { getEnv } from '../../../utils/env';
 
 interface WorkerConstructProps {
   dockerEnvironment: Record<string, string>;
