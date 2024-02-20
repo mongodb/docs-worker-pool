@@ -30,9 +30,10 @@ jobs:
           npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.head_ref}} auto-builder-stack-enhancedApp-dotcomstg-${{github.head_ref}}-worker
           npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.head_ref}} auto-builder-stack-enhancedApp-dotcomstg-${{github.head_ref}}-webhooks --outputs-file outputs.json
       - name: Get Webhook URL
-        uses: mongodb/docs-worker-actions/comment-pr@main
+        uses: mongodb/docs-worker-actions/comment-pr@DOP-4334
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STAGE: dotcomstg
       - name: Cache root node_modules
         id: cache-root
         uses: actions/cache@v3
