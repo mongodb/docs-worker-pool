@@ -58,7 +58,7 @@ export class ShellCommandExecutor implements ICommandExecutor {
       if (cwd) {
         options.cwd = cwd;
       }
-      const { stdout, stderr } = await exec(commands.join(' && '), options);
+      const { stdout, stderr } = await exec(commands.join(' && '), { ...options, maxBuffer });
 
       resp.output = stdout.trim();
       resp.error = stderr;
