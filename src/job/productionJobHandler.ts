@@ -179,7 +179,7 @@ export class ProductionJobHandler extends JobHandler {
     let resp;
     if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && this.currJob.payload.repoName === MONOREPO_NAME) {
       const { mutPrefix, branchName } = this.currJob.payload;
-      await this.logger.save(this.currJob._id, `${'(prod)'.padEnd(15)} Begin Deploy without makefiles`);
+      await this.logger.save(this.currJob._id, `${'(prod-monorepo)'.padEnd(15)} Begin Deploy without makefiles`);
 
       // using this as a way to test deploy with feature branches in dotcomstg (preprod)
       const finalMutPrefix =
@@ -188,8 +188,10 @@ export class ProductionJobHandler extends JobHandler {
           : mutPrefix;
 
       const { bucket, url } = await this.getEnvironmentVariables();
-      const hasConfigRedirects = await checkRedirects(this.currJob.payload.repoName, this.currJob.payload.directory);
 
+      await this.logger.save(this.currJob._id, `${'(prod-monorepo)'.padEnd(15)} Check redirects`);
+      const hasConfigRedirects = await checkRedirects(this.currJob.payload.repoName, this.currJob.payload.directory);
+      await this.logger.save(this.currJob._id, `${'(prod-monorepo)'.padEnd(15)} Redirects checked`);
       resp = await nextGenDeploy({ mutPrefix: finalMutPrefix, bucket, url, branchName, hasConfigRedirects });
     } else {
       resp = await this.deployWithMakefiles();

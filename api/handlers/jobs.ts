@@ -293,7 +293,6 @@ interface CreatePayloadProps {
   repoOwner: string;
   repoName: string;
   branchName: string;
-  newHead: string;
   project: string;
   prefix: string;
   urlSlug;
@@ -303,6 +302,7 @@ interface CreatePayloadProps {
   primaryAlias: boolean;
   stable: boolean;
   directory?: string;
+  newHead?: string;
 }
 
 export function createPayload({
