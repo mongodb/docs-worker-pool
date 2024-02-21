@@ -5,7 +5,7 @@ on:
     types:
       - opened
       - reopened
-name: Initial Feature Branch Deploy
+name: Dummy test
 jobs:
   deploy:
     permissions: write-all
