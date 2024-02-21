@@ -192,6 +192,7 @@ export class ProductionJobHandler extends JobHandler {
       await this.logger.save(this.currJob._id, `${'(prod-monorepo)'.padEnd(15)} Check redirects`);
       const hasConfigRedirects = await checkRedirects(this.currJob.payload.repoName, this.currJob.payload.directory);
       await this.logger.save(this.currJob._id, `${'(prod-monorepo)'.padEnd(15)} Redirects checked`);
+      console.log('Generic log to see that it actually logs stuff in CloudWatch (which it should)');
       resp = await nextGenDeploy({ mutPrefix: finalMutPrefix, bucket, url, branchName, hasConfigRedirects });
     } else {
       resp = await this.deployWithMakefiles();
