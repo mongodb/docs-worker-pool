@@ -34,7 +34,7 @@ jobs:
           npm ci
       - name: Cache root node_modules
         id: cache-root
-        uses: actions/cache@v3
+        uses: actions/cache/save@v4
         with:
           path: |
             node_modules
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         id: cache-restore
         with:
           path: |
