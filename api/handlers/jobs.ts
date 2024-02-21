@@ -7,7 +7,7 @@ import { JobRepository } from '../../src/repositories/jobRepository';
 import { GithubCommenter } from '../../src/services/github';
 import { SlackConnector } from '../../src/services/slack';
 import { RepoEntitlementsRepository } from '../../src/repositories/repoEntitlementsRepository';
-import { EnhancedJob, Job, JobStatus, Payload } from '../../src/entities/job';
+import { EnhancedJob, EnhancedPayload, Job, JobStatus, Payload } from '../../src/entities/job';
 
 // Although data in payload should always be present, it's not guaranteed from
 // external callers
@@ -279,4 +279,81 @@ function getPreviewUrl(payload: Payload | undefined, env: string): string | unde
   const githubUsernameNoHyphens = repoOwner.split('-').join('').toLowerCase();
   const possibleStagingSuffix = env === 'stg' ? 'stg' : '';
   return `https://preview-mongodb${githubUsernameNoHyphens}${possibleStagingSuffix}.gatsbyjs.io/${project}/${branchName}/`;
+}
+
+interface CreateJobProps {
+  payload: EnhancedPayload;
+  jobTitle: string;
+  jobUserName: string;
+  jobUserEmail?: string;
+}
+
+interface CreatePayloadProps {
+  jobType: string;
+  repoOwner: string;
+  repoName: string;
+  branchName: string;
+  newHead: string;
+  project: string;
+  prefix: string;
+  urlSlug;
+  source: string;
+  action: string;
+  aliased: boolean;
+  primaryAlias: boolean;
+  stable: boolean;
+  directory?: string;
+}
+
+export function createPayload({
+  jobType,
+  repoOwner,
+  repoName,
+  branchName,
+  newHead,
+  project,
+  prefix,
+  urlSlug,
+  source,
+  action,
+  aliased = false,
+  primaryAlias = false,
+  stable = false,
+  directory,
+}: CreatePayloadProps): EnhancedPayload {
+  return {
+    jobType,
+    source,
+    action,
+    repoName,
+    branchName,
+    project,
+    prefix,
+    aliased,
+    urlSlug,
+    isFork: true,
+    repoOwner,
+    url: 'https://github.com/' + repoOwner + '/' + repoName,
+    newHead,
+    primaryAlias,
+    stable,
+    directory,
+  };
+}
+
+export function createJob({ jobTitle, jobUserName, payload, jobUserEmail }: CreateJobProps): Omit<EnhancedJob, '_id'> {
+  return {
+    title: jobTitle,
+    user: jobUserName,
+    email: jobUserEmail,
+    status: JobStatus.inQueue,
+    createdTime: new Date(),
+    startTime: null,
+    endTime: null,
+    priority: 1,
+    error: {},
+    result: null,
+    payload,
+    logs: [],
+  };
 }

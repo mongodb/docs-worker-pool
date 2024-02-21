@@ -202,7 +202,6 @@ export abstract class JobHandler {
     try {
       await this._repoConnector.pullRepo(this.currJob);
     } catch (error) {
-      await error;
       throw error;
     }
   }

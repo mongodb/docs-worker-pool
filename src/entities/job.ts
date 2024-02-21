@@ -75,9 +75,9 @@ export type EnhancedPayload = {
   pathPrefix?: string | null;
   mutPrefix?: string | null;
   aliased?: boolean | null;
-  primaryAlias?: string | null;
+  primaryAlias?: boolean | null;
   stable?: boolean | null;
-  repoBranches?: any;
+  repoBranches?: unknown;
   regression?: boolean | null;
   urlSlug?: string | null;
   prefix: string;
@@ -112,15 +112,21 @@ export type Job = {
   shouldGenerateSearchManifest: boolean;
 };
 
-export type EnhancedJob = {
+/**
+ * NOTE: This is just the Job type, but we kept them separate
+ * to minimize any risk of interfering with existing code. This should be
+ * re-examined at some point so that we can replace the Job type with this one
+ * to reduce confusion.
+ */
+export interface EnhancedJob {
   _id: string;
   payload: EnhancedPayload;
   createdTime: Date;
   endTime: Date | null | undefined;
-  error?: any;
+  error?: unknown;
   logs: string[] | null | undefined;
   priority: number | null | undefined;
-  result?: any;
+  result?: unknown;
   startTime: Date | null;
   status: JobStatus | null;
   title: string;
@@ -131,8 +137,8 @@ export type EnhancedJob = {
   buildCommands?: string[];
   deployCommands?: string[];
   invalidationStatusURL?: string | null;
-  email: string | null; // probably can be removed
+  email?: string | null; // probably can be removed
   comMessage?: string[] | null;
   purgedUrls?: string[] | null;
   shouldGenerateSearchManifest?: boolean;
-};
+}
