@@ -21,6 +21,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
+      - name: Install node_modules
+        run: |
+          npm ci
+          cd cdk-infra/
+          npm ci
+      - name: Cache root node_modules
+        id: cache-root
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            cdk-infra/node_modules
+          key: ${{ github.head_ref }}
+
       - name: Deploy Feature Branch Infrastructure
         run: |
           npm ci
@@ -34,11 +48,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STAGE: dotcomstg
-      - name: Cache root node_modules
-        id: cache-root
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            cdk-infra/node_modules
-          key: ${{ github.head_ref }}
