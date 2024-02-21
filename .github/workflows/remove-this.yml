@@ -1,0 +1,18 @@
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+name: Initial Feature Branch Deploy
+jobs:
+  deploy:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Webhook URL
+        uses: mongodb/docs-worker-actions/comment-pr@DOP-4334
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STAGE: dotcomstg
