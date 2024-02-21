@@ -42,7 +42,7 @@ async function prepGithubPushPayload(
     error: {},
     result: null,
     payload: {
-      jobType: 'githubPush',
+      jobType: 'productionDeploy',
       source: 'github',
       action: 'push',
       repoName: githubEvent.repository.name,

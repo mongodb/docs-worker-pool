@@ -18,6 +18,8 @@ export async function nextGenDeploy({
   bucket,
   url,
 }: NextGenDeployParams): Promise<CommandExecutorResponse> {
+  console.log('In next gen deploy');
+  console.log('branchName', branchName);
   try {
     if (hasConfigRedirects && (branchName === 'main' || branchName === 'master' || branchName === 'current')) {
       // equivalent to: mut-redirects config/redirects -o public/.htaccess
