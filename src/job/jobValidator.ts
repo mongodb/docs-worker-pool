@@ -38,8 +38,7 @@ export class JobValidator implements IJobValidator {
     }`;
     if (
       !entitlementsObject?.repos?.includes(entitlementToFind) &&
-      job.payload.repoOwner !== '10gen' &&
-      job.payload.repoOwner !== 'mongodb'
+      (job.payload.repoOwner === '10gen' || job.payload.repoOwner === 'mongodb')
     ) {
       throw new AuthorizationError(`${job.user} is not entitled for repo ${entitlementToFind}`);
     }
