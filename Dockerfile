@@ -1,6 +1,5 @@
 # where repo work will happen
 FROM ubuntu:20.04 as initial
-# #######################
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ARG SNOOTY_PARSER_VERSION=0.15.2
