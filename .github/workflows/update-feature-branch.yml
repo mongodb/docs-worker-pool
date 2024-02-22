@@ -114,8 +114,8 @@ jobs:
           context: .
           tags: autobuilder/enhanced:latest
           build-args: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE64_AUTH }}
-          cache-from: type=gha,ref=autobuilder/enhanced:latest
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha,ref=autobuilder/enhanced:latest
+          # cache-to: type=gha,mode=max
         env:
           NPM_BASE_64_AUTH: ${{ secrets.NPM_BASE64_AUTH }}
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
