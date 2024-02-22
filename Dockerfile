@@ -24,8 +24,7 @@ RUN apt-get install --yes curl
 RUN curl --location https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
-RUN echo email=${NPM_EMAIL} >> ~/.npmrc
-RUN echo _auth=${NPM_BASE_64_AUTH} >> ~/.npmrc
+
 # install snooty parser
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
