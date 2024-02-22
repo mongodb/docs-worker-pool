@@ -6,7 +6,6 @@ ARG SNOOTY_PARSER_VERSION=0.15.2
 ARG SNOOTY_FRONTEND_VERSION=0.15.7
 ARG MUT_VERSION=0.10.7
 ARG REDOC_CLI_VERSION=1.2.3
-ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
 
@@ -22,7 +21,7 @@ RUN apt-get install --yes curl
 RUN curl --location https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
-
+RUN echo //artifactory.corp.mongodb.com/artifactory/api/npm/:_auth=${NPM_BASE_64_AUTH} >> ~/.npmrc
 # install snooty parser
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
