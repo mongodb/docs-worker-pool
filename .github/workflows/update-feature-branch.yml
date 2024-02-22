@@ -44,10 +44,6 @@ jobs:
     needs: prep-build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          version: v0.12.0
       - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -83,6 +79,8 @@ jobs:
     needs: prep-build
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -109,6 +107,15 @@ jobs:
               - 'cdk-infra/lib/constructs/worker/**'
               - 'Dockerfile'
               - 'modules/**'
+      - uses: docker/build-push-action@v5
+        if: steps.filter.outputs.worker == 'true'
+        name: build Docker image
+        with:
+          context: .
+          tags: autobuilder/enhanced:latest
+          build-args: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE64_AUTH }}
+          cache-from: type=gha,ref=autobuilder/enhanced:latest
+          cache-to: type=gha,mode=max
       - name: Update Worker Stack
         if: steps.filter.outputs.worker == 'true'
         run: |

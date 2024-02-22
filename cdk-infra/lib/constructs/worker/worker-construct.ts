@@ -94,7 +94,7 @@ export class WorkerConstruct extends Construct {
     taskRole.addToPolicy(updateTaskProtectionPolicy);
 
     taskDefinition.addContainer('workerImage', {
-      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
+      image: ContainerImage.fromTarball(`${process.cwd()}/image.tar.gz`),
       environment: dockerEnvironment,
       command: ['node', '--enable-source-maps', 'enhanced/enhancedApp.js'],
       logging: LogDrivers.awsLogs({
