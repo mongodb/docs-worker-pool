@@ -1,41 +1,21 @@
-# Build the Typescript app
-FROM node:18.16.0-alpine as ts-compiler
-WORKDIR /home/docsworker-xlarge
-COPY  config config/
-COPY package*.json ./
-COPY tsconfig*.json ./
-RUN npm ci --legacy-peer-deps
-COPY . ./
-RUN npm run build
-
-# install persistence module
-RUN cd ./modules/persistence \
-    && npm ci --legacy-peer-deps \
-    && npm run build
-
-# Build modules
-# OAS Page Builder
-RUN cd ./modules/oas-page-builder \
-    && npm ci --legacy-peer-deps \
-    && npm run build
-
 # where repo work will happen
-FROM ubuntu:20.04
-ARG WORK_DIRECTORY=/home/docsworker-xlarge
-ARG SNOOTY_PARSER_VERSION=0.16.0
-ARG SNOOTY_FRONTEND_VERSION=0.16.1
-ARG MUT_VERSION=0.11.1
+FROM ubuntu:20.04 as initial
+# #######################
+ARG NPM_BASE_64_AUTH
+ARG NPM_EMAIL
+ARG SNOOTY_PARSER_VERSION=0.15.2
+ARG SNOOTY_FRONTEND_VERSION=0.15.7
+ARG MUT_VERSION=0.10.7
 ARG REDOC_CLI_VERSION=1.2.3
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
-ENV DEBIAN_FRONTEND=noninteractive
+ARG WORK_DIRECTORY=/home/docsworker-xlarge
 
+ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR ${WORK_DIRECTORY}
 
 # helper libraries for docs builds
-RUN apt-get update && apt-get install -y vim git unzip rsync curl
-
-
-ENV PATH="${PATH}:/opt/snooty:/opt/mut:/home/docsworker-xlarge/.local/bin"
+RUN apt-get update && apt-get install -y vim git unzip zip rsync
 
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab
@@ -43,9 +23,6 @@ RUN apt-get install --yes curl
 RUN curl --location https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install --yes nodejs
 RUN apt-get install --yes build-essential
-
-# use npm 8.*
-RUN npm install -g npm@8
 
 # install snooty parser
 RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
@@ -55,56 +32,81 @@ RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releas
 RUN curl -L -o mut.zip https://github.com/mongodb/mut/releases/download/v${MUT_VERSION}/mut-v${MUT_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ mut.zip
 
+
+ENV PATH="${PATH}:/opt/snooty:/opt/mut:/${WORK_DIRECTORY}/.local/bin"
+
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
 RUN chmod 755 -R ${WORK_DIRECTORY}
 RUN chown -Rv docsworker-xlarge ${WORK_DIRECTORY}
 USER docsworker-xlarge
 
-WORKDIR ${WORK_DIRECTORY}
-
-# get shared.mk
-RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
-
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
-    && npm ci --legacy-peer-deps --omit=dev                                                        \
-    && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
-    && mkdir -p ./static/images                                                                    \
-    && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
-    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
+    && npm ci --legacy-peer-deps --omit=dev                                                        
 
-# install redoc fork
+RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
+
+
 RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.com/mongodb-forks/redoc.git redoc \
     # Install dependencies for Redoc CLI
     && cd redoc/ \
     && npm ci --prefix cli/ --omit=dev
 
-COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/package*.json ./
-COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/config config/
-COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/build ./
-RUN npm install
+FROM initial as persistence
 
-# Persistence module copy
-# Create directory and add permissions to allow node module installation
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
-COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/persistence/package*.json ./modules/persistence/
-COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/persistence/dist ./modules/persistence/
+COPY modules/persistence/package*.json ./modules/persistence/
+RUN cd ./modules/persistence \
+    && npm ci --legacy-peer-deps 
+# Build persistence module
+
+COPY --chown=docsworker-xlarge modules/persistence/tsconfig*.json ./modules/persistence
+COPY --chown=docsworker-xlarge modules/persistence/src ./modules/persistence/src/
+COPY --chown=docsworker-xlarge modules/persistence/index.ts ./modules/persistence
+
+RUN cd ./modules/persistence \
+    && npm run build:esbuild
+
+FROM initial as oas
+
+RUN  mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
+COPY modules/oas-page-builder/package*.json ./modules/oas-page-builder/
+RUN cd ./modules/oas-page-builder \
+    && npm ci --legacy-peer-deps 
+# Build modules
+# OAS Page Builder
+COPY --chown=docsworker-xlarge modules/oas-page-builder/tsconfig*.json ./modules/oas-page-builder
+COPY --chown=docsworker-xlarge modules/oas-page-builder/src ./modules/oas-page-builder/src/
+COPY --chown=docsworker-xlarge modules/oas-page-builder/index.ts ./modules/oas-page-builder
+
+RUN cd ./modules/oas-page-builder \
+    && npm run build:esbuild
+
+FROM initial as root
+
+COPY --from=persistence --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/persistence/dist/ ./modules/persistence
+COPY --from=oas --chown=docsworker-xlarge ${WORK_DIRECTORY}/modules/oas-page-builder/dist/ ./modules/oas-page-builder
+
+# Root project build
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
+
+
+COPY tsconfig*.json ./
+COPY config config/
+COPY api api/
+COPY src src/
+
+RUN npm run build:esbuild
+
 ENV PERSISTENCE_MODULE_PATH=${WORK_DIRECTORY}/modules/persistence/index.js
-RUN cd ./modules/persistence/ && ls && npm ci --legacy-peer-deps
-
-# OAS Page Builder module copy
-# Create directory and add permissions to allow node module installation
-RUN mkdir -p modules/oas-page-builder && chmod 755 modules/oas-page-builder
-COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/oas-page-builder/package*.json ./modules/oas-page-builder/
-COPY --from=ts-compiler --chown=docsworker-xlarge /home/docsworker-xlarge/modules/oas-page-builder/dist ./modules/oas-page-builder/
-RUN cd ./modules/oas-page-builder/ && npm ci --legacy-peer-deps
-
-# Needed for OAS Page Builder module in shared.mk
-ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
 ENV OAS_MODULE_PATH=${WORK_DIRECTORY}/modules/oas-page-builder/index.js
+ENV REDOC_PATH=${WORK_DIRECTORY}/redoc/cli/index.js
 
+RUN mkdir -p modules/persistence && chmod 755 modules/persistence
 RUN mkdir repos && chmod 755 repos
+
 EXPOSE 3000
 CMD ["node", "app.js"]
