@@ -36,8 +36,8 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     snootyParseCacheBucket.grantWrite(taskRole);
 
     const taskDefinition = new FargateTaskDefinition(this, 'cacheUpdaterWorker', {
-      cpu: 2048,
-      memoryLimitMiB: 4096,
+      cpu: 4096,
+      memoryLimitMiB: 8192,
       taskRole,
     });
 
