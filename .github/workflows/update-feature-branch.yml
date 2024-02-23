@@ -118,6 +118,7 @@ jobs:
             NPM_BASE_64_AUTH=${{ secrets.NPM_BASE64_AUTH }}
           cache-from: type=gha,ref=autobuilder/enhanced:latest
           cache-to: type=gha,mode=max
+          outputs: type=tar,dest=cdk-infra/image.tar.gz
       - name: Update Worker Stack
         if: steps.filter.outputs.worker == 'true'
         run: |
