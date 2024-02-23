@@ -6,6 +6,9 @@ on:
       forceRun:
         description: Force the cache to be rebuilt.
         default: 'false'
+  push:
+    branches:
+      - 'cache-updater-hotfix'
 
 concurrency:
   group: environment-prd-enhanced-cacheUpdate-${{ github.ref }}
@@ -26,8 +29,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       - name: Rebuild Cache if New Snooty Parser Version
-        uses: mongodb/docs-worker-actions/rebuild-parse-cache@main
+        uses: mongodb/docs-worker-actions/rebuild-parse-cache@cache-update-hotfix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKSPACE: ${{ github.workspace }}
-          FORCE_RUN: ${{ inputs.forceRun }}
+          # FORCE_RUN: ${{ inputs.forceRun }}
+          FORCE_RUN: 'true'
