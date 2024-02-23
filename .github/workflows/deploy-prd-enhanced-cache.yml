@@ -1,6 +1,12 @@
 on:
   release:
     types: [released]
+  workflow_dispatch:
+    inputs:
+      forceRun:
+        description: Force the cache to be rebuilt.
+        default: 'false'
+
 concurrency:
   group: environment-prd-enhanced-cacheUpdate-${{ github.ref }}
   cancel-in-progress: true
@@ -24,3 +30,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKSPACE: ${{ github.workspace }}
+          FORCE_RUN: ${{ inputs.forceRun }}

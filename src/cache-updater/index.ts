@@ -7,15 +7,27 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { executeCliCommand } from '../commands/src/helpers';
 
 const readdirAsync = promisify(fs.readdir);
-const SNOOTY_CACHE_BUCKET_NAME = process.env.SNOOTY_CACHE_BUCKET_NAME;
+const { SNOOTY_CACHE_BUCKET_NAME, GITHUB_BOT_USERNAME, GITHUB_BOT_PASSWORD } = process.env;
 
 if (!SNOOTY_CACHE_BUCKET_NAME) throw new Error('ERROR! SNOOTY_CACHE_BUCKET_NAME is not defined');
 
 async function cloneDocsRepo(repoName: string, repoOwner: string) {
+  if (!GITHUB_BOT_USERNAME) {
+    const errorMessage = `ERROR! GITHUB_BOT_USERNAME is not set. ${repoOwner}/${repoName} will not have their cache updated`;
+    console.error(`ERROR! GITHUB_BOT_USERNAME is not set. ${repoOwner}/${repoName} will not have their cache updated`);
+    throw new Error(errorMessage);
+  }
+
+  if (!GITHUB_BOT_PASSWORD) {
+    const errorMessage = `ERROR! GITHUB_BOT_PASSWORD is not set. ${repoOwner}/${repoName} will not have their cache updated`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
   try {
     const cloneResults = await executeCliCommand({
       command: 'git',
-      args: ['clone', `https://github.com/${repoOwner}/${repoName}`],
+      args: ['clone', `https://${GITHUB_BOT_USERNAME}:${GITHUB_BOT_PASSWORD}@github.com/${repoOwner}/${repoName}`],
     });
 
     console.log('clone: ', cloneResults);
