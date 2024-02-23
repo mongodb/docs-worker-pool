@@ -29,7 +29,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       - name: Rebuild Cache if New Snooty Parser Version
-        uses: mongodb/docs-worker-actions/rebuild-parse-cache@cache-update-hotfix
+        uses: mongodb/docs-worker-actions/rebuild-parse-cache@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKSPACE: ${{ github.workspace }}
