@@ -45,7 +45,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     const taskDefLogGroup = new LogGroup(this, 'cacheUpdaterWorkerLogGroup');
 
     const snootyParserVersion = getSnootyParserVersion();
-    const githubBotUsername = StringParameter.valueFromLookup(this, '/env/${env}/docs/worker_pool/github/bot/username');
+    const githubBotUsername = StringParameter.valueFromLookup(this, '/env/prd/docs/worker_pool/github/bot/username');
 
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
