@@ -6,10 +6,6 @@ on:
       forceRun:
         description: Force the cache to be rebuilt.
         default: 'false'
-  push:
-    branches:
-      - 'cache-updater-hotfix'
-
 concurrency:
   group: environment-prd-enhanced-cacheUpdate-${{ github.ref }}
   cancel-in-progress: true
