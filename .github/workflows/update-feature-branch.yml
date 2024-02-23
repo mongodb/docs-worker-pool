@@ -88,7 +88,9 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
       - uses: actions/cache/restore@v3
         id: cache-restore
         with:
@@ -111,12 +113,11 @@ jobs:
         with:
           context: .
           tags: autobuilder/enhanced:latest
-          build-args: NPM_EMAIL=${{ secrets.NPM_EMAIL }},NPM_BASE_64_AUTH=${{ secrets.NPM_BASE64_AUTH }}
+          build-args: |
+            NPM_EMAIL=${{ secrets.NPM_EMAIL }}
+            NPM_BASE_64_AUTH=${{ secrets.NPM_BASE64_AUTH }}
           cache-from: type=gha,ref=autobuilder/enhanced:latest
           cache-to: type=gha,mode=max
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
       - name: Update Worker Stack
         if: steps.filter.outputs.worker == 'true'
         run: |

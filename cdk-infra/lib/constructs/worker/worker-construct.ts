@@ -64,14 +64,6 @@ export class WorkerConstruct extends Construct {
 
     executionRole.addToPolicy(executionRoleSsmPolicy);
 
-    const containerProps: AssetImageProps = {
-      buildArgs: {
-        NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
-        NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
-        DOCKER_BUILDKIT: '1',
-      },
-    };
-
     const taskDefLogGroup = new LogGroup(this, 'workerLogGroup');
     const taskDefinition = new FargateTaskDefinition(this, 'workerTaskDefinition', {
       cpu: 4096,
