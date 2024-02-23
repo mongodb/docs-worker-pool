@@ -181,6 +181,13 @@ function validateSnootyPayload(payload: string, signature: string) {
  * @returns
  */
 export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
+  // Testing to make sure it appears
+  if (event.queryStringParameters) {
+    return {
+      statusCode: 202,
+      body: JSON.stringify(event.queryStringParameters),
+    };
+  }
   const consoleLogger = new ConsoleLogger();
   const defaultHeaders = { 'Content-Type': 'text/plain' };
 
