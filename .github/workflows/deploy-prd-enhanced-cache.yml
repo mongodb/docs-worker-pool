@@ -33,5 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKSPACE: ${{ github.workspace }}
-          # FORCE_RUN: ${{ inputs.forceRun }}
-          FORCE_RUN: 'true'
+          FORCE_RUN: ${{ inputs.forceRun }}
