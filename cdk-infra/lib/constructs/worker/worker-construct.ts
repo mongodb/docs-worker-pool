@@ -64,6 +64,15 @@ export class WorkerConstruct extends Construct {
 
     executionRole.addToPolicy(executionRoleSsmPolicy);
 
+    const containerProps: AssetImageProps = {
+      buildArgs: {
+        NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
+        NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
+      },
+      cacheTo: { type: 'gha', params: { mode: 'max' } },
+      cacheFrom: [{ type: 'gha' }],
+    };
+
     const taskDefLogGroup = new LogGroup(this, 'workerLogGroup');
     const taskDefinition = new FargateTaskDefinition(this, 'workerTaskDefinition', {
       cpu: 4096,
@@ -86,7 +95,7 @@ export class WorkerConstruct extends Construct {
     taskRole.addToPolicy(updateTaskProtectionPolicy);
 
     taskDefinition.addContainer('workerImage', {
-      image: ContainerImage.fromTarball(`${process.cwd()}/image.tar.gz`),
+      image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment: dockerEnvironment,
       command: ['node', '--enable-source-maps', 'enhanced/enhancedApp.js'],
       logging: LogDrivers.awsLogs({
