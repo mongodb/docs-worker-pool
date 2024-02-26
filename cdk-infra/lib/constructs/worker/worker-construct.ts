@@ -69,8 +69,8 @@ export class WorkerConstruct extends Construct {
         NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
         NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
       },
-      cacheFrom: [{ type: 'ecr' }],
-      cacheTo: { type: 'ecr', params: { mode: 'max' } },
+      cacheFrom: [{ type: 'gha' }],
+      cacheTo: { type: 'gha', params: { mode: 'max' } },
     };
 
     const taskDefLogGroup = new LogGroup(this, 'workerLogGroup');
