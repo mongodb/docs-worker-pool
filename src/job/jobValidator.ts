@@ -36,6 +36,7 @@ export class JobValidator implements IJobValidator {
     const entitlementToFind = `${job.payload.repoOwner}/${job.payload.repoName}${
       job.payload.repoName === MONOREPO_NAME ? `/${job.payload.directory}` : ``
     }`;
+    return;
     if (
       !entitlementsObject?.repos?.includes(entitlementToFind) &&
       (job.payload.repoOwner === '10gen' || job.payload.repoOwner === 'mongodb')

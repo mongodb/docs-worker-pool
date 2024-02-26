@@ -69,8 +69,8 @@ export class WorkerConstruct extends Construct {
         NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
         NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
       },
-      cacheTo: { type: 'gha', params: { mode: 'max' } },
-      cacheFrom: [{ type: 'gha' }],
+      cacheFrom: [{ type: 'ecr' }],
+      cacheTo: { type: 'ecr', params: { mode: 'max' } },
     };
 
     const taskDefLogGroup = new LogGroup(this, 'workerLogGroup');
@@ -97,6 +97,7 @@ export class WorkerConstruct extends Construct {
     taskDefinition.addContainer('workerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), containerProps),
       environment: dockerEnvironment,
+
       command: ['node', '--enable-source-maps', 'enhanced/enhancedApp.js'],
       logging: LogDrivers.awsLogs({
         streamPrefix: 'autobuilderworker',

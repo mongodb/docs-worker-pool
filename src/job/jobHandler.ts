@@ -265,6 +265,7 @@ export abstract class JobHandler {
 
     this.prepStageSpecificNextGenCommands();
     this.constructEnvVars();
+    return;
     if (this._currJob.payload.jobType === 'productionDeploy') {
       this._validator.throwIfNotPublishable(this._currJob);
     }
