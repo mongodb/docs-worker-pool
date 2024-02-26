@@ -77,4 +77,15 @@ describe('Post-build webhook tests', () => {
     );
     expect(res.statusCode).toBe(400);
   });
+
+  test('successfully handles builder=netlify query string param', async () => {
+    const signature = createSha256Signature(payloadString, 'SNOOTY_SECRET');
+    const mockReqEvent = createMockAPIGatewayEvent(payloadString, { 'x-snooty-signature': signature });
+    mockReqEvent.queryStringParameters = {
+      builder: 'netlify',
+    };
+    const res = await SnootyBuildComplete(mockReqEvent);
+    // Ideally, we would have a more robust way to check that only specific data is updated
+    expect(res.statusCode).toBe(200);
+  });
 });
