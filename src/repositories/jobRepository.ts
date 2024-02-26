@@ -106,9 +106,11 @@ export class JobRepository extends BaseRepository {
       _id: new objectId(id),
     };
     const update = { $set: setValues };
-    this.updateOne(query, update, `Mongo Timeout Error: Timed out while retrieving job`).catch((err) => {
+    try {
+      await this.updateOne(query, update, `Mongo Timeout Error: Timed out while retrieving job`);
+    } catch (err) {
       this._logger.error('updateExecutionTime', `Error: ${err}`);
-    });
+    }
   }
 
   async findOneAndUpdateJob(query): Promise<Job | null> {
