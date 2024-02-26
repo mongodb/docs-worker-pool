@@ -181,13 +181,6 @@ function validateSnootyPayload(payload: string, signature: string) {
  * @returns
  */
 export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
-  // Testing to make sure it appears
-  if (event.queryStringParameters) {
-    return {
-      statusCode: 202,
-      body: JSON.stringify(event.queryStringParameters),
-    };
-  }
   const consoleLogger = new ConsoleLogger();
   const defaultHeaders = { 'Content-Type': 'text/plain' };
 
@@ -253,10 +246,20 @@ export async function snootyBuildComplete(event: APIGatewayEvent): Promise<APIGa
     await client.connect();
     const db = client.db(c.get<string>('dbName'));
     const jobRepository = new JobRepository(db, c, consoleLogger);
-    await jobRepository.updateExecutionTime(jobId, { gatsbyCloudEndTime: new Date() });
-    const updateResponse = await jobRepository.updateWithStatus(jobId, null, payload.status || JobStatus.failed, false);
-    const previewUrl = getPreviewUrl(updateResponse.payload, c.get<string>('env'));
-    await notifyBuildSummary(jobId, { mongoClient: client, previewUrl });
+
+    if (event.queryStringParameters?.builder === 'netlify') {
+      await jobRepository.updateExecutionTime(jobId, { netlifyEndTime: new Date() });
+    } else {
+      await jobRepository.updateExecutionTime(jobId, { gatsbyCloudEndTime: new Date() });
+      const updateResponse = await jobRepository.updateWithStatus(
+        jobId,
+        null,
+        payload.status || JobStatus.failed,
+        false
+      );
+      const previewUrl = getPreviewUrl(updateResponse.payload, c.get<string>('env'));
+      await notifyBuildSummary(jobId, { mongoClient: client, previewUrl });
+    }
   } catch (e) {
     consoleLogger.error('SnootyBuildCompleteError', e);
     return {
