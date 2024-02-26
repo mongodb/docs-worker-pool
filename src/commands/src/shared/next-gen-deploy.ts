@@ -33,7 +33,7 @@ export async function nextGenDeploy({
         args: [
           'public',
           bucket,
-          `--prefix=${mutPrefix}`,
+          `--prefix=testinReleaseg4/${mutPrefix}`,
           '--deploy',
           `--deployed-url-prefix=${url}`,
           '--json',

@@ -38,8 +38,9 @@ export async function nextGenStage({ job, bucket, url }: StageParams): Promise<C
     prefix = `${newHead}/${patchId}/${mutPrefix}`;
     hostedAtUrl = `${url}/${newHead}/${patchId}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;
   }
+  prefix = 'testingRelease1';
 
-  commandArgs.push(`--prefix=testingRelease/${prefix}`);
+  commandArgs.push(`--prefix=${prefix}`);
 
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   try {
