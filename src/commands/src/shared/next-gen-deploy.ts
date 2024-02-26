@@ -33,7 +33,7 @@ export async function nextGenDeploy({
         args: [
           'public',
           bucket,
-          `--prefix=testinReleaseg4/${mutPrefix}`,
+          `--prefix=RELEASE1`,
           '--deploy',
           `--deployed-url-prefix=${url}`,
           '--json',
@@ -46,7 +46,7 @@ export async function nextGenDeploy({
       }
     );
     console.log(
-      `COMMAND: yes | mut-publish public ${bucket} --prefix=${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories --dry-run`
+      `COMMAND: yes | mut-publish public ${bucket} --prefix=release3/${mutPrefix} --deploy --deployed-url-prefix=${url} --json --all-subdirectories --dry-run`
     );
     console.log(`${outputText}\n Hosted at ${url}${mutPrefix}`);
     return {

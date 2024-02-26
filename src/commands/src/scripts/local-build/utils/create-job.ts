@@ -30,7 +30,7 @@ export function createLocalJob({
     priority: 1,
     error: {},
     result: null,
-    pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
+    pathPrefix: `${project}/testingRelease6/docsworker-xlarge/${branchName}`,
     payload: {
       jobType: 'githubPush',
       source: 'github',

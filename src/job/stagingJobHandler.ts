@@ -49,7 +49,9 @@ export class StagingJobHandler extends JobHandler {
   prepDeployCommands(): void {
     this.currJob.deployCommands = [
       `cd repos/${getDirectory(this.currJob)}`,
-      `make next-gen-stage${this.currJob.payload.pathPrefix ? `MUT_PREFIX=${this.currJob.payload.mutPrefix}` : ''}`,
+      `make next-gen-stage${
+        this.currJob.payload.pathPrefix ? `MUT_PREFIX=testing9${this.currJob.payload.mutPrefix}` : ''
+      }`,
     ];
   }
 
