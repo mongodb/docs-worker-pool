@@ -14,7 +14,7 @@ if (!SNOOTY_CACHE_BUCKET_NAME) throw new Error('ERROR! SNOOTY_CACHE_BUCKET_NAME 
 async function cloneDocsRepo(repoName: string, repoOwner: string) {
   if (!GITHUB_BOT_USERNAME) {
     const errorMessage = `ERROR! GITHUB_BOT_USERNAME is not set. ${repoOwner}/${repoName} will not have their cache updated`;
-    console.error(`ERROR! GITHUB_BOT_USERNAME is not set. ${repoOwner}/${repoName} will not have their cache updated`);
+    console.error(errorMessage);
     throw new Error(errorMessage);
   }
 
