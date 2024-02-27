@@ -110,7 +110,7 @@ export async function executeAndPipeCommands(
       reject(new ExecuteCommandError('The second command failed', 1, err));
     });
 
-    cmdTo.on('exit', (exitCode) => {
+    cmdTo.on('close', (exitCode) => {
       // previous command errored out, return so we don't
       // accidentally resolve if the second command somehow still
       // exits without error
