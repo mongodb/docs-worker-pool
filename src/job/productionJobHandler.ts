@@ -15,6 +15,7 @@ import { joinUrlAndPrefix } from './manifestJobHandler';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import { nextGenDeploy } from '../commands';
 import { checkRedirects } from '../commands/src/helpers/dependency-helpers';
+import path from 'path';
 
 export class ProductionJobHandler extends JobHandler {
   constructor(
@@ -196,7 +197,9 @@ export class ProductionJobHandler extends JobHandler {
         `${'(prod-monorepo)'.padEnd(15)} Redirects checked ${hasConfigRedirects}`
       );
       console.log('Generic log to see that it actually logs stuff in CloudWatch (which it should)');
-      resp = await nextGenDeploy({ mutPrefix: finalMutPrefix, bucket, url, branchName, hasConfigRedirects });
+      const repoDir = path.resolve(process.cwd(), `repos/${getDirectory(this.currJob)}`);
+
+      resp = await nextGenDeploy({ mutPrefix: finalMutPrefix, bucket, url, branchName, hasConfigRedirects, repoDir });
     } else {
       resp = await this.deployWithMakefiles();
     }

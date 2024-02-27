@@ -4,6 +4,7 @@ import { executeAndPipeCommands, executeCliCommand } from '../helpers';
 interface NextGenDeployParams {
   branchName: string;
   hasConfigRedirects: boolean;
+  repoDir: string;
   mutPrefix?: string | null;
   bucket?: string;
   url?: string;
@@ -15,6 +16,7 @@ export async function nextGenDeploy({
   mutPrefix,
   branchName,
   hasConfigRedirects,
+  repoDir,
   bucket,
   url,
 }: NextGenDeployParams): Promise<CommandExecutorResponse> {
@@ -23,10 +25,15 @@ export async function nextGenDeploy({
   try {
     if (hasConfigRedirects && (branchName === 'main' || branchName === 'master' || branchName === 'current')) {
       // equivalent to: mut-redirects config/redirects -o public/.htaccess
-      await executeCliCommand({ command: 'mut-redirects', args: ['config/redirects', '-o', 'public/.htaccess'] });
+      await executeCliCommand({
+        command: 'mut-redirects',
+        args: ['config/redirects', '-o', 'public/.htaccess'],
+        options: { cwd: repoDir },
+      });
       console.log(`COMMAND: mut-redirects config/redirects -o public/.htaccess`);
     }
 
+    console.log('REDIRECTS COMPLETE!');
     if (!bucket) {
       console.log(`nextGenStage has failed. Variable for S3 bucket address was undefined.`);
       return {
