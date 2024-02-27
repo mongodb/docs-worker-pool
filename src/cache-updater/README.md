@@ -8,6 +8,8 @@ A cache invalidation event occurs under two circumstances:
 
 2. An updated version of the Snooty Parser is used by the Autobuilder; all doc sites' Snooty caches will be rebuilt in this event
 
+The cache update process can be manually triggered by going to the GitHub Actions for the `docs-worker-pool` repository, going to the workflow for the cache updater, and then clicking run workflow. Make sure to set force run to be `true`.
+
 ### Architecture
 
 #### Worker
