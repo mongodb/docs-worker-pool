@@ -147,9 +147,11 @@ export abstract class JobHandler {
   }
 
   @throwIfJobInterupted()
-  private async constructPrefix(): Promise<void> {
+  private constructPrefix(): void {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
     const pathPrefix = this.getPathPrefix();
+
+    if (!pathPrefix) return;
 
     this.currJob.payload.pathPrefix = pathPrefix;
     const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
@@ -572,7 +574,13 @@ export abstract class JobHandler {
     }
     const baseUrl = docset?.url?.[env] || 'https://mongodbcom-cdn.website.staging.corp.mongodb.com';
 
-    const { patchId } = await prepareBuild(job.payload.repoName, job.payload.project, baseUrl, job.payload.directory);
+    const { patchId } = await prepareBuild(
+      job.payload.repoName,
+      job.payload.project,
+      baseUrl,
+      job.payload.prefix,
+      job.payload.directory
+    );
     // Set patchId on payload for use in nextGenStage
     this._currJob.payload.patchId = patchId;
 

@@ -104,7 +104,13 @@ export async function downloadBuildDependencies(
 export const checkRedirects = async (repoName: string, directory?: string) =>
   existsAsync(path.join(process.cwd(), getRepoDir(repoName, directory), 'config/redirects'));
 
-export async function prepareBuild(repoName: string, projectName: string, baseUrl: string, directory?: string) {
+export async function prepareBuild(
+  repoName: string,
+  projectName: string,
+  baseUrl: string,
+  prefix: string,
+  directory?: string
+) {
   const repoDir = getRepoDir(repoName, directory);
 
   // doing these in parallel
@@ -116,6 +122,7 @@ export async function prepareBuild(repoName: string, projectName: string, baseUr
       repoDir,
       projectName,
       baseUrl,
+      prefix,
       commitHash: dependencies[1] as string | undefined,
       patchId: dependencies[2] as string | undefined,
     });
