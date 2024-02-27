@@ -154,10 +154,11 @@ export abstract class JobHandler {
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Regression Test Child Process') {
+      if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Merge to main') {
         this._logger.save(this.currJob?.payload?.newHead, `Testing7 Commit Hash: ${this.currJob?.payload?.newHead}`);
       }
-      this.currJob.payload.mutPrefix = mutPrefix + this.currJob?.payload?.newHead;
+      this._logger.save(mutPrefix.split('/')[0], mutPrefix.split('/')[0]);
+      this.currJob.payload.mutPrefix = mutPrefix;
     }
   }
 
