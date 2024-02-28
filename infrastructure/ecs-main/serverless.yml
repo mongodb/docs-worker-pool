@@ -45,8 +45,8 @@ custom:
       dev: '2048'
       stg: '2048'
       prd: '4096'
-      dotcomstg: '8192'
-      dotcomprd: '8192'
+      dotcomstg: '16384'
+      dotcomprd: '16384'
     containerMemory:
       dev: '8192'
       stg: '8192'
