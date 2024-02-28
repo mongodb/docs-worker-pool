@@ -29,6 +29,7 @@ Resources:
           Image: ${self:custom.ecs.imageUrl}
           Cpu: ${self:custom.ecs.containerCpu.${self:provider.stage}}
           Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
+           SizeInGiB: 100
           Environment:
             - Name: STAGE
               Value: ${self:provider.stage}
