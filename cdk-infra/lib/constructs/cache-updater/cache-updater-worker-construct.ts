@@ -6,11 +6,13 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import path from 'path';
 import { getSnootyParserVersion } from '../../../utils/env';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 
 const SNOOTY_CACHE_BUCKET_NAME = 'snooty-parse-cache';
 
 interface CacheUpdaterWorkerConstructProps {
   vpc: IVpc;
+  githubBotPassword: string;
 }
 
 export class CacheUpdaterWorkerConstruct extends Construct {
@@ -18,7 +20,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
   readonly taskDefinition: TaskDefinition;
   readonly containerName: string;
 
-  constructor(scope: Construct, id: string, { vpc }: CacheUpdaterWorkerConstructProps) {
+  constructor(scope: Construct, id: string, { vpc, githubBotPassword }: CacheUpdaterWorkerConstructProps) {
     super(scope, id);
 
     const cluster = new Cluster(this, 'cacheUpdaterCluster', {
@@ -34,8 +36,8 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     snootyParseCacheBucket.grantWrite(taskRole);
 
     const taskDefinition = new FargateTaskDefinition(this, 'cacheUpdaterWorker', {
-      cpu: 2048,
-      memoryLimitMiB: 4096,
+      cpu: 4096,
+      memoryLimitMiB: 8192,
       taskRole,
     });
 
@@ -43,6 +45,7 @@ export class CacheUpdaterWorkerConstruct extends Construct {
     const taskDefLogGroup = new LogGroup(this, 'cacheUpdaterWorkerLogGroup');
 
     const snootyParserVersion = getSnootyParserVersion();
+    const githubBotUsername = StringParameter.valueFromLookup(this, '/env/prd/docs/worker_pool/github/bot/username');
 
     taskDefinition.addContainer('cacheUpdaterWorkerImage', {
       image: ContainerImage.fromAsset(path.join(__dirname, '../../../../'), {
@@ -52,7 +55,10 @@ export class CacheUpdaterWorkerConstruct extends Construct {
       }),
       environment: {
         SNOOTY_CACHE_BUCKET_NAME,
+        GITHUB_BOT_PASSWORD: githubBotPassword,
+        GITHUB_BOT_USERNAME: githubBotUsername,
       },
+
       logging: LogDrivers.awsLogs({
         streamPrefix: 'cacheupdater',
         logGroup: taskDefLogGroup,

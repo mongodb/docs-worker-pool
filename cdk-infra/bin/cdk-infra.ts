@@ -46,7 +46,12 @@ async function main() {
     env,
   });
 
-  new CacheUpdaterStack(app, `${stackName}-cache`, { vpc, env, githubSecret: workerSecureStrings.GITHUB_SECRET });
+  new CacheUpdaterStack(app, `${stackName}-cache`, {
+    vpc,
+    env,
+    githubSecret: workerSecureStrings.GITHUB_SECRET,
+    githubBotPassword: workerSecureStrings.GITHUB_BOT_PASSWORD,
+  });
 }
 
 main();
