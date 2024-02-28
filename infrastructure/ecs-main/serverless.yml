@@ -51,8 +51,8 @@ custom:
       dev: '8192'
       stg: '8192'
       prd: '24576'
-      dotcomstg: '32768'
-      dotcomprd: '32768'
+      dotcomstg: '65536'
+      dotcomprd: '65536'
 
     desiredCount:
       dev: '4'
