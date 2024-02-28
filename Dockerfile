@@ -17,7 +17,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${WORK_DIRECTORY}
 
 # helper libraries for docs builds
-RUN apt-get update && apt-get install -y vim git unzip zip rsync
+RUN apt-get update && apt-get install -y vim git unzip zip rsync time
 
 # get node 18
 # https://gist.github.com/RinatMullayanov/89687a102e696b1d4cab

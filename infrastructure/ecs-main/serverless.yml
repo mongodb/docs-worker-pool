@@ -45,14 +45,14 @@ custom:
       dev: '2048'
       stg: '2048'
       prd: '4096'
-      dotcomstg: '4096'
-      dotcomprd: '4096'
+      dotcomstg: '8192'
+      dotcomprd: '8192'
     containerMemory:
       dev: '8192'
       stg: '8192'
       prd: '24576'
-      dotcomstg: '24576'
-      dotcomprd: '24576'
+      dotcomstg: '32768'
+      dotcomprd: '32768'
 
     desiredCount:
       dev: '4'
