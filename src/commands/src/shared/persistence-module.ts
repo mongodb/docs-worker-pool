@@ -10,6 +10,8 @@ export async function persistenceModule({ job }: PersistenceModuleParams): Promi
   const bundlePath = `${repoDir}/bundle.zip`;
 
   const args = [
+    '-v',
+    'node',
     `${process.cwd()}/modules/persistence/index.js`,
     '--unhandled-rejections=strict',
     '--path',
@@ -25,7 +27,7 @@ export async function persistenceModule({ job }: PersistenceModuleParams): Promi
 
   try {
     const result = await executeCliCommand({
-      command: 'node',
+      command: 'time',
       args,
     });
 

@@ -55,8 +55,10 @@ export async function nextGenDeploy({
     const { outputText, errorText } = await executeAndPipeCommands(
       { command: 'yes' },
       {
-        command: 'mut-publish',
+        command: 'time',
         args: [
+          '-v',
+          'mut-publish',
           'public',
           bucket,
           `--prefix=${mutPrefix}`,

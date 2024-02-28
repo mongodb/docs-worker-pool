@@ -31,8 +31,8 @@ export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams)
   }
   try {
     const result = await executeCliCommand({
-      command: 'snooty',
-      args: commandArgs,
+      command: 'time',
+      args: ['-v', 'snooty', ...commandArgs],
       options: { cwd: repoDir },
     });
     return result;

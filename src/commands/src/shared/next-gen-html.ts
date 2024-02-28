@@ -3,8 +3,8 @@ import { CliCommandResponse, executeCliCommand } from '../helpers';
 export async function nextGenHtml(): Promise<CliCommandResponse> {
   try {
     const result = await executeCliCommand({
-      command: 'npm',
-      args: ['run', 'build'],
+      command: 'time',
+      args: ['-v', 'npm', 'run', 'build'],
       options: { cwd: `${process.cwd()}/snooty` },
     });
     return result;
