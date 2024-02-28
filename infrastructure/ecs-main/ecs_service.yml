@@ -24,12 +24,12 @@ Resources:
       Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
       ExecutionRoleArn: !Ref ExecutionRole
       TaskRoleArn: !Ref TaskRole
+      EphemeralStorage: 100
       ContainerDefinitions:
         - Name: ${self:service}-${self:provider.stage}
           Image: ${self:custom.ecs.imageUrl}
           Cpu: ${self:custom.ecs.containerCpu.${self:provider.stage}}
           Memory: ${self:custom.ecs.containerMemory.${self:provider.stage}}
-          SizeInGiB: 100
           Environment:
             - Name: STAGE
               Value: ${self:provider.stage}

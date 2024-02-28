@@ -80,6 +80,7 @@ export class WorkerConstruct extends Construct {
       memoryLimitMiB: 8192,
       taskRole,
       executionRole,
+      ephemeralStorageGiB,
     });
 
     const updateTaskProtectionPolicy = new PolicyStatement({
