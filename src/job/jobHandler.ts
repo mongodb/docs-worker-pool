@@ -157,7 +157,8 @@ export abstract class JobHandler {
       if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Merge to main') {
         this._logger.save(this.currJob?.payload?.newHead, `Testing7 Commit Hash: ${this.currJob?.payload?.newHead}`);
       }
-      this._logger.save(mutPrefix.split('/')[0], mutPrefix.split('/')[0]);
+      this._logger.save(mutPrefix.split('/')[0], `Testing7 Commit Hash: ${this.currJob?.payload?.newHead}`);
+      this._logger.save(mutPrefix.split('/')[0], 'MUT PREFIX9: ' + mutPrefix.split('/')[0]) + mutPrefix.split('/')[1];
       this.currJob.payload.mutPrefix = mutPrefix;
     }
   }
