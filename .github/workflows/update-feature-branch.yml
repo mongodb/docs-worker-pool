@@ -125,5 +125,5 @@ jobs:
         if: steps.filter.outputs.worker == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- --hotswap -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.head_ref}} \
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-dotcomstg-${{github.head_ref}}-worker
