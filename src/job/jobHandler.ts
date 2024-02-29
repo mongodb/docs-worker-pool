@@ -361,7 +361,8 @@ export abstract class JobHandler {
       const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
       if (
         key === 'persistence-module' &&
-        this.name === 'Staging' &&
+        // TEMP-4353: Remove this after testing
+        // this.name === 'Staging' &&
         isFeaturePreviewWebhookEnabled &&
         process.env.IS_FEATURE_BRANCH !== 'true'
       ) {
