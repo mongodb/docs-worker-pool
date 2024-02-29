@@ -159,8 +159,8 @@ export abstract class JobHandler {
       }
       this._logger.save(this.currJob._id, `Testing7 Commit Hash: ${this.currJob?.payload?.newHead}`);
       this._logger.save(this.currJob._id, 'MUT PREFIX9: ' + mutPrefix.split('/')[0]) + mutPrefix.split('/')[1];
+      this.currJob.payload.mutPrefix = mutPrefix + 'customprefix';
       this._logger.save(this.currJob._id, 'CurrJob6 mutprefix' + this.currJob.mutPrefix);
-      this.currJob.payload.mutPrefix = mutPrefix;
     }
   }
 
@@ -527,6 +527,8 @@ export abstract class JobHandler {
     process.env.BUCKET = bucket;
     process.env.URL = url;
     process.env.REGRESSION = regression;
+    this._logger.save(this._currJob._id, 'BUCKET1' + bucket);
+    this._logger.save(this._currJob._id, 'URL1' + url);
   }
 
   @throwIfJobInterupted()
