@@ -159,6 +159,7 @@ export abstract class JobHandler {
       }
       this._logger.save(this.currJob._id, `Testing7 Commit Hash: ${this.currJob?.payload?.newHead}`);
       this._logger.save(this.currJob._id, 'MUT PREFIX9: ' + mutPrefix.split('/')[0]) + mutPrefix.split('/')[1];
+      this._logger.save(this.currJob._id, 'CurrJob6 mutprefix' + this.currJob.mutPrefix);
       this.currJob.payload.mutPrefix = mutPrefix;
     }
   }
