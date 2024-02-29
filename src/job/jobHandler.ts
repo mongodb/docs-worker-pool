@@ -152,15 +152,15 @@ export abstract class JobHandler {
     const pathPrefix = await this.getPathPrefix();
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
-      this.currJob.payload.pathPrefix = pathPrefix;
+      this._logger.save(this.currJob._id, 'Path prefix raw' + pathPrefix);
+      this.currJob.payload.pathPrefix = pathPrefix + '/customprefix';
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      if (this.currJob?.payload?.newHead && this.currJob?.title !== 'Merge to main') {
-        this._logger.save(this.currJob._id, `Testing7 Commit Hash: ${this.currJob?.payload?.newHead}`);
-      }
-      this._logger.save(this.currJob._id, `Testing7 Commit Hash: ${this.currJob?.payload?.newHead}`);
-      this._logger.save(this.currJob._id, 'MUT PREFIX9: ' + mutPrefix.split('/')[0]) + mutPrefix.split('/')[1];
-      this.currJob.payload.mutPrefix = mutPrefix + 'customprefix';
-      this._logger.save(this.currJob._id, 'CurrJob6 mutprefix' + this.currJob.mutPrefix);
+      this._logger.save(this.currJob._id, 'MUT PREFIX9: ' + mutPrefix.split('/')[0]) +
+        mutPrefix.split('/')[1] +
+        mutPrefix.split('/')[2] +
+        mutPrefix.split('/')[3];
+      this.currJob.payload.mutPrefix = mutPrefix + '/customprefix';
+      this._logger.save(this.currJob._id, 'CurrJob6 mutprefix' + this.currJob.payload.mutPrefix);
     }
   }
 
@@ -271,6 +271,8 @@ export abstract class JobHandler {
       this.currJob.payload.manifestPrefix = this.constructManifestPrefix();
       this._logger.info(this.currJob._id, `Created payload manifestPrefix: ${this.currJob.payload.manifestPrefix}`);
     }
+
+    this._logger.info(this.currJob._id, `Checking Mut Prefix after ConstructPrefix: ${this.currJob.payload.mutPrefix}`);
 
     this.prepStageSpecificNextGenCommands();
     this.constructEnvVars();
