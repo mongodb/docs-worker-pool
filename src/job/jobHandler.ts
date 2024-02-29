@@ -366,6 +366,7 @@ export abstract class JobHandler {
         process.env.IS_FEATURE_BRANCH !== 'true'
       ) {
         await this.callGatsbyCloudWebhook();
+        await this.callNetlifyWebhook();
       }
     }
     await this._logger.save(this.currJob._id, `${'(BUILD)'.padEnd(15)}Finished Build`);
@@ -591,6 +592,7 @@ export abstract class JobHandler {
     if (this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
       await this.callGatsbyCloudWebhook();
       await this.logger.save(job._id, 'Gatsby Webhook Called');
+      await this.callNetlifyWebhook();
     }
 
     const oasPageBuilderFunc = async () => oasPageBuild({ job, baseUrl });
@@ -793,16 +795,11 @@ export abstract class JobHandler {
 
   // Invokes Gatsby Cloud Preview Webhook
   protected async callGatsbyCloudWebhook(): Promise<void> {
-    const featurePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED;
-    // Logging for Debugging purposes only will remove once we see the build working in Gatsby.
-    await this.logger.save(
-      this.currJob._id,
-      `${'(GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED)'.padEnd(15)}${featurePreviewWebhookEnabled}`
-    );
+    const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
+    const githubUsername = this.currJob.user;
+    const logPrefix = '(POST Gatsby Cloud Webhook Status)';
 
     try {
-      const previewWebhookURL = 'https://webhook.gatsbyjs.com/hooks/data_source';
-      const githubUsername = this.currJob.user;
       const gatsbySiteId = await this._repoEntitlementsRepo.getGatsbySiteIdByGithubUsername(githubUsername);
       if (!gatsbySiteId) {
         const message = `User ${githubUsername} does not have a Gatsby Cloud Site ID.`;
@@ -811,24 +808,48 @@ export abstract class JobHandler {
       }
 
       const url = `${previewWebhookURL}/${gatsbySiteId}`;
-      const response = await axios.post(
-        url,
-        {
-          jobId: this.currJob._id,
-        },
-        {
-          headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
-        }
-      );
-      await this._jobRepository.updateExecutionTime(this.currJob._id, { gatsbyCloudStartTime: new Date() });
-      await this.logger.save(this.currJob._id, `${'(POST Webhook Status)'.padEnd(15)}${response.status}`);
+      const response = await this.callExternalBuildHook(url, 'gatsbyCloudStartTime');
+      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)}${response.status}`);
     } catch (err) {
-      await this.logger.save(
-        this.currJob._id,
-        `${'(POST Webhook)'.padEnd(15)}Failed to POST to Gatsby Cloud webhook: ${err}`
-      );
+      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)}Failed to POST to Gatsby Cloud webhook: ${err}`);
       throw err;
     }
+  }
+
+  // Invokes Netlify Build Hook
+  protected async callNetlifyWebhook(): Promise<void> {
+    const githubUsername = this.currJob.user;
+    const logPrefix = '(EXPERIMENTAL - POST Netlify Webhook Status)';
+
+    try {
+      const url = await this._repoEntitlementsRepo.getNetlifyBuildHookByGithubUsername(githubUsername);
+      if (!url) {
+        const message = `User ${githubUsername} does not have a Netlify build hook.`;
+        this._logger.warn('Netlify Build Hook', message);
+        return;
+      }
+
+      const res = await this.callExternalBuildHook(url, 'netlifyStartTime');
+      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)}${res.status}`);
+    } catch (err) {
+      // Intentionally log and don't throw error since this is currently experimental and shouldn't block build progress
+      const errorMsg = `${logPrefix.padEnd(
+        15
+      )}Failed to POST to Netlify webhook. This should not affect completion of the build: ${err}`;
+      await this.logger.save(this.currJob._id, errorMsg);
+    }
+  }
+
+  protected async callExternalBuildHook(url: string, startTimeKey: string) {
+    const jobId = this.currJob._id;
+    const payload = { jobId };
+    const config = {
+      headers: { 'x-gatsby-cloud-data-source': 'gatsby-source-snooty-preview' },
+    };
+
+    const res = await axios.post(url, payload, config);
+    await this._jobRepository.updateExecutionTime(jobId, { [startTimeKey]: new Date() });
+    return res;
   }
 }
 
