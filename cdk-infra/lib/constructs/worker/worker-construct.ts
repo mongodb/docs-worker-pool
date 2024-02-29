@@ -13,6 +13,7 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
 import { getEnv } from '../../../utils/env';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 
 interface WorkerConstructProps {
   dockerEnvironment: Record<string, string>;
@@ -69,9 +70,9 @@ export class WorkerConstruct extends Construct {
         NPM_BASE_64_AUTH: dockerEnvironment.NPM_BASE_64_AUTH,
         NPM_EMAIL: dockerEnvironment.NPM_EMAIL,
       },
-
       cacheFrom: [{ type: 'gha' }],
       cacheTo: { type: 'gha', params: { mode: 'max' } },
+      platform: Platform.LINUX_AMD64,
     };
 
     const taskDefLogGroup = new LogGroup(this, 'workerLogGroup');

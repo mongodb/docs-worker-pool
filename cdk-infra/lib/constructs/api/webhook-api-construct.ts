@@ -10,6 +10,8 @@ import { getFeatureName } from '../../../utils/env';
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
 
+const memorySize = 1024;
+
 const bundling: BundlingOptions = {
   sourceMap: true,
   minify: true,
@@ -46,6 +48,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       bundling,
       timeout,
+      memorySize,
     });
 
     const slackDisplayRepoLambda = new NodejsFunction(this, 'slackDisplayRepoLambda', {
@@ -55,6 +58,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       bundling,
       timeout,
+      memorySize,
     });
 
     const dochubTriggerUpsertLambda = new NodejsFunction(this, 'dochubTriggerUpsertLambda', {
@@ -63,6 +67,7 @@ export class WebhookApiConstruct extends Construct {
       handler: 'UpsertEdgeDictionaryItem',
       environment,
       timeout,
+      memorySize,
     });
 
     const githubTriggerLambda = new NodejsFunction(this, 'githubTriggerLambda', {
@@ -72,6 +77,7 @@ export class WebhookApiConstruct extends Construct {
       bundling,
       environment,
       timeout,
+      memorySize,
     });
 
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
@@ -81,6 +87,7 @@ export class WebhookApiConstruct extends Construct {
       bundling,
       environment,
       timeout,
+      memorySize,
     });
 
     const triggerLocalBuildLambda = new NodejsFunction(this, 'triggerLocalBuildLambda', {
@@ -90,6 +97,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       bundling,
       timeout,
+      memorySize,
     });
 
     const handleJobsLambda = new NodejsFunction(this, 'handleJobsLambda', {
@@ -99,6 +107,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       bundling,
       timeout,
+      memorySize,
     });
 
     const snootyBuildCompleteLambda = new NodejsFunction(this, 'snootyBuildCompleteLambda', {
@@ -108,6 +117,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       bundling,
       timeout,
+      memorySize,
     });
     const testDeployLambda = new NodejsFunction(this, 'testDeployLambda', {
       entry: `${HANDLERS_PATH}/test-deploy.ts`,
@@ -116,6 +126,7 @@ export class WebhookApiConstruct extends Construct {
       environment,
       bundling,
       timeout,
+      memorySize,
     });
 
     // generic handler for the root endpoint
@@ -124,6 +135,7 @@ export class WebhookApiConstruct extends Construct {
       runtime,
       handler: 'RootEndpointLambda',
       timeout,
+      memorySize,
     });
 
     const apiName = `webhookHandlers-${getFeatureName()}`;
