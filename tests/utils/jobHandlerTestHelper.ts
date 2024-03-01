@@ -20,6 +20,7 @@ import { getBuildJobDef, getManifestJobDef, getStagingJobDef } from '../data/job
 type MockReturnValueOnce = { status: string; output: string; error: string | null };
 type SetupOptions = {
   hasGatsbySiteId?: boolean;
+  hasNetlifyBuildHook?: boolean;
 };
 
 export class JobHandlerTestHelper {
@@ -88,9 +89,12 @@ export class JobHandlerTestHelper {
     this.setupForSuccess();
     const publishOutput = TestDataProvider.getPublishOutputWithPurgedUrls(prodDeploy);
 
-    const { hasGatsbySiteId } = setupOptions;
+    const { hasGatsbySiteId, hasNetlifyBuildHook } = setupOptions;
     if (hasGatsbySiteId) {
       this.repoEntitlementsRepo.getGatsbySiteIdByGithubUsername.mockResolvedValue('gatsby_site_id');
+    }
+    if (hasNetlifyBuildHook) {
+      this.repoEntitlementsRepo.getNetlifyBuildHookByGithubUsername.mockResolvedValue('netlify_build_hook');
     }
 
     if (returnValue) {

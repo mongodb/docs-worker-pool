@@ -1,13 +1,22 @@
+import axios from 'axios';
 import { TestDataProvider } from '../../data/data';
 import { JobHandlerTestHelper } from '../../utils/jobHandlerTestHelper';
 import { getStagingJobDef } from '../../data/jobDef';
+import { JobStatus } from '../../../src/entities/job';
 
 describe('StagingJobHandler Tests', () => {
   let jobHandlerTestHelper: JobHandlerTestHelper;
+  let spyPost;
 
   beforeEach(() => {
     jobHandlerTestHelper = new JobHandlerTestHelper();
     jobHandlerTestHelper.init('staging');
+    spyPost = jest.spyOn(axios, 'post');
+  });
+
+  afterEach(() => {
+    process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED = 'false';
+    spyPost.mockClear();
   });
 
   test('Construct Production Handler', () => {
@@ -82,9 +91,50 @@ describe('StagingJobHandler Tests', () => {
     expect(jobHandlerTestHelper.jobRepo.insertJob).toBeCalledTimes(0);
   });
 
-  test('Staging deploy with Gatsby Cloud site does not result in job completion', async () => {
-    jobHandlerTestHelper.setStageForDeploySuccess(false, undefined, { hasGatsbySiteId: true });
-    await jobHandlerTestHelper.jobHandler.execute();
-    expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledTimes(0);
+  describe('Gatsby Cloud build hooks', () => {
+    beforeEach(() => {
+      process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED = 'true';
+    });
+
+    test('Staging with Gatsby Cloud site does not result in immediate job completion', async () => {
+      jobHandlerTestHelper.setStageForDeploySuccess(false, undefined, { hasGatsbySiteId: true });
+      await jobHandlerTestHelper.jobHandler.execute();
+      // Post-build webhook is expected to update the status
+      expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledTimes(0);
+    });
+
+    test('Gatsby Cloud build hook fail results in job failure', async () => {
+      jobHandlerTestHelper.setStageForDeploySuccess(false, undefined, { hasGatsbySiteId: true });
+      spyPost.mockImplementationOnce(() => Promise.reject({}));
+      await jobHandlerTestHelper.jobHandler.execute();
+      expect(jobHandlerTestHelper.jobRepo.updateWithErrorStatus).toBeCalledTimes(1);
+    });
+  });
+
+  describe('Netlify build hooks', () => {
+    beforeEach(() => {
+      process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED = 'true';
+    });
+
+    test('Staging with Netlify does not result in immediate job completion with Gatsby Cloud', async () => {
+      jobHandlerTestHelper.setStageForDeploySuccess(false, undefined, {
+        hasGatsbySiteId: true,
+        hasNetlifyBuildHook: true,
+      });
+      await jobHandlerTestHelper.jobHandler.execute();
+      // Post-build webhook is expected to update the status
+      expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledTimes(0);
+    });
+
+    test('Netlify build hook error does not interfere with job execution', async () => {
+      jobHandlerTestHelper.setStageForDeploySuccess(false, undefined, { hasNetlifyBuildHook: true });
+      spyPost.mockImplementationOnce(() => Promise.reject({}));
+      await jobHandlerTestHelper.jobHandler.execute();
+      expect(jobHandlerTestHelper.jobRepo.updateWithStatus).toBeCalledWith(
+        expect.anything(),
+        undefined,
+        JobStatus.completed
+      );
+    });
   });
 });
