@@ -359,8 +359,12 @@ export abstract class JobHandler {
 
       // Call Gatsby Cloud preview webhook after persistence module finishes for staging builds
       const isFeaturePreviewWebhookEnabled = process.env.GATSBY_CLOUD_PREVIEW_WEBHOOK_ENABLED?.toLowerCase() === 'true';
-      // TEMP-4353: Restore stg safeguard after done testing
-      if (key === 'persistence-module' && this.name === 'Staging' && isFeaturePreviewWebhookEnabled) {
+      if (
+        key === 'persistence-module' &&
+        this.name === 'Staging' &&
+        isFeaturePreviewWebhookEnabled &&
+        process.env.IS_FEATURE_BRANCH !== 'true'
+      ) {
         await this.callGatsbyCloudWebhook();
         await this.callNetlifyWebhook();
       }
@@ -805,9 +809,12 @@ export abstract class JobHandler {
 
       const url = `${previewWebhookURL}/${gatsbySiteId}`;
       const response = await this.callExternalBuildHook(url, 'gatsbyCloudStartTime');
-      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)}${response.status}`);
+      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)} ${response.status}`);
     } catch (err) {
-      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)}Failed to POST to Gatsby Cloud webhook: ${err}`);
+      await this.logger.save(
+        this.currJob._id,
+        `${logPrefix.padEnd(15)} Failed to POST to Gatsby Cloud webhook: ${err}`
+      );
       throw err;
     }
   }
@@ -826,12 +833,12 @@ export abstract class JobHandler {
       }
 
       const res = await this.callExternalBuildHook(url, 'netlifyStartTime');
-      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)}${res.status}`);
+      await this.logger.save(this.currJob._id, `${logPrefix.padEnd(15)} ${res.status}`);
     } catch (err) {
       // Intentionally log and don't throw error since this is currently experimental and shouldn't block build progress
       const errorMsg = `${logPrefix.padEnd(
         15
-      )}Failed to POST to Netlify webhook. This should not affect completion of the build: ${err}`;
+      )} Failed to POST to Netlify webhook. This should not affect completion of the build: ${err}`;
       await this.logger.save(this.currJob._id, errorMsg);
     }
   }
