@@ -155,10 +155,14 @@ export abstract class JobHandler {
       this._logger.save(this.currJob._id, 'Path prefix raw' + pathPrefix);
       this.currJob.payload.pathPrefix = pathPrefix + '/customprefix';
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this._logger.save(this.currJob._id, 'MUT PREFIX9: ' + mutPrefix.split('/')[0]) +
-        mutPrefix.split('/')[1] +
-        mutPrefix.split('/')[2] +
-        mutPrefix.split('/')[3];
+      this._logger.save(
+        this.currJob._id,
+        'MUT PREFIX9: ' +
+          mutPrefix.split('/')[0] +
+          mutPrefix.split('/')[1] +
+          mutPrefix.split('/')[2] +
+          mutPrefix.split('/')[3]
+      );
       this.currJob.payload.mutPrefix = mutPrefix + '/customprefix';
       this._logger.save(this.currJob._id, 'CurrJob6 mutprefix' + this.currJob.payload.mutPrefix);
     }
