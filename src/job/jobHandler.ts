@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -843,7 +843,7 @@ export abstract class JobHandler {
     }
   }
 
-  protected async callExternalBuildHook(url: string, startTimeKey: string) {
+  protected async callExternalBuildHook(url: string, startTimeKey: string): Promise<AxiosResponse> {
     const jobId = this.currJob._id;
     const payload = { jobId };
     const config = {
