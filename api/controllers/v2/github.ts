@@ -115,6 +115,12 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, path);
 
     consoleLogger.info(job.title, 'Creating Job');
+    consoleLogger.info(job.title, 'JOB INFO :' + body?.repository);
+    consoleLogger.info(job.title, 'REPO INFO:' + repoInfo);
+    consoleLogger.info(job.title, 'REPO INFO PREFIX:' + repoInfo?.prefix);
+    consoleLogger.info(job.title, 'REPO INFO PREFIX ENV:' + jobPrefix);
+    consoleLogger.info(job.title, 'PATH:' + path);
+
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
     jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
     consoleLogger.info(job.title, `Created Job ${jobId}`);
