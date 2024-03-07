@@ -1,4 +1,5 @@
 import { JobRepository } from '../repositories/jobRepository';
+import { filterSensitiveValues } from '../enhanced/utils/filter-sensitive-values';
 
 export interface ILogger {
   info(contextId: string, message: string): void;
@@ -11,14 +12,17 @@ export interface IJobRepoLogger extends ILogger {
 }
 
 export class ConsoleLogger implements ILogger {
+  private filterMessage(message: string) {
+    return filterSensitiveValues(message);
+  }
   info(contextId: string, message: string): void {
-    console.info(`Context: ${contextId} message: ${message}`);
+    console.info(`Context: ${contextId} message: ${this.filterMessage(message)}`);
   }
   warn(contextId: string, message: string): void {
-    console.warn(`Context: ${contextId} message: ${message}`);
+    console.warn(`Context: ${contextId} message: ${this.filterMessage(message)}`);
   }
   error(contextId: string, message: string): void {
-    console.error(`Context: ${contextId} message: ${message}`);
+    console.error(`Context: ${contextId} message: ${this.filterMessage(message)}`);
   }
 }
 
@@ -29,6 +33,7 @@ export class HybridJobLogger extends ConsoleLogger implements IJobRepoLogger {
     this._jobRepo = jobRepo;
   }
   async save(contextId: string, message: string): Promise<void> {
+    message = filterSensitiveValues(message);
     try {
       this.info(contextId, message);
       await this._jobRepo.insertLogStatement(contextId, [message]);
