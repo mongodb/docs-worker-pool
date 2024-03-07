@@ -81,6 +81,7 @@ const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) 
 // For every repo/branch selected to be deployed, return an array of jobs with the payload data
 // needed for a successful build.
 export const getDeployableJobs = async (
+  consoleLogger,
   values,
   entitlement,
   repoBranchesRepository: RepoBranchesRepository,
@@ -106,6 +107,10 @@ export const getDeployableJobs = async (
     const jobUserEmail = entitlement?.email ?? '';
 
     const repoInfo = await docsetsRepository.getRepo(repoName, directory);
+    consoleLogger.info(jobTitle, 'Creating Job');
+    consoleLogger.info(jobTitle, 'JOB INFO :' + repoOwner);
+    consoleLogger.info(jobTitle, 'REPO INFO:' + repoInfo);
+    consoleLogger.info(jobTitle, 'REPO INFO PREFIX:' + repoInfo?.prefix);
     const non_versioned = repoInfo.branches.length === 1;
 
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
@@ -211,7 +216,13 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
 
   const values = slackConnector.parseSelection(stateValues);
 
-  const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
+  const deployable = await getDeployableJobs(
+    consoleLogger,
+    values,
+    entitlement,
+    repoBranchesRepository,
+    docsetsRepository
+  );
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
