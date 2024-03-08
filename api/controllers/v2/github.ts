@@ -117,9 +117,9 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     consoleLogger.info(job.title, 'Creating Job');
     consoleLogger.info(job.title, 'JOB repo name :' + body?.repository.name);
     consoleLogger.info(job.title, 'commits info:' + (body.head_commit ? Object.keys(body.commits) : ''));
-    consoleLogger.info(job.title, 'commits info:' + (body.base_ref ? Object.keys(body.base_ref) : ''));
-    consoleLogger.info(job.title, 'commits info:' + (body.ref ? Object.keys(body.ref) : ''));
-    consoleLogger.info(job.title, 'commits info:' + (body.before ? Object.keys(body.before) : ''));
+    consoleLogger.info(job.title, 'base_ref info:' + (body.base_ref ? Object.keys(body.base_ref) : ''));
+    consoleLogger.info(job.title, 'ref info:' + (body.ref ? Object.keys(body.ref) : ''));
+    consoleLogger.info(job.title, 'before info:' + (body.before ? Object.keys(body.before) : ''));
     consoleLogger.info(job.title, 'env' + env);
 
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
