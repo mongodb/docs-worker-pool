@@ -14,11 +14,24 @@ import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
 import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
+const SMOKETEST_SITES = [
+  'docs-landing',
+  'cloud-docs',
+  'docs-realm',
+  'docs',
+  'docs-atlas-cli',
+  'docs-ecosystem',
+  'docs-node',
+  'docs-landing',
+  'docs-app-services',
+];
+
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
   repoBranchesRepository: RepoBranchesRepository,
   prefix: string,
   repoInfo: ReposBranchesDocsetsDocument,
+  title: string,
   directory?: string
 ): Promise<Omit<EnhancedJob, '_id'>> {
   const branch_name = githubEvent.ref.split('/')[2];
@@ -31,7 +44,7 @@ async function prepGithubPushPayload(
   const project = repoInfo?.project ?? githubEvent.repository.name;
 
   return {
-    title: githubEvent.repository.full_name,
+    title: title,
     user: githubEvent.pusher.name,
     email: githubEvent.pusher.email ?? '',
     status: JobStatus.inQueue,
@@ -59,6 +72,110 @@ async function prepGithubPushPayload(
     logs: [],
   };
 }
+
+/**
+ * 1st, we want to define a list of the sites we want to build as a new collection.
+ * validate credentials
+ * Next, we want to create each job
+ *  - should I create a new prepGithubPayload method, a new githubEvent interface, or amend the existing one to be able to pass in a different title, branchName and it's own githash,
+ *  - i could also alter body attributes, although I don't know it that's a good idea
+ *  - could also create a createpayload function
+ * create and insert the jobs using bulk insert
+ */
+export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+  // this code can be updated to references values pertaining to the set list of sites
+  const client = new mongodb.MongoClient(c.get('dbUrl'));
+  await client.connect();
+  const db = client.db(c.get('dbName'));
+  const consoleLogger = new ConsoleLogger();
+  const jobRepository = new JobRepository(db, c, consoleLogger);
+  const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
+  const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
+
+  if (!event.body) {
+    const err = 'Trigger build does not have a body in event payload';
+    consoleLogger.error('TriggerBuildError', err);
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+
+  // validate credentials here
+
+  let body: PushEvent;
+  try {
+    body = JSON.parse(event.body) as PushEvent;
+  } catch (e) {
+    console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
+    return {
+      statusCode: 502,
+      headers: { 'Content-Type': 'text/plain' },
+      body: ' ERROR! Could not parse event.body',
+    };
+  }
+
+  //env could be hardcoded?
+  const env = c.get<string>('env');
+
+  async function createAndInsertJob(path?: string) {
+    //should this array be typed more specifically
+    const deployable: Array<any> = [];
+
+    for (const s in SMOKETEST_SITES) {
+      //ensure repotitle is consistent with other type of title
+      const jobTitle = 'Smoke Test' + s;
+      const repoInfo = await docsetsRepository.getRepo(s, path);
+
+      //add commit hash- how do you get commit hash??
+      //local-build/index.ts line 53?
+      const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+      const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
+
+      //change this so that can pass in specific branch
+      //add logic for getting master branch, latest stable branch
+      const job = await prepGithubPushPayload(
+        body,
+        repoBranchesRepository,
+        ammendedJobPrefix,
+        repoInfo,
+        jobTitle,
+        path
+      );
+      deployable.push(job);
+    }
+
+    try {
+      await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
+
+      // notify the jobUpdatesQueue
+      await Promise.all(
+        deployable.map(async ({ jobId }) => {
+          await jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+          consoleLogger.info(jobId, `Created Job ${jobId}`);
+        })
+      );
+    } catch (err) {
+      consoleLogger.error('deployRepo', err);
+    }
+  }
+
+  try {
+    await createAndInsertJob();
+  } catch (err) {
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'text/plain' },
+      body: err,
+    };
+  }
+  return {
+    statusCode: 202,
+    headers: { 'Content-Type': 'text/plain' },
+    body: 'Jobs Queued',
+  };
+};
 
 export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -112,16 +229,10 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   async function createAndInsertJob(path?: string) {
     const repoInfo = await docsetsRepository.getRepo(body.repository.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, path);
+    const jobTitle = body.repository.full_name;
+    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, jobTitle, path);
 
     consoleLogger.info(job.title, 'Creating Job');
-    consoleLogger.info(job.title, 'JOB repo name :' + body?.repository.name);
-    consoleLogger.info(job.title, 'commits info:' + (body.head_commit ? Object.keys(body.commits) : ''));
-    consoleLogger.info(job.title, 'base_ref info:' + (body.base_ref ? Object.keys(body.base_ref) : ''));
-    consoleLogger.info(job.title, 'ref info:' + (body.ref ? Object.keys(body.ref) : ''));
-    consoleLogger.info(job.title, 'before info:' + (body.before ? Object.keys(body.before) : ''));
-    consoleLogger.info(job.title, 'env' + env);
-
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
     jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
     consoleLogger.info(job.title, `Created Job ${jobId}`);

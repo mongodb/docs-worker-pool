@@ -74,6 +74,15 @@ export class WebhookApiConstruct extends Construct {
       timeout,
     });
 
+    const githubSmokeTestBuildLambda = new NodejsFunction(this, 'githubSmokeTestBuildLambda', {
+      entry: `${HANDLERS_PATH}/github.ts`,
+      runtime,
+      handler: 'triggerSmokeTestAutomatedBuild',
+      bundling,
+      environment,
+      timeout,
+    });
+
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
       entry: `${HANDLERS_PATH}/github.ts`,
       runtime,
@@ -159,6 +168,9 @@ export class WebhookApiConstruct extends Construct {
     githubEndpointTrigger
       .addResource('build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubTriggerLambda));
+
+    // add endpoint for automated testing
+    githubEndpointTrigger.addResource('smoke-test-build', { defaultCorsPreflightOptions });
 
     githubEndpointTrigger
       .addResource('delete', { defaultCorsPreflightOptions })
