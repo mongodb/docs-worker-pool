@@ -107,19 +107,22 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     };
   }
 
+  //hardcode env
   const env = c.get<string>('env');
 
   async function createAndInsertJob(path?: string) {
+    //hardcode bodd.repository.name
+    //when is path used?
     const repoInfo = await docsetsRepository.getRepo(body.repository.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
     const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, path);
 
     consoleLogger.info(job.title, 'Creating Job');
-    consoleLogger.info(job.title, 'JOB INFO :' + body?.repository);
-    consoleLogger.info(job.title, 'REPO INFO:' + repoInfo);
-    consoleLogger.info(job.title, 'REPO INFO PREFIX:' + repoInfo?.prefix);
+    consoleLogger.info(job.title, 'JOB INFO :' + body?.repository.name);
+    consoleLogger.info(job.title, 'JOB INFO :' + body.head_commit + body.head_commit?.id);
+    consoleLogger.info(job.title, 'REPO INFO:' + repoInfo[0]);
+    consoleLogger.info(job.title, 'REPO INFO PREFIX:' + repoInfo?.prefix[1]);
     consoleLogger.info(job.title, 'REPO INFO PREFIX ENV:' + jobPrefix);
-    consoleLogger.info(job.title, 'PATH:' + path);
 
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
     jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
