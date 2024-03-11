@@ -107,10 +107,6 @@ export const getDeployableJobs = async (
     const jobUserEmail = entitlement?.email ?? '';
 
     const repoInfo = await docsetsRepository.getRepo(repoName, directory);
-    consoleLogger.info(jobTitle, 'Creating Job');
-    consoleLogger.info(jobTitle, 'JOB INFO :' + repoOwner);
-    consoleLogger.info(jobTitle, 'REPO INFO:' + repoInfo);
-    consoleLogger.info(jobTitle, 'REPO INFO PREFIX:' + repoInfo?.prefix);
     const non_versioned = repoInfo.branches.length === 1;
 
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);

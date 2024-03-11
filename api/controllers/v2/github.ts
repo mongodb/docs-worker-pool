@@ -6,12 +6,17 @@ import { PushEvent } from '@octokit/webhooks-types';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
+import { ProjectsRepository } from '../../../src/repositories/projectsRepository';
 import { EnhancedJob, JobStatus } from '../../../src/entities/job';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { getMonorepoPaths } from '../../../src/monorepo';
+x;
 import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
-import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
+import {
+  ReposBranchesDocsetsDocument,
+  ReposBranchesDocument,
+} from '../../../modules/persistence/src/services/metadata/repos_branches';
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
@@ -22,27 +27,14 @@ const SMOKETEST_SITES = [
   'docs-atlas-cli',
   'docs-ecosystem',
   'docs-node',
-  'docs-landing',
   'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
   githubEvent: PushEvent,
-  repoBranchesRepository: RepoBranchesRepository,
-  prefix: string,
-  repoInfo: ReposBranchesDocsetsDocument,
-  title: string,
-  directory?: string
+  payload: any,
+  title: string
 ): Promise<Omit<EnhancedJob, '_id'>> {
-  const branch_name = githubEvent.ref.split('/')[2];
-  const branch_info = await repoBranchesRepository.getRepoBranchAliases(
-    githubEvent.repository.name,
-    branch_name,
-    repoInfo.project
-  );
-  const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
-  const project = repoInfo?.project ?? githubEvent.repository.name;
-
   return {
     title: title,
     user: githubEvent.pusher.name,
@@ -54,22 +46,68 @@ async function prepGithubPushPayload(
     priority: 1,
     error: {},
     result: null,
-    payload: {
-      jobType: 'githubPush',
-      source: 'github',
-      action: 'push',
-      repoName: githubEvent.repository.name,
-      branchName: githubEvent.ref.split('/')[2],
-      isFork: githubEvent.repository.fork,
-      repoOwner: githubEvent.repository.owner.login,
-      url: githubEvent.repository.clone_url,
-      newHead: githubEvent.after,
-      urlSlug: urlSlug,
-      prefix: prefix,
-      project: project,
-      directory: directory,
-    },
+    payload: payload,
     logs: [],
+  };
+}
+
+async function createPayload(
+  repoName: string,
+  isSmokeTestDeploy = false,
+  prefix: string,
+  repoBranchesRepository: RepoBranchesRepository,
+  repoInfo: ReposBranchesDocsetsDocument,
+  githubEvent?: PushEvent,
+  repoOwner?: string,
+  directory?: string
+) {
+  const jobType = 'githubPush';
+  const source = 'github';
+  const action = 'push';
+  const project = repoInfo?.project ?? repoName;
+
+  let branch_name = 'master';
+  let isFork = false;
+  let url: string | undefined;
+  let newHead;
+
+  if (isSmokeTestDeploy) {
+    branch_name = 'master';
+    url = 'https://github.com/' + repoOwner + '/' + repoName;
+    newHead = null;
+  } else {
+    try {
+      if (!githubEvent) {
+        return false;
+      }
+      branch_name = githubEvent.ref.split('/')[2];
+      isFork = githubEvent?.repository.fork;
+      url = githubEvent?.repository.clone_url;
+      newHead = githubEvent?.after;
+      repoOwner = githubEvent.repository.owner.login;
+    } catch (e) {
+      console.log('Error! No Github Push Event provided, payload could not be constructed');
+    }
+  }
+
+  const branch_info = await repoBranchesRepository.getRepoBranchAliases(repoName, branch_name, repoInfo.project);
+  const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
+
+  return {
+    jobType,
+    source,
+    action,
+    repoName,
+    repoOwner,
+    branchName: branch_name,
+    project,
+    prefix,
+    urlSlug,
+    isFork,
+    url,
+    //can we keep newHead as null for smokeTest Deploys
+    newHead,
+    directory,
   };
 }
 
@@ -77,18 +115,19 @@ async function prepGithubPushPayload(
  * 1st, we want to define a list of the sites we want to build as a new collection.
  * validate credentials
  * Next, we want to create each job
- *  - should I create a new prepGithubPayload method, a new githubEvent interface, or amend the existing one to be able to pass in a different title, branchName and it's own githash,
+ *  - should I create a new prepGithubPayload method, a new githubEvent interface, or amend the existing one to be able to pass in a different title, branchName and it's own githash
  *  - i could also alter body attributes, although I don't know it that's a good idea
  *  - could also create a createpayload function
  * create and insert the jobs using bulk insert
  */
 export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-  // this code can be updated to references values pertaining to the set list of sites
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
+  //add docs_metadata to config
+  const projectsRepository = new ProjectsRepository(client.db('docs_metadata'), c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
 
@@ -103,6 +142,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   }
 
   // validate credentials here
+  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
 
   let body: PushEvent;
   try {
@@ -116,33 +163,30 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  //env could be hardcoded?
-  const env = c.get<string>('env');
+  //automated test builds will always deploy in dotcomstg
+  const env = 'dotcomstg';
 
   async function createAndInsertJob(path?: string) {
     //should this array be typed more specifically
     const deployable: Array<any> = [];
 
     for (const s in SMOKETEST_SITES) {
-      //ensure repotitle is consistent with other type of title
+      //ensure repoTitle is consistent with other type of title
       const jobTitle = 'Smoke Test' + s;
       const repoInfo = await docsetsRepository.getRepo(s, path);
+      const repoName = s;
+      const projectEntry = await projectsRepository.getProjectEntry(s);
+      const repoOwner = projectEntry.github.organization;
 
       //add commit hash- how do you get commit hash??
       //local-build/index.ts line 53?
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
       const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
+      const prefix = ammendedJobPrefix;
 
-      //change this so that can pass in specific branch
+      const payload = await createPayload(repoName, true, prefix, repoBranchesRepository, repoInfo, repoOwner);
       //add logic for getting master branch, latest stable branch
-      const job = await prepGithubPushPayload(
-        body,
-        repoBranchesRepository,
-        ammendedJobPrefix,
-        repoInfo,
-        jobTitle,
-        path
-      );
+      const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
     }
 
@@ -227,10 +271,13 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
   const env = c.get<string>('env');
 
   async function createAndInsertJob(path?: string) {
-    const repoInfo = await docsetsRepository.getRepo(body.repository.name, path);
+    const repo = body.repository;
+    const repoInfo = await docsetsRepository.getRepo(repo.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-    const jobTitle = body.repository.full_name;
-    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, jobTitle, path);
+    const jobTitle = repo.full_name;
+
+    // \ const payload = createPayload(repo.owner.login, repo.name, body.ref.split('/')[2], body.after,  project, isFork: repo.fork, url: repo.clone_url,  urlSlug: urlSlug, prefix: prefix, directory: directory,)
+    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, payload, jobTitle, path);
 
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
