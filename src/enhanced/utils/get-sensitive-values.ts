@@ -88,7 +88,7 @@ export async function getSecureStrings(
 
       if (!envName) {
         console.error(
-          `ERROR! The param '${paramName}' does not having a mapping to an environment variable name. Please define this in the ${resourceName} map.`
+          `ERROR! The param '${paramName}' does not have a mapping to an environment variable name. Please define this in the ${resourceName} map.`
         );
         return;
       }
