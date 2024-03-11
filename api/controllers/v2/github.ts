@@ -11,12 +11,8 @@ import { EnhancedJob, JobStatus } from '../../../src/entities/job';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { getMonorepoPaths } from '../../../src/monorepo';
-x;
 import { getUpdatedFilePaths } from '../../../src/monorepo/utils/path-utils';
-import {
-  ReposBranchesDocsetsDocument,
-  ReposBranchesDocument,
-} from '../../../modules/persistence/src/services/metadata/repos_branches';
+import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
@@ -63,20 +59,22 @@ async function createPayload(
 ) {
   const jobType = 'githubPush';
   const source = 'github';
-  const action = 'push';
   const project = repoInfo?.project ?? repoName;
 
-  let branch_name = 'master';
+  let branch_name = githubEvent?.ref.split('/')[2];
+  let action = 'push';
   let isFork = false;
-  let url: string | undefined;
+  let url = githubEvent?.repository.clone_url;
   let newHead;
 
   if (isSmokeTestDeploy) {
     branch_name = 'master';
     url = 'https://github.com/' + repoOwner + '/' + repoName;
     newHead = null;
+    action = 'automatedTest';
   } else {
     try {
+      action = 'push';
       if (!githubEvent) {
         return false;
       }
@@ -276,8 +274,8 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
     const jobTitle = repo.full_name;
 
-    // \ const payload = createPayload(repo.owner.login, repo.name, body.ref.split('/')[2], body.after,  project, isFork: repo.fork, url: repo.clone_url,  urlSlug: urlSlug, prefix: prefix, directory: directory,)
-    const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo, payload, jobTitle, path);
+    const payload = createPayload(repo.name, false, jobPrefix, repoBranchesRepository, repoInfo, body);
+    const job = await prepGithubPushPayload(body, payload, jobTitle);
 
     consoleLogger.info(job.title, 'Creating Job');
     const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
