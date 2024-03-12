@@ -68,7 +68,6 @@ async function createPayload(
   let newHead;
 
   if (isSmokeTestDeploy) {
-    branch_name = 'master';
     try {
       if (!repoOwner) {
         return false;
@@ -77,7 +76,7 @@ async function createPayload(
     } catch (e) {
       console.log('Error! repoOwner is must be configured for an automated smoke test deploy');
     }
-
+    branch_name = 'master';
     newHead = null;
     action = 'automatedTest';
   } else {
@@ -169,21 +168,15 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  return {
-    statusCode: 202,
-    headers: { 'Content-Type': 'text/plain' },
-    body: 'Return early' + body.ref,
-  };
-
-  //if the build was not building master, no need for smoke test sites
-  if (body.ref.split('/')[2] != 'main') {
-    console.log('Build was not on master branch, sites will not deploy as no smoke tests are needed');
-    return {
-      statusCode: 202,
-      headers: { 'Content-Type': 'text/plain' },
-      body: 'No Jobs queued, build was not on master branch' + body.ref,
-    };
-  }
+  // //if the build was not building master, no need for smoke test sites
+  // if (body.ref.split('/')[2] != 'main') {
+  //   console.log('Build was not on master branch, sites will not deploy as no smoke tests are needed');
+  //   return {
+  //     statusCode: 202,
+  //     headers: { 'Content-Type': 'text/plain' },
+  //     body: 'No Jobs queued, build was not on master branch' + body.ref,
+  //   };
+  // }
 
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
