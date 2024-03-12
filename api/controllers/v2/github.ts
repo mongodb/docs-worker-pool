@@ -182,11 +182,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const env = 'dotcomstg';
 
   async function createAndInsertJob(path?: string) {
-    return {
-      statusCode: 202,
-      headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued',
-    };
     //should this array be typed more specifically
     const deployable: Array<any> = [];
 
