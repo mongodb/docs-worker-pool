@@ -126,7 +126,7 @@ async function createPayload(
  *  - could also create a createpayload function
  * create and insert the jobs using bulk insert
  */
-export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult | null> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
@@ -167,6 +167,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       headers: { 'Content-Type': 'text/plain' },
       body: ' ERROR! Could not parse event.body',
     };
+  }
+
+  //if the build was not building master, no need for smoke test sites
+  if (body.ref.split('/')[2] != 'main') {
+    console.log('Build was not on master branch, sites will not deploy as no smoke tests are needed');
+    return null;
   }
 
   //automated test builds will always deploy in dotcomstg
