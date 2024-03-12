@@ -204,6 +204,11 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
     }
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Jobs Queued',
+    };
 
     try {
       await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
