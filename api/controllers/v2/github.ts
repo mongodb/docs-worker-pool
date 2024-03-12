@@ -127,16 +127,6 @@ async function createPayload(
  * create and insert the jobs using bulk insert
  */
 export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult | null> => {
-  // validate credentials here
-  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
-    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-    return {
-      statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
-      body: errMsg,
-    };
-  }
-
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
@@ -157,6 +147,16 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
+  // validate credentials here
+  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+
   let body: PushEvent;
   try {
     body = JSON.parse(event.body) as PushEvent;
@@ -169,16 +169,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  return {
-    statusCode: 202,
-    headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued 2',
-  };
-
   //if the build was not building master, no need for smoke test sites
   if (body.ref.split('/')[2] != 'main') {
     console.log('Build was not on master branch, sites will not deploy as no smoke tests are needed');
-    return null;
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'No Jobs queued, build was not on master branch',
+    };
   }
 
   //automated test builds will always deploy in dotcomstg
