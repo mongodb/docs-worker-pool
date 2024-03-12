@@ -181,13 +181,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
 
-  return {
-    statusCode: 202,
-    headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued',
-  };
-
   async function createAndInsertJob(path?: string) {
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Jobs Queued',
+    };
     //should this array be typed more specifically
     const deployable: Array<any> = [];
 
