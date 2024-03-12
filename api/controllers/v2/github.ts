@@ -61,15 +61,23 @@ async function createPayload(
   const source = 'github';
   const project = repoInfo?.project ?? repoName;
 
-  let branch_name = githubEvent?.ref.split('/')[2];
-  let action = 'push';
+  let branch_name = '';
+  let action = '';
   let isFork = false;
-  let url = githubEvent?.repository.clone_url;
+  let url;
   let newHead;
 
   if (isSmokeTestDeploy) {
     branch_name = 'master';
-    url = 'https://github.com/' + repoOwner + '/' + repoName;
+    try {
+      if (!repoOwner) {
+        return false;
+      }
+      url = 'https://github.com/' + repoOwner + '/' + repoName;
+    } catch (e) {
+      console.log('Error! repoOwner is must be configured for an automated smoke test deploy');
+    }
+
     newHead = null;
     action = 'automatedTest';
   } else {
