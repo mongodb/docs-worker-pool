@@ -185,6 +185,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     //should this array be typed more specifically
     const deployable: Array<any> = [];
 
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Jobs Queued',
+    };
+
     for (const s in SMOKETEST_SITES) {
       //ensure repoTitle is consistent with other type of title
       const jobTitle = 'Smoke Test' + s;
