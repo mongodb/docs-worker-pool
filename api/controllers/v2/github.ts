@@ -172,7 +172,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued',
+    body: 'Jobs Queued 2',
   };
 
   //if the build was not building master, no need for smoke test sites
