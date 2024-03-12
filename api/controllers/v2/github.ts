@@ -196,10 +196,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //add commit hash- how do you get commit hash??
       //local-build/index.ts line 53?
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-      const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
-      const prefix = ammendedJobPrefix;
+      // const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
+      // const prefix = ammendedJobPrefix;
 
-      const payload = await createPayload(repoName, true, prefix, repoBranchesRepository, repoInfo, repoOwner);
+      const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
