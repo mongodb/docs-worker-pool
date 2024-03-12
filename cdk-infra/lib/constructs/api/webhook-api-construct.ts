@@ -170,7 +170,9 @@ export class WebhookApiConstruct extends Construct {
       .addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
     // add endpoint for automated testing
-    githubEndpointTrigger.addResource('smoke-test-build', { defaultCorsPreflightOptions });
+    githubEndpointTrigger
+      .addResource('smoke-test-build', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(githubSmokeTestBuildLambda));
 
     githubEndpointTrigger
       .addResource('delete', { defaultCorsPreflightOptions })
@@ -188,6 +190,7 @@ export class WebhookApiConstruct extends Construct {
 
     // grant permission for lambdas to enqueue messages to the jobs queue
     jobsQueue.grantSendMessages(slackTriggerLambda);
+    jobsQueue.grantSendMessages(githubSmokeTestBuildLambda);
     jobsQueue.grantSendMessages(githubTriggerLambda);
     jobsQueue.grantSendMessages(triggerLocalBuildLambda);
 
