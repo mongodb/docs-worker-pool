@@ -137,12 +137,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  return {
-    statusCode: 202,
-    headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued',
-  };
-
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
@@ -174,6 +168,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       body: ' ERROR! Could not parse event.body',
     };
   }
+
+  return {
+    statusCode: 202,
+    headers: { 'Content-Type': 'text/plain' },
+    body: 'Jobs Queued',
+  };
 
   //if the build was not building master, no need for smoke test sites
   if (body.ref.split('/')[2] != 'main') {
