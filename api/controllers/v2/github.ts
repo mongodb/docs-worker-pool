@@ -194,7 +194,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       return {
         statusCode: 202,
         headers: { 'Content-Type': 'text/plain' },
-        body: 'Jobs Queued' + body,
+        body: 'Jobs Queued 3' + body,
       };
       const projectEntry = await projectsRepository.getProjectEntry(s);
       const repoOwner = projectEntry.github.organization;
@@ -210,11 +210,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
     }
-    return {
-      statusCode: 202,
-      headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued',
-    };
 
     try {
       await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
