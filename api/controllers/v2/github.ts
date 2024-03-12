@@ -127,6 +127,22 @@ async function createPayload(
  * create and insert the jobs using bulk insert
  */
 export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult | null> => {
+  // validate credentials here
+  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
+
+  return {
+    statusCode: 202,
+    headers: { 'Content-Type': 'text/plain' },
+    body: 'Jobs Queued',
+  };
+
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
@@ -144,16 +160,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       statusCode: 400,
       headers: { 'Content-Type': 'text/plain' },
       body: err,
-    };
-  }
-
-  // validate credentials here
-  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
-    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-    return {
-      statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
-      body: errMsg,
     };
   }
 
