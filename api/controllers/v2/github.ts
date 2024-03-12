@@ -169,6 +169,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
+  return {
+    statusCode: 202,
+    headers: { 'Content-Type': 'text/plain' },
+    body: 'Return early' + body.ref,
+  };
+
   //if the build was not building master, no need for smoke test sites
   if (body.ref.split('/')[2] != 'main') {
     console.log('Build was not on master branch, sites will not deploy as no smoke tests are needed');
@@ -181,12 +187,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
-
-  return {
-    statusCode: 202,
-    headers: { 'Content-Type': 'text/plain' },
-    body: 'Return early' + body.ref,
-  };
 
   async function createAndInsertJob(path?: string) {
     //should this array be typed more specifically
