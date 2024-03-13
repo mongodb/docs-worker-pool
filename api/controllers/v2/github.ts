@@ -189,9 +189,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //ensure repoTitle is consistent with other type of title
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test' + repoName;
-      const repoInfo = await docsetsRepository.getRepo(s, path);
-      const projectEntry = await projectsRepository.getProjectEntry(s);
-      return repoName;
+      const repoInfo = await docsetsRepository.getRepo(repoName, path);
+      const projectEntry = await projectsRepository.getProjectEntry(repoName);
+      return projectEntry;
       const repoOwner = projectEntry.github.organization;
 
       //add commit hash- how do you get commit hash??
