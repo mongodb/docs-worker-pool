@@ -66,7 +66,7 @@ async function createPayload(
   let isFork = false;
   let url;
   let newHead;
-
+  return repoOwner;
   if (isSmokeTestDeploy) {
     try {
       if (repoOwner == null) {
@@ -198,9 +198,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
       // const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
       // const prefix = ammendedJobPrefix;
-      return true;
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
+      return payload;
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
@@ -226,7 +226,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 3' + projectEntry,
+      body: 'Jobs Queued 1' + projectEntry,
     };
   } catch (err) {
     return {
