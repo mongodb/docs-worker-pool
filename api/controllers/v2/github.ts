@@ -30,7 +30,8 @@ async function prepGithubPushPayload(
   githubEvent: PushEvent,
   payload: any,
   title: string
-): Promise<Omit<EnhancedJob, '_id'>> {
+): Promise<Omit<EnhancedJob, '_id'> | boolean> {
+  return true;
   return {
     title: title,
     user: githubEvent.pusher.name,
