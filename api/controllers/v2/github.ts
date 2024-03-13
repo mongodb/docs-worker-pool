@@ -191,7 +191,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const repoInfo = await docsetsRepository.getRepo(s, path);
       const repoName = s;
       const projectEntry = await projectsRepository.getProjectEntry(s);
-      return projectEntry;
+      return s;
       const repoOwner = projectEntry.github.organization;
 
       //add commit hash- how do you get commit hash??
