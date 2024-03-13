@@ -34,7 +34,6 @@ async function prepGithubPushPayload(
   return {
     title: title,
     user: githubEvent.sender.login,
-    // email: githubEvent.pusher.email ?? '',
     email: '',
     status: JobStatus.inQueue,
     createdTime: new Date(),
@@ -62,38 +61,29 @@ async function createPayload(
   const source = 'github';
   const project = repoInfo?.project ?? repoName;
 
-  let branch_name = '';
-  let action = '';
-  let isFork = false;
-  let url;
-  let newHead;
+  let branch_name: string;
+  let action: string;
+  let url: any;
+  let isFork: boolean;
+  let newHead: any;
+
   if (isSmokeTestDeploy) {
-    try {
-      if (repoOwner == null) {
-        return 'no repo owner' + repoOwner;
-      }
-      url = 'https://github.com/' + repoOwner + '/' + repoName;
-    } catch (e) {
-      console.log('Error! repoOwner is must be configured for an automated smoke test deploy');
-    }
+    url = 'https://github.com/' + repoOwner + '/' + repoName;
     branch_name = 'master';
     newHead = null;
+    isFork = false;
     action = 'automatedTest';
     return repoName + branch_name + repoInfo;
   } else {
-    try {
-      action = 'push';
-      if (!githubEvent) {
-        return false;
-      }
-      branch_name = githubEvent.ref.split('/')[2];
-      isFork = githubEvent?.repository.fork;
-      url = githubEvent?.repository.clone_url;
-      newHead = githubEvent?.after;
-      repoOwner = githubEvent.repository.owner.login;
-    } catch (e) {
-      console.log('Error! No Github Push Event provided, payload could not be constructed');
+    if (!githubEvent) {
+      return false;
     }
+    action = 'push';
+    branch_name = githubEvent.ref.split('/')[2];
+    isFork = githubEvent?.repository.fork;
+    url = githubEvent?.repository.clone_url;
+    newHead = githubEvent?.after;
+    repoOwner = githubEvent.repository.owner.login;
   }
 
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(repoName, branch_name, repoInfo.project);
@@ -217,10 +207,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
       //add logic for getting master branch, latest stable branch
-      return true;
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
-      return job;
+      return 'job' + job;
     }
 
     try {
@@ -243,7 +232,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 3' + projectEntry,
+      body: 'Jobs Queued 4' + projectEntry,
     };
   } catch (err) {
     return {
