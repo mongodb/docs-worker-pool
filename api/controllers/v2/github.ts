@@ -70,7 +70,7 @@ async function createPayload(
   if (isSmokeTestDeploy) {
     try {
       if (!repoOwner) {
-        return false;
+        return 'no repo owner';
       }
       url = 'https://github.com/' + repoOwner + '/' + repoName;
     } catch (e) {
