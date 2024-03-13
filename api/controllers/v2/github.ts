@@ -72,7 +72,6 @@ async function createPayload(
         return 'no repo owner' + repoOwner;
       }
       url = 'https://github.com/' + repoOwner + '/' + repoName;
-      return url;
     } catch (e) {
       console.log('Error! repoOwner is must be configured for an automated smoke test deploy');
     }
@@ -97,6 +96,7 @@ async function createPayload(
 
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(repoName, branch_name, repoInfo.project);
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
+  return branch_info;
 
   return {
     jobType,
