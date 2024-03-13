@@ -69,7 +69,7 @@ async function createPayload(
 
   if (isSmokeTestDeploy) {
     try {
-      if (!repoOwner) {
+      if (repoOwner == null) {
         return 'no repo owner';
       }
       url = 'https://github.com/' + repoOwner + '/' + repoName;
@@ -226,7 +226,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 2' + projectEntry,
+      body: 'Jobs Queued 3' + projectEntry,
     };
   } catch (err) {
     return {
