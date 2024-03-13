@@ -191,7 +191,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const jobTitle = 'Smoke Test' + repoName;
       const repoInfo = await docsetsRepository.getRepo(repoName, path);
       const projectEntry = await projectsRepository.getProjectEntry(repoName);
-      return projectEntry.github.organization;
       const repoOwner = projectEntry.github.organization;
 
       //add commit hash- how do you get commit hash??
@@ -202,6 +201,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
       //add logic for getting master branch, latest stable branch
+      return payload;
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
     }
