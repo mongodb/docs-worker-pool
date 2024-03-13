@@ -69,7 +69,6 @@ async function createPayload(
   if (isSmokeTestDeploy) {
     url = 'https://github.com/' + repoOwner + '/' + repoName;
     branch_name = 'master';
-    newHead = null;
     isFork = false;
     action = 'automatedTest';
     return repoName + branch_name + repoInfo;
@@ -100,7 +99,6 @@ async function createPayload(
     urlSlug,
     isFork,
     url,
-    //can we keep newHead as null for smokeTest Deploys
     newHead,
     directory,
   };
@@ -199,7 +197,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     const deployable: Array<any> = [];
 
     for (const s in SMOKETEST_SITES) {
-      //ensure repoTitle is consistent with other type of title
       const repoName = SMOKETEST_SITES[s];
 
       const jobTitle = 'Smoke Test' + repoName;
@@ -207,8 +204,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
       const repoOwner = projectEntry.github.organization;
 
-      //add commit hash- how do you get commit hash??
-      //local-build/index.ts line 53?
+      //add commit hash here
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
       // const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
       // const prefix = ammendedJobPrefix;
@@ -217,7 +213,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
-      return 'New' + job;
     }
 
     try {
@@ -236,12 +231,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   }
 
   try {
-    const projectEntry = await createAndInsertJob();
-    return {
-      statusCode: 202,
-      headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 4' + projectEntry,
-    };
+    await createAndInsertJob();
   } catch (err) {
     return {
       statusCode: 500,
@@ -252,7 +242,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued',
+    body: 'Jobs Queued 2',
   };
 };
 
