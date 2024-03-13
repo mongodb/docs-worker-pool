@@ -18,6 +18,6 @@ export class ProjectsRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving branches for ${name}
       }`
     );
-    return name;
+    return projectEntry;
   }
 }
