@@ -190,7 +190,11 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const jobTitle = 'Smoke Test' + s;
       const repoInfo = await docsetsRepository.getRepo(s, path);
       const repoName = s;
-      return true;
+      return {
+        statusCode: 202,
+        headers: { 'Content-Type': 'text/plain' },
+        body: 'Jobs Queued 1' + body,
+      };
       const projectEntry = await projectsRepository.getProjectEntry(s);
       const repoOwner = projectEntry.github.organization;
 
