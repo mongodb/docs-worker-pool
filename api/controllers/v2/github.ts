@@ -53,8 +53,8 @@ async function createPayload(
   prefix: string,
   repoBranchesRepository: RepoBranchesRepository,
   repoInfo: ReposBranchesDocsetsDocument,
-  githubEvent?: PushEvent,
   repoOwner?: string,
+  githubEvent?: PushEvent,
   directory?: string
 ) {
   const jobType = 'githubPush';
