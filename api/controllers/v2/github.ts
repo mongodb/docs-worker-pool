@@ -95,8 +95,8 @@ async function createPayload(
   }
 
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(repoName, branch_name, repoInfo.project);
-  const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
   return branch_info;
+  const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
 
   return {
     jobType,
@@ -226,7 +226,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 1' + projectEntry,
+      body: 'Jobs Queued 2' + projectEntry,
     };
   } catch (err) {
     return {
