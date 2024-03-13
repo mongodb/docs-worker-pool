@@ -198,10 +198,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
       // const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
       // const prefix = ammendedJobPrefix;
+      return true;
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
       //add logic for getting master branch, latest stable branch
-      return 'true';
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
     }
