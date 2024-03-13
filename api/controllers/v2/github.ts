@@ -159,12 +159,13 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  // if (body.workflow_run.conclusion != 'success')
-  //   return {
-  //     statusCode: 202,
-  //     headers: { 'Content-Type': 'text/plain' },
-  //     body: 'Build on branch' + body.workflow_run.head_branch + ' failed and will not trigger smoke test site deployments ' ,
-  //   };
+  if (body.workflow_run.conclusion != 'success')
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body:
+        'Build on branch' + body.workflow_run.head_branch + ' failed and will not trigger smoke test site deployments ',
+    };
 
   // if (body.workflow_run.name != 'Deploy Staging ECS')
   //   return {
