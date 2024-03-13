@@ -201,10 +201,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       // const prefix = ammendedJobPrefix;
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
-      return payload;
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
+      return job;
     }
 
     try {
@@ -227,7 +227,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 2' + projectEntry,
+      body: 'Jobs Queued 1' + projectEntry,
     };
   } catch (err) {
     return {
