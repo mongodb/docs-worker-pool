@@ -78,7 +78,7 @@ async function createPayload(
     branch_name = 'master';
     newHead = null;
     action = 'automatedTest';
-    return repoName + branch_name + repoInfo.project;
+    return repoName + branch_name + repoInfo;
   } else {
     try {
       action = 'push';
