@@ -226,7 +226,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 4' + projectEntry,
+      body: 'Jobs Queued 5' + projectEntry,
     };
   } catch (err) {
     return {
