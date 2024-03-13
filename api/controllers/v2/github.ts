@@ -16,7 +16,7 @@ import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/s
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
-  'landing',
+  'docs-landing',
   'cloud-docs',
   'docs-realm',
   'docs',
@@ -188,9 +188,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     for (const s in SMOKETEST_SITES) {
       //ensure repoTitle is consistent with other type of title
       const repoName = SMOKETEST_SITES[s];
+
       const jobTitle = 'Smoke Test' + repoName;
       const repoInfo = await docsetsRepository.getRepo(repoName);
-      const projectEntry = await projectsRepository.getProjectEntry(repoName);
+      const projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
       const repoOwner = projectEntry.github.organization;
 
       //add commit hash- how do you get commit hash??
@@ -226,7 +227,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 1' + projectEntry,
+      body: 'Jobs Queued 2' + projectEntry,
     };
   } catch (err) {
     return {
