@@ -191,6 +191,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const repoInfo = await docsetsRepository.getRepo(s, path);
       const repoName = s;
       const projectEntry = await projectsRepository.getProjectEntry(s);
+      return true;
       const repoOwner = projectEntry.github.organization;
 
       return true;
@@ -226,7 +227,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 5' + body,
+      body: 'Jobs Queued 1' + body,
     };
   } catch (err) {
     return {
