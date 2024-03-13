@@ -1,7 +1,7 @@
 import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { PushEvent } from '@octokit/webhooks-types';
+import { PushEvent, WorkflowRunCompletedEvent } from '@octokit/webhooks-types';
 
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
@@ -27,7 +27,7 @@ const SMOKETEST_SITES = [
 ];
 
 async function prepGithubPushPayload(
-  githubEvent: PushEvent,
+  githubEvent: PushEvent | WorkflowRunCompletedEvent,
   payload: any,
   title: string
 ): Promise<Omit<EnhancedJob, '_id'> | string> {
@@ -157,9 +157,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  let body: PushEvent;
+  let body: WorkflowRunCompletedEvent;
   try {
-    body = JSON.parse(event.body) as PushEvent;
+    body = JSON.parse(event.body) as WorkflowRunCompletedEvent;
   } catch (e) {
     console.log('[TriggerBuild]: ERROR! Could not parse event.body', e);
     return {
@@ -169,14 +169,27 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  // //if the build was not building master, no need for smoke test sites
-  //check that fork is false
-  // if (body.ref.split('/')[2] != 'main') {
-  //   console.log('Build was not on master branch, sites will not deploy as no smoke tests are needed');
+  // if (body.workflow_run.conclusion != 'success')
   //   return {
   //     statusCode: 202,
   //     headers: { 'Content-Type': 'text/plain' },
-  //     body: 'No Jobs queued, build was not on master branch' + body.ref,
+  //     body: 'Build on branch' + body.workflow_run.head_branch + ' failed and will not trigger smoke test site deployments ' ,
+  //   };
+
+  // if (body.workflow_run.name != 'Deploy Staging ECS')
+  //   return {
+  //     statusCode: 202,
+  //     headers: { 'Content-Type': 'text/plain' },
+  //     body: 'Workflow' + body.workflow_run.name + 'completed successfully. Will not trigger smoke test site deployments, only Deploy Staging ECS workflow completion will.' ,
+  //   };
+
+  // //if the build was not building master, no need for smoke test sites
+  // if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
+  //   console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
+  //   return {
+  //     statusCode: 202,
+  //     headers: { 'Content-Type': 'text/plain' },
+  //     body: 'Build on branch' + body.workflow_run.head_branch + ' will not trigger site deployments as no smoke tests are needed' ,
   //   };
   // }
 
@@ -204,6 +217,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
       //add logic for getting master branch, latest stable branch
+      return true;
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
       return job;
