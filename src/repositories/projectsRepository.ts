@@ -18,11 +18,6 @@ export class ProjectsRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving branches for ${name}
       }`
     );
-    // if user has specific entitlements
     return projectEntry;
-  }
-
-  static getGithuRepoUrl(repoOwner: string, repoName: string): string {
-    return 'https://github.com/' + repoOwner + '/' + repoName;
   }
 }
