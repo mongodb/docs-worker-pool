@@ -31,7 +31,7 @@ async function prepGithubPushPayload(
   payload: any,
   title: string
 ): Promise<Omit<EnhancedJob, '_id'> | string> {
-  return 'here' + githubEvent.pusher;
+  return 'here' + JSON.stringify(githubEvent);
   return {
     title: title,
     user: githubEvent.pusher.name,
