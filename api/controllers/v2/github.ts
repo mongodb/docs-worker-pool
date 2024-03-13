@@ -31,11 +31,11 @@ async function prepGithubPushPayload(
   payload: any,
   title: string
 ): Promise<Omit<EnhancedJob, '_id'> | string> {
-  return 'here' + JSON.stringify(githubEvent);
   return {
     title: title,
-    user: githubEvent.pusher.name,
-    email: githubEvent.pusher.email ?? '',
+    user: githubEvent.sender.login,
+    // email: githubEvent.pusher.email ?? '',
+    email: '',
     status: JobStatus.inQueue,
     createdTime: new Date(),
     startTime: null,
@@ -170,6 +170,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   }
 
   // //if the build was not building master, no need for smoke test sites
+  //check that fork is false
   // if (body.ref.split('/')[2] != 'main') {
   //   console.log('Build was not on master branch, sites will not deploy as no smoke tests are needed');
   //   return {
