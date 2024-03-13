@@ -181,7 +181,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
 
-  async function createAndInsertJob(path?: string) {
+  async function createAndInsertJob() {
     //should this array be typed more specifically
     const deployable: Array<any> = [];
 
@@ -189,7 +189,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //ensure repoTitle is consistent with other type of title
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test' + repoName;
-      const repoInfo = await docsetsRepository.getRepo(repoName, path);
+      const repoInfo = await docsetsRepository.getRepo(repoName);
       const projectEntry = await projectsRepository.getProjectEntry(repoName);
       const repoOwner = projectEntry.github.organization;
 
@@ -226,7 +226,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 2' + projectEntry,
+      body: 'Jobs Queued 1' + projectEntry,
     };
   } catch (err) {
     return {
