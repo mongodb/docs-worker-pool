@@ -131,7 +131,7 @@ export type EnhancedJob = {
   buildCommands?: string[];
   deployCommands?: string[];
   invalidationStatusURL?: string | null;
-  email: string | null; // probably can be removed
+  email?: string | null; // probably can be removed
   comMessage?: string[] | null;
   purgedUrls?: string[] | null;
   shouldGenerateSearchManifest?: boolean;

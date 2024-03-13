@@ -34,7 +34,6 @@ async function prepGithubPushPayload(
   return {
     title: title,
     user: githubEvent.sender.login,
-    email: '',
     status: JobStatus.inQueue,
     createdTime: new Date(),
     startTime: null,
@@ -164,7 +163,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
       body:
-        'Build on branch' + body.workflow_run.head_branch + ' failed and will not trigger smoke test site deployments ',
+        'Build on branch' +
+        body.workflow_run.head_branch +
+        ' is not complete and will not trigger smoke test site deployments ',
     };
 
   if (body.workflow_run.name != 'Deploy Staging ECS')
@@ -174,7 +175,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       body:
         'Workflow' +
         body.workflow_run.name +
-        'completed successfully. Will not trigger smoke test site deployments, only Deploy Staging ECS workflow completion will.',
+        'completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments',
     };
 
   //if the build was not building master, no need for smoke test sites
