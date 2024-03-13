@@ -201,7 +201,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
       //add logic for getting master branch, latest stable branch
-      return payload;
+      return 'true';
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
     }
