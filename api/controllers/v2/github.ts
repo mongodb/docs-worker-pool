@@ -187,11 +187,11 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
     for (const s in SMOKETEST_SITES) {
       //ensure repoTitle is consistent with other type of title
-      const jobTitle = 'Smoke Test' + s;
+      const repoName = SMOKETEST_SITES[s];
+      const jobTitle = 'Smoke Test' + repoName;
       const repoInfo = await docsetsRepository.getRepo(s, path);
-      const repoName = s;
       const projectEntry = await projectsRepository.getProjectEntry(s);
-      return s;
+      return repoName;
       const repoOwner = projectEntry.github.organization;
 
       //add commit hash- how do you get commit hash??
@@ -226,7 +226,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued 5' + projectEntry,
+      body: 'Jobs Queued 1' + projectEntry,
     };
   } catch (err) {
     return {
