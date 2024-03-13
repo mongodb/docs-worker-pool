@@ -60,7 +60,7 @@ async function createPayload(
   const source = 'github';
   const project = repoInfo?.project ?? repoName;
 
-  let branch_name: string;
+  let branchName: string;
   let action: string;
   let url: any;
   let isFork: boolean;
@@ -68,24 +68,24 @@ async function createPayload(
 
   if (isSmokeTestDeploy) {
     url = 'https://github.com/' + repoOwner + '/' + repoName;
-    branch_name = 'master';
+    branchName = 'master';
     isFork = false;
     action = 'automatedTest';
-    return repoName + branch_name + repoInfo;
+    return repoName + branchName + repoInfo;
   } else {
     if (!githubEvent) {
       return false;
     }
     action = 'push';
-    branch_name = githubEvent.ref.split('/')[2];
+    branchName = githubEvent.ref.split('/')[2];
     isFork = githubEvent?.repository.fork;
     url = githubEvent?.repository.clone_url;
     newHead = githubEvent?.after;
     repoOwner = githubEvent.repository.owner.login;
   }
 
-  const branch_info = await repoBranchesRepository.getRepoBranchAliases(repoName, branch_name, repoInfo.project);
-  const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
+  const branchInfo = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
+  const urlSlug = branchInfo.aliasObject?.urlSlug ?? branchName;
 
   return {
     jobType,
@@ -93,7 +93,7 @@ async function createPayload(
     action,
     repoName,
     repoOwner,
-    branchName: branch_name,
+    branchName,
     project,
     prefix,
     urlSlug,
