@@ -94,8 +94,8 @@ async function createPayload(
     }
   }
 
+  return repoName + branch_name + repoInfo.project;
   const branch_info = await repoBranchesRepository.getRepoBranchAliases(repoName, branch_name, repoInfo.project);
-  return branch_info;
   const urlSlug = branch_info.aliasObject?.urlSlug ?? branch_name;
 
   return {
