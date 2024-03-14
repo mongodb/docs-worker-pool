@@ -71,7 +71,6 @@ async function createPayload(
     branchName = 'master';
     isFork = false;
     action = 'automatedTest';
-    return repoName + branchName + repoInfo;
   } else {
     if (!githubEvent) {
       return false;
@@ -228,9 +227,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         consoleLogger.info(job.title, 'Creating Job');
         const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
         jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
-        return jobId;
         consoleLogger.info(job.title, `Created Job ${jobId}`);
-        deployable.push(jobId);
       } catch (err) {
         return err + repoName;
         consoleLogger.error('TriggerBuildError', err + repoName);
