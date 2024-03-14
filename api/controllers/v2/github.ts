@@ -16,11 +16,11 @@ import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/s
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
-  // 'docs-landing',
-  // 'cloud-docs',
-  // 'docs-realm',
-  // 'docs',
-  'docs-atlas-cli',
+  'docs-landing',
+  'cloud-docs',
+  'docs-realm',
+  'docs',
+  // 'docs-atlas-cli',
   // 'docs-ecosystem',
   // 'docs-node',
   // 'docs-app-services',
@@ -198,16 +198,24 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     let names = '';
 
     for (const s in SMOKETEST_SITES) {
+      const repoBranches = await repoBranchesRepository.getRepoBranches(SMOKETEST_SITES[s]);
       const repoName = SMOKETEST_SITES[s];
-
       const jobTitle = 'Smoke Test' + repoName;
       let repoInfo, projectEntry, repoOwner;
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
+        return repoBranches.project + repoInfo.project;
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
         repoOwner = projectEntry.github.organization;
       } catch {
-        return 'repoInfo, projectEntry, or repoOwner not found ' + repoInfo + projectEntry + repoOwner;
+        return (
+          'repoInfo, projectEntry, or repoOwner not found.  Repo info: ' +
+          repoInfo.project +
+          'projectEntry ' +
+          projectEntry +
+          ' repoOwner ' +
+          repoOwner
+        );
       }
 
       //add commit hash here
