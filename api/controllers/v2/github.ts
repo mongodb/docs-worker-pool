@@ -171,23 +171,23 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
       body:
-        'Workflow' +
+        'Workflow ' +
         body.workflow_run.name +
-        'completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments',
+        ' completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments',
     };
 
   //if the build was not building master, no need for smoke test sites
-  if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
-    console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
-    return {
-      statusCode: 202,
-      headers: { 'Content-Type': 'text/plain' },
-      body:
-        'Build on branch' +
-        body.workflow_run.head_branch +
-        ' will not trigger site deployments as no smoke tests are needed',
-    };
-  }
+  // if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
+  //   console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
+  //   return {
+  //     statusCode: 202,
+  //     headers: { 'Content-Type': 'text/plain' },
+  //     body:
+  //       'Build on branch' +
+  //       body.workflow_run.head_branch +
+  //       ' will not trigger site deployments as it was not on master branch in upstream repo',
+  //   };
+  // }
 
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
