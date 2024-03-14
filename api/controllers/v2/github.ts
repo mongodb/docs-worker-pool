@@ -224,18 +224,18 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
-      return true;
-      // try {
-      //   consoleLogger.info(job.title, 'Creating Job');
-      //   const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
-      //   jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
-      //   consoleLogger.info(job.title, `Created Job ${jobId}`);
-      //   deployable.push(jobId);
-      // } catch (err) {
-      //   return err + repoName;
-      //   consoleLogger.error('TriggerBuildError', err + repoName);
-      // }
-      // deployable.push(job);
+      try {
+        consoleLogger.info(job.title, 'Creating Job');
+        const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+        return jobId;
+        jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+        consoleLogger.info(job.title, `Created Job ${jobId}`);
+        deployable.push(jobId);
+      } catch (err) {
+        return err + repoName;
+        consoleLogger.error('TriggerBuildError', err + repoName);
+      }
+      deployable.push(job);
     }
     return deployable;
 
