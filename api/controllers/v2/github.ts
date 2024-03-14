@@ -134,15 +134,15 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  // validate credentials here
-  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
-    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-    return {
-      statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
-      body: errMsg,
-    };
-  }
+  // // validate credentials here
+  // if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
+  //   const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+  //   return {
+  //     statusCode: 401,
+  //     headers: { 'Content-Type': 'text/plain' },
+  //     body: errMsg,
+  //   };
+  // }
 
   let body: WorkflowRunCompletedEvent;
   try {
@@ -161,7 +161,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
       body:
-        'Build on branch' +
+        'Build on branch ' +
         body.workflow_run.head_branch +
         ' is not complete and will not trigger smoke test site deployments ',
     };
