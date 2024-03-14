@@ -18,12 +18,12 @@ import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 const SMOKETEST_SITES = [
   'docs-landing',
   'cloud-docs',
-  'docs-realm',
-  'docs',
-  'docs-atlas-cli',
-  'docs-ecosystem',
-  'docs-node',
-  'docs-app-services',
+  // 'docs-realm',
+  // 'docs',
+  // 'docs-atlas-cli',
+  // 'docs-ecosystem',
+  // 'docs-node',
+  // 'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
@@ -195,6 +195,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   async function createAndInsertJob() {
     //should this array be typed more specifically
     const deployable: Array<any> = [];
+    let names = '';
 
     for (const s in SMOKETEST_SITES) {
       const repoName = SMOKETEST_SITES[s];
@@ -213,8 +214,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
-      return deployable;
+      names = names + s;
     }
+    return names;
 
     try {
       await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
@@ -231,8 +233,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     }
   }
 
+  let returnVal;
   try {
-    await createAndInsertJob();
+    returnVal = await createAndInsertJob();
   } catch (err) {
     return {
       statusCode: 500,
@@ -243,7 +246,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued 2',
+    body: 'Jobs Queued ' + returnVal,
   };
 };
 
