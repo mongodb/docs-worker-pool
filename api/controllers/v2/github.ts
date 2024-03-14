@@ -201,9 +201,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const repoName = SMOKETEST_SITES[s];
 
       const jobTitle = 'Smoke Test' + repoName;
-      const repoInfo = await docsetsRepository.getRepo(repoName);
-      const projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
-      const repoOwner = projectEntry.github.organization;
+      let repoInfo, projectEntry, repoOwner;
+      try {
+        repoInfo = await docsetsRepository.getRepo(repoName);
+        projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
+        repoOwner = projectEntry.github.organization;
+      } catch {
+        return 'repoInfo, projectEntry, or repoOwner not found ' + repoInfo + projectEntry + repoOwner;
+      }
 
       //add commit hash here
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
@@ -211,6 +216,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       // const prefix = ammendedJobPrefix;
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
+
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
