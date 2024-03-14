@@ -216,6 +216,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     }
 
     try {
+      return true;
       await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
 
       // notify the jobUpdatesQueue
