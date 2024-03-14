@@ -18,8 +18,8 @@ import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 const SMOKETEST_SITES = [
   'docs-landing',
   'cloud-docs',
-  // 'docs-realm',
-  // 'docs',
+  'docs-realm',
+  'docs',
   // 'docs-atlas-cli',
   // 'docs-ecosystem',
   // 'docs-node',
@@ -30,7 +30,7 @@ async function prepGithubPushPayload(
   githubEvent: PushEvent | WorkflowRunCompletedEvent,
   payload: any,
   title: string
-): Promise<Omit<EnhancedJob, '_id'> | string> {
+): Promise<Omit<EnhancedJob, '_id'>> {
   return {
     title: title,
     user: githubEvent.sender.login,
@@ -214,7 +214,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
-      names = names + s;
+      names = names + repoName;
     }
     return names;
 
@@ -305,7 +305,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
     const jobTitle = repo.full_name;
 
-    const payload = createPayload(repo.name, false, jobPrefix, repoBranchesRepository, repoInfo, body);
+    const payload = createPayload(repo.name, false, jobPrefix, repoBranchesRepository, repoInfo, undefined, body);
     const job = await prepGithubPushPayload(body, payload, jobTitle);
 
     consoleLogger.info(job.title, 'Creating Job');
