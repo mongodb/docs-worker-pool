@@ -195,7 +195,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   async function createAndInsertJob() {
     //should this array be typed more specifically
     const deployable: Array<any> = [];
-    let names = '';
+    const names = '';
 
     for (const s in SMOKETEST_SITES) {
       const repoName = SMOKETEST_SITES[s];
@@ -226,9 +226,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
       deployable.push(job);
-      names = names + repoName;
     }
-    return names;
 
     try {
       await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
@@ -240,6 +238,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           consoleLogger.info(jobId, `Created Job ${jobId}`);
         })
       );
+      return true;
     } catch (err) {
       consoleLogger.error('deployRepo', err);
     }
