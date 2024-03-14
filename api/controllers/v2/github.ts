@@ -17,9 +17,9 @@ import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
   'docs-landing',
-  'cloud-docs',
-  // 'docs-realm',
-  // 'docs',
+  // 'cloud-docs',
+  'docs-realm',
+  'docs',
   // 'docs-atlas-cli',
   // 'docs-ecosystem',
   // 'docs-node',
@@ -195,9 +195,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     //should this array be typed more specifically
     const deployable: Array<any> = [];
 
+    let names = '';
     for (const s in SMOKETEST_SITES) {
       const repoName = SMOKETEST_SITES[s];
-      const jobTitle = 'Smoke Test' + repoName;
+      const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
@@ -228,13 +229,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
         jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
         consoleLogger.info(job.title, `Created Job ${jobId}`);
+        names = names + repoName;
       } catch (err) {
         return err + repoName;
         consoleLogger.error('TriggerBuildError', err + repoName);
       }
-      deployable.push(job);
+      // deployable.push(job);
     }
-    return deployable;
+    return names;
 
     // try {
     //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
@@ -251,9 +253,8 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     // }
   }
 
-  let returnVal;
   try {
-    returnVal = await createAndInsertJob();
+    await createAndInsertJob();
   } catch (err) {
     return {
       statusCode: 500,
@@ -264,7 +265,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued ' + returnVal,
+    body: 'Jobs Queued ',
   };
 };
 
