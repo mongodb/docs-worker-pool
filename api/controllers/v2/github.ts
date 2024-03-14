@@ -20,10 +20,10 @@ const SMOKETEST_SITES = [
   'cloud-docs',
   'docs-realm',
   'docs',
-  // 'docs-atlas-cli',
-  // 'docs-ecosystem',
-  // 'docs-node',
-  // 'docs-app-services',
+  'docs-atlas-cli',
+  'docs-ecosystem',
+  'docs-node',
+  'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
