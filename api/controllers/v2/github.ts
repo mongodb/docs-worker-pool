@@ -21,9 +21,9 @@ const SMOKETEST_SITES = [
   'docs-realm',
   'docs',
   // 'docs-atlas-cli',
-  // 'docs-ecosystem',
-  // 'docs-node',
-  // 'docs-app-services',
+  'docs-ecosystem',
+  'docs-node',
+  'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
@@ -198,13 +198,11 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     let names = '';
 
     for (const s in SMOKETEST_SITES) {
-      const repoBranches = await repoBranchesRepository.getRepoBranches(SMOKETEST_SITES[s]);
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test' + repoName;
       let repoInfo, projectEntry, repoOwner;
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
-        return repoBranches.project + repoInfo.project;
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
         repoOwner = projectEntry.github.organization;
       } catch {
@@ -218,8 +216,8 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         );
       }
 
-      //add commit hash here
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+      //add commit hash to jobPrefix here?
       // const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
       // const prefix = ammendedJobPrefix;
 
