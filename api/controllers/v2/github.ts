@@ -18,12 +18,12 @@ import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 const SMOKETEST_SITES = [
   'docs-landing',
   'cloud-docs',
-  'docs-realm',
-  'docs',
-  'docs-atlas-cli',
-  'docs-ecosystem',
-  'docs-node',
-  'docs-app-services',
+  // 'docs-realm',
+  // 'docs',
+  // 'docs-atlas-cli',
+  // 'docs-ecosystem',
+  // 'docs-node',
+  // 'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
@@ -224,22 +224,32 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
-      deployable.push(job);
+      try {
+        consoleLogger.info(job.title, 'Creating Job');
+        const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+        jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+        consoleLogger.info(job.title, `Created Job ${jobId}`);
+        deployable.push(jobId);
+      } catch (err) {
+        consoleLogger.error('TriggerBuildError', err + repoName);
+      }
+      // deployable.push(job);
     }
+    return deployable;
 
-    try {
-      await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
+    // try {
+    //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
 
-      // notify the jobUpdatesQueue
-      await Promise.all(
-        deployable.map(async ({ jobId }) => {
-          await jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
-          consoleLogger.info(jobId, `Created Job ${jobId}`);
-        })
-      );
-    } catch (err) {
-      consoleLogger.error('deployRepo', err);
-    }
+    //   // notify the jobUpdatesQueue
+    //   await Promise.all(
+    //     deployable.map(async ({ jobId }) => {
+    //       await jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+    //       consoleLogger.info(jobId, `Created Job ${jobId}`);
+    //     })
+    //   );
+    // } catch (err) {
+    //   consoleLogger.error('TriggerBuildError', err+ );
+    // }
   }
 
   let returnVal;
