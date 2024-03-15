@@ -221,6 +221,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
+
+      if (repoName == 'docs') {
+        return job;
+      }
       try {
         consoleLogger.info(job.title, 'Creating Job');
         const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
