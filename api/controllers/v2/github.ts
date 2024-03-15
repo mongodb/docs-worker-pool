@@ -219,12 +219,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
 
+      if (repoName != 'docs-realm') {
+        return payload;
+      }
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
 
-      if (repoName == 'docs') {
-        return job;
-      }
       try {
         consoleLogger.info(job.title, 'Creating Job');
         const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
