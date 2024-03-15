@@ -16,7 +16,7 @@ import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/s
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
-  // 'docs-landing',
+  'docs-landing',
   // 'cloud-docs',
   // 'docs-realm',
   'docs',
@@ -234,6 +234,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         consoleLogger.error('TriggerBuildError', err + repoName);
       }
       // deployable.push(job);
+      return names;
     }
 
     // try {
