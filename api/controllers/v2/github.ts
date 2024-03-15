@@ -17,13 +17,13 @@ import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
   'docs-landing',
-  // 'cloud-docs',
+  'cloud-docs',
   'docs-realm',
   'docs',
-  // 'docs-atlas-cli',
-  // 'docs-ecosystem',
-  // 'docs-node',
-  // 'docs-app-services',
+  'docs-atlas-cli',
+  'docs-ecosystem',
+  'docs-node',
+  'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
@@ -133,15 +133,15 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  // // validate credentials here
-  // if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
-  //   const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-  //   return {
-  //     statusCode: 401,
-  //     headers: { 'Content-Type': 'text/plain' },
-  //     body: errMsg,
-  //   };
-  // }
+  // validate credentials here
+  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
 
   let body: WorkflowRunCompletedEvent;
   try {
