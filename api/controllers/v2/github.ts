@@ -56,6 +56,9 @@ async function createPayload(
   githubEvent?: PushEvent,
   directory?: string
 ) {
+  if (repoName != 'docs-realm') {
+    return repoName;
+  }
   const jobType = 'githubPush';
   const source = 'github';
   const project = repoInfo?.project ?? repoName;
@@ -219,9 +222,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
 
-      if (repoName != 'docs-realm') {
-        return payload;
-      }
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
 
