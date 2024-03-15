@@ -236,8 +236,8 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         consoleLogger.error('TriggerBuildError', err + repoName);
       }
       // deployable.push(job);
+      return names;
     }
-    return names;
 
     // try {
     //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
