@@ -369,7 +369,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued',
+      body: 'Jobs Queued ',
     };
   }
 
