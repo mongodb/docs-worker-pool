@@ -215,10 +215,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         );
       }
 
-      const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+      const jobPrefix = 'testing';
+      // repoInfo?.prefix ? repoInfo['prefix'][env] : '';
       //add commit hash to jobPrefix here?
-      // const ammendedJobPrefix = body.after ? jobPrefix + body.after : jobPrefix;
-      // const prefix = ammendedJobPrefix;
+      // const prefix = jobPrefix + "/" + body.workflow_run.head_sha;
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
 
