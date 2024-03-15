@@ -236,7 +236,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         consoleLogger.error('TriggerBuildError', err + repoName);
       }
       // deployable.push(job);
-      return names;
     }
 
     // try {
