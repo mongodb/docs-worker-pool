@@ -56,9 +56,6 @@ async function createPayload(
   githubEvent?: PushEvent,
   directory?: string
 ) {
-  if (repoName != 'docs-realm') {
-    return repoName;
-  }
   const jobType = 'githubPush';
   const source = 'github';
   const project = repoInfo?.project ?? repoName;
@@ -200,6 +197,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
+      if (repoName != 'docs-realm') {
+        return repoName;
+      }
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
