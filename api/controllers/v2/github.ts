@@ -20,10 +20,10 @@ const SMOKETEST_SITES = [
   // 'cloud-docs',
   'docs-realm',
   'docs',
-  'docs-atlas-cli',
-  'docs-ecosystem',
-  'docs-node',
-  'docs-app-services',
+  // 'docs-atlas-cli',
+  // 'docs-ecosystem',
+  // 'docs-node',
+  // 'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
@@ -95,7 +95,7 @@ async function createPayload(
     branchName,
     project,
     prefix,
-    urlSlug: '',
+    urlSlug,
     isFork,
     url,
     newHead,
@@ -192,9 +192,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const env = 'dotcomstg';
 
   async function createAndInsertJob() {
-    //should this array be typed more specifically
-    const deployable: Array<any> = [];
-
     let names = '';
     for (const s in SMOKETEST_SITES) {
       const repoName = SMOKETEST_SITES[s];
@@ -253,19 +250,20 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     // }
   }
 
+  let returnVal;
   try {
-    await createAndInsertJob();
+    returnVal = await createAndInsertJob();
   } catch (err) {
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'text/plain' },
-      body: err,
+      body: returnVal + err,
     };
   }
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Jobs Queued ',
+    body: 'Jobs Queued ' + returnVal,
   };
 };
 
