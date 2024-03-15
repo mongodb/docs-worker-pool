@@ -10,7 +10,7 @@ interface StageParams {
 }
 
 export async function nextGenStage({ job, bucket, url }: StageParams): Promise<CommandExecutorResponse> {
-  const { mutPrefix, branchName, project, newHead, patchId } = job.payload;
+  const { mutPrefix, branchName, project, newHead, patchId, action } = job.payload;
 
   if (!bucket) {
     console.log(`nextGenStage has failed. Variable for S3 bucket address was undefined.`);
@@ -29,15 +29,22 @@ export async function nextGenStage({ job, bucket, url }: StageParams): Promise<C
     };
   }
 
+  console.log(mutPrefix);
   let prefix = mutPrefix || project;
+  console.log(prefix);
+
   let hostedAtUrl = `${url}/${prefix}/${DOCS_WORKER_USER}/${branchName}/`;
 
   const commandArgs = ['public', bucket, '--stage'];
+
+  //add commithash to url and prefix here if its an automated test type of job
 
   if (patchId && newHead && project === mutPrefix) {
     prefix = `${newHead}/${patchId}/${mutPrefix}`;
     hostedAtUrl = `${url}/${newHead}/${patchId}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;
   }
+
+  console.log(hostedAtUrl);
 
   commandArgs.push(`--prefix=${prefix}`);
 

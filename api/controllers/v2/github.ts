@@ -52,6 +52,7 @@ async function createPayload(
   prefix: string,
   repoBranchesRepository: RepoBranchesRepository,
   repoInfo: ReposBranchesDocsetsDocument,
+  newHead: string,
   repoOwner?: string,
   githubEvent?: PushEvent,
   directory?: string
@@ -64,7 +65,6 @@ async function createPayload(
   let action: string;
   let url: any;
   let isFork: boolean;
-  let newHead: any;
 
   if (isSmokeTestDeploy) {
     url = 'https://github.com/' + repoOwner + '/' + repoName;
@@ -213,12 +213,19 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         );
       }
 
-      const jobPrefix = 'testing';
-      // repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+      const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
       //add commit hash to jobPrefix here?
-      // const prefix = jobPrefix + "/" + body.workflow_run.head_sha;
+      const newHead = body.workflow_run.head_sha;
 
-      const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, repoOwner);
+      const payload = await createPayload(
+        repoName,
+        true,
+        jobPrefix,
+        repoBranchesRepository,
+        repoInfo,
+        newHead,
+        repoOwner
+      );
 
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
@@ -230,7 +237,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         consoleLogger.info(job.title, `Created Job ${jobId}`);
         names = names + repoName;
       } catch (err) {
-        return err + repoName;
+        return false;
         consoleLogger.error('TriggerBuildError', err + repoName);
       }
       // deployable.push(job);
