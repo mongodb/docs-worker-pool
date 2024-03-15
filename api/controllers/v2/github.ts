@@ -18,7 +18,7 @@ import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 const SMOKETEST_SITES = [
   // 'docs-landing',
   // 'cloud-docs',
-  'docs-realm',
+  // 'docs-realm',
   'docs',
   // 'docs-atlas-cli',
   // 'docs-ecosystem',
