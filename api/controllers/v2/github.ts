@@ -198,10 +198,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
+      if (repoName == 'docs') return true;
 
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
-        if (repoName == 'docs') return true;
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
         repoOwner = projectEntry.github.organization;
       } catch {
