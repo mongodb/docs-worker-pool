@@ -201,9 +201,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
+        if (repoName == 'docs') return true;
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
         repoOwner = projectEntry.github.organization;
-        if (repoName == 'docs') return true;
       } catch {
         return (
           'repoInfo, projectEntry, or repoOwner not found.  Repo info: ' +
