@@ -198,7 +198,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
-      if (repoName == 'docs') return true;
+      if (repoName == 'docs') return docsetsRepository.getRepo(repoName);
 
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
