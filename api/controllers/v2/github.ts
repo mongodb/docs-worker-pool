@@ -194,8 +194,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   async function createAndInsertJob() {
     let names = '';
     for (const s in SMOKETEST_SITES) {
-      names += s;
+      names = names + s;
       const repoName = SMOKETEST_SITES[s];
+      if (repoName == 'docs') return true;
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
 
@@ -233,7 +234,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       }
       // deployable.push(job);
     }
-    return names;
 
     // try {
     //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
