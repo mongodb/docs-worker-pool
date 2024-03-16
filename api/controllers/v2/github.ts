@@ -215,18 +215,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
       //add commit hash to jobPrefix here?
-      const newHead = body.workflow_run.head_sha;
+      //const newHead = body.workflow_run.head_sha;
 
-      const payload = await createPayload(
-        repoName,
-        true,
-        jobPrefix,
-        repoBranchesRepository,
-        repoInfo,
-        newHead,
-        repoOwner
-      );
-
+      const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, '', repoOwner);
+      names = names + repoName;
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
 
@@ -235,7 +227,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
         jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
         consoleLogger.info(job.title, `Created Job ${jobId}`);
-        names = names + repoName;
       } catch (err) {
         return false;
         consoleLogger.error('TriggerBuildError', err + repoName);
