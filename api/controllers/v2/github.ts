@@ -134,14 +134,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   }
 
   // validate credentials here
-  // if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
-  //   const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-  //   return {
-  //     statusCode: 401,
-  //     headers: { 'Content-Type': 'text/plain' },
-  //     body: errMsg,
-  //   };
-  // }
+  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
+    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'text/plain' },
+      body: errMsg,
+    };
+  }
 
   let body: WorkflowRunCompletedEvent;
   try {
