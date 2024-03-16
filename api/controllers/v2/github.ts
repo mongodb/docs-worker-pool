@@ -194,6 +194,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   async function createAndInsertJob() {
     let names = '';
     for (const s in SMOKETEST_SITES) {
+      names += s;
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
@@ -218,7 +219,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //const newHead = body.workflow_run.head_sha;
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, '', repoOwner);
-      names = names + repoName;
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
 
@@ -228,12 +228,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
         consoleLogger.info(job.title, `Created Job ${jobId}`);
       } catch (err) {
-        return false;
+        return repoName;
         consoleLogger.error('TriggerBuildError', err + repoName);
       }
       // deployable.push(job);
-      return names;
     }
+    return names;
 
     // try {
     //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
