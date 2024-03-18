@@ -265,7 +265,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     };
   }
 
-  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
+  if (!validateJsonWebhook(event, process.env.GITHUB_SECRET)) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
       statusCode: 401,
