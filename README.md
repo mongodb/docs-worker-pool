@@ -23,7 +23,7 @@ To add a new property:
 
 ## Debug the Autobuilder for Local Testing
 
-### Setup
+### Setting up
 
 To debug the Autobuilder for local testing, you first need to ensure the following has been done:
 

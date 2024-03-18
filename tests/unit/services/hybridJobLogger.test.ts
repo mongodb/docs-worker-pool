@@ -1,5 +1,6 @@
 import { HybridJobLogger } from '../../../src/services/logger';
 import { JobRepository } from '../../../src/repositories/jobRepository';
+import { sensitiveKeys } from '../../../src/enhanced/utils/get-sensitive-values';
 import { mockDeep } from 'jest-mock-extended';
 
 describe('HybridJobLogger Tests', () => {
@@ -58,6 +59,16 @@ describe('HybridJobLogger Tests', () => {
     test('HybridJobLogger save succeeds', async () => {
       await hybridJobLogger.save('TestContext', 'testMessage');
       expect(console.info).toBeCalledWith(`Context: TestContext message: testMessage`);
+      expect(console.info.mock.calls).toHaveLength(1);
+      expect(jobRepo.insertLogStatement.mock.calls).toHaveLength(1);
+    });
+  });
+
+  describe('HybridJobLogger Redact Test', () => {
+    test('HybridJobLogger redacts secrets from the message', async () => {
+      sensitiveKeys.push('my_secret');
+      await hybridJobLogger.save('SensitiveKeyContext', 'Oops I just logged my_secret');
+      expect(console.info).toBeCalledWith('Context: SensitiveKeyContext message: Oops I just logged *******');
       expect(console.info.mock.calls).toHaveLength(1);
       expect(jobRepo.insertLogStatement.mock.calls).toHaveLength(1);
     });
