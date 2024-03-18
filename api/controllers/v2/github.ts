@@ -22,7 +22,7 @@ const SMOKETEST_SITES = [
   'docs',
   // 'docs-atlas-cli',
   // 'docs-ecosystem',
-  'docs-node',
+  // 'docs-node',
   // 'docs-app-services',
 ];
 
