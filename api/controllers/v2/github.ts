@@ -16,13 +16,13 @@ import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/s
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
-  // 'docs-landing',
-  // 'cloud-docs',
-  // 'docs-realm',
+  'docs-landing',
+  'cloud-docs',
+  'docs-realm',
   'docs',
   'docs-atlas-cli',
-  // 'docs-node',
-  // 'docs-app-services',
+  'docs-node',
+  'docs-app-services',
 ];
 
 async function prepGithubPushPayload(
@@ -191,9 +191,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
   async function createAndInsertJob() {
     let names = '';
-    for (let i = 0; i < 2; i++) {
-      names = names + i;
-      const repoName = SMOKETEST_SITES[i];
+    for (const s in SMOKETEST_SITES) {
+      names = names + s;
+      const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
       const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
@@ -237,7 +237,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
     // try {
     //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
-
     //   // notify the jobUpdatesQueue
     //   await Promise.all(
     //     deployable.map(async ({ jobId }) => {
