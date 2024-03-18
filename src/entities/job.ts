@@ -64,7 +64,7 @@ export type EnhancedPayload = {
   action: string;
   repoName: string;
   branchName: string;
-  isFork: boolean;
+  isFork?: boolean;
   isXlarge?: boolean | null;
   repoOwner: string;
   url: string;
