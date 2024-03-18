@@ -16,13 +16,12 @@ import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/s
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
-  'docs-landing',
+  // 'docs-landing',
   // 'cloud-docs',
   // 'docs-realm',
   // 'docs',
   // 'docs-atlas-cli',
-  // 'docs-ecosystem',
-  // 'docs-node',
+  'docs-node',
   // 'docs-app-services',
 ];
 
