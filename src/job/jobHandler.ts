@@ -156,6 +156,10 @@ export abstract class JobHandler {
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
       this.currJob.payload.mutPrefix = mutPrefix;
     }
+    //add second part of conditional for jobtype check
+    if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
+      this.currJob.payload.mutPrefix += this.currJob.payload.newHead;
+    }
   }
 
   @throwIfJobInterupted()
