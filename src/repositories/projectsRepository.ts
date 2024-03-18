@@ -4,7 +4,7 @@ import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 
 /**
- * Manages metadata for parser builds.
+ * Project information from docs_metadata.projects for parser builds.
  */
 export class ProjectsRepository extends BaseRepository {
   constructor(db: Db, config: IConfig, logger: ILogger) {

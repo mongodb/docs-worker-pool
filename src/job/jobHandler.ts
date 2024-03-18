@@ -152,7 +152,6 @@ export abstract class JobHandler {
     const pathPrefix = await this.getPathPrefix();
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
-      this._logger.save(this.currJob._id, 'Path prefix raw' + pathPrefix);
       this.currJob.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
       this.currJob.payload.mutPrefix = mutPrefix;

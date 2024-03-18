@@ -6,7 +6,7 @@ import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { JobStatus } from '../../../src/entities/job';
+import { EnhancedPayload, JobStatus } from '../../../src/entities/job';
 import {
   buildEntitledBranchList,
   getQSString,
@@ -81,7 +81,6 @@ const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) 
 // For every repo/branch selected to be deployed, return an array of jobs with the payload data
 // needed for a successful build.
 export const getDeployableJobs = async (
-  consoleLogger,
   values,
   entitlement,
   repoBranchesRepository: RepoBranchesRepository,
@@ -212,13 +211,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
 
   const values = slackConnector.parseSelection(stateValues);
 
-  const deployable = await getDeployableJobs(
-    consoleLogger,
-    values,
-    entitlement,
-    repoBranchesRepository,
-    docsetsRepository
-  );
+  const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
@@ -263,7 +256,7 @@ function createPayload(
   };
 }
 
-function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserEmail: string) {
+function createJob(payload: EnhancedPayload, jobTitle: string, jobUserName: string, jobUserEmail: string) {
   return {
     title: jobTitle,
     user: jobUserName,
