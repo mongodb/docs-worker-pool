@@ -192,13 +192,13 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
   async function createAndInsertJob() {
     let names = '';
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 2; i++) {
       names = names + i;
       const repoName = SMOKETEST_SITES[i];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
       const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
-      if (repoName == 'docs') return docsetsRepository.getRepo(repoName);
+      // if (repoName == 'docs') return docsetsRepository.getRepo(repoName);
 
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
@@ -234,6 +234,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       }
       // deployable.push(job);
     }
+    return names;
 
     // try {
     //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
