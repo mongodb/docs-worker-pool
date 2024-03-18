@@ -7,7 +7,7 @@ import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { ProjectsRepository } from '../../../src/repositories/projectsRepository';
-import { EnhancedJob, JobStatus } from '../../../src/entities/job';
+import { EnhancedJob, EnhancedPayload, JobStatus } from '../../../src/entities/job';
 import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handlers/github';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { getMonorepoPaths } from '../../../src/monorepo';
@@ -25,9 +25,10 @@ const SMOKETEST_SITES = [
   'docs-app-services',
 ];
 
+//EnhancedPayload and EnhancedJob are used here for both githubPush (feature branch) events as well as productionDeploy(smoke test deploy) events for typing purposes
 async function prepGithubPushPayload(
   githubEvent: PushEvent | WorkflowRunCompletedEvent,
-  payload: any,
+  payload: EnhancedPayload,
   title: string
 ): Promise<Omit<EnhancedJob, '_id'>> {
   return {
@@ -47,7 +48,6 @@ async function prepGithubPushPayload(
 
 interface CreatePayloadProps {
   repoName: string;
-  githubEvent?: PushEvent;
   isSmokeTestDeploy?: boolean;
   prefix: string;
   repoBranchesRepository: RepoBranchesRepository;
@@ -55,6 +55,7 @@ interface CreatePayloadProps {
   newHead?: string;
   repoOwner?: string;
   directory?: string;
+  githubEvent?: PushEvent;
 }
 
 async function createPayload({
@@ -64,10 +65,10 @@ async function createPayload({
   repoBranchesRepository,
   repoInfo,
   newHead,
-  repoOwner,
+  repoOwner = '',
   githubEvent,
   directory,
-}: CreatePayloadProps) {
+}: CreatePayloadProps): Promise<EnhancedPayload> {
   const source = 'github';
   const project = repoInfo?.project ?? repoName;
 
@@ -83,7 +84,7 @@ async function createPayload({
     branchName = 'master';
   } else {
     if (!githubEvent) {
-      return false;
+      throw 'Non SmokeTest Deploy jobs must have a github Event';
     }
     action = 'push';
     jobType = 'githubPush';
@@ -194,9 +195,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const env = 'dotcomstg';
 
   async function createAndInsertJob() {
-    let names = '';
     for (const s in SMOKETEST_SITES) {
-      names = names + s;
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
@@ -206,20 +205,12 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
         repoOwner = projectEntry.github.organization;
       } catch {
-        return (
-          'repoInfo, projectEntry, or repoOwner not found.  Repo info: ' +
-          repoInfo.project +
-          'projectEntry ' +
-          projectEntry +
-          ' repoOwner ' +
-          repoOwner
-        );
+        return 'repoInfo, projectEntry, or repoOwner not found for docs site ' + repoName;
       }
 
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
 
-      //add commit hash here
-      //const newHead = body.workflow_run.head_sha;
+      //add commit hash here: const newHead = body.workflow_run.head_sha;
 
       const payload = await createPayload({
         repoName,
@@ -235,28 +226,13 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       try {
         consoleLogger.info(job.title, 'Creating Job');
         const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
-        // jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+        jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
         consoleLogger.info(job.title, `Created Job ${jobId}`);
       } catch (err) {
-        return err + repoName;
         consoleLogger.error('TriggerBuildError', err + repoName);
+        return err;
       }
-      // deployable.push(job);
     }
-    return names;
-
-    // try {
-    //   await jobRepository.insertBulkJobs(deployable, c.get('jobsQueueUrl'));
-    //   // notify the jobUpdatesQueue
-    //   await Promise.all(
-    //     deployable.map(async ({ jobId }) => {
-    //       await jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
-    //       consoleLogger.info(jobId, `Created Job ${jobId}`);
-    //     })
-    //   );
-    // } catch (err) {
-    //   consoleLogger.error('TriggerBuildError', err+ );
-    // }
   }
 
   let returnVal;
@@ -329,7 +305,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     const repoInfo = await docsetsRepository.getRepo(repo.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
     const jobTitle = repo.full_name;
-    const payload = createPayload({
+    const payload = await createPayload({
       repoName: repo.name,
       prefix: jobPrefix,
       repoBranchesRepository,
