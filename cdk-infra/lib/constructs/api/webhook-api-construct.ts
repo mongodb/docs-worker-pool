@@ -169,7 +169,6 @@ export class WebhookApiConstruct extends Construct {
       .addResource('build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
-    // add endpoint for automated testing
     githubEndpointTrigger
       .addResource('smoke-test-build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubSmokeTestBuildLambda));
