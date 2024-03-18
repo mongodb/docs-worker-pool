@@ -120,6 +120,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   //add docs_metadata to config
   const projectsRepository = new ProjectsRepository(client.db('docs_metadata'), c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
+  const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
 
   if (!event.body) {
     const err = 'Trigger build does not have a body in event payload';
@@ -196,8 +197,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
-      const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
-      // if (repoName == 'docs') return docsetsRepository.getRepo(repoName);
 
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
@@ -215,7 +214,8 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       }
 
       const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-      //add commit hash to jobPrefix here?
+
+      //add commit hash here
       //const newHead = body.workflow_run.head_sha;
 
       const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, '', repoOwner);

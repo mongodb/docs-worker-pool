@@ -196,6 +196,7 @@ export class WebhookApiConstruct extends Construct {
 
     // grant permission for lambdas to enqueue messages to the job updates queue
     jobUpdatesQueue.grantSendMessages(slackTriggerLambda);
+    jobUpdatesQueue.grantSendMessages(githubSmokeTestBuildLambda);
     jobUpdatesQueue.grantSendMessages(githubTriggerLambda);
     jobUpdatesQueue.grantSendMessages(triggerLocalBuildLambda);
 
