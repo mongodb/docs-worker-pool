@@ -78,6 +78,7 @@ export class DocsetsRepository extends BaseRepository {
         directory ? `with directory: /${directory}` : ''
       }`;
       this._logger.info(this._repoName, msg);
+      return this._repoName;
     }
     return res?.[0];
   }

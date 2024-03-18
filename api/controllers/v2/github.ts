@@ -16,13 +16,13 @@ import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/s
 import { MONOREPO_NAME } from '../../../src/monorepo/utils/monorepo-constants';
 
 const SMOKETEST_SITES = [
-  'docs-landing',
+  // 'docs-landing',
   // 'cloud-docs',
   // 'docs-realm',
   'docs',
   // 'docs-atlas-cli',
   // 'docs-ecosystem',
-  // 'docs-node',
+  'docs-node',
   // 'docs-app-services',
 ];
 
@@ -192,9 +192,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
   async function createAndInsertJob() {
     let names = '';
-    for (const s in SMOKETEST_SITES) {
-      names = names + s;
-      const repoName = SMOKETEST_SITES[s];
+    for (let i = 0; i < 1; i++) {
+      names = names + i;
+      const repoName = SMOKETEST_SITES[i];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
       const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
