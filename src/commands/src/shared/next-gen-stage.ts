@@ -34,8 +34,6 @@ export async function nextGenStage({ job, bucket, url }: StageParams): Promise<C
 
   const commandArgs = ['public', bucket, '--stage'];
 
-  //add commithash to url and prefix here if its an automated test type of job
-
   if (patchId && newHead && project === mutPrefix) {
     prefix = `${newHead}/${patchId}/${mutPrefix}`;
     hostedAtUrl = `${url}/${newHead}/${patchId}/${mutPrefix}/${DOCS_WORKER_USER}/${branchName}/`;

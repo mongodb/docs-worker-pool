@@ -113,9 +113,6 @@ async function createPayload({
   };
 }
 
-/**
- *
- */
 export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult | null> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
@@ -136,8 +133,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  // validate credentials here
-  if (!validateJsonWebhook(event, 'mongodbsmoketesting')) {
+  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
       statusCode: 401,
@@ -178,18 +174,18 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         ' completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments',
     };
 
-  //if the build was not building master, no need for smoke test sites
-  // if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
-  //   console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
-  //   return {
-  //     statusCode: 202,
-  //     headers: { 'Content-Type': 'text/plain' },
-  //     body:
-  //       'Build on branch' +
-  //       body.workflow_run.head_branch +
-  //       ' will not trigger site deployments as it was not on master branch in upstream repo',
-  //   };
-  // }
+  // if the build was not building master, no need for smoke test sites
+  if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
+    console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body:
+        'Build on branch' +
+        body.workflow_run.head_branch +
+        ' will not trigger site deployments as it was not on master branch in upstream repo',
+    };
+  }
 
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
@@ -357,7 +353,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Jobs Queued ',
+      body: 'Jobs Queued',
     };
   }
 
