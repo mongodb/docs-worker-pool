@@ -45,38 +45,49 @@ async function prepGithubPushPayload(
   };
 }
 
-async function createPayload(
-  repoName: string,
+interface CreatePayloadProps {
+  repoName: string;
+  githubEvent?: PushEvent;
+  isSmokeTestDeploy?: boolean;
+  prefix: string;
+  repoBranchesRepository: RepoBranchesRepository;
+  repoInfo: ReposBranchesDocsetsDocument;
+  newHead?: string;
+  repoOwner?: string;
+  directory?: string;
+}
+
+async function createPayload({
+  repoName,
   isSmokeTestDeploy = false,
-  prefix: string,
-  repoBranchesRepository: RepoBranchesRepository,
-  repoInfo: ReposBranchesDocsetsDocument,
-  newHead: string,
-  repoOwner?: string,
-  githubEvent?: PushEvent,
-  directory?: string
-) {
-  const jobType = 'githubPush';
+  prefix,
+  repoBranchesRepository,
+  repoInfo,
+  newHead,
+  repoOwner,
+  githubEvent,
+  directory,
+}: CreatePayloadProps) {
   const source = 'github';
   const project = repoInfo?.project ?? repoName;
 
   let branchName: string;
+  let jobType: string;
   let action: string;
-  let url: any;
-  let isFork: boolean;
+  let url: string;
 
   if (isSmokeTestDeploy) {
     url = 'https://github.com/' + repoOwner + '/' + repoName;
-    branchName = 'master';
-    isFork = false;
     action = 'automatedTest';
+    jobType = 'productionDeploy';
+    branchName = 'master';
   } else {
     if (!githubEvent) {
       return false;
     }
     action = 'push';
+    jobType = 'githubPush';
     branchName = githubEvent.ref.split('/')[2];
-    isFork = githubEvent?.repository.fork;
     url = githubEvent?.repository.clone_url;
     newHead = githubEvent?.after;
     repoOwner = githubEvent.repository.owner.login;
@@ -95,7 +106,6 @@ async function createPayload(
     project,
     prefix,
     urlSlug,
-    isFork,
     url,
     newHead,
     directory,
@@ -103,13 +113,7 @@ async function createPayload(
 }
 
 /**
- * 1st, we want to define a list of the sites we want to build as a new collection.
- * validate credentials
- * Next, we want to create each job
- *  - should I create a new prepGithubPayload method, a new githubEvent interface, or amend the existing one to be able to pass in a different title, branchName and it's own githash
- *  - i could also alter body attributes, although I don't know it that's a good idea
- *  - could also create a createpayload function
- * create and insert the jobs using bulk insert
+ *
  */
 export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult | null> => {
   const client = new mongodb.MongoClient(c.get('dbUrl'));
@@ -117,7 +121,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const db = client.db(c.get('dbName'));
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  //add docs_metadata to config
   const projectsRepository = new ProjectsRepository(client.db('docs_metadata'), c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
@@ -218,7 +221,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       //add commit hash here
       //const newHead = body.workflow_run.head_sha;
 
-      const payload = await createPayload(repoName, true, jobPrefix, repoBranchesRepository, repoInfo, '', repoOwner);
+      const payload = await createPayload({
+        repoName,
+        isSmokeTestDeploy: true,
+        prefix: jobPrefix,
+        repoBranchesRepository,
+        repoInfo,
+        repoOwner,
+      });
       //add logic for getting master branch, latest stable branch
       const job = await prepGithubPushPayload(body, payload, jobTitle);
 
@@ -277,7 +287,6 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
 
   if (!event.body) {
     const err = 'Trigger build does not have a body in event payload';
-    consoleLogger.error('TriggerBuildError', err);
     return {
       statusCode: 400,
       headers: { 'Content-Type': 'text/plain' },
@@ -320,8 +329,14 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     const repoInfo = await docsetsRepository.getRepo(repo.name, path);
     const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
     const jobTitle = repo.full_name;
+    const payload = createPayload({
+      repoName: repo.name,
+      prefix: jobPrefix,
+      repoBranchesRepository,
+      repoInfo,
+      githubEvent: body,
+    });
 
-    const payload = createPayload(repo.name, false, jobPrefix, repoBranchesRepository, repoInfo, undefined, body);
     const job = await prepGithubPushPayload(body, payload, jobTitle);
 
     consoleLogger.info(job.title, 'Creating Job');
