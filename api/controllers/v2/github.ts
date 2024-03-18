@@ -19,9 +19,9 @@ const SMOKETEST_SITES = [
   // 'docs-landing',
   // 'cloud-docs',
   // 'docs-realm',
-  // 'docs',
+  'docs',
   // 'docs-atlas-cli',
-  'docs-node',
+  // 'docs-node',
   // 'docs-app-services',
 ];
 
