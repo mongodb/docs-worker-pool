@@ -174,7 +174,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         ' completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments',
     };
 
-  // // if the build was not building master, no need for smoke test sites
+  // // if the build was not building main branch, no need for smoke test sites
   // if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
   //   console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
   //   return {
@@ -196,6 +196,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       let repoInfo, projectEntry, repoOwner;
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
+        return repoName + repoInfo;
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
         repoOwner = projectEntry.github.organization;
       } catch {
