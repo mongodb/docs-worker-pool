@@ -4,6 +4,7 @@ on:
     branches:
       - 'main'
       - 'integration'
+      - 'DOP-4414'
 
 concurrency:
   group: environment-stg-enhanced-worker-${{ github.ref }}
