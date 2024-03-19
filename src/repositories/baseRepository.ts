@@ -71,11 +71,7 @@ export abstract class BaseRepository {
     );
   }
 
-  protected async findOne(
-    query: any,
-    errorMsg: string,
-    options: mongodb.FindOptions = {}
-  ): Promise<mongodb.WithId<mongodb.BSON.Document> | null> {
+  protected async findOne(query: any, errorMsg: string, options: mongodb.FindOptions = {}): Promise<any> {
     try {
       return await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),

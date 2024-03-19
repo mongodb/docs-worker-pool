@@ -79,7 +79,7 @@ export class JobRepository extends BaseRepository {
     return jobIds;
   }
 
-  async getJobById(id: string): Promise<any | null> {
+  async getJobById(id: string): Promise<Job | null> {
     const query = {
       _id: new objectId(id),
     };

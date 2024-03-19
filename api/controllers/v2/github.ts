@@ -41,7 +41,7 @@ async function prepGithubPushPayload(
     priority: 1,
     error: {},
     result: null,
-    payload,
+    payload: payload,
     logs: [],
   };
 }
@@ -89,8 +89,8 @@ async function createPayload({
     action = 'push';
     jobType = 'githubPush';
     branchName = githubEvent.ref.split('/')[2];
-    url = githubEvent.repository.clone_url;
-    newHead = githubEvent.after;
+    url = githubEvent?.repository.clone_url;
+    newHead = githubEvent?.after;
     repoOwner = githubEvent.repository.owner.login;
   }
 
@@ -191,9 +191,11 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const env = 'dotcomstg';
 
   async function createAndInsertJob() {
-    for (const repoName of SMOKETEST_SITES) {
+    for (const s in SMOKETEST_SITES) {
+      const repoName = SMOKETEST_SITES[s];
       const jobTitle = 'Smoke Test ' + repoName;
       let repoInfo, projectEntry, repoOwner;
+
       try {
         repoInfo = await docsetsRepository.getRepo(repoName);
         projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
@@ -263,17 +265,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     };
   }
 
-  const { GITHUB_SECRET } = process.env;
-
-  if (!GITHUB_SECRET) {
-    console.error('GITHUB_SECRET is not defined');
-    return {
-      statusCode: 500,
-      body: 'internal server error',
-    };
-  }
-
-  if (!validateJsonWebhook(event, GITHUB_SECRET)) {
+  if (!validateJsonWebhook(event, process.env.GITHUB_SECRET)) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
       statusCode: 401,
@@ -281,7 +273,6 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
       body: errMsg,
     };
   }
-
   let body: PushEvent;
   try {
     body = JSON.parse(event.body) as PushEvent;
