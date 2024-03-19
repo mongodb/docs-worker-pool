@@ -199,12 +199,15 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         }
 
         const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+        const newHead = body.workflow_run.head_sha;
+
         const payload = await createPayload({
           repoName,
           isSmokeTestDeploy: true,
           prefix: jobPrefix,
           repoBranchesRepository,
           repoInfo,
+          newHead,
           repoOwner,
         });
 
