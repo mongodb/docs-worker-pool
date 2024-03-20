@@ -191,7 +191,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const env = 'dotcomstg';
 
   async function createAndInsertJob() {
-    const jobs = await Promise.all(
+    return await Promise.all(
       SMOKETEST_SITES.map(async (repoName): Promise<string> => {
         const jobTitle = 'Smoke Test ' + repoName;
         let repoInfo, projectEntry, repoOwner;
