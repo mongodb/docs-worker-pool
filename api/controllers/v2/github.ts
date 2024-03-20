@@ -84,7 +84,7 @@ async function createPayload({
     branchName = 'master';
   } else {
     if (!githubEvent) {
-      throw 'Non SmokeTest Deploy jobs must have a github Event';
+      throw new Error(`Non SmokeTest Deploy jobs must have a github Event`);
     }
     action = 'push';
     jobType = 'githubPush';
@@ -158,20 +158,17 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body:
-        'Build on branch ' +
-        body.workflow_run.head_branch +
-        ' is not complete and will not trigger smoke test site deployments ',
+      body: `Build on branch
+        ${body.workflow_run.head_branch}
+         is not complete and will not trigger smoke test site deployments`,
     };
 
   if (body.workflow_run.name != 'Deploy Staging ECS')
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body:
-        'Workflow ' +
-        body.workflow_run.name +
-        ' completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments',
+      body: `Workflow
+        ${body.workflow_run.name} completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments`,
     };
 
   // if the build was not building main branch, no need for smoke test sites
@@ -181,9 +178,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   //     statusCode: 202,
   //     headers: { 'Content-Type': 'text/plain' },
   //     body:
-  //       'Build on branch ' +
-  //       body.workflow_run.head_branch +
-  //       ' will not trigger site deployments as it was not on main branch in upstream repo',
+  //       `Build on branch
+  //       ${body.workflow_run.head_branch}
+  //       will not trigger site deployments as it was not on main branch in upstream repo`,
   //   };
   // }
 
@@ -199,14 +196,15 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           repoInfo = await docsetsRepository.getRepo(repoName);
           projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
           repoOwner = projectEntry.github.organization;
-        } catch {
-          return 'repoInfo, projectEntry, or repoOwner not found for docs site ' + repoName;
+        } catch (err) {
+          consoleLogger.error(
+            `Atlas Repo Information Error`,
+            `RepoInfo, projectEntry, or repoOwner not found for docs site ${repoName}. RepoInfo: ${repoInfo}, projectEntry: ${projectEntry}, repoOwner: ${repoOwner}`
+          );
+          return err;
         }
 
         const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-
-        //add commit hash here: const newHead = body.workflow_run.head_sha;
-
         const payload = await createPayload({
           repoName,
           isSmokeTestDeploy: true,
@@ -215,6 +213,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           repoInfo,
           repoOwner,
         });
+
         //add logic for getting master branch, latest stable branch
         const job = await prepGithubPushPayload(body, payload, jobTitle);
 
@@ -225,7 +224,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           consoleLogger.info(job.title, `Created Job ${jobId}`);
           return jobId;
         } catch (err) {
-          consoleLogger.error('TriggerBuildError', err + repoName);
+          consoleLogger.error('TriggerBuildError', `${err} Error inserting job for ${repoName}`);
           return err;
         }
       })
@@ -245,7 +244,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Smoke Test Jobs Queued ' + returnVal,
+    body: 'Smoke Test Jobs Queued with the following Job Ids' + returnVal,
   };
 };
 
@@ -267,7 +266,7 @@ export const TriggerBuild = async (event: APIGatewayEvent): Promise<APIGatewayPr
     };
   }
 
-  if (!validateJsonWebhook(event, process.env.GITHUB_SECRET)) {
+  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
     const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
     return {
       statusCode: 401,
