@@ -126,6 +126,8 @@ custom:
   javaIntgrBucketName: docs-java-intgr
   nodeBucketName: docs-node-${self:provider.stage}
   nodeIntgrBucketName: docs-node-intgr
+  pymongoArrowBucketName: docs-pymongo-arrow-${self:provider.stage}
+  pymongoArrowIntgrBucketName: docs-pymongo-arrow-intgr
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   docsetsCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/docsets}
