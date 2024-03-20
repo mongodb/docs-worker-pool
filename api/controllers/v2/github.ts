@@ -232,8 +232,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     );
   }
 
+  let returnVal;
   try {
-    await createAndInsertJob();
+    returnVal = await createAndInsertJob();
   } catch (err) {
     return {
       statusCode: 500,
@@ -244,7 +245,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Smoke Test Jobs Queued ',
+    body: 'Smoke Test Jobs Queued ' + returnVal,
   };
 };
 
