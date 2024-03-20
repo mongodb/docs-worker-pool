@@ -41,7 +41,7 @@ async function prepGithubPushPayload(
     priority: 1,
     error: {},
     result: null,
-    payload: payload,
+    payload,
     logs: [],
   };
 }
@@ -89,9 +89,9 @@ async function createPayload({
     action = 'push';
     jobType = 'githubPush';
     branchName = githubEvent.ref.split('/')[2];
-    url = githubEvent?.repository.clone_url;
-    newHead = githubEvent?.after;
-    repoOwner = githubEvent.repository.owner.login;
+    url = githubEvent.repository?.clone_url;
+    newHead = githubEvent.after;
+    repoOwner = githubEvent.repository?.owner?.login;
   }
 
   const branchInfo = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
@@ -154,15 +154,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  if (body.workflow_run.conclusion != 'success')
-    return {
-      statusCode: 202,
-      headers: { 'Content-Type': 'text/plain' },
-      body:
-        'Build on branch ' +
-        body.workflow_run.head_branch +
-        ' is not complete and will not trigger smoke test site deployments ',
-    };
+  return {
+    statusCode: 202,
+    headers: { 'Content-Type': 'text/plain' },
+    body:
+      'Build on branch ' +
+      body.workflow_run.head_branch +
+      ' is not complete and will not trigger smoke test site deployments ',
+  };
 
   if (body.workflow_run.name != 'Deploy Staging ECS')
     return {

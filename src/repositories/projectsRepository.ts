@@ -1,4 +1,4 @@
-import { Db } from 'mongodb';
+import mongodb, { Db } from 'mongodb';
 import { IConfig } from 'config';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
@@ -11,7 +11,7 @@ export class ProjectsRepository extends BaseRepository {
     super(config, logger, 'ProjectsRepository', db.collection('projects'));
   }
 
-  async getProjectEntry(name: string): Promise<any> {
+  async getProjectEntry(name: string): Promise<mongodb.WithId<mongodb.BSON.Document> | null> {
     const query = { name: name };
     const projectEntry = await this.findOne(
       query,
