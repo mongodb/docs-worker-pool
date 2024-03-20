@@ -1,6 +1,6 @@
 on:
   push:
-    # paths: ['src/**', 'cdk-infra/lib/constructs/worker/**', 'Dockerfile', 'modules/**']
+    paths: ['src/**', 'cdk-infra/lib/constructs/worker/**', 'Dockerfile', 'modules/**']
     branches:
       - 'main'
       - 'integration'
