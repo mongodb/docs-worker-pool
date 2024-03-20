@@ -154,14 +154,15 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
   }
 
-  return {
-    statusCode: 202,
-    headers: { 'Content-Type': 'text/plain' },
-    body:
-      'Build on branch ' +
-      body.workflow_run.head_branch +
-      ' is not complete and will not trigger smoke test site deployments ',
-  };
+  if (body.workflow_run.conclusion != 'success')
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body:
+        'Build on branch ' +
+        body.workflow_run.head_branch +
+        ' is not complete and will not trigger smoke test site deployments ',
+    };
 
   if (body.workflow_run.name != 'Deploy Staging ECS')
     return {
@@ -190,44 +191,45 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const env = 'dotcomstg';
 
   async function createAndInsertJob() {
-    for (const s in SMOKETEST_SITES) {
-      const repoName = SMOKETEST_SITES[s];
-      const jobTitle = 'Smoke Test ' + repoName;
-      let repoInfo, projectEntry, repoOwner;
+    const jobs = await Promise.all(
+      SMOKETEST_SITES.map(async (repoName): Promise<string> => {
+        const jobTitle = 'Smoke Test ' + repoName;
+        let repoInfo, projectEntry, repoOwner;
+        try {
+          repoInfo = docsetsRepository.getRepo(repoName);
+          projectEntry = projectsRepository.getProjectEntry(repoInfo.project);
+          repoOwner = projectEntry.github.organization;
+        } catch {
+          return 'repoInfo, projectEntry, or repoOwner not found for docs site ' + repoName;
+        }
 
-      try {
-        repoInfo = await docsetsRepository.getRepo(repoName);
-        projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
-        repoOwner = projectEntry.github.organization;
-      } catch {
-        return 'repoInfo, projectEntry, or repoOwner not found for docs site ' + repoName;
-      }
+        const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
 
-      const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
+        //add commit hash here: const newHead = body.workflow_run.head_sha;
 
-      //add commit hash here: const newHead = body.workflow_run.head_sha;
+        const payload = await createPayload({
+          repoName,
+          isSmokeTestDeploy: true,
+          prefix: jobPrefix,
+          repoBranchesRepository,
+          repoInfo,
+          repoOwner,
+        });
+        //add logic for getting master branch, latest stable branch
+        const job = await prepGithubPushPayload(body, payload, jobTitle);
 
-      const payload = await createPayload({
-        repoName,
-        isSmokeTestDeploy: true,
-        prefix: jobPrefix,
-        repoBranchesRepository,
-        repoInfo,
-        repoOwner,
-      });
-      //add logic for getting master branch, latest stable branch
-      const job = await prepGithubPushPayload(body, payload, jobTitle);
-
-      try {
-        consoleLogger.info(job.title, 'Creating Job');
-        const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
-        jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
-        consoleLogger.info(job.title, `Created Job ${jobId}`);
-      } catch (err) {
-        consoleLogger.error('TriggerBuildError', err + repoName);
-        return err;
-      }
-    }
+        try {
+          consoleLogger.info(job.title, 'Creating Job');
+          const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
+          jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
+          consoleLogger.info(job.title, `Created Job ${jobId}`);
+          return jobId;
+        } catch (err) {
+          consoleLogger.error('TriggerBuildError', err + repoName);
+          return err;
+        }
+      })
+    );
   }
 
   try {
