@@ -196,8 +196,8 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         const jobTitle = 'Smoke Test ' + repoName;
         let repoInfo, projectEntry, repoOwner;
         try {
-          repoInfo = docsetsRepository.getRepo(repoName);
-          projectEntry = projectsRepository.getProjectEntry(repoInfo.project);
+          repoInfo = await docsetsRepository.getRepo(repoName);
+          projectEntry = await projectsRepository.getProjectEntry(repoInfo.project);
           repoOwner = projectEntry.github.organization;
         } catch {
           return 'repoInfo, projectEntry, or repoOwner not found for docs site ' + repoName;
