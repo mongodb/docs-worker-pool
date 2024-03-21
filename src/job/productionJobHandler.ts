@@ -142,15 +142,15 @@ export class ProductionJobHandler extends JobHandler {
 
   getPathPrefix(): string {
     try {
-      if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
-        return this.currJob.payload.urlSlug ?? '';
-      }
+      // if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
+      //   return this.currJob.payload.urlSlug ?? '';
+      // }
       if (this.currJob.payload.urlSlug) {
-        if (this.currJob.payload.urlSlug === '') {
-          return this.currJob.payload.prefix;
-        } else {
-          return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
-        }
+        // if (this.currJob.payload.urlSlug === '') {
+        //   return this.currJob.payload.prefix;
+        // } else {
+        return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
+        // }
       }
       return this.currJob.payload.prefix;
     } catch (error) {
