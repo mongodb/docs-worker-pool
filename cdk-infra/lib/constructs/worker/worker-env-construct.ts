@@ -80,6 +80,7 @@ export class WorkerEnvConstruct extends Construct {
       MONGO_ATLAS_URL: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/admin?retryWrites=true`,
       DB_NAME: dbName,
       SNOOTY_DB_NAME: snootyDbName,
+      METADATA_DB_NAME: 'docs_metadata',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,
       JOB_UPDATES_QUEUE_URL: jobUpdatesQueue.queueUrl,
       GITHUB_BOT_USERNAME: githubBotUsername,

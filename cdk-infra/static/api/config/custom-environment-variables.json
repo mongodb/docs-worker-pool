@@ -8,6 +8,7 @@
   "githubBotPW": "GITHUB_BOT_PASSWORD",
   "dbName": "DB_NAME",
   "snootyDbName": "SNOOTY_DB_NAME",
+  "metadataDbName": "METADATA_DB_NAME",
   "dbUrl": "MONGO_ATLAS_URL",
   "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
   "githubSecret": "GITHUB_SECRET",
