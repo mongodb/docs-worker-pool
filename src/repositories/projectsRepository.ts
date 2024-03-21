@@ -3,12 +3,13 @@ import { IConfig } from 'config';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 
-/**
- * Project information from docs_metadata.projects for parser builds.
- */
+//Project information from docs_metadata.projects for parser builds.
+
+const projectsCollectionName = process.env.PROJECTS_COL_NAME || 'projects';
+
 export class ProjectsRepository extends BaseRepository {
-  constructor(db: Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'ProjectsRepository', db.collection('projects'));
+  constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
+    super(config, logger, 'ProjectsRepository', db.collection(projectsCollectionName));
   }
 
   async getProjectEntry(name: string): Promise<mongodb.WithId<mongodb.BSON.Document> | null> {

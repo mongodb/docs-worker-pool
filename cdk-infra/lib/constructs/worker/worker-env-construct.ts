@@ -92,6 +92,7 @@ export class WorkerEnvConstruct extends Construct {
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,
       DOCSETS_COL_NAME: docsetsCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
+      PROJECTS_COL_NAME: 'projects',
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
       SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),

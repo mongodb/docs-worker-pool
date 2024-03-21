@@ -42,6 +42,7 @@ export class WebhookEnvConstruct extends Construct {
       SNOOTY_DB_NAME: snootyDbName,
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,
       DOCSETS_COL_NAME: docsetsCollection,
+      PROJECTS_COL_NAME: 'projects',
       JOB_QUEUE_COL_NAME: jobCollection,
       NODE_CONFIG_DIR: './config',
       JOBS_QUEUE_URL: jobsQueue.queueUrl,

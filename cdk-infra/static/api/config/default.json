@@ -17,6 +17,7 @@
   "slackViewOpenUrl": "https://slack.com/api/views.open",
   "snootySecret": "SNOOTY_SECRET",
   "jobQueueCollection": "JOB_QUEUE_COL_NAME",
+  "projectsCollection": "PROJECTS_COL_NAME",
   "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "docsetsCollection": "DOCSETS_COL_NAME",
