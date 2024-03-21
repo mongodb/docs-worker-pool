@@ -142,21 +142,34 @@ export class ProductionJobHandler extends JobHandler {
 
   getPathPrefix(): string {
     try {
-      // if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
-      //   return this.currJob.payload.urlSlug ?? '';
-      // }
-      if (this.currJob.payload.urlSlug) {
-        // if (this.currJob.payload.urlSlug === '') {
-        //   return this.currJob.payload.prefix;
-        // } else {
-        return `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`;
-        // }
+      const prefix = this.currJob.payload.urlSlug
+        ? `${this.currJob.payload.urlSlug}/${this.currJob.payload.prefix}`
+        : this.currJob.payload.prefix;
+      if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
+        return `${prefix}/${this.currJob.payload.newHead}`;
       }
-      return this.currJob.payload.prefix;
+      return prefix;
     } catch (error) {
       this.logger.save(this.currJob._id, error).then();
       throw new InvalidJobError(error.message);
     }
+    // try {
+    //   if (this.currJob.payload.prefix && this.currJob.payload.prefix === '') {
+    //     return this.currJob.payload.urlSlug ?? '';
+    //   }
+    //   if (this.currJob.payload.urlSlug) {
+    //     if (this.currJob.payload.urlSlug === '') {
+    //       return this.currJob.payload.prefix;
+    //     } else {
+    //     return this.currJob.payload.prefix + `/${this.currJob.payload.urlSlug}`;
+    //     }
+    //   }
+
+    //   return prefix;
+    // } catch (error) {
+    //   this.logger.save(this.currJob._id, error).then();
+    //   throw new InvalidJobError(error.message);
+    // }
   }
 
   private async purgePublishedContent(makefileOutput: Array<string>): Promise<void> {
