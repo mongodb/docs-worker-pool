@@ -20,7 +20,6 @@
   "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "docsetsCollection": "DOCSETS_COL_NAME",
-  "projectsCollection": "PROJECTS_COL_NAME",
   "MONGO_TIMEOUT_S": 15,
   "JOB_TIMEOUT_S": 900,
   "RETRY_TIMEOUT_MS": 5000,

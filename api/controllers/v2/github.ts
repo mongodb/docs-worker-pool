@@ -158,17 +158,14 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: `Build on branch
-        ${body.workflow_run.head_branch}
-         is not complete and will not trigger smoke test site deployments`,
+      body: `Build on branch ${body.workflow_run.head_branch} is not complete and will not trigger smoke test site deployments`,
     };
 
   if (body.workflow_run.name != 'Deploy Staging ECS')
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: `Workflow
-        ${body.workflow_run.name} completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments`,
+      body: `Workflow ${body.workflow_run.name} completed successfully but only Deploy Staging ECS workflow completion will trigger smoke test site deployments`,
     };
 
   // if the build was not building main branch, no need for smoke test sites
@@ -244,7 +241,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   return {
     statusCode: 202,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Smoke Test Jobs Queued with the following Job Ids' + returnVal,
+    body: 'Smoke Test Jobs Queued with the following Job Ids ' + returnVal,
   };
 };
 

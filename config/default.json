@@ -12,7 +12,6 @@
   "githubBotPW": "q1w",
   "fastlyDochubMap": "devfslydochubmap",
   "entitlementCollection": "entitlements",
-  "projectsCollection": "projects",
   "docsetsCollection": "docsets",
   "MONGO_TIMEOUT_S": 1500,
   "JOB_TIMEOUT_S": 900,
