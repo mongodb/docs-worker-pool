@@ -40,7 +40,7 @@ async function init(): Promise<void> {
   )}/?retryWrites=true&w=majority`;
   const client = new mongodb.MongoClient(atlasURL);
   await client.connect();
-  db = client.db(c.get(''));
+  db = client.db(c.get('dbName'));
   consoleLogger = new ConsoleLogger();
   fileSystemServices = new FileSystemServices();
   jobCommandExecutor = new JobSpecificCommandExecutor();
