@@ -36,5 +36,4 @@
   "cdnClientSecret": "CDN_CLIENT_SECRET",
   "cdnInvalidatorServiceURL": "CDN_INVALIDATOR_SERVICE_URL",
   "searchIndexBucket": "SEARCH_INDEX_BUCKET",
-  "projectsCollection": "PROJECTS_COL_NAME"
 }
