@@ -111,7 +111,6 @@ webhook-env-core: &webhook-env-core
   GITHUB_BOT_PASSWORD: ${self:custom.githubBotPW}
   REPO_BRANCHES_COL_NAME: ${self:custom.repoBranchesCollection}
   DOCSETS_COL_NAME: ${self:custom.docsetsCollection}
-  # PROJECTS_COL_NAME: ${self:custom.projectsCollection}
   SLACK_SECRET: ${self:custom.slackSecret}
   SLACK_TOKEN: ${self:custom.slackAuthToken}
   SNOOTY_SECRET: ${self:custom.snootySecret}
