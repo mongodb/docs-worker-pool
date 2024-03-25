@@ -67,6 +67,7 @@ export class WorkerEnvConstruct extends Construct {
     const docsetsCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/docsets`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
     const gatsbyMarianUrl = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/marian_url`);
+    const projectsCollection = 'projects';
 
     const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
     this.environment = {
@@ -93,7 +94,7 @@ export class WorkerEnvConstruct extends Construct {
       REPO_BRANCHES_COL_NAME: repoBranchesCollection,
       DOCSETS_COL_NAME: docsetsCollection,
       JOB_QUEUE_COL_NAME: jobCollection,
-      PROJECTS_COL_NAME: 'projects',
+      PROJECTS_COL_NAME: projectsCollection,
       CDN_INVALIDATOR_SERVICE_URL: getCdnInvalidatorUrl(env),
       SEARCH_INDEX_BUCKET: 'docs-search-indexes-test',
       SEARCH_INDEX_FOLDER: getSearchIndexFolder(env),
