@@ -50,8 +50,8 @@ Resources:
               Value: ${self:custom.repoBranchesCollection}
             - Name: DOCSETS_COL_NAME
               Value: ${self:custom.docsetsCollection}
-            - Name: PROJECTS_COL_NAME
-              Value: ${self:custom.projectsCollection}
+            # - Name: PROJECTS_COL_NAME
+            #   Value: ${self:custom.projectsCollection}
             - Name: NPM_BASE_64_AUTH
               Value: ${self:custom.npmBase64Auth}
             - Name: NPM_EMAIL
