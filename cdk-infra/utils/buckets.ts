@@ -15,6 +15,7 @@ export const docsBucketNames = [
   'docs-go',
   'docs-java',
   'docs-node',
+  'docs-languages',
 ] as const;
 
 interface CustomBucketProps {
