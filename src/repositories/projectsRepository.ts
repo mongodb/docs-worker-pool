@@ -5,8 +5,6 @@ import { ILogger } from '../services/logger';
 
 //Project information from docs_metadata.projects for parser builds.
 
-// const projectsCollectionName = config.get('projectsCollection') || '';
-
 export class ProjectsRepository extends BaseRepository {
   constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
     super(config, logger, 'ProjectsRepository', db.collection(process.env.PROJECTS_COL_NAME || ''));
