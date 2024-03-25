@@ -1,5 +1,5 @@
-import mongodb, { Db } from 'mongodb';
-import c, { IConfig } from 'config';
+import mongodb from 'mongodb';
+import { IConfig } from 'config';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 

@@ -174,9 +174,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
-      body: `Build on branch
-        ${body.workflow_run.head_branch}
-        will not trigger site deployments as it was not on main branch in upstream repo`,
+      body: `Build on branch ${body.workflow_run.head_branch} will not trigger site deployments as it was not on main branch in upstream repo`,
     };
   }
 
