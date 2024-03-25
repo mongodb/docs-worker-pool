@@ -37,7 +37,7 @@ const workerParamStrings = [
   '/flag/monorepo_path',
   '/atlas/collections/repo',
   '/atlas/collections/docsets',
-  '/atlas/collections/projects',
+  // '/atlas/collections/projects',
   '/atlas/collections/job/queue',
   '/atlas/collections/user/entitlements',
 ] as const;
