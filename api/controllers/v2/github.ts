@@ -119,7 +119,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   const db = client.db(c.get('dbName'));
   const consoleLogger = new ConsoleLogger();
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  const projectsRepository = new ProjectsRepository(client.db(process.env.METADATA_DB_NAME), c, consoleLogger);
+  const projectsRepository = new ProjectsRepository(client.db('docs_metadata'), c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
 
