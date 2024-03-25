@@ -9,7 +9,7 @@ import { ILogger } from '../services/logger';
 
 export class ProjectsRepository extends BaseRepository {
   constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'ProjectsRepository', db.collection(config.get('projectsCollection')));
+    super(config, logger, 'ProjectsRepository', db.collection(process.env.PROJECTS_COL_NAME || ''));
   }
 
   async getProjectEntry(name: string): Promise<mongodb.WithId<mongodb.BSON.Document> | null> {
