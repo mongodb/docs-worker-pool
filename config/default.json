@@ -33,7 +33,6 @@
   "previewBuildEnabled": "false",
   "featureFlagUpdatePages": "false",
   "featureFlagSearchUI": "false",
-  "gatsbyUseChatbot": "false",
   "parallel": {
     "enabled": true,
     "stg": {
