@@ -121,11 +121,9 @@ custom:
   cSharpBucketName: docs-csharp-${self:provider.stage}
   cSharpIntgrBucketName: docs-csharp-dev
   goBucketName: docs-go-${self:provider.stage}
-  goIntgrBucketName: docs-go-intgr
   javaBucketName: docs-java-${self:provider.stage}
-  javaIntgrBucketName: docs-java-intgr
   nodeBucketName: docs-node-${self:provider.stage}
-  nodeIntgrBucketName: docs-node-intgr
+  languagesBucketName: docs-languages-${self:provider.stage}
   jobCollection:  ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/job/queue}
   repoBranchesCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/repo}
   docsetsCollection: ${ssm:/env/${self:provider.stage}/docs/worker_pool/atlas/collections/docsets}
