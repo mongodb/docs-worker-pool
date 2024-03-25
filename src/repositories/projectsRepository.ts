@@ -1,15 +1,15 @@
 import mongodb, { Db } from 'mongodb';
-import { IConfig } from 'config';
+import c, { IConfig } from 'config';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 
 //Project information from docs_metadata.projects for parser builds.
 
-const projectsCollectionName = process.env.PROJECTS_COL_NAME || '';
+// const projectsCollectionName = config.get('projectsCollection') || '';
 
 export class ProjectsRepository extends BaseRepository {
   constructor(db: mongodb.Db, config: IConfig, logger: ILogger) {
-    super(config, logger, 'ProjectsRepository', db.collection(projectsCollectionName));
+    super(config, logger, 'ProjectsRepository', db.collection(config.get('projectsCollection')));
   }
 
   async getProjectEntry(name: string): Promise<mongodb.WithId<mongodb.BSON.Document> | null> {
