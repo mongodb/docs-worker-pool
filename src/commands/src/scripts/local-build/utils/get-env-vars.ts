@@ -37,6 +37,7 @@ const workerParamStrings = [
   '/flag/monorepo_path',
   '/atlas/collections/repo',
   '/atlas/collections/docsets',
+  '/atlas/collections/projects',
   '/atlas/collections/job/queue',
   '/atlas/collections/user/entitlements',
 ] as const;
@@ -61,6 +62,7 @@ const workerParamPathToEnvName: Record<WorkerParamString, string> = {
   '/cdn/client/id': 'CDN_CLIENT_ID',
   '/cdn/client/secret': 'CDN_CLIENT_SECRET',
   '/atlas/collections/docsets': 'DOCSETS_COL_NAME',
+  '/atlas/collections/projects': 'PROJECTS_COL_NAME',
   '/atlas/dbname': 'DB_NAME',
   '/atlas/collections/snooty': 'SNOOTY_DB_NAME',
   '/atlas/username': 'MONGO_ATLAS_USERNAME',
