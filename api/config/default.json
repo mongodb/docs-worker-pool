@@ -7,7 +7,6 @@
   "dbPassword": "password",
   "dbName": "db_name",
   "snootyDbName": "snooty_db_name",
-  "metadataDbName": "METADATA_DB_NAME",
   "dbUrl": "url",
   "fastlyDochubMap": "FASTLY_DOCHUB_MAP",
   "githubSecret": "GITHUB_SECRET",
@@ -18,7 +17,6 @@
   "slackViewOpenUrl": "https://slack.com/api/views.open",
   "snootySecret": "SNOOTY_SECRET",
   "jobQueueCollection": "JOB_QUEUE_COL_NAME",
-  "projectsCollection": "PROJECTS_COL_NAME",
   "entitlementCollection": "USER_ENTITLEMENT_COL_NAME",
   "repoBranchesCollection": "REPO_BRANCHES_COL_NAME",
   "docsetsCollection": "DOCSETS_COL_NAME",
@@ -39,7 +37,6 @@
     "stg": {
       "dbName": "pool_test",
       "jobQueueCollection": "dotcom_queue",
-      "projectsCollection": "PROJECTS_COL_NAME",
       "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomstg",
       "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomstg",
       "parallelStgName": "dotcomstg"
@@ -47,7 +44,6 @@
     "prd": {
       "dbName": "pool",
       "jobQueueCollection": "dotcom_queue",
-      "projectsCollection": "PROJECTS_COL_NAME",
       "jobsQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-jobs-queue-dotcomprd",
       "jobUpdatesQueueUrl": "https://sqs.us-east-2.amazonaws.com/216656347858/autobuilder-job-updates-queue-dotcomprd",
       "parallelStgName": "dotcomprd"
