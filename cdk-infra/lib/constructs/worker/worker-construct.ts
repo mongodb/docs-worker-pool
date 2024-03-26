@@ -39,7 +39,7 @@ export class WorkerConstruct extends Construct {
 
     const taskRoleSsmPolicyStatement = new PolicyStatement({
       effect: Effect.ALLOW,
-      actions: ['ssm:GetParameter'],
+      actions: ['ssm:GetParameter', 'ssm:PutParameter'],
       resources: ['*'],
     });
 

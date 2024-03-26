@@ -181,7 +181,7 @@ export class ProductionJobHandler extends JobHandler {
         await this.jobRepository.insertInvalidationRequestStatusUrl(this.currJob._id, 'Invalidation Failed');
       }
     } catch (error) {
-      await this.logger.save(this.currJob._id, error);
+      await this.logger.save(this.currJob._id, error.message);
     }
   }
 
