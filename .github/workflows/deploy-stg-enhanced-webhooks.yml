@@ -1,10 +1,9 @@
 on:
   push:
-    # paths: ["api/v2/**", "cdk-infra/lib/constructs/api/**", "cdk-infra/utils/**"]
+    paths: ["api/v2/**", "cdk-infra/lib/constructs/api/**", "cdk-infra/utils/**"]
     branches:
       - "main"
       - "integration"
-      - "DOP-4414"
 
 concurrency:
   group: environment-stg-enhanced-webhooks-${{ github.ref }}
