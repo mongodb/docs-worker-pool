@@ -4,6 +4,7 @@ import { RepoEntitlementsRepository } from '../../../src/repositories/repoEntitl
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import {
   buildEntitledBranchList,
@@ -14,12 +15,21 @@ import {
 } from '../../handlers/slack';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 
-export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Promise<any> => {
+export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
+
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      body: 'Event body is undefined',
+    };
+  }
+
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
@@ -34,8 +44,11 @@ export const DisplayRepoOptions = async (event: any = {}, context: any = {}): Pr
       : 'User is not entitled!';
     return prepResponse(401, 'text/plain', response);
   }
+
+  const admin = entitlement.repos[0] == 'admin' ? true : false;
+
   const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
-  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id']);
+  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], admin);
   if (resp?.status == 200 && resp?.data) {
     return {
       statusCode: 200,
