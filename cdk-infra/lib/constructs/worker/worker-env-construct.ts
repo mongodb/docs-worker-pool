@@ -46,9 +46,6 @@ export class WorkerEnvConstruct extends Construct {
     // font-end feature flag for unified footer locale selector
     const gatsbyHideUnifiedFooterLocale = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/hide_locale`);
 
-    // front end feature flag for chatbot UI
-    const gatsbyUseChatbot = StringParameter.valueFromLookup(this, `${ssmPrefix}/flag/use_chatbot`);
-
     const githubBotUsername = StringParameter.valueFromLookup(this, `${ssmPrefix}/github/bot/username`);
 
     const npmEmail = StringParameter.valueFromLookup(this, `${ssmPrefix}/npm/email`);
@@ -101,7 +98,6 @@ export class WorkerEnvConstruct extends Construct {
       USE_CUSTOM_BUCKETS: `${getUseCustomBuckets()}`,
       FEATURE_NAME: getFeatureName(),
       GATSBY_TEST_SEARCH_UI: 'false',
-      GATSBY_SHOW_CHATBOT: gatsbyUseChatbot,
       GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: gatsbyHideUnifiedFooterLocale,
       GATSBY_MARIAN_URL: gatsbyMarianUrl,
       IS_FEATURE_BRANCH: getIsFeatureBranch(),
