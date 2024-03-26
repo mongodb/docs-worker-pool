@@ -3,7 +3,7 @@ on:
     branches:
       - "main"
       - "integration"
-      - "DOP-4451"
+      # - "DOP-4451"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
