@@ -86,7 +86,7 @@ async function createPayload({
     if (!githubEvent) {
       throw new Error(`Non SmokeTest Deploy jobs must have a github Event`);
     }
-    action = 'push';
+    action = 'automatedTest';
     jobType = 'githubPush';
     branchName = githubEvent.ref.split('/')[2];
     url = githubEvent.repository?.clone_url;
