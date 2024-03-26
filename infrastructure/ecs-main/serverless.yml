@@ -105,7 +105,6 @@ custom:
   featureFlagMonorepoPath: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/monorepo_path}
   featureFlagSearchUI: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/search_ui}
   gatsbyTestEmbedVersions: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/embedded_versions}
-  gatsbyUseChatbot: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/use_chatbot}
   gatsbyHideUnifiedFooterLocale: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/hide_locale}
   gatsbyMarianURL: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/marian_url}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
