@@ -144,6 +144,10 @@ export class ProductionJobHandler extends JobHandler {
     const prefix = this.currJob.payload.urlSlug
       ? `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`
       : this.currJob.payload.prefix;
+    this.logger.save(
+      this.currJob._id,
+      `current job prefix ${prefix}, newHead ${this.currJob.payload.newHead} & action ${this.currJob.payload.action}`
+    );
     if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
       return `${prefix}/${this.currJob.payload.newHead}`;
     }
