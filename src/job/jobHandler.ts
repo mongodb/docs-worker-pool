@@ -149,7 +149,10 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
-    const pathPrefix = await this.getPathPrefix();
+    let pathPrefix = this.getPathPrefix();
+    if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
+      pathPrefix = `${pathPrefix}/${this.currJob.payload.newHead}`;
+    }
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
