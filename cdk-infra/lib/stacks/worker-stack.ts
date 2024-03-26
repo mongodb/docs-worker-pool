@@ -13,6 +13,8 @@ interface WorkerStackProps extends StackProps {
 }
 
 export class WorkerStack extends Stack {
+  // TODO: Create the task definition as properties here so
+  // that they are accessible to the webhook stack
   public readonly clusterName: string;
 
   constructor(scope: Construct, id: string, { queues, workerSecureStrings, vpc, ...props }: WorkerStackProps) {
@@ -23,6 +25,8 @@ export class WorkerStack extends Stack {
       secureStrings: workerSecureStrings,
     });
 
+    // TODO: retrieve the task definition from this stack as it is required
+    // for the RunTask in the smoke test build
     const { clusterName, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
       vpc,
       dockerEnvironment: environment,
@@ -34,6 +38,8 @@ export class WorkerStack extends Stack {
       bucket.grantReadWrite(ecsTaskRole);
     });
 
+    // TODO: Assign the task definition as properties here so
+    // that they are accessible to the webhook stack
     this.clusterName = clusterName;
   }
 }
