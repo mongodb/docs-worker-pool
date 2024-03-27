@@ -154,11 +154,11 @@ export abstract class JobHandler {
     // if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
     //   pathPrefix = `${prePrefix}/${this.currJob.payload.newHead}`;
     // } else pathPrefix = prePrefix;
-    this._logger.save(this.currJob._id, `${pathPrefix}, prePrefix: ${pathPrefix}, server user: ${server_user}`);
     if (pathPrefix || pathPrefix === '') {
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this.currJob.payload.mutPrefix = mutPrefix;
-      this.currJob.payload.pathPrefix = `${pathPrefix}/${this.currJob.payload.newHead}`;
+      this.currJob.payload.mutPrefix = `${this.currJob.payload.newHead}`;
+      this.currJob.payload.pathPrefix = `${this.currJob.payload.newHead}`;
+      this._logger.save(this.currJob._id, `${mutPrefix}, prePrefix: ${pathPrefix}, server user: ${server_user}`);
     }
   }
 
