@@ -155,7 +155,7 @@ export abstract class JobHandler {
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this.currJob.payload.mutPrefix = 'this';
+      this.currJob.payload.mutPrefix = 'thism';
     }
   }
 
