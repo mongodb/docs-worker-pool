@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
 import * as crypto from 'crypto';
+import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
 export const axiosApi = axios.create();
 
 function bufferEqual(a: Buffer, b: Buffer) {
@@ -22,8 +23,8 @@ function timeSafeCompare(a: string, b: string) {
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
-  displayRepoOptions(repos: Array<string>, triggerId: string): Promise<any>;
-  parseSelection(payload: any): any;
+  displayRepoOptions(repos: Array<string>, triggerId: string, admin: boolean): Promise<any>;
+  parseSelection(payload: any, entitlement: any, repoBranchesRepository: RepoBranchesRepository): any;
   sendMessage(message: any, user: string): Promise<any>;
 }
 
@@ -52,14 +53,29 @@ export class SlackConnector implements ISlackConnector {
     }
     return {};
   }
-  parseSelection(stateValues: any): any {
+  //fix this in slack connector interface
+  async parseSelection(stateValues: any, entitlement: any, repoBranchesRepository: RepoBranchesRepository): any {
     const values = {};
     const inputMapping = {
       block_repo_option: 'repo_option',
       block_hash_option: 'hash_option',
     };
+    //conditional here first to check if stateValues[deployAll] is populated
+    //if so return an object
+    if (stateValues[2]['deploy_all']) {
+      if (!(entitlement.repos[0] == 'admin')) {
+        //add a chechk to make sure a null return won't break anything
+        return;
+      }
+      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
+      //if prodDeployable = true and internalOnly= false, return
+      //TODO: new reposBranches object
+      //get list of all prodDeployable repos and their latest branch
+      //return a list in proper format
+    }
 
     // get key and values to figure out what user wants to deploy
+    //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
     for (const blockKey in inputMapping) {
       const blockInputKey = inputMapping[blockKey];
       const stateValuesObj = stateValues[blockKey][blockInputKey];
@@ -99,8 +115,9 @@ export class SlackConnector implements ISlackConnector {
     return false;
   }
 
-  async displayRepoOptions(repos: string[], triggerId: string): Promise<any> {
-    const repoOptView = this._buildDropdown(repos, triggerId);
+  async displayRepoOptions(repos: string[], triggerId: string, admin: boolean): Promise<any> {
+    const reposToShow = this._buildDropdown(repos);
+    const repoOptView = this._getDropDownView(triggerId, reposToShow);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {
@@ -168,12 +185,33 @@ export class SlackConnector implements ISlackConnector {
               text: 'Commit Hash',
             },
           },
+          {
+            type: 'section',
+            text: {
+              type: 'plain_text',
+              text: 'Click to deploy all repos on latest respective branches',
+            },
+            accessory: {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: 'Deploy all repos',
+              },
+              value: true,
+              action_id: 'deploy_all',
+              confirm: {
+                type: 'plain_text',
+                text: 'Are you sure you want to deploy all repos?',
+              },
+              style: 'danger',
+            },
+          },
         ],
       },
     };
   }
 
-  private _buildDropdown(branches: Array<string>, triggerId: string): any {
+  private _buildDropdown(branches: Array<string>): Array<any> {
     let reposToShow: Array<any> = [];
     branches.forEach((fullPath) => {
       const displayBranchPath = fullPath;
@@ -208,6 +246,6 @@ export class SlackConnector implements ISlackConnector {
         .localeCompare(a.text.text.toString().replace(/\d+/g, (n) => +n + 100000));
     });
 
-    return this._getDropDownView(triggerId, reposToShow);
+    return reposToShow;
   }
 }

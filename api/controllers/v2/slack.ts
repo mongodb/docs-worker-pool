@@ -213,7 +213,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
-  const values = slackConnector.parseSelection(stateValues);
+  const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {

@@ -32,6 +32,21 @@ export class RepoBranchesRepository extends BaseRepository {
     return repo?.['branches'] ?? [];
   }
 
+  async getProdDeployableRepoBranches(directoryPath?: string): Promise<any> {
+    const query = { prodDeployable: true, internalOnly: false };
+    const projection = { _id: 0, repoName: 1 };
+    const repos = await this.find(
+      query,
+      `Mongo Timeout Error: Timedout while retrieving repo branches entries ${
+        directoryPath ? `/${directoryPath}` : ''
+      }`,
+      null,
+      projection
+    );
+
+    return repos ?? [];
+  }
+
   async getRepoBranchAliases(repoName: string, branchName: string, project: string): Promise<any> {
     const returnObject = { status: 'failure' };
     const aliasArray = await this._collection
