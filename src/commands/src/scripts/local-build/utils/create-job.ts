@@ -44,7 +44,7 @@ export function createLocalJob({
       urlSlug: branchName,
       prefix: '',
       project: project,
-      pathPrefix: `${project}/docsworker-xlarge/${branchName}`,
+      pathPrefix: `${project}/docsworker-xlarge12/${branchName}`,
       mutPrefix: project,
       directory: directory,
     },
