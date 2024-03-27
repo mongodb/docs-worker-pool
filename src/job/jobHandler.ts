@@ -150,11 +150,12 @@ export abstract class JobHandler {
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
     const pathPrefix = await this.getPathPrefix();
+    // const pathPrefix = 'testing';
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this.currJob.payload.mutPrefix = mutPrefix;
+      this.currJob.payload.mutPrefix = 'thism';
     }
   }
 
