@@ -9,7 +9,7 @@ interface OasPageBuildParams {
 export async function oasPageBuild({ job, baseUrl }: OasPageBuildParams): Promise<CliCommandResponse> {
   const siteUrl = job.payload.mutPrefix
     ? `${baseUrl}/${job.payload.mutPrefix}`
-    : `${baseUrl}/${job.payload.project}/docsworker-xlarge 11/${job.payload.branchName}`;
+    : `${baseUrl}/${job.payload.project}/docsworker-xlarge/${job.payload.branchName}`;
   const repoDir = getRepoDir(job.payload.repoName, job.payload.directory);
   const bundlePath = `${repoDir}/bundle.zip`;
 
