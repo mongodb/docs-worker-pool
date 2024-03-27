@@ -149,16 +149,16 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
-    const prePrefix = this.getPathPrefix();
-    let pathPrefix;
-    if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
-      pathPrefix = `${prePrefix}/${this.currJob.payload.newHead}`;
-    } else pathPrefix = prePrefix;
-    this._logger.save(this.currJob._id, `${pathPrefix}, prePrefix: ${prePrefix}, server user: ${server_user}`);
+    const pathPrefix = this.getPathPrefix();
+    // let pathPrefix;
+    // if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
+    //   pathPrefix = `${prePrefix}/${this.currJob.payload.newHead}`;
+    // } else pathPrefix = prePrefix;
+    this._logger.save(this.currJob._id, `${pathPrefix}, prePrefix: ${pathPrefix}, server user: ${server_user}`);
     if (pathPrefix || pathPrefix === '') {
-      this.currJob.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
       this.currJob.payload.mutPrefix = mutPrefix;
+      this.currJob.payload.pathPrefix = `${pathPrefix}/${this.currJob.payload.newHead}`;
     }
   }
 
