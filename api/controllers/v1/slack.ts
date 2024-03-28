@@ -203,6 +203,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
 
+  return { statusCode: 400, body: 'hit deploy repo function' };
+
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
