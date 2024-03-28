@@ -66,11 +66,12 @@ export class SlackConnector implements ISlackConnector {
     };
     //conditional here first to check if stateValues[deployAll] is populated
     //if so return an object
-    // if (stateValues[2]['deploy_all']) {
-    //   if (!(entitlement.repos[0] == 'admin')) {
-    //     //add a chechk to make sure a null return won't break anything
-    //     return;
-    //   }
+    if (stateValues[2]['deploy_all']) {
+      if (!(entitlement.repos[0] == 'admin')) {
+        //add a chechk to make sure a null return won't break anything
+        return;
+      }
+    }
     //   values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
     //   //if prodDeployable = true and internalOnly= false, return
     //   //TODO: new reposBranches object
@@ -80,9 +81,13 @@ export class SlackConnector implements ISlackConnector {
 
     // get key and values to figure out what user wants to deploy
     //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
+    this._logger.error('State values SendMessage', stateValues);
+
     for (const blockKey in inputMapping) {
       const blockInputKey = inputMapping[blockKey];
       const stateValuesObj = stateValues[blockKey][blockInputKey];
+      this._logger.error('block input key', blockInputKey);
+
       // selected value from dropdown
       if (stateValuesObj?.selected_option?.value) {
         values[blockInputKey] = stateValuesObj.selected_option.value;

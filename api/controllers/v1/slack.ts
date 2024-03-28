@@ -83,7 +83,6 @@ export const getDeployableJobs = async (
   docsetsRepository: DocsetsRepository
 ) => {
   const deployable = [];
-  return deployable;
 
   for (let i = 0; i < values.repo_option.length; i++) {
     let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
