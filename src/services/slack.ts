@@ -201,7 +201,7 @@ export class SlackConnector implements ISlackConnector {
                 type: 'plain_text',
                 text: 'Deploy all repos',
               },
-              value: true,
+              // value: true,
               action_id: 'deploy_all',
               // confirm: {
               //   type: 'plain_text',
