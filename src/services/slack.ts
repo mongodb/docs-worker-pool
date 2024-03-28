@@ -195,13 +195,14 @@ export class SlackConnector implements ISlackConnector {
               type: 'plain_text',
               text: 'Click to deploy all repos on latest respective branches',
             },
+            accessory: {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: 'Deploy all repos',
+              },
+            },
           },
-          //   accessory: {
-          //     type: 'button',
-          //     text: {
-          //       type: 'plain_text',
-          //       text: 'Deploy all repos',
-          //     },
           //     value: true,
           //     action_id: 'deploy_all',
           //     confirm: {
