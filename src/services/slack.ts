@@ -189,12 +189,13 @@ export class SlackConnector implements ISlackConnector {
               text: 'Commit Hash',
             },
           },
-          // {
-          //   type: 'section',
-          //   text: {
-          //     type: 'plain_text',
-          //     text: 'Click to deploy all repos on latest respective branches',
-          //   },
+          {
+            type: 'section',
+            text: {
+              type: 'plain_text',
+              text: 'Click to deploy all repos on latest respective branches',
+            },
+          },
           //   accessory: {
           //     type: 'button',
           //     text: {
