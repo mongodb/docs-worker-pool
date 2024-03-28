@@ -34,14 +34,13 @@ export class RepoBranchesRepository extends BaseRepository {
 
   async getProdDeployableRepoBranches(directoryPath?: string): Promise<any> {
     const query = { prodDeployable: true, internalOnly: false };
-    const projection = { _id: 0, repoName: 1 };
+    const findOptions = { projection: { _id: 0, repoName: 1 } };
     const repos = await this.find(
       query,
       `Mongo Timeout Error: Timedout while retrieving repo branches entries ${
         directoryPath ? `/${directoryPath}` : ''
       }`,
-      undefined,
-      projection
+      findOptions
     );
 
     return repos ?? [];
