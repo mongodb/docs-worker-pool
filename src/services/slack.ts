@@ -66,17 +66,17 @@ export class SlackConnector implements ISlackConnector {
     };
     //conditional here first to check if stateValues[deployAll] is populated
     //if so return an object
-    if (stateValues[2]['deploy_all']) {
-      if (!(entitlement.repos[0] == 'admin')) {
-        //add a chechk to make sure a null return won't break anything
-        return;
-      }
-      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
-      //if prodDeployable = true and internalOnly= false, return
-      //TODO: new reposBranches object
-      //get list of all prodDeployable repos and their latest branch
-      //return a list in proper format
-    }
+    // if (stateValues[2]['deploy_all']) {
+    //   if (!(entitlement.repos[0] == 'admin')) {
+    //     //add a chechk to make sure a null return won't break anything
+    //     return;
+    //   }
+    //   values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
+    //   //if prodDeployable = true and internalOnly= false, return
+    //   //TODO: new reposBranches object
+    //   //get list of all prodDeployable repos and their latest branch
+    //   //return a list in proper format
+    // }
 
     // get key and values to figure out what user wants to deploy
     //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
@@ -189,27 +189,27 @@ export class SlackConnector implements ISlackConnector {
               text: 'Commit Hash',
             },
           },
-          {
-            type: 'section',
-            text: {
-              type: 'plain_text',
-              text: 'Click to deploy all repos on latest respective branches',
-            },
-            accessory: {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'Deploy all repos',
-              },
-              value: true,
-              action_id: 'deploy_all',
-              confirm: {
-                type: 'plain_text',
-                text: 'Are you sure you want to deploy all repos?',
-              },
-              style: 'danger',
-            },
-          },
+          // {
+          //   type: 'section',
+          //   text: {
+          //     type: 'plain_text',
+          //     text: 'Click to deploy all repos on latest respective branches',
+          //   },
+          //   accessory: {
+          //     type: 'button',
+          //     text: {
+          //       type: 'plain_text',
+          //       text: 'Deploy all repos',
+          //     },
+          //     value: true,
+          //     action_id: 'deploy_all',
+          //     confirm: {
+          //       type: 'plain_text',
+          //       text: 'Are you sure you want to deploy all repos?',
+          //     },
+          //     style: 'danger',
+          //   },
+          // },
         ],
       },
     };
