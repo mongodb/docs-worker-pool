@@ -186,21 +186,28 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
+
+  consoleLogger.error('deployRepo', 'client connected');
+
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  return { statusCode: 200, body: 'hit deploy repo function' };
+
+  consoleLogger.error('deployRepo', 'repos created');
 
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
+  consoleLogger.error('deployRepo', 'json parsed');
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
   if (!isUserEntitled(entitlement)) {
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
+
+  consoleLogger.error('deployRepo', 'got entitlements');
 
   const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
 
