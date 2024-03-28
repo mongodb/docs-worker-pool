@@ -83,6 +83,7 @@ export const getDeployableJobs = async (
   docsetsRepository: DocsetsRepository
 ) => {
   const deployable = [];
+  return deployable;
 
   for (let i = 0; i < values.repo_option.length; i++) {
     let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
@@ -210,6 +211,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   consoleLogger.error('deployRepo', 'got entitlements');
 
   const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
+
+  consoleLogger.error('deployRepo', 'values parsed');
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {
