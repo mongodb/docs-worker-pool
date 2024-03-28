@@ -185,6 +185,7 @@ export const getDeployableJobs = async (
 export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
+  return { statusCode: 400, body: 'hit deploy repo function' };
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
