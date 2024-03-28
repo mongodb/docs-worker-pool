@@ -190,6 +190,7 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
+  return { statusCode: 200, body: 'hit deploy repo function' };
 
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
@@ -202,8 +203,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   }
 
   const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
-
-  return { statusCode: 400, body: 'hit deploy repo function' };
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {
