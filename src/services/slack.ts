@@ -189,27 +189,27 @@ export class SlackConnector implements ISlackConnector {
               text: 'Commit Hash',
             },
           },
-          {
-            type: 'section',
-            text: {
-              type: 'plain_text',
-              text: 'Click to deploy all repos on latest respective branches',
-            },
-            accessory: {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'Deploy all repos',
-              },
-              value: 'clicked',
-              action_id: 'deploy_all',
-              // confirm: {
-              //   type: 'plain_text',
-              //   text: 'Are you sure you want to deploy all repos?',
-              // },
-              // style: 'danger',
-            },
-          },
+          // {
+          //   type: 'section',
+          //   text: {
+          //     type: 'plain_text',
+          //     text: 'Click to deploy all repos on latest respective branches',
+          //   },
+          //   accessory: {
+          //     type: 'button',
+          //     text: {
+          //       type: 'plain_text',
+          //       text: 'Deploy all repos',
+          //     },
+          //     value: 'clicked',
+          //     action_id: 'deploy_all',
+          //     // confirm: {
+          //     //   type: 'plain_text',
+          //     //   text: 'Are you sure you want to deploy all repos?',
+          //     // },
+          //     // style: 'danger',
+          //   },
+          // },
         ],
       },
     };
