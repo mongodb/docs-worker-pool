@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
 import * as crypto from 'crypto';
-import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
+import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 export const axiosApi = axios.create();
 
 function bufferEqual(a: Buffer, b: Buffer) {
@@ -54,7 +54,11 @@ export class SlackConnector implements ISlackConnector {
     return {};
   }
   //fix this in slack connector interface
-  async parseSelection(stateValues: any, entitlement: any, repoBranchesRepository: RepoBranchesRepository): any {
+  async parseSelection(
+    stateValues: any,
+    entitlement: any,
+    repoBranchesRepository: RepoBranchesRepository
+  ): Promise<any> {
     const values = {};
     const inputMapping = {
       block_repo_option: 'repo_option',

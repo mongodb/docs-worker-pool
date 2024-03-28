@@ -40,7 +40,7 @@ export class RepoBranchesRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving repo branches entries ${
         directoryPath ? `/${directoryPath}` : ''
       }`,
-      null,
+      undefined,
       projection
     );
 
