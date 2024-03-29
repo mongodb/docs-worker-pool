@@ -208,11 +208,11 @@ export class SlackConnector implements ISlackConnector {
               },
               value: 'clicked',
               action_id: 'deploy_all',
-              // confirm: {
-              //   type: 'plain_text',
-              //   text: 'Are you sure you want to deploy all repos?',
-              // },
-              // style: 'danger',
+              confirm: {
+                type: 'plain_text',
+                text: 'Are you sure you want to deploy all repos?',
+              },
+              style: 'danger',
             },
           },
         ],
