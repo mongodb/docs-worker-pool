@@ -66,12 +66,12 @@ export class SlackConnector implements ISlackConnector {
     };
     //conditional here first to check if stateValues[deployAll] is populated
     //if so return an object
-    if (stateValues[2]['deploy_all']) {
-      if (!(entitlement.repos[0] == 'admin')) {
-        //add a chechk to make sure a null return won't break anything
-        return;
-      }
-    }
+    // if (stateValues[2]['deploy_all']) {
+    //   if (!(entitlement.repos[0] == 'admin')) {
+    //     //add a chechk to make sure a null return won't break anything
+    //     return;
+    //   }
+    // }
     //   values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
     //   //if prodDeployable = true and internalOnly= false, return
     //   //TODO: new reposBranches object
