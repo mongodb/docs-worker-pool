@@ -178,6 +178,10 @@ export const getDeployableJobs = async (
 };
 
 export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
