@@ -209,7 +209,8 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   console.log('deployRepo', 'got entitlements');
 
-  const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
+  // const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
+  const values = await slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
 
   console.log('deployRepo', values);
 
