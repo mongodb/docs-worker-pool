@@ -207,13 +207,16 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
-  consoleLogger.error('deployRepo', 'got entitlements');
+  console.log('deployRepo', 'got entitlements');
 
   const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
 
-  consoleLogger.error('deployRepo', 'values parsed');
+  console.log('deployRepo', values);
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
+
+  console.log(deployable);
+
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
