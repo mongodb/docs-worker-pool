@@ -187,33 +187,36 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   await client.connect();
   const db = client.db(c.get('dbName'));
 
-  consoleLogger.error('deployRepo', 'client connected');
+  consoleLogger.info('deployRepo', 'client connected');
 
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
 
-  consoleLogger.error('deployRepo', 'repos created');
+  consoleLogger.info('deployRepo', 'repos created');
 
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
-  consoleLogger.error('deployRepo', 'json parsed');
+  consoleLogger.info('deployRepo', stateValues);
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
   if (!isUserEntitled(entitlement)) {
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
+  const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
+
   console.log('deployRepo', 'got entitlements');
 
-  const values = await slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
+
+  const values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
 
   console.log('deployRepo', values);
 
