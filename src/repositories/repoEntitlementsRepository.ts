@@ -47,6 +47,19 @@ export class RepoEntitlementsRepository extends BaseRepository {
     }
   }
 
+  async getIsAdmin(githubUsername: string): Promise<boolean> {
+    const query = { github_username: githubUsername };
+    const entitlementsObject = await this.findOne(
+      query,
+      `Mongo Timeout Error: Timedout while retrieving entitlements for ${githubUsername}`
+    );
+    if (entitlementsObject?.admin) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   async getGatsbySiteIdByGithubUsername(githubUsername: string): Promise<string | undefined> {
     return this.getBuildHookByGithubUsername(githubUsername, 'gatsby_site_id');
   }
