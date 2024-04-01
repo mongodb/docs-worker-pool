@@ -178,10 +178,6 @@ export const getDeployableJobs = async (
 };
 
 export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
@@ -197,6 +193,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
 
   consoleLogger.error('deployRepo', 'repos created');
 
@@ -213,7 +213,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   console.log('deployRepo', 'got entitlements');
 
-  // const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
   const values = await slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
 
   console.log('deployRepo', values);
