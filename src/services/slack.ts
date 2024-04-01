@@ -136,27 +136,35 @@ export class SlackConnector implements ISlackConnector {
     });
   }
   private _getDropDownView(triggerId: string, repos: Array<any>, admin: boolean) {
-    const deployAll = admin && {
-      type: 'section',
-      text: {
-        type: 'plain_text',
-        text: 'Click to deploy all repos',
-      },
-      accessory: {
-        type: 'button',
-        text: {
-          type: 'plain_text',
-          text: 'Deploy all repos',
-        },
-        value: 'clicked',
-        action_id: 'deploy_all',
-        // confirm: {
-        //   type: 'plain_text',
-        //   text: 'Are you sure you want to deploy all repos?',
-        // },
-        style: 'danger',
-      },
-    };
+    const deployAll = admin
+      ? {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: 'Click to deploy all repos',
+          },
+          accessory: {
+            type: 'button',
+            text: {
+              type: 'plain_text',
+              text: 'Deploy all repos',
+            },
+            value: 'clicked',
+            action_id: 'deploy_all',
+            // confirm: {
+            //   type: 'plain_text',
+            //   text: 'Are you sure you want to deploy all repos?',
+            // },
+            style: 'danger',
+          },
+        }
+      : {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: 'Click to deploy all repos',
+          },
+        };
 
     return {
       trigger_id: triggerId,
