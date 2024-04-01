@@ -203,9 +203,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const stateValues = parsed.view.state.values;
 
   try {
-    consoleLogger.info('parsed values', parsed.view.state.values);
-    consoleLogger.info('parsed state', parsed.view.state);
-    consoleLogger.info('parsed view', parsed.view);
+    consoleLogger.info('parsed values', parsed.type[0]);
+    consoleLogger.info('parsed values', parsed.view.state.values[0]);
+    consoleLogger.info('parsed values', JSON.stringify(parsed.view.state.values));
+    consoleLogger.info('parsed state', parsed.view.state[0]);
+    consoleLogger.info('parsed view', parsed.view[0]);
   } catch (e) {
     console.log('parsing values error');
     return {
