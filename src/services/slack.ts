@@ -66,10 +66,10 @@ export class SlackConnector implements ISlackConnector {
     };
     //conditional here first to check if stateValues[deployAll] is populated
     // if so return an object
-    if (stateValues[0]) {
+    if (stateValues['repo_option']) {
       if (!isAdmin) {
         //add a check to make sure a null return won't break anything
-        return;
+        return [];
       }
       values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
       //if prodDeployable = true and internalOnly= false, return
@@ -81,6 +81,7 @@ export class SlackConnector implements ISlackConnector {
     // get key and values to figure out what user wants to deploy
     //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
     this._logger.error('State values SendMessage', stateValues);
+    return [];
 
     for (const blockKey in inputMapping) {
       const blockInputKey = inputMapping[blockKey];
