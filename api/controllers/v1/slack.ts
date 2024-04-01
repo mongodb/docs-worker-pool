@@ -230,10 +230,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
 
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
+  // return {
+  //   statusCode: 200,
+  //   headers: { 'Content-Type': 'application/json' },
+  // };
 
   console.log(deployable);
 

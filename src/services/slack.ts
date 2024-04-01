@@ -136,24 +136,39 @@ export class SlackConnector implements ISlackConnector {
   private _getDropDownView(triggerId: string, repos: Array<any>, admin: boolean) {
     const deployAll = admin
       ? {
-          type: 'actions',
-          block_id: 'deploy_all_button',
-          elements: [
-            {
-              type: 'button',
+          type: 'section',
+          block_id: 'block_testing_option',
+          text: {
+            type: 'plain_text',
+            text: 'How would you like to deploy docs sites?',
+          },
+          accessory: {
+            type: 'radio_buttons',
+            action_id: 'deploy_button',
+            initial_option: {
+              value: 'deploy_individually',
               text: {
                 type: 'plain_text',
-                text: 'Deploy all repos',
+                text: 'Deploy individual repos',
               },
-              value: 'clicked',
-              action_id: 'deploy_all',
-              // confirm: {
-              //   type: 'plain_text',
-              //   text: 'Are you sure you want to deploy all repos?',
-              // },
-              style: 'danger',
             },
-          ],
+            options: [
+              {
+                value: 'deploy_individually',
+                text: {
+                  type: 'plain_text',
+                  text: 'Deploy individual repos',
+                },
+              },
+              {
+                value: 'deploy_all',
+                text: {
+                  type: 'plain_text',
+                  text: 'Deploy all repos',
+                },
+              },
+            ],
+          },
         }
       : {
           type: 'section',
@@ -220,41 +235,6 @@ export class SlackConnector implements ISlackConnector {
             },
           },
           deployAll,
-          {
-            type: 'section',
-            block_id: 'block_testing_option',
-            text: {
-              type: 'plain_text',
-              text: 'Check out these rad radio buttons',
-            },
-            accessory: {
-              type: 'radio_buttons',
-              action_id: 'this_is_an_action_id',
-              initial_option: {
-                value: 'A1',
-                text: {
-                  type: 'plain_text',
-                  text: 'Radio 1',
-                },
-              },
-              options: [
-                {
-                  value: 'A1',
-                  text: {
-                    type: 'plain_text',
-                    text: 'Radio 1',
-                  },
-                },
-                {
-                  value: 'A2',
-                  text: {
-                    type: 'plain_text',
-                    text: 'Radio 2',
-                  },
-                },
-              ],
-            },
-          },
         ],
       },
     };
