@@ -136,7 +136,7 @@ export class SlackConnector implements ISlackConnector {
   private _getDropDownView(triggerId: string, repos: Array<any>, admin: boolean) {
     const deployAll = admin
       ? {
-          type: 'section',
+          type: 'action',
           block_id: 'deploy_all_button',
           elements: [
             {
