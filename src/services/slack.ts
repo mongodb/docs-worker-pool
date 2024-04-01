@@ -78,7 +78,7 @@ export class SlackConnector implements ISlackConnector {
 
     // get key and values to figure out what user wants to deploy
     //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
-    this._logger.error('State values SendMessage', stateValues);
+    this._logger.error('all prod deployable repos SendMessage', values['repo_option']);
 
     for (const blockKey in inputMapping) {
       const blockInputKey = inputMapping[blockKey];
