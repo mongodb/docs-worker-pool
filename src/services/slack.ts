@@ -56,7 +56,7 @@ export class SlackConnector implements ISlackConnector {
   //fix this in slack connector interface
   async parseSelection(
     stateValues: any,
-    entitlement: any,
+    isAdmin: boolean,
     repoBranchesRepository: RepoBranchesRepository
   ): Promise<any> {
     const values = {};
@@ -67,8 +67,8 @@ export class SlackConnector implements ISlackConnector {
     //conditional here first to check if stateValues[deployAll] is populated
     // if so return an object
     if (stateValues[2]['deploy_all']) {
-      if (!(entitlement.repos[0] == 'admin')) {
-        //add a chechk to make sure a null return won't break anything
+      if (!isAdmin) {
+        //add a check to make sure a null return won't break anything
         return;
       }
       values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
@@ -135,8 +135,28 @@ export class SlackConnector implements ISlackConnector {
       },
     });
   }
-
   private _getDropDownView(triggerId: string, repos: Array<any>) {
+    const deployAll = {
+      type: 'section',
+      text: {
+        type: 'plain_text',
+        text: 'Click to deploy all repos',
+      },
+      accessory: {
+        type: 'button',
+        text: {
+          type: 'plain_text',
+          text: 'Deploy all repos',
+        },
+        value: 'clicked',
+        action_id: 'deploy_all',
+        // confirm: {
+        //   type: 'plain_text',
+        //   text: 'Are you sure you want to deploy all repos?',
+        // },
+        style: 'danger',
+      },
+    };
     return {
       trigger_id: triggerId,
       view: {
@@ -193,27 +213,7 @@ export class SlackConnector implements ISlackConnector {
               text: 'Commit Hash',
             },
           },
-          {
-            type: 'section',
-            text: {
-              type: 'plain_text',
-              text: 'Click to deploy all repos',
-            },
-            accessory: {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'Deploy all repos',
-              },
-              value: 'clicked',
-              action_id: 'deploy_all',
-              // confirm: {
-              //   type: 'plain_text',
-              //   text: 'Are you sure you want to deploy all repos?',
-              // },
-              style: 'danger',
-            },
-          },
+          deployAll,
         ],
       },
     };

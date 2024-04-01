@@ -45,7 +45,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
     return prepResponse(401, 'text/plain', response);
   }
 
-  const admin = entitlement.repos[0] == 'admin' ? true : false;
+  const admin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
 
   const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], admin);
@@ -198,6 +198,12 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
+
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
+
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
   consoleLogger.info('deployRepo', stateValues);
@@ -210,11 +216,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
 
   console.log('deployRepo', 'got entitlements');
-
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
 
   const values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
 

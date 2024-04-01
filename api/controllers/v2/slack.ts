@@ -46,7 +46,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
     return prepResponse(401, 'text/plain', response);
   }
 
-  const admin = entitlement.repos[0] == 'admin' ? true : false;
+  const admin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
 
   const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], admin);
@@ -185,7 +185,6 @@ export const getDeployableJobs = async (
 export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-  return { statusCode: 400, body: 'hit deploy repo function' };
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
