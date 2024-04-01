@@ -125,7 +125,7 @@ export class SlackConnector implements ISlackConnector {
 
   async displayRepoOptions(repos: string[], triggerId: string, admin: boolean): Promise<any> {
     const reposToShow = this._buildDropdown(repos);
-    const repoOptView = this._getDropDownView(triggerId, reposToShow);
+    const repoOptView = this._getDropDownView(triggerId, reposToShow, admin);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {
@@ -135,8 +135,8 @@ export class SlackConnector implements ISlackConnector {
       },
     });
   }
-  private _getDropDownView(triggerId: string, repos: Array<any>) {
-    const deployAll = {
+  private _getDropDownView(triggerId: string, repos: Array<any>, admin: boolean) {
+    const deployAll = admin && {
       type: 'section',
       text: {
         type: 'plain_text',
@@ -157,6 +157,7 @@ export class SlackConnector implements ISlackConnector {
         style: 'danger',
       },
     };
+
     return {
       trigger_id: triggerId,
       view: {
