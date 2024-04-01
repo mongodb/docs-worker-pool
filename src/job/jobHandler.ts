@@ -526,10 +526,11 @@ export abstract class JobHandler {
 
   // TODO-4442: Need to figure out how to split between cache and S3 files
   private async downloadExistingArtifacts() {
+    await this._logger.save(this._currJob._id, 'Attempting to download existing artifacts');
     const client = new S3Client({ region: 'us-east-2' });
     const bucket = process.env.BUCKET;
     if (!bucket) {
-      // Probably want to log here
+      this._logger.error(this._currJob._id, `Missing bucket: ${bucket}`);
       return;
     }
 
@@ -542,10 +543,13 @@ export abstract class JobHandler {
     // Since the Makefiles move the path to Snooty a bit, we want to make sure we target the original, before the
     // frontend is built
     const originalSnootyPath = `${repoDir}/../../snooty`;
-    const targetPublicDirectory = `${originalSnootyPath}/public`;
+    await this._logger.save(this._currJob._id, `originalSnootyPath: ${originalSnootyPath}`);
+    const targetPublicDirectory = path.join(originalSnootyPath, '/public');
+    await this._logger.save(this._currJob._id, `targetPublicDirectory: ${targetPublicDirectory}`);
 
     // For debugging purposes
     let contents = '';
+    let n = 0;
 
     // NOTE: This currently does not taking into account the .cache folder
     try {
@@ -557,6 +561,7 @@ export abstract class JobHandler {
       while (isTruncated) {
         const { Contents, IsTruncated, NextContinuationToken } = await client.send(listCommand);
         if (!Contents) {
+          this._logger.info(this._currJob._id, 'No contents');
           break;
         }
 
@@ -573,24 +578,28 @@ export abstract class JobHandler {
           // Files in the local public directory should exclude path prefixes
           const localFileName = objKey.replace(s3Prefix, '');
           const targetFilePath = path.join(targetPublicDirectory, localFileName);
+          this._logger.info(this._currJob._id, `targetFilePath: ${targetFilePath}`);
           if (objBody) {
             await writeFileAsync(targetFilePath, await objBody.transformToString());
           }
         }
 
         // For debugging
-        const contentsList = Contents.map((c) => `${c.Key}\n`);
+        const contentsList = Contents.map((c) => {
+          n++;
+          return `${c.Key}\n`;
+        });
         contents += contentsList;
 
         isTruncated = !!IsTruncated;
         listCommand.input.ContinuationToken = NextContinuationToken;
       }
     } catch (e) {
-      console.error(e);
+      this._logger.error(this._currJob._id, e);
     }
 
     // For debugging purposes
-    console.log(contents);
+    this._logger.info(this._currJob._id, contents);
   }
 
   @throwIfJobInterupted()
