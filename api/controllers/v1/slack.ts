@@ -85,7 +85,7 @@ export const getDeployableJobs = async (
 ) => {
   const deployable = [];
 
-  for (let i = 0; i < values.repo_option.length; i++) {
+  for (let i = 0; i < values?.repo_option?.length; i++) {
     let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
     const splitValues = values.repo_option[i].value.split('/');
 

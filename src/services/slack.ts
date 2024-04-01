@@ -140,6 +140,7 @@ export class SlackConnector implements ISlackConnector {
     const deployAll = admin
       ? {
           type: 'section',
+          block_id: 'deploy_all_button',
           text: {
             type: 'plain_text',
             text: 'Click to deploy all repos',
