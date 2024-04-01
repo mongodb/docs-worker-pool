@@ -1,4 +1,6 @@
+import { GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import axios, { AxiosResponse } from 'axios';
+import path from 'path';
 import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -14,7 +16,7 @@ import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepo
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import { nextGenHtml, nextGenParse, oasPageBuild, persistenceModule, prepareBuild } from '../commands';
-import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
+import { downloadBuildDependencies, writeFileAsync } from '../commands/src/helpers/dependency-helpers';
 import { CliCommandResponse } from '../commands/src/helpers';
 require('fs');
 
@@ -522,6 +524,75 @@ export abstract class JobHandler {
     process.env.REGRESSION = regression;
   }
 
+  // TODO-4442: Need to figure out how to split between cache and S3 files
+  private async downloadExistingArtifacts() {
+    const client = new S3Client({ region: 'us-east-2' });
+    const bucket = process.env.BUCKET;
+    if (!bucket) {
+      // Probably want to log here
+      return;
+    }
+
+    // S3 object prefix should match the path prefix that Mut uploads to for the build
+    // Probably want to make this an argument, but leave as a static variable for testing
+    // We'll need to figure out how to handle differences between prod deploy vs. content staging build, if necessary
+    const s3Prefix = 'docs/docsworker-xlarge/DOP-4442/';
+    const listCommand = new ListObjectsV2Command({ Bucket: bucket, Prefix: s3Prefix });
+    const repoDir = this._config.get<string>('repo_dir');
+    // Since the Makefiles move the path to Snooty a bit, we want to make sure we target the original, before the
+    // frontend is built
+    const originalSnootyPath = `${repoDir}/../../snooty`;
+    const targetPublicDirectory = `${originalSnootyPath}/public`;
+
+    // For debugging purposes
+    let contents = '';
+
+    // NOTE: This currently does not taking into account the .cache folder
+    try {
+      let isTruncated = true;
+
+      this._fileSystemServices.createDirIfNotExists(targetPublicDirectory);
+
+      // Grab contents, and then attempt to continue, in case there are more objects
+      while (isTruncated) {
+        const { Contents, IsTruncated, NextContinuationToken } = await client.send(listCommand);
+        if (!Contents) {
+          break;
+        }
+
+        for (const obj of Contents) {
+          const objKey = obj.Key;
+          if (!objKey) {
+            continue;
+          }
+
+          const getCommand = new GetObjectCommand({ Bucket: bucket, Key: objKey });
+          const { Body: objBody } = await client.send(getCommand);
+
+          // Save S3 objects to local file paths
+          // Files in the local public directory should exclude path prefixes
+          const localFileName = objKey.replace(s3Prefix, '');
+          const targetFilePath = path.join(targetPublicDirectory, localFileName);
+          if (objBody) {
+            await writeFileAsync(targetFilePath, await objBody.transformToString());
+          }
+        }
+
+        // For debugging
+        const contentsList = Contents.map((c) => `${c.Key}\n`);
+        contents += contentsList;
+
+        isTruncated = !!IsTruncated;
+        listCommand.input.ContinuationToken = NextContinuationToken;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // For debugging purposes
+    console.log(contents);
+  }
+
   @throwIfJobInterupted()
   protected async buildWithMakefiles(): Promise<boolean> {
     this.cleanup();
@@ -531,6 +602,9 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
+
+    const downloadArtifactsPromise = this.downloadExistingArtifacts();
+
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
@@ -541,6 +615,9 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
     this._logger.save(this._currJob._id, 'Prepared Environment variables');
+
+    await downloadArtifactsPromise;
+
     return await this.executeBuild();
   }
 

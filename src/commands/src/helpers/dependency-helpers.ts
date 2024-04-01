@@ -7,7 +7,7 @@ import { BuildDependencies } from '../../../entities/job';
 import { finished } from 'stream/promises';
 
 const existsAsync = promisify(fs.exists);
-const writeFileAsync = promisify(fs.writeFile);
+export const writeFileAsync = promisify(fs.writeFile);
 
 async function createEnvProdFile({
   repoDir,
