@@ -199,11 +199,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
+  const parsed = JSON.parse(decoded);
+  const stateValues = parsed.view.state.values;
 
   try {
-    const parsed = JSON.parse(decoded);
-    const stateValues = parsed.view.state.values;
-    consoleLogger.info('deployRepo', stateValues);
+    consoleLogger.info('deployRepo', stateValues[0]);
   } catch (e) {
     console.log('parsing values error');
     return {
@@ -211,11 +211,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
       headers: { 'Content-Type': 'application/json' },
     };
   }
-
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
   if (!isUserEntitled(entitlement)) {
@@ -231,6 +226,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   console.log('deployRepo', values);
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
+
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
 
   console.log(deployable);
 
