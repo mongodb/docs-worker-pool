@@ -66,7 +66,7 @@ export class SlackConnector implements ISlackConnector {
     };
     //conditional here first to check if stateValues[deployAll] is populated
     // if so return an object
-    if (stateValues[2]['deploy_all']) {
+    if (stateValues[0]) {
       if (!isAdmin) {
         //add a check to make sure a null return won't break anything
         return;
