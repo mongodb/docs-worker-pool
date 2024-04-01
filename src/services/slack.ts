@@ -162,7 +162,7 @@ export class SlackConnector implements ISlackConnector {
           type: 'section',
           text: {
             type: 'plain_text',
-            text: 'Click to deploy all repos',
+            text: ' ',
           },
         };
 
