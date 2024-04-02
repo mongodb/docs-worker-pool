@@ -403,6 +403,7 @@ export abstract class JobHandler {
     const snootyFrontEndVars = {
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
       PREVIEW_BUILD_ENABLED: this._config.get<string>('previewBuildEnabled'),
+      USE_FILTER_BRANCH: true,
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),
       GATSBY_SHOW_CHATBOT: this._config.get<string>('gatsbyUseChatbot'),
       GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: this._config.get<string>('gatsbyHideUnifiedFooterLocale'),
