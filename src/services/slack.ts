@@ -75,7 +75,7 @@ export class SlackConnector implements ISlackConnector {
       return values;
     }
 
-    // get key and values to figure out what user wants to deploy
+    // get key and values to figure out what the user wants to deploy
     //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
     this._logger.info('all prod deployable repos SendMessage', values['repo_option']);
 
