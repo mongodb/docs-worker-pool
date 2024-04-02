@@ -19,7 +19,7 @@ import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import { nextGenHtml, nextGenParse, oasPageBuild, persistenceModule, prepareBuild } from '../commands';
 import { downloadBuildDependencies, writeFileAsync } from '../commands/src/helpers/dependency-helpers';
-import { CliCommandResponse } from '../commands/src/helpers';
+import { CliCommandResponse, getRepoDir } from '../commands/src/helpers';
 
 export abstract class JobHandler {
   private _currJob: Job;
@@ -563,7 +563,7 @@ export abstract class JobHandler {
     // We'll need to figure out how to handle differences between prod deploy vs. content staging build, if necessary
     const s3Prefix = 'docs/docsworker-xlarge/DOP-4442/';
     const listCommand = new ListObjectsV2Command({ Bucket: bucket, Prefix: s3Prefix });
-    const repoDir = 'test-s3-fetching-repo';
+    const repoDir = getRepoDir(this.currJob.payload.project);
     // Since the Makefiles move the path to Snooty a bit, we want to make sure we target the original, before the
     // frontend is built. Unclear if this needs to be resolved more accurately?
     const originalSnootyPath = `${repoDir}/../../snooty`;
