@@ -63,18 +63,15 @@ export class SlackConnector implements ISlackConnector {
     const inputMapping = {
       block_repo_option: 'repo_option',
       block_hash_option: 'hash_option',
+      block_deploy_option: 'deploy_option',
     };
     //conditional here first to check if stateValues[deployAll] is populated
     // if so return an object
-    if (!isAdmin) {
+    if (isAdmin && stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
       //add a check to make sure a null return won't break anything
-      return [];
+      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
+      return values;
     }
-    values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
-    //if prodDeployable = true and internalOnly= false, return
-    //TODO: new reposBranches object
-    //get list of all prodDeployable repos and their latest branch
-    //return a list in proper format
 
     // get key and values to figure out what user wants to deploy
     //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
@@ -85,12 +82,13 @@ export class SlackConnector implements ISlackConnector {
       const stateValuesObj = stateValues[blockKey][blockInputKey];
       this._logger.error('block input key', blockInputKey);
 
-      // selected value from dropdown
-      if (stateValuesObj?.selected_option?.value) {
-        values[blockInputKey] = stateValuesObj.selected_option.value;
-      }
+      //this will never execute
+      // // selected value from dropdown
+      // if (stateValuesObj?.selected_option?.value && stateValuesObj?.selected_option?.value == 'deploy_individually') {
+      //   values['repo_option'] = stateValuesObj.selected_option.value;
+      // }
       // multi select is an array
-      else if (stateValuesObj?.selected_options?.length > 0) {
+      if (stateValuesObj?.selected_options?.length > 0) {
         values[blockInputKey] = stateValuesObj.selected_options;
       }
       // input value
@@ -137,14 +135,14 @@ export class SlackConnector implements ISlackConnector {
     const deployAll = admin
       ? {
           type: 'section',
-          block_id: 'block_testing_option',
+          block_id: 'block_deploy_option',
           text: {
             type: 'plain_text',
             text: 'How would you like to deploy docs sites?',
           },
           accessory: {
             type: 'radio_buttons',
-            action_id: 'deploy_button',
+            action_id: 'deploy_option',
             initial_option: {
               value: 'deploy_individually',
               text: {
