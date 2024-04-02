@@ -35,6 +35,9 @@ export class RepoBranchesRepository extends BaseRepository {
   async getProdDeployableRepoBranches(directoryPath?: string): Promise<any> {
     const query = { prodDeployable: true, internalOnly: false };
     const findOptions = { projection: { _id: 0, repoName: 1 } };
+    const reposArray = await this._collection
+      .aggregate([{ $match: { prodDeployable: true, internalOnly: false } }, { $project: { _id: 0, repoName: 1 } }])
+      .toArray();
     const repos = await this.find(
       query,
       `Mongo Timeout Error: Timedout while retrieving repo branches entries ${
@@ -43,7 +46,7 @@ export class RepoBranchesRepository extends BaseRepository {
       findOptions
     );
 
-    return repos.toArray() ?? [];
+    return reposArray ?? [];
   }
 
   async getRepoBranchAliases(repoName: string, branchName: string, project: string): Promise<any> {
