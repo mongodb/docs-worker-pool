@@ -547,7 +547,7 @@ export abstract class JobHandler {
   }
 
   private async downloadExistingArtifacts() {
-    const timerLabel = 'downloadExistingArtifacts - No limit';
+    const timerLabel = 'downloadExistingArtifacts';
     console.time(timerLabel);
 
     console.log('Attempting to download existing artifacts');
@@ -566,7 +566,7 @@ export abstract class JobHandler {
     const repoDir = 'test-s3-fetching-repo';
     // Since the Makefiles move the path to Snooty a bit, we want to make sure we target the original, before the
     // frontend is built
-    const originalSnootyPath = `${repoDir}/../snooty`;
+    const originalSnootyPath = `${repoDir}/../../snooty`;
     console.log(`originalSnootyPath: ${originalSnootyPath}`);
     const targetPublicDirectory = path.join(originalSnootyPath, '/public');
     console.log(`targetPublicDirectory: ${targetPublicDirectory}`);
