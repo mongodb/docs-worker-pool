@@ -70,12 +70,14 @@ export class SlackConnector implements ISlackConnector {
     if (isAdmin && stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
       //add a check to make sure a null return won't break anything
       values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
+      this._logger.info('all prod deployable repos SendMessage', values['repo_option']);
+
       return values;
     }
 
     // get key and values to figure out what user wants to deploy
     //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
-    this._logger.error('all prod deployable repos SendMessage', values['repo_option']);
+    this._logger.info('all prod deployable repos SendMessage', values['repo_option']);
 
     for (const blockKey in inputMapping) {
       const blockInputKey = inputMapping[blockKey];

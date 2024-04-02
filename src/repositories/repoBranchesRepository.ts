@@ -43,7 +43,7 @@ export class RepoBranchesRepository extends BaseRepository {
       findOptions
     );
 
-    return repos ?? [];
+    return repos.toArray() ?? [];
   }
 
   async getRepoBranchAliases(repoName: string, branchName: string, project: string): Promise<any> {
