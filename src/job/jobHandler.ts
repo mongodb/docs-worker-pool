@@ -1,7 +1,7 @@
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import axios, { AxiosResponse } from 'axios';
 import path from 'path';
-import pLimit from 'p-limit';
+// import pLimit from 'p-limit';
 import fs from 'fs';
 import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
@@ -565,7 +565,7 @@ export abstract class JobHandler {
     const listCommand = new ListObjectsV2Command({ Bucket: bucket, Prefix: s3Prefix });
     const repoDir = 'test-s3-fetching-repo';
     // Since the Makefiles move the path to Snooty a bit, we want to make sure we target the original, before the
-    // frontend is built
+    // frontend is built. Unclear if this needs to be resolved more accurately?
     const originalSnootyPath = `${repoDir}/../../snooty`;
     console.log(`originalSnootyPath: ${originalSnootyPath}`);
     const targetPublicDirectory = path.join(originalSnootyPath, '/public');
@@ -618,9 +618,11 @@ export abstract class JobHandler {
     }
 
     // Limit concurrency to avoid rate limits
-    const limit = pLimit(5);
+    // TO DEBUG: Might be having trouble using this package, but works fine in local script?
+    // const limit = pLimit(5);
     const downloadPromises = keysList.map(({ objKey, destPath }) => {
-      return limit(() => this.downloadByUrl(objKey, destPath));
+      return this.downloadByUrl(objKey, destPath);
+      // return limit(() => this.downloadByUrl(objKey, destPath));
     });
 
     // For debugging purposes
