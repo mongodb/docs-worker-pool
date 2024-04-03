@@ -198,6 +198,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
+
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
