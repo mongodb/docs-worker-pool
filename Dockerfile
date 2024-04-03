@@ -82,11 +82,11 @@ RUN git clone -b main --depth 1 https://github.com/mongodb/snooty.git       \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
     && mkdir -p ./static/images                                                                    \
     && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
-    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg \
-    && cd component-factory-transformer \
-    && cargo build \
-    && rustup target add wasm32-wasi \
-    && npm run prepublishOnly                                                        
+    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg 
+# && cd component-factory-transformer \
+# && cargo build \
+# && rustup target add wasm32-wasi \
+# && npm run prepublishOnly                                                        
 
 
 # install redoc fork
