@@ -206,6 +206,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
+  console.log(parsed.type);
 
   if (!(parsed.type == 'submission_view')) {
     return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
