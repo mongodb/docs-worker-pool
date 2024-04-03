@@ -78,29 +78,40 @@ const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) 
 // For every repo/branch selected to be deployed, return an array of jobs with the payload data
 // needed for a successful build.
 export const getDeployableJobs = async (
-  values,
-  entitlement,
+  values: any,
+  entitlement: any,
   repoBranchesRepository: RepoBranchesRepository,
   docsetsRepository: DocsetsRepository
 ) => {
   const deployable = [];
 
   for (let i = 0; i < values?.repo_option?.length; i++) {
-    let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
-    const splitValues = values.repo_option[i].value.split('/');
-
-    if (splitValues.length === 3) {
-      // e.g. mongodb/docs-realm/master => (owner/repo/branch)
-      [repoOwner, repoName, branchName] = splitValues;
-    } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
-      // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
-      [repoOwner, repoName, directory, branchName] = splitValues;
+    let jobTitle: string, repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
+    if (values.deploy_option == 'deploy_all') {
+      repoOwner = 'mongodb';
+      branchName = 'master';
+      repoName = values.repo_option[i].repoName;
+      jobTitle = `Slack deploy: ${repoName}, by ${entitlement.github_username}`;
     } else {
-      throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
+      const splitValues = values.repo_option[i].value.split('/');
+      jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
+
+      if (splitValues.length === 1) {
+        [repoName] = splitValues;
+        //  get and set repoOwner, branchName here
+      }
+      if (splitValues.length === 3) {
+        // e.g. mongodb/docs-realm/master => (owner/repo/branch)
+        [repoOwner, repoName, branchName] = splitValues;
+      } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
+        // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
+        [repoOwner, repoName, directory, branchName] = splitValues;
+      } else {
+        throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
+      }
     }
 
     const hashOption = values?.hash_option ?? null;
-    const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement?.email ?? '';
 
@@ -111,11 +122,11 @@ export const getDeployableJobs = async (
     if (!branchObject?.aliasObject) continue;
 
     // TODO: Create strong typing for these rather than comments
-    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; // bool
+    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName;
     let aliases = branchObject.aliasObject.urlAliases; // array or null
-    let urlSlug = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
-    const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
-    aliases = aliases?.filter((a) => a);
+    let urlSlug: string = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
+    const isStableBranch = !!branchObject.aliasObject.isStableBranch; // bool or Falsey
+
     if (!urlSlug || !urlSlug.trim()) {
       urlSlug = branchName;
     }
@@ -132,12 +143,11 @@ export const getDeployableJobs = async (
       urlSlug,
       false,
       false,
-      false,
+      isStableBranch,
       directory
     );
 
-    newPayload.stable = !!isStableBranch;
-
+    aliases = aliases?.filter((a) => a);
     if (!aliases || aliases.length === 0) {
       if (non_versioned) {
         newPayload.urlSlug = '';
@@ -178,7 +188,7 @@ export const getDeployableJobs = async (
   return deployable;
 };
 
-export const DeployRepo = async (event: any = {}, context: any = {}): Promise<any> => {
+export const DeployRepo = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
@@ -188,14 +198,10 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
   await client.connect();
   const db = client.db(c.get('dbName'));
 
-  consoleLogger.info('deployRepo', 'client connected');
-
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
-
-  consoleLogger.info('deployRepo', 'repos created');
 
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
@@ -206,7 +212,6 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
     consoleLogger.info('parsed type', parsed.type);
     consoleLogger.info('parsed values', JSON.stringify(parsed.view.state.values));
     consoleLogger.info('parsed state', JSON.stringify(parsed.view.state));
-    consoleLogger.info('parsed view', JSON.stringify(parsed.view));
   } catch (e) {
     console.log('parsing values error');
     return {
@@ -222,18 +227,11 @@ export const DeployRepo = async (event: any = {}, context: any = {}): Promise<an
 
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
 
-  console.log('deployRepo', 'got entitlements');
-
   const values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
 
   console.log('deployRepo', values);
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-
-  // return {
-  //   statusCode: 200,
-  //   headers: { 'Content-Type': 'application/json' },
-  // };
 
   console.log(deployable);
 
