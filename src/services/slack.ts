@@ -69,6 +69,7 @@ export class SlackConnector implements ISlackConnector {
     // if so return an object
     if (isAdmin && stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
       //add a check to make sure a null return won't break anything
+      values['deploy_option'] = 'deploy_individually';
       values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
       this._logger.info('all prod deployable repos SendMessage', values['repo_option']);
 
