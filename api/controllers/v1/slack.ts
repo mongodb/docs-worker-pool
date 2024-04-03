@@ -46,7 +46,6 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   }
 
   const admin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
-  console.log(admin, key_val['user_id']);
 
   const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], admin);
@@ -78,8 +77,8 @@ const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) 
 // For every repo/branch selected to be deployed, return an array of jobs with the payload data
 // needed for a successful build.
 export const getDeployableJobs = async (
-  values: any,
-  entitlement: any,
+  values,
+  entitlement,
   repoBranchesRepository: RepoBranchesRepository,
   docsetsRepository: DocsetsRepository
 ) => {
@@ -91,7 +90,7 @@ export const getDeployableJobs = async (
       repoOwner = 'mongodb';
       branchName = 'master';
       repoName = values.repo_option[i].repoName;
-      jobTitle = `Slack deploy: ${repoName}, by ${entitlement.github_username}`;
+      jobTitle = `Slack deploy: ${repoOwner}/${repoName}/${branchName}, by ${entitlement.github_username}`;
     } else {
       const splitValues = values.repo_option[i].value.split('/');
       jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
@@ -208,16 +207,8 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
 
-  try {
-    consoleLogger.info('parsed type', parsed.type);
-    consoleLogger.info('parsed values', JSON.stringify(parsed.view.state.values));
-    consoleLogger.info('parsed state', JSON.stringify(parsed.view.state));
-  } catch (e) {
-    console.log('parsing values error');
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-    };
+  if (!(parsed.type == 'submission_view')) {
+    return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
   }
 
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
@@ -226,14 +217,8 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   }
 
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
-
   const values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
-
-  console.log('deployRepo', values);
-
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-
-  console.log(deployable);
 
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
