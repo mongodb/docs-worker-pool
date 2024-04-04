@@ -207,6 +207,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
 
+  //TODO: create an interface for slack view_submission payloads
   if (!(parsed.type == 'view_submission')) {
     return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
   }
@@ -216,8 +217,15 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
+  let values = [];
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
-  const values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
+  try {
+    values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
+    console.log(values);
+  } catch (e) {
+    console.log(`Error parsing selection: ${e}`);
+    return e;
+  }
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
 
   if (deployable.length > 0) {
