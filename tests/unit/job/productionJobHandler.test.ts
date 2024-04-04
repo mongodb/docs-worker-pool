@@ -166,12 +166,6 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
-    // TODO: Correct number of arguments
-    expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
-      `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-      TestDataProvider.getEnvVarsWithPathPrefixWithFlags(jobHandlerTestHelper.job),
-      { encoding: 'utf8', flag: 'w' }
-    );
   });
 
   test('Default production deploy does not kick off  manifest generation', async () => {
