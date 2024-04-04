@@ -1,4 +1,4 @@
-import { Db } from 'mongodb';
+import { Document, Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
@@ -32,20 +32,10 @@ export class RepoBranchesRepository extends BaseRepository {
     return repo?.['branches'] ?? [];
   }
 
-  async getProdDeployableRepoBranches(directoryPath?: string): Promise<any> {
-    const query = { prodDeployable: true, internalOnly: false };
-    const findOptions = { projection: { _id: 0, repoName: 1 } };
+  async getProdDeployableRepoBranches(): Promise<Document[]> {
     const reposArray = await this._collection
       .aggregate([{ $match: { prodDeployable: true, internalOnly: false } }, { $project: { _id: 0, repoName: 1 } }])
       .toArray();
-    const repos = await this.find(
-      query,
-      `Mongo Timeout Error: Timedout while retrieving repo branches entries ${
-        directoryPath ? `/${directoryPath}` : ''
-      }`,
-      findOptions
-    );
-
     return reposArray ?? [];
   }
 

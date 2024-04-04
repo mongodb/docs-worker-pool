@@ -53,7 +53,7 @@ export class SlackConnector implements ISlackConnector {
     }
     return {};
   }
-  //fix this in slack connector interface
+
   async parseSelection(
     stateValues: any,
     isAdmin: boolean,
@@ -65,30 +65,36 @@ export class SlackConnector implements ISlackConnector {
       block_hash_option: 'hash_option',
       block_deploy_option: 'deploy_option',
     };
-    //conditional here first to check if stateValues[deployAll] is populated
-    // if so return an object
-    if (isAdmin && stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
-      //add a check to make sure a null return won't break anything
-      values['deploy_option'] = 'deploy_all';
-      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches(); //aggregation in repoBranches
-      return values;
+
+    // if deploy all was selected:
+    if (stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
+      if (isAdmin) {
+        values['deploy_option'] = 'deploy_all';
+        values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
+        return values;
+      } else
+        return {
+          statusCode: 401,
+          headers: { 'Content-Type': 'application/json' },
+        };
     }
 
+    //if deploy indivual repos was selected:
     // get key and values to figure out what user wants to deploy
-    //get "repo_option" in stateValues[0], get hash_option in stateValues[1]""
     for (const blockKey in inputMapping) {
       const blockInputKey = inputMapping[blockKey];
       const stateValuesObj = stateValues[blockKey][blockInputKey];
-      this._logger.error('block input key', blockInputKey);
 
-      //this will never execute
-      // // selected value from dropdown
-      // if (stateValuesObj?.selected_option?.value && stateValuesObj?.selected_option?.value == 'deploy_individually') {
-      //   values['repo_option'] = stateValuesObj.selected_option.value;
-      // }
       // multi select is an array
       if (stateValuesObj?.selected_options?.length > 0) {
         values[blockInputKey] = stateValuesObj.selected_options;
+      }
+      //retrun an error if radio button choice 'deploy individual repos' was selected but no repo was actually chosen
+      else if (blockInputKey == 'repo_option') {
+        return {
+          statusCode: 400,
+          headers: { 'Content-Type': 'application/json' },
+        };
       }
       // input value
       else if (stateValuesObj?.value) {
