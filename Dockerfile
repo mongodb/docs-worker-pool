@@ -75,18 +75,17 @@ RUN echo ${WORK_DIRECTORY}
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-# RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
-RUN git clone -b main --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps --omit=dev                                                        \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
     && mkdir -p ./static/images                                                                    \
     && mv ./docs-tools/themes/mongodb/static ./static/docs-tools                                   \
-    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg 
-# && cd component-factory-transformer \
-# && cargo build \
-# && rustup target add wasm32-wasi \
-# && npm run prepublishOnly                                                        
+    && mv ./docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg \
+    && cd component-factory-transformer \
+    && cargo build \
+    && rustup target add wasm32-wasi \
+    && npm run prepublishOnly                                                        
 
 
 # install redoc fork
