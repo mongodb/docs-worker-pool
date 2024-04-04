@@ -208,6 +208,7 @@ export class SlackConnector implements ISlackConnector {
               },
               options: repos,
             },
+            optional: true,
             label: {
               type: 'plain_text',
               text: 'Select Repo',
