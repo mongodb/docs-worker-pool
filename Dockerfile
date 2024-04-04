@@ -69,7 +69,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN chmod -R 777 ${WORK_DIRECTORY}/.cargo/bin
 
 ENV PATH="${WORK_DIRECTORY}/.cargo/bin:${PATH}"
-RUN echo ${WORK_DIRECTORY}
+
 
 # get shared.mk
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
@@ -77,6 +77,7 @@ RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefil
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
+    # Need to remove omit dev as the filter functionality for the frontend depends on a dev dependency.
     && npm ci --legacy-peer-deps                                                       \
     && git clone --depth 1 https://github.com/mongodb/docs-tools.git                               \
     && mkdir -p ./static/images                                                                    \
