@@ -221,7 +221,6 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
   try {
     values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
-    console.log(values);
   } catch (e) {
     console.log(`Error parsing selection: ${e}`);
     return e;
