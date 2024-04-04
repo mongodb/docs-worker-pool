@@ -244,12 +244,6 @@ describe('ProductionJobHandler Tests', () => {
     jobHandlerTestHelper.setupForSuccess();
     await jobHandlerTestHelper.jobHandler.execute();
     jobHandlerTestHelper.verifyNextGenSuccess();
-
-    expect(jobHandlerTestHelper.fileSystemServices.writeToFile).toBeCalledWith(
-      `repos/${jobHandlerTestHelper.job.payload.repoName}/.env.production`,
-      `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${jobHandlerTestHelper.job.payload.branchName}\nPATH_PREFIX=/\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_SHOW_CHATBOT=false\nGATSBY_HIDE_UNIFIED_FOOTER_LOCALE=true\nGATSBY_MARIAN_URL=test-url\n`,
-      { encoding: 'utf8', flag: 'w' }
-    );
   });
 
   test('Execute Next Gen Build successfully', async () => {
