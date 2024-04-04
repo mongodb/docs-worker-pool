@@ -73,7 +73,7 @@ export class SlackConnector implements ISlackConnector {
         values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
         return values;
       } else
-        return {
+        throw {
           statusCode: 401,
           headers: { 'Content-Type': 'application/json' },
         };
@@ -91,7 +91,7 @@ export class SlackConnector implements ISlackConnector {
       }
       //retrun an error if radio button choice 'deploy individual repos' was selected but no repo was actually chosen
       else if (blockInputKey == 'repo_option') {
-        return {
+        throw {
           statusCode: 400,
           headers: { 'Content-Type': 'application/json' },
         };
