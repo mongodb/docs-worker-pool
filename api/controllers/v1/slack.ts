@@ -14,6 +14,7 @@ import {
   prepResponse,
 } from '../../handlers/slack';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
+import { Payload } from '../../../src/entities/job';
 
 export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -95,10 +96,6 @@ export const getDeployableJobs = async (
       const splitValues = values.repo_option[i].value.split('/');
       jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
 
-      if (splitValues.length === 1) {
-        [repoName] = splitValues;
-        //  get and set repoOwner, branchName here
-      }
       if (splitValues.length === 3) {
         // e.g. mongodb/docs-realm/master => (owner/repo/branch)
         [repoOwner, repoName, branchName] = splitValues;
@@ -120,11 +117,10 @@ export const getDeployableJobs = async (
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     if (!branchObject?.aliasObject) continue;
 
-    // TODO: Create strong typing for these rather than comments
-    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName;
-    let aliases = branchObject.aliasObject.urlAliases; // array or null
+    const publishOriginalBranchName: boolean = branchObject.aliasObject.publishOriginalBranchName;
+    const aliases: [] | null = branchObject.aliasObject.urlAliases;
     let urlSlug: string = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
-    const isStableBranch = !!branchObject.aliasObject.isStableBranch; // bool or Falsey
+    const isStableBranch = !!branchObject.aliasObject.isStableBranch; // bool or Falsey, add strong typing
 
     if (!urlSlug || !urlSlug.trim()) {
       urlSlug = branchName;
@@ -146,7 +142,6 @@ export const getDeployableJobs = async (
       directory
     );
 
-    aliases = aliases?.filter((a) => a);
     if (!aliases || aliases.length === 0) {
       if (non_versioned) {
         newPayload.urlSlug = '';
@@ -271,7 +266,7 @@ function createPayload(
   };
 }
 
-function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserEmail: string) {
+function createJob(payload: Payload, jobTitle: string, jobUserName: string, jobUserEmail: string) {
   return {
     title: jobTitle,
     user: jobUserName,
