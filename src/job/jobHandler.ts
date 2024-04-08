@@ -157,7 +157,9 @@ export abstract class JobHandler {
     // } else pathPrefix = prePrefix;
     if (pathPrefix || pathPrefix === '') {
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this.currJob.payload.mutPrefix = prePrefix;
+      //TODO: append something to pathPrefix and see if link and bucket path still function and correspond appropriately
+      this.currJob.payload.mutPrefix = prePrefix + '/slackDeploy';
+      // TODO: see what pathPrefix does, if having it not be an empty string changes something
       this.currJob.payload.pathPrefix = pathPrefix;
       this._logger.save(this.currJob._id, `${mutPrefix}, prePrefix: ${prePrefix}, server user: ${server_user}`);
     }
