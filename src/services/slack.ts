@@ -68,15 +68,16 @@ export class SlackConnector implements ISlackConnector {
 
     // if deploy all was selected:
     if (stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
-      if (isAdmin) {
-        values['deploy_option'] = 'deploy_all';
-        values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
-        return values;
-      } else
+      if (!isAdmin) {
         throw {
           statusCode: 401,
           headers: { 'Content-Type': 'application/json' },
         };
+      }
+
+      values['deploy_option'] = 'deploy_all';
+      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
+      return values;
     }
 
     //if deploy indivual repos was selected:
