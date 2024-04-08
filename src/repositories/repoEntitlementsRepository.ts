@@ -53,11 +53,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       query,
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${slackUserId}`
     );
-    if (entitlementsObject?.admin) {
-      return true;
-    } else {
-      return false;
-    }
+    return entitlementsObject?.admin;
   }
 
   async getGatsbySiteIdByGithubUsername(githubUsername: string): Promise<string | undefined> {

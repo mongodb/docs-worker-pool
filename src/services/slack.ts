@@ -24,7 +24,7 @@ function timeSafeCompare(a: string, b: string) {
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
   displayRepoOptions(repos: Array<string>, triggerId: string, admin: boolean): Promise<any>;
-  parseSelection(payload: any, entitlement: any, repoBranchesRepository: RepoBranchesRepository): any;
+  parseSelection(payload: any, isAdmin: boolean, repoBranchesRepository: RepoBranchesRepository): any;
   sendMessage(message: any, user: string): Promise<any>;
 }
 

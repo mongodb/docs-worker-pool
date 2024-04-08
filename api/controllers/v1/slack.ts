@@ -118,7 +118,7 @@ export const getDeployableJobs = async (
     if (!branchObject?.aliasObject) continue;
 
     const publishOriginalBranchName: boolean = branchObject.aliasObject.publishOriginalBranchName;
-    const aliases: [] | null = branchObject.aliasObject.urlAliases;
+    const aliases: string[] | null = branchObject.aliasObject.urlAliases;
     let urlSlug: string = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = !!branchObject.aliasObject.isStableBranch; // bool or Falsey, add strong typing
 
