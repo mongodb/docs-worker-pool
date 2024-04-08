@@ -157,7 +157,7 @@ export abstract class JobHandler {
     // } else pathPrefix = prePrefix;
     if (pathPrefix || pathPrefix === '') {
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this.currJob.payload.mutPrefix = `slackPrefix`;
+      this.currJob.payload.mutPrefix = prePrefix;
       this.currJob.payload.pathPrefix = pathPrefix;
       this._logger.save(this.currJob._id, `${mutPrefix}, prePrefix: ${prePrefix}, server user: ${server_user}`);
     }
