@@ -61,6 +61,12 @@ jobs:
             node_modules
             cdk-infra/node_modules
           key: ${{ github.head_ref }}
+      - name: Install Dependencies
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          cd cdk-infra/
+          npm ci
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -96,6 +102,12 @@ jobs:
             node_modules
             cdk-infra/node_modules
           key: ${{ github.head_ref }}
+      - name: Install Dependencies
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          cd cdk-infra/
+          npm ci
       - uses: dorny/paths-filter@v2
         id: filter
         with:
