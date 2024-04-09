@@ -2,7 +2,7 @@ import * as c from 'config';
 import * as mongodb from 'mongodb';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { PushEvent, WorkflowRunCompletedEvent } from '@octokit/webhooks-types';
-
+import { ECSClient, RunTaskCommand } from '@aws-sdk/client-ecs';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { ConsoleLogger } from '../../../src/services/logger';
 import { RepoBranchesRepository } from '../../../src/repositories/repoBranchesRepository';
@@ -181,6 +181,34 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
 
+  //TODO: I thought we wanted vpc, not subnets? should we be getting the vars from process.env in this way(taken from runcacherebuildjob)
+  //no overrides needed, correct?
+  async function runAdditionalECSTasks() {
+    const { TASK_DEFINITION, CONTAINER_NAME, CLUSTER, SUBNETS } = process.env;
+
+    if (!TASK_DEFINITION) throw new Error('ERROR! process.env.TASK_DEFINITION is not defined');
+    if (!CONTAINER_NAME) throw new Error('ERROR! process.env.CONTAINER_NAME is not defined');
+    if (!CLUSTER) throw new Error('ERROR! process.env.CLUSTER is not defined');
+    if (!SUBNETS) throw new Error('ERROR! process.env.SUBNETS is not defined');
+
+    const client = new ECSClient({
+      region: 'us-east-2',
+    });
+
+    const command = new RunTaskCommand({
+      taskDefinition: TASK_DEFINITION,
+      cluster: CLUSTER,
+      launchType: 'FARGATE',
+      networkConfiguration: {
+        awsvpcConfiguration: {
+          subnets: JSON.parse(SUBNETS),
+        },
+      },
+    });
+
+    await client.send(command);
+  }
+
   async function createAndInsertJob() {
     return await Promise.all(
       SMOKETEST_SITES.map(async (repoName): Promise<string> => {
@@ -216,6 +244,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
           jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
           consoleLogger.info(job.title, `Created Job ${jobId}`);
+          // runAdditionalECSTasks();
           return jobId;
         } catch (err) {
           consoleLogger.error('TriggerBuildError', `${err} Error inserting job for ${repoName}`);
