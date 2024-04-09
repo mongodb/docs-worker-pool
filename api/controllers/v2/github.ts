@@ -184,7 +184,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   async function createAndInsertJob() {
     return await Promise.all(
       SMOKETEST_SITES.map(async (repoName): Promise<string> => {
-        const jobTitle = 'Smoke Test ' + repoName;
+        const jobTitle = `Smoke Test ${repoName} site for commit ${body.workflow_run.head_sha} on docs-worker-pool main branch`;
         let repoInfo, projectEntry, repoOwner;
         try {
           repoInfo = await docsetsRepository.getRepo(repoName);
@@ -205,7 +205,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           prefix: jobPrefix,
           repoBranchesRepository,
           repoInfo,
-          newHead: body.workflow_run.head_sha,
           repoOwner,
         });
 

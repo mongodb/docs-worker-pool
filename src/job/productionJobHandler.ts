@@ -145,7 +145,9 @@ export class ProductionJobHandler extends JobHandler {
       ? `${this.currJob.payload.prefix}/${this.currJob.payload.urlSlug}`
       : this.currJob.payload.prefix;
     if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
-      return `smokeTestDeploys/${this.currJob.payload.newHead}/${prefix}`;
+      const titleArray = this.currJob.title.split(' ');
+      const commitHash = titleArray[titleArray.length - 5];
+      return `smokeTestDeploys/${commitHash}/${prefix}`;
     }
     return prefix;
   }
