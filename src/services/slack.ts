@@ -23,7 +23,7 @@ function timeSafeCompare(a: string, b: string) {
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
-  displayRepoOptions(repos: Array<string>, triggerId: string, admin: boolean): Promise<any>;
+  displayRepoOptions(repos: Array<string>, triggerId: string, isAdmin: boolean): Promise<any>;
   parseSelection(payload: any, isAdmin: boolean, repoBranchesRepository: RepoBranchesRepository): any;
   sendMessage(message: any, user: string): Promise<any>;
 }
@@ -90,7 +90,7 @@ export class SlackConnector implements ISlackConnector {
       if (stateValuesObj?.selected_options?.length > 0) {
         values[blockInputKey] = stateValuesObj.selected_options;
       }
-      //retrun an error if radio button choice 'deploy individual repos' was selected but no repo was actually chosen
+      //return an error if radio button choice 'deploy individual repos' was selected but no repo was actually chosen
       else if (blockInputKey == 'repo_option') {
         throw {
           statusCode: 400,
@@ -125,9 +125,9 @@ export class SlackConnector implements ISlackConnector {
     return false;
   }
 
-  async displayRepoOptions(repos: string[], triggerId: string, admin: boolean): Promise<any> {
+  async displayRepoOptions(repos: string[], triggerId: string, isAdmin: boolean): Promise<any> {
     const reposToShow = this._buildDropdown(repos);
-    const repoOptView = this._getDropDownView(triggerId, reposToShow, admin);
+    const repoOptView = this._getDropDownView(triggerId, reposToShow, isAdmin);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {
@@ -137,8 +137,8 @@ export class SlackConnector implements ISlackConnector {
       },
     });
   }
-  private _getDropDownView(triggerId: string, repos: Array<any>, admin: boolean) {
-    const deployAll = admin
+  private _getDropDownView(triggerId: string, repos: Array<any>, isAdmin: boolean) {
+    const deployAll = isAdmin
       ? {
           type: 'section',
           block_id: 'block_deploy_option',

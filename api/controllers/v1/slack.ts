@@ -46,10 +46,10 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
     return prepResponse(401, 'text/plain', response);
   }
 
-  const admin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
+  const isAdmin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
 
   const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
-  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], admin);
+  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
   if (resp?.status == 200 && resp?.data) {
     return {
       statusCode: 200,
@@ -203,7 +203,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const stateValues = parsed.view.state.values;
 
   //TODO: create an interface for slack view_submission payloads
-  if (!(parsed.type == 'view_submission')) {
+  if (parsed.type !== 'view_submission') {
     return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
   }
 
