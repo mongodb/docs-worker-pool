@@ -149,14 +149,16 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
-    const prePrefix = this.getPathPrefix();
-    const pathPrefix = '';
+    const pathPrefix = this.getPathPrefix();
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      this.currJob.payload.mutPrefix = prePrefix + '/slackDeploy';
-      this._logger.save(this.currJob._id, `${mutPrefix}, prePrefix: ${prePrefix}, server user: ${server_user}`);
+      this.currJob.payload.mutPrefix = mutPrefix + '/slackDeploy';
+      this._logger.save(
+        this.currJob._id,
+        `mutPrefix split ${mutPrefix}, mutPrefix: ${this.currJob.payload.mutPrefix}, prePrefix: ${pathPrefix}, server user: ${server_user}`
+      );
     }
   }
 
