@@ -38,7 +38,12 @@ async function main() {
   const stackName = `auto-builder-stack-${getFeatureName()}`;
 
   const queues = new AutoBuilderQueueStack(app, `${stackName}-queues`, { env });
-  const { clusterName } = new WorkerStack(app, `${stackName}-worker`, { queues, workerSecureStrings, vpc, env });
+  const { clusterName, taskDefinition } = new WorkerStack(app, `${stackName}-worker`, {
+    queues,
+    workerSecureStrings,
+    vpc,
+    env,
+  });
 
   // TODO: Pass the VPC as a prop here like the queues or clusterName
   // TODO: Pass the task definition that will be added from the Worker stack
@@ -47,6 +52,8 @@ async function main() {
     clusterName,
     webhookSecureStrings,
     env,
+    vpc,
+    taskDefinition,
   });
 
   new CacheUpdaterStack(app, `${stackName}-cache`, {
