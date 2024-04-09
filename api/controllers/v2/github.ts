@@ -54,8 +54,8 @@ interface CreatePayloadProps {
   repoInfo: ReposBranchesDocsetsDocument;
   newHead?: string;
   repoOwner?: string;
-  directory?: string;
   githubEvent?: PushEvent;
+  directory?: string;
 }
 
 async function createPayload({
@@ -205,6 +205,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           prefix: jobPrefix,
           repoBranchesRepository,
           repoInfo,
+          newHead: body.workflow_run.head_sha,
           repoOwner,
         });
 
