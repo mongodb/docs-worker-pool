@@ -4,6 +4,7 @@ import { WorkerConstruct } from '../constructs/worker/worker-construct';
 import { WorkerEnvConstruct } from '../constructs/worker/worker-env-construct';
 import { WorkerBucketsConstruct } from '../constructs/worker/buckets-construct';
 import { AutoBuilderQueues } from './auto-builder-queue-stack';
+import { TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
 
 interface WorkerStackProps extends StackProps {
@@ -16,6 +17,7 @@ export class WorkerStack extends Stack {
   // TODO: Create the task definition as properties here so
   // that they are accessible to the webhook stack
   public readonly clusterName: string;
+  public readonly taskDefinition: TaskDefinition;
 
   constructor(scope: Construct, id: string, { queues, workerSecureStrings, vpc, ...props }: WorkerStackProps) {
     super(scope, id, props);
@@ -27,7 +29,7 @@ export class WorkerStack extends Stack {
 
     // TODO: retrieve the task definition from this stack as it is required
     // for the RunTask in the smoke test build
-    const { clusterName, ecsTaskRole } = new WorkerConstruct(this, 'worker', {
+    const { clusterName, ecsTaskRole, taskDefinition } = new WorkerConstruct(this, 'worker', {
       vpc,
       dockerEnvironment: environment,
       ...queues,
@@ -40,6 +42,7 @@ export class WorkerStack extends Stack {
 
     // TODO: Assign the task definition as properties here so
     // that they are accessible to the webhook stack
+    this.taskDefinition = taskDefinition;
     this.clusterName = clusterName;
   }
 }

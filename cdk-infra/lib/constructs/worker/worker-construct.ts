@@ -6,6 +6,7 @@ import {
   FargateService,
   FargateTaskDefinition,
   LogDrivers,
+  TaskDefinition,
 } from 'aws-cdk-lib/aws-ecs';
 import { Effect, IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
@@ -23,6 +24,7 @@ interface WorkerConstructProps {
 export class WorkerConstruct extends Construct {
   readonly ecsTaskRole: IRole;
   readonly clusterName: string;
+  readonly taskDefinition: TaskDefinition;
 
   constructor(
     scope: Construct,
@@ -112,6 +114,7 @@ export class WorkerConstruct extends Construct {
       maxHealthyPercent: 200,
     });
 
+    this.taskDefinition = taskDefinition;
     this.clusterName = cluster.clusterName;
     this.ecsTaskRole = taskRole;
   }
