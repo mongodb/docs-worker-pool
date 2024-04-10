@@ -149,19 +149,13 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
-    const prePrefix = await this.getPathPrefix();
-    const pathPrefix = '';
-    // let pathPrefix;
-    // if (this.currJob.payload.newHead && this.currJob.payload.action == 'automatedTest') {
-    //   pathPrefix = `${prePrefix}/${this.currJob.payload.newHead}`;
-    // } else pathPrefix = prePrefix;
+    const pathPrefix = await this.getPathPrefix();
+    // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
-      const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
-      //TODO: append something to pathPrefix and see if link and bucket path still function and correspond appropriately
-      this.currJob.payload.mutPrefix = prePrefix + '/slackDeploy';
-      // TODO: see what pathPrefix does, if having it not be an empty string changes something
       this.currJob.payload.pathPrefix = pathPrefix;
-      this._logger.save(this.currJob._id, `${mutPrefix}, prePrefix: ${prePrefix}, server user: ${server_user}`);
+      //sets mutPrefix to the full pathPrefix unless server user is in the path (I believe this only happens in a subset of cases when docs-worker-xlarge is the server-user)
+      const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
+      this.currJob.payload.mutPrefix = mutPrefix;
     }
   }
 
