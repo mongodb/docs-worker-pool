@@ -147,7 +147,7 @@ export class ProductionJobHandler extends JobHandler {
     if (this.currJob.payload.action == 'automatedTest') {
       const titleArray = this.currJob.title.split(' ');
       const commitHash = titleArray[titleArray.length - 5];
-      return `smokeTestDeploys/${commitHash}/${prefix}`;
+      return `${prefix}/${commitHash}`;
     }
     return prefix;
   }
