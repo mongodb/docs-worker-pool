@@ -1,8 +1,8 @@
 FROM arm64v8/ubuntu:20.04 as initial
 ARG NPM_BASE_64_AUTH
 ARG NPM_EMAIL
-ARG SNOOTY_PARSER_VERSION=0.15.2
-ARG SNOOTY_FRONTEND_VERSION=0.15.7
+ARG SNOOTY_PARSER_VERSION=0.16.4
+ARG SNOOTY_FRONTEND_VERSION=0.16.8
 ARG MUT_VERSION=0.10.7
 ARG REDOC_CLI_VERSION=1.2.3
 ARG NPM_BASE_64_AUTH
@@ -24,6 +24,8 @@ RUN apt-get install --yes build-essential
 RUN apt-get install --yes python3-pip libxml2-dev libxslt-dev python-dev pkg-config
 
 
+
+
 RUN python3 -m pip install poetry
 
 # install snooty parser
@@ -43,16 +45,32 @@ RUN git clone -b v${MUT_VERSION} --depth 1 https://github.com/mongodb/mut.git \
 
 ENV PATH="${PATH}:/opt/snooty:/opt/mut:/${WORK_DIRECTORY}/.local/bin"
 
+
+
 # setup user and root directory
 RUN useradd -ms /bin/bash docsworker-xlarge
 RUN chmod 755 -R ${WORK_DIRECTORY}
 RUN chown -Rv docsworker-xlarge ${WORK_DIRECTORY}
+
 USER docsworker-xlarge
+
+# Get Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+RUN chmod -R 777 ${WORK_DIRECTORY}/.cargo/bin
+
+ENV PATH="${WORK_DIRECTORY}/.cargo/bin:${PATH}"
+RUN echo ${WORK_DIRECTORY}
+
 
 # install snooty frontend and docs-tools
 RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
-    && npm ci --legacy-peer-deps --omit=dev                                                        
+    && npm ci --legacy-peer-deps \
+    && cd component-factory-transformer \
+    && cargo build \
+    && rustup target add wasm32-wasi \
+    && npm run prepublishOnly                                                        
 
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
@@ -61,7 +79,7 @@ RUN git clone -b @dop/redoc-cli@${REDOC_CLI_VERSION} --depth 1 https://github.co
     # Install dependencies for Redoc CLI
     && cd redoc/ \
     && npm ci --prefix cli/ --omit=dev
-    
+
 FROM initial as persistence
 
 RUN mkdir -p modules/persistence && chmod 755 modules/persistence
