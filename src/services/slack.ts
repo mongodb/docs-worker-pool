@@ -69,10 +69,7 @@ export class SlackConnector implements ISlackConnector {
     // if deploy all was selected:
     if (stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
       if (!isAdmin) {
-        throw {
-          statusCode: 401,
-          headers: { 'Content-Type': 'application/json' },
-        };
+        throw new Error('User is not an admin and therefore not entitled to deploy all repos');
       }
 
       values['deploy_option'] = 'deploy_all';
@@ -92,10 +89,7 @@ export class SlackConnector implements ISlackConnector {
       }
       //return an error if radio button choice 'deploy individual repos' was selected but no repo was actually chosen
       else if (blockInputKey == 'repo_option') {
-        throw {
-          statusCode: 400,
-          headers: { 'Content-Type': 'application/json' },
-        };
+        throw new Error('Deploy individual repos was selected but no repo was actually chosen to be deployed');
       }
       // input value
       else if (stateValuesObj?.value) {
