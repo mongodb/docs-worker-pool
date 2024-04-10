@@ -25,6 +25,7 @@ jobs:
           aws-region: us-east-2
       - name: Deploy Enhanced Infrastructure
         run: |
+          npm ci
           cd cdk-infra/
           npm ci
           npm run deploy:feature:stack -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg auto-builder-stack-enhancedApp-dotcomstg-worker
