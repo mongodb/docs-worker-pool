@@ -218,7 +218,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
     values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
   } catch (e) {
     console.log(`Error parsing selection: ${e}`);
-    return e;
+    return prepResponse(401, 'text/plain', e);
   }
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
 
