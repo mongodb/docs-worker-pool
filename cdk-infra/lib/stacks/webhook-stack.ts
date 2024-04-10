@@ -19,7 +19,7 @@ export class WebhookStack extends Stack {
   constructor(
     scope: Construct,
     id: string,
-    { queues, webhookSecureStrings, clusterName, ...props }: WebhookStackProps
+    { queues, webhookSecureStrings, clusterName, vpc, taskDefinition, ...props }: WebhookStackProps
   ) {
     super(scope, id, props);
 
@@ -30,6 +30,8 @@ export class WebhookStack extends Stack {
 
     new WebhookApiConstruct(this, 'api', {
       ...queues,
+      vpc,
+      taskDefinition,
       environment: { ...webhookEnvironment, TASK_DEFINITION_FAMILY: clusterName },
     });
   }

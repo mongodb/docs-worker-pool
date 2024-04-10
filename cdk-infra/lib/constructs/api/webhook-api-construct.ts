@@ -7,6 +7,8 @@ import { IQueue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import path from 'path';
 import { getFeatureName } from '../../../utils/env';
+import { IVpc } from 'aws-cdk-lib/aws-ec2';
+import { TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 const HANDLERS_PATH = path.join(__dirname, '/../../../../api/controllers/v2');
 
@@ -31,10 +33,16 @@ interface WebhookApiConstructProps {
   jobsQueue: IQueue;
   jobUpdatesQueue: IQueue;
   environment: Record<string, string>;
+  vpc: IVpc;
+  taskDefinition: TaskDefinition;
 }
 
 export class WebhookApiConstruct extends Construct {
-  constructor(scope: Construct, id: string, { jobsQueue, jobUpdatesQueue, environment }: WebhookApiConstructProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    { jobsQueue, jobUpdatesQueue, environment, vpc, taskDefinition }: WebhookApiConstructProps
+  ) {
     super(scope, id);
 
     const timeout = Duration.minutes(2);
@@ -79,9 +87,15 @@ export class WebhookApiConstruct extends Construct {
       runtime,
       handler: 'triggerSmokeTestAutomatedBuild',
       bundling,
-      environment,
+      environment: {
+        TASK_DEFINITION: taskDefinition.taskDefinitionArn,
+        SUBNETS: JSON.stringify(vpc.privateSubnets.map((subnet) => subnet.subnetId)),
+        ...environment,
+      },
       timeout,
     });
+
+    taskDefinition.grantRun(githubSmokeTestBuildLambda);
 
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
       entry: `${HANDLERS_PATH}/github.ts`,

@@ -181,13 +181,10 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
 
-  //TODO: I thought we wanted vpc, not subnets? should we be getting the vars from process.env in this way(taken from runcacherebuildjob)
-  //no overrides needed, correct?
   async function runAdditionalECSTasks() {
-    const { TASK_DEFINITION, CONTAINER_NAME, CLUSTER, SUBNETS } = process.env;
+    const { TASK_DEFINITION, CLUSTER, SUBNETS } = process.env;
 
     if (!TASK_DEFINITION) throw new Error('ERROR! process.env.TASK_DEFINITION is not defined');
-    if (!CONTAINER_NAME) throw new Error('ERROR! process.env.CONTAINER_NAME is not defined');
     if (!CLUSTER) throw new Error('ERROR! process.env.CLUSTER is not defined');
     if (!SUBNETS) throw new Error('ERROR! process.env.SUBNETS is not defined');
 
