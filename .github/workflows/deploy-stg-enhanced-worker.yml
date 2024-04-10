@@ -1,10 +1,9 @@
 on:
   push:
-    # paths: ['src/**', 'cdk-infra/lib/constructs/worker/**', 'Dockerfile', 'modules/**']
+    paths: ['src/**', 'cdk-infra/lib/constructs/worker/**', 'Dockerfile', 'modules/**']
     branches:
       - 'main'
       - 'integration'
-      - 'DOP-4414'
 concurrency:
   group: environment-stg-enhanced-worker-${{ github.ref }}
   cancel-in-progress: true
