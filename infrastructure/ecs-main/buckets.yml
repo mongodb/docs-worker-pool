@@ -85,11 +85,23 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/php-library/upcoming
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/realm
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/realm/sdk
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/device-sdks
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/device-sdks/sdk
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/realm/web
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/device-sdks/web
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/realm/studio
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/device-sdks/studio
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
     Properties:
