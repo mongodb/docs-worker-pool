@@ -242,7 +242,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
           jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
           consoleLogger.info(job.title, `Created Job ${jobId}`);
-          // runAdditionalECSTasks();
+          runAdditionalECSTasks();
           return jobId;
         } catch (err) {
           consoleLogger.error('TriggerBuildError', `${err} Error inserting job for ${repoName}`);
