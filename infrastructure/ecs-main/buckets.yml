@@ -186,6 +186,13 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
+          RoutingRules:
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/languages/
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/languages
 
   DocsBucketPolicy:
     Type: AWS::S3::BucketPolicy
