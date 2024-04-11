@@ -71,55 +71,24 @@ jobs:
         id: filter
         with:
           filters: |
-            webhooks:
-              - 'api/**'
-              - 'cdk-infra/lib/constructs/api/**'
-              - 'cdk-infra/utils/**'
-      - name: Update Webhook Stack
-        if: steps.filter.outputs.webhooks == 'true'
-        run: |
-          cd cdk-infra/
-          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
-            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
-  build-worker:
-    needs: prep-build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
-      - uses: actions/cache/restore@v3
-        id: cache-restore
-        with:
-          path: |
-            node_modules
-            cdk-infra/node_modules
-          key: ${{ github.head_ref }}
-      - name: Install Dependencies
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        run: |
-          npm ci
-          cd cdk-infra/
-          npm ci
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
             worker:
               - 'src/!(cache-updater/**)/**'
               - 'cdk-infra/lib/constructs/worker/**'
               - 'Dockerfile'
               - 'modules/**'
+            webhooks:
+              - 'api/**'
+              - 'cdk-infra/lib/constructs/api/**'
+              - 'cdk-infra/utils/**'
       - name: Update Worker Stack
         if: steps.filter.outputs.worker == 'true'
         run: |
           cd cdk-infra/
           npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
             auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
+      - name: Update Webhook Stack
+        if: steps.filter.outputs.webhooks == 'true'
+        run: |
+          cd cdk-infra/
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
+            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
