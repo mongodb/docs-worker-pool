@@ -149,7 +149,7 @@ export abstract class JobHandler {
   @throwIfJobInterupted()
   private async constructPrefix(): Promise<void> {
     const server_user = this._config.get<string>('GATSBY_PARSER_USER');
-    const pathPrefix = await this.getPathPrefix();
+    const pathPrefix = this.getPathPrefix();
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
@@ -401,6 +401,12 @@ export abstract class JobHandler {
       envVars += `PATH_PREFIX=${pathPrefix}\n`;
     }
     const snootyFrontEndVars = {
+      // Setting this to always be true. It's one less SSM parameter to manage,
+      // and it doesn't hurt to always do the filtering. The only reason
+      // it exists here is so that we don't always filter when testing locally.
+      // This is because the filter functionality updates the ComponentFactory.js file
+      // which could be accidentally committed if run locally.
+      USE_FILTER_BRANCH: true,
       GATSBY_BASE_URL: this._config.get<string>('gatsbyBaseUrl'),
       PREVIEW_BUILD_ENABLED: this._config.get<string>('previewBuildEnabled'),
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),

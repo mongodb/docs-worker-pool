@@ -4,7 +4,6 @@ on:
     branches:
       - 'main'
       - 'integration'
-
 concurrency:
   group: environment-stg-enhanced-worker-${{ github.ref }}
   cancel-in-progress: true
@@ -25,6 +24,7 @@ jobs:
           aws-region: us-east-2
       - name: Deploy Enhanced Infrastructure
         run: |
+          npm ci
           cd cdk-infra/
           npm ci
           npm run deploy:feature:stack -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg auto-builder-stack-enhancedApp-dotcomstg-worker

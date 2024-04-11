@@ -54,8 +54,8 @@ interface CreatePayloadProps {
   repoInfo: ReposBranchesDocsetsDocument;
   newHead?: string;
   repoOwner?: string;
-  directory?: string;
   githubEvent?: PushEvent;
+  directory?: string;
 }
 
 async function createPayload({
@@ -169,14 +169,15 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
     };
 
   // if the build was not building main branch, no need for smoke test sites
-  // if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
-  //   console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
-  //   return {
-  //     statusCode: 202,
-  //     headers: { 'Content-Type': 'text/plain' },
-  //     body: `Build on branch ${body.workflow_run.head_branch} will not trigger site deployments as it was not on main branch in upstream repo`,
-  //   };
-  // }
+
+  if (body.workflow_run.head_branch != 'main' || body.repository.fork) {
+    console.log('Build was not on master branch in main repo, sites will not deploy as no smoke tests are needed');
+    return {
+      statusCode: 202,
+      headers: { 'Content-Type': 'text/plain' },
+      body: `Build on branch ${body.workflow_run.head_branch} will not trigger site deployments as it was not on main branch in upstream repo`,
+    };
+  }
 
   //automated test builds will always deploy in dotcomstg
   const env = 'dotcomstg';
@@ -209,7 +210,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   async function createAndInsertJob() {
     return await Promise.all(
       SMOKETEST_SITES.map(async (repoName): Promise<string> => {
-        const jobTitle = 'Smoke Test ' + repoName;
+        const jobTitle = `Smoke Test ${repoName} site for commit ${body.workflow_run.head_sha} on docs-worker-pool main branch`;
         let repoInfo, projectEntry, repoOwner;
         try {
           repoInfo = await docsetsRepository.getRepo(repoName);
@@ -254,7 +255,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
   try {
     const returnVal = await createAndInsertJob();
     // run tasks here
-
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
