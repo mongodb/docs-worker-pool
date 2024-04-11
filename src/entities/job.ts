@@ -64,7 +64,7 @@ export type EnhancedPayload = {
   action: string;
   repoName: string;
   branchName: string;
-  isFork: boolean;
+  isFork?: boolean;
   isXlarge?: boolean | null;
   repoOwner: string;
   url: string;
@@ -131,7 +131,7 @@ export type EnhancedJob = {
   buildCommands?: string[];
   deployCommands?: string[];
   invalidationStatusURL?: string | null;
-  email: string | null; // probably can be removed
+  email?: string | null; // probably can be removed
   comMessage?: string[] | null;
   purgedUrls?: string[] | null;
   shouldGenerateSearchManifest?: boolean;

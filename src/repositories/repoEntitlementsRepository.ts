@@ -82,7 +82,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${slackUserId}`
     );
     // if user has specific entitlements
-    if ((entitlementsObject?.repos?.length ?? 0) > 0) {
+    if (entitlementsObject?.repos?.length) {
       return {
         repos: entitlementsObject.repos,
         github_username: entitlementsObject.github_username,
