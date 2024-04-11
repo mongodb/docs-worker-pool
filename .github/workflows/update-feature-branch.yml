@@ -81,14 +81,6 @@ jobs:
               - 'cdk-infra/lib/constructs/api/**'
               - 'cdk-infra/utils/**'
       - name: Update Worker Stack
-        if: steps.filter.outputs.worker == 'true'
         run: |
           cd cdk-infra/
-          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
-            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
-      - name: Update Webhook Stack
-        if: steps.filter.outputs.webhooks == 'true'
-        run: |
-          cd cdk-infra/
-          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
-            auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
+          npm run deploy:feature -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}}
