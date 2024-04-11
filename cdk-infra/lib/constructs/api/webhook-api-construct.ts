@@ -74,6 +74,15 @@ export class WebhookApiConstruct extends Construct {
       timeout,
     });
 
+    const githubSmokeTestBuildLambda = new NodejsFunction(this, 'githubSmokeTestBuildLambda', {
+      entry: `${HANDLERS_PATH}/github.ts`,
+      runtime,
+      handler: 'triggerSmokeTestAutomatedBuild',
+      bundling,
+      environment,
+      timeout,
+    });
+
     const githubDeleteArtifactsLambda = new NodejsFunction(this, 'githubDeleteArtifactsLambda', {
       entry: `${HANDLERS_PATH}/github.ts`,
       runtime,
@@ -160,6 +169,11 @@ export class WebhookApiConstruct extends Construct {
       .addResource('build', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubTriggerLambda));
 
+    // add endpoint for automated testing
+    githubEndpointTrigger
+      .addResource('smoke-test-build', { defaultCorsPreflightOptions })
+      .addMethod('POST', new LambdaIntegration(githubSmokeTestBuildLambda));
+
     githubEndpointTrigger
       .addResource('delete', { defaultCorsPreflightOptions })
       .addMethod('POST', new LambdaIntegration(githubDeleteArtifactsLambda));
@@ -176,11 +190,13 @@ export class WebhookApiConstruct extends Construct {
 
     // grant permission for lambdas to enqueue messages to the jobs queue
     jobsQueue.grantSendMessages(slackTriggerLambda);
+    jobsQueue.grantSendMessages(githubSmokeTestBuildLambda);
     jobsQueue.grantSendMessages(githubTriggerLambda);
     jobsQueue.grantSendMessages(triggerLocalBuildLambda);
 
     // grant permission for lambdas to enqueue messages to the job updates queue
     jobUpdatesQueue.grantSendMessages(slackTriggerLambda);
+    jobUpdatesQueue.grantSendMessages(githubSmokeTestBuildLambda);
     jobUpdatesQueue.grantSendMessages(githubTriggerLambda);
     jobUpdatesQueue.grantSendMessages(triggerLocalBuildLambda);
 

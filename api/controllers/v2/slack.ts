@@ -6,7 +6,7 @@ import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { JobStatus } from '../../../src/entities/job';
+import { EnhancedPayload, JobStatus } from '../../../src/entities/job';
 import {
   buildEntitledBranchList,
   getQSString,
@@ -256,7 +256,7 @@ function createPayload(
   };
 }
 
-function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserEmail: string) {
+function createJob(payload: EnhancedPayload, jobTitle: string, jobUserName: string, jobUserEmail: string) {
   return {
     title: jobTitle,
     user: jobUserName,
