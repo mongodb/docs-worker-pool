@@ -47,6 +47,15 @@ export class RepoEntitlementsRepository extends BaseRepository {
     }
   }
 
+  async getIsAdmin(slackUserId: string): Promise<boolean> {
+    const query = { slack_user_id: slackUserId };
+    const entitlementsObject = await this.findOne(
+      query,
+      `Mongo Timeout Error: Timedout while retrieving entitlements for ${slackUserId}`
+    );
+    return entitlementsObject?.admin;
+  }
+
   async getGatsbySiteIdByGithubUsername(githubUsername: string): Promise<string | undefined> {
     return this.getBuildHookByGithubUsername(githubUsername, 'gatsby_site_id');
   }
