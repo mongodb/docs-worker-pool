@@ -1,9 +1,9 @@
 on:
   push:
-    paths: ["api/v2/**", "cdk-infra/lib/constructs/api/**", "cdk-infra/utils/**"]
+    paths: ['api/**', 'cdk-infra/lib/constructs/api/**', 'cdk-infra/utils/**']
     branches:
-      - "main"
-      - "integration"
+      - 'main'
+      - 'integration'
 
 concurrency:
   group: environment-stg-enhanced-webhooks-${{ github.ref }}
@@ -30,4 +30,3 @@ jobs:
           npm ci
           npm run deploy:feature:stack -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg auto-builder-stack-enhancedApp-dotcomstg-webhooks
           npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg auto-builder-stack-enhancedApp-stg-webhooks
-
