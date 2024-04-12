@@ -6,7 +6,7 @@ import { ConsoleLogger, ILogger } from '../../../src/services/logger';
 import { SlackConnector } from '../../../src/services/slack';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { JobStatus } from '../../../src/entities/job';
+import { EnhancedPayload, JobStatus } from '../../../src/entities/job';
 import {
   buildEntitledBranchList,
   getQSString,
@@ -20,6 +20,10 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
 
+  if (!slackConnector.validateSlackRequest(event)) {
+    return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
+  }
+
   if (!event.body) {
     return {
       statusCode: 400,
@@ -27,9 +31,6 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
     };
   }
 
-  if (!slackConnector.validateSlackRequest(event)) {
-    return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
-  }
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
@@ -44,8 +45,11 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
       : 'User is not entitled!';
     return prepResponse(401, 'text/plain', response);
   }
+
+  const admin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
+
   const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
-  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id']);
+  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], admin);
   if (resp?.status == 200 && resp?.data) {
     return {
       statusCode: 200,
@@ -194,6 +198,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
+
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
@@ -209,7 +214,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
-  const values = slackConnector.parseSelection(stateValues);
+  const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {
@@ -256,7 +261,7 @@ function createPayload(
   };
 }
 
-function createJob(payload: any, jobTitle: string, jobUserName: string, jobUserEmail: string) {
+function createJob(payload: EnhancedPayload, jobTitle: string, jobUserName: string, jobUserEmail: string) {
   return {
     title: jobTitle,
     user: jobUserName,
