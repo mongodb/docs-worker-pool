@@ -187,9 +187,8 @@ export const getDeployableJobs = async (
 export const DeployRepo = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-  consoleLogger.info('deployRepo 190', 'testing request reveived');
+  consoleLogger.info('deployRepo 190', 'testing request received');
   consoleLogger.info('event', JSON.stringify(event));
-  consoleLogger.info('payload view', event.body.payload.view);
 
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
