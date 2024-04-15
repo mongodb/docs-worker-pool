@@ -187,10 +187,13 @@ export const getDeployableJobs = async (
 export const DeployRepo = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
+  consoleLogger.info('deployRepo 190', 'testing request reveived');
+  consoleLogger.info('event', event);
+
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
-  consoleLogger.info('deployRepo', 'testing deploy repo ');
+  consoleLogger.info('deployRepo 195', 'testing slack validation passed');
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
