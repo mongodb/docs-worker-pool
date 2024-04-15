@@ -83,6 +83,7 @@ jobs:
       - name: Update Worker Stack
         run: |
           cd cdk-infra/
+          npm run cdk destroy -- -c customFeatureName=enhancedApp-stg-${{github.head_ref}} --force auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-webhooks
           npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
           auto-builder-stack-enhancedApp-stg-${{github.head_ref}}-worker
           npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=stg -c customFeatureName=enhancedApp-stg-${{github.head_ref}} \
