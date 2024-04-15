@@ -188,7 +188,8 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   consoleLogger.info('deployRepo 190', 'testing request reveived');
-  consoleLogger.info('event', event);
+  consoleLogger.info('event', JSON.stringify(event));
+  consoleLogger.info('payload view', event.body.payload.view);
 
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
@@ -207,6 +208,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
+  consoleLogger.info('payload view', parsed.view);
 
   //TODO: create an interface for slack view_submission payloads
   if (parsed.type !== 'view_submission') {
