@@ -228,6 +228,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
+    body: 'success!',
   };
 };
 

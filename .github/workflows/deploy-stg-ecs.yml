@@ -2,8 +2,8 @@ on:
   push:
     branches:
       - "main"
+      - "DOP-4549"
       - "integration"
-      - "DOP-4504"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
