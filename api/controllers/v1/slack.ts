@@ -20,6 +20,8 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
 
+  consoleLogger.info('deployRepo', 'testing display repo options');
+
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
@@ -188,6 +190,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
+  consoleLogger.info('deployRepo', 'testing deploy repo ');
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
