@@ -198,7 +198,7 @@ export class SlackConnector implements ISlackConnector {
         blocks: [
           {
             type: 'input',
-            dispatch_action: 'true',
+            // dispatch_action: 'true',
             block_id: 'block_repo_option',
             element: {
               type: 'multi_static_select',
