@@ -20,6 +20,8 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
 
+  consoleLogger.info('deployRepo', 'testing display repo options');
+
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
@@ -236,7 +238,7 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
   }
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-
+  consoleLogger.info('deployRepo', 'testing Deploy Repo');
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
