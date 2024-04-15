@@ -4,7 +4,6 @@ on:
     branches:
       - 'main'
       - 'integration'
-      - "DOP-4451"
 concurrency:
   group: environment-stg-enhanced-worker-${{ github.ref }}
   cancel-in-progress: true
