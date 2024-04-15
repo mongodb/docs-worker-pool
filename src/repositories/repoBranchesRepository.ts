@@ -1,4 +1,4 @@
-import { Db } from 'mongodb';
+import { Document, Db } from 'mongodb';
 import { BaseRepository } from './baseRepository';
 import { ILogger } from '../services/logger';
 import { IConfig } from 'config';
@@ -30,6 +30,13 @@ export class RepoBranchesRepository extends BaseRepository {
     );
     // if user has specific entitlements
     return repo?.['branches'] ?? [];
+  }
+
+  async getProdDeployableRepoBranches(): Promise<Document[]> {
+    const reposArray = await this._collection
+      .aggregate([{ $match: { prodDeployable: true, internalOnly: false } }, { $project: { _id: 0, repoName: 1 } }])
+      .toArray();
+    return reposArray ?? [];
   }
 
   async getRepoBranchAliases(repoName: string, branchName: string, project: string): Promise<any> {

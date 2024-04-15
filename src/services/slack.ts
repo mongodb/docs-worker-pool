@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
 import * as crypto from 'crypto';
+import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 export const axiosApi = axios.create();
 
 function bufferEqual(a: Buffer, b: Buffer) {
@@ -22,8 +23,8 @@ function timeSafeCompare(a: string, b: string) {
 
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
-  displayRepoOptions(repos: Array<string>, triggerId: string): Promise<any>;
-  parseSelection(payload: any): any;
+  displayRepoOptions(repos: Array<string>, triggerId: string, isAdmin: boolean): Promise<any>;
+  parseSelection(payload: any, isAdmin: boolean, repoBranchesRepository: RepoBranchesRepository): any;
   sendMessage(message: any, user: string): Promise<any>;
 }
 
@@ -52,24 +53,43 @@ export class SlackConnector implements ISlackConnector {
     }
     return {};
   }
-  parseSelection(stateValues: any): any {
+
+  async parseSelection(
+    stateValues: any,
+    isAdmin: boolean,
+    repoBranchesRepository: RepoBranchesRepository
+  ): Promise<any> {
     const values = {};
     const inputMapping = {
       block_repo_option: 'repo_option',
       block_hash_option: 'hash_option',
+      block_deploy_option: 'deploy_option',
     };
 
+    // if deploy all was selected:
+    if (stateValues['block_deploy_option']['deploy_option']?.selected_option?.value == 'deploy_all') {
+      if (!isAdmin) {
+        throw new Error('User is not an admin and therefore not entitled to deploy all repos');
+      }
+
+      values['deploy_option'] = 'deploy_all';
+      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
+      return values;
+    }
+
+    //if deploy indivual repos was selected:
     // get key and values to figure out what user wants to deploy
     for (const blockKey in inputMapping) {
       const blockInputKey = inputMapping[blockKey];
       const stateValuesObj = stateValues[blockKey][blockInputKey];
-      // selected value from dropdown
-      if (stateValuesObj?.selected_option?.value) {
-        values[blockInputKey] = stateValuesObj.selected_option.value;
-      }
+
       // multi select is an array
-      else if (stateValuesObj?.selected_options && stateValuesObj.selected_options.length > 0) {
+      if (stateValuesObj?.selected_options?.length > 0) {
         values[blockInputKey] = stateValuesObj.selected_options;
+      }
+      //return an error if radio button choice 'deploy individual repos' was selected but no repo was actually chosen
+      else if (blockInputKey == 'repo_option') {
+        throw new Error('Deploy individual repos was selected but no repo was actually chosen to be deployed');
       }
       // input value
       else if (stateValuesObj?.value) {
@@ -99,8 +119,9 @@ export class SlackConnector implements ISlackConnector {
     return false;
   }
 
-  async displayRepoOptions(repos: string[], triggerId: string): Promise<any> {
-    const repoOptView = this._buildDropdown(repos, triggerId);
+  async displayRepoOptions(repos: string[], triggerId: string, isAdmin: boolean): Promise<any> {
+    const reposToShow = this._buildDropdown(repos);
+    const repoOptView = this._getDropDownView(triggerId, reposToShow, isAdmin);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {
@@ -110,8 +131,51 @@ export class SlackConnector implements ISlackConnector {
       },
     });
   }
+  private _getDropDownView(triggerId: string, repos: Array<any>, isAdmin: boolean) {
+    const deployAll = isAdmin
+      ? {
+          type: 'section',
+          block_id: 'block_deploy_option',
+          text: {
+            type: 'plain_text',
+            text: 'How would you like to deploy docs sites?',
+          },
+          accessory: {
+            type: 'radio_buttons',
+            action_id: 'deploy_option',
+            initial_option: {
+              value: 'deploy_individually',
+              text: {
+                type: 'plain_text',
+                text: 'Deploy individual repos',
+              },
+            },
+            options: [
+              {
+                value: 'deploy_individually',
+                text: {
+                  type: 'plain_text',
+                  text: 'Deploy individual repos',
+                },
+              },
+              {
+                value: 'deploy_all',
+                text: {
+                  type: 'plain_text',
+                  text: 'Deploy all repos',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: ' ',
+          },
+        };
 
-  private _getDropDownView(triggerId: string, repos: Array<any>) {
     return {
       trigger_id: triggerId,
       view: {
@@ -145,6 +209,7 @@ export class SlackConnector implements ISlackConnector {
               },
               options: repos,
             },
+            optional: true,
             label: {
               type: 'plain_text',
               text: 'Select Repo',
@@ -168,12 +233,13 @@ export class SlackConnector implements ISlackConnector {
               text: 'Commit Hash',
             },
           },
+          deployAll,
         ],
       },
     };
   }
 
-  private _buildDropdown(branches: Array<string>, triggerId: string): any {
+  private _buildDropdown(branches: Array<string>): Array<any> {
     let reposToShow: Array<any> = [];
     branches.forEach((fullPath) => {
       const displayBranchPath = fullPath;
@@ -208,6 +274,6 @@ export class SlackConnector implements ISlackConnector {
         .localeCompare(a.text.text.toString().replace(/\d+/g, (n) => +n + 100000));
     });
 
-    return this._getDropDownView(triggerId, reposToShow);
+    return reposToShow;
   }
 }
