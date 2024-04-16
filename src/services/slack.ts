@@ -197,26 +197,45 @@ export class SlackConnector implements ISlackConnector {
         },
         blocks: [
           {
-            type: 'input',
-            dispatch_action: true,
-            block_id: 'block_repo_option',
-            element: {
-              type: 'multi_static_select',
-              action_id: 'repo_option',
-              placeholder: {
-                type: 'plain_text',
-                text: 'Select a repo to deploy',
-                emoji: true,
-              },
-              options: repos,
-            },
-            optional: true,
-            label: {
+            type: 'section',
+            text: {
               type: 'plain_text',
-              text: 'Select Repo',
-              emoji: true,
+              text: 'repo option groups',
+            },
+            accessory: {
+              type: 'static_select',
+              option_groups: [
+                {
+                  label: {
+                    type: 'plain_text',
+                    text: 'group 1',
+                  },
+                  options: repos,
+                },
+              ],
             },
           },
+          // {
+          //   type: 'input',
+          //   dispatch_action: true,
+          //   block_id: 'block_repo_option',
+          //   element: {
+          //     type: 'static_select',
+          //     action_id: 'repo_option',
+          //     placeholder: {
+          //       type: 'plain_text',
+          //       text: 'Select a repo to deploy',
+          //       emoji: true,
+          //     },
+          //     options: repos,
+          //   },
+          //   optional: true,
+          //   label: {
+          //     type: 'plain_text',
+          //     text: 'Select Repo',
+          //     emoji: true,
+          //   },
+          // },
           {
             type: 'input',
             block_id: 'block_hash_option',
