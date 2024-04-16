@@ -121,6 +121,8 @@ export class SlackConnector implements ISlackConnector {
 
   async displayRepoOptions(repos: string[], triggerId: string, isAdmin: boolean): Promise<any> {
     const reposToShow = this._buildDropdown(repos);
+    console.log(reposToShow.length);
+    console.log(reposToShow[reposToShow.length - 1]);
     const repoOptView = this._getDropDownView(triggerId, reposToShow, isAdmin);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
