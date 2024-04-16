@@ -210,14 +210,14 @@ export class SlackConnector implements ISlackConnector {
                     type: 'plain_text',
                     text: 'group 1',
                   },
-                  options: repos.slice(0, 50),
+                  options: repos.slice(0, 30),
                 },
                 {
                   label: {
                     type: 'plain_text',
-                    text: repos.length,
+                    text: 'group 2',
                   },
-                  options: repos.slice(50, -1),
+                  options: repos.slice(50, repos.length),
                 },
               ],
             },
