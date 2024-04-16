@@ -120,8 +120,8 @@ export class SlackConnector implements ISlackConnector {
   }
 
   async displayRepoOptions(repos: string[], triggerId: string, isAdmin: boolean): Promise<any> {
-    const reposToShow = this._buildDropdown(repos);
-    const repoOptView = this._getDropDownView(triggerId, reposToShow, isAdmin);
+    // const reposToShow = this._buildDropdown(repos);
+    const repoOptView = this._getDropDownView(triggerId, repos, isAdmin);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {
@@ -204,24 +204,26 @@ export class SlackConnector implements ISlackConnector {
             },
             accessory: {
               type: 'static_select',
-              option_groups: [
-                {
-                  label: {
-                    type: 'plain_text',
-                    text: `${repos.length}`,
-                  },
-                  options: repos.slice(0, 50),
-                },
-                {
-                  label: {
-                    type: 'plain_text',
-                    text: `${repos[-1]}`,
-                  },
-                  options: repos.slice(50, repos.length),
-                },
-              ],
+              option_groups: repos,
+              // [
+              //   {
+              //     label: {
+              //       type: 'plain_text',
+              //       text: `${repos.length}`,
+              //     },
+              //     options: repos.slice(0, 50),
+              //   },
+              //   {
+              //     label: {
+              //       type: 'plain_text',
+              //       text: `${repos[-1]}`,
+              //     },
+              //     options: repos.slice(50, repos.length),
+              //   },
+              // ],
             },
           },
+
           // {
           //   type: 'input',
           //   dispatch_action: true,
