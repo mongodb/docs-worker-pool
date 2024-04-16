@@ -48,17 +48,25 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
     const [repoOwner, repoName, directoryPath] = repo.split('/');
 
     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
-    const options: string[] = [];
+    const options: any[] = [];
     for (const branch of branches) {
       const buildWithSnooty = branch['buildsWithSnooty'];
       if (buildWithSnooty) {
         const active = branch['active'];
         const repoPath = `${repoName}${directoryPath ? '/' + directoryPath : ''}/${branch['gitBranchName']}`;
+        let txt: string;
         if (!active) {
-          options.push(`(!inactive) ${repoPath}`);
+          txt = `(!inactive) ${repoPath}`;
         } else {
-          options.push(repoPath);
+          txt = repoPath;
         }
+        options.push({
+          text: {
+            type: 'plain_text',
+            text: txt,
+          },
+          value: repoPath,
+        });
       }
     }
 
