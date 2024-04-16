@@ -290,7 +290,7 @@ export class SlackConnector implements ISlackConnector {
     //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
 
     if (reposToShow.length > 100) {
-      reposToShow = reposToShow.sort().reverse();
+      reposToShow = reposToShow.sort().reverse().splice(0, 150);
     }
 
     //sort versions like so: 4.1, 4.2, 4.11
