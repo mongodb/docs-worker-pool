@@ -75,7 +75,7 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
     const repoOption = {
       label: {
         type: 'plain_text',
-        text: repoOwner,
+        text: repoName,
       },
       options: options.sort((branchOne, branchTwo) => {
         return branchOne.text.text.localeCompare(branchTwo.text.text);
