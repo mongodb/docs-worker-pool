@@ -53,12 +53,13 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
       const buildWithSnooty = branch['buildsWithSnooty'];
       if (buildWithSnooty) {
         const active = branch['active'];
-        const repoPath = `${repoName}${directoryPath ? '/' + directoryPath : ''}/${branch['gitBranchName']}`;
+        const branchName = `${directoryPath ? '/' + directoryPath : ''}/${branch['gitBranchName']}`;
+        const repoPath = `${repoOwner}/${repoName}/${branchName}`;
         let txt: string;
         if (!active) {
-          txt = `(!inactive) ${repoPath}`;
+          txt = `(!inactive) ${branchName}`;
         } else {
-          txt = repoPath;
+          txt = branchName;
         }
         options.push({
           text: {
@@ -70,12 +71,15 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
       }
     }
 
+    //create a sort function to sort the options by their text
     const repoOption = {
       label: {
         type: 'plain_text',
         text: repoOwner,
       },
-      options: options.sort(),
+      options: options.sort((branchOne, branchTwo) => {
+        return branchOne.text.text.localeCompare(branchTwo.text.text);
+      }),
     };
     repoOptions.push(repoOption);
   }
