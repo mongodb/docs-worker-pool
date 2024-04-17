@@ -18,14 +18,14 @@ include ~/shared.mk
 next-gen-parse: get-build-dependencies
 	# snooty parse -- separated from front-end to support index gen
 	@if [ -n "${PATCH_ID}" ]; then \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG}; \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG} ${NO_CACHING}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
 			exit 0; \
 		fi \
 	else \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG}; \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG} ${NO_CACHING}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
@@ -72,4 +72,3 @@ next-gen-stage: ## Host online for review
 		mut-publish public ${BUCKET} --prefix="${MUT_PREFIX}" --stage ${ARGS}; \
 		echo "Hosted at ${URL}/${MUT_PREFIX}/${USER}/${GIT_BRANCH}/"; \
 	fi
-
