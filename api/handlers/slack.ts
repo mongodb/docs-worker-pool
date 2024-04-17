@@ -53,7 +53,7 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
       const buildWithSnooty = branch['buildsWithSnooty'];
       if (buildWithSnooty) {
         const active = branch['active'];
-        const branchName = `${directoryPath ? '/' + directoryPath : ''}/${branch['gitBranchName']}`;
+        const branchName = `${directoryPath ? `${directoryPath}/` : ''}${branch['gitBranchName']}`;
         const repoPath = `${repoOwner}/${repoName}/${branchName}`;
         let txt: string;
         if (!active) {
@@ -78,12 +78,17 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
         text: repoName,
       },
       options: options.sort((branchOne, branchTwo) => {
-        return branchOne.text.text.localeCompare(branchTwo.text.text);
+        return branchTwo.text.text
+          .toString()
+          .replace(/\d+/g, (n) => +n + 100000)
+          .localeCompare(branchOne.text.text.toString().replace(/\d+/g, (n) => +n + 100000));
       }),
     };
     repoOptions.push(repoOption);
   }
-  return repoOptions;
+  return repoOptions.sort((repoOne, repoTwo) => {
+    return repoOne.label.value.localeCompare(repoTwo.label.value);
+  });
 }
 
 export function getQSString(qs: string) {
