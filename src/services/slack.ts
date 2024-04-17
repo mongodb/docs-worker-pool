@@ -197,13 +197,13 @@ export class SlackConnector implements ISlackConnector {
         },
         blocks: [
           {
-            type: 'section',
-            text: {
+            type: 'input',
+            label: {
               type: 'plain_text',
               text: 'repo option groups',
             },
-            accessory: {
-              type: 'static_select',
+            element: {
+              type: 'multi_static_select',
               option_groups: repos,
               // [
               //   {
