@@ -86,10 +86,9 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
     };
     repoOptions.push(repoOption);
   }
-  return repoOptions;
-  // .sort((repoOne, repoTwo) => {
-  //   return repoOne.label.value.localeCompare(repoTwo.label.value);
-  // });
+  return repoOptions.sort((repoOne, repoTwo) => {
+    return repoOne.label.text.localeCompare(repoTwo.label.text);
+  });
 }
 
 export function getQSString(qs: string) {
