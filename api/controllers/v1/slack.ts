@@ -71,6 +71,7 @@ async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
   } catch (err) {
     logger.error('deployRepo', err);
+    return err;
   }
 }
 
@@ -229,10 +230,10 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
     consoleLogger.info('values', JSON.stringify(values));
   } catch (e) {
     console.log(`Error parsing selection: ${e}`);
-    return prepResponse(401, 'text/plain', e);
+    return prepResponse(401, 'text/åplain', e);
   }
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-
+  console.log(JSON.stringify(deployable));
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }

@@ -183,17 +183,14 @@ export class SlackConnector implements ISlackConnector {
         title: {
           type: 'plain_text',
           text: 'Deploy Docs',
-          emoji: true,
         },
         submit: {
           type: 'plain_text',
           text: 'Submit',
-          emoji: true,
         },
         close: {
           type: 'plain_text',
           text: 'Cancel',
-          emoji: true,
         },
         blocks: [
           {
@@ -209,7 +206,6 @@ export class SlackConnector implements ISlackConnector {
               placeholder: {
                 type: 'plain_text',
                 text: 'Select a repo to deploy',
-                emoji: true,
               },
               option_groups: repos,
             },
