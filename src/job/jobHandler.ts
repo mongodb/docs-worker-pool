@@ -153,6 +153,7 @@ export abstract class JobHandler {
     // TODO: Can empty string check be removed?
     if (pathPrefix || pathPrefix === '') {
       this.currJob.payload.pathPrefix = pathPrefix;
+      //sets mutPrefix to the full pathPrefix unless server user is in the path (I believe this only happens in a subset of cases when docs-worker-xlarge is the server-user)
       const mutPrefix = pathPrefix.split(`/${server_user}`)[0];
       this.currJob.payload.mutPrefix = mutPrefix;
     }
