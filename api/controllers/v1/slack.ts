@@ -195,6 +195,12 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   consoleLogger.info('line 190', 'testing request received');
   consoleLogger.info('event', JSON.stringify(event));
 
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+    body: 'success!',
+  };
+
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
