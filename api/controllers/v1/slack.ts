@@ -91,6 +91,7 @@ export const getDeployableJobs = async (
 
   for (let i = 0; i < values?.repo_option?.length; i++) {
     let jobTitle: string, repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
+    console.log('repo option', JSON.stringify(values.repo_option[i]));
     if (values.deploy_option == 'deploy_all') {
       repoOwner = 'mongodb';
       branchName = 'master';
@@ -225,6 +226,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
   try {
     values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
+    consoleLogger.info('values', JSON.stringify(values));
   } catch (e) {
     console.log(`Error parsing selection: ${e}`);
     return prepResponse(401, 'text/plain', e);
