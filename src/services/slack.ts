@@ -63,15 +63,11 @@ export class SlackConnector implements ISlackConnector {
     const inputMapping = {
       block_repo_option: 'repo_option',
       block_hash_option: 'hash_option',
-      block_deploy_option: 'deploy_option',
     };
 
     console.log(stateValues);
     // if deploy all was selected:
-    if (
-      stateValues['block_deploy_option'] &&
-      stateValues['block_deploy_option']?.deploy_option?.selected_option?.value == 'deploy_all'
-    ) {
+    if (stateValues['block_deploy_option']?.deploy_option?.selected_option?.value == 'deploy_all') {
       if (!isAdmin) {
         throw new Error('User is not an admin and therefore not entitled to deploy all repos');
       }
