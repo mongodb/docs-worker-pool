@@ -208,6 +208,12 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+    body: 'success!',
+  };
+
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
@@ -235,11 +241,6 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   }
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   console.log(JSON.stringify(deployable));
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: 'success!',
-  };
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
     console.log('Repos have been deployed');
