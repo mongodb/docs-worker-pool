@@ -64,7 +64,7 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
         options.push({
           text: {
             type: 'plain_text',
-            text: txt,
+            text: repoPath,
           },
           value: repoPath,
         });

@@ -68,7 +68,8 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
-    await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
+    const jobIds = await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
+    console.log(jobIds);
   } catch (err) {
     logger.error('deployRepo', err);
     return err;
@@ -191,13 +192,13 @@ export const getDeployableJobs = async (
 export const DeployRepo = async (event: any = {}): Promise<any> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-  consoleLogger.info('deployRepo 190', 'testing request received');
+  consoleLogger.info('line 190', 'testing request received');
   consoleLogger.info('event', JSON.stringify(event));
 
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
-  consoleLogger.info('deployRepo 195', 'testing slack validation passed');
+  consoleLogger.info('line 195', 'testing slack validation passed');
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
@@ -236,6 +237,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   console.log(JSON.stringify(deployable));
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
+    console.log('Repos have been deployed');
   }
   return {
     statusCode: 200,
