@@ -65,7 +65,6 @@ export class SlackConnector implements ISlackConnector {
       block_hash_option: 'hash_option',
     };
 
-    console.log(stateValues);
     // if deploy all was selected:
     if (stateValues['block_deploy_option']?.deploy_option?.selected_option?.value == 'deploy_all') {
       if (!isAdmin) {
