@@ -190,16 +190,15 @@ export const getDeployableJobs = async (
 };
 
 export const DeployRepo = async (event: any = {}): Promise<any> => {
-  const consoleLogger = new ConsoleLogger();
-  const slackConnector = new SlackConnector(consoleLogger, c);
-  consoleLogger.info('line 190', 'testing request received');
-  consoleLogger.info('event', JSON.stringify(event));
-
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
     body: 'success!',
   };
+  const consoleLogger = new ConsoleLogger();
+  const slackConnector = new SlackConnector(consoleLogger, c);
+  consoleLogger.info('line 190', 'testing request received');
+  consoleLogger.info('event', JSON.stringify(event));
 
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
