@@ -203,11 +203,6 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const stateValues = parsed.view.state.values;
   console.log(JSON.stringify(stateValues));
 
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
-
   //TODO: create an interface for slack view_submission payloads
   if (parsed.type !== 'view_submission') {
     return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
@@ -220,6 +215,11 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
 
   let values = [];
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
+
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
   try {
     values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
   } catch (e) {
