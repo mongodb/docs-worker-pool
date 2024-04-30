@@ -7,8 +7,7 @@ import { SlackConnector } from '../../../src/services/slack';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { JobRepository } from '../../../src/repositories/jobRepository';
 import {
-  // buildEntitledBranchList,
-  buildEntitledGroupsList,
+  buildEntitledBranchList,
   getQSString,
   isRestrictedToDeploy,
   isUserEntitled,
@@ -20,8 +19,6 @@ import { Payload } from '../../../src/entities/job';
 export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-
-  consoleLogger.info('deployRepo', 'testing display repo options');
 
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
@@ -51,8 +48,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 
   const isAdmin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
 
-  const entitledBranches = await buildEntitledGroupsList(entitlement, repoBranchesRepository);
-  console.log('repo groups', entitledBranches);
+  const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
   if (resp?.status == 200 && resp?.data) {
     return {
@@ -68,11 +64,9 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
-    const jobIds = await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
-    console.log(jobIds);
+    await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
   } catch (err) {
     logger.error('deployRepo', err);
-    return err;
   }
 }
 
@@ -93,7 +87,6 @@ export const getDeployableJobs = async (
 
   for (let i = 0; i < values?.repo_option?.length; i++) {
     let jobTitle: string, repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
-    console.log('repo option', JSON.stringify(values.repo_option[i]));
     if (values.deploy_option == 'deploy_all') {
       repoOwner = 'mongodb';
       branchName = 'master';
@@ -190,20 +183,11 @@ export const getDeployableJobs = async (
 };
 
 export const DeployRepo = async (event: any = {}): Promise<any> => {
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: 'success!',
-  };
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
-  consoleLogger.info('line 190', 'testing request received');
-  consoleLogger.info('event', JSON.stringify(event));
-
   if (!slackConnector.validateSlackRequest(event)) {
     return prepResponse(401, 'text/plain', 'Signature Mismatch, Authentication Failed!');
   }
-  consoleLogger.info('line 195', 'testing slack validation passed');
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(c.get('dbName'));
@@ -216,14 +200,12 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
-    body: 'success!',
   };
 
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
-  consoleLogger.info('parsed view state values', JSON.stringify(parsed.view.state.values));
 
   //TODO: create an interface for slack view_submission payloads
   if (parsed.type !== 'view_submission') {
@@ -239,26 +221,18 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
   try {
     values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
-    consoleLogger.info('values', JSON.stringify(values));
   } catch (e) {
     console.log(`Error parsing selection: ${e}`);
-    return prepResponse(401, 'text/åplain', e);
+    return prepResponse(401, 'text/plain', e);
   }
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-  console.log(JSON.stringify(deployable));
+
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
-    console.log('Repos have been deployed');
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: 'success!',
-    };
   }
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
-    body: 'success!',
   };
 };
 
