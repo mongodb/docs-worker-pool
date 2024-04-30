@@ -215,11 +215,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
 
   let values = [];
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
-  console.log(isAdmin);
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
+  console.log('ADMIN' + isAdmin);
   try {
     values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
   } catch (e) {
@@ -227,6 +223,11 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
     return prepResponse(401, 'text/plain', e);
   }
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
+  console.log('DEPLOYABLE' + deployable);
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
 
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
