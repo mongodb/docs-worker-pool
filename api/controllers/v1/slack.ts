@@ -183,6 +183,7 @@ export const getDeployableJobs = async (
 };
 
 export const DeployRepo = async (event: any = {}): Promise<any> => {
+  return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
   const consoleLogger = new ConsoleLogger();
   const slackConnector = new SlackConnector(consoleLogger, c);
   if (!slackConnector.validateSlackRequest(event)) {
