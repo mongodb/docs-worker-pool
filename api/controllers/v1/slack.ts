@@ -201,6 +201,10 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
 
   //TODO: create an interface for slack view_submission payloads
   if (parsed.type !== 'view_submission') {
