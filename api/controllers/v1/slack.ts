@@ -215,7 +215,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
 
   let values = [];
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
-
+  console.log(isAdmin);
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
