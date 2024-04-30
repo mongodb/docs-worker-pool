@@ -197,15 +197,16 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
   const jobRepository = new JobRepository(db, c, consoleLogger);
 
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
-
   // This is coming in as urlencoded string, need to decode before parsing
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
+  console.log(JSON.stringify(stateValues));
+
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+  };
 
   //TODO: create an interface for slack view_submission payloads
   if (parsed.type !== 'view_submission') {
