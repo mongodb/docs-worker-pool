@@ -223,11 +223,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
     return prepResponse(401, 'text/plain', e);
   }
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-  console.log('DEPLOYABLE' + deployable);
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
+  console.log('DEPLOYABLE' + JSON.stringify(deployable));
 
   if (deployable.length > 0) {
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
