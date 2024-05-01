@@ -34,14 +34,14 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
         const repoPath = `${repoOwner}/${repoName}/${branchName}`;
         let txt: string;
         if (!active) {
-          txt = `(!inactive) ${branchName}`;
+          txt = `(!inactive) ${repoPath}`;
         } else {
-          txt = branchName;
+          txt = repoPath;
         }
         options.push({
           text: {
             type: 'plain_text',
-            text: repoPath,
+            text: txt,
           },
           value: repoPath,
         });
