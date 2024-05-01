@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - "main"
-      - "DOP-4549"
       - "integration"
 concurrency:
   group: environment-stg-${{ github.ref }}
