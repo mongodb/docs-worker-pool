@@ -65,7 +65,6 @@ export class SlackConnector implements ISlackConnector {
       block_hash_option: 'hash_option',
     };
 
-    console.log('parsing');
     // if deploy all was selected:
     if (stateValues['block_deploy_option']?.deploy_option?.selected_option?.value == 'deploy_all') {
       if (!isAdmin) {
@@ -120,7 +119,6 @@ export class SlackConnector implements ISlackConnector {
   }
 
   async displayRepoOptions(repos: string[], triggerId: string, isAdmin: boolean): Promise<any> {
-    // const reposToShow = this._buildDropdown(repos);
     const repoOptView = this._getDropDownView(triggerId, repos, isAdmin);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
@@ -231,43 +229,5 @@ export class SlackConnector implements ISlackConnector {
         ],
       },
     };
-  }
-
-  private _buildDropdown(branches: Array<string>): Array<any> {
-    let reposToShow: Array<any> = [];
-    branches.forEach((fullPath) => {
-      const displayBranchPath = fullPath;
-      let valueBranchPath = fullPath;
-      const isInactive = fullPath.startsWith('(!inactive)');
-      if (isInactive == true) {
-        valueBranchPath = fullPath.slice(12);
-      }
-      const opt = {
-        text: {
-          type: 'plain_text',
-          text: displayBranchPath,
-        },
-        value: valueBranchPath,
-      };
-      reposToShow.push(opt);
-    });
-
-    // This is the limitation enforced by slack as no more 100 items are allowd in the dropdown
-    //Sort the list so that any inactive versions are at the end and will be truncated if any items must be truncated
-    //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
-
-    if (reposToShow.length > 100) {
-      reposToShow = reposToShow.sort().reverse().splice(0, 150);
-    }
-
-    //sort versions like so: 4.1, 4.2, 4.11
-    reposToShow.sort((a, b) => {
-      return b.text.text
-        .toString()
-        .replace(/\d+/g, (n) => +n + 100000)
-        .localeCompare(a.text.text.toString().replace(/\d+/g, (n) => +n + 100000));
-    });
-
-    return reposToShow;
   }
 }

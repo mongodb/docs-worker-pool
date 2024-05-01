@@ -18,29 +18,6 @@ export function prepResponse(statusCode, contentType, body) {
   };
 }
 
-// export async function buildEntitledBranchList(entitlement: any, repoBranchesRepository: RepoBranchesRepository) {
-//   const entitledBranches: string[] = [];
-//   for (const repo of entitlement.repos) {
-//     const [repoOwner, repoName, directoryPath] = repo.split('/');
-//     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
-//     for (const branch of branches) {
-//       const buildWithSnooty = branch['buildsWithSnooty'];
-//       if (buildWithSnooty) {
-//         const active = branch['active'];
-//         const repoPath = `${repoOwner}/${repoName}${directoryPath ? '/' + directoryPath : ''}/${
-//           branch['gitBranchName']
-//         }`;
-//         if (!active) {
-//           entitledBranches.push(`(!inactive) ${repoPath}`);
-//         } else {
-//           entitledBranches.push(repoPath);
-//         }
-//       }
-//     }
-//   }
-//   return entitledBranches.sort();
-// }
-
 //if person is admin, get all prod deployable repos
 export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepository: RepoBranchesRepository) {
   const repoOptions: any[] = [];
@@ -71,7 +48,7 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
       }
     }
 
-    //create a sort function to sort the options by their text
+    //sort the options by version number
     const repoOption = {
       label: {
         type: 'plain_text',
