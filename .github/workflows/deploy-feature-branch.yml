@@ -2,6 +2,7 @@ on:
   pull_request:
     branches:
       - main
+      - DOP-4497
     types:
       - opened
       - reopened
