@@ -146,7 +146,7 @@ async function stopECSTask(taskId: string, consoleLogger: ConsoleLogger) {
 async function retry(message: JobQueueMessage, consoleLogger: ConsoleLogger, url: string): Promise<any> {
   try {
     const tries = message.tries;
-    // TODO: c.get('maxRetries') is of type 'Unknown', needs validation
+    // TODO: c.get('maxRetries') is of type 'Unknown', needs validation.
     if (tries < c.get('maxRetries')) {
       const sqs = new SQSConnector(consoleLogger, c);
       message['tries'] += 1;
