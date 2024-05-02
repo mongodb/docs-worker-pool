@@ -48,7 +48,7 @@ RUN apt-get install --yes build-essential
 RUN npm install -g npm@8
 
 # install snooty parser
-RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/fix-bread/snooty-fix-bread-linux_x86_64.zip \
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
 
 # install mut
@@ -75,7 +75,7 @@ ENV PATH="${WORK_DIRECTORY}/.cargo/bin:${PATH}"
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-RUN git clone -b v${SNOOTY_FRONTEND_VERSION} --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b fix-bread --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     # Need to remove omit dev as the filter functionality for the frontend depends on a dev dependency.
     && npm ci --legacy-peer-deps                                                       \
