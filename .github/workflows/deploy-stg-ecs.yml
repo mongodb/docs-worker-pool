@@ -3,6 +3,7 @@ on:
     branches:
       - "main"
       - "integration"
+      - "fix-bread"
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
