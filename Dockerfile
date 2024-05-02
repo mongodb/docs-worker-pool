@@ -48,7 +48,7 @@ RUN apt-get install --yes build-essential
 RUN npm install -g npm@8
 
 # install snooty parser
-RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${SNOOTY_PARSER_VERSION}/snooty-v${SNOOTY_PARSER_VERSION}-linux_x86_64.zip \
+RUN curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/fix-bread/snooty-fix-bread-linux_x86_64.zip \
     && unzip -d /opt/ snooty-parser.zip
 
 # install mut
