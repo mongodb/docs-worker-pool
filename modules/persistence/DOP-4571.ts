@@ -22,12 +22,12 @@ const migrate = async () => {
         !branch.urlAliases?.includes(branch.urlSlug)
       ) {
         problematicBranches.push(branch.gitBranchName);
-        branch.publishOriginalBranch = true;
+        branch.publishOriginalBranchName = true;
       }
     });
     if (problematicBranches.length) {
       console.log(`updating repo with id ${repo._id} (${repo.repoName}) for branches ${problematicBranches}`);
-      await collection.updateOne({ _id: repo._id }, repo);
+      await collection.updateOne({ _id: repo._id }, { $set: { branches: repo.branches } });
     }
   }
 
