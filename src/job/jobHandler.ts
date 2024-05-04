@@ -1,4 +1,8 @@
+import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import axios, { AxiosResponse } from 'axios';
+import path from 'path';
+// import pLimit from 'p-limit';
+import fs from 'fs';
 import { Payload, Job, JobStatus } from '../entities/job';
 import { JobRepository } from '../repositories/jobRepository';
 import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
@@ -14,9 +18,8 @@ import { RepoEntitlementsRepository } from '../repositories/repoEntitlementsRepo
 import { DocsetsRepository } from '../repositories/docsetsRepository';
 import { MONOREPO_NAME } from '../monorepo/utils/monorepo-constants';
 import { nextGenHtml, nextGenParse, oasPageBuild, persistenceModule, prepareBuild } from '../commands';
-import { downloadBuildDependencies } from '../commands/src/helpers/dependency-helpers';
-import { CliCommandResponse } from '../commands/src/helpers';
-require('fs');
+import { downloadBuildDependencies, writeFileAsync } from '../commands/src/helpers/dependency-helpers';
+import { CliCommandResponse, getRepoDir } from '../commands/src/helpers';
 
 export abstract class JobHandler {
   private _currJob: Job;
@@ -529,6 +532,195 @@ export abstract class JobHandler {
     process.env.REGRESSION = regression;
   }
 
+  private async downloadByUrl(objKey: string, destPath: string) {
+    const s3Url = `https://docs-mongodb-org-stg.s3.us-east-2.amazonaws.com/${objKey}`;
+    const maxAttempts = 3;
+
+    // Retry in case of random network issues
+    for (let i = maxAttempts; i > 0; i--) {
+      try {
+        const res = await axios.get(s3Url, { timeout: 10000, responseType: 'stream' });
+        const dirName = path.dirname(destPath);
+        this._fileSystemServices.createDirIfNotExists(dirName);
+        const dest = fs.createWriteStream(destPath);
+        res.data.pipe(dest);
+        console.log(`${objKey} is okay!`);
+      } catch (err) {
+        console.error(`Failed fetchinng ${objKey}, retrying`);
+        const delay = 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  private async downloadExistingArtifacts() {
+    const timerLabel = 'downloadExistingArtifacts';
+    console.time(timerLabel);
+
+    console.log('Attempting to download existing artifacts');
+    const client = new S3Client({ region: 'us-east-2' });
+    const bucket = 'docs-mongodb-org-stg';
+    if (!bucket) {
+      console.error(`Missing bucket: ${bucket}`);
+      return;
+    }
+
+    // S3 object prefix should match the path prefix that Mut uploads to for the build
+    // Probably want to make this an argument, but leave as a static variable for testing
+    // We'll need to figure out how to handle differences between prod deploy vs. content staging build, if necessary
+    const s3Prefix = 'docs/docsworker-xlarge/DOP-4442/';
+    const listCommand = new ListObjectsV2Command({ Bucket: bucket, Prefix: s3Prefix });
+    const repoDir = getRepoDir(this.currJob.payload.project);
+    // Since the Makefiles move the path to Snooty a bit, we want to make sure we target the original, before the
+    // frontend is built. Unclear if this needs to be resolved more accurately?
+    const originalSnootyPath = `${repoDir}/../../snooty`;
+    console.log(`originalSnootyPath: ${originalSnootyPath}`);
+    const targetPublicDirectory = path.join(originalSnootyPath, '/public');
+    console.log(`targetPublicDirectory: ${targetPublicDirectory}`);
+    // Target cache directory should just be the root snooty dir since objects will have ".cache/" already included
+    const targetCacheDirectory = path.join(originalSnootyPath);
+    console.log(`targetCacheDirectory: ${targetCacheDirectory}`);
+
+    // Need to type this
+    const keysList: any[] = [];
+
+    try {
+      let isTruncated = true;
+
+      this._fileSystemServices.createDirIfNotExists(targetPublicDirectory);
+
+      // Grab contents, and then attempt to continue, in case there are more objects
+      while (isTruncated) {
+        const { Contents, IsTruncated, NextContinuationToken } = await client.send(listCommand);
+        if (!Contents) {
+          console.log('No contents');
+          break;
+        }
+
+        console.log('Contents found');
+
+        for (const obj of Contents) {
+          const objKey = obj.Key;
+          if (!objKey) {
+            continue;
+          }
+
+          // Save S3 objects to local file paths
+          // Files in the local public directory should exclude path prefixes
+          const localFileName = objKey.replace(s3Prefix, '');
+          const targetDir = objKey.includes('.cache') ? targetCacheDirectory : targetPublicDirectory;
+          const targetFilePath = path.join(targetDir, localFileName);
+
+          // Some objects are just empty directories, apparently
+          if (!objKey.endsWith('/')) {
+            keysList.push({ objKey, destPath: targetFilePath });
+          }
+        }
+
+        isTruncated = !!IsTruncated;
+        listCommand.input.ContinuationToken = NextContinuationToken;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Limit concurrency to avoid rate limits
+    // TO DEBUG: Might be having trouble using this package, but works fine in local script?
+    // const limit = pLimit(5);
+    const downloadPromises = keysList.map(({ objKey, destPath }) => {
+      return this.downloadByUrl(objKey, destPath);
+      // return limit(() => this.downloadByUrl(objKey, destPath));
+    });
+
+    // For debugging purposes
+    // console.info(contents);
+    try {
+      await Promise.all(downloadPromises);
+    } catch (err) {
+      console.error(err);
+    }
+
+    console.timeEnd(timerLabel);
+  }
+
+  // TODO-4442: Need to figure out how to split between cache and S3 files
+  // private async downloadExistingArtifacts() {
+  //   await this._logger.save(this._currJob._id, 'Attempting to download existing artifacts');
+  //   const client = new S3Client({ region: 'us-east-2' });
+  //   const bucket = process.env.BUCKET;
+  //   if (!bucket) {
+  //     this._logger.error(this._currJob._id, `Missing bucket: ${bucket}`);
+  //     return;
+  //   }
+
+  //   // S3 object prefix should match the path prefix that Mut uploads to for the build
+  //   // Probably want to make this an argument, but leave as a static variable for testing
+  //   // We'll need to figure out how to handle differences between prod deploy vs. content staging build, if necessary
+  //   const s3Prefix = 'docs/docsworker-xlarge/DOP-4442/';
+  //   const listCommand = new ListObjectsV2Command({ Bucket: bucket, Prefix: s3Prefix });
+  //   const repoDir = this._config.get<string>('repo_dir');
+  //   // Since the Makefiles move the path to Snooty a bit, we want to make sure we target the original, before the
+  //   // frontend is built
+  //   const originalSnootyPath = `${repoDir}/../../snooty`;
+  //   await this._logger.save(this._currJob._id, `originalSnootyPath: ${originalSnootyPath}`);
+  //   const targetPublicDirectory = path.join(originalSnootyPath, '/public');
+  //   await this._logger.save(this._currJob._id, `targetPublicDirectory: ${targetPublicDirectory}`);
+
+  //   // For debugging purposes
+  //   let contents = '';
+  //   let n = 0;
+
+  //   // NOTE: This currently does not taking into account the .cache folder
+  //   try {
+  //     let isTruncated = true;
+
+  //     this._fileSystemServices.createDirIfNotExists(targetPublicDirectory);
+
+  //     // Grab contents, and then attempt to continue, in case there are more objects
+  //     while (isTruncated) {
+  //       const { Contents, IsTruncated, NextContinuationToken } = await client.send(listCommand);
+  //       if (!Contents) {
+  //         this._logger.info(this._currJob._id, 'No contents');
+  //         break;
+  //       }
+
+  //       for (const obj of Contents) {
+  //         const objKey = obj.Key;
+  //         if (!objKey) {
+  //           continue;
+  //         }
+
+  //         const getCommand = new GetObjectCommand({ Bucket: bucket, Key: objKey });
+  //         const { Body: objBody } = await client.send(getCommand);
+
+  //         // Save S3 objects to local file paths
+  //         // Files in the local public directory should exclude path prefixes
+  //         const localFileName = objKey.replace(s3Prefix, '');
+  //         const targetFilePath = path.join(targetPublicDirectory, localFileName);
+  //         this._logger.info(this._currJob._id, `targetFilePath: ${targetFilePath}`);
+  //         if (objBody) {
+  //           await writeFileAsync(targetFilePath, await objBody.transformToString());
+  //         }
+  //       }
+
+  //       // For debugging
+  //       const contentsList = Contents.map((c) => {
+  //         n++;
+  //         return `${c.Key}\n`;
+  //       });
+  //       contents += contentsList;
+
+  //       isTruncated = !!IsTruncated;
+  //       listCommand.input.ContinuationToken = NextContinuationToken;
+  //     }
+  //   } catch (e) {
+  //     this._logger.error(this._currJob._id, e);
+  //   }
+
+  //   // For debugging purposes
+  //   this._logger.info(this._currJob._id, contents);
+  // }
+
   @throwIfJobInterupted()
   protected async buildWithMakefiles(): Promise<boolean> {
     this.cleanup();
@@ -538,6 +730,9 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Checked Commit');
     await this.pullRepo();
     this._logger.save(this._currJob._id, 'Pulled Repo');
+
+    const downloadArtifactsPromise = this.downloadExistingArtifacts();
+
     this.prepBuildCommands();
     this._logger.save(this._currJob._id, 'Prepared Build commands');
     await this.prepNextGenBuild();
@@ -548,6 +743,9 @@ export abstract class JobHandler {
     this._logger.save(this._currJob._id, 'Downloaded Makefile');
     await this.setEnvironmentVariables();
     this._logger.save(this._currJob._id, 'Prepared Environment variables');
+
+    await downloadArtifactsPromise;
+
     return await this.executeBuild();
   }
 
