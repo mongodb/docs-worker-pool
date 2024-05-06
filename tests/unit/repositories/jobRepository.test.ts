@@ -50,11 +50,11 @@ describe('Job Repository Tests', () => {
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
     });
 
-    test('Update with completion status succeeds', () => {
+    test('Update with completion status succeeds', async () => {
       setupForFindOneAndUpdateSuccess();
-      expect(jobRepo.updateWithStatus('64ad959b423952aeb9341fad', 'All good', JobStatus.completed)).resolves.toEqual(
-        job
-      );
+      await expect(
+        jobRepo.updateWithStatus('64ad959b423952aeb9341fad', 'All good', JobStatus.completed)
+      ).resolves.toEqual(job);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
       expect(dbRepoHelper.logger.error).toBeCalledTimes(0);
     });
