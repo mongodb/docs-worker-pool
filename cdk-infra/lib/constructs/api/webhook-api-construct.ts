@@ -35,13 +35,14 @@ interface WebhookApiConstructProps {
   environment: Record<string, string>;
   vpc: IVpc;
   taskDefinition: TaskDefinition;
+  clusterName: string;
 }
 
 export class WebhookApiConstruct extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    { jobsQueue, jobUpdatesQueue, environment, vpc, taskDefinition }: WebhookApiConstructProps
+    { jobsQueue, jobUpdatesQueue, environment, vpc, taskDefinition, clusterName }: WebhookApiConstructProps
   ) {
     super(scope, id);
 
@@ -90,7 +91,7 @@ export class WebhookApiConstruct extends Construct {
       environment: {
         TASK_DEFINITION: taskDefinition.taskDefinitionArn,
         SUBNETS: JSON.stringify(vpc.privateSubnets.map((subnet) => subnet.subnetId)),
-        ...environment,
+        CLUSTER: clusterName,
       },
       timeout,
     });

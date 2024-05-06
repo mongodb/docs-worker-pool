@@ -184,10 +184,13 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
   async function runAdditionalECSTasks() {
     const { TASK_DEFINITION, CLUSTER, SUBNETS } = process.env;
+    console.log('RUN');
 
     if (!TASK_DEFINITION) throw new Error('ERROR! process.env.TASK_DEFINITION is not defined');
     if (!CLUSTER) throw new Error('ERROR! process.env.CLUSTER is not defined');
     if (!SUBNETS) throw new Error('ERROR! process.env.SUBNETS is not defined');
+
+    console.log('Env Vars exist for run');
 
     const client = new ECSClient({
       region: 'us-east-2',
@@ -234,7 +237,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           repoOwner,
         });
 
-        //add logic for getting master branch, latest stable branch
         const job = await prepGithubPushPayload(body, payload, jobTitle);
 
         try {
@@ -242,7 +244,6 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
           const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
           jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
           consoleLogger.info(job.title, `Created Job ${jobId}`);
-          runAdditionalECSTasks();
           return jobId;
         } catch (err) {
           consoleLogger.error('TriggerBuildError', `${err} Error inserting job for ${repoName}`);
@@ -254,7 +255,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
   try {
     const returnVal = await createAndInsertJob();
-    // run tasks here
+    await runAdditionalECSTasks();
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
