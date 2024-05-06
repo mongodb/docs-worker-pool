@@ -106,11 +106,11 @@ describe('Job Repository Tests', () => {
 
     test('getOneQueuedJobAndUpdate succeeds', async () => {
       const testData = TestDataProvider.getFindOneAndUpdateCallInfo();
-      const mockVal = getBuildJobPlain();
+      const mockVal = { value: getBuildJobPlain() };
       jest.spyOn(jobRepo, 'notify').mockResolvedValueOnce(true);
       dbRepoHelper.collection.findOneAndUpdate.mockResolvedValueOnce(mockVal);
 
-      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(mockVal);
+      await expect(jobRepo.getOneQueuedJobAndUpdate()).resolves.toEqual(mockVal.value);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledTimes(1);
       expect(dbRepoHelper.collection.findOneAndUpdate).toBeCalledWith(
         testData.query,
