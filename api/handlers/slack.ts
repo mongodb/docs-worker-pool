@@ -48,12 +48,12 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
       }
     }
 
-    //sort the options by version number
     const repoOption = {
       label: {
         type: 'plain_text',
         text: repoName,
       },
+      //sort the options by version number
       options: options.sort((branchOne, branchTwo) => {
         return branchTwo.text.text
           .toString()
