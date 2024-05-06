@@ -46,7 +46,7 @@ export class JobRepository extends BaseRepository {
     if (shouldNotifySqs) {
       await this.notify(objectId.toString(), c.get('jobUpdatesQueueUrl'), JobStatus.completed, 0);
     }
-    return updateResponse.value;
+    return updateResponse;
   }
 
   async insertJob(job: Omit<Job | EnhancedJob, '_id'>, url: string): Promise<string> {
