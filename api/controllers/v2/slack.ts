@@ -8,7 +8,7 @@ import { JobRepository } from '../../../src/repositories/jobRepository';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { EnhancedPayload, JobStatus } from '../../../src/entities/job';
 import {
-  buildEntitledBranchList,
+  buildEntitledGroupsList,
   getQSString,
   isRestrictedToDeploy,
   isUserEntitled,
@@ -46,10 +46,10 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
     return prepResponse(401, 'text/plain', response);
   }
 
-  const admin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
+  const isAdmin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
 
-  const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
-  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], admin);
+  const entitledBranches = await buildEntitledGroupsList(entitlement, repoBranchesRepository);
+  const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
   if (resp?.status == 200 && resp?.data) {
     return {
       statusCode: 200,
@@ -92,20 +92,29 @@ export const getDeployableJobs = async (
 ) => {
   const deployable = [];
 
-  for (let i = 0; i < values.repo_option.length; i++) {
-    let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
-    const splitValues = values.repo_option[i].value.split('/');
-
-    if (process.env.FEATURE_FLAG_MONOREPO_PATH === 'true' && splitValues.length === 4) {
-      // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
-      [repoOwner, repoName, directory, branchName] = splitValues;
+  for (let i = 0; i < values?.repo_option?.length; i++) {
+    let jobTitle: string, repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
+    if (values.deploy_option == 'deploy_all') {
+      repoOwner = 'mongodb';
+      branchName = 'master';
+      repoName = values.repo_option[i].repoName;
+      jobTitle = `Slack deploy: ${repoOwner}/${repoName}/${branchName}, by ${entitlement.github_username}`;
     } else {
-      // e.g. mongodb/docs-realm/master => (owner/repo/branch)
-      [repoOwner, repoName, branchName] = splitValues;
+      const splitValues = values.repo_option[i].value.split('/');
+      jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
+
+      if (splitValues.length === 3) {
+        // e.g. mongodb/docs-realm/master => (owner/repo/branch)
+        [repoOwner, repoName, branchName] = splitValues;
+      } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
+        // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
+        [repoOwner, repoName, directory, branchName] = splitValues;
+      } else {
+        throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
+      }
     }
 
     const hashOption = values?.hash_option ?? null;
-    const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
     const jobUserName = entitlement.github_username;
     const jobUserEmail = entitlement?.email ?? '';
 
@@ -115,11 +124,11 @@ export const getDeployableJobs = async (
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     if (!branchObject?.aliasObject) continue;
 
-    const publishOriginalBranchName = branchObject.aliasObject.publishOriginalBranchName; //bool
-    let aliases = branchObject.aliasObject.urlAliases; // array or null
-    let urlSlug = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
-    const isStableBranch = branchObject.aliasObject.isStableBranch; // bool or Falsey
-    aliases = aliases?.filter((a) => a);
+    const publishOriginalBranchName: boolean = branchObject.aliasObject.publishOriginalBranchName;
+    const aliases: string[] | null = branchObject.aliasObject.urlAliases;
+    let urlSlug: string = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
+    const isStableBranch = !!branchObject.aliasObject.isStableBranch; // bool or Falsey, add strong typing
+
     if (!urlSlug || !urlSlug.trim()) {
       urlSlug = branchName;
     }
@@ -136,11 +145,9 @@ export const getDeployableJobs = async (
       urlSlug,
       false,
       false,
-      false,
+      isStableBranch,
       directory
     );
-
-    newPayload.stable = !!isStableBranch;
 
     if (!aliases || aliases.length === 0) {
       if (non_versioned) {
@@ -209,12 +216,24 @@ export const DeployRepo = async (event: APIGatewayEvent): Promise<APIGatewayProx
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
 
+  //TODO: create an interface for slack view_submission payloads
+  if (parsed.type !== 'view_submission') {
+    return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
+  }
+
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
   if (!isUserEntitled(entitlement)) {
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
-  const values = slackConnector.parseSelection(stateValues, entitlement, repoBranchesRepository);
+  let values = [];
+  const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
+  try {
+    values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
+  } catch (e) {
+    console.log(`Error parsing selection: ${e}`);
+    return prepResponse(401, 'text/plain', e);
+  }
 
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
   if (deployable.length > 0) {
