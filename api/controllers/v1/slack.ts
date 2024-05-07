@@ -51,7 +51,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const entitledBranches = await buildEntitledGroupsList(entitlement, repoBranchesRepository);
   console.log('built branches');
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
-  console.log(JSON.stringify(resp));
+  console.log(resp);
   if (resp?.status == 200 && resp?.data) {
     return {
       statusCode: 200,
