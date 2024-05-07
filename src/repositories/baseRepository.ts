@@ -166,7 +166,7 @@ export abstract class BaseRepository {
     try {
       const updateResponse = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
-        this._collection.findOneAndUpdate(query, update, options),
+        this._collection.findOneAndUpdate(query, update, { ...options, includeResultMetadata: true }),
         errorMsg
       );
       if (!updateResponse) {

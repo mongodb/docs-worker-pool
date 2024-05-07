@@ -40,7 +40,7 @@ export class JobRepository extends BaseRepository {
     const updateResponse = await this.findOneAndUpdate(
       query,
       update,
-      { includeResultMetadata: true },
+      {},
       `Mongo Timeout Error: Timed out while updating job status to "${status}" for jobId: ${id}`
     );
     if (shouldNotifySqs) {
@@ -115,7 +115,7 @@ export class JobRepository extends BaseRepository {
 
   async findOneAndUpdateJob(query): Promise<Job | null> {
     const update = { $set: { startTime: new Date(), status: 'inProgress' } };
-    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true, includeResultMetadata: true };
+    const options = { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true };
     const response = await this.findOneAndUpdate(
       query,
       update,
