@@ -54,18 +54,16 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
         text: repoName,
       },
       //sort the options by version number
-      options: options.sort((branchOne, branchTwo) => {
-        return branchTwo.text.text
+      options: options.sort((branchOne, branchTwo) =>
+        branchTwo.text.text
           .toString()
           .replace(/\d+/g, (n) => +n + 100000)
-          .localeCompare(branchOne.text.text.toString().replace(/\d+/g, (n) => +n + 100000));
-      }),
+          .localeCompare(branchOne.text.text.toString().replace(/\d+/g, (n) => +n + 100000))
+      ),
     };
     repoOptions.push(repoOption);
   }
-  return repoOptions.sort((repoOne, repoTwo) => {
-    return repoOne.label.text.localeCompare(repoTwo.label.text);
-  });
+  return repoOptions.sort((repoOne, repoTwo) => repoOne.label.text.localeCompare(repoTwo.label.text));
 }
 
 export function getQSString(qs: string) {
