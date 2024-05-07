@@ -5,6 +5,7 @@ import { TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { AutoBuilderQueues } from './auto-builder-queue-stack';
 import { WebhookApiConstruct } from '../constructs/api/webhook-api-construct';
 import { WebhookEnvConstruct } from '../constructs/api/webhook-env-construct';
+import cluster from 'cluster';
 
 interface WebhookStackProps extends StackProps {
   webhookSecureStrings: Record<string, string>;
@@ -31,6 +32,7 @@ export class WebhookStack extends Stack {
     new WebhookApiConstruct(this, 'api', {
       ...queues,
       vpc,
+      clusterName,
       taskDefinition,
       environment: { ...webhookEnvironment, TASK_DEFINITION_FAMILY: clusterName },
     });
