@@ -51,7 +51,7 @@ export class WebhookApiConstruct extends Construct {
     const slackDisplayRepoLambda = new NodejsFunction(this, 'slackDisplayRepoLambda', {
       entry: `${HANDLERS_PATH}/slack.ts`,
       runtime,
-      handler: 'DisplayRepoOptions',
+      handler: 'DeployRepoDisplayRepoOptions',
       environment,
       bundling,
       timeout,

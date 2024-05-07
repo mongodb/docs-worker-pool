@@ -119,7 +119,8 @@ export class SlackConnector implements ISlackConnector {
   }
 
   async displayRepoOptions(repos: string[], triggerId: string, isAdmin: boolean): Promise<any> {
-    const repoOptView = this._getDropDownView(triggerId, repos, isAdmin);
+    const reposToShow = this._buildDropdown(repos);
+    const repoOptView = this._getDropDownView(triggerId, reposToShow, isAdmin);
     const slackToken = this._config.get<string>('slackAuthToken');
     const slackUrl = this._config.get<string>('slackViewOpenUrl');
     return await axiosApi.post(slackUrl, repoOptView, {
@@ -181,31 +182,37 @@ export class SlackConnector implements ISlackConnector {
         title: {
           type: 'plain_text',
           text: 'Deploy Docs',
+          emoji: true,
         },
         submit: {
           type: 'plain_text',
           text: 'Submit',
+          emoji: true,
         },
         close: {
           type: 'plain_text',
           text: 'Cancel',
+          emoji: true,
         },
         blocks: [
           {
             type: 'input',
             block_id: 'block_repo_option',
-            label: {
-              type: 'plain_text',
-              text: 'Select Repo',
-            },
             element: {
               type: 'multi_static_select',
               action_id: 'repo_option',
               placeholder: {
                 type: 'plain_text',
                 text: 'Select a repo to deploy',
+                emoji: true,
               },
-              option_groups: repos,
+              options: repos,
+            },
+            optional: true,
+            label: {
+              type: 'plain_text',
+              text: 'Select Repo',
+              emoji: true,
             },
           },
           {
@@ -229,5 +236,43 @@ export class SlackConnector implements ISlackConnector {
         ],
       },
     };
+  }
+
+  private _buildDropdown(branches: Array<string>): Array<any> {
+    let reposToShow: Array<any> = [];
+    branches.forEach((fullPath) => {
+      const displayBranchPath = fullPath;
+      let valueBranchPath = fullPath;
+      const isInactive = fullPath.startsWith('(!inactive)');
+      if (isInactive == true) {
+        valueBranchPath = fullPath.slice(12);
+      }
+      const opt = {
+        text: {
+          type: 'plain_text',
+          text: displayBranchPath,
+        },
+        value: valueBranchPath,
+      };
+      reposToShow.push(opt);
+    });
+
+    // This is the limitation enforced by slack as no more 100 items are allowd in the dropdown
+    //Sort the list so that any inactive versions are at the end and will be truncated if any items must be truncated
+    //'[ERROR] no more than 100 items allowed [json-pointer:/view/blocks/0/element/options]'
+
+    if (reposToShow.length > 100) {
+      reposToShow = reposToShow.sort().reverse().splice(0, 100);
+    }
+
+    //sort versions like so: 4.1, 4.2, 4.11
+    reposToShow.sort((a, b) => {
+      return b.text.text
+        .toString()
+        .replace(/\d+/g, (n) => +n + 100000)
+        .localeCompare(a.text.text.toString().replace(/\d+/g, (n) => +n + 100000));
+    });
+
+    return reposToShow;
   }
 }
