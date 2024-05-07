@@ -255,7 +255,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
 
   try {
     const returnVal = await createAndInsertJob();
-    // await runAdditionalECSTasks();
+    await runAdditionalECSTasks();
     return {
       statusCode: 202,
       headers: { 'Content-Type': 'text/plain' },
