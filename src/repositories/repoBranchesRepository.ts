@@ -32,7 +32,7 @@ export class RepoBranchesRepository extends BaseRepository {
     return repo?.['branches'] ?? [];
   }
 
-  async getProdDeployableRepoBranches(): Promise<Document[]> {
+  async getProdDeployableRepos(): Promise<Document[]> {
     const reposArray = await this._collection
       .aggregate([{ $match: { prodDeployable: true, internalOnly: false } }, { $project: { _id: 0, repoName: 1 } }])
       .toArray();
