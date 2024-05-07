@@ -72,7 +72,7 @@ export class SlackConnector implements ISlackConnector {
       }
 
       values['deploy_option'] = 'deploy_all';
-      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
+      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepos();
       return values;
     }
 
