@@ -37,16 +37,22 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
-  if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
-    const { restrictedProdDeploy } = c.get<any>('prodDeploy');
-    const response = restrictedProdDeploy
-      ? 'Production freeze in place - please notify DOP if seeing this past 3/26'
-      : 'User is not entitled!';
-    return prepResponse(401, 'text/plain', response);
-  }
 
   const isAdmin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
+  let entitlement;
+  //if user has admin permissions, they can deploy all repo branches
+  if (isAdmin) {
+    entitlement = await repoBranchesRepository.getProdDeployableRepoBranches();
+  } else {
+    entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
+    if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
+      const { restrictedProdDeploy } = c.get<any>('prodDeploy');
+      const response = restrictedProdDeploy
+        ? 'Production freeze in place - please notify DOP if seeing this past 3/26'
+        : 'User is not entitled!';
+      return prepResponse(401, 'text/plain', response);
+    }
+  }
 
   const entitledBranches = await buildEntitledBranchList(entitlement, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
@@ -201,6 +207,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const decoded = decodeURIComponent(event.body).split('=')[1];
   const parsed = JSON.parse(decoded);
   const stateValues = parsed.view.state.values;
+  console.log(JSON.stringify(stateValues));
 
   //TODO: create an interface for slack view_submission payloads
   if (parsed.type !== 'view_submission') {
