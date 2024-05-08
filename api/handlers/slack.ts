@@ -21,11 +21,9 @@ export function prepResponse(statusCode, contentType, body) {
 //if person is admin, get all prod deployable repos
 export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepository: RepoBranchesRepository) {
   const repoOptions: any[] = [];
-  let count = 0;
   for (const repo of entitlement.repos) {
     const [repoOwner, repoName, directoryPath] = repo.split('/');
     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
-    count += branches.length;
     const options: any[] = [];
     console.log(repoName);
     console.log(branches.length);
@@ -66,7 +64,6 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
     };
     repoOptions.push(repoOption);
   }
-  console.log(count);
   return repoOptions.sort((repoOne, repoTwo) => repoOne.label.text.localeCompare(repoTwo.label.text));
 }
 

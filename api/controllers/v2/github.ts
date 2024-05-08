@@ -240,7 +240,7 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
         const job = await prepGithubPushPayload(body, payload, jobTitle);
 
         try {
-          await runAdditionalECSTasks();
+          // await runAdditionalECSTasks();
           consoleLogger.info(job.title, 'Creating Job');
           const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
           jobRepository.notify(jobId, c.get('jobUpdatesQueueUrl'), JobStatus.inQueue, 0);
