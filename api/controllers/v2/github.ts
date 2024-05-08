@@ -200,6 +200,9 @@ export const triggerSmokeTestAutomatedBuild = async (event: APIGatewayEvent): Pr
       taskDefinition: TASK_DEFINITION,
       cluster: CLUSTER,
       launchType: 'FARGATE',
+      overrides: {
+        containerOverrides: [{ environment: [{ name: 'INDPENDENT_TASK', value: 'true' }] }],
+      },
       networkConfiguration: {
         awsvpcConfiguration: {
           subnets: JSON.parse(SUBNETS),

@@ -39,7 +39,9 @@ export async function listenToJobQueue(): Promise<JobsQueuePayload> {
     // NOTE: Intentionally not catching here, as this throw should be handled by the method listening to the queue.
     // We don't want to continue listening to the queue, as there is something wrong with the protect task mechanism.
     // We can let the task end, as it is unsafe to let an unprotected task process a job.
-    await protectTask();
+    if (process.env.INDEPENDENT_TASK !== 'yes') {
+      await protectTask();
+    }
 
     console.log('[listenToJobQueue]: Deleting message...');
 
