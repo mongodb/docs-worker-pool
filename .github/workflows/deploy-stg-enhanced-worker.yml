@@ -1,10 +1,10 @@
 on:
   push:
-    paths: ['src/**', 'cdk-infra/lib/constructs/worker/**', 'Dockerfile', 'modules/**']
+    # paths: ['src/**', 'cdk-infra/lib/constructs/worker/**', 'Dockerfile', 'modules/**']
     branches:
       - 'main'
       - 'integration'
-      - "DOP-4451"
+      - 'DOP-4451'
 concurrency:
   group: environment-stg-enhanced-worker-${{ github.ref }}
   cancel-in-progress: true
@@ -28,5 +28,8 @@ jobs:
           npm ci
           cd cdk-infra/
           npm ci
-          npm run deploy:feature:stack -- -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg auto-builder-stack-enhancedApp-dotcomstg-worker
-          npm run deploy:feature:stack -- -c env=stg -c customFeatureName=enhancedApp-stg auto-builder-stack-enhancedApp-stg-worker
+          npm run cdk destroy -- -c customFeatureName=enhancedApp-dotcomstg --force auto-builder-stack-enhancedApp-dotcomstg-webhooks
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg \
+          auto-builder-stack-enhancedApp-dotcomstg-worker
+          npm run deploy:feature:stack -- -c isFeatureBranch=true -c env=dotcomstg -c customFeatureName=enhancedApp-dotcomstg \
+            auto-builder-stack-enhancedApp-dotcomstg-webhooks
