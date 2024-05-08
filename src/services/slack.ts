@@ -72,6 +72,7 @@ export class SlackConnector implements ISlackConnector {
       }
 
       values['deploy_option'] = 'deploy_all';
+      //instead of this go through all options in dropdown, whether selected or not, and append them if version is active
       values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
       return values;
     }
