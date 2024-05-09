@@ -89,7 +89,6 @@ export class WebhookApiConstruct extends Construct {
       handler: 'triggerSmokeTestAutomatedBuild',
       bundling,
       environment: {
-        ...environment,
         TASK_DEFINITION: taskDefinition.taskDefinitionArn,
         SUBNETS: JSON.stringify(vpc.privateSubnets.map((subnet) => subnet.subnetId)),
         CLUSTER: clusterName,
