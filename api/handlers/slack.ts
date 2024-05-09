@@ -26,8 +26,6 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
     if (branches.length) {
       const options: any[] = [];
-      console.log(repoName);
-      console.log(branches.length);
       for (const branch of branches) {
         const buildWithSnooty = branch['buildsWithSnooty'];
         if (buildWithSnooty) {
