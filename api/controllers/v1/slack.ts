@@ -92,25 +92,18 @@ export const getDeployableJobs = async (
   const deployable = [];
 
   for (let i = 0; i < values?.repo_option?.length; i++) {
-    let jobTitle: string, repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
-    if (values.deploy_option == 'deploy_all') {
-      repoOwner = 'mongodb';
-      branchName = 'master';
-      repoName = values.repo_option[i].repoName;
-      jobTitle = `Slack deploy: ${repoOwner}/${repoName}/${branchName}, by ${entitlement.github_username}`;
-    } else {
-      const splitValues = values.repo_option[i].value.split('/');
-      jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
+    let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
+    const splitValues = values.repo_option[i].value.split('/');
+    const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
 
-      if (splitValues.length === 3) {
-        // e.g. mongodb/docs-realm/master => (owner/repo/branch)
-        [repoOwner, repoName, branchName] = splitValues;
-      } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
-        // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
-        [repoOwner, repoName, directory, branchName] = splitValues;
-      } else {
-        throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
-      }
+    if (splitValues.length === 3) {
+      // e.g. mongodb/docs-realm/master => (owner/repo/branch)
+      [repoOwner, repoName, branchName] = splitValues;
+    } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
+      // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
+      [repoOwner, repoName, directory, branchName] = splitValues;
+    } else {
+      throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
     }
 
     const hashOption = values?.hash_option ?? null;
@@ -221,8 +214,9 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
 
   let values = [];
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
+  const optionGroups = parsed.view.blocks.element.option_groups;
   try {
-    values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
+    values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository, optionGroups);
   } catch (e) {
     console.log(`Error parsing selection: ${e}`);
     return prepResponse(401, 'text/plain', e);

@@ -24,7 +24,12 @@ function timeSafeCompare(a: string, b: string) {
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
   displayRepoOptions(repos: Array<string>, triggerId: string, isAdmin: boolean): Promise<any>;
-  parseSelection(payload: any, isAdmin: boolean, repoBranchesRepository: RepoBranchesRepository): any;
+  parseSelection(
+    payload: any,
+    isAdmin: boolean,
+    repoBranchesRepository: RepoBranchesRepository,
+    optionGroups: any[]
+  ): any;
   sendMessage(message: any, user: string): Promise<any>;
 }
 
@@ -57,7 +62,8 @@ export class SlackConnector implements ISlackConnector {
   async parseSelection(
     stateValues: any,
     isAdmin: boolean,
-    repoBranchesRepository: RepoBranchesRepository
+    repoBranchesRepository: RepoBranchesRepository,
+    optionGroups: any[]
   ): Promise<any> {
     const values = {};
     const inputMapping = {
@@ -72,8 +78,16 @@ export class SlackConnector implements ISlackConnector {
       }
 
       values['deploy_option'] = 'deploy_all';
-      //instead of this go through all options in dropdown, whether selected or not, and append them if version is active
-      values['repo_option'] = await repoBranchesRepository.getProdDeployableRepoBranches();
+      //go through all options in dropdown by option group
+      //append version to repo_option if active
+      for (const group of optionGroups) {
+        console.log('group' + group);
+        values['repo_option'].append(
+          ...group.options.map((option) => {
+            if (!option.text.text.startsWith('(!inactive)')) return option;
+          })
+        );
+      }
       return values;
     }
 
