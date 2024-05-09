@@ -64,6 +64,8 @@ export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepo
         ),
       };
       repoOptions.push(repoOption);
+    } else {
+      console.log(repo, branches);
     }
   }
   return repoOptions.sort((repoOne, repoTwo) => repoOne.label.text.localeCompare(repoTwo.label.text));
