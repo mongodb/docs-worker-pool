@@ -39,22 +39,24 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const key_val = getQSString(event.body);
 
   const isAdmin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
-  let entitlement;
+  let entitledRepos;
   //if user has admin permissions, they can deploy all repo branches
   if (isAdmin) {
-    entitlement = await repoBranchesRepository.getProdDeployableRepoBranches();
+    entitledRepos = await repoBranchesRepository.getProdDeployableRepoBranches();
+    console.log(entitledRepos);
   } else {
-    entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
-    if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
+    const entitlements = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
+    if (!isUserEntitled(entitlements) || isRestrictedToDeploy(key_val['user_id'])) {
       const { restrictedProdDeploy } = c.get<any>('prodDeploy');
       const response = restrictedProdDeploy
         ? 'Production freeze in place - please notify DOP if seeing this past 3/26'
         : 'User is not entitled!';
       return prepResponse(401, 'text/plain', response);
     }
+    entitledRepos = entitlements.repos;
   }
 
-  const entitledBranches = await buildEntitledGroupsList(entitlement, repoBranchesRepository);
+  const entitledBranches = await buildEntitledGroupsList(entitledRepos, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
   if (resp?.status == 200 && resp?.data) {
     return {

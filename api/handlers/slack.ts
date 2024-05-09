@@ -18,9 +18,9 @@ export function prepResponse(statusCode, contentType, body) {
   };
 }
 
-export async function buildEntitledGroupsList(entitlement: any, repoBranchesRepository: RepoBranchesRepository) {
+export async function buildEntitledGroupsList(entitledRepos: any, repoBranchesRepository: RepoBranchesRepository) {
   const entitledBranches: string[] = [];
-  for (const repo of entitlement.repos) {
+  for (const repo of entitledRepos) {
     const [repoOwner, repoName, directoryPath] = repo.split('/');
     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
     for (const branch of branches) {
