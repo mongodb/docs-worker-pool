@@ -22,7 +22,7 @@ RUN cd ./modules/oas-page-builder \
 # where repo work will happen
 FROM ubuntu:20.04
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
-ARG SNOOTY_PARSER_VERSION=0.16.6
+ARG SNOOTY_PARSER_VERSION=0.16.7-beta
 ARG SNOOTY_FRONTEND_VERSION=0.16.13
 ARG MUT_VERSION=0.11.2
 ARG REDOC_CLI_VERSION=1.2.3
@@ -75,7 +75,7 @@ ENV PATH="${WORK_DIRECTORY}/.cargo/bin:${PATH}"
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-RUN git clone -b fix-breadcrumb-links --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b DOP-4594-slug-breadcrumblabel --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     # Need to remove omit dev as the filter functionality for the frontend depends on a dev dependency.
     && npm ci --legacy-peer-deps                                                       \
