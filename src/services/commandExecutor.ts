@@ -65,7 +65,7 @@ export class ShellCommandExecutor implements ICommandExecutor {
       resp.status = CommandExecutorResponseStatus.success;
       return resp;
     } catch (error) {
-      resp.output = '';
+      resp.output = (error.stdout || '').trim();
       resp.error = error;
       resp.status = CommandExecutorResponseStatus.failed;
     }
