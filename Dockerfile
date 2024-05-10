@@ -75,7 +75,7 @@ ENV PATH="${WORK_DIRECTORY}/.cargo/bin:${PATH}"
 RUN curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/makefiles/shared.mk -o shared.mk
 
 # install snooty frontend and docs-tools
-RUN git clone -b fix-breadcrumb-linksli --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b fix-breadcrumb-links --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     # Need to remove omit dev as the filter functionality for the frontend depends on a dev dependency.
     && npm ci --legacy-peer-deps                                                       \
