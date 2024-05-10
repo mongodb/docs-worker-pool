@@ -319,7 +319,7 @@ export class TestDataProvider {
         createdTime: { $lte: new Date() },
       },
       update: { $set: { startTime: new Date(), status: 'inProgress' } },
-      options: { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true },
+      options: { sort: { priority: -1, createdTime: 1 }, returnNewDocument: true, includeResultMetadata: true },
     };
   }
 

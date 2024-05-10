@@ -18,27 +18,54 @@ export function prepResponse(statusCode, contentType, body) {
   };
 }
 
+//if person is admin, get all prod deployable repos
 export async function buildEntitledGroupsList(entitledRepos: any, repoBranchesRepository: RepoBranchesRepository) {
   const entitledBranches: string[] = [];
   for (const repo of entitledRepos) {
     const [repoOwner, repoName, directoryPath] = repo.split('/');
     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
-    for (const branch of branches) {
-      const buildWithSnooty = branch['buildsWithSnooty'];
-      if (buildWithSnooty) {
-        const active = branch['active'];
-        const repoPath = `${repoOwner}/${repoName}${directoryPath ? '/' + directoryPath : ''}/${
-          branch['gitBranchName']
-        }`;
-        if (!active) {
-          entitledBranches.push(`(!inactive) ${repoPath}`);
-        } else {
-          entitledBranches.push(repoPath);
+
+    if (branches.length) {
+      const options: any[] = [];
+      for (const branch of branches) {
+        const buildWithSnooty = branch['buildsWithSnooty'];
+        if (buildWithSnooty) {
+          const active = branch['active'];
+          const branchName = `${directoryPath ? `${directoryPath}/` : ''}${branch['gitBranchName']}`;
+          const repoPath = `${repoOwner}/${repoName}/${branchName}`;
+          let txt: string;
+          if (!active) {
+            txt = `(!inactive) ${repoPath}`;
+          } else {
+            txt = repoPath;
+          }
+          options.push({
+            text: {
+              type: 'plain_text',
+              text: txt,
+            },
+            value: repoPath,
+          });
         }
       }
+
+      const repoOption = {
+        label: {
+          type: 'plain_text',
+          text: repoName,
+        },
+        //sort the options by version number
+        options: options.sort((branchOne, branchTwo) =>
+          branchTwo.text.text
+            .toString()
+            .replace(/\d+/g, (n) => +n + 100000)
+            .localeCompare(branchOne.text.text.toString().replace(/\d+/g, (n) => +n + 100000))
+        ),
+      };
+      repoOptions.push(repoOption);
     }
   }
-  return entitledBranches.sort();
+  return repoOptions.sort((repoOne, repoTwo) => repoOne.label.text.localeCompare(repoTwo.label.text));
 }
 
 export function getQSString(qs: string) {
