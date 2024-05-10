@@ -15,6 +15,7 @@ import {
 } from '../../handlers/slack';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { Payload } from '../../../src/entities/job';
+import { ProjectsRepository } from '../../../src/repositories/projectsRepository';
 
 export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -34,15 +35,23 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
+  const projectsRepository = new ProjectsRepository(client.db(process.env.METADATA_DB_NAME), c, consoleLogger);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
 
   const isAdmin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
-  let entitledRepos;
+  let entitledRepos: any[] = [];
   //if user has admin permissions, they can deploy all repo branches
   if (isAdmin) {
-    entitledRepos = await repoBranchesRepository.getProdDeployableRepoBranches();
+    const repos = await repoBranchesRepository.getProdDeployableRepoBranches();
+    //add checks for all of these things existing
+    for (const repo of repos) {
+      const projectEntry = await projectsRepository.getProjectEntry(repo.project);
+      const repoOwner = projectEntry?.github?.organization;
+      entitledRepos.push(`${repoOwner}/${repo.repoName}`);
+    }
+    //add repoOwner to each of these
     console.log(entitledRepos);
   } else {
     const entitlements = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
