@@ -35,7 +35,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
-  const projectsRepository = new ProjectsRepository(client.db(process.env.METADATA_DB_NAME), c, consoleLogger);
+  const projectsRepository = new ProjectsRepository(client.db('docs_metada'), c, consoleLogger);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
@@ -53,7 +53,6 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
       entitledRepos.push(`${'mongodb'}/${repo.repoName}`);
     }
     //add repoOwner to each of these
-    console.log(entitledRepos);
   } else {
     const entitlements = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
     if (!isUserEntitled(entitlements) || isRestrictedToDeploy(key_val['user_id'])) {
@@ -226,7 +225,6 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   let values = [];
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
   const optionGroups = parsed.view.blocks[0]?.element?.option_groups;
-  console.log('option groups' + parsed.view.blocks[0]?.element?.option_groups);
   try {
     values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository, optionGroups);
   } catch (e) {
