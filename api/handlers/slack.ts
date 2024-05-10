@@ -20,7 +20,7 @@ export function prepResponse(statusCode, contentType, body) {
 
 //if person is admin, get all prod deployable repos
 export async function buildEntitledGroupsList(entitledRepos: any, repoBranchesRepository: RepoBranchesRepository) {
-  const entitledBranches: string[] = [];
+  const entitledBranches: any[] = [];
   for (const repo of entitledRepos) {
     const [repoOwner, repoName, directoryPath] = repo.split('/');
     const branches = await repoBranchesRepository.getRepoBranches(repoName, directoryPath);
@@ -62,10 +62,10 @@ export async function buildEntitledGroupsList(entitledRepos: any, repoBranchesRe
             .localeCompare(branchOne.text.text.toString().replace(/\d+/g, (n) => +n + 100000))
         ),
       };
-      repoOptions.push(repoOption);
+      entitledBranches.push(repoOption);
     }
   }
-  return repoOptions.sort((repoOne, repoTwo) => repoOne.label.text.localeCompare(repoTwo.label.text));
+  return entitledBranches.sort((repoOne, repoTwo) => repoOne.label.text.localeCompare(repoTwo.label.text));
 }
 
 export function getQSString(qs: string) {
