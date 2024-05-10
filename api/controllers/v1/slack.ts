@@ -35,6 +35,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
+  //change this to get db from env vars
   const projectsRepository = new ProjectsRepository(client.db('docs_metadata'), c, consoleLogger);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
@@ -49,9 +50,8 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
     console.log(projectsRepository);
     for (const repo of repos) {
       const projectEntry = await projectsRepository.getProjectEntry(repo.project);
-      console.log(projectEntry, repo.project);
       const repoOwner = projectEntry?.github?.organization;
-      entitledRepos.push(`${'mongodb'}/${repo.repoName}`);
+      entitledRepos.push(`${repoOwner}/${repo.repoName}`);
     }
     //add repoOwner to each of these
   } else {
