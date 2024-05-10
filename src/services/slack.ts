@@ -81,7 +81,6 @@ export class SlackConnector implements ISlackConnector {
       //go through all options in dropdown by option group
       //append version to repo_option if active
       for (const group of optionGroups) {
-        console.log('group' + group);
         values['repo_option'].append(
           ...group.options.map((option) => {
             if (!option.text.text.startsWith('(!inactive)')) return option;

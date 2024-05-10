@@ -47,7 +47,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   if (isAdmin) {
     const repos = await repoBranchesRepository.getProdDeployableRepoBranches();
     //add checks for all of these things existing
-    console.log(projectsRepository);
+    //fix for monorepo repos
     for (const repo of repos) {
       const projectEntry = await projectsRepository.getProjectEntry(repo.project);
       const repoOwner = projectEntry?.github?.organization;

@@ -14,7 +14,7 @@ export class ProjectsRepository extends BaseRepository {
     const query = { name: name };
     const projectEntry = await this.findOne(
       query,
-      `Mongo Timeout Error: Timed out while retrieving branches for ${name}
+      `Mongo Timeout Error: Timedout while retrieving branches for ${name}
       }`
     );
     return projectEntry;

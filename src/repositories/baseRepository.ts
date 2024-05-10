@@ -14,7 +14,6 @@ export abstract class BaseRepository {
     this._config = config;
     this._repoName = repoName;
     this._collection = collection;
-    console.log(collection);
   }
 
   private promiseTimeoutS(seconds, promise, errMsg) {
