@@ -48,7 +48,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
     //add checks for all of these things existing
     for (const repo of repos) {
       const projectEntry = await projectsRepository.getProjectEntry(repo.project);
-      console.log(JSON.stringify(projectEntry), repo.project);
+      console.log(projectEntry, repo.project);
       const repoOwner = projectEntry?.github?.organization;
       entitledRepos.push(`${'mongodb'}/${repo.repoName}`);
     }
