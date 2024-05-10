@@ -35,7 +35,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
-  const projectsRepository = new ProjectsRepository(client.db('docs_metada'), c, consoleLogger);
+  const projectsRepository = new ProjectsRepository(client.db('docs_metadata'), c, consoleLogger);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
@@ -46,6 +46,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   if (isAdmin) {
     const repos = await repoBranchesRepository.getProdDeployableRepoBranches();
     //add checks for all of these things existing
+    console.log(projectsRepository);
     for (const repo of repos) {
       const projectEntry = await projectsRepository.getProjectEntry(repo.project);
       console.log(projectEntry, repo.project);
