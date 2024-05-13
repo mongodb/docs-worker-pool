@@ -2,7 +2,6 @@ import axios from 'axios';
 import { ILogger } from './logger';
 import { IConfig } from 'config';
 import * as crypto from 'crypto';
-import { RepoBranchesRepository } from '../repositories/repoBranchesRepository';
 export const axiosApi = axios.create();
 
 function bufferEqual(a: Buffer, b: Buffer) {
@@ -24,12 +23,7 @@ function timeSafeCompare(a: string, b: string) {
 export interface ISlackConnector {
   validateSlackRequest(payload: any): boolean;
   displayRepoOptions(repos: Array<string>, triggerId: string, isAdmin: boolean): Promise<any>;
-  parseSelection(
-    payload: any,
-    isAdmin: boolean,
-    repoBranchesRepository: RepoBranchesRepository,
-    optionGroups: any[]
-  ): any;
+  parseSelection(payload: any, isAdmin: boolean, optionGroups: any[]): any;
   sendMessage(message: any, user: string): Promise<any>;
 }
 
@@ -59,12 +53,7 @@ export class SlackConnector implements ISlackConnector {
     return {};
   }
 
-  async parseSelection(
-    stateValues: any,
-    isAdmin: boolean,
-    repoBranchesRepository: RepoBranchesRepository,
-    optionGroups: any[]
-  ): Promise<any> {
+  async parseSelection(stateValues: any, isAdmin: boolean, optionGroups: any[]): Promise<any> {
     const values = {};
     const inputMapping = {
       block_repo_option: 'repo_option',
