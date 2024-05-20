@@ -69,6 +69,7 @@ export class SlackConnector implements ISlackConnector {
       values['deploy_option'] = 'deploy_all';
       //go through all options in dropdown by option group
       //append version to repo_option if active
+      values['repo_option'] = [];
       for (const group of optionGroups) {
         values['repo_option'].append(
           ...group.options.map((option) => {
