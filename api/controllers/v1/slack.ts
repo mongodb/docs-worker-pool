@@ -50,7 +50,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 
   const entitledBranches = await buildEntitledGroupsList(entitlement, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
-  if (resp?.status == 200 && resp?.data) {
+  if (resp?.status == 200 && resp?.data?.ok) {
     return {
       statusCode: 200,
       body: 'Model requested',
