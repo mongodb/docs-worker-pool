@@ -71,7 +71,7 @@ export class SlackConnector implements ISlackConnector {
       //append version to repo_option if active
       values['repo_option'] = [];
       for (const group of optionGroups) {
-        values['repo_option'].append(
+        values['repo_option'].push(
           ...group.options.map((option) => {
             if (!option.text.text.startsWith('(!inactive)')) return option;
           })
@@ -198,6 +198,7 @@ export class SlackConnector implements ISlackConnector {
           {
             type: 'input',
             block_id: 'block_repo_option',
+            optional: 'true',
             label: {
               type: 'plain_text',
               text: 'Select Repo',

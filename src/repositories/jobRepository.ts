@@ -71,9 +71,7 @@ export class JobRepository extends BaseRepository {
     // Insertion/re-enqueueing should be sent to jobs queue and updates for an existing job should be sent to jobUpdates Queue
     this._logger.info(
       'insertBulkJobs',
-      `Total Jobs Expected : ${jobs.length}, Jobs: ${JSON.stringify(jobIds)}, Total Jobs Sent: ${
-        JSON.stringify(jobIds).length
-      }`
+      `Total Jobs Expected : ${jobs.length}, Jobs: ${JSON.stringify(jobIds)}, Total Jobs Sent: ${jobIds.length}`
     );
     await Promise.all(
       Object.values(jobIds).map(async (jobId: string) => {
