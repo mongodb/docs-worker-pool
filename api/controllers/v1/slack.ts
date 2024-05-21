@@ -83,7 +83,9 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
+    return;
   } catch (err) {
+    console.error('deploy repo error');
     logger.error('deployRepo', err);
   }
 }
@@ -235,6 +237,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
 
   if (deployable.length > 0) {
+    console.log('deploying');
     await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
   }
   return {
