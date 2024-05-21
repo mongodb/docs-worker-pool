@@ -198,7 +198,6 @@ export class SlackConnector implements ISlackConnector {
           {
             type: 'input',
             block_id: 'block_repo_option',
-            optional: true,
             label: {
               type: 'plain_text',
               text: 'Select Repo',
