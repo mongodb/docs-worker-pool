@@ -16,6 +16,7 @@ import {
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { Payload } from '../../../src/entities/job';
 import { ProjectsRepository } from '../../../src/repositories/projectsRepository';
+import DOCS_METADATA from '../../../src/constants';
 
 export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -35,8 +36,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
-  //change this to get db from env vars
-  const projectsRepository = new ProjectsRepository(client.db('docs_metadata'), c, consoleLogger);
+  const projectsRepository = new ProjectsRepository(client.db(DOCS_METADATA), c, consoleLogger);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
@@ -46,14 +46,11 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   //if user has admin permissions, they can deploy all repo branches
   if (isAdmin) {
     const repos = await repoBranchesRepository.getProdDeployableRepoBranches();
-    //add checks for all of these things existing
-    //fix for monorepo repos
     for (const repo of repos) {
       const projectEntry = await projectsRepository.getProjectEntry(repo.project);
       const repoOwner = projectEntry?.github?.organization;
-      entitledRepos.push(`${repoOwner}/${repo.repoName}`);
+      if (repoOwner) entitledRepos.push(`${repoOwner}/${repo.repoName}`);
     }
-    //add repoOwner to each of these
   } else {
     const entitlements = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
     if (!isUserEntitled(entitlements) || isRestrictedToDeploy(key_val['user_id'])) {
@@ -83,7 +80,6 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
-    return;
   } catch (err) {
     console.error('deploy repo error');
     logger.error('deployRepo', err);

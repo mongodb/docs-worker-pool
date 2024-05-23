@@ -77,6 +77,7 @@ export class SlackConnector implements ISlackConnector {
           })
         );
       }
+      console.log(JSON.stringify(values['repo_option']));
       return values;
     }
 
@@ -211,6 +212,7 @@ export class SlackConnector implements ISlackConnector {
               },
               option_groups: repos,
             },
+            optional: true,
           },
           {
             type: 'input',
