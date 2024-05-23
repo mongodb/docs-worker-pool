@@ -52,7 +52,7 @@ export class RepoBranchesRepository extends BaseRepository {
         { $project: { branches: 1 } },
       ])
       .toArray();
-
+    console.log(JSON.stringify(aliasArray));
     if (aliasArray.length === 1) {
       returnObject['aliasObject'] = aliasArray[0].branches;
       returnObject.status = 'success';

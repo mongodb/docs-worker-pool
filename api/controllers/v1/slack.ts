@@ -88,6 +88,7 @@ async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository
 
 // Used solely for adding parallel deploy jobs to another array
 const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) => {
+  console.log('inside deploy helper!');
   deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail));
 };
 
@@ -124,6 +125,7 @@ export const getDeployableJobs = async (
     const non_versioned = repoInfo.branches.length === 1;
 
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
+    console.log(JSON.stringify(branchObject));
     if (!branchObject?.aliasObject) continue;
 
     const publishOriginalBranchName: boolean = branchObject.aliasObject.publishOriginalBranchName;
@@ -151,7 +153,7 @@ export const getDeployableJobs = async (
       directory
     );
 
-    if (!aliases || aliases.length === 0) {
+    if (!aliases || aliases.length) {
       if (non_versioned) {
         newPayload.urlSlug = '';
       }
