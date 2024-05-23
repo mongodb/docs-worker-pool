@@ -13,11 +13,23 @@ Resources:
           ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
           RoutingRules:
             - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/stable
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/manual
+            - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/master
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/upcoming
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/manual
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/current
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/manual
             - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.3.0
               RedirectRule:
@@ -131,25 +143,31 @@ Resources:
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self.custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/stable
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.0
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self.custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/stable
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
             - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self.custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/stable
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/stable
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self.custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
             - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self.custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/stable
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/stable
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self.custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
             - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/v1.1
               RedirectRule:
@@ -168,6 +186,24 @@ Resources:
                 Protocol: "https"
                 HostName: ${self.custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/ruby-driver/master
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self.custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/ruby-driver/upcoming
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/compass/beta
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self.custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/compass/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/compass/upcoming
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self.custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/compass/current
   DocAtlasBucket:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -180,6 +216,18 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
+          - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/stable
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self.custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/current
+          - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/atlas-operator/stable
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self.custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/atlas-operator/current
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -270,6 +318,14 @@ Resources:
       WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
+          RoutingRules:
+            - RoutingRuleCondition:
+                  KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/languages/scala/driver/master
+                RedirectRule:
+                  Protocol: "https"
+                  HostName: ${self.custom.site.host.${self:provider.stage}}
+                  ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/languages/scala/driver/upcoming
+
 
   DocsBucketPolicy:
     Type: AWS::S3::BucketPolicy
