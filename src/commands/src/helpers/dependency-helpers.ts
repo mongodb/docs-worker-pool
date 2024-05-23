@@ -36,7 +36,8 @@ async function createEnvProdFile({
       GATSBY_MARIAN_URL=${process.env.GATSBY_MARIAN_URL}
       PATH_PREFIX=${prefix}
       ${patchId ? `PATCH_ID=${patchId}` : ''}
-      ${commitHash ? `COMMIT_HASH=${commitHash}` : ''}`,
+      ${commitHash ? `COMMIT_HASH=${commitHash}` : ''}
+      GATSBY_ENABLE_DARK_MODE=${process.env.GATSBY_ENABLE_DARK_MODE}`,
       'utf8'
     );
   } catch (e) {

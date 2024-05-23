@@ -64,6 +64,7 @@ export class WorkerEnvConstruct extends Construct {
     const docsetsCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/docsets`);
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
     const gatsbyMarianUrl = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/marian_url`);
+    const gatsbyEnableDarkMode = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/enable_dark_mode`);
 
     const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
     this.environment = {
@@ -101,6 +102,7 @@ export class WorkerEnvConstruct extends Construct {
       GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: gatsbyHideUnifiedFooterLocale,
       GATSBY_MARIAN_URL: gatsbyMarianUrl,
       IS_FEATURE_BRANCH: getIsFeatureBranch(),
+      GATSBY_ENABLE_DARK_MODE: gatsbyEnableDarkMode,
     };
   }
 }
