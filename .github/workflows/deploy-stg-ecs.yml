@@ -1,8 +1,8 @@
 on:
   push:
     branches:
-      - "main"
-      - "integration"
+      - 'main'
+      - 'integration'
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: '18.x'
       - name: Install Serverless Framework
-        run: npm install -g serverless
+        run: npm install -g serverless@3
       - name: Serverless AWS authentication
         run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Configure AWS credentials

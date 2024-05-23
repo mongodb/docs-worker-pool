@@ -169,7 +169,7 @@ docs-worker-pool contains various triggers for release to higher environments. C
 #### Installation
 
 ```shell
-npm install -g serverless
+npm install -g serverless@3
 ```
 
 #### AWS Config
