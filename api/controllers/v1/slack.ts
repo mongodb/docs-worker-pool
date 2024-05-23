@@ -110,6 +110,7 @@ export const getDeployableJobs = async (
     if (splitValues.length === 3) {
       // e.g. mongodb/docs-realm/master => (owner/repo/branch)
       [repoOwner, repoName, branchName] = splitValues;
+      console.log('repoOwner: ', repoOwner, ' repoName:', repoName, 'branchName: ', branchName);
     } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
       [repoOwner, repoName, directory, branchName] = splitValues;
@@ -124,6 +125,7 @@ export const getDeployableJobs = async (
     const repoInfo = await docsetsRepository.getRepo(repoName, directory);
     const non_versioned = repoInfo.branches.length === 1;
 
+    console.log(repoName, branchName, repoInfo.project);
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
     console.log(JSON.stringify(branchObject));
     if (!branchObject?.aliasObject) continue;
