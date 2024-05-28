@@ -166,6 +166,7 @@ export class JobHandlerTestHelper {
       .calledWith(`repos/${this.job.payload.repoName}/worker.sh`)
       .mockReturnValue(nextGenEntry);
     this.config.get.calledWith('GATSBY_PARSER_USER').mockReturnValue('TestUser');
+    this.config.get.calledWith('gatsbyEnableDarkMode').mockReturnValue('true');
     this.jobCommandExecutor.execute.mockResolvedValue({ status: 'success', output: 'Great work', error: null });
   }
 }
