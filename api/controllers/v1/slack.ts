@@ -78,7 +78,6 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 };
 
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
-  console.log('in little deploy repo');
   try {
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
   } catch (err) {
@@ -88,7 +87,6 @@ async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository
 
 // Used solely for adding parallel deploy jobs to another array
 const deployHelper = (deployable, payload, jobTitle, jobUserName, jobUserEmail) => {
-  console.log('inside deploy helper!');
   deployable.push(createJob({ ...payload }, jobTitle, jobUserName, jobUserEmail));
 };
 
@@ -106,11 +104,9 @@ export const getDeployableJobs = async (
     let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
     const splitValues = values.repo_option[i].value.split('/');
     const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
-    console.log(jobTitle);
     if (splitValues.length === 3) {
       // e.g. mongodb/docs-realm/master => (owner/repo/branch)
       [repoOwner, repoName, branchName] = splitValues;
-      console.log('repoOwner: ', repoOwner, ' repoName:', repoName, 'branchName: ', branchName);
     } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
       // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
       [repoOwner, repoName, directory, branchName] = splitValues;
@@ -125,14 +121,13 @@ export const getDeployableJobs = async (
     const repoInfo = await docsetsRepository.getRepo(repoName, directory);
     const non_versioned = repoInfo.branches.length === 1;
 
-    console.log(repoName, branchName, repoInfo.project);
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
-    console.log(JSON.stringify(branchObject));
-    if (!branchObject?.aliasObject) continue;
+    if (branchObject.status == 'failure' || !branchObject?.aliasObject)
+      return prepResponse(401, 'text/plain', 'Branch not found in repos branches repository');
 
     const publishOriginalBranchName: boolean = branchObject.aliasObject.publishOriginalBranchName;
     const aliases: string[] | null = branchObject.aliasObject.urlAliases;
-    let urlSlug: string = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
+    let urlSlug: string = branchObject?.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = !!branchObject.aliasObject.isStableBranch; // bool or Falsey, add strong typing
 
     if (!urlSlug || !urlSlug.trim()) {
@@ -220,10 +215,8 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
     return prepResponse(200, 'text/plain', 'Form not submitted, will not process request');
   }
 
-  console.log('parsed type:', parsed.type);
   const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(parsed.user.id);
   if (!isUserEntitled(entitlement)) {
-    console.log('User is not entitled');
     return prepResponse(401, 'text/plain', 'User is not entitled!');
   }
 
@@ -232,23 +225,20 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   const optionGroups = parsed.view.blocks[0]?.element?.option_groups;
   try {
     values = await slackConnector.parseSelection(stateValues, isAdmin, optionGroups);
-    console.log(JSON.stringify(values));
   } catch (e) {
-    console.log(`Error parsing selection: ${e}`);
     return prepResponse(401, 'text/plain', e);
   }
   let deployable;
   try {
     deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-    console.log(JSON.stringify(deployable));
   } catch (e) {
-    console.log(JSON.stringify(deployable), e, 'error within get deployable jobs');
+    return prepResponse(401, 'text/plain', `${e} error within get deployable jobs`);
   }
   if (deployable.length > 0) {
     try {
       await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
     } catch (e) {
-      console.log(e, 'error deploying repo');
+      return prepResponse(401, 'text/plain', `${e} error deploying repos`);
     }
   }
   return {
