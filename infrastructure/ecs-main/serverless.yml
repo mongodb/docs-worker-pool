@@ -108,6 +108,7 @@ custom:
   gatsbyHideUnifiedFooterLocale: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/hide_locale}
   gatsbyMarianURL: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/marian_url}
   gatsbyEnableDarkMode: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/enable_dark_mode}
+  gatsbyFeatureShowHiddenLocales: ${ssm:/env/${self:provider.stage}/docs/worker_pool/flag/show_hidden_locales}
   fastlyMainToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/token}
   fastlyMainServiceId: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/main/service_id}
   fastlyCloudManagerToken: ${ssm:/env/${self:provider.stage}/docs/worker_pool/fastly/docs/cloudmanager/token}

@@ -167,6 +167,7 @@ export class JobHandlerTestHelper {
       .mockReturnValue(nextGenEntry);
     this.config.get.calledWith('GATSBY_PARSER_USER').mockReturnValue('TestUser');
     this.config.get.calledWith('gatsbyEnableDarkMode').mockReturnValue('true');
+    this.config.get.calledWith('gatsbyFeatureShowHiddenLocales').mockReturnValue('true');
     this.jobCommandExecutor.execute.mockResolvedValue({ status: 'success', output: 'Great work', error: null });
   }
 }

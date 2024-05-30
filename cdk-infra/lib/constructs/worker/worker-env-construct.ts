@@ -65,6 +65,12 @@ export class WorkerEnvConstruct extends Construct {
     const jobCollection = StringParameter.valueFromLookup(this, `${ssmPrefix}/atlas/collections/job/queue`);
     const gatsbyMarianUrl = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/marian_url`);
     const gatsbyEnableDarkMode = StringParameter.valueFromLookup(this, `${ssmPrefix}/frontend/enable_dark_mode`);
+    // Feature flag to render locales in the process of being translated. Might want to keep this while we continue to translate
+    // to new languages to avoid needing to keep moving this flag around
+    const gatsbyFeatureShowHiddenLocales = StringParameter.valueFromLookup(
+      this,
+      `${ssmPrefix}/flag/show_hidden_locales`
+    );
 
     const dbPassword = secureStrings['MONGO_ATLAS_PASSWORD'];
     this.environment = {
@@ -103,6 +109,7 @@ export class WorkerEnvConstruct extends Construct {
       GATSBY_MARIAN_URL: gatsbyMarianUrl,
       IS_FEATURE_BRANCH: getIsFeatureBranch(),
       GATSBY_ENABLE_DARK_MODE: gatsbyEnableDarkMode,
+      GATSBY_FEATURE_SHOW_HIDDEN_LOCALES: gatsbyFeatureShowHiddenLocales,
     };
   }
 }
