@@ -16,7 +16,7 @@ import {
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { Payload } from '../../../src/entities/job';
 import { ProjectsRepository } from '../../../src/repositories/projectsRepository';
-import DOCS_METADATA from '../../../src/constants';
+import { DOCS_METADATA } from '../../../src/constants';
 
 export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -80,6 +80,7 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
+    console.error('testing console error logging');
   } catch (err) {
     console.error('Deploy repo error');
   }
@@ -150,7 +151,7 @@ export const getDeployableJobs = async (
       directory
     );
 
-    if (!aliases || aliases.length) {
+    if (!aliases || !aliases.length) {
       if (non_versioned) {
         newPayload.urlSlug = '';
       }

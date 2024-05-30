@@ -1,3 +1,1 @@
-const DOCS_METADATA = 'docs_metadata';
-
-export default DOCS_METADATA;
+export const DOCS_METADATA = 'docs_metadata';
