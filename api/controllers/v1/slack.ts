@@ -80,7 +80,6 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
 async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository: JobRepository, jobQueueUrl) {
   try {
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
-    console.error('testing console error logging');
   } catch (err) {
     console.error('Deploy repo error');
   }
