@@ -176,7 +176,7 @@ export class TestDataProvider {
   }
 
   static getEnvVarsWithPathPrefixWithFlags(job: Job): string {
-    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_HIDE_UNIFIED_FOOTER_LOCALE=true\nGATSBY_MARIAN_URL=test-url\nGATSBY_ENABLE_DARK_MODE=true\n`;
+    return `GATSBY_PARSER_USER=TestUser\nGATSBY_PARSER_BRANCH=${job.payload.branchName}\nPATH_PREFIX=${job.payload.pathPrefix}\nGATSBY_BASE_URL=test\nPREVIEW_BUILD_ENABLED=false\nGATSBY_TEST_SEARCH_UI=false\nGATSBY_HIDE_UNIFIED_FOOTER_LOCALE=true\nGATSBY_MARIAN_URL=test-url\nGATSBY_ENABLE_DARK_MODE=true\nGATSBY_FEATURE_SHOW_HIDDEN_LOCALES=true\n`;
   }
 
   static getPathPrefixCases(): Array<any> {
