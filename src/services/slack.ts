@@ -71,11 +71,7 @@ export class SlackConnector implements ISlackConnector {
       //append version to repo_option if active
       values['repo_option'] = [];
       for (const group of optionGroups) {
-        values['repo_option'].push(
-          ...group.options.filter((option) => {
-            !option.text.text.startsWith('(!inactive)');
-          })
-        );
+        values['repo_option'].push(...group.options.filter((option) => !option.text.text.startsWith('(!inactive)')));
       }
       return values;
     }
