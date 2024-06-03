@@ -139,13 +139,139 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/bi-connector/current
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v0.
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v0.8
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v0.9
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v0.10
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v0.11
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v0.12
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.0
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.1
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.2
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.3
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.4
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.5
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.6
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.7
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.8
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.9
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.10
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.11
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.12
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.13
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.14
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.15
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.16
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.17
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
@@ -157,7 +283,31 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.0.3
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.0.4
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.1.0
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.2.0
+              RedirectRule:
+                Protocol: "https"
+                HostName: ${self:custom.site.host.${self:provider.stage}}
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
+            - RoutingRuleCondition:
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.5.0
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
@@ -175,13 +325,7 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/current
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/v2
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/current
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/v3.0
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/v2.0
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
