@@ -1,6 +1,6 @@
 ls -l ./snooty-parser
 chmod +x ./snooty-parser/snooty
-./snooty-parser/snooty/snooty create-cache . --output=bundle.zip
+./snooty-parser/snooty/snooty create-cache . --output=./bundle.zip
 echo "snooty not cloned, downloading"
 git clone -b netlify-poc --depth 1 https://github.com/mongodb/snooty.git 
 echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
