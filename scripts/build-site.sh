@@ -1,6 +1,6 @@
 ls -l ./snooty-parser
 chmod +x ./snooty-parser/snooty
-./snooty-parser/snooty/snooty create-cache . --output=./bundle.zip
+./snooty-parser/snooty/snooty create-cache .
 
 if [ ! -d "snooty" ]; then
   echo "snooty not cloned, downloading"
