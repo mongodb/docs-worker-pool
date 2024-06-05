@@ -17,6 +17,4 @@ fi
 
 
 cd snooty && npm run build
-
-echo $(pwd)
-./snooty-parser/snooty/snooty create-cache .
+cd .. && ./snooty-parser/snooty/snooty create-cache .
