@@ -32,6 +32,12 @@ export class JobValidator implements IJobValidator {
   }
 
   async throwIfUserNotEntitled(job: Job): Promise<void> {
+    try {
+      const admin = await this._repoEntitlementRepository.getIsAdmin(job.user);
+      if (admin) return;
+    } catch (e) {
+      throw new InvalidJobError(`Invalid job user: ${job.user}`);
+    }
     const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
     const entitlementToFind = `${job.payload.repoOwner}/${job.payload.repoName}${
       job.payload.repoName === MONOREPO_NAME ? `/${job.payload.directory}` : ``
