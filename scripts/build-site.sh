@@ -1,7 +1,7 @@
 ls -l ./snooty-parser
 chmod +x ./snooty-parser/snooty
 ./snooty-parser/snooty/snooty build . --output=./bundle.zip
-git clone -b v0.16.14 --depth 1 https://github.com/mongodb/snooty.git 
+git clone -b netlify-poc --depth 1 https://github.com/mongodb/snooty.git 
 echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
 cd snooty                
 npm ci --legacy-peer-deps
