@@ -5,7 +5,7 @@ chmod +x ./snooty-parser/snooty
 if [ ! -d "snooty" ]; then
   echo "snooty not cloned, downloading"
   
-  git clone -b v0.16.14 --depth 1 https://github.com/mongodb/snooty.git 
+  git clone -b netlify-poc --depth 1 https://github.com/mongodb/snooty.git 
   cd snooty
   npm ci --legacy-peer-deps
   git clone --depth 1 https://github.com/mongodb/docs-tools.git ./snooty/docs-tools
