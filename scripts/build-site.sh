@@ -18,4 +18,4 @@ fi
 
 cd snooty && npm run build
 
-snooty create-cache .
+./snooty-parser/snooty/snooty create-cache .
