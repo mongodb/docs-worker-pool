@@ -15,6 +15,5 @@ if [ ! -d "snooty" ]; then
 fi
 
 echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
-cat ./snooty/.env.production
 
 cd snooty && npm run build
