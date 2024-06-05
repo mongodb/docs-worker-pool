@@ -43,6 +43,7 @@ export class JobValidator implements IJobValidator {
       job.payload.repoName === MONOREPO_NAME ? `/${job.payload.directory}` : ``
     }`;
     if (!entitlementsObject?.repos?.includes(entitlementToFind)) {
+      console.log(`Auth error for ${job}`);
       throw new AuthorizationError(`${job.user} is not entitled for repo ${entitlementToFind}`);
     }
   }
@@ -75,6 +76,7 @@ export class JobValidator implements IJobValidator {
   public async throwIfJobInvalid(job: Job): Promise<void> {
     this._validateInput(job);
     if (this.isProd(job.payload.jobType)) {
+      console.log(`checking if user is entitled for job ${job}`);
       await this.throwIfUserNotEntitled(job);
     }
   }

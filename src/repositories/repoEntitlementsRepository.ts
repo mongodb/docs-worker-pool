@@ -52,6 +52,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       throw new Error('getIsAdmin function must be given at least one argument');
     }
     let query;
+    console.log('getIsAdmin function called');
     if (slackUserId) {
       query = { slack_user_id: slackUserId };
     } else query = { github_username: githubUsername };
