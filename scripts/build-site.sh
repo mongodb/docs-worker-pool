@@ -17,3 +17,5 @@ fi
 echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
 
 cd snooty && npm run build
+
+snooty create-cache .
