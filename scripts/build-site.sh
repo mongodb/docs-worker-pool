@@ -4,6 +4,7 @@ chmod +x ./snooty-parser/snooty
 
 if [ ! -d "snooty" ]; then
   echo "snooty not cloned, downloading"
+  
   git clone -b v0.16.14 --depth 1 https://github.com/mongodb/snooty.git 
   cd snooty
   npm ci --legacy-peer-deps
@@ -11,9 +12,9 @@ if [ ! -d "snooty" ]; then
   mkdir -p ./snooty/static/images
   mv ./snooty/docs-tools/themes/mongodb/static ./static/docs-tools
   mv ./snooty/docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
-  echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
 fi
 
+echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
 cat ./snooty/.env.production
 
 cd snooty && npm run build
