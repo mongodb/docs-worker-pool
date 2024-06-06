@@ -237,15 +237,15 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   if (deployable.length > 0) {
     try {
       console.log('deploying repos');
-      await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
+      deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+      };
     } catch (e) {
       return prepResponse(401, 'text/plain', `${e} error deploying repos`);
     }
   }
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
 };
 
 function createPayload(
