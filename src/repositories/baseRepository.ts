@@ -28,6 +28,7 @@ export abstract class BaseRepository {
 
   protected async insertMany(docs: Array<any>, errorMsg: string): Promise<any> {
     try {
+      console.log('inserting many');
       const insertManyResult = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.insertMany(docs),
@@ -36,6 +37,7 @@ export abstract class BaseRepository {
       if (insertManyResult?.insertedIds) {
         return insertManyResult.insertedIds;
       }
+      console.log('returned null for insertMany??');
       return null;
     } catch (error) {
       this._logger.error(`${this._repoName}:upsert`, `Failed to insert job (${JSON.stringify(docs)}) error: ${error}`);

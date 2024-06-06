@@ -52,7 +52,6 @@ export class RepoEntitlementsRepository extends BaseRepository {
       throw new Error('getIsAdmin function must be given at least one argument');
     }
     let query;
-    console.log('getIsAdmin function called');
     if (slackUserId) {
       query = { slack_user_id: slackUserId };
     } else query = { github_username: githubUsername };
@@ -60,6 +59,7 @@ export class RepoEntitlementsRepository extends BaseRepository {
       query,
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${slackUserId}`
     );
+    console.log(`getIsAdmin function called, ${entitlementsObject?.admin}`);
     return entitlementsObject?.admin;
   }
 

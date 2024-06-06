@@ -66,6 +66,7 @@ export async function handleJob(jobId: string, db: mongodb.Db) {
 
   try {
     await jobManager.startSpecificJob(jobId);
+    console.log('in enhanced app handle job');
   } catch (err) {
     consoleLogger.info('enhancedApp', err);
   }

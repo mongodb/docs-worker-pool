@@ -236,6 +236,7 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
   }
   if (deployable.length > 0) {
     try {
+      console.log('deploying repos');
       await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
     } catch (e) {
       return prepResponse(401, 'text/plain', `${e} error deploying repos`);
