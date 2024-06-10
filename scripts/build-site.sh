@@ -24,6 +24,6 @@ if [ ! -d "snooty" ]; then
   echo "snooty frontend installed"
 fi
 
-
+ls -al
 
 cd snooty && npm run build
