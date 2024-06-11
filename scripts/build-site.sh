@@ -1,7 +1,8 @@
+PARSER_VERSION=0.16.6
 
 if [ ! -d "snooty-parser" ]; then
   echo "snooty parser not installed, downloading..."
-  curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v0.16.6/snooty-v0.16.6-linux_x86_64.zip
+  curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${PARSER_VERSION}/snooty-v${PARSER_VERSION}-linux_x86_64.zip
   unzip -d ./snooty-parser snooty-parser.zip
   chmod +x ./snooty-parser/snooty
 fi
@@ -24,6 +25,5 @@ if [ ! -d "snooty" ]; then
   echo "snooty frontend installed"
 fi
 
-ls -al
 
 cd snooty && npm run build

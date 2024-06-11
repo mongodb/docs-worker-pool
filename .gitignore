@@ -13,3 +13,5 @@ local.json
 globalConfig.json
 .serverless
 dist
+
+Dockerfile
