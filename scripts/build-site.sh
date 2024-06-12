@@ -1,5 +1,9 @@
 PARSER_VERSION=0.16.6
 
+# This make command curls the examples for certain repos.
+# If the rule doesn't exist, the error doesn't interrupt the build process.
+make examples
+
 if [ ! -d "snooty-parser" ]; then
   echo "snooty parser not installed, downloading..."
   curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${PARSER_VERSION}/snooty-v${PARSER_VERSION}-linux_x86_64.zip
