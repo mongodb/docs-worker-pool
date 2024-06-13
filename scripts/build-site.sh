@@ -11,9 +11,11 @@ if [ ! -d "snooty-parser" ]; then
   chmod +x ./snooty-parser/snooty
 fi
 
+echo "============================================================================================="
 echo "===================================== Running parser... ====================================="
 ./snooty-parser/snooty/snooty build . --output=./bundle.zip
 echo "===================================== Parser complete ======================================="
+echo "============================================================================================="
 
 if [ ! -d "snooty" ]; then
   echo "snooty frontend not installed, downloading"
