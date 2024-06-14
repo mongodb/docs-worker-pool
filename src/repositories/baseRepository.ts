@@ -28,7 +28,7 @@ export abstract class BaseRepository {
 
   protected async insertMany(docs: Array<any>, errorMsg: string): Promise<any> {
     try {
-      console.log('inserting many');
+      console.log('inserting many', JSON.stringify(docs));
       const insertManyResult = await this.promiseTimeoutS(
         this._config.get('MONGO_TIMEOUT_S'),
         this._collection.insertMany(docs),
