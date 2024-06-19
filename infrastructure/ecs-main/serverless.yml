@@ -96,6 +96,8 @@ custom:
   atlasGovBucketName: docs-govcloud-${self:provider.stage}
   cloudManagerBucketName: docs-cloudmanager-${self:provider.stage}
   opsManagerBucketName: docs-opsmanager-${self:provider.stage}
+  k8sBucketName: docs-k8s-${self:provider.stage}
+  mongocliBucketName: docs-mongocli-${self:provider.stage}
   npmBase64Auth: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/auth}
   npmEmail: ${ssm:/env/${self:provider.stage}/docs/worker_pool/npm/email}
   gatsbyBaseUrl: ${ssm:/env/${self:provider.stage}/docs/worker_pool/frontend/base_url}

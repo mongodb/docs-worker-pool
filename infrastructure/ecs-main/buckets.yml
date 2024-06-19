@@ -339,6 +339,32 @@ Resources:
           IndexDocument: index.html
           ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
 
+  K8sBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      BucketName: ${self:custom.k8sBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
+
+  MongoCLIBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      BucketName: ${self:custom.mongocliBucketName}
+      WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: ${self:custom.site.errorDoc.${self:provider.stage}, null}
+
   JavaBucket:
     Type: "AWS::S3::Bucket"
     Properties:
