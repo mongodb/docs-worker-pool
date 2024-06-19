@@ -31,24 +31,6 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/manual
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.3.0
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.3
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.2
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.2
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.1
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/v1.1
-            - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/php-library/master
               RedirectRule:
                 Protocol: "https"
@@ -175,18 +157,6 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.1
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.2
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
-            - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/v1.3
               RedirectRule:
                 Protocol: "https"
@@ -283,43 +253,13 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/kubernetes-operator/current
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.0.3
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.0.4
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.1.0
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.2.0
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
-            - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/v0.5.0
-              RedirectRule:
-                Protocol: "https"
-                HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
-            - RoutingRuleCondition:
                 KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/stable
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/mongocli/current
             - RoutingRuleCondition:
-                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/v1.1
+                KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/spark-connector/v1.1.1
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
