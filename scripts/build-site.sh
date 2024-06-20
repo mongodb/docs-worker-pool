@@ -33,6 +33,7 @@ if [ ! -d "snooty" ]; then
   rustup target add wasm32-wasi 
   npm run prepublishOnly 
   echo "snooty frontend installed"
+  cd ../..
 fi
 
 
