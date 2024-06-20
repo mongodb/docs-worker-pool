@@ -27,7 +27,10 @@ if [ ! -d "snooty" ]; then
   mkdir -p ./snooty/static/images
   mv ./snooty/docs-tools/themes/mongodb/static ./static/docs-tools
   mv ./snooty/docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
-
+  cd component-factory-transformer 
+  cargo build 
+  rustup target add wasm32-wasi 
+  npm run prepublishOnly 
   echo "snooty frontend installed"
 fi
 
