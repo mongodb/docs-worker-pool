@@ -21,6 +21,7 @@ if [ ! -d "snooty" ]; then
   echo "snooty frontend not installed, downloading"
   git clone -b netlify-poc --depth 1 https://github.com/mongodb/snooty.git 
   echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
+  echo USE_FILTER_BRANCH=true >> ./snooty/.env.production
   cd snooty
   npm ci --legacy-peer-deps
   git clone --depth 1 https://github.com/mongodb/docs-tools.git ./snooty/docs-tools
