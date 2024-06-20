@@ -28,6 +28,7 @@ if [ ! -d "snooty" ]; then
   mv ./snooty/docs-tools/themes/mongodb/static ./static/docs-tools
   mv ./snooty/docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
   cd component-factory-transformer 
+  rustup default stable
   cargo build 
   rustup target add wasm32-wasi 
   npm run prepublishOnly 
