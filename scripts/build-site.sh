@@ -32,4 +32,4 @@ if [ ! -d "snooty" ]; then
 fi
 
 
-cd snooty && npm run build
+cd snooty && npm run build:no-prefix
