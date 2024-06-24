@@ -3,7 +3,8 @@ import { Job } from '../../../entities/job';
 import { getDirectory } from '../../../job/jobHandler';
 import { CliCommandResponse, ExecuteCommandError, executeCliCommand } from '../helpers';
 
-const RSTSPEC_FLAG = '--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/latest/snooty/rstspec.toml';
+const SNOOTY_PARSER_VERSION = process.env['SNOOTY_PARSER_VERSION'];
+const RSTSPEC_FLAG = `--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/${SNOOTY_PARSER_VERSION}/snooty/rstspec.toml`;
 interface NextGenParseParams {
   job: Job;
   patchId?: string;
@@ -22,6 +23,10 @@ export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams)
     commandArgs.push('--patch');
     commandArgs.push(patchId);
   }
+  // log rstspect flag here
+  // log branch name here
+  console.log(`check rstspect_flag ${RSTSPEC_FLAG}`);
+
   commandArgs.push(RSTSPEC_FLAG);
 
   // Not currently used in production builds, adding functionality
