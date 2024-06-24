@@ -19,7 +19,7 @@ PARSER_VERSION := $(SNOOTY_PARSER_VERSION)
 else
 PARSER_VERSION := main
 endif
-RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/${PARSER_VERSION}/snooty/rstspec.toml
+RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/v${PARSER_VERSION}/snooty/rstspec.toml
 
 ifeq ($(SNOOTY_INTEGRATION),true)
 	BUCKET_FLAG=-b ${INTEGRATION_SEARCH_BUCKET}
