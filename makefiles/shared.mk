@@ -14,13 +14,6 @@ PATCH_ID=$(shell if test -f "${PATCH_FILE}"; then git patch-id < ${PATCH_FILE} |
 PATCH_CLAUSE=$(shell if [ ! -z "${PATCH_ID}" ]; then echo --patch "${PATCH_ID}"; fi)
 
 BUNDLE_PATH=${REPO_DIR}/bundle.zip
-ifdef SNOOTY_PARSER_VERSION
-PARSER_VERSION := v$(SNOOTY_PARSER_VERSION)
-else
-PARSER_VERSION := main
-endif
-RSTSPEC_FLAG=--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/${PARSER_VERSION}/snooty/rstspec.toml
-
 ifeq ($(SNOOTY_INTEGRATION),true)
 	BUCKET_FLAG=-b ${INTEGRATION_SEARCH_BUCKET}
 endif
@@ -42,14 +35,14 @@ ifndef PUSHLESS_DEPLOY_SHARED_DISABLED
 next-gen-parse:
 	# snooty parse -- separated from front-end to support index gen
 	if [ -n "${PATCH_ID}" ]; then \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${RSTSPEC_FLAG} ${NO_CACHING}; \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" --commit "${COMMIT_HASH}" ${PATCH_CLAUSE} ${NO_CACHING}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
 			exit 0; \
 		fi \
 	else \
-		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${RSTSPEC_FLAG} ${NO_CACHING}; \
+		snooty build "${REPO_DIR}" --output "${BUNDLE_PATH}" ${NO_CACHING}; \
 		if [ $$? -eq 1 ]; then \
 			exit 1; \
 		else \
