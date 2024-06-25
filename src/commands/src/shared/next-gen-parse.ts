@@ -3,7 +3,9 @@ import { Job } from '../../../entities/job';
 import { getDirectory } from '../../../job/jobHandler';
 import { CliCommandResponse, ExecuteCommandError, executeCliCommand } from '../helpers';
 
-const SNOOTY_PARSER_VERSION = process.env['SNOOTY_PARSER_VERSION'];
+const SNOOTY_PARSER_VERSION = process.env['SNOOTY_PARSER_VERSION']
+  ? `v${process.env['SNOOTY_PARSER_VERSION']}`
+  : 'main';
 const RSTSPEC_FLAG = `--rstspec=https://raw.githubusercontent.com/mongodb/snooty-parser/${SNOOTY_PARSER_VERSION}/snooty/rstspec.toml`;
 interface NextGenParseParams {
   job: Job;
