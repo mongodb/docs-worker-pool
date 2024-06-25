@@ -585,7 +585,7 @@ export abstract class JobHandler {
 
     let buildStepOutput: CliCommandResponse;
 
-    this.logger.save(job._id, `calling nextgenparse with env flag ${process.env['SNOOTY_PARSER_VERSION']}`);
+    this._logger.save(job._id, `calling nextgenparse with env flag ${process.env['SNOOTY_PARSER_VERSION']}`);
     const parseFunc = async () => nextGenParse({ job, patchId });
     buildStepOutput = await this.wrapWithBenchmarks(parseFunc, 'parseExe');
     this.logger.save(job._id, 'Repo Parsing Complete');
