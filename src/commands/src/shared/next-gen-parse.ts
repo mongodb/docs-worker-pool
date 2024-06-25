@@ -23,9 +23,6 @@ export async function nextGenParse({ job, patchId, isProd }: NextGenParseParams)
     commandArgs.push('--patch');
     commandArgs.push(patchId);
   }
-  // log rstspect flag here
-  // log branch name here
-  console.log(`check rstspect_flag ${RSTSPEC_FLAG}`);
 
   commandArgs.push(RSTSPEC_FLAG);
 
