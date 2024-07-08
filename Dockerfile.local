@@ -64,7 +64,7 @@ RUN echo ${WORK_DIRECTORY}
 
 
 # install snooty frontend and docs-tools
-RUN git clone -b DOP-4784-preprd --depth 1 https://github.com/mongodb/snooty.git       \
+RUN git clone -b DOP-4784-chatbot-404 --depth 1 https://github.com/mongodb/snooty.git       \
     && cd snooty                                                                                   \
     && npm ci --legacy-peer-deps \
     && cd component-factory-transformer \
