@@ -32,11 +32,18 @@ export class JobValidator implements IJobValidator {
   }
 
   async throwIfUserNotEntitled(job: Job): Promise<void> {
+    try {
+      const admin = await this._repoEntitlementRepository.getIsAdmin(job.user);
+      if (admin) return;
+    } catch (e) {
+      throw new InvalidJobError(`Invalid job user: ${job.user}`);
+    }
     const entitlementsObject = await this._repoEntitlementRepository.getRepoEntitlementsByGithubUsername(job.user);
     const entitlementToFind = `${job.payload.repoOwner}/${job.payload.repoName}${
       job.payload.repoName === MONOREPO_NAME ? `/${job.payload.directory}` : ``
     }`;
     if (!entitlementsObject?.repos?.includes(entitlementToFind)) {
+      console.log(`Auth error for ${job}`);
       throw new AuthorizationError(`${job.user} is not entitled for repo ${entitlementToFind}`);
     }
   }
@@ -69,6 +76,7 @@ export class JobValidator implements IJobValidator {
   public async throwIfJobInvalid(job: Job): Promise<void> {
     this._validateInput(job);
     if (this.isProd(job.payload.jobType)) {
+      console.log(`checking if user is entitled for job ${job}`);
       await this.throwIfUserNotEntitled(job);
     }
   }

@@ -15,6 +15,8 @@ import {
 } from '../../handlers/slack';
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { Payload } from '../../../src/entities/job';
+import { ProjectsRepository } from '../../../src/repositories/projectsRepository';
+import { DOCS_METADATA } from '../../../src/constants';
 
 export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const consoleLogger = new ConsoleLogger();
@@ -34,21 +36,34 @@ export const DisplayRepoOptions = async (event: APIGatewayEvent): Promise<APIGat
   const client = new mongodb.MongoClient(c.get('dbUrl'));
   await client.connect();
   const db = client.db(process.env.DB_NAME);
+  const projectsRepository = new ProjectsRepository(client.db(DOCS_METADATA), c, consoleLogger);
   const repoEntitlementRepository = new RepoEntitlementsRepository(db, c, consoleLogger);
   const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
   const key_val = getQSString(event.body);
-  const entitlement = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
-  if (!isUserEntitled(entitlement) || isRestrictedToDeploy(key_val['user_id'])) {
-    const { restrictedProdDeploy } = c.get<any>('prodDeploy');
-    const response = restrictedProdDeploy
-      ? 'Production freeze in place - please notify DOP if seeing this past 3/26'
-      : 'User is not entitled!';
-    return prepResponse(401, 'text/plain', response);
-  }
 
   const isAdmin = await repoEntitlementRepository.getIsAdmin(key_val['user_id']);
+  let entitledRepos: any[] = [];
+  //if user has admin permissions, they can deploy all repo branches
+  if (isAdmin) {
+    const repos = await repoBranchesRepository.getProdDeployableRepoBranches();
+    for (const repo of repos) {
+      const projectEntry = await projectsRepository.getProjectEntry(repo.project);
+      const repoOwner = projectEntry?.github?.organization;
+      if (repoOwner) entitledRepos.push(`${repoOwner}/${repo.repoName}`);
+    }
+  } else {
+    const entitlements = await repoEntitlementRepository.getRepoEntitlementsBySlackUserId(key_val['user_id']);
+    if (!isUserEntitled(entitlements) || isRestrictedToDeploy(key_val['user_id'])) {
+      const { restrictedProdDeploy } = c.get<any>('prodDeploy');
+      const response = restrictedProdDeploy
+        ? 'Production freeze in place - please notify DOP if seeing this past 3/26'
+        : 'User is not entitled!';
+      return prepResponse(401, 'text/plain', response);
+    }
+    entitledRepos = entitlements.repos;
+  }
 
-  const entitledBranches = await buildEntitledGroupsList(entitlement, repoBranchesRepository);
+  const entitledBranches = await buildEntitledGroupsList(entitledRepos, repoBranchesRepository);
   const resp = await slackConnector.displayRepoOptions(entitledBranches, key_val['trigger_id'], isAdmin);
   if (resp?.status == 200 && resp?.data?.ok) {
     return {
@@ -66,7 +81,7 @@ async function deployRepo(deployable: Array<any>, logger: ILogger, jobRepository
   try {
     await jobRepository.insertBulkJobs(deployable, jobQueueUrl);
   } catch (err) {
-    logger.error('deployRepo', err);
+    console.error('Deploy repo error');
   }
 }
 
@@ -86,25 +101,17 @@ export const getDeployableJobs = async (
   const deployable = [];
 
   for (let i = 0; i < values?.repo_option?.length; i++) {
-    let jobTitle: string, repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
-    if (values.deploy_option == 'deploy_all') {
-      repoOwner = 'mongodb';
-      branchName = 'master';
-      repoName = values.repo_option[i].repoName;
-      jobTitle = `Slack deploy: ${repoOwner}/${repoName}/${branchName}, by ${entitlement.github_username}`;
+    let repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
+    const splitValues = values.repo_option[i].value.split('/');
+    const jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
+    if (splitValues.length === 3) {
+      // e.g. mongodb/docs-realm/master => (owner/repo/branch)
+      [repoOwner, repoName, branchName] = splitValues;
+    } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
+      // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
+      [repoOwner, repoName, directory, branchName] = splitValues;
     } else {
-      const splitValues = values.repo_option[i].value.split('/');
-      jobTitle = `Slack deploy: ${values.repo_option[i].value}, by ${entitlement.github_username}`;
-
-      if (splitValues.length === 3) {
-        // e.g. mongodb/docs-realm/master => (owner/repo/branch)
-        [repoOwner, repoName, branchName] = splitValues;
-      } else if (splitValues.length === 4 && process.env.FEATURE_FLAG_MONOREPO_PATH === 'true') {
-        // e.g. 10gen/docs-monorepo/cloud-docs/master => (owner/monorepo/repoDirectory/branch)
-        [repoOwner, repoName, directory, branchName] = splitValues;
-      } else {
-        throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
-      }
+      throw Error('Selected entitlement value is configured incorrectly. Check user entitlements!');
     }
 
     const hashOption = values?.hash_option ?? null;
@@ -115,11 +122,12 @@ export const getDeployableJobs = async (
     const non_versioned = repoInfo.branches.length === 1;
 
     const branchObject = await repoBranchesRepository.getRepoBranchAliases(repoName, branchName, repoInfo.project);
-    if (!branchObject?.aliasObject) continue;
+    if (branchObject.status == 'failure' || !branchObject?.aliasObject)
+      return prepResponse(401, 'text/plain', 'Branch not found in repos branches repository');
 
     const publishOriginalBranchName: boolean = branchObject.aliasObject.publishOriginalBranchName;
     const aliases: string[] | null = branchObject.aliasObject.urlAliases;
-    let urlSlug: string = branchObject.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
+    let urlSlug: string = branchObject?.aliasObject.urlSlug; // string or null, string must match value in urlAliases or gitBranchName
     const isStableBranch = !!branchObject.aliasObject.isStableBranch; // bool or Falsey, add strong typing
 
     if (!urlSlug || !urlSlug.trim()) {
@@ -142,7 +150,7 @@ export const getDeployableJobs = async (
       directory
     );
 
-    if (!aliases || aliases.length === 0) {
+    if (!aliases || !aliases.length) {
       if (non_versioned) {
         newPayload.urlSlug = '';
       }
@@ -214,21 +222,30 @@ export const DeployRepo = async (event: any = {}): Promise<any> => {
 
   let values = [];
   const isAdmin = await repoEntitlementRepository.getIsAdmin(parsed.user.id);
+  const optionGroups = parsed.view.blocks[0]?.element?.option_groups;
   try {
-    values = await slackConnector.parseSelection(stateValues, isAdmin, repoBranchesRepository);
+    values = await slackConnector.parseSelection(stateValues, isAdmin, optionGroups);
   } catch (e) {
-    console.log(`Error parsing selection: ${e}`);
     return prepResponse(401, 'text/plain', e);
   }
-  const deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
-
-  if (deployable.length > 0) {
-    await deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
+  let deployable;
+  try {
+    deployable = await getDeployableJobs(values, entitlement, repoBranchesRepository, docsetsRepository);
+  } catch (e) {
+    return prepResponse(401, 'text/plain', `${e} error within get deployable jobs`);
   }
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-  };
+  if (deployable.length > 0) {
+    try {
+      console.log('deploying repos');
+      deployRepo(deployable, consoleLogger, jobRepository, c.get('jobsQueueUrl'));
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+      };
+    } catch (e) {
+      return prepResponse(401, 'text/plain', `${e} error deploying repos`);
+    }
+  }
 };
 
 function createPayload(

@@ -34,7 +34,10 @@ export class RepoBranchesRepository extends BaseRepository {
 
   async getProdDeployableRepoBranches(): Promise<Document[]> {
     const reposArray = await this._collection
-      .aggregate([{ $match: { prodDeployable: true, internalOnly: false } }, { $project: { _id: 0, repoName: 1 } }])
+      .aggregate([
+        { $match: { prodDeployable: true, internalOnly: false } },
+        { $project: { _id: 0, repoName: 1, project: 1 } },
+      ])
       .toArray();
     return reposArray ?? [];
   }
@@ -49,7 +52,6 @@ export class RepoBranchesRepository extends BaseRepository {
         { $project: { branches: 1 } },
       ])
       .toArray();
-
     if (aliasArray.length === 1) {
       returnObject['aliasObject'] = aliasArray[0].branches;
       returnObject.status = 'success';
