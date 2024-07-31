@@ -57,8 +57,8 @@ get-build-dependencies: fetch-submodule
 	@curl https://raw.githubusercontent.com/mongodb/docs-worker-pool/meta/publishedbranches/docs-php-library.yaml > ${REPO_DIR}/published-branches.yaml
 
 fetch-submodule:
-	git submodule update --remote --init
-	rsync -a --delete ${REPO_DIR}/mongo-php-library/docs/ ${REPO_DIR}/source
+	-git submodule update --remote --init
+	-rsync -a --delete ${REPO_DIR}/mongo-php-library/docs/ ${REPO_DIR}/source
 
 next-gen-stage: ## Host online for review
 	# stagel local jobs \
