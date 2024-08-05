@@ -110,11 +110,15 @@ function prepProgressMessage(
   status: string,
   errorReason: string
 ): string {
-  const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
   const env = c.get<string>('env');
+  const deprecationWarning =
+    env === 'prd'
+      ? 'The Autobuilder for staging will be deprecated by Sept. 30th. Please reach out to #ask-docs-platform on questions on how to migrate to Netlify for staging builds.'
+      : '';
+  const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
   switch (status) {
     case 'inQueue':
-      return msg + 'has successfully been added to the ' + env + ' queue.';
+      return msg + `has successfully been added to the ' + env + ' queue. ${deprecationWarning}`;
     case 'inProgress':
       return msg + 'is now being processed.';
     case 'completed':
