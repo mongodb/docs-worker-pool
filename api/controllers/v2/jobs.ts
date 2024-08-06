@@ -118,7 +118,7 @@ function prepProgressMessage(
   const msg = `Your Job (<${jobUrl}${jobId}|${jobTitle}>) `;
   switch (status) {
     case 'inQueue':
-      return msg + `has successfully been added to the ' + env + ' queue. ${deprecationWarning}`;
+      return msg + `has successfully been added to the ${env} queue. ${deprecationWarning}`;
     case 'inProgress':
       return msg + 'is now being processed.';
     case 'completed':
