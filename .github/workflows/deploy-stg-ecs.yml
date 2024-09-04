@@ -3,6 +3,7 @@ on:
     branches:
       - 'main'
       - 'integration'
+      - 'dark-mode-uat'
 concurrency:
   group: environment-stg-${{ github.ref }}
   cancel-in-progress: true
