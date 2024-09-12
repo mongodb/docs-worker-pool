@@ -7,6 +7,7 @@ import { markBuildArtifactsForDeletion, validateJsonWebhook } from '../../handle
 import { DocsetsRepository } from '../../../src/repositories/docsetsRepository';
 import { ReposBranchesDocsetsDocument } from '../../../modules/persistence/src/services/metadata/repos_branches';
 import { PushEvent } from '@octokit/webhooks-types';
+import { APIGatewayProxyResult } from 'aws-lambda';
 
 async function prepGithubPushPayload(
   githubEvent: any,
@@ -61,75 +62,11 @@ async function prepGithubPushPayload(
   };
 }
 
-export const TriggerBuild = async (event: any = {}, context: any = {}): Promise<any> => {
-  const client = new mongodb.MongoClient(c.get('dbUrl'));
-  await client.connect();
-  const db = client.db(c.get('dbName'));
-  const consoleLogger = new ConsoleLogger();
-  const jobRepository = new JobRepository(db, c, consoleLogger);
-  const repoBranchesRepository = new RepoBranchesRepository(db, c, consoleLogger);
-  const docsetsRepository = new DocsetsRepository(db, c, consoleLogger);
-
-  if (!validateJsonWebhook(event, c.get<string>('githubSecret'))) {
-    const errMsg = "X-Hub-Signature incorrect. Github webhook token doesn't match";
-    return {
-      statusCode: 401,
-      headers: { 'Content-Type': 'text/plain' },
-      body: errMsg,
-    };
-  }
-  if (!event.body) {
-    const err = 'Trigger build does not have a body in event payload';
-    consoleLogger.error('TriggerBuildError', err);
-    return {
-      statusCode: 400,
-      headers: { 'Content-Type': 'text/plain' },
-      body: err,
-    };
-  }
-
-  let body: PushEvent;
-  try {
-    body = JSON.parse(event.body) as PushEvent;
-  } catch (e) {
-    consoleLogger.error('[TriggerBuild]', `ERROR! Could not parse event.body ${e}`);
-    console.log(`event: ${event} and event body: ${event.body}`);
-    return {
-      statusCode: 502,
-      headers: { 'Content-Type': 'text/plain' },
-      body: ' ERROR! Could not parse event.body',
-    };
-  }
-
-  if (body.deleted) {
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'text/plain' },
-      body: 'Job Ignored (Deletion)',
-    };
-  }
-
-  const env = c.get<string>('env');
-  const repoInfo = await docsetsRepository.getRepo(body.repository.name);
-  const jobPrefix = repoInfo?.prefix ? repoInfo['prefix'][env] : '';
-  // TODO: Make job be of type Job
-  const job = await prepGithubPushPayload(body, repoBranchesRepository, jobPrefix, repoInfo);
-  try {
-    consoleLogger.info(job.title, 'Creating Job');
-    const jobId = await jobRepository.insertJob(job, c.get('jobsQueueUrl'));
-    consoleLogger.info(job.title, `Created Job ${jobId}`);
-  } catch (err) {
-    return {
-      statusCode: 500,
-      headers: { 'Content-Type': 'text/plain' },
-      body: err,
-    };
-  }
+export const TriggerBuild = async (): Promise<APIGatewayProxyResult> => {
   return {
-    statusCode: 202,
+    statusCode: 404,
     headers: { 'Content-Type': 'text/plain' },
-    body: 'Job Queued',
+    body: 'The Autobuilder is currently disabled for staging. Please use Netlify instead.',
   };
 };
-
 export const MarkBuildArtifactsForDeletion = markBuildArtifactsForDeletion;
