@@ -95,9 +95,8 @@ export const getDeployableJobs = async (
   for (let i = 0; i < values?.repo_option?.length; i++) {
     let jobTitle: string, repoOwner: string, repoName: string, branchName: string, directory: string | undefined;
     if (values.deploy_option == 'deploy_all') {
-      repoOwner = 'mongodb';
-      branchName = 'master';
-      repoName = values.repo_option[i].repoName;
+      const splitValues = values.repo_option[i].value.split('/');
+      [repoOwner, repoName, branchName] = splitValues;
       jobTitle = `Slack deploy: ${repoOwner}/${repoName}/${branchName}, by ${entitlement.github_username}`;
     } else {
       const splitValues = values.repo_option[i].value.split('/');
