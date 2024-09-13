@@ -413,6 +413,8 @@ export abstract class JobHandler {
       GATSBY_TEST_SEARCH_UI: this._config.get<string>('featureFlagSearchUI'),
       GATSBY_HIDE_UNIFIED_FOOTER_LOCALE: this._config.get<string>('gatsbyHideUnifiedFooterLocale'),
       GATSBY_MARIAN_URL: this._config.get<string>('gatsbyMarianURL'),
+      GATSBY_ENABLE_DARK_MODE: this._config.get<string>('gatsbyEnableDarkMode'),
+      GATSBY_FEATURE_SHOW_HIDDEN_LOCALES: this._config.get<string>('gatsbyFeatureShowHiddenLocales'),
     };
 
     for (const [envName, envValue] of Object.entries(snootyFrontEndVars)) {
