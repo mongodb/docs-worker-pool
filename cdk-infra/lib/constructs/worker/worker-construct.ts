@@ -102,12 +102,10 @@ export class WorkerConstruct extends Construct {
       }),
     });
 
-    const env = getEnv();
-
     new FargateService(this, 'fargateService', {
       cluster,
       taskDefinition,
-      desiredCount: env === 'prd' ? 10 : 1,
+      desiredCount: 0,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
     });
