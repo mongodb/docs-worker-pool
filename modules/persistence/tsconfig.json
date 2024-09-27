@@ -9,6 +9,6 @@
     "baseUrl": "./",
     "types": ["adm-zip"]
   },
-  "include": ["src/**/*.ts", "index.ts"],
+  "include": ["src/**/*.ts", "index.ts", "DOP-4571.ts"],
   "exclude": ["node_modules", "tests/**/*.ts"]
 }
