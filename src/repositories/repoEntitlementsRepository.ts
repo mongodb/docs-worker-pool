@@ -47,12 +47,19 @@ export class RepoEntitlementsRepository extends BaseRepository {
     }
   }
 
-  async getIsAdmin(slackUserId: string): Promise<boolean> {
-    const query = { slack_user_id: slackUserId };
+  async getIsAdmin(slackUserId?: string, githubUsername?: string): Promise<boolean> {
+    if (!arguments.length) {
+      throw new Error('getIsAdmin function must be given at least one argument');
+    }
+    let query;
+    if (slackUserId) {
+      query = { slack_user_id: slackUserId };
+    } else query = { github_username: githubUsername };
     const entitlementsObject = await this.findOne(
       query,
       `Mongo Timeout Error: Timedout while retrieving entitlements for ${slackUserId}`
     );
+    console.log(`getIsAdmin function was called, ${entitlementsObject?.admin}`);
     return entitlementsObject?.admin;
   }
 
