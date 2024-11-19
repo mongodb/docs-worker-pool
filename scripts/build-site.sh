@@ -6,7 +6,7 @@ make examples
 
 if [ ! -d "snooty-parser" ]; then
   echo "snooty parser not installed, downloading..."
-  curl -L -o snooty-parser.zip https://github.com/rayangler/snooty-parser/releases/download/DOP-5189-test-2/snooty-DOP-5189-test-2-linux_x86_64.zip
+  curl -L -o snooty-parser.zip https://github.com/rayangler/snooty-parser/releases/download/DOP-5189-test-4/snooty-DOP-5189-test-4-linux_x86_64.zip
   unzip -d ./snooty-parser snooty-parser.zip
   chmod +x ./snooty-parser/snooty
 fi
