@@ -1,4 +1,4 @@
-PARSER_VERSION=0.18.7
+PARSER_VERSION=DOP-5189-test-5
 
 # This make command curls the examples for certain repos.
 # If the rule doesn't exist, the error doesn't interrupt the build process.
@@ -6,7 +6,7 @@ make examples
 
 if [ ! -d "snooty-parser" ]; then
   echo "snooty parser not installed, downloading..."
-  curl -L -o snooty-parser.zip https://github.com/rayangler/snooty-parser/releases/download/DOP-5189-test-4/snooty-DOP-5189-test-4-linux_x86_64.zip
+  curl -L -o snooty-parser.zip https://github.com/rayangler/snooty-parser/releases/download/${PARSER_VERSION}/snooty-${PARSER_VERSION}-linux_x86_64.zip
   unzip -d ./snooty-parser snooty-parser.zip
   chmod +x ./snooty-parser/snooty
 fi
