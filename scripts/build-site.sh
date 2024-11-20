@@ -1,4 +1,4 @@
-PARSER_VERSION=DOP-5189-test-7
+PARSER_VERSION=DOP-5189-test-10
 
 # This make command curls the examples for certain repos.
 # If the rule doesn't exist, the error doesn't interrupt the build process.
