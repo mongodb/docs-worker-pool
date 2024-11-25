@@ -8,7 +8,7 @@ import { ObjectId, Db, Document } from 'mongodb';
 import { db as poolDb } from './pool';
 
 // We should only ever have one client active at a time.
-const atlasURL = `mongodb+srv://${process.env.MONGO_ATLAS_USERNAME}:${process.env.MONGO_ATLAS_PASSWORD}@${process.env.MONGO_ATLAS_HOST}/?retryWrites=true&w=majority&maxPoolSize=20`;
+const atlasURL = `mongodb://${process.env.MONGO_ATLAS_HOST}`;
 const client = new mongodb.MongoClient(atlasURL);
 
 export const teardown = async () => {
