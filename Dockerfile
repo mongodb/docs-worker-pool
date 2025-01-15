@@ -22,7 +22,7 @@ RUN cd ./modules/oas-page-builder \
 # where repo work will happen
 FROM ubuntu:20.04
 ARG WORK_DIRECTORY=/home/docsworker-xlarge
-ARG SNOOTY_PARSER_VERSION=0.18.10
+ARG SNOOTY_PARSER_VERSION=0.18.11
 ARG SNOOTY_FRONTEND_VERSION=0.18.15-b
 ARG MUT_VERSION=0.11.4
 ARG REDOC_CLI_VERSION=1.3.4
