@@ -1,4 +1,4 @@
-PARSER_VERSION=0.18.12
+PARSER_VERSION=0.18.13
 
 # This make command curls the examples for certain repos.
 # If the rule doesn't exist, the error doesn't interrupt the build process.
