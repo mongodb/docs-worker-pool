@@ -17,12 +17,20 @@ interface PageAst {
   [key: string]: any;
 }
 
+interface Facet {
+  category: string;
+  value: string;
+  display_name: string;
+  sub_facets?: { [key: string]: any }[];
+}
+
 export interface Page {
   page_id: string;
   filename: string;
   ast: PageAst;
   static_assets: UpdatedAsset[];
   github_username: string;
+  facets?: Facet[];
 }
 
 export interface UpdatedPage extends Page {
@@ -162,6 +170,7 @@ class UpdatedPagesManager {
                 deleted: false,
                 // Track the last build ID to update the content
                 build_id: this.buildId,
+                facets: page.facets,
               },
               $setOnInsert: {
                 created_at: this.updateTime,

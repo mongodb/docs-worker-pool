@@ -113,6 +113,16 @@ describe('pages module', () => {
           page_id: `${pagePrefix}/page1.txt`,
           filename: 'page1.txt',
           ast: { foo: 'foo', bar: { foo: 'baz' } },
+          facets: [
+            {
+              category: 'target_product',
+              value: 'atlas',
+              display_name: 'Atlas',
+              sub_facets: [
+                { category: 'sub_product', value: 'kubernetes-operator', display_name: 'Kubernetes Operator' },
+              ],
+            },
+          ],
           static_assets: [],
           github_username: GH_USER,
         },
@@ -123,6 +133,7 @@ describe('pages module', () => {
       expect(res).toHaveLength(2);
       const updatedPage = res.find(({ filename }) => filename === 'page1.txt');
       expect(updatedPage).toHaveProperty('ast.bar.foo', 'baz');
+      expect(updatedPage).toHaveProperty('facets[0].category');
       // Page documents should have different timestamps to denote different update times
       expect(res[0].updated_at !== res[1].updated_at).toBeTruthy();
     });
