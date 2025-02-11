@@ -43,6 +43,7 @@ interface PreviousPageMapping {
   [key: string]: {
     ast: PageAst;
     static_assets: StaticAsset[];
+    facets?: Facet[];
   };
 }
 
@@ -83,6 +84,7 @@ const findPrevPageDocs = async (pageIdPrefix: string, collection: string, github
     page_id: 1,
     ast: 1,
     static_assets: 1,
+    facets: 1,
   };
 
   try {
@@ -104,6 +106,7 @@ const createPageAstMapping = async (docsCursor: FindCursor) => {
     mapping[doc.page_id] = {
       ast: doc.ast,
       static_assets: doc.static_assets,
+      facets: doc.facets,
     };
     pageIds.add(doc.page_id);
   }
@@ -156,7 +159,7 @@ class UpdatedPagesManager {
 
       // Update the document if page's current AST is different from previous build's.
       // New pages should always count as having a "different" AST
-      if (!isEqual(page.ast, prevPageData?.ast)) {
+      if (!isEqual(page.ast, prevPageData?.ast) || !isEqual(page.facets, prevPageData?.facets)) {
         const operation = {
           updateOne: {
             filter: { page_id: currentPageId, github_username: page.github_username },
