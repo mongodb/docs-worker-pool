@@ -269,7 +269,12 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
   try {
     // Find all pages that share the same project name + branch. Expects page IDs
     // to include these two properties after parse
-    const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
+    const pageIdArr = pages[0].page_id.split('/').slice(0, 3);
+    if (pageIdArr[1] === 'buildbot') {
+      pageIdArr[1] = 'docsworker-xlarge';
+    }
+    const pageIdPrefix = pageIdArr.join('/');
+
     const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection, githubUser);
     const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
 
