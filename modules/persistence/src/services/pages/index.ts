@@ -279,9 +279,12 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
   console.time(timerLabel);
 
   try {
+    // TEMPORARY FIX FOR NETLIFY BUILDS
+    // TODO: DOP-5405 remove parser user from page id
+    const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/').replace('buildbot', 'docsworker-xlarge');
+
     // Find all pages that share the same project name + branch. Expects page IDs
     // to include these two properties after parse
-    const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
     const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection, githubUser);
     const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
 
