@@ -127,6 +127,49 @@ describe('pages module', () => {
       expect(res[0].updated_at !== res[1].updated_at).toBeTruthy();
     });
 
+    it('should update pages with modified facets', async () => {
+      const pagePrefix = generatePagePrefix();
+      const pages = generatePages(pagePrefix);
+      await _updatePages(pages, collection, GH_USER, new ObjectID());
+      // Applying facet updates to both pages
+      const updatedPages = generatePages(pagePrefix);
+      updatedPages[0].facets = [
+        {
+          category: 'target_product',
+          value: 'atlas',
+          display_name: 'Atlas',
+        },
+      ];
+      updatedPages[1].facets = [
+        {
+          category: 'target_product',
+          value: 'atlas',
+          display_name: 'Atlas',
+          sub_facets: [{ category: 'sub_product', value: 'kubernetes-operator', display_name: 'Kubernetes Operator' }],
+        },
+      ];
+
+      const findQuery = {
+        page_id: { $regex: new RegExp(`^${pagePrefix}`) },
+      };
+      await _updatePages(updatedPages, collection, GH_USER, new ObjectID());
+      const res = await mockDb.collection<UpdatedPage>(collection).find(findQuery).toArray();
+      expect(res).toHaveLength(2);
+      expect(res.every(({ facets }) => facets && facets.length)).toBeTruthy();
+      expect(res[1]).toHaveProperty('facets[0].sub_facets[0].value');
+
+      // removal of facet also propagates to update
+      const removedFacetUpdates = generatePages(pagePrefix).slice(0, 1);
+      delete removedFacetUpdates[0].facets;
+
+      await _updatePages(removedFacetUpdates, collection, GH_USER, new ObjectID());
+      const findRemovalQuery = {
+        page_id: { $regex: new RegExp(`^${pagePrefix}/page0.txt`) },
+      };
+      const removeFacetRes = await mockDb.collection<UpdatedPage>(collection).find(findRemovalQuery).toArray();
+      expect(removeFacetRes[0].facets).toBeNull();
+    });
+
     it('should mark pages for deletion', async () => {
       const pagePrefix = generatePagePrefix();
       const pages = generatePages(pagePrefix);
