@@ -299,13 +299,13 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
 
 export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githubUser: string) => {
   try {
-    const pages = pagesFromZip(zip, githubUser);
-
     // TEMPORARY FIX FOR NETLIFY BUILDS
     // TODO: DOP-5405 remove parser user from page id altogether
-    for (const page of pages) {
+
+    const pages = pagesFromZip(zip, githubUser).map((page: Page) => {
       page.page_id = page.page_id.replace('buildbot', 'docsworker-xlarge');
-    }
+      return page;
+    });
 
     const ops: PromiseLike<any>[] = [insert(pages, COLLECTION_NAME, buildId, true)];
 
