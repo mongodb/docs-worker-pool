@@ -11,7 +11,8 @@ on:
 jobs:
   # Checks for changes to the modules/persistence directory
   changes:
-    runs-on: ubuntu-latest
+    # locking to ubuntu 22.04 to allow mongodb-memory-server to run
+    runs-on: ubuntu-22.04
     outputs:
       persistence: ${{ steps.filter.outputs.persistence }}
     steps:
@@ -29,7 +30,8 @@ jobs:
     defaults:
       run:
         working-directory: 'modules/persistence'
-    runs-on: ubuntu-latest
+    # locking to ubuntu 22.04 to allow mongodb-memory-server to run
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v1
