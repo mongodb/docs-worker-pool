@@ -5,7 +5,7 @@ PARSER_VERSION=0.18.15
 make examples
 
 if [ ! -d "snooty-parser" ]; then
-  echo "snooty parser not installed, downloading..."
+  echo "Snooty parser not installed, downloading..."
   curl -L -o snooty-parser.zip https://github.com/mongodb/snooty-parser/releases/download/v${PARSER_VERSION}/snooty-v${PARSER_VERSION}-linux_x86_64.zip
   unzip -d ./snooty-parser snooty-parser.zip
   chmod +x ./snooty-parser/snooty
@@ -30,6 +30,7 @@ if [ ! -d "snooty" ]; then
 fi
 
 if [ -d "docs-worker-pool" ]; then
+  echo "Running persistence module"
   node --unhandled-rejections=strict docs-worker-pool/modules/persistence/dist/index.js --path bundle.zip --githubUser netlify
 fi
 
