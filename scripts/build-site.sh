@@ -29,12 +29,8 @@ if [ ! -d "snooty" ]; then
   mv ./snooty/docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 fi
 
-ls
-
-if [ -d "docs-worker-pool" ]; then
-  echo "Running persistence module"
-  node --unhandled-rejections=strict docs-worker-pool/modules/persistence/dist/index.js --path bundle.zip --githubUser netlify
-fi
+echo "Running persistence module"
+node --unhandled-rejections=strict docs-worker-pool/modules/persistence/dist/index.js --path bundle.zip --githubUser netlify
 
 
 cd snooty && npm run build:no-prefix
