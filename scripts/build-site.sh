@@ -18,7 +18,7 @@ echo "==========================================================================
 echo "======================================================================================================================================================================="
 
 if [ ! -d "snooty" ]; then
-  echo "snooty frontend not installed, downloading"
+  echo "Snooty frontend not installed, downloading"
   git clone -b netlify-poc --depth 1 https://github.com/mongodb/snooty.git 
   echo GATSBY_MANIFEST_PATH=$(pwd)/bundle.zip >> ./snooty/.env.production
   cd snooty
@@ -28,6 +28,8 @@ if [ ! -d "snooty" ]; then
   mv ./snooty/docs-tools/themes/mongodb/static ./static/docs-tools
   mv ./snooty/docs-tools/themes/guides/static/images/bg-accent.svg ./static/docs-tools/images/bg-accent.svg
 fi
+
+ls
 
 if [ -d "docs-worker-pool" ]; then
   echo "Running persistence module"
