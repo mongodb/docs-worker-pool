@@ -314,11 +314,11 @@ Resources:
                 HostName: ${self:custom.site.host.${self:provider.stage}}
                 ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/cli/current
             - RoutingRuleCondition:
-                  KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/atlas-operator/stable
+                  KeyPrefixEquals: ${self:custom.site.prefix.${self:provider.stage}}/atlas/operator/stable
               RedirectRule:
                 Protocol: "https"
                 HostName: ${self:custom.site.host.${self:provider.stage}}
-                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/atlas-operator/current
+                ReplaceKeyPrefixWith: ${self:custom.site.prefix.${self:provider.stage}}/atlas/operator/current
   CloudManagerBucket:
     Type: "AWS::S3::Bucket"
     Properties:
