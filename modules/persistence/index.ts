@@ -17,8 +17,6 @@ import { upsertAssets } from './src/services/assets';
 
 interface ModuleArgs {
   path: string;
-  // Leaving around for backwards compatibility, in case a builder attempts to add the variable
-  githubUser?: string;
   jobId?: string;
   strict: string;
   [props: string | number | symbol]: unknown;
