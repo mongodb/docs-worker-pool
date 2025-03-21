@@ -49,14 +49,12 @@ describe('pages module', () => {
           filename: 'page0.txt',
           ast: { foo: 'foo', bar: { foo: 'foo' } },
           static_assets: [],
-          github_username: GH_USER,
         },
         {
           page_id: `${pagePrefix}/page1.txt`,
           filename: 'page1.txt',
           ast: { foo: 'foo', bar: { foo: 'bar' } },
           static_assets: [],
-          github_username: GH_USER,
         },
       ];
     };
@@ -76,10 +74,9 @@ describe('pages module', () => {
         filename: 'includes/included-file.rst',
         ast: { foo: 'foo', bar: { foo: 'foo' } },
         static_assets: [],
-        github_username: GH_USER,
       };
       pages.push(rstFile);
-      await _updatePages(pages, collection, GH_USER, new ObjectID());
+      await _updatePages(pages, collection, new ObjectID());
 
       res = await mockDb.collection(collection).find(findQuery).toArray();
       expect(res).toHaveLength(2);
@@ -90,7 +87,7 @@ describe('pages module', () => {
     it('should update modified pages', async () => {
       const pagePrefix = generatePagePrefix();
       const pages = generatePages(pagePrefix);
-      await _updatePages(pages, collection, GH_USER, new ObjectID());
+      await _updatePages(pages, collection, new ObjectID());
 
       const findQuery = {
         page_id: { $regex: new RegExp(`^${pagePrefix}`) },
@@ -107,17 +104,15 @@ describe('pages module', () => {
           filename: 'page0.txt',
           ast: { foo: 'foo', bar: { foo: 'foo' } },
           static_assets: [],
-          github_username: GH_USER,
         },
         {
           page_id: `${pagePrefix}/page1.txt`,
           filename: 'page1.txt',
           ast: { foo: 'foo', bar: { foo: 'baz' } },
           static_assets: [],
-          github_username: GH_USER,
         },
       ];
-      await _updatePages(updatedPages, collection, GH_USER, new ObjectID());
+      await _updatePages(updatedPages, collection, new ObjectID());
 
       res = await mockDb.collection<UpdatedPage>(collection).find(findQuery).toArray();
       expect(res).toHaveLength(2);
@@ -130,7 +125,7 @@ describe('pages module', () => {
     it('should update pages with modified facets', async () => {
       const pagePrefix = generatePagePrefix();
       const pages = generatePages(pagePrefix);
-      await _updatePages(pages, collection, GH_USER, new ObjectID());
+      await _updatePages(pages, collection, new ObjectID());
       // Applying facet updates to both pages
       const updatedPages = generatePages(pagePrefix);
       updatedPages[0].facets = [
@@ -152,7 +147,7 @@ describe('pages module', () => {
       const findQuery = {
         page_id: { $regex: new RegExp(`^${pagePrefix}`) },
       };
-      await _updatePages(updatedPages, collection, GH_USER, new ObjectID());
+      await _updatePages(updatedPages, collection, new ObjectID());
       const res = await mockDb.collection<UpdatedPage>(collection).find(findQuery).toArray();
       expect(res).toHaveLength(2);
       expect(res.every(({ facets }) => facets && facets.length)).toBeTruthy();
@@ -162,7 +157,7 @@ describe('pages module', () => {
       const removedFacetUpdates = generatePages(pagePrefix).slice(0, 1);
       delete removedFacetUpdates[0].facets;
 
-      await _updatePages(removedFacetUpdates, collection, GH_USER, new ObjectID());
+      await _updatePages(removedFacetUpdates, collection, new ObjectID());
       const findRemovalQuery = {
         page_id: { $regex: new RegExp(`^${pagePrefix}/page0.txt`) },
       };
@@ -173,7 +168,7 @@ describe('pages module', () => {
     it('should mark pages for deletion', async () => {
       const pagePrefix = generatePagePrefix();
       const pages = generatePages(pagePrefix);
-      await _updatePages(pages, collection, GH_USER, new ObjectID());
+      await _updatePages(pages, collection, new ObjectID());
 
       const findQuery = {
         page_id: { $regex: new RegExp(`^${pagePrefix}`) },
@@ -188,10 +183,9 @@ describe('pages module', () => {
           filename: 'page1.txt',
           ast: { foo: 'foo', bar: { foo: 'bar' } },
           static_assets: [],
-          github_username: GH_USER,
         },
       ];
-      await _updatePages(updatedPages, collection, GH_USER, new ObjectID());
+      await _updatePages(updatedPages, collection, new ObjectID());
 
       // There should be 1 page marked as deleted
       res = await mockDb.collection(collection).find(findQuery).toArray();
@@ -199,7 +193,7 @@ describe('pages module', () => {
       expect(res[0]).toHaveProperty('filename', 'page0.txt');
 
       // Re-adding the deleted page should lead to no deleted pages
-      await _updatePages(pages, collection, GH_USER, new ObjectID());
+      await _updatePages(pages, collection, new ObjectID());
       res = await mockDb.collection(collection).find(findQuery).toArray();
       expect(res).toHaveLength(0);
     });
@@ -216,7 +210,6 @@ describe('pages module', () => {
           filename: 'page0.txt',
           ast: { foo: 'foo', bar: { foo: 'foo' } },
           static_assets: [],
-          github_username: GH_USER,
         };
 
         if (withAssets) {
@@ -230,7 +223,7 @@ describe('pages module', () => {
         // Setup for empty static assets
         const pagePrefix = generatePagePrefix();
         const page = createSamplePage(pagePrefix);
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         const findQuery = { page_id: page.page_id };
         let res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
@@ -239,7 +232,7 @@ describe('pages module', () => {
 
         // Simulate update in page
         page.ast.foo = 'foobar';
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
         res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
         expect(res).toBeTruthy();
         // Should still be 0
@@ -250,13 +243,13 @@ describe('pages module', () => {
         // Setup for empty static assets
         const pagePrefix = generatePagePrefix();
         const page = createSamplePage(pagePrefix);
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         // Modify page with new AST; a change in static_assets implies a change in AST
         page.ast.foo = 'new assets';
         page.static_assets = sampleStaticAssets;
         const numStaticAssets = page.static_assets.length;
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         // Check that both assets were added
         const findQuery = { page_id: page.page_id };
@@ -270,7 +263,7 @@ describe('pages module', () => {
       it('should keep assets the same when no assets are changed', async () => {
         const pagePrefix = generatePagePrefix();
         const page = createSamplePage(pagePrefix, true);
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         // Check that static assets were saved
         const findQuery = { page_id: page.page_id };
@@ -280,7 +273,7 @@ describe('pages module', () => {
 
         // Simulate change in AST but not in static assets
         page.ast.foo = 'no change in assets';
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         // Check to make sure no changes in static assets
         res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
@@ -293,7 +286,7 @@ describe('pages module', () => {
         const page = createSamplePage(pagePrefix, true);
         const originalKey = page.static_assets[1].key;
         const numStaticAssets = page.static_assets.length;
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         // Check to make sure asset we plan to change was successfully added
         const findQuery = { page_id: page.page_id };
@@ -306,7 +299,7 @@ describe('pages module', () => {
         page.ast.foo = 'change in one asset';
         const changedKey = '/images/changed-asset-name.svg';
         page.static_assets[1].key = changedKey;
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         // Make sure changed asset is different from original asset
         res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
@@ -324,11 +317,11 @@ describe('pages module', () => {
         // Setup for single static asset
         const pagePrefix = generatePagePrefix();
         const page = createSamplePage(pagePrefix, true);
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         page.ast.foo = 'deleted assets';
         page.static_assets = [];
-        await _updatePages([page], collection, GH_USER, new ObjectID());
+        await _updatePages([page], collection, new ObjectID());
 
         const findQuery = { page_id: page.page_id };
         const res = await mockDb.collection<UpdatedPage>(collection).findOne(findQuery);
