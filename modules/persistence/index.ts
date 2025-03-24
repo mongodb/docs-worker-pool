@@ -34,12 +34,9 @@ const app = async (path: string, jobId?: string) => {
   try {
     if (!path) throw missingPathMessage;
     const zip = new AdmZip(path);
-
-    // Safely convert jobId in case of empty string
-    const autobuilderJobId = jobId;
     // atomic buildId for all artifacts read by this module - fundamental assumption
     // that only one build will be used per run of this module.
-    const buildId = new mongodb.ObjectId(autobuilderJobId);
+    const buildId = new mongodb.ObjectId(jobId);
     const metadata = await metadataFromZip(zip);
     // initialize db connections to handle shared connections
     await snootyDb();
