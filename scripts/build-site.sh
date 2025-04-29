@@ -1,1 +1,1 @@
-cd snooty && npm run build:no-prefix
+echo Beginning build step
