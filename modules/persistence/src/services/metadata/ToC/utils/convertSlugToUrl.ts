@@ -1,7 +1,7 @@
 export const convertSlugToUrl = (slug, prefix, url, alias) => {
   const leading = ensureTrailingSlash(url) + prefix;
   const trailing = alias ? ensureLeadingSlash(alias) + ensureLeadingSlash(slug) : ensureLeadingSlash(slug);
-  return leading + trailing;
+  return ensureTrailingSlash(leading + trailing);
 };
 
 const ensureTrailingSlash = (subpath: string) => {
