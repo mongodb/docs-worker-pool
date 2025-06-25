@@ -110,7 +110,7 @@ export const getAllAssociatedRepoBranchesEntries = async (metadata: Metadata) =>
 };
 
 // Queries pool*.repos_branches and pool*. for any entries for the given project and branch from a metadata entry.
-export const getRepoBranchesEntry = async (project: project, branch = ''): Promise<ReposBranchesDocument> => {
+export const getRepoBranchesEntry = async (project: project, branch = ''): Promise<ReposBranchesDocsetsDocument> => {
   const cachedDoc = internals[project];
   // return cached repo doc if exists
   if (cachedDoc !== undefined) {
@@ -120,7 +120,7 @@ export const getRepoBranchesEntry = async (project: project, branch = ''): Promi
 
     return cachedDoc.branches.map((b) => b.gitBranchName).includes(branch)
       ? cachedDoc
-      : (null as unknown as ReposBranchesDocument);
+      : (null as unknown as ReposBranchesDocsetsDocument);
   }
 
   // get from DB if not cached

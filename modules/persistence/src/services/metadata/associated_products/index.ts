@@ -44,38 +44,26 @@ const mapRepoBranches = (repoBranches: ReposBranchesDocsetsDocument[]) =>
 
 export const hasAssociations = (metadata) => !!metadata.associated_products?.length;
 
-const umbrellaMetadataEntry = async (project: string): Promise<Metadata> => {
+const umbrellaMetadataEntry = async (project: string): Promise<Metadata | null> => {
   try {
     const snooty = await db();
 
-    // first find any umbrella
-    const umbrella = await snooty.collection('metadata').findOne(
+    const umbrellaRepos = await getRepoBranchesEntry(project);
+    const branchNames = umbrellaRepos.branches.map((branchEntry) => branchEntry.gitBranchName);
+    const entry = await snooty.collection('metadata').findOne(
       {
         'associated_products.name': project,
-        is_merged_toc: { $ne: true },
+        branch: { $in: branchNames },
       },
       {
-        sort: { build_id: -1 },
+        sort: { build_id: -1, is_merged_toc: -1 },
       }
     );
 
-    if (!umbrella) {
-      return null as unknown as Metadata;
+    if (!entry) {
+      return null;
     }
-
-    const umbrellaRepos = await getRepoBranchesEntry(umbrella.project);
-    const branchNames = umbrellaRepos.branches.map((branchEntry) => branchEntry.gitBranchName);
-    const entry = await snooty
-      .collection('metadata')
-      .find({
-        'associated_products.name': project,
-        is_merged_toc: { $ne: true },
-        branch: { $in: branchNames },
-      })
-      .sort({ build_id: -1 })
-      .limit(1)
-      .toArray();
-    return entry[0] as unknown as Metadata;
+    return entry as unknown as Metadata;
   } catch (error) {
     console.log(`Error at time of querying for umbrella metadata entry: ${error}`);
     throw error;
@@ -159,7 +147,8 @@ const getAssociatedProducts = async (umbrellaMetadata) => {
 export const mergeAssociatedToCs = async (metadata: Metadata) => {
   try {
     const { project, branch } = metadata;
-    const umbrellaMetadata = hasAssociations(metadata) ? metadata : await umbrellaMetadataEntry(project);
+    const isUmbrellaMetadata = hasAssociations(metadata);
+    const umbrellaMetadata = isUmbrellaMetadata ? metadata : await umbrellaMetadataEntry(project);
 
     // Short circuit execution here if there's no umbrella product metadata found
     if (!umbrellaMetadata) return;
@@ -173,7 +162,12 @@ export const mergeAssociatedToCs = async (metadata: Metadata) => {
     if (!umbrellaRepoBranchesEntry)
       throw `No repoBranches entry available for umbrella metadata with project: ${umbrellaMetadata.project}, branch: ${umbrellaMetadata.branch}`;
 
-    const repoBranchesEntries = await getAllAssociatedRepoBranchesEntries(umbrellaMetadata);
+    // if input is already umbrella metadata, update all the children projects
+    // if input is child  metadata, update only the current branch and the parent
+    const repoBranchesEntries = isUmbrellaMetadata
+      ? await getAllAssociatedRepoBranchesEntries(umbrellaMetadata)
+      : [await getRepoBranchesEntry(project, branch)];
+
     const repoBranchesMap = mapRepoBranches(repoBranchesEntries);
     const metadataCursor = await getAssociatedProducts(umbrellaMetadata);
 
@@ -203,6 +197,10 @@ export const mergeAssociatedToCs = async (metadata: Metadata) => {
       mergedMetadataEntry.is_merged_toc = true;
       return mergedMetadataEntry;
     });
+    console.log(
+      'mergedMetadataEntries versions ',
+      mergedMetadataEntries.map((m) => m.branch)
+    );
     return mergedMetadataEntries;
   } catch (error) {
     console.log(`Error at time of merging associated ToC entries: ${error}`);
