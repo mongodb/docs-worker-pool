@@ -29,7 +29,6 @@ export interface Page {
   filename: string;
   ast: PageAst;
   static_assets: UpdatedAsset[];
-  github_username: string;
   facets?: Facet[];
 }
 
@@ -53,13 +52,12 @@ const UPDATED_AST_COLL_NAME = 'updated_documents';
 // Service responsible for memoization of page level documents.
 // Any extraneous logic performed on page level documents as part of upload should be added here
 // or within subfolders of this module
-const pagesFromZip = (zip: AdmZip, githubUser: string): Page[] => {
+const pagesFromZip = (zip: AdmZip): Page[] => {
   const zipPages = zip.getEntries();
   return zipPages
     .filter((entry) => entry.entryName?.startsWith('documents/'))
     .map((entry) => {
       const document = deserialize(entry.getData()) as Page;
-      document.github_username = githubUser;
       return document;
     });
 };
@@ -72,11 +70,10 @@ const pagesFromZip = (zip: AdmZip, githubUser: string): Page[] => {
  * @param pageIdPrefix - Includes the Snooty project name, user (docsworker-xlarge), and branch
  * @param collection - The collection to perform the find query on
  */
-const findPrevPageDocs = async (pageIdPrefix: string, collection: string, githubUser: string) => {
+const findPrevPageDocs = async (pageIdPrefix: string, collection: string) => {
   const dbSession = await db();
   const findQuery = {
     page_id: { $regex: new RegExp(`^${pageIdPrefix}/`) },
-    github_username: githubUser,
     deleted: false,
   };
   const projection = {
@@ -119,21 +116,13 @@ class UpdatedPagesManager {
   prevPageDocsMapping: PreviousPageMapping;
   prevPageIds: Set<string>;
   updateTime: Date;
-  githubUser: string;
   buildId: ObjectId;
 
-  constructor(
-    prevPageDocsMapping: PreviousPageMapping,
-    prevPagesIds: Set<string>,
-    pages: Page[],
-    githubUser: string,
-    buildId: ObjectId
-  ) {
+  constructor(prevPageDocsMapping: PreviousPageMapping, prevPagesIds: Set<string>, pages: Page[], buildId: ObjectId) {
     this.currentPages = pages;
     this.operations = [];
     this.prevPageDocsMapping = prevPageDocsMapping;
     this.prevPageIds = prevPagesIds;
-    this.githubUser = githubUser;
     this.buildId = buildId;
 
     this.updateTime = new Date();
@@ -162,7 +151,7 @@ class UpdatedPagesManager {
       if (!isEqual(page.ast, prevPageData?.ast) || !isEqual(page.facets, prevPageData?.facets)) {
         const operation = {
           updateOne: {
-            filter: { page_id: currentPageId, github_username: page.github_username },
+            filter: { page_id: currentPageId },
             update: {
               $set: {
                 page_id: currentPageId,
@@ -243,7 +232,7 @@ class UpdatedPagesManager {
     this.prevPageIds.forEach((unseenPageId) => {
       const operation = {
         updateOne: {
-          filter: { page_id: unseenPageId, github_username: this.githubUser },
+          filter: { page_id: unseenPageId },
           update: {
             $set: {
               deleted: true,
@@ -270,7 +259,7 @@ class UpdatedPagesManager {
  * @param pages
  * @param collection
  */
-const updatePages = async (pages: Page[], collection: string, githubUser: string, buildId: ObjectId) => {
+const updatePages = async (pages: Page[], collection: string, buildId: ObjectId) => {
   if (pages.length === 0) {
     return;
   }
@@ -282,12 +271,12 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
     // Find all pages that share the same project name + branch. Expects page IDs
     // to include these two properties after parse
     const pageIdPrefix = pages[0].page_id.split('/').slice(0, 3).join('/');
-    const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection, githubUser);
+    const previousPagesCursor = await findPrevPageDocs(pageIdPrefix, collection);
     const { mapping: prevPageDocsMapping, pageIds: prevPageIds } = await createPageAstMapping(previousPagesCursor);
 
     const diffsTimerLabel = 'finding page differences';
     console.time(diffsTimerLabel);
-    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, githubUser, buildId);
+    const updatedPagesManager = new UpdatedPagesManager(prevPageDocsMapping, prevPageIds, pages, buildId);
     const operations = updatedPagesManager.getOperations();
     console.timeEnd(diffsTimerLabel);
 
@@ -309,13 +298,12 @@ const updatePages = async (pages: Page[], collection: string, githubUser: string
   }
 };
 
-export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githubUser: string) => {
+export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip) => {
   try {
-    
     // TEMPORARY FIX FOR NETLIFY BUILDS
     // TODO: DOP-5405 remove parser user from page id altogether
 
-    const pages = pagesFromZip(zip, githubUser).map((page: Page) => {
+    const pages = pagesFromZip(zip).map((page: Page) => {
       page.page_id = page.page_id.replace('buildbot', 'docsworker-xlarge');
       return page;
     });
@@ -324,7 +312,7 @@ export const insertAndUpdatePages = async (buildId: ObjectId, zip: AdmZip, githu
 
     const featureEnabled = process.env.FEATURE_FLAG_UPDATE_PAGES;
     if (featureEnabled && featureEnabled.toUpperCase() === 'TRUE') {
-      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME, githubUser, buildId));
+      ops.push(updatePages(pages, UPDATED_AST_COLL_NAME, buildId));
     }
 
     return Promise.all(ops);
